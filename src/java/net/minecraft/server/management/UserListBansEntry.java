@@ -17,9 +17,9 @@ public class UserListBansEntry extends BanEntry<GameProfile>
         super(profile, endDate, banner, endDate, banReason);
     }
 
-    public UserListBansEntry(JsonObject json)
+    public UserListBansEntry(JsonObject p_i1136_1_)
     {
-        super(toGameProfile(json), json);
+        super(func_152648_b(p_i1136_1_), p_i1136_1_);
     }
 
     protected void onSerialization(JsonObject data)
@@ -32,11 +32,11 @@ public class UserListBansEntry extends BanEntry<GameProfile>
         }
     }
 
-    private static GameProfile toGameProfile(JsonObject json)
+    private static GameProfile func_152648_b(JsonObject p_152648_0_)
     {
-        if (json.has("uuid") && json.has("name"))
+        if (p_152648_0_.has("uuid") && p_152648_0_.has("name"))
         {
-            String s = json.get("uuid").getAsString();
+            String s = p_152648_0_.get("uuid").getAsString();
             UUID uuid;
 
             try
@@ -48,7 +48,7 @@ public class UserListBansEntry extends BanEntry<GameProfile>
                 return null;
             }
 
-            return new GameProfile(uuid, json.get("name").getAsString());
+            return new GameProfile(uuid, p_152648_0_.get("name").getAsString());
         }
         else
         {

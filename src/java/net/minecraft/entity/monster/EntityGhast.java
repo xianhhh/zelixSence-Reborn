@@ -23,6 +23,7 @@ import net.minecraft.world.World;
 
 public class EntityGhast extends EntityFlying implements IMob
 {
+    /** The explosion radius of spawned fireballs. */
     private int explosionStrength = 1;
 
     public EntityGhast(World worldIn)
@@ -43,9 +44,9 @@ public class EntityGhast extends EntityFlying implements IMob
         return this.dataWatcher.getWatchableObjectByte(16) != 0;
     }
 
-    public void setAttacking(boolean attacking)
+    public void setAttacking(boolean p_175454_1_)
     {
-        this.dataWatcher.updateObject(16, Byte.valueOf((byte)(attacking ? 1 : 0)));
+        this.dataWatcher.updateObject(16, Byte.valueOf((byte)(p_175454_1_ ? 1 : 0)));
     }
 
     public int getFireballStrength()
@@ -53,6 +54,9 @@ public class EntityGhast extends EntityFlying implements IMob
         return this.explosionStrength;
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         super.onUpdate();
@@ -63,6 +67,9 @@ public class EntityGhast extends EntityFlying implements IMob
         }
     }
 
+    /**
+     * Called when the entity is attacked.
+     */
     public boolean attackEntityFrom(DamageSource source, float amount)
     {
         if (this.isEntityInvulnerable(source))
@@ -94,16 +101,25 @@ public class EntityGhast extends EntityFlying implements IMob
         this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(100.0D);
     }
 
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
     protected String getLivingSound()
     {
         return "mob.ghast.moan";
     }
 
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
     protected String getHurtSound()
     {
         return "mob.ghast.scream";
     }
 
+    /**
+     * Returns the sound this mob makes on death.
+     */
     protected String getDeathSound()
     {
         return "mob.ghast.death";
@@ -114,16 +130,19 @@ public class EntityGhast extends EntityFlying implements IMob
         return Items.gunpowder;
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
-        int i = this.rand.nextInt(2) + this.rand.nextInt(1 + lootingModifier);
+        int i = this.rand.nextInt(2) + this.rand.nextInt(1 + p_70628_2_);
 
         for (int j = 0; j < i; ++j)
         {
             this.dropItem(Items.ghast_tear, 1);
         }
 
-        i = this.rand.nextInt(3) + this.rand.nextInt(1 + lootingModifier);
+        i = this.rand.nextInt(3) + this.rand.nextInt(1 + p_70628_2_);
 
         for (int k = 0; k < i; ++k)
         {
@@ -131,27 +150,42 @@ public class EntityGhast extends EntityFlying implements IMob
         }
     }
 
+    /**
+     * Returns the volume for the sounds this mob makes.
+     */
     protected float getSoundVolume()
     {
         return 10.0F;
     }
 
+    /**
+     * Checks if the entity's current position is a valid location to spawn this entity.
+     */
     public boolean getCanSpawnHere()
     {
         return this.rand.nextInt(20) == 0 && super.getCanSpawnHere() && this.worldObj.getDifficulty() != EnumDifficulty.PEACEFUL;
     }
 
+    /**
+     * Will return how many at most can spawn in a chunk at once.
+     */
     public int getMaxSpawnedInChunk()
     {
         return 1;
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
         tagCompound.setInteger("ExplosionPower", this.explosionStrength);
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         super.readEntityFromNBT(tagCompund);
@@ -172,9 +206,9 @@ public class EntityGhast extends EntityFlying implements IMob
         private EntityGhast parentEntity;
         public int attackTimer;
 
-        public AIFireballAttack(EntityGhast ghast)
+        public AIFireballAttack(EntityGhast p_i45837_1_)
         {
-            this.parentEntity = ghast;
+            this.parentEntity = p_i45837_1_;
         }
 
         public boolean shouldExecute()
@@ -237,9 +271,9 @@ public class EntityGhast extends EntityFlying implements IMob
     {
         private EntityGhast parentEntity;
 
-        public AILookAround(EntityGhast ghast)
+        public AILookAround(EntityGhast p_i45839_1_)
         {
-            this.parentEntity = ghast;
+            this.parentEntity = p_i45839_1_;
             this.setMutexBits(2);
         }
 
@@ -252,7 +286,7 @@ public class EntityGhast extends EntityFlying implements IMob
         {
             if (this.parentEntity.getAttackTarget() == null)
             {
-                this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.atan2(this.parentEntity.motionX, this.parentEntity.motionZ)) * 180.0F / (float)Math.PI;
+                this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.func_181159_b(this.parentEntity.motionX, this.parentEntity.motionZ)) * 180.0F / (float)Math.PI;
             }
             else
             {
@@ -263,7 +297,7 @@ public class EntityGhast extends EntityFlying implements IMob
                 {
                     double d1 = entitylivingbase.posX - this.parentEntity.posX;
                     double d2 = entitylivingbase.posZ - this.parentEntity.posZ;
-                    this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.atan2(d1, d2)) * 180.0F / (float)Math.PI;
+                    this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.func_181159_b(d1, d2)) * 180.0F / (float)Math.PI;
                 }
             }
         }
@@ -273,9 +307,9 @@ public class EntityGhast extends EntityFlying implements IMob
     {
         private EntityGhast parentEntity;
 
-        public AIRandomFly(EntityGhast ghast)
+        public AIRandomFly(EntityGhast p_i45836_1_)
         {
-            this.parentEntity = ghast;
+            this.parentEntity = p_i45836_1_;
             this.setMutexBits(1);
         }
 
@@ -317,10 +351,10 @@ public class EntityGhast extends EntityFlying implements IMob
         private EntityGhast parentEntity;
         private int courseChangeCooldown;
 
-        public GhastMoveHelper(EntityGhast ghast)
+        public GhastMoveHelper(EntityGhast p_i45838_1_)
         {
-            super(ghast);
-            this.parentEntity = ghast;
+            super(p_i45838_1_);
+            this.parentEntity = p_i45838_1_;
         }
 
         public void onUpdateMoveHelper()
@@ -351,11 +385,11 @@ public class EntityGhast extends EntityFlying implements IMob
             }
         }
 
-        private boolean isNotColliding(double x, double y, double z, double p_179926_7_)
+        private boolean isNotColliding(double p_179926_1_, double p_179926_3_, double p_179926_5_, double p_179926_7_)
         {
-            double d0 = (x - this.parentEntity.posX) / p_179926_7_;
-            double d1 = (y - this.parentEntity.posY) / p_179926_7_;
-            double d2 = (z - this.parentEntity.posZ) / p_179926_7_;
+            double d0 = (p_179926_1_ - this.parentEntity.posX) / p_179926_7_;
+            double d1 = (p_179926_3_ - this.parentEntity.posY) / p_179926_7_;
+            double d2 = (p_179926_5_ - this.parentEntity.posZ) / p_179926_7_;
             AxisAlignedBB axisalignedbb = this.parentEntity.getEntityBoundingBox();
 
             for (int i = 1; (double)i < p_179926_7_; ++i)

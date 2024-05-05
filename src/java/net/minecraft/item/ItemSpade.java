@@ -14,6 +14,9 @@ public class ItemSpade extends ItemTool
         super(1.0F, material, EFFECTIVE_ON);
     }
 
+    /**
+     * Check whether this Item can harvest the given Block
+     */
     public boolean canHarvestBlock(Block blockIn)
     {
         return blockIn == Blocks.snow_layer ? true : blockIn == Blocks.snow;

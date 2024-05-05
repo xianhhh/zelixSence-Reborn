@@ -44,6 +44,9 @@ public class ModelChicken extends ModelBase
         this.leftWing.setRotationPoint(4.0F, (float)(-3 + i), 0.0F);
     }
 
+    /**
+     * Sets the models various rotation angles then renders the model.
+     */
     public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
     {
         this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale, entityIn);
@@ -80,18 +83,23 @@ public class ModelChicken extends ModelBase
         }
     }
 
-    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
+    /**
+     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms
+     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how
+     * "far" arms and legs can swing at most.
+     */
+    public void setRotationAngles(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity entityIn)
     {
-        this.head.rotateAngleX = headPitch / (180F / (float)Math.PI);
-        this.head.rotateAngleY = netHeadYaw / (180F / (float)Math.PI);
+        this.head.rotateAngleX = p_78087_5_ / (180F / (float)Math.PI);
+        this.head.rotateAngleY = p_78087_4_ / (180F / (float)Math.PI);
         this.bill.rotateAngleX = this.head.rotateAngleX;
         this.bill.rotateAngleY = this.head.rotateAngleY;
         this.chin.rotateAngleX = this.head.rotateAngleX;
         this.chin.rotateAngleY = this.head.rotateAngleY;
         this.body.rotateAngleX = ((float)Math.PI / 2F);
-        this.rightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
-        this.leftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
-        this.rightWing.rotateAngleZ = ageInTicks;
-        this.leftWing.rotateAngleZ = -ageInTicks;
+        this.rightLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F) * 1.4F * p_78087_2_;
+        this.leftLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + (float)Math.PI) * 1.4F * p_78087_2_;
+        this.rightWing.rotateAngleZ = p_78087_3_;
+        this.leftWing.rotateAngleZ = -p_78087_3_;
     }
 }

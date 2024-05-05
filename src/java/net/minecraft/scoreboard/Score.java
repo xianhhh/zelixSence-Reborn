@@ -18,14 +18,14 @@ public class Score
     private final String scorePlayerName;
     private int scorePoints;
     private boolean locked;
-    private boolean forceUpdate;
+    private boolean field_178818_g;
 
     public Score(Scoreboard theScoreboardIn, ScoreObjective theScoreObjectiveIn, String scorePlayerNameIn)
     {
         this.theScoreboard = theScoreboardIn;
         this.theScoreObjective = theScoreObjectiveIn;
         this.scorePlayerName = scorePlayerNameIn;
-        this.forceUpdate = true;
+        this.field_178818_g = true;
     }
 
     public void increseScore(int amount)
@@ -74,9 +74,9 @@ public class Score
         int i = this.scorePoints;
         this.scorePoints = points;
 
-        if (i != points || this.forceUpdate)
+        if (i != points || this.field_178818_g)
         {
-            this.forceUpdate = false;
+            this.field_178818_g = false;
             this.getScoreScoreboard().func_96536_a(this);
         }
     }
@@ -86,6 +86,9 @@ public class Score
         return this.theScoreObjective;
     }
 
+    /**
+     * Returns the name of the player this score belongs to
+     */
     public String getPlayerName()
     {
         return this.scorePlayerName;
@@ -108,6 +111,6 @@ public class Score
 
     public void func_96651_a(List<EntityPlayer> p_96651_1_)
     {
-        this.setScorePoints(this.theScoreObjective.getCriteria().setScore(p_96651_1_));
+        this.setScorePoints(this.theScoreObjective.getCriteria().func_96635_a(p_96651_1_));
     }
 }

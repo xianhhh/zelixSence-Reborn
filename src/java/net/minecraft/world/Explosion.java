@@ -25,7 +25,10 @@ import net.minecraft.util.Vec3;
 
 public class Explosion
 {
+    /** whether or not the explosion sets fire to blocks around it */
     private final boolean isFlaming;
+
+    /** whether or not this explosion spawns smoke particles */
     private final boolean isSmoking;
     private final Random explosionRNG;
     private final World worldObj;
@@ -37,32 +40,35 @@ public class Explosion
     private final List<BlockPos> affectedBlockPositions;
     private final Map<EntityPlayer, Vec3> playerKnockbackMap;
 
-    public Explosion(World worldIn, Entity entityIn, double x, double y, double z, float size, List<BlockPos> affectedPositions)
+    public Explosion(World worldIn, Entity p_i45752_2_, double p_i45752_3_, double p_i45752_5_, double p_i45752_7_, float p_i45752_9_, List<BlockPos> p_i45752_10_)
     {
-        this(worldIn, entityIn, x, y, z, size, false, true, affectedPositions);
+        this(worldIn, p_i45752_2_, p_i45752_3_, p_i45752_5_, p_i45752_7_, p_i45752_9_, false, true, p_i45752_10_);
     }
 
-    public Explosion(World worldIn, Entity entityIn, double x, double y, double z, float size, boolean flaming, boolean smoking, List<BlockPos> affectedPositions)
+    public Explosion(World worldIn, Entity p_i45753_2_, double p_i45753_3_, double p_i45753_5_, double p_i45753_7_, float p_i45753_9_, boolean p_i45753_10_, boolean p_i45753_11_, List<BlockPos> p_i45753_12_)
     {
-        this(worldIn, entityIn, x, y, z, size, flaming, smoking);
-        this.affectedBlockPositions.addAll(affectedPositions);
+        this(worldIn, p_i45753_2_, p_i45753_3_, p_i45753_5_, p_i45753_7_, p_i45753_9_, p_i45753_10_, p_i45753_11_);
+        this.affectedBlockPositions.addAll(p_i45753_12_);
     }
 
-    public Explosion(World worldIn, Entity entityIn, double x, double y, double z, float size, boolean flaming, boolean smoking)
+    public Explosion(World worldIn, Entity p_i45754_2_, double p_i45754_3_, double p_i45754_5_, double p_i45754_7_, float size, boolean p_i45754_10_, boolean p_i45754_11_)
     {
         this.explosionRNG = new Random();
         this.affectedBlockPositions = Lists.<BlockPos>newArrayList();
         this.playerKnockbackMap = Maps.<EntityPlayer, Vec3>newHashMap();
         this.worldObj = worldIn;
-        this.exploder = entityIn;
+        this.exploder = p_i45754_2_;
         this.explosionSize = size;
-        this.explosionX = x;
-        this.explosionY = y;
-        this.explosionZ = z;
-        this.isFlaming = flaming;
-        this.isSmoking = smoking;
+        this.explosionX = p_i45754_3_;
+        this.explosionY = p_i45754_5_;
+        this.explosionZ = p_i45754_7_;
+        this.isFlaming = p_i45754_10_;
+        this.isSmoking = p_i45754_11_;
     }
 
+    /**
+     * Does the first part of the explosion (destroy blocks)
+     */
     public void doExplosionA()
     {
         Set<BlockPos> set = Sets.<BlockPos>newHashSet();
@@ -162,6 +168,9 @@ public class Explosion
         }
     }
 
+    /**
+     * Does the second part of the explosion (sound, particles, drop spawn)
+     */
     public void doExplosionB(boolean spawnParticles)
     {
         this.worldObj.playSoundEffect(this.explosionX, this.explosionY, this.explosionZ, "random.explode", 4.0F, (1.0F + (this.worldObj.rand.nextFloat() - this.worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
@@ -232,12 +241,15 @@ public class Explosion
         return this.playerKnockbackMap;
     }
 
+    /**
+     * Returns either the entity that placed the explosive block, the entity that caused the explosion or null.
+     */
     public EntityLivingBase getExplosivePlacedBy()
     {
         return this.exploder == null ? null : (this.exploder instanceof EntityTNTPrimed ? ((EntityTNTPrimed)this.exploder).getTntPlacedBy() : (this.exploder instanceof EntityLivingBase ? (EntityLivingBase)this.exploder : null));
     }
 
-    public void clearAffectedBlockPositions()
+    public void func_180342_d()
     {
         this.affectedBlockPositions.clear();
     }

@@ -2,19 +2,12 @@ package net.optifine;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockNewLeaf;
-import net.minecraft.block.BlockOldLeaf;
-import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.src.Config;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.model.ModelUtils;
 
 public class SmartLeaves
 {
@@ -37,30 +30,16 @@ public class SmartLeaves
     private static IBakedModel modelLeavesDoubleOak = null;
     private static IBakedModel modelLeavesDoubleSpruce = null;
 
-    public static IBakedModel getLeavesModel(IBakedModel model, IBlockState stateIn)
+    public static IBakedModel getLeavesModel(IBakedModel p_getLeavesModel_0_)
     {
         if (!Config.isTreesSmart())
         {
-            return model;
+            return p_getLeavesModel_0_;
         }
         else
         {
-            List list = model.getGeneralQuads();
-            return list == generalQuadsCullAcacia ? modelLeavesDoubleAcacia : (list == generalQuadsCullBirch ? modelLeavesDoubleBirch : (list == generalQuadsCullDarkOak ? modelLeavesDoubleDarkOak : (list == generalQuadsCullJungle ? modelLeavesDoubleJungle : (list == generalQuadsCullOak ? modelLeavesDoubleOak : (list == generalQuadsCullSpruce ? modelLeavesDoubleSpruce : model)))));
-        }
-    }
-
-    public static boolean isSameLeaves(IBlockState state1, IBlockState state2)
-    {
-        if (state1 == state2)
-        {
-            return true;
-        }
-        else
-        {
-            Block block = state1.getBlock();
-            Block block1 = state2.getBlock();
-            return block != block1 ? false : (block instanceof BlockOldLeaf ? ((BlockPlanks.EnumType)state1.getValue(BlockOldLeaf.VARIANT)).equals(state2.getValue(BlockOldLeaf.VARIANT)) : (block instanceof BlockNewLeaf ? ((BlockPlanks.EnumType)state1.getValue(BlockNewLeaf.VARIANT)).equals(state2.getValue(BlockNewLeaf.VARIANT)) : false));
+            List list = p_getLeavesModel_0_.getGeneralQuads();
+            return list == generalQuadsCullAcacia ? modelLeavesDoubleAcacia : (list == generalQuadsCullBirch ? modelLeavesDoubleBirch : (list == generalQuadsCullDarkOak ? modelLeavesDoubleDarkOak : (list == generalQuadsCullJungle ? modelLeavesDoubleJungle : (list == generalQuadsCullOak ? modelLeavesDoubleOak : (list == generalQuadsCullSpruce ? modelLeavesDoubleSpruce : p_getLeavesModel_0_)))));
         }
     }
 
@@ -92,12 +71,12 @@ public class SmartLeaves
         }
     }
 
-    private static List getGeneralQuadsSafe(IBakedModel model)
+    private static List getGeneralQuadsSafe(IBakedModel p_getGeneralQuadsSafe_0_)
     {
-        return model == null ? null : model.getGeneralQuads();
+        return p_getGeneralQuadsSafe_0_ == null ? null : p_getGeneralQuadsSafe_0_.getGeneralQuads();
     }
 
-    static IBakedModel getModelCull(String type, List updatedTypes)
+    static IBakedModel getModelCull(String p_getModelCull_0_, List p_getModelCull_1_)
     {
         ModelManager modelmanager = Config.getModelManager();
 
@@ -107,7 +86,7 @@ public class SmartLeaves
         }
         else
         {
-            ResourceLocation resourcelocation = new ResourceLocation("blockstates/" + type + "_leaves.json");
+            ResourceLocation resourcelocation = new ResourceLocation("blockstates/" + p_getModelCull_0_ + "_leaves.json");
 
             if (Config.getDefiningResourcePack(resourcelocation) != Config.getDefaultResourcePack())
             {
@@ -115,7 +94,7 @@ public class SmartLeaves
             }
             else
             {
-                ResourceLocation resourcelocation1 = new ResourceLocation("models/block/" + type + "_leaves.json");
+                ResourceLocation resourcelocation1 = new ResourceLocation("models/block/" + p_getModelCull_0_ + "_leaves.json");
 
                 if (Config.getDefiningResourcePack(resourcelocation1) != Config.getDefaultResourcePack())
                 {
@@ -123,7 +102,7 @@ public class SmartLeaves
                 }
                 else
                 {
-                    ModelResourceLocation modelresourcelocation = new ModelResourceLocation(type + "_leaves", "normal");
+                    ModelResourceLocation modelresourcelocation = new ModelResourceLocation(p_getModelCull_0_ + "_leaves", "normal");
                     IBakedModel ibakedmodel = modelmanager.getModel(modelresourcelocation);
 
                     if (ibakedmodel != null && ibakedmodel != modelmanager.getMissingModel())
@@ -140,10 +119,9 @@ public class SmartLeaves
                         }
                         else
                         {
-                            for (Object o : list)
+                            for (Object bakedquad : list)
                             {
-                                BakedQuad bakedquad = (BakedQuad) o;
-                                List list1 = ibakedmodel.getFaceQuads(bakedquad.getFace());
+                                List list1 = ibakedmodel.getFaceQuads(((BakedQuad) bakedquad).getFace());
 
                                 if (list1.size() > 0)
                                 {
@@ -154,7 +132,7 @@ public class SmartLeaves
                             }
 
                             list.clear();
-                            updatedTypes.add(type + "_leaves");
+                            p_getModelCull_1_.add(p_getModelCull_0_ + "_leaves");
                             return ibakedmodel;
                         }
                     }
@@ -167,16 +145,16 @@ public class SmartLeaves
         }
     }
 
-    private static IBakedModel getModelDoubleFace(IBakedModel model)
+    private static IBakedModel getModelDoubleFace(IBakedModel p_getModelDoubleFace_0_)
     {
-        if (model == null)
+        if (p_getModelDoubleFace_0_ == null)
         {
             return null;
         }
-        else if (model.getGeneralQuads().size() > 0)
+        else if (p_getModelDoubleFace_0_.getGeneralQuads().size() > 0)
         {
-            Config.warn("SmartLeaves: Model is not cube, general quads: " + model.getGeneralQuads().size() + ", model: " + model);
-            return model;
+            Config.warn("SmartLeaves: Model is not cube, general quads: " + p_getModelDoubleFace_0_.getGeneralQuads().size() + ", model: " + p_getModelDoubleFace_0_);
+            return p_getModelDoubleFace_0_;
         }
         else
         {
@@ -185,16 +163,16 @@ public class SmartLeaves
             for (int i = 0; i < aenumfacing.length; ++i)
             {
                 EnumFacing enumfacing = aenumfacing[i];
-                List<BakedQuad> list = model.getFaceQuads(enumfacing);
+                List<BakedQuad> list = p_getModelDoubleFace_0_.getFaceQuads(enumfacing);
 
                 if (list.size() != 1)
                 {
-                    Config.warn("SmartLeaves: Model is not cube, side: " + enumfacing + ", quads: " + list.size() + ", model: " + model);
-                    return model;
+                    Config.warn("SmartLeaves: Model is not cube, side: " + enumfacing + ", quads: " + list.size() + ", model: " + p_getModelDoubleFace_0_);
+                    return p_getModelDoubleFace_0_;
                 }
             }
 
-            IBakedModel ibakedmodel = ModelUtils.duplicateModel(model);
+            IBakedModel ibakedmodel = ModelUtils.duplicateModel(p_getModelDoubleFace_0_);
             List[] alist = new List[aenumfacing.length];
 
             for (int k = 0; k < aenumfacing.length; ++k)

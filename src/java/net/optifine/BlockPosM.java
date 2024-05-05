@@ -5,7 +5,6 @@ import java.util.Iterator;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3i;
 
 public class BlockPosM extends BlockPos
 {
@@ -16,70 +15,65 @@ public class BlockPosM extends BlockPos
     private BlockPosM[] facings;
     private boolean needsUpdate;
 
-    public BlockPosM(int x, int y, int z)
+    public BlockPosM(int p_i22_1_, int p_i22_2_, int p_i22_3_)
     {
-        this(x, y, z, 0);
+        this(p_i22_1_, p_i22_2_, p_i22_3_, 0);
     }
 
-    public BlockPosM(double xIn, double yIn, double zIn)
+    public BlockPosM(double p_i23_1_, double p_i23_3_, double p_i23_5_)
     {
-        this(MathHelper.floor_double(xIn), MathHelper.floor_double(yIn), MathHelper.floor_double(zIn));
+        this(MathHelper.floor_double(p_i23_1_), MathHelper.floor_double(p_i23_3_), MathHelper.floor_double(p_i23_5_));
     }
 
-    public BlockPosM(int x, int y, int z, int level)
+    public BlockPosM(int p_i24_1_, int p_i24_2_, int p_i24_3_, int p_i24_4_)
     {
         super(0, 0, 0);
-        this.mx = x;
-        this.my = y;
-        this.mz = z;
-        this.level = level;
+        this.mx = p_i24_1_;
+        this.my = p_i24_2_;
+        this.mz = p_i24_3_;
+        this.level = p_i24_4_;
     }
 
+    /**
+     * Get the X coordinate
+     */
     public int getX()
     {
         return this.mx;
     }
 
+    /**
+     * Get the Y coordinate
+     */
     public int getY()
     {
         return this.my;
     }
 
+    /**
+     * Get the Z coordinate
+     */
     public int getZ()
     {
         return this.mz;
     }
 
-    public void setXyz(int x, int y, int z)
+    public void setXyz(int p_setXyz_1_, int p_setXyz_2_, int p_setXyz_3_)
     {
-        this.mx = x;
-        this.my = y;
-        this.mz = z;
+        this.mx = p_setXyz_1_;
+        this.my = p_setXyz_2_;
+        this.mz = p_setXyz_3_;
         this.needsUpdate = true;
     }
 
-    public void setXyz(double xIn, double yIn, double zIn)
+    public void setXyz(double p_setXyz_1_, double p_setXyz_3_, double p_setXyz_5_)
     {
-        this.setXyz(MathHelper.floor_double(xIn), MathHelper.floor_double(yIn), MathHelper.floor_double(zIn));
+        this.setXyz(MathHelper.floor_double(p_setXyz_1_), MathHelper.floor_double(p_setXyz_3_), MathHelper.floor_double(p_setXyz_5_));
     }
 
-    public BlockPosM set(Vec3i vec)
-    {
-        this.setXyz(vec.getX(), vec.getY(), vec.getZ());
-        return this;
-    }
-
-    public BlockPosM set(int xIn, int yIn, int zIn)
-    {
-        this.setXyz(xIn, yIn, zIn);
-        return this;
-    }
-
-    public BlockPos offsetMutable(EnumFacing facing)
-    {
-        return this.offset(facing);
-    }
-
+    /**
+     * Offset this BlockPos 1 block in the given direction
+     */
     public BlockPos offset(EnumFacing facing)
     {
         if (this.level <= 0)
@@ -114,6 +108,9 @@ public class BlockPosM extends BlockPos
         }
     }
 
+    /**
+     * Offsets this BlockPos n blocks in the given direction
+     */
     public BlockPos offset(EnumFacing facing, int n)
     {
         return n == 1 ? this.offset(facing) : super.offset(facing, n);
@@ -138,15 +135,10 @@ public class BlockPosM extends BlockPos
         this.needsUpdate = false;
     }
 
-    public BlockPos toImmutable()
+    public static Iterable getAllInBoxMutable(BlockPos p_getAllInBoxMutable_0_, BlockPos p_getAllInBoxMutable_1_)
     {
-        return new BlockPos(this.mx, this.my, this.mz);
-    }
-
-    public static Iterable getAllInBoxMutable(BlockPos from, BlockPos to)
-    {
-        final BlockPos blockpos = new BlockPos(Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()));
-        final BlockPos blockpos1 = new BlockPos(Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
+        final BlockPos blockpos = new BlockPos(Math.min(p_getAllInBoxMutable_0_.getX(), p_getAllInBoxMutable_1_.getX()), Math.min(p_getAllInBoxMutable_0_.getY(), p_getAllInBoxMutable_1_.getY()), Math.min(p_getAllInBoxMutable_0_.getZ(), p_getAllInBoxMutable_1_.getZ()));
+        final BlockPos blockpos1 = new BlockPos(Math.max(p_getAllInBoxMutable_0_.getX(), p_getAllInBoxMutable_1_.getX()), Math.max(p_getAllInBoxMutable_0_.getY(), p_getAllInBoxMutable_1_.getY()), Math.max(p_getAllInBoxMutable_0_.getZ(), p_getAllInBoxMutable_1_.getZ()));
         return new Iterable()
         {
             public Iterator iterator()
@@ -198,5 +190,10 @@ public class BlockPosM extends BlockPos
                 };
             }
         };
+    }
+
+    public BlockPos getImmutable()
+    {
+        return new BlockPos(this.getX(), this.getY(), this.getZ());
     }
 }

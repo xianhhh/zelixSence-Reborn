@@ -21,16 +21,18 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.src.Config;
+import net.minecraft.potion.PotionHelper;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -39,15 +41,6 @@ import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.optifine.config.ConnectedParser;
-import net.optifine.config.MatchBlock;
-import net.optifine.reflect.Reflector;
-import net.optifine.render.RenderEnv;
-import net.optifine.util.EntityUtils;
-import net.optifine.util.PropertiesOrdered;
-import net.optifine.util.ResUtils;
-import net.optifine.util.StrUtils;
-import net.optifine.util.TextureUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -67,10 +60,10 @@ public class CustomColors
     private static CustomColorFader fogColorFader = new CustomColorFader();
     private static CustomColormap underwaterColors = null;
     private static CustomColorFader underwaterColorFader = new CustomColorFader();
-    private static CustomColormap underlavaColors = null;
-    private static CustomColorFader underlavaColorFader = new CustomColorFader();
-    private static LightMapPack[] lightMapPacks = null;
+    private static CustomColormap[] lightMapsColorsRgb = null;
     private static int lightmapMinDimensionId = 0;
+    private static float[][] sunRgbs = new float[16][3];
+    private static float[][] torchRgbs = new float[16][3];
     private static CustomColormap redstoneColors = null;
     private static CustomColormap xpOrbColors = null;
     private static int xpOrbTime = -1;
@@ -101,10 +94,10 @@ public class CustomColors
     public static Random random = new Random();
     private static final CustomColors.IColorizer COLORIZER_GRASS = new CustomColors.IColorizer()
     {
-        public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+        public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
         {
-            BiomeGenBase biomegenbase = CustomColors.getColorBiome(blockAccess, blockPos);
-            return CustomColors.swampGrassColors != null && biomegenbase == BiomeGenBase.swampland ? CustomColors.swampGrassColors.getColor(biomegenbase, blockPos) : biomegenbase.getGrassColorAtPos(blockPos);
+            BiomeGenBase biomegenbase = CustomColors.getColorBiome(p_getColor_1_, p_getColor_2_);
+            return CustomColors.swampGrassColors != null && biomegenbase == BiomeGenBase.swampland ? CustomColors.swampGrassColors.getColor(biomegenbase, p_getColor_2_) : biomegenbase.getGrassColorAtPos(p_getColor_2_);
         }
         public boolean isColorConstant()
         {
@@ -113,10 +106,10 @@ public class CustomColors
     };
     private static final CustomColors.IColorizer COLORIZER_FOLIAGE = new CustomColors.IColorizer()
     {
-        public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+        public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
         {
-            BiomeGenBase biomegenbase = CustomColors.getColorBiome(blockAccess, blockPos);
-            return CustomColors.swampFoliageColors != null && biomegenbase == BiomeGenBase.swampland ? CustomColors.swampFoliageColors.getColor(biomegenbase, blockPos) : biomegenbase.getFoliageColorAtPos(blockPos);
+            BiomeGenBase biomegenbase = CustomColors.getColorBiome(p_getColor_1_, p_getColor_2_);
+            return CustomColors.swampFoliageColors != null && biomegenbase == BiomeGenBase.swampland ? CustomColors.swampFoliageColors.getColor(biomegenbase, p_getColor_2_) : biomegenbase.getFoliageColorAtPos(p_getColor_2_);
         }
         public boolean isColorConstant()
         {
@@ -125,9 +118,9 @@ public class CustomColors
     };
     private static final CustomColors.IColorizer COLORIZER_FOLIAGE_PINE = new CustomColors.IColorizer()
     {
-        public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+        public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
         {
-            return CustomColors.foliagePineColors != null ? CustomColors.foliagePineColors.getColor(blockAccess, blockPos) : ColorizerFoliage.getFoliageColorPine();
+            return CustomColors.foliagePineColors != null ? CustomColors.foliagePineColors.getColor(p_getColor_1_, p_getColor_2_) : ColorizerFoliage.getFoliageColorPine();
         }
         public boolean isColorConstant()
         {
@@ -136,9 +129,9 @@ public class CustomColors
     };
     private static final CustomColors.IColorizer COLORIZER_FOLIAGE_BIRCH = new CustomColors.IColorizer()
     {
-        public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+        public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
         {
-            return CustomColors.foliageBirchColors != null ? CustomColors.foliageBirchColors.getColor(blockAccess, blockPos) : ColorizerFoliage.getFoliageColorBirch();
+            return CustomColors.foliageBirchColors != null ? CustomColors.foliageBirchColors.getColor(p_getColor_1_, p_getColor_2_) : ColorizerFoliage.getFoliageColorBirch();
         }
         public boolean isColorConstant()
         {
@@ -147,10 +140,10 @@ public class CustomColors
     };
     private static final CustomColors.IColorizer COLORIZER_WATER = new CustomColors.IColorizer()
     {
-        public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+        public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
         {
-            BiomeGenBase biomegenbase = CustomColors.getColorBiome(blockAccess, blockPos);
-            return CustomColors.waterColors != null ? CustomColors.waterColors.getColor(biomegenbase, blockPos) : (Reflector.ForgeBiome_getWaterColorMultiplier.exists() ? Reflector.callInt(biomegenbase, Reflector.ForgeBiome_getWaterColorMultiplier, new Object[0]) : biomegenbase.waterColorMultiplier);
+            BiomeGenBase biomegenbase = CustomColors.getColorBiome(p_getColor_1_, p_getColor_2_);
+            return CustomColors.waterColors != null ? CustomColors.waterColors.getColor(biomegenbase, p_getColor_2_) : (Reflector.ForgeBiome_getWaterColorMultiplier.exists() ? Reflector.callInt(biomegenbase, Reflector.ForgeBiome_getWaterColorMultiplier, new Object[0]) : biomegenbase.waterColorMultiplier);
         }
         public boolean isColorConstant()
         {
@@ -169,14 +162,13 @@ public class CustomColors
         skyColors = null;
         fogColors = null;
         underwaterColors = null;
-        underlavaColors = null;
         redstoneColors = null;
         xpOrbColors = null;
         xpOrbTime = -1;
         durabilityColors = null;
         stemColors = null;
         myceliumParticleColors = null;
-        lightMapPacks = null;
+        lightMapsColorsRgb = null;
         particleWaterColor = -1;
         particlePortalColor = -1;
         lilyPadColor = -1;
@@ -196,6 +188,7 @@ public class CustomColors
         textColors = null;
         setMapColors(mapColorsOriginal);
         potionColors = null;
+        PotionHelper.clearPotionColorCache();
         paletteFormatDefault = getValidProperty("mcpatcher/color.properties", "palette.format", CustomColormap.FORMAT_STRINGS, "vanilla");
         String s = "mcpatcher/colormap/";
         String[] astring = new String[] {"water.png", "watercolorX.png"};
@@ -218,20 +211,18 @@ public class CustomColors
             fogColors = getCustomColors(s, astring6, 256, 256);
             String[] astring7 = new String[] {"underwater.png", "underwatercolor.png"};
             underwaterColors = getCustomColors(s, astring7, 256, 256);
-            String[] astring8 = new String[] {"underlava.png", "underlavacolor.png"};
-            underlavaColors = getCustomColors(s, astring8, 256, 256);
-            String[] astring9 = new String[] {"redstone.png", "redstonecolor.png"};
-            redstoneColors = getCustomColors(s, astring9, 16, 1);
+            String[] astring8 = new String[] {"redstone.png", "redstonecolor.png"};
+            redstoneColors = getCustomColors(s, astring8, 16, 1);
             xpOrbColors = getCustomColors(s + "xporb.png", -1, -1);
             durabilityColors = getCustomColors(s + "durability.png", -1, -1);
-            String[] astring10 = new String[] {"stem.png", "stemcolor.png"};
-            stemColors = getCustomColors(s, astring10, 8, 1);
+            String[] astring9 = new String[] {"stem.png", "stemcolor.png"};
+            stemColors = getCustomColors(s, astring9, 8, 1);
             stemPumpkinColors = getCustomColors(s + "pumpkinstem.png", 8, 1);
             stemMelonColors = getCustomColors(s + "melonstem.png", 8, 1);
-            String[] astring11 = new String[] {"myceliumparticle.png", "myceliumparticlecolor.png"};
-            myceliumParticleColors = getCustomColors(s, astring11, -1, -1);
-            Pair<LightMapPack[], Integer> pair = parseLightMapPacks();
-            lightMapPacks = (LightMapPack[])pair.getLeft();
+            String[] astring10 = new String[] {"myceliumparticle.png", "myceliumparticlecolor.png"};
+            myceliumParticleColors = getCustomColors(s, astring10, -1, -1);
+            Pair<CustomColormap[], Integer> pair = parseLightmapsRgb();
+            lightMapsColorsRgb = (CustomColormap[])pair.getLeft();
             lightmapMinDimensionId = ((Integer)pair.getRight()).intValue();
             readColorProperties("mcpatcher/color.properties");
             blockColormaps = readBlockColormaps(new String[] {s + "custom/", s + "blocks/"}, colorsBlockColormaps, 256, 256);
@@ -239,41 +230,41 @@ public class CustomColors
         }
     }
 
-    private static String getValidProperty(String fileName, String key, String[] validValues, String valDef)
+    private static String getValidProperty(String p_getValidProperty_0_, String p_getValidProperty_1_, String[] p_getValidProperty_2_, String p_getValidProperty_3_)
     {
         try
         {
-            ResourceLocation resourcelocation = new ResourceLocation(fileName);
+            ResourceLocation resourcelocation = new ResourceLocation(p_getValidProperty_0_);
             InputStream inputstream = Config.getResourceStream(resourcelocation);
 
             if (inputstream == null)
             {
-                return valDef;
+                return p_getValidProperty_3_;
             }
             else
             {
-                Properties properties = new PropertiesOrdered();
+                Properties properties = new Properties();
                 properties.load(inputstream);
                 inputstream.close();
-                String s = properties.getProperty(key);
+                String s = properties.getProperty(p_getValidProperty_1_);
 
                 if (s == null)
                 {
-                    return valDef;
+                    return p_getValidProperty_3_;
                 }
                 else
                 {
-                    List<String> list = Arrays.<String>asList(validValues);
+                    List<String> list = Arrays.<String>asList(p_getValidProperty_2_);
 
                     if (!list.contains(s))
                     {
-                        warn("Invalid value: " + key + "=" + s);
-                        warn("Expected values: " + Config.arrayToString((Object[])validValues));
-                        return valDef;
+                        warn("Invalid value: " + p_getValidProperty_1_ + "=" + s);
+                        warn("Expected values: " + Config.arrayToString((Object[])p_getValidProperty_2_));
+                        return p_getValidProperty_3_;
                     }
                     else
                     {
-                        dbg("" + key + "=" + s);
+                        dbg("" + p_getValidProperty_1_ + "=" + s);
                         return s;
                     }
                 }
@@ -281,16 +272,16 @@ public class CustomColors
         }
         catch (FileNotFoundException var9)
         {
-            return valDef;
+            return p_getValidProperty_3_;
         }
         catch (IOException ioexception)
         {
             ioexception.printStackTrace();
-            return valDef;
+            return p_getValidProperty_3_;
         }
     }
 
-    private static Pair<LightMapPack[], Integer> parseLightMapPacks()
+    private static Pair<CustomColormap[], Integer> parseLightmapsRgb()
     {
         String s = "mcpatcher/lightmap/world";
         String s1 = ".png";
@@ -348,58 +339,38 @@ public class CustomColors
                 }
             }
 
-            LightMapPack[] alightmappack = new LightMapPack[acustomcolormap.length];
-
-            for (int l1 = 0; l1 < acustomcolormap.length; ++l1)
-            {
-                CustomColormap customcolormap3 = acustomcolormap[l1];
-
-                if (customcolormap3 != null)
-                {
-                    String s5 = customcolormap3.name;
-                    String s6 = customcolormap3.basePath;
-                    CustomColormap customcolormap1 = getCustomColors(s6 + "/" + s5 + "_rain.png", -1, -1);
-                    CustomColormap customcolormap2 = getCustomColors(s6 + "/" + s5 + "_thunder.png", -1, -1);
-                    LightMap lightmap = new LightMap(customcolormap3);
-                    LightMap lightmap1 = customcolormap1 != null ? new LightMap(customcolormap1) : null;
-                    LightMap lightmap2 = customcolormap2 != null ? new LightMap(customcolormap2) : null;
-                    LightMapPack lightmappack = new LightMapPack(lightmap, lightmap1, lightmap2);
-                    alightmappack[l1] = lightmappack;
-                }
-            }
-
-            return new ImmutablePair(alightmappack, Integer.valueOf(j1));
+            return new ImmutablePair(acustomcolormap, Integer.valueOf(j1));
         }
     }
 
-    private static int getTextureHeight(String path, int defHeight)
+    private static int getTextureHeight(String p_getTextureHeight_0_, int p_getTextureHeight_1_)
     {
         try
         {
-            InputStream inputstream = Config.getResourceStream(new ResourceLocation(path));
+            InputStream inputstream = Config.getResourceStream(new ResourceLocation(p_getTextureHeight_0_));
 
             if (inputstream == null)
             {
-                return defHeight;
+                return p_getTextureHeight_1_;
             }
             else
             {
                 BufferedImage bufferedimage = ImageIO.read(inputstream);
                 inputstream.close();
-                return bufferedimage == null ? defHeight : bufferedimage.getHeight();
+                return bufferedimage == null ? p_getTextureHeight_1_ : bufferedimage.getHeight();
             }
         }
         catch (IOException var4)
         {
-            return defHeight;
+            return p_getTextureHeight_1_;
         }
     }
 
-    private static void readColorProperties(String fileName)
+    private static void readColorProperties(String p_readColorProperties_0_)
     {
         try
         {
-            ResourceLocation resourcelocation = new ResourceLocation(fileName);
+            ResourceLocation resourcelocation = new ResourceLocation(p_readColorProperties_0_);
             InputStream inputstream = Config.getResourceStream(resourcelocation);
 
             if (inputstream == null)
@@ -407,8 +378,8 @@ public class CustomColors
                 return;
             }
 
-            dbg("Loading " + fileName);
-            Properties properties = new PropertiesOrdered();
+            dbg("Loading " + p_readColorProperties_0_);
+            Properties properties = new Properties();
             properties.load(inputstream);
             inputstream.close();
             particleWaterColor = readColor(properties, new String[] {"particle.water", "drop.water"});
@@ -420,13 +391,13 @@ public class CustomColors
             fogColorNether = readColorVec3(properties, "fog.nether");
             fogColorEnd = readColorVec3(properties, "fog.end");
             skyColorEnd = readColorVec3(properties, "sky.end");
-            colorsBlockColormaps = readCustomColormaps(properties, fileName);
-            spawnEggPrimaryColors = readSpawnEggColors(properties, fileName, "egg.shell.", "Spawn egg shell");
-            spawnEggSecondaryColors = readSpawnEggColors(properties, fileName, "egg.spots.", "Spawn egg spot");
-            wolfCollarColors = readDyeColors(properties, fileName, "collar.", "Wolf collar");
-            sheepColors = readDyeColors(properties, fileName, "sheep.", "Sheep");
-            textColors = readTextColors(properties, fileName, "text.code.", "Text");
-            int[] aint = readMapColors(properties, fileName, "map.", "Map");
+            colorsBlockColormaps = readCustomColormaps(properties, p_readColorProperties_0_);
+            spawnEggPrimaryColors = readSpawnEggColors(properties, p_readColorProperties_0_, "egg.shell.", "Spawn egg shell");
+            spawnEggSecondaryColors = readSpawnEggColors(properties, p_readColorProperties_0_, "egg.spots.", "Spawn egg spot");
+            wolfCollarColors = readDyeColors(properties, p_readColorProperties_0_, "collar.", "Wolf collar");
+            sheepColors = readDyeColors(properties, p_readColorProperties_0_, "sheep.", "Sheep");
+            textColors = readTextColors(properties, p_readColorProperties_0_, "text.code.", "Text");
+            int[] aint = readMapColors(properties, p_readColorProperties_0_, "map.", "Map");
 
             if (aint != null)
             {
@@ -438,7 +409,7 @@ public class CustomColors
                 setMapColors(aint);
             }
 
-            potionColors = readPotionColors(properties, fileName, "potion.", "Potion");
+            potionColors = readPotionColors(properties, p_readColorProperties_0_, "potion.", "Potion");
             xpOrbTime = Config.parseInt(properties.getProperty("xporb.time"), -1);
         }
         catch (FileNotFoundException var5)
@@ -451,18 +422,17 @@ public class CustomColors
         }
     }
 
-    private static CustomColormap[] readCustomColormaps(Properties props, String fileName)
+    private static CustomColormap[] readCustomColormaps(Properties p_readCustomColormaps_0_, String p_readCustomColormaps_1_)
     {
         List list = new ArrayList();
         String s = "palette.block.";
         Map map = new HashMap();
 
-        for (Object o: props.keySet())
+        for (Object s1 : p_readCustomColormaps_0_.keySet())
         {
-            String s1 = (String) o;
-            String s2 = props.getProperty(s1);
+            String s2 = p_readCustomColormaps_0_.getProperty((String) s1);
 
-            if (s1.startsWith(s))
+            if (((String) s1).startsWith(s))
             {
                 map.put(s1, s2);
             }
@@ -473,10 +443,10 @@ public class CustomColors
         for (int j = 0; j < astring.length; ++j)
         {
             String s6 = astring[j];
-            String s3 = props.getProperty(s6);
+            String s3 = p_readCustomColormaps_0_.getProperty(s6);
             dbg("Block palette: " + s6 + " = " + s3);
             String s4 = s6.substring(s.length());
-            String s5 = TextureUtils.getBasePath(fileName);
+            String s5 = TextureUtils.getBasePath(p_readCustomColormaps_1_);
             s4 = TextureUtils.fixResourcePath(s4, s5);
             CustomColormap customcolormap = getCustomColors(s4, 256, 256);
 
@@ -517,9 +487,9 @@ public class CustomColors
         }
     }
 
-    private static CustomColormap[][] readBlockColormaps(String[] basePaths, CustomColormap[] basePalettes, int width, int height)
+    private static CustomColormap[][] readBlockColormaps(String[] p_readBlockColormaps_0_, CustomColormap[] p_readBlockColormaps_1_, int p_readBlockColormaps_2_, int p_readBlockColormaps_3_)
     {
-        String[] astring = ResUtils.collectFiles(basePaths, new String[] {".properties"});
+        String[] astring = ResUtils.collectFiles(p_readBlockColormaps_0_, new String[] {".properties"});
         Arrays.sort((Object[])astring);
         List list = new ArrayList();
 
@@ -539,10 +509,9 @@ public class CustomColors
                 }
                 else
                 {
-                    Properties properties = new PropertiesOrdered();
+                    Properties properties = new Properties();
                     properties.load(inputstream);
-                    inputstream.close();
-                    CustomColormap customcolormap = new CustomColormap(properties, s, width, height, paletteFormatDefault);
+                    CustomColormap customcolormap = new CustomColormap(properties, s, p_readBlockColormaps_2_, p_readBlockColormaps_3_, paletteFormatDefault);
 
                     if (customcolormap.isValid(s) && customcolormap.isValidMatchBlocks(s))
                     {
@@ -560,11 +529,11 @@ public class CustomColors
             }
         }
 
-        if (basePalettes != null)
+        if (p_readBlockColormaps_1_ != null)
         {
-            for (int j = 0; j < basePalettes.length; ++j)
+            for (int j = 0; j < p_readBlockColormaps_1_.length; ++j)
             {
-                CustomColormap customcolormap1 = basePalettes[j];
+                CustomColormap customcolormap1 = p_readBlockColormaps_1_[j];
                 addToBlockList(customcolormap1, list);
             }
         }
@@ -580,9 +549,9 @@ public class CustomColors
         }
     }
 
-    private static void addToBlockList(CustomColormap cm, List blockList)
+    private static void addToBlockList(CustomColormap p_addToBlockList_0_, List p_addToBlockList_1_)
     {
-        int[] aint = cm.getMatchBlockIds();
+        int[] aint = p_addToBlockList_0_.getMatchBlockIds();
 
         if (aint != null && aint.length > 0)
         {
@@ -596,7 +565,7 @@ public class CustomColors
                 }
                 else
                 {
-                    addToList(cm, blockList, j);
+                    addToList(p_addToBlockList_0_, p_addToBlockList_1_, j);
                 }
             }
         }
@@ -606,31 +575,31 @@ public class CustomColors
         }
     }
 
-    private static void addToList(CustomColormap cm, List lists, int id)
+    private static void addToList(CustomColormap p_addToList_0_, List p_addToList_1_, int p_addToList_2_)
     {
-        while (id >= lists.size())
+        while (p_addToList_2_ >= p_addToList_1_.size())
         {
-            lists.add(null);
+            p_addToList_1_.add(null);
         }
 
-        List list = (List)lists.get(id);
+        List list = (List)p_addToList_1_.get(p_addToList_2_);
 
         if (list == null)
         {
             list = new ArrayList();
-            list.set(id, list);
+            p_addToList_1_.set(p_addToList_2_, list);
         }
 
-        list.add(cm);
+        list.add(p_addToList_0_);
     }
 
-    private static CustomColormap[][] blockListToArray(List lists)
+    private static CustomColormap[][] blockListToArray(List p_blockListToArray_0_)
     {
-        CustomColormap[][] acustomcolormap = new CustomColormap[lists.size()][];
+        CustomColormap[][] acustomcolormap = new CustomColormap[p_blockListToArray_0_.size()][];
 
-        for (int i = 0; i < lists.size(); ++i)
+        for (int i = 0; i < p_blockListToArray_0_.size(); ++i)
         {
-            List list = (List)lists.get(i);
+            List list = (List)p_blockListToArray_0_.get(i);
 
             if (list != null)
             {
@@ -642,12 +611,12 @@ public class CustomColors
         return acustomcolormap;
     }
 
-    private static int readColor(Properties props, String[] names)
+    private static int readColor(Properties p_readColor_0_, String[] p_readColor_1_)
     {
-        for (int i = 0; i < names.length; ++i)
+        for (int i = 0; i < p_readColor_1_.length; ++i)
         {
-            String s = names[i];
-            int j = readColor(props, s);
+            String s = p_readColor_1_[i];
+            int j = readColor(p_readColor_0_, s);
 
             if (j >= 0)
             {
@@ -658,9 +627,9 @@ public class CustomColors
         return -1;
     }
 
-    private static int readColor(Properties props, String name)
+    private static int readColor(Properties p_readColor_0_, String p_readColor_1_)
     {
-        String s = props.getProperty(name);
+        String s = p_readColor_0_.getProperty(p_readColor_1_);
 
         if (s == null)
         {
@@ -673,30 +642,30 @@ public class CustomColors
 
             if (i < 0)
             {
-                warn("Invalid color: " + name + " = " + s);
+                warn("Invalid color: " + p_readColor_1_ + " = " + s);
                 return i;
             }
             else
             {
-                dbg(name + " = " + s);
+                dbg(p_readColor_1_ + " = " + s);
                 return i;
             }
         }
     }
 
-    private static int parseColor(String str)
+    private static int parseColor(String p_parseColor_0_)
     {
-        if (str == null)
+        if (p_parseColor_0_ == null)
         {
             return -1;
         }
         else
         {
-            str = str.trim();
+            p_parseColor_0_ = p_parseColor_0_.trim();
 
             try
             {
-                int i = Integer.parseInt(str, 16) & 16777215;
+                int i = Integer.parseInt(p_parseColor_0_, 16) & 16777215;
                 return i;
             }
             catch (NumberFormatException var2)
@@ -706,9 +675,9 @@ public class CustomColors
         }
     }
 
-    private static Vec3 readColorVec3(Properties props, String name)
+    private static Vec3 readColorVec3(Properties p_readColorVec3_0_, String p_readColorVec3_1_)
     {
-        int i = readColor(props, name);
+        int i = readColor(p_readColorVec3_0_, p_readColorVec3_1_);
 
         if (i < 0)
         {
@@ -726,13 +695,13 @@ public class CustomColors
         }
     }
 
-    private static CustomColormap getCustomColors(String basePath, String[] paths, int width, int height)
+    private static CustomColormap getCustomColors(String p_getCustomColors_0_, String[] p_getCustomColors_1_, int p_getCustomColors_2_, int p_getCustomColors_3_)
     {
-        for (int i = 0; i < paths.length; ++i)
+        for (int i = 0; i < p_getCustomColors_1_.length; ++i)
         {
-            String s = paths[i];
-            s = basePath + s;
-            CustomColormap customcolormap = getCustomColors(s, width, height);
+            String s = p_getCustomColors_1_[i];
+            s = p_getCustomColors_0_ + s;
+            CustomColormap customcolormap = getCustomColors(s, p_getCustomColors_2_, p_getCustomColors_3_);
 
             if (customcolormap != null)
             {
@@ -743,11 +712,11 @@ public class CustomColors
         return null;
     }
 
-    public static CustomColormap getCustomColors(String pathImage, int width, int height)
+    public static CustomColormap getCustomColors(String p_getCustomColors_0_, int p_getCustomColors_1_, int p_getCustomColors_2_)
     {
         try
         {
-            ResourceLocation resourcelocation = new ResourceLocation(pathImage);
+            ResourceLocation resourcelocation = new ResourceLocation(p_getCustomColors_0_);
 
             if (!Config.hasResource(resourcelocation))
             {
@@ -755,9 +724,9 @@ public class CustomColors
             }
             else
             {
-                dbg("Colormap " + pathImage);
-                Properties properties = new PropertiesOrdered();
-                String s = StrUtils.replaceSuffix(pathImage, ".png", ".properties");
+                dbg("Colormap " + p_getCustomColors_0_);
+                Properties properties = new Properties();
+                String s = StrUtils.replaceSuffix(p_getCustomColors_0_, ".png", ".properties");
                 ResourceLocation resourcelocation1 = new ResourceLocation(s);
 
                 if (Config.hasResource(resourcelocation1))
@@ -770,11 +739,11 @@ public class CustomColors
                 else
                 {
                     properties.put("format", paletteFormatDefault);
-                    properties.put("source", pathImage);
-                    s = pathImage;
+                    properties.put("source", p_getCustomColors_0_);
+                    s = p_getCustomColors_0_;
                 }
 
-                CustomColormap customcolormap = new CustomColormap(properties, s, width, height, paletteFormatDefault);
+                CustomColormap customcolormap = new CustomColormap(properties, s, p_getCustomColors_1_, p_getCustomColors_2_, paletteFormatDefault);
                 return !customcolormap.isValid(s) ? null : customcolormap;
             }
         }
@@ -790,30 +759,29 @@ public class CustomColors
         useDefaultGrassFoliageColors = foliageBirchColors == null && foliagePineColors == null && swampGrassColors == null && swampFoliageColors == null && Config.isSwampColors() && Config.isSmoothBiomes();
     }
 
-    public static int getColorMultiplier(BakedQuad quad, IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos, RenderEnv renderEnv)
+    public static int getColorMultiplier(BakedQuad p_getColorMultiplier_0_, Block p_getColorMultiplier_1_, IBlockAccess p_getColorMultiplier_2_, BlockPos p_getColorMultiplier_3_, RenderEnv p_getColorMultiplier_4_)
     {
-        Block block = blockState.getBlock();
-        IBlockState iblockstate = renderEnv.getBlockState();
-
         if (blockColormaps != null)
         {
-            if (!quad.hasTintIndex())
+            IBlockState iblockstate = p_getColorMultiplier_4_.getBlockState();
+
+            if (!p_getColorMultiplier_0_.hasTintIndex())
             {
-                if (block == Blocks.grass)
+                if (p_getColorMultiplier_1_ == Blocks.grass)
                 {
                     iblockstate = BLOCK_STATE_DIRT;
                 }
 
-                if (block == Blocks.redstone_wire)
+                if (p_getColorMultiplier_1_ == Blocks.redstone_wire)
                 {
                     return -1;
                 }
             }
 
-            if (block == Blocks.double_plant && renderEnv.getMetadata() >= 8)
+            if (p_getColorMultiplier_1_ == Blocks.double_plant && p_getColorMultiplier_4_.getMetadata() >= 8)
             {
-                blockPos = blockPos.down();
-                iblockstate = blockAccess.getBlockState(blockPos);
+                p_getColorMultiplier_3_ = p_getColorMultiplier_3_.down();
+                iblockstate = p_getColorMultiplier_2_.getBlockState(p_getColorMultiplier_3_);
             }
 
             CustomColormap customcolormap = getBlockColormap(iblockstate);
@@ -822,28 +790,28 @@ public class CustomColors
             {
                 if (Config.isSmoothBiomes() && !customcolormap.isColorConstant())
                 {
-                    return getSmoothColorMultiplier(blockState, blockAccess, blockPos, customcolormap, renderEnv.getColorizerBlockPosM());
+                    return getSmoothColorMultiplier(p_getColorMultiplier_2_, p_getColorMultiplier_3_, customcolormap, p_getColorMultiplier_4_.getColorizerBlockPosM());
                 }
 
-                return customcolormap.getColor(blockAccess, blockPos);
+                return customcolormap.getColor(p_getColorMultiplier_2_, p_getColorMultiplier_3_);
             }
         }
 
-        if (!quad.hasTintIndex())
+        if (!p_getColorMultiplier_0_.hasTintIndex())
         {
             return -1;
         }
-        else if (block == Blocks.waterlily)
+        else if (p_getColorMultiplier_1_ == Blocks.waterlily)
         {
-            return getLilypadColorMultiplier(blockAccess, blockPos);
+            return getLilypadColorMultiplier(p_getColorMultiplier_2_, p_getColorMultiplier_3_);
         }
-        else if (block == Blocks.redstone_wire)
+        else if (p_getColorMultiplier_1_ == Blocks.redstone_wire)
         {
-            return getRedstoneColor(renderEnv.getBlockState());
+            return getRedstoneColor(p_getColorMultiplier_4_.getBlockState());
         }
-        else if (block instanceof BlockStem)
+        else if (p_getColorMultiplier_1_ instanceof BlockStem)
         {
-            return getStemColorMultiplier(block, blockAccess, blockPos, renderEnv);
+            return getStemColorMultiplier(p_getColorMultiplier_1_, p_getColorMultiplier_2_, p_getColorMultiplier_3_, p_getColorMultiplier_4_);
         }
         else if (useDefaultGrassFoliageColors)
         {
@@ -851,21 +819,21 @@ public class CustomColors
         }
         else
         {
-            int i = renderEnv.getMetadata();
+            int i = p_getColorMultiplier_4_.getMetadata();
             CustomColors.IColorizer customcolors$icolorizer;
 
-            if (block != Blocks.grass && block != Blocks.tallgrass && block != Blocks.double_plant)
+            if (p_getColorMultiplier_1_ != Blocks.grass && p_getColorMultiplier_1_ != Blocks.tallgrass && p_getColorMultiplier_1_ != Blocks.double_plant)
             {
-                if (block == Blocks.double_plant)
+                if (p_getColorMultiplier_1_ == Blocks.double_plant)
                 {
                     customcolors$icolorizer = COLORIZER_GRASS;
 
                     if (i >= 8)
                     {
-                        blockPos = blockPos.down();
+                        p_getColorMultiplier_3_ = p_getColorMultiplier_3_.down();
                     }
                 }
-                else if (block == Blocks.leaves)
+                else if (p_getColorMultiplier_1_ == Blocks.leaves)
                 {
                     switch (i & 3)
                     {
@@ -885,13 +853,13 @@ public class CustomColors
                             customcolors$icolorizer = COLORIZER_FOLIAGE;
                     }
                 }
-                else if (block == Blocks.leaves2)
+                else if (p_getColorMultiplier_1_ == Blocks.leaves2)
                 {
                     customcolors$icolorizer = COLORIZER_FOLIAGE;
                 }
                 else
                 {
-                    if (block != Blocks.vine)
+                    if (p_getColorMultiplier_1_ != Blocks.vine)
                     {
                         return -1;
                     }
@@ -904,13 +872,13 @@ public class CustomColors
                 customcolors$icolorizer = COLORIZER_GRASS;
             }
 
-            return Config.isSmoothBiomes() && !customcolors$icolorizer.isColorConstant() ? getSmoothColorMultiplier(blockState, blockAccess, blockPos, customcolors$icolorizer, renderEnv.getColorizerBlockPosM()) : customcolors$icolorizer.getColor(iblockstate, blockAccess, blockPos);
+            return Config.isSmoothBiomes() && !customcolors$icolorizer.isColorConstant() ? getSmoothColorMultiplier(p_getColorMultiplier_2_, p_getColorMultiplier_3_, customcolors$icolorizer, p_getColorMultiplier_4_.getColorizerBlockPosM()) : customcolors$icolorizer.getColor(p_getColorMultiplier_2_, p_getColorMultiplier_3_);
         }
     }
 
-    protected static BiomeGenBase getColorBiome(IBlockAccess blockAccess, BlockPos blockPos)
+    protected static BiomeGenBase getColorBiome(IBlockAccess p_getColorBiome_0_, BlockPos p_getColorBiome_1_)
     {
-        BiomeGenBase biomegenbase = blockAccess.getBiomeGenForCoords(blockPos);
+        BiomeGenBase biomegenbase = p_getColorBiome_0_.getBiomeGenForCoords(p_getColorBiome_1_);
 
         if (biomegenbase == BiomeGenBase.swampland && !Config.isSwampColors())
         {
@@ -920,19 +888,19 @@ public class CustomColors
         return biomegenbase;
     }
 
-    private static CustomColormap getBlockColormap(IBlockState blockState)
+    private static CustomColormap getBlockColormap(IBlockState p_getBlockColormap_0_)
     {
         if (blockColormaps == null)
         {
             return null;
         }
-        else if (!(blockState instanceof BlockStateBase))
+        else if (!(p_getBlockColormap_0_ instanceof BlockStateBase))
         {
             return null;
         }
         else
         {
-            BlockStateBase blockstatebase = (BlockStateBase)blockState;
+            BlockStateBase blockstatebase = (BlockStateBase)p_getBlockColormap_0_;
             int i = blockstatebase.getBlockId();
 
             if (i >= 0 && i < blockColormaps.length)
@@ -965,22 +933,22 @@ public class CustomColors
         }
     }
 
-    private static int getSmoothColorMultiplier(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos, CustomColors.IColorizer colorizer, BlockPosM blockPosM)
+    private static int getSmoothColorMultiplier(IBlockAccess p_getSmoothColorMultiplier_0_, BlockPos p_getSmoothColorMultiplier_1_, CustomColors.IColorizer p_getSmoothColorMultiplier_2_, BlockPosM p_getSmoothColorMultiplier_3_)
     {
         int i = 0;
         int j = 0;
         int k = 0;
-        int l = blockPos.getX();
-        int i1 = blockPos.getY();
-        int j1 = blockPos.getZ();
-        BlockPosM blockposm = blockPosM;
+        int l = p_getSmoothColorMultiplier_1_.getX();
+        int i1 = p_getSmoothColorMultiplier_1_.getY();
+        int j1 = p_getSmoothColorMultiplier_1_.getZ();
+        BlockPosM blockposm = p_getSmoothColorMultiplier_3_;
 
         for (int k1 = l - 1; k1 <= l + 1; ++k1)
         {
             for (int l1 = j1 - 1; l1 <= j1 + 1; ++l1)
             {
                 blockposm.setXyz(k1, i1, l1);
-                int i2 = colorizer.getColor(blockState, blockAccess, blockposm);
+                int i2 = p_getSmoothColorMultiplier_2_.getColor(p_getSmoothColorMultiplier_0_, blockposm);
                 i += i2 >> 16 & 255;
                 j += i2 >> 8 & 255;
                 k += i2 & 255;
@@ -993,20 +961,20 @@ public class CustomColors
         return j2 << 16 | k2 << 8 | l2;
     }
 
-    public static int getFluidColor(IBlockAccess blockAccess, IBlockState blockState, BlockPos blockPos, RenderEnv renderEnv)
+    public static int getFluidColor(IBlockAccess p_getFluidColor_0_, IBlockState p_getFluidColor_1_, BlockPos p_getFluidColor_2_, RenderEnv p_getFluidColor_3_)
     {
-        Block block = blockState.getBlock();
-        CustomColors.IColorizer customcolors$icolorizer = getBlockColormap(blockState);
+        Block block = p_getFluidColor_1_.getBlock();
+        CustomColors.IColorizer customcolors$icolorizer = getBlockColormap(p_getFluidColor_1_);
 
-        if (customcolors$icolorizer == null && blockState.getBlock().getMaterial() == Material.water)
+        if (customcolors$icolorizer == null && block.getMaterial() == Material.water)
         {
             customcolors$icolorizer = COLORIZER_WATER;
         }
 
-        return customcolors$icolorizer == null ? block.colorMultiplier(blockAccess, blockPos, 0) : (Config.isSmoothBiomes() && !customcolors$icolorizer.isColorConstant() ? getSmoothColorMultiplier(blockState, blockAccess, blockPos, customcolors$icolorizer, renderEnv.getColorizerBlockPosM()) : customcolors$icolorizer.getColor(blockState, blockAccess, blockPos));
+        return customcolors$icolorizer == null ? block.colorMultiplier(p_getFluidColor_0_, p_getFluidColor_2_) : (Config.isSmoothBiomes() && !customcolors$icolorizer.isColorConstant() ? getSmoothColorMultiplier(p_getFluidColor_0_, p_getFluidColor_2_, customcolors$icolorizer, p_getFluidColor_3_.getColorizerBlockPosM()) : customcolors$icolorizer.getColor(p_getFluidColor_0_, p_getFluidColor_2_));
     }
 
-    public static void updatePortalFX(EntityFX fx)
+    public static void updatePortalFX(EntityFX p_updatePortalFX_0_)
     {
         if (particlePortalColor >= 0)
         {
@@ -1017,11 +985,11 @@ public class CustomColors
             float f = (float)j / 255.0F;
             float f1 = (float)k / 255.0F;
             float f2 = (float)l / 255.0F;
-            fx.setRBGColorF(f, f1, f2);
+            p_updatePortalFX_0_.setRBGColorF(f, f1, f2);
         }
     }
 
-    public static void updateMyceliumFX(EntityFX fx)
+    public static void updateMyceliumFX(EntityFX p_updateMyceliumFX_0_)
     {
         if (myceliumParticleColors != null)
         {
@@ -1032,11 +1000,11 @@ public class CustomColors
             float f = (float)j / 255.0F;
             float f1 = (float)k / 255.0F;
             float f2 = (float)l / 255.0F;
-            fx.setRBGColorF(f, f1, f2);
+            p_updateMyceliumFX_0_.setRBGColorF(f, f1, f2);
         }
     }
 
-    private static int getRedstoneColor(IBlockState blockState)
+    private static int getRedstoneColor(IBlockState p_getRedstoneColor_0_)
     {
         if (redstoneColors == null)
         {
@@ -1044,17 +1012,17 @@ public class CustomColors
         }
         else
         {
-            int i = getRedstoneLevel(blockState, 15);
+            int i = getRedstoneLevel(p_getRedstoneColor_0_, 15);
             int j = redstoneColors.getColor(i);
             return j;
         }
     }
 
-    public static void updateReddustFX(EntityFX fx, IBlockAccess blockAccess, double x, double y, double z)
+    public static void updateReddustFX(EntityFX p_updateReddustFX_0_, IBlockAccess p_updateReddustFX_1_, double p_updateReddustFX_2_, double p_updateReddustFX_4_, double p_updateReddustFX_6_)
     {
         if (redstoneColors != null)
         {
-            IBlockState iblockstate = blockAccess.getBlockState(new BlockPos(x, y, z));
+            IBlockState iblockstate = p_updateReddustFX_1_.getBlockState(new BlockPos(p_updateReddustFX_2_, p_updateReddustFX_4_, p_updateReddustFX_6_));
             int i = getRedstoneLevel(iblockstate, 15);
             int j = redstoneColors.getColor(i);
             int k = j >> 16 & 255;
@@ -1063,25 +1031,25 @@ public class CustomColors
             float f = (float)k / 255.0F;
             float f1 = (float)l / 255.0F;
             float f2 = (float)i1 / 255.0F;
-            fx.setRBGColorF(f, f1, f2);
+            p_updateReddustFX_0_.setRBGColorF(f, f1, f2);
         }
     }
 
-    private static int getRedstoneLevel(IBlockState state, int def)
+    private static int getRedstoneLevel(IBlockState p_getRedstoneLevel_0_, int p_getRedstoneLevel_1_)
     {
-        Block block = state.getBlock();
+        Block block = p_getRedstoneLevel_0_.getBlock();
 
         if (!(block instanceof BlockRedstoneWire))
         {
-            return def;
+            return p_getRedstoneLevel_1_;
         }
         else
         {
-            Object object = state.getValue(BlockRedstoneWire.POWER);
+            Object object = p_getRedstoneLevel_0_.getValue(BlockRedstoneWire.POWER);
 
             if (!(object instanceof Integer))
             {
-                return def;
+                return p_getRedstoneLevel_1_;
             }
             else
             {
@@ -1091,20 +1059,20 @@ public class CustomColors
         }
     }
 
-    public static float getXpOrbTimer(float timer)
+    public static float getXpOrbTimer(float p_getXpOrbTimer_0_)
     {
         if (xpOrbTime <= 0)
         {
-            return timer;
+            return p_getXpOrbTimer_0_;
         }
         else
         {
             float f = 628.0F / (float)xpOrbTime;
-            return timer * f;
+            return p_getXpOrbTimer_0_ * f;
         }
     }
 
-    public static int getXpOrbColor(float timer)
+    public static int getXpOrbColor(float p_getXpOrbColor_0_)
     {
         if (xpOrbColors == null)
         {
@@ -1112,13 +1080,13 @@ public class CustomColors
         }
         else
         {
-            int i = (int)Math.round((double)((MathHelper.sin(timer) + 1.0F) * (float)(xpOrbColors.getLength() - 1)) / 2.0D);
+            int i = (int)Math.round((double)((MathHelper.sin(p_getXpOrbColor_0_) + 1.0F) * (float)(xpOrbColors.getLength() - 1)) / 2.0D);
             int j = xpOrbColors.getColor(i);
             return j;
         }
     }
 
-    public static int getDurabilityColor(int dur255)
+    public static int getDurabilityColor(int p_getDurabilityColor_0_)
     {
         if (durabilityColors == null)
         {
@@ -1126,19 +1094,19 @@ public class CustomColors
         }
         else
         {
-            int i = dur255 * durabilityColors.getLength() / 255;
+            int i = p_getDurabilityColor_0_ * durabilityColors.getLength() / 255;
             int j = durabilityColors.getColor(i);
             return j;
         }
     }
 
-    public static void updateWaterFX(EntityFX fx, IBlockAccess blockAccess, double x, double y, double z, RenderEnv renderEnv)
+    public static void updateWaterFX(EntityFX p_updateWaterFX_0_, IBlockAccess p_updateWaterFX_1_, double p_updateWaterFX_2_, double p_updateWaterFX_4_, double p_updateWaterFX_6_)
     {
-        if (waterColors != null || blockColormaps != null || particleWaterColor >= 0)
+        if (waterColors != null || blockColormaps != null)
         {
-            BlockPos blockpos = new BlockPos(x, y, z);
-            renderEnv.reset(BLOCK_STATE_WATER, blockpos);
-            int i = getFluidColor(blockAccess, BLOCK_STATE_WATER, blockpos, renderEnv);
+            BlockPos blockpos = new BlockPos(p_updateWaterFX_2_, p_updateWaterFX_4_, p_updateWaterFX_6_);
+            RenderEnv renderenv = RenderEnv.getInstance(p_updateWaterFX_1_, BLOCK_STATE_WATER, blockpos);
+            int i = getFluidColor(p_updateWaterFX_1_, BLOCK_STATE_WATER, blockpos, renderenv);
             int j = i >> 16 & 255;
             int k = i >> 8 & 255;
             int l = i & 255;
@@ -1156,48 +1124,48 @@ public class CustomColors
                 f2 *= (float)k1 / 255.0F;
             }
 
-            fx.setRBGColorF(f, f1, f2);
+            p_updateWaterFX_0_.setRBGColorF(f, f1, f2);
         }
     }
 
-    private static int getLilypadColorMultiplier(IBlockAccess blockAccess, BlockPos blockPos)
+    private static int getLilypadColorMultiplier(IBlockAccess p_getLilypadColorMultiplier_0_, BlockPos p_getLilypadColorMultiplier_1_)
     {
-        return lilyPadColor < 0 ? Blocks.waterlily.colorMultiplier(blockAccess, blockPos) : lilyPadColor;
+        return lilyPadColor < 0 ? Blocks.waterlily.colorMultiplier(p_getLilypadColorMultiplier_0_, p_getLilypadColorMultiplier_1_) : lilyPadColor;
     }
 
-    private static Vec3 getFogColorNether(Vec3 col)
+    private static Vec3 getFogColorNether(Vec3 p_getFogColorNether_0_)
     {
-        return fogColorNether == null ? col : fogColorNether;
+        return fogColorNether == null ? p_getFogColorNether_0_ : fogColorNether;
     }
 
-    private static Vec3 getFogColorEnd(Vec3 col)
+    private static Vec3 getFogColorEnd(Vec3 p_getFogColorEnd_0_)
     {
-        return fogColorEnd == null ? col : fogColorEnd;
+        return fogColorEnd == null ? p_getFogColorEnd_0_ : fogColorEnd;
     }
 
-    private static Vec3 getSkyColorEnd(Vec3 col)
+    private static Vec3 getSkyColorEnd(Vec3 p_getSkyColorEnd_0_)
     {
-        return skyColorEnd == null ? col : skyColorEnd;
+        return skyColorEnd == null ? p_getSkyColorEnd_0_ : skyColorEnd;
     }
 
-    public static Vec3 getSkyColor(Vec3 skyColor3d, IBlockAccess blockAccess, double x, double y, double z)
+    public static Vec3 getSkyColor(Vec3 p_getSkyColor_0_, IBlockAccess p_getSkyColor_1_, double p_getSkyColor_2_, double p_getSkyColor_4_, double p_getSkyColor_6_)
     {
         if (skyColors == null)
         {
-            return skyColor3d;
+            return p_getSkyColor_0_;
         }
         else
         {
-            int i = skyColors.getColorSmooth(blockAccess, x, y, z, 3);
+            int i = skyColors.getColorSmooth(p_getSkyColor_1_, p_getSkyColor_2_, p_getSkyColor_4_, p_getSkyColor_6_, 3);
             int j = i >> 16 & 255;
             int k = i >> 8 & 255;
             int l = i & 255;
             float f = (float)j / 255.0F;
             float f1 = (float)k / 255.0F;
             float f2 = (float)l / 255.0F;
-            float f3 = (float)skyColor3d.xCoord / 0.5F;
-            float f4 = (float)skyColor3d.yCoord / 0.66275F;
-            float f5 = (float)skyColor3d.zCoord;
+            float f3 = (float)p_getSkyColor_0_.xCoord / 0.5F;
+            float f4 = (float)p_getSkyColor_0_.yCoord / 0.66275F;
+            float f5 = (float)p_getSkyColor_0_.zCoord;
             f = f * f3;
             f1 = f1 * f4;
             f2 = f2 * f5;
@@ -1206,24 +1174,24 @@ public class CustomColors
         }
     }
 
-    private static Vec3 getFogColor(Vec3 fogColor3d, IBlockAccess blockAccess, double x, double y, double z)
+    private static Vec3 getFogColor(Vec3 p_getFogColor_0_, IBlockAccess p_getFogColor_1_, double p_getFogColor_2_, double p_getFogColor_4_, double p_getFogColor_6_)
     {
         if (fogColors == null)
         {
-            return fogColor3d;
+            return p_getFogColor_0_;
         }
         else
         {
-            int i = fogColors.getColorSmooth(blockAccess, x, y, z, 3);
+            int i = fogColors.getColorSmooth(p_getFogColor_1_, p_getFogColor_2_, p_getFogColor_4_, p_getFogColor_6_, 3);
             int j = i >> 16 & 255;
             int k = i >> 8 & 255;
             int l = i & 255;
             float f = (float)j / 255.0F;
             float f1 = (float)k / 255.0F;
             float f2 = (float)l / 255.0F;
-            float f3 = (float)fogColor3d.xCoord / 0.753F;
-            float f4 = (float)fogColor3d.yCoord / 0.8471F;
-            float f5 = (float)fogColor3d.zCoord;
+            float f3 = (float)p_getFogColor_0_.xCoord / 0.753F;
+            float f4 = (float)p_getFogColor_0_.yCoord / 0.8471F;
+            float f5 = (float)p_getFogColor_0_.zCoord;
             f = f * f3;
             f1 = f1 * f4;
             f2 = f2 * f5;
@@ -1232,46 +1200,36 @@ public class CustomColors
         }
     }
 
-    public static Vec3 getUnderwaterColor(IBlockAccess blockAccess, double x, double y, double z)
+    public static Vec3 getUnderwaterColor(IBlockAccess p_getUnderwaterColor_0_, double p_getUnderwaterColor_1_, double p_getUnderwaterColor_3_, double p_getUnderwaterColor_5_)
     {
-        return getUnderFluidColor(blockAccess, x, y, z, underwaterColors, underwaterColorFader);
-    }
-
-    public static Vec3 getUnderlavaColor(IBlockAccess blockAccess, double x, double y, double z)
-    {
-        return getUnderFluidColor(blockAccess, x, y, z, underlavaColors, underlavaColorFader);
-    }
-
-    public static Vec3 getUnderFluidColor(IBlockAccess blockAccess, double x, double y, double z, CustomColormap underFluidColors, CustomColorFader underFluidColorFader)
-    {
-        if (underFluidColors == null)
+        if (underwaterColors == null)
         {
             return null;
         }
         else
         {
-            int i = underFluidColors.getColorSmooth(blockAccess, x, y, z, 3);
+            int i = underwaterColors.getColorSmooth(p_getUnderwaterColor_0_, p_getUnderwaterColor_1_, p_getUnderwaterColor_3_, p_getUnderwaterColor_5_, 3);
             int j = i >> 16 & 255;
             int k = i >> 8 & 255;
             int l = i & 255;
             float f = (float)j / 255.0F;
             float f1 = (float)k / 255.0F;
             float f2 = (float)l / 255.0F;
-            Vec3 vec3 = underFluidColorFader.getColor((double)f, (double)f1, (double)f2);
+            Vec3 vec3 = underwaterColorFader.getColor((double)f, (double)f1, (double)f2);
             return vec3;
         }
     }
 
-    private static int getStemColorMultiplier(Block blockStem, IBlockAccess blockAccess, BlockPos blockPos, RenderEnv renderEnv)
+    private static int getStemColorMultiplier(Block p_getStemColorMultiplier_0_, IBlockAccess p_getStemColorMultiplier_1_, BlockPos p_getStemColorMultiplier_2_, RenderEnv p_getStemColorMultiplier_3_)
     {
         CustomColormap customcolormap = stemColors;
 
-        if (blockStem == Blocks.pumpkin_stem && stemPumpkinColors != null)
+        if (p_getStemColorMultiplier_0_ == Blocks.pumpkin_stem && stemPumpkinColors != null)
         {
             customcolormap = stemPumpkinColors;
         }
 
-        if (blockStem == Blocks.melon_stem && stemMelonColors != null)
+        if (p_getStemColorMultiplier_0_ == Blocks.melon_stem && stemMelonColors != null)
         {
             customcolormap = stemMelonColors;
         }
@@ -1282,30 +1240,107 @@ public class CustomColors
         }
         else
         {
-            int i = renderEnv.getMetadata();
+            int i = p_getStemColorMultiplier_3_.getMetadata();
             return customcolormap.getColor(i);
         }
     }
 
-    public static boolean updateLightmap(World world, float torchFlickerX, int[] lmColors, boolean nightvision, float partialTicks)
+    public static boolean updateLightmap(World p_updateLightmap_0_, float p_updateLightmap_1_, int[] p_updateLightmap_2_, boolean p_updateLightmap_3_)
     {
-        if (world == null)
+        if (p_updateLightmap_0_ == null)
         {
             return false;
         }
-        else if (lightMapPacks == null)
+        else if (lightMapsColorsRgb == null)
         {
             return false;
         }
         else
         {
-            int i = world.provider.getDimensionId();
+            int i = p_updateLightmap_0_.provider.getDimensionId();
             int j = i - lightmapMinDimensionId;
 
-            if (j >= 0 && j < lightMapPacks.length)
+            if (j >= 0 && j < lightMapsColorsRgb.length)
             {
-                LightMapPack lightmappack = lightMapPacks[j];
-                return lightmappack == null ? false : lightmappack.updateLightmap(world, torchFlickerX, lmColors, nightvision, partialTicks);
+                CustomColormap customcolormap = lightMapsColorsRgb[j];
+
+                if (customcolormap == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    int k = customcolormap.getHeight();
+
+                    if (p_updateLightmap_3_ && k < 64)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        int l = customcolormap.getWidth();
+
+                        if (l < 16)
+                        {
+                            warn("Invalid lightmap width: " + l + " for dimension: " + i);
+                            lightMapsColorsRgb[j] = null;
+                            return false;
+                        }
+                        else
+                        {
+                            int i1 = 0;
+
+                            if (p_updateLightmap_3_)
+                            {
+                                i1 = l * 16 * 2;
+                            }
+
+                            float f = 1.1666666F * (p_updateLightmap_0_.getSunBrightness(1.0F) - 0.2F);
+
+                            if (p_updateLightmap_0_.getLastLightningBolt() > 0)
+                            {
+                                f = 1.0F;
+                            }
+
+                            f = Config.limitTo1(f);
+                            float f1 = f * (float)(l - 1);
+                            float f2 = Config.limitTo1(p_updateLightmap_1_ + 0.5F) * (float)(l - 1);
+                            float f3 = Config.limitTo1(Config.getGameSettings().gammaSetting);
+                            boolean flag = f3 > 1.0E-4F;
+                            float[][] afloat = customcolormap.getColorsRgb();
+                            getLightMapColumn(afloat, f1, i1, l, sunRgbs);
+                            getLightMapColumn(afloat, f2, i1 + 16 * l, l, torchRgbs);
+                            float[] afloat1 = new float[3];
+
+                            for (int j1 = 0; j1 < 16; ++j1)
+                            {
+                                for (int k1 = 0; k1 < 16; ++k1)
+                                {
+                                    for (int l1 = 0; l1 < 3; ++l1)
+                                    {
+                                        float f4 = Config.limitTo1(sunRgbs[j1][l1] + torchRgbs[k1][l1]);
+
+                                        if (flag)
+                                        {
+                                            float f5 = 1.0F - f4;
+                                            f5 = 1.0F - f5 * f5 * f5 * f5;
+                                            f4 = f3 * f5 + (1.0F - f3) * f4;
+                                        }
+
+                                        afloat1[l1] = f4;
+                                    }
+
+                                    int i2 = (int)(afloat1[0] * 255.0F);
+                                    int j2 = (int)(afloat1[1] * 255.0F);
+                                    int k2 = (int)(afloat1[2] * 255.0F);
+                                    p_updateLightmap_2_[j1 * 16 + k1] = -16777216 | i2 << 16 | j2 << 8 | k2;
+                                }
+                            }
+
+                            return true;
+                        }
+                    }
+                }
             }
             else
             {
@@ -1314,84 +1349,112 @@ public class CustomColors
         }
     }
 
-    public static Vec3 getWorldFogColor(Vec3 fogVec, World world, Entity renderViewEntity, float partialTicks)
+    private static void getLightMapColumn(float[][] p_getLightMapColumn_0_, float p_getLightMapColumn_1_, int p_getLightMapColumn_2_, int p_getLightMapColumn_3_, float[][] p_getLightMapColumn_4_)
     {
-        int i = world.provider.getDimensionId();
+        int i = (int)Math.floor((double)p_getLightMapColumn_1_);
+        int j = (int)Math.ceil((double)p_getLightMapColumn_1_);
+
+        if (i == j)
+        {
+            for (int i1 = 0; i1 < 16; ++i1)
+            {
+                float[] afloat3 = p_getLightMapColumn_0_[p_getLightMapColumn_2_ + i1 * p_getLightMapColumn_3_ + i];
+                float[] afloat4 = p_getLightMapColumn_4_[i1];
+
+                for (int j1 = 0; j1 < 3; ++j1)
+                {
+                    afloat4[j1] = afloat3[j1];
+                }
+            }
+        }
+        else
+        {
+            float f = 1.0F - (p_getLightMapColumn_1_ - (float)i);
+            float f1 = 1.0F - ((float)j - p_getLightMapColumn_1_);
+
+            for (int k = 0; k < 16; ++k)
+            {
+                float[] afloat = p_getLightMapColumn_0_[p_getLightMapColumn_2_ + k * p_getLightMapColumn_3_ + i];
+                float[] afloat1 = p_getLightMapColumn_0_[p_getLightMapColumn_2_ + k * p_getLightMapColumn_3_ + j];
+                float[] afloat2 = p_getLightMapColumn_4_[k];
+
+                for (int l = 0; l < 3; ++l)
+                {
+                    afloat2[l] = afloat[l] * f + afloat1[l] * f1;
+                }
+            }
+        }
+    }
+
+    public static Vec3 getWorldFogColor(Vec3 p_getWorldFogColor_0_, WorldClient p_getWorldFogColor_1_, Entity p_getWorldFogColor_2_, float p_getWorldFogColor_3_)
+    {
+        int i = p_getWorldFogColor_1_.provider.getDimensionId();
 
         switch (i)
         {
             case -1:
-                fogVec = getFogColorNether(fogVec);
+                p_getWorldFogColor_0_ = getFogColorNether(p_getWorldFogColor_0_);
                 break;
 
             case 0:
                 Minecraft minecraft = Minecraft.getMinecraft();
-                fogVec = getFogColor(fogVec, minecraft.theWorld, renderViewEntity.posX, renderViewEntity.posY + 1.0D, renderViewEntity.posZ);
+                p_getWorldFogColor_0_ = getFogColor(p_getWorldFogColor_0_, minecraft.theWorld, p_getWorldFogColor_2_.posX, p_getWorldFogColor_2_.posY + 1.0D, p_getWorldFogColor_2_.posZ);
                 break;
 
             case 1:
-                fogVec = getFogColorEnd(fogVec);
+                p_getWorldFogColor_0_ = getFogColorEnd(p_getWorldFogColor_0_);
         }
 
-        return fogVec;
+        return p_getWorldFogColor_0_;
     }
 
-    public static Vec3 getWorldSkyColor(Vec3 skyVec, World world, Entity renderViewEntity, float partialTicks)
+    public static Vec3 getWorldSkyColor(Vec3 p_getWorldSkyColor_0_, World p_getWorldSkyColor_1_, Entity p_getWorldSkyColor_2_, float p_getWorldSkyColor_3_)
     {
-        int i = world.provider.getDimensionId();
+        int i = p_getWorldSkyColor_1_.provider.getDimensionId();
 
         switch (i)
         {
             case 0:
                 Minecraft minecraft = Minecraft.getMinecraft();
-                skyVec = getSkyColor(skyVec, minecraft.theWorld, renderViewEntity.posX, renderViewEntity.posY + 1.0D, renderViewEntity.posZ);
+                p_getWorldSkyColor_0_ = getSkyColor(p_getWorldSkyColor_0_, minecraft.theWorld, p_getWorldSkyColor_2_.posX, p_getWorldSkyColor_2_.posY + 1.0D, p_getWorldSkyColor_2_.posZ);
                 break;
 
             case 1:
-                skyVec = getSkyColorEnd(skyVec);
+                p_getWorldSkyColor_0_ = getSkyColorEnd(p_getWorldSkyColor_0_);
         }
 
-        return skyVec;
+        return p_getWorldSkyColor_0_;
     }
 
-    private static int[] readSpawnEggColors(Properties props, String fileName, String prefix, String logName)
+    private static int[] readSpawnEggColors(Properties p_readSpawnEggColors_0_, String p_readSpawnEggColors_1_, String p_readSpawnEggColors_2_, String p_readSpawnEggColors_3_)
     {
         List<Integer> list = new ArrayList();
-        Set set = props.keySet();
+        Set set = p_readSpawnEggColors_0_.keySet();
         int i = 0;
 
-        for (Object o : set)
+        for (Object s : set)
         {
-            String s = (String) o;
-            String s1 = props.getProperty(s);
+            String s1 = p_readSpawnEggColors_0_.getProperty((String) s);
 
-            if (s.startsWith(prefix))
+            if (((String) s).startsWith(p_readSpawnEggColors_2_))
             {
-                String s2 = StrUtils.removePrefix(s, prefix);
-                int j = EntityUtils.getEntityIdByName(s2);
+                String s2 = StrUtils.removePrefix((String) s, p_readSpawnEggColors_2_);
+                int j = getEntityId(s2);
+                int k = parseColor(s1);
 
-                if (j < 0)
+                if (j >= 0 && k >= 0)
                 {
-                    warn("Invalid spawn egg name: " + s);
+                    while (((List)list).size() <= j)
+                    {
+                        list.add(Integer.valueOf(-1));
+                    }
+
+                    list.set(j, Integer.valueOf(k));
+                    ++i;
                 }
                 else
                 {
-                    int k = parseColor(s1);
-
-                    if (k < 0)
-                    {
-                        warn("Invalid spawn egg color: " + s + " = " + s1);
-                    }
-                    else
-                    {
-                        while (((List)list).size() <= j)
-                        {
-                            list.add(Integer.valueOf(-1));
-                        }
-
-                        list.set(j, Integer.valueOf(k));
-                        ++i;
-                    }
+                    warn("Invalid spawn egg color: " + s + " = " + s1);
                 }
             }
         }
@@ -1402,7 +1465,7 @@ public class CustomColors
         }
         else
         {
-            dbg(logName + " colors: " + i);
+            dbg(p_readSpawnEggColors_3_ + " colors: " + i);
             int[] aint = new int[list.size()];
 
             for (int l = 0; l < aint.length; ++l)
@@ -1414,40 +1477,40 @@ public class CustomColors
         }
     }
 
-    private static int getSpawnEggColor(ItemMonsterPlacer item, ItemStack itemStack, int layer, int color)
+    private static int getSpawnEggColor(ItemMonsterPlacer p_getSpawnEggColor_0_, ItemStack p_getSpawnEggColor_1_, int p_getSpawnEggColor_2_, int p_getSpawnEggColor_3_)
     {
-        int i = itemStack.getMetadata();
-        int[] aint = layer == 0 ? spawnEggPrimaryColors : spawnEggSecondaryColors;
+        int i = p_getSpawnEggColor_1_.getMetadata();
+        int[] aint = p_getSpawnEggColor_2_ == 0 ? spawnEggPrimaryColors : spawnEggSecondaryColors;
 
         if (aint == null)
         {
-            return color;
+            return p_getSpawnEggColor_3_;
         }
         else if (i >= 0 && i < aint.length)
         {
             int j = aint[i];
-            return j < 0 ? color : j;
+            return j < 0 ? p_getSpawnEggColor_3_ : j;
         }
         else
         {
-            return color;
+            return p_getSpawnEggColor_3_;
         }
     }
 
-    public static int getColorFromItemStack(ItemStack itemStack, int layer, int color)
+    public static int getColorFromItemStack(ItemStack p_getColorFromItemStack_0_, int p_getColorFromItemStack_1_, int p_getColorFromItemStack_2_)
     {
-        if (itemStack == null)
+        if (p_getColorFromItemStack_0_ == null)
         {
-            return color;
+            return p_getColorFromItemStack_2_;
         }
         else
         {
-            Item item = itemStack.getItem();
-            return item == null ? color : (item instanceof ItemMonsterPlacer ? getSpawnEggColor((ItemMonsterPlacer)item, itemStack, layer, color) : color);
+            Item item = p_getColorFromItemStack_0_.getItem();
+            return item == null ? p_getColorFromItemStack_2_ : (item instanceof ItemMonsterPlacer ? getSpawnEggColor((ItemMonsterPlacer)item, p_getColorFromItemStack_0_, p_getColorFromItemStack_1_, p_getColorFromItemStack_2_) : p_getColorFromItemStack_2_);
         }
     }
 
-    private static float[][] readDyeColors(Properties props, String fileName, String prefix, String logName)
+    private static float[][] readDyeColors(Properties p_readDyeColors_0_, String p_readDyeColors_1_, String p_readDyeColors_2_, String p_readDyeColors_3_)
     {
         EnumDyeColor[] aenumdyecolor = EnumDyeColor.values();
         Map<String, EnumDyeColor> map = new HashMap();
@@ -1461,14 +1524,13 @@ public class CustomColors
         float[][] afloat1 = new float[aenumdyecolor.length][];
         int k = 0;
 
-        for (Object o : props.keySet())
+        for (Object s : p_readDyeColors_0_.keySet())
         {
-            String s = (String) o;
-            String s1 = props.getProperty(s);
+            String s1 = p_readDyeColors_0_.getProperty((String) s);
 
-            if (s.startsWith(prefix))
+            if (((String) s).startsWith(p_readDyeColors_2_))
             {
-                String s2 = StrUtils.removePrefix(s, prefix);
+                String s2 = StrUtils.removePrefix((String) s, p_readDyeColors_2_);
 
                 if (s2.equals("lightBlue"))
                 {
@@ -1497,52 +1559,51 @@ public class CustomColors
         }
         else
         {
-            dbg(logName + " colors: " + k);
+            dbg(p_readDyeColors_3_ + " colors: " + k);
             return afloat1;
         }
     }
 
-    private static float[] getDyeColors(EnumDyeColor dye, float[][] dyeColors, float[] colors)
+    private static float[] getDyeColors(EnumDyeColor p_getDyeColors_0_, float[][] p_getDyeColors_1_, float[] p_getDyeColors_2_)
     {
-        if (dyeColors == null)
+        if (p_getDyeColors_1_ == null)
         {
-            return colors;
+            return p_getDyeColors_2_;
         }
-        else if (dye == null)
+        else if (p_getDyeColors_0_ == null)
         {
-            return colors;
+            return p_getDyeColors_2_;
         }
         else
         {
-            float[] afloat = dyeColors[dye.ordinal()];
-            return afloat == null ? colors : afloat;
+            float[] afloat = p_getDyeColors_1_[p_getDyeColors_0_.ordinal()];
+            return afloat == null ? p_getDyeColors_2_ : afloat;
         }
     }
 
-    public static float[] getWolfCollarColors(EnumDyeColor dye, float[] colors)
+    public static float[] getWolfCollarColors(EnumDyeColor p_getWolfCollarColors_0_, float[] p_getWolfCollarColors_1_)
     {
-        return getDyeColors(dye, wolfCollarColors, colors);
+        return getDyeColors(p_getWolfCollarColors_0_, wolfCollarColors, p_getWolfCollarColors_1_);
     }
 
-    public static float[] getSheepColors(EnumDyeColor dye, float[] colors)
+    public static float[] getSheepColors(EnumDyeColor p_getSheepColors_0_, float[] p_getSheepColors_1_)
     {
-        return getDyeColors(dye, sheepColors, colors);
+        return getDyeColors(p_getSheepColors_0_, sheepColors, p_getSheepColors_1_);
     }
 
-    private static int[] readTextColors(Properties props, String fileName, String prefix, String logName)
+    private static int[] readTextColors(Properties p_readTextColors_0_, String p_readTextColors_1_, String p_readTextColors_2_, String p_readTextColors_3_)
     {
         int[] aint = new int[32];
         Arrays.fill((int[])aint, (int) - 1);
         int i = 0;
 
-        for (Object o: props.keySet())
+        for (Object s : p_readTextColors_0_.keySet())
         {
-            String s = (String) o;
-            String s1 = props.getProperty(s);
+            String s1 = p_readTextColors_0_.getProperty((String) s);
 
-            if (s.startsWith(prefix))
+            if (((String) s).startsWith(p_readTextColors_2_))
             {
-                String s2 = StrUtils.removePrefix(s, prefix);
+                String s2 = StrUtils.removePrefix((String) s, p_readTextColors_2_);
                 int j = Config.parseInt(s2, -1);
                 int k = parseColor(s1);
 
@@ -1564,42 +1625,41 @@ public class CustomColors
         }
         else
         {
-            dbg(logName + " colors: " + i);
+            dbg(p_readTextColors_3_ + " colors: " + i);
             return aint;
         }
     }
 
-    public static int getTextColor(int index, int color)
+    public static int getTextColor(int p_getTextColor_0_, int p_getTextColor_1_)
     {
         if (textColors == null)
         {
-            return color;
+            return p_getTextColor_1_;
         }
-        else if (index >= 0 && index < textColors.length)
+        else if (p_getTextColor_0_ >= 0 && p_getTextColor_0_ < textColors.length)
         {
-            int i = textColors[index];
-            return i < 0 ? color : i;
+            int i = textColors[p_getTextColor_0_];
+            return i < 0 ? p_getTextColor_1_ : i;
         }
         else
         {
-            return color;
+            return p_getTextColor_1_;
         }
     }
 
-    private static int[] readMapColors(Properties props, String fileName, String prefix, String logName)
+    private static int[] readMapColors(Properties p_readMapColors_0_, String p_readMapColors_1_, String p_readMapColors_2_, String p_readMapColors_3_)
     {
         int[] aint = new int[MapColor.mapColorArray.length];
         Arrays.fill((int[])aint, (int) - 1);
         int i = 0;
 
-        for (Object o : props.keySet())
+        for (Object s : p_readMapColors_0_.keySet())
         {
-            String s = (String)o;
-            String s1 = props.getProperty(s);
+            String s1 = p_readMapColors_0_.getProperty((String) s);
 
-            if (s.startsWith(prefix))
+            if (((String) s).startsWith(p_readMapColors_2_))
             {
-                String s2 = StrUtils.removePrefix(s, prefix);
+                String s2 = StrUtils.removePrefix((String) s, p_readMapColors_2_);
                 int j = getMapColorIndex(s2);
                 int k = parseColor(s1);
 
@@ -1621,25 +1681,24 @@ public class CustomColors
         }
         else
         {
-            dbg(logName + " colors: " + i);
+            dbg(p_readMapColors_3_ + " colors: " + i);
             return aint;
         }
     }
 
-    private static int[] readPotionColors(Properties props, String fileName, String prefix, String logName)
+    private static int[] readPotionColors(Properties p_readPotionColors_0_, String p_readPotionColors_1_, String p_readPotionColors_2_, String p_readPotionColors_3_)
     {
         int[] aint = new int[Potion.potionTypes.length];
         Arrays.fill((int[])aint, (int) - 1);
         int i = 0;
 
-        for (Object o : props.keySet())
+        for (Object s : p_readPotionColors_0_.keySet())
         {
-            String s = (String) o;
-            String s1 = props.getProperty(s);
+            String s1 = p_readPotionColors_0_.getProperty((String) s);
 
-            if (s.startsWith(prefix))
+            if (((String) s).startsWith(p_readPotionColors_2_))
             {
-                int j = getPotionId(s);
+                int j = getPotionId((String) s);
                 int k = parseColor(s1);
 
                 if (j >= 0 && j < aint.length && k >= 0)
@@ -1660,14 +1719,14 @@ public class CustomColors
         }
         else
         {
-            dbg(logName + " colors: " + i);
+            dbg(p_readPotionColors_3_ + " colors: " + i);
             return aint;
         }
     }
 
-    private static int getPotionId(String name)
+    private static int getPotionId(String p_getPotionId_0_)
     {
-        if (name.equals("potion.water"))
+        if (p_getPotionId_0_.equals("potion.water"))
         {
             return 0;
         }
@@ -1679,7 +1738,7 @@ public class CustomColors
             {
                 Potion potion = apotion[i];
 
-                if (potion != null && potion.getName().equals(name))
+                if (potion != null && potion.getName().equals(p_getPotionId_0_))
                 {
                     return potion.getId();
                 }
@@ -1689,26 +1748,26 @@ public class CustomColors
         }
     }
 
-    public static int getPotionColor(int potionId, int color)
+    public static int getPotionColor(int p_getPotionColor_0_, int p_getPotionColor_1_)
     {
         if (potionColors == null)
         {
-            return color;
+            return p_getPotionColor_1_;
         }
-        else if (potionId >= 0 && potionId < potionColors.length)
+        else if (p_getPotionColor_0_ >= 0 && p_getPotionColor_0_ < potionColors.length)
         {
-            int i = potionColors[potionId];
-            return i < 0 ? color : i;
+            int i = potionColors[p_getPotionColor_0_];
+            return i < 0 ? p_getPotionColor_1_ : i;
         }
         else
         {
-            return color;
+            return p_getPotionColor_1_;
         }
     }
 
-    private static int getMapColorIndex(String name)
+    private static int getMapColorIndex(String p_getMapColorIndex_0_)
     {
-        return name == null ? -1 : (name.equals("air") ? MapColor.airColor.colorIndex : (name.equals("grass") ? MapColor.grassColor.colorIndex : (name.equals("sand") ? MapColor.sandColor.colorIndex : (name.equals("cloth") ? MapColor.clothColor.colorIndex : (name.equals("tnt") ? MapColor.tntColor.colorIndex : (name.equals("ice") ? MapColor.iceColor.colorIndex : (name.equals("iron") ? MapColor.ironColor.colorIndex : (name.equals("foliage") ? MapColor.foliageColor.colorIndex : (name.equals("clay") ? MapColor.clayColor.colorIndex : (name.equals("dirt") ? MapColor.dirtColor.colorIndex : (name.equals("stone") ? MapColor.stoneColor.colorIndex : (name.equals("water") ? MapColor.waterColor.colorIndex : (name.equals("wood") ? MapColor.woodColor.colorIndex : (name.equals("quartz") ? MapColor.quartzColor.colorIndex : (name.equals("gold") ? MapColor.goldColor.colorIndex : (name.equals("diamond") ? MapColor.diamondColor.colorIndex : (name.equals("lapis") ? MapColor.lapisColor.colorIndex : (name.equals("emerald") ? MapColor.emeraldColor.colorIndex : (name.equals("podzol") ? MapColor.obsidianColor.colorIndex : (name.equals("netherrack") ? MapColor.netherrackColor.colorIndex : (!name.equals("snow") && !name.equals("white") ? (!name.equals("adobe") && !name.equals("orange") ? (name.equals("magenta") ? MapColor.magentaColor.colorIndex : (!name.equals("light_blue") && !name.equals("lightBlue") ? (name.equals("yellow") ? MapColor.yellowColor.colorIndex : (name.equals("lime") ? MapColor.limeColor.colorIndex : (name.equals("pink") ? MapColor.pinkColor.colorIndex : (name.equals("gray") ? MapColor.grayColor.colorIndex : (name.equals("silver") ? MapColor.silverColor.colorIndex : (name.equals("cyan") ? MapColor.cyanColor.colorIndex : (name.equals("purple") ? MapColor.purpleColor.colorIndex : (name.equals("blue") ? MapColor.blueColor.colorIndex : (name.equals("brown") ? MapColor.brownColor.colorIndex : (name.equals("green") ? MapColor.greenColor.colorIndex : (name.equals("red") ? MapColor.redColor.colorIndex : (name.equals("black") ? MapColor.blackColor.colorIndex : -1)))))))))))) : MapColor.lightBlueColor.colorIndex)) : MapColor.adobeColor.colorIndex) : MapColor.snowColor.colorIndex)))))))))))))))))))));
+        return p_getMapColorIndex_0_ == null ? -1 : (p_getMapColorIndex_0_.equals("air") ? MapColor.airColor.colorIndex : (p_getMapColorIndex_0_.equals("grass") ? MapColor.grassColor.colorIndex : (p_getMapColorIndex_0_.equals("sand") ? MapColor.sandColor.colorIndex : (p_getMapColorIndex_0_.equals("cloth") ? MapColor.clothColor.colorIndex : (p_getMapColorIndex_0_.equals("tnt") ? MapColor.tntColor.colorIndex : (p_getMapColorIndex_0_.equals("ice") ? MapColor.iceColor.colorIndex : (p_getMapColorIndex_0_.equals("iron") ? MapColor.ironColor.colorIndex : (p_getMapColorIndex_0_.equals("foliage") ? MapColor.foliageColor.colorIndex : (p_getMapColorIndex_0_.equals("clay") ? MapColor.clayColor.colorIndex : (p_getMapColorIndex_0_.equals("dirt") ? MapColor.dirtColor.colorIndex : (p_getMapColorIndex_0_.equals("stone") ? MapColor.stoneColor.colorIndex : (p_getMapColorIndex_0_.equals("water") ? MapColor.waterColor.colorIndex : (p_getMapColorIndex_0_.equals("wood") ? MapColor.woodColor.colorIndex : (p_getMapColorIndex_0_.equals("quartz") ? MapColor.quartzColor.colorIndex : (p_getMapColorIndex_0_.equals("gold") ? MapColor.goldColor.colorIndex : (p_getMapColorIndex_0_.equals("diamond") ? MapColor.diamondColor.colorIndex : (p_getMapColorIndex_0_.equals("lapis") ? MapColor.lapisColor.colorIndex : (p_getMapColorIndex_0_.equals("emerald") ? MapColor.emeraldColor.colorIndex : (p_getMapColorIndex_0_.equals("podzol") ? MapColor.obsidianColor.colorIndex : (p_getMapColorIndex_0_.equals("netherrack") ? MapColor.netherrackColor.colorIndex : (!p_getMapColorIndex_0_.equals("snow") && !p_getMapColorIndex_0_.equals("white") ? (!p_getMapColorIndex_0_.equals("adobe") && !p_getMapColorIndex_0_.equals("orange") ? (p_getMapColorIndex_0_.equals("magenta") ? MapColor.magentaColor.colorIndex : (!p_getMapColorIndex_0_.equals("light_blue") && !p_getMapColorIndex_0_.equals("lightBlue") ? (p_getMapColorIndex_0_.equals("yellow") ? MapColor.yellowColor.colorIndex : (p_getMapColorIndex_0_.equals("lime") ? MapColor.limeColor.colorIndex : (p_getMapColorIndex_0_.equals("pink") ? MapColor.pinkColor.colorIndex : (p_getMapColorIndex_0_.equals("gray") ? MapColor.grayColor.colorIndex : (p_getMapColorIndex_0_.equals("silver") ? MapColor.silverColor.colorIndex : (p_getMapColorIndex_0_.equals("cyan") ? MapColor.cyanColor.colorIndex : (p_getMapColorIndex_0_.equals("purple") ? MapColor.purpleColor.colorIndex : (p_getMapColorIndex_0_.equals("blue") ? MapColor.blueColor.colorIndex : (p_getMapColorIndex_0_.equals("brown") ? MapColor.brownColor.colorIndex : (p_getMapColorIndex_0_.equals("green") ? MapColor.greenColor.colorIndex : (p_getMapColorIndex_0_.equals("red") ? MapColor.redColor.colorIndex : (p_getMapColorIndex_0_.equals("black") ? MapColor.blackColor.colorIndex : -1)))))))))))) : MapColor.lightBlueColor.colorIndex)) : MapColor.adobeColor.colorIndex) : MapColor.snowColor.colorIndex)))))))))))))))))))));
     }
 
     private static int[] getMapColors()
@@ -1730,20 +1789,20 @@ public class CustomColors
         return aint;
     }
 
-    private static void setMapColors(int[] colors)
+    private static void setMapColors(int[] p_setMapColors_0_)
     {
-        if (colors != null)
+        if (p_setMapColors_0_ != null)
         {
             MapColor[] amapcolor = MapColor.mapColorArray;
             boolean flag = false;
 
-            for (int i = 0; i < amapcolor.length && i < colors.length; ++i)
+            for (int i = 0; i < amapcolor.length && i < p_setMapColors_0_.length; ++i)
             {
                 MapColor mapcolor = amapcolor[i];
 
                 if (mapcolor != null)
                 {
-                    int j = colors[i];
+                    int j = p_setMapColors_0_[i];
 
                     if (j >= 0 && mapcolor.colorValue != j)
                     {
@@ -1760,34 +1819,56 @@ public class CustomColors
         }
     }
 
-    private static void dbg(String str)
+    private static int getEntityId(String p_getEntityId_0_)
     {
-        Config.dbg("CustomColors: " + str);
+        if (p_getEntityId_0_ == null)
+        {
+            return -1;
+        }
+        else
+        {
+            int i = EntityList.getIDFromString(p_getEntityId_0_);
+
+            if (i < 0)
+            {
+                return -1;
+            }
+            else
+            {
+                String s = EntityList.getStringFromID(i);
+                return !Config.equals(p_getEntityId_0_, s) ? -1 : i;
+            }
+        }
     }
 
-    private static void warn(String str)
+    private static void dbg(String p_dbg_0_)
     {
-        Config.warn("CustomColors: " + str);
+        Config.dbg("CustomColors: " + p_dbg_0_);
     }
 
-    public static int getExpBarTextColor(int color)
+    private static void warn(String p_warn_0_)
     {
-        return expBarTextColor < 0 ? color : expBarTextColor;
+        Config.warn("CustomColors: " + p_warn_0_);
     }
 
-    public static int getBossTextColor(int color)
+    public static int getExpBarTextColor(int p_getExpBarTextColor_0_)
     {
-        return bossTextColor < 0 ? color : bossTextColor;
+        return expBarTextColor < 0 ? p_getExpBarTextColor_0_ : expBarTextColor;
     }
 
-    public static int getSignTextColor(int color)
+    public static int getBossTextColor(int p_getBossTextColor_0_)
     {
-        return signTextColor < 0 ? color : signTextColor;
+        return bossTextColor < 0 ? p_getBossTextColor_0_ : bossTextColor;
+    }
+
+    public static int getSignTextColor(int p_getSignTextColor_0_)
+    {
+        return signTextColor < 0 ? p_getSignTextColor_0_ : signTextColor;
     }
 
     public interface IColorizer
     {
-        int getColor(IBlockState var1, IBlockAccess var2, BlockPos var3);
+        int getColor(IBlockAccess var1, BlockPos var2);
 
         boolean isColorConstant();
     }

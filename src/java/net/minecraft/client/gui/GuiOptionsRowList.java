@@ -37,6 +37,9 @@ public class GuiOptionsRowList extends GuiListExtended
         }
     }
 
+    /**
+     * Gets the IGuiListEntry object for the given index
+     */
     public GuiOptionsRowList.Row getListEntry(int index)
     {
         return (GuiOptionsRowList.Row)this.field_148184_k.get(index);
@@ -47,6 +50,9 @@ public class GuiOptionsRowList extends GuiListExtended
         return this.field_148184_k.size();
     }
 
+    /**
+     * Gets the width of the list
+     */
     public int getListWidth()
     {
         return 400;

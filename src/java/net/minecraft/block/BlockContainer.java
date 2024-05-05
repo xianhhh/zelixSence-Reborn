@@ -21,16 +21,19 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
         this.isBlockContainer = true;
     }
 
-    protected boolean isInvalidNeighbor(World p_181086_1_, BlockPos p_181086_2_, EnumFacing p_181086_3_)
+    protected boolean func_181086_a(World p_181086_1_, BlockPos p_181086_2_, EnumFacing p_181086_3_)
     {
         return p_181086_1_.getBlockState(p_181086_2_.offset(p_181086_3_)).getBlock().getMaterial() == Material.cactus;
     }
 
-    protected boolean hasInvalidNeighbor(World p_181087_1_, BlockPos p_181087_2_)
+    protected boolean func_181087_e(World p_181087_1_, BlockPos p_181087_2_)
     {
-        return this.isInvalidNeighbor(p_181087_1_, p_181087_2_, EnumFacing.NORTH) || this.isInvalidNeighbor(p_181087_1_, p_181087_2_, EnumFacing.SOUTH) || this.isInvalidNeighbor(p_181087_1_, p_181087_2_, EnumFacing.WEST) || this.isInvalidNeighbor(p_181087_1_, p_181087_2_, EnumFacing.EAST);
+        return this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.NORTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.SOUTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.WEST) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.EAST);
     }
 
+    /**
+     * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
+     */
     public int getRenderType()
     {
         return -1;
@@ -42,6 +45,9 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
         worldIn.removeTileEntity(pos);
     }
 
+    /**
+     * Called on both Client and Server when World#addBlockEvent is called
+     */
     public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
     {
         super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);

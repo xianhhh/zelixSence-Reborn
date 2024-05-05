@@ -55,7 +55,7 @@ public class NetworkSystem
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Server IO #%d").setDaemon(true).build());
         }
     };
-    public static final LazyLoadBase<EpollEventLoopGroup> SERVER_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>()
+    public static final LazyLoadBase<EpollEventLoopGroup> field_181141_b = new LazyLoadBase<EpollEventLoopGroup>()
     {
         protected EpollEventLoopGroup load()
         {
@@ -69,7 +69,11 @@ public class NetworkSystem
             return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).build());
         }
     };
+
+    /** Reference to the MinecraftServer object. */
     private final MinecraftServer mcServer;
+
+    /** True if this NetworkSystem has never had his endpoints terminated */
     public volatile boolean isAlive;
     private final List<ChannelFuture> endpoints = Collections.<ChannelFuture>synchronizedList(Lists.<ChannelFuture>newArrayList());
     private final List<NetworkManager> networkManagers = Collections.<NetworkManager>synchronizedList(Lists.<NetworkManager>newArrayList());
@@ -80,6 +84,9 @@ public class NetworkSystem
         this.isAlive = true;
     }
 
+    /**
+     * Adds a channel that listens on publicly accessible network ports
+     */
     public void addLanEndpoint(InetAddress address, int port) throws IOException
     {
         synchronized (this.endpoints)
@@ -87,10 +94,10 @@ public class NetworkSystem
             Class <? extends ServerSocketChannel > oclass;
             LazyLoadBase <? extends EventLoopGroup > lazyloadbase;
 
-            if (Epoll.isAvailable() && this.mcServer.shouldUseNativeTransport())
+            if (Epoll.isAvailable() && this.mcServer.func_181035_ah())
             {
                 oclass = EpollServerSocketChannel.class;
-                lazyloadbase = SERVER_EPOLL_EVENTLOOP;
+                lazyloadbase = field_181141_b;
                 logger.info("Using epoll channel type");
             }
             else
@@ -123,6 +130,9 @@ public class NetworkSystem
         }
     }
 
+    /**
+     * Adds a channel that listens locally
+     */
     public SocketAddress addLocalEndpoint()
     {
         ChannelFuture channelfuture;
@@ -145,6 +155,9 @@ public class NetworkSystem
         return channelfuture.channel().localAddress();
     }
 
+    /**
+     * Shuts down all open endpoints (with immediate effect?)
+     */
     public void terminateEndpoints()
     {
         this.isAlive = false;
@@ -162,6 +175,10 @@ public class NetworkSystem
         }
     }
 
+    /**
+     * Will try to process the packets received by each NetworkManager, gracefully manage processing failures and cleans
+     * up dead connections
+     */
     public void networkTick()
     {
         synchronized (this.networkManagers)

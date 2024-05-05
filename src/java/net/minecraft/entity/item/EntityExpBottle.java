@@ -18,11 +18,14 @@ public class EntityExpBottle extends EntityThrowable
         super(worldIn, p_i1786_2_);
     }
 
-    public EntityExpBottle(World worldIn, double x, double y, double z)
+    public EntityExpBottle(World worldIn, double p_i1787_2_, double p_i1787_4_, double p_i1787_6_)
     {
-        super(worldIn, x, y, z);
+        super(worldIn, p_i1787_2_, p_i1787_4_, p_i1787_6_);
     }
 
+    /**
+     * Gets the amount of gravity to apply to the thrown entity with each tick.
+     */
     protected float getGravityVelocity()
     {
         return 0.07F;
@@ -38,6 +41,9 @@ public class EntityExpBottle extends EntityThrowable
         return -20.0F;
     }
 
+    /**
+     * Called when this EntityThrowable hits a block or entity.
+     */
     protected void onImpact(MovingObjectPosition p_70184_1_)
     {
         if (!this.worldObj.isRemote)

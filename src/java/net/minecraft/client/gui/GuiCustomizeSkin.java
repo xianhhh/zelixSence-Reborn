@@ -3,12 +3,13 @@ package net.minecraft.client.gui;
 import java.io.IOException;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.optifine.gui.GuiButtonOF;
-import net.optifine.gui.GuiScreenCapeOF;
 
 public class GuiCustomizeSkin extends GuiScreen
 {
+    /** The parent GUI for this GUI */
     private final GuiScreen parentScreen;
+
+    /** The title of the GUI. */
     private String title;
 
     public GuiCustomizeSkin(GuiScreen parentScreenIn)
@@ -16,6 +17,10 @@ public class GuiCustomizeSkin extends GuiScreen
         this.parentScreen = parentScreenIn;
     }
 
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
     public void initGui()
     {
         int i = 0;
@@ -32,20 +37,16 @@ public class GuiCustomizeSkin extends GuiScreen
             ++i;
         }
 
-        this.buttonList.add(new GuiButtonOF(210, this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), I18n.format("of.options.skinCustomisation.ofCape", new Object[0])));
-        i = i + 2;
         this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), I18n.format("gui.done", new Object[0])));
     }
 
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
     protected void actionPerformed(GuiButton button) throws IOException
     {
         if (button.enabled)
         {
-            if (button.id == 210)
-            {
-                this.mc.displayGuiScreen(new GuiScreenCapeOF(this));
-            }
-
             if (button.id == 200)
             {
                 this.mc.gameSettings.saveOptions();
@@ -60,6 +61,9 @@ public class GuiCustomizeSkin extends GuiScreen
         }
     }
 
+    /**
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();

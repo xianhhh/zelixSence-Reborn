@@ -24,17 +24,20 @@ public class RegistrySimple<K, V> implements IRegistry<K, V>
         return this.registryObjects.get(name);
     }
 
-    public void putObject(K key, V value)
+    /**
+     * Register an object on this registry.
+     */
+    public void putObject(K p_82595_1_, V p_82595_2_)
     {
-        Validate.notNull(key);
-        Validate.notNull(value);
+        Validate.notNull(p_82595_1_);
+        Validate.notNull(p_82595_2_);
 
-        if (this.registryObjects.containsKey(key))
+        if (this.registryObjects.containsKey(p_82595_1_))
         {
-            logger.debug("Adding duplicate key \'" + key + "\' to registry");
+            logger.debug("Adding duplicate key \'" + p_82595_1_ + "\' to registry");
         }
 
-        this.registryObjects.put(key, value);
+        this.registryObjects.put(p_82595_1_, p_82595_2_);
     }
 
     public Set<K> getKeys()
@@ -42,9 +45,12 @@ public class RegistrySimple<K, V> implements IRegistry<K, V>
         return Collections.<K>unmodifiableSet(this.registryObjects.keySet());
     }
 
-    public boolean containsKey(K key)
+    /**
+     * Does this registry contain an entry for the given key?
+     */
+    public boolean containsKey(K p_148741_1_)
     {
-        return this.registryObjects.containsKey(key);
+        return this.registryObjects.containsKey(p_148741_1_);
     }
 
     public Iterator<V> iterator()

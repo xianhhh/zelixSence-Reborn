@@ -8,13 +8,28 @@ import net.minecraft.util.MathHelper;
 
 public class ModelOcelot extends ModelBase
 {
+    /** The back left leg model for the Ocelot. */
     ModelRenderer ocelotBackLeftLeg;
+
+    /** The back right leg model for the Ocelot. */
     ModelRenderer ocelotBackRightLeg;
+
+    /** The front left leg model for the Ocelot. */
     ModelRenderer ocelotFrontLeftLeg;
+
+    /** The front right leg model for the Ocelot. */
     ModelRenderer ocelotFrontRightLeg;
+
+    /** The tail model for the Ocelot. */
     ModelRenderer ocelotTail;
+
+    /** The second part of tail model for the Ocelot. */
     ModelRenderer ocelotTail2;
+
+    /** The head model for the Ocelot. */
     ModelRenderer ocelotHead;
+
+    /** The body model for the Ocelot. */
     ModelRenderer ocelotBody;
     int field_78163_i = 1;
 
@@ -54,6 +69,9 @@ public class ModelOcelot extends ModelBase
         this.ocelotFrontRightLeg.setRotationPoint(-1.2F, 13.8F, -5.0F);
     }
 
+    /**
+     * Sets the models various rotation angles then renders the model.
+     */
     public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
     {
         this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale, entityIn);
@@ -91,10 +109,15 @@ public class ModelOcelot extends ModelBase
         }
     }
 
-    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
+    /**
+     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms
+     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how
+     * "far" arms and legs can swing at most.
+     */
+    public void setRotationAngles(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity entityIn)
     {
-        this.ocelotHead.rotateAngleX = headPitch / (180F / (float)Math.PI);
-        this.ocelotHead.rotateAngleY = netHeadYaw / (180F / (float)Math.PI);
+        this.ocelotHead.rotateAngleX = p_78087_5_ / (180F / (float)Math.PI);
+        this.ocelotHead.rotateAngleY = p_78087_4_ / (180F / (float)Math.PI);
 
         if (this.field_78163_i != 3)
         {
@@ -102,31 +125,35 @@ public class ModelOcelot extends ModelBase
 
             if (this.field_78163_i == 2)
             {
-                this.ocelotBackLeftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.0F * limbSwingAmount;
-                this.ocelotBackRightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + 0.3F) * 1.0F * limbSwingAmount;
-                this.ocelotFrontLeftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI + 0.3F) * 1.0F * limbSwingAmount;
-                this.ocelotFrontRightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.0F * limbSwingAmount;
-                this.ocelotTail2.rotateAngleX = 1.7278761F + ((float)Math.PI / 10F) * MathHelper.cos(limbSwing) * limbSwingAmount;
+                this.ocelotBackLeftLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F) * 1.0F * p_78087_2_;
+                this.ocelotBackRightLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + 0.3F) * 1.0F * p_78087_2_;
+                this.ocelotFrontLeftLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + (float)Math.PI + 0.3F) * 1.0F * p_78087_2_;
+                this.ocelotFrontRightLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + (float)Math.PI) * 1.0F * p_78087_2_;
+                this.ocelotTail2.rotateAngleX = 1.7278761F + ((float)Math.PI / 10F) * MathHelper.cos(p_78087_1_) * p_78087_2_;
             }
             else
             {
-                this.ocelotBackLeftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.0F * limbSwingAmount;
-                this.ocelotBackRightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.0F * limbSwingAmount;
-                this.ocelotFrontLeftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.0F * limbSwingAmount;
-                this.ocelotFrontRightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.0F * limbSwingAmount;
+                this.ocelotBackLeftLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F) * 1.0F * p_78087_2_;
+                this.ocelotBackRightLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + (float)Math.PI) * 1.0F * p_78087_2_;
+                this.ocelotFrontLeftLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F + (float)Math.PI) * 1.0F * p_78087_2_;
+                this.ocelotFrontRightLeg.rotateAngleX = MathHelper.cos(p_78087_1_ * 0.6662F) * 1.0F * p_78087_2_;
 
                 if (this.field_78163_i == 1)
                 {
-                    this.ocelotTail2.rotateAngleX = 1.7278761F + ((float)Math.PI / 4F) * MathHelper.cos(limbSwing) * limbSwingAmount;
+                    this.ocelotTail2.rotateAngleX = 1.7278761F + ((float)Math.PI / 4F) * MathHelper.cos(p_78087_1_) * p_78087_2_;
                 }
                 else
                 {
-                    this.ocelotTail2.rotateAngleX = 1.7278761F + 0.47123894F * MathHelper.cos(limbSwing) * limbSwingAmount;
+                    this.ocelotTail2.rotateAngleX = 1.7278761F + 0.47123894F * MathHelper.cos(p_78087_1_) * p_78087_2_;
                 }
             }
         }
     }
 
+    /**
+     * Used for easily adding entity-dependent animations. The second and third float params here are the same second
+     * and third as in the setRotationAngles method.
+     */
     public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime)
     {
         EntityOcelot entityocelot = (EntityOcelot)entitylivingbaseIn;

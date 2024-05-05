@@ -27,6 +27,10 @@ public class BlockQuartz extends Block
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
+    /**
+     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
+     * IBlockstate
+     */
     public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         if (meta == BlockQuartz.EnumType.LINES_Y.getMetadata())
@@ -50,6 +54,10 @@ public class BlockQuartz extends Block
         }
     }
 
+    /**
+     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
+     * returns the metadata of the dropped item based on the old metadata of the block.
+     */
     public int damageDropped(IBlockState state)
     {
         BlockQuartz.EnumType blockquartz$enumtype = (BlockQuartz.EnumType)state.getValue(VARIANT);
@@ -62,6 +70,9 @@ public class BlockQuartz extends Block
         return blockquartz$enumtype != BlockQuartz.EnumType.LINES_X && blockquartz$enumtype != BlockQuartz.EnumType.LINES_Z ? super.createStackedBlock(state) : new ItemStack(Item.getItemFromBlock(this), 1, BlockQuartz.EnumType.LINES_Y.getMetadata());
     }
 
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
         list.add(new ItemStack(itemIn, 1, BlockQuartz.EnumType.DEFAULT.getMetadata()));
@@ -69,16 +80,25 @@ public class BlockQuartz extends Block
         list.add(new ItemStack(itemIn, 1, BlockQuartz.EnumType.LINES_Y.getMetadata()));
     }
 
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
     public MapColor getMapColor(IBlockState state)
     {
         return MapColor.quartzColor;
     }
 
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
     public IBlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState().withProperty(VARIANT, BlockQuartz.EnumType.byMetadata(meta));
     }
 
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
     public int getMetaFromState(IBlockState state)
     {
         return ((BlockQuartz.EnumType)state.getValue(VARIANT)).getMetadata();

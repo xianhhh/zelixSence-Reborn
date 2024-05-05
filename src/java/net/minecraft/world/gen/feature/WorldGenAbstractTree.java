@@ -9,9 +9,9 @@ import net.minecraft.world.World;
 
 public abstract class WorldGenAbstractTree extends WorldGenerator
 {
-    public WorldGenAbstractTree(boolean notify)
+    public WorldGenAbstractTree(boolean p_i45448_1_)
     {
-        super(notify);
+        super(p_i45448_1_);
     }
 
     protected boolean func_150523_a(Block p_150523_1_)
@@ -24,11 +24,11 @@ public abstract class WorldGenAbstractTree extends WorldGenerator
     {
     }
 
-    protected void func_175921_a(World worldIn, BlockPos pos)
+    protected void func_175921_a(World worldIn, BlockPos p_175921_2_)
     {
-        if (worldIn.getBlockState(pos).getBlock() != Blocks.dirt)
+        if (worldIn.getBlockState(p_175921_2_).getBlock() != Blocks.dirt)
         {
-            this.setBlockAndNotifyAdequately(worldIn, pos, Blocks.dirt.getDefaultState());
+            this.setBlockAndNotifyAdequately(worldIn, p_175921_2_, Blocks.dirt.getDefaultState());
         }
     }
 }

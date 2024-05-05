@@ -11,21 +11,33 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 
 public class CommandCompare extends CommandBase
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "testforblocks";
     }
 
+    /**
+     * Return the required permission level for this command.
+     */
     public int getRequiredPermissionLevel()
     {
         return 2;
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.compare.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 9)
@@ -70,8 +82,8 @@ public class CommandCompare extends CommandBase
                         {
                             for (int l = structureboundingbox.minX; l <= structureboundingbox.maxX; ++l)
                             {
-                                blockpos$mutableblockpos.set(l, k, j);
-                                blockpos$mutableblockpos1.set(l + blockpos3.getX(), k + blockpos3.getY(), j + blockpos3.getZ());
+                                blockpos$mutableblockpos.func_181079_c(l, k, j);
+                                blockpos$mutableblockpos1.func_181079_c(l + blockpos3.getX(), k + blockpos3.getY(), j + blockpos3.getZ());
                                 boolean flag1 = false;
                                 IBlockState iblockstate = world.getBlockState(blockpos$mutableblockpos);
 

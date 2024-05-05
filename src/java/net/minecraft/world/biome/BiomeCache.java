@@ -7,9 +7,12 @@ import net.minecraft.util.LongHashMap;
 
 public class BiomeCache
 {
+    /** Reference to the WorldChunkManager */
     private final WorldChunkManager chunkManager;
+
+    /** The last time this BiomeCache was cleaned, in milliseconds. */
     private long lastCleanupTime;
-    private LongHashMap<BiomeCache.Block> cacheMap = new LongHashMap();
+    private LongHashMap cacheMap = new LongHashMap();
     private List<BiomeCache.Block> cache = Lists.<BiomeCache.Block>newArrayList();
 
     public BiomeCache(WorldChunkManager chunkManagerIn)
@@ -17,6 +20,9 @@ public class BiomeCache
         this.chunkManager = chunkManagerIn;
     }
 
+    /**
+     * Returns a biome cache block at location specified.
+     */
     public BiomeCache.Block getBiomeCacheBlock(int x, int z)
     {
         x = x >> 4;
@@ -41,6 +47,9 @@ public class BiomeCache
         return biomegenbase == null ? p_180284_3_ : biomegenbase;
     }
 
+    /**
+     * Removes BiomeCacheBlocks from this cache that haven't been accessed in at least 30 seconds.
+     */
     public void cleanupCache()
     {
         long i = MinecraftServer.getCurrentTimeMillis();
@@ -65,6 +74,9 @@ public class BiomeCache
         }
     }
 
+    /**
+     * Returns the array of cached biome types in the BiomeCacheBlock at the given location.
+     */
     public BiomeGenBase[] getCachedBiomes(int x, int z)
     {
         return this.getBiomeCacheBlock(x, z).biomes;

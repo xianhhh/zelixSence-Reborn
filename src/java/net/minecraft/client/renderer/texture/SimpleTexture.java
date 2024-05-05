@@ -6,19 +6,18 @@ import java.io.InputStream;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.data.TextureMetadataSection;
-import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.EmissiveTextures;
-import net.optifine.shaders.ShadersTex;
+import net.optifine.Config;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import net.shadersmod.client.ShadersTex;
 
 public class SimpleTexture extends AbstractTexture
 {
     private static final Logger logger = LogManager.getLogger();
     protected final ResourceLocation textureLocation;
-    public ResourceLocation locationEmissive;
-    public boolean isEmissive;
+    private static final String __OBFID = "CL_00001052";
 
     public SimpleTexture(ResourceLocation textureResourceLocation)
     {
@@ -63,11 +62,6 @@ public class SimpleTexture extends AbstractTexture
             else
             {
                 TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
-            }
-
-            if (EmissiveTextures.isActive())
-            {
-                EmissiveTextures.loadTexture(this.textureLocation, this);
             }
         }
         finally

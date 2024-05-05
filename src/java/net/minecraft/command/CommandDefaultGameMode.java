@@ -7,16 +7,25 @@ import net.minecraft.world.WorldSettings;
 
 public class CommandDefaultGameMode extends CommandGameMode
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "defaultgamemode";
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.defaultgamemode.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length <= 0)
@@ -31,16 +40,16 @@ public class CommandDefaultGameMode extends CommandGameMode
         }
     }
 
-    protected void setGameType(WorldSettings.GameType gameMode)
+    protected void setGameType(WorldSettings.GameType p_71541_1_)
     {
         MinecraftServer minecraftserver = MinecraftServer.getServer();
-        minecraftserver.setGameType(gameMode);
+        minecraftserver.setGameType(p_71541_1_);
 
         if (minecraftserver.getForceGamemode())
         {
-            for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager().getPlayerList())
+            for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager().func_181057_v())
             {
-                entityplayermp.setGameType(gameMode);
+                entityplayermp.setGameType(p_71541_1_);
                 entityplayermp.fallDistance = 0.0F;
             }
         }

@@ -63,13 +63,27 @@ import org.apache.logging.log4j.Logger;
 public class EntityTrackerEntry
 {
     private static final Logger logger = LogManager.getLogger();
+
+    /** The entity that this EntityTrackerEntry tracks. */
     public Entity trackedEntity;
     public int trackingDistanceThreshold;
+
+    /** check for sync when ticks % updateFrequency==0 */
     public int updateFrequency;
+
+    /** The encoded entity X position. */
     public int encodedPosX;
+
+    /** The encoded entity Y position. */
     public int encodedPosY;
+
+    /** The encoded entity Z position. */
     public int encodedPosZ;
+
+    /** The encoded entity yaw rotation. */
     public int encodedRotationYaw;
+
+    /** The encoded entity pitch rotation. */
     public int encodedRotationPitch;
     public int lastHeadMotion;
     public double lastTrackedEntityMotionX;
@@ -81,6 +95,11 @@ public class EntityTrackerEntry
     private double lastTrackedEntityPosZ;
     private boolean firstUpdateDone;
     private boolean sendVelocityUpdates;
+
+    /**
+     * every 400 ticks a  full teleport packet is sent, rather than just a "move me +x" command, so that position
+     * remains fully synced.
+     */
     private int ticksSinceLastForcedTeleport;
     private Entity field_85178_v;
     private boolean ridingEntity;
@@ -113,7 +132,7 @@ public class EntityTrackerEntry
         return this.trackedEntity.getEntityId();
     }
 
-    public void updatePlayerList(List<EntityPlayer> players)
+    public void updatePlayerList(List<EntityPlayer> p_73122_1_)
     {
         this.playerEntitiesUpdated = false;
 
@@ -124,7 +143,7 @@ public class EntityTrackerEntry
             this.lastTrackedEntityPosZ = this.trackedEntity.posZ;
             this.firstUpdateDone = true;
             this.playerEntitiesUpdated = true;
-            this.updatePlayerEntities(players);
+            this.updatePlayerEntities(p_73122_1_);
         }
 
         if (this.field_85178_v != this.trackedEntity.ridingEntity || this.trackedEntity.ridingEntity != null && this.updateCounter % 60 == 0)
@@ -142,7 +161,7 @@ public class EntityTrackerEntry
             {
                 MapData mapdata = Items.filled_map.getMapData(itemstack, this.trackedEntity.worldObj);
 
-                for (EntityPlayer entityplayer : players)
+                for (EntityPlayer entityplayer : p_73122_1_)
                 {
                     EntityPlayerMP entityplayermp = (EntityPlayerMP)entityplayer;
                     mapdata.updateVisiblePlayers(entityplayermp, itemstack);
@@ -282,6 +301,10 @@ public class EntityTrackerEntry
         }
     }
 
+    /**
+     * Sends the entity metadata (DataWatcher) and attributes to all players tracking this entity, including the entity
+     * itself if a player.
+     */
     private void sendMetadataToAllAssociatedPlayers()
     {
         DataWatcher datawatcher = this.trackedEntity.getDataWatcher();
@@ -305,6 +328,9 @@ public class EntityTrackerEntry
         }
     }
 
+    /**
+     * Send the given packet to all players tracking this entity.
+     */
     public void sendPacketToTrackedPlayers(Packet packetIn)
     {
         for (EntityPlayerMP entityplayermp : this.trackingPlayers)
@@ -349,7 +375,7 @@ public class EntityTrackerEntry
                 if (!this.trackingPlayers.contains(playerMP) && (this.isPlayerWatchingThisChunk(playerMP) || this.trackedEntity.forceSpawn))
                 {
                     this.trackingPlayers.add(playerMP);
-                    Packet packet = this.createSpawnPacket();
+                    Packet packet = this.func_151260_c();
                     playerMP.playerNetServerHandler.sendPacket(packet);
 
                     if (!this.trackedEntity.getDataWatcher().getIsBlank())
@@ -448,15 +474,15 @@ public class EntityTrackerEntry
         return playerMP.getServerForPlayer().getPlayerManager().isPlayerWatchingChunk(playerMP, this.trackedEntity.chunkCoordX, this.trackedEntity.chunkCoordZ);
     }
 
-    public void updatePlayerEntities(List<EntityPlayer> players)
+    public void updatePlayerEntities(List<EntityPlayer> p_73125_1_)
     {
-        for (int i = 0; i < players.size(); ++i)
+        for (int i = 0; i < p_73125_1_.size(); ++i)
         {
-            this.updatePlayerEntity((EntityPlayerMP)players.get(i));
+            this.updatePlayerEntity((EntityPlayerMP)p_73125_1_.get(i));
         }
     }
 
-    private Packet createSpawnPacket()
+    private Packet func_151260_c()
     {
         if (this.trackedEntity.isDead)
         {
@@ -603,6 +629,9 @@ public class EntityTrackerEntry
         }
     }
 
+    /**
+     * Remove a tracked player from our list and tell the tracked player to destroy us from their world.
+     */
     public void removeTrackedPlayerSymmetric(EntityPlayerMP playerMP)
     {
         if (this.trackingPlayers.contains(playerMP))

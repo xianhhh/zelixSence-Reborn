@@ -13,21 +13,33 @@ import net.minecraft.util.ChatComponentTranslation;
 
 public class CommandWhitelist extends CommandBase
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "whitelist";
     }
 
+    /**
+     * Return the required permission level for this command.
+     */
     public int getRequiredPermissionLevel()
     {
         return 3;
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.whitelist.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 1)
@@ -78,7 +90,7 @@ public class CommandWhitelist extends CommandBase
                     throw new WrongUsageException("commands.whitelist.remove.usage", new Object[0]);
                 }
 
-                GameProfile gameprofile1 = minecraftserver.getConfigurationManager().getWhitelistedPlayers().getBannedProfile(args[1]);
+                GameProfile gameprofile1 = minecraftserver.getConfigurationManager().getWhitelistedPlayers().func_152706_a(args[1]);
 
                 if (gameprofile1 == null)
                 {

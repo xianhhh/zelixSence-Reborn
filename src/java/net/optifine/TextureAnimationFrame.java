@@ -2,14 +2,13 @@ package net.optifine;
 
 public class TextureAnimationFrame
 {
-    public int index;
-    public int duration;
-    public int counter;
+    public int index = 0;
+    public int duration = 0;
+    public int counter = 0;
 
-    public TextureAnimationFrame(int index, int duration)
+    public TextureAnimationFrame(int p_i96_1_, int p_i96_2_)
     {
-        this.index = index;
-        this.duration = duration;
-        this.counter = 0;
+        this.index = p_i96_1_;
+        this.duration = p_i96_2_;
     }
 }

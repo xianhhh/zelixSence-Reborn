@@ -10,21 +10,33 @@ import net.minecraft.util.ChatComponentTranslation;
 
 public class CommandEffect extends CommandBase
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "effect";
     }
 
+    /**
+     * Return the required permission level for this command.
+     */
     public int getRequiredPermissionLevel()
     {
         return 2;
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.effect.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 2)
@@ -131,7 +143,7 @@ public class CommandEffect extends CommandBase
 
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, this.getAllUsernames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, Potion.getPotionLocations()) : (args.length == 5 ? getListOfStringsMatchingLastWord(args, new String[] {"true", "false"}): null));
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, this.getAllUsernames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, Potion.func_181168_c()) : (args.length == 5 ? getListOfStringsMatchingLastWord(args, new String[] {"true", "false"}): null));
     }
 
     protected String[] getAllUsernames()
@@ -139,6 +151,9 @@ public class CommandEffect extends CommandBase
         return MinecraftServer.getServer().getAllUsernames();
     }
 
+    /**
+     * Return whether the specified command parameter index is a username parameter.
+     */
     public boolean isUsernameIndex(String[] args, int index)
     {
         return index == 0;

@@ -58,9 +58,13 @@ public class NoiseGeneratorImproved extends NoiseGenerator
         return field_152381_e[i] * p_76310_2_ + field_152382_f[i] * p_76310_4_ + field_152383_g[i] * p_76310_6_;
     }
 
-    public void populateNoiseArray(double[] noiseArray, double xOffset, double yOffset, double zOffset, int xSize, int ySize, int zSize, double xScale, double yScale, double zScale, double noiseScale)
+    /**
+     * pars: noiseArray , xOffset , yOffset , zOffset , xSize , ySize , zSize , xScale, yScale , zScale , noiseScale.
+     * noiseArray should be xSize*ySize*zSize in size
+     */
+    public void populateNoiseArray(double[] p_76308_1_, double p_76308_2_, double p_76308_4_, double p_76308_6_, int p_76308_8_, int p_76308_9_, int p_76308_10_, double p_76308_11_, double p_76308_13_, double p_76308_15_, double p_76308_17_)
     {
-        if (ySize == 1)
+        if (p_76308_9_ == 1)
         {
             int i5 = 0;
             int j5 = 0;
@@ -69,11 +73,11 @@ public class NoiseGeneratorImproved extends NoiseGenerator
             double d14 = 0.0D;
             double d15 = 0.0D;
             int l5 = 0;
-            double d16 = 1.0D / noiseScale;
+            double d16 = 1.0D / p_76308_17_;
 
-            for (int j2 = 0; j2 < xSize; ++j2)
+            for (int j2 = 0; j2 < p_76308_8_; ++j2)
             {
-                double d17 = xOffset + (double)j2 * xScale + this.xCoord;
+                double d17 = p_76308_2_ + (double)j2 * p_76308_11_ + this.xCoord;
                 int i6 = (int)d17;
 
                 if (d17 < (double)i6)
@@ -85,9 +89,9 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                 d17 = d17 - (double)i6;
                 double d18 = d17 * d17 * d17 * (d17 * (d17 * 6.0D - 15.0D) + 10.0D);
 
-                for (int j6 = 0; j6 < zSize; ++j6)
+                for (int j6 = 0; j6 < p_76308_10_; ++j6)
                 {
-                    double d19 = zOffset + (double)j6 * zScale + this.zCoord;
+                    double d19 = p_76308_6_ + (double)j6 * p_76308_15_ + this.zCoord;
                     int k6 = (int)d19;
 
                     if (d19 < (double)k6)
@@ -106,14 +110,14 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                     d15 = this.lerp(d18, this.grad(this.permutations[j5 + 1], d17, 0.0D, d19 - 1.0D), this.grad(this.permutations[k5 + 1], d17 - 1.0D, 0.0D, d19 - 1.0D));
                     double d21 = this.lerp(d20, d14, d15);
                     int i7 = l5++;
-                    noiseArray[i7] += d21 * d16;
+                    p_76308_1_[i7] += d21 * d16;
                 }
             }
         }
         else
         {
             int i = 0;
-            double d0 = 1.0D / noiseScale;
+            double d0 = 1.0D / p_76308_17_;
             int k = -1;
             int l = 0;
             int i1 = 0;
@@ -126,9 +130,9 @@ public class NoiseGeneratorImproved extends NoiseGenerator
             double d3 = 0.0D;
             double d4 = 0.0D;
 
-            for (int l2 = 0; l2 < xSize; ++l2)
+            for (int l2 = 0; l2 < p_76308_8_; ++l2)
             {
-                double d5 = xOffset + (double)l2 * xScale + this.xCoord;
+                double d5 = p_76308_2_ + (double)l2 * p_76308_11_ + this.xCoord;
                 int i3 = (int)d5;
 
                 if (d5 < (double)i3)
@@ -140,9 +144,9 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                 d5 = d5 - (double)i3;
                 double d6 = d5 * d5 * d5 * (d5 * (d5 * 6.0D - 15.0D) + 10.0D);
 
-                for (int k3 = 0; k3 < zSize; ++k3)
+                for (int k3 = 0; k3 < p_76308_10_; ++k3)
                 {
-                    double d7 = zOffset + (double)k3 * zScale + this.zCoord;
+                    double d7 = p_76308_6_ + (double)k3 * p_76308_15_ + this.zCoord;
                     int l3 = (int)d7;
 
                     if (d7 < (double)l3)
@@ -154,9 +158,9 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                     d7 = d7 - (double)l3;
                     double d8 = d7 * d7 * d7 * (d7 * (d7 * 6.0D - 15.0D) + 10.0D);
 
-                    for (int j4 = 0; j4 < ySize; ++j4)
+                    for (int j4 = 0; j4 < p_76308_9_; ++j4)
                     {
-                        double d9 = yOffset + (double)j4 * yScale + this.yCoord;
+                        double d9 = p_76308_4_ + (double)j4 * p_76308_13_ + this.yCoord;
                         int k4 = (int)d9;
 
                         if (d9 < (double)k4)
@@ -187,7 +191,7 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                         double d12 = this.lerp(d10, d3, d4);
                         double d13 = this.lerp(d8, d11, d12);
                         int j7 = i++;
-                        noiseArray[j7] += d13 * d0;
+                        p_76308_1_[j7] += d13 * d0;
                     }
                 }
             }

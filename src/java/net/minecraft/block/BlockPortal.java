@@ -117,6 +117,9 @@ public class BlockPortal extends BlockBreakable
         }
     }
 
+    /**
+     * Called when a neighboring block changes.
+     */
     public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
         EnumFacing.Axis enumfacing$axis = (EnumFacing.Axis)state.getValue(AXIS);
@@ -175,6 +178,9 @@ public class BlockPortal extends BlockBreakable
         return flag4 && side == EnumFacing.WEST ? true : (flag4 && side == EnumFacing.EAST ? true : (flag5 && side == EnumFacing.NORTH ? true : flag5 && side == EnumFacing.SOUTH));
     }
 
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
     public int quantityDropped(Random random)
     {
         return 0;
@@ -185,11 +191,14 @@ public class BlockPortal extends BlockBreakable
         return EnumWorldBlockLayer.TRANSLUCENT;
     }
 
+    /**
+     * Called When an Entity Collided with the Block
+     */
     public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
         if (entityIn.ridingEntity == null && entityIn.riddenByEntity == null)
         {
-            entityIn.setPortal(pos);
+            entityIn.func_181015_d(pos);
         }
     }
 
@@ -230,11 +239,17 @@ public class BlockPortal extends BlockBreakable
         return null;
     }
 
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
     public IBlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState().withProperty(AXIS, (meta & 3) == 2 ? EnumFacing.Axis.Z : EnumFacing.Axis.X);
     }
 
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
     public int getMetaFromState(IBlockState state)
     {
         return getMetaForAxis((EnumFacing.Axis)state.getValue(AXIS));
@@ -269,7 +284,7 @@ public class BlockPortal extends BlockBreakable
 
             for (EnumFacing.AxisDirection enumfacing$axisdirection : EnumFacing.AxisDirection.values())
             {
-                BlockPattern.PatternHelper blockpattern$patternhelper = new BlockPattern.PatternHelper(enumfacing.getAxisDirection() == enumfacing$axisdirection ? blockpos : blockpos.offset(blockportal$size.field_150866_c, blockportal$size.func_181101_b() - 1), EnumFacing.getFacingFromAxis(enumfacing$axisdirection, enumfacing$axis), EnumFacing.UP, loadingcache, blockportal$size.func_181101_b(), blockportal$size.func_181100_a(), 1);
+                BlockPattern.PatternHelper blockpattern$patternhelper = new BlockPattern.PatternHelper(enumfacing.getAxisDirection() == enumfacing$axisdirection ? blockpos : blockpos.offset(blockportal$size.field_150866_c, blockportal$size.func_181101_b() - 1), EnumFacing.func_181076_a(enumfacing$axisdirection, enumfacing$axis), EnumFacing.UP, loadingcache, blockportal$size.func_181101_b(), blockportal$size.func_181100_a(), 1);
 
                 for (int i = 0; i < blockportal$size.func_181101_b(); ++i)
                 {
@@ -295,7 +310,7 @@ public class BlockPortal extends BlockBreakable
                 }
             }
 
-            return new BlockPattern.PatternHelper(enumfacing.getAxisDirection() == enumfacing$axisdirection1 ? blockpos : blockpos.offset(blockportal$size.field_150866_c, blockportal$size.func_181101_b() - 1), EnumFacing.getFacingFromAxis(enumfacing$axisdirection1, enumfacing$axis), EnumFacing.UP, loadingcache, blockportal$size.func_181101_b(), blockportal$size.func_181100_a(), 1);
+            return new BlockPattern.PatternHelper(enumfacing.getAxisDirection() == enumfacing$axisdirection1 ? blockpos : blockpos.offset(blockportal$size.field_150866_c, blockportal$size.func_181101_b() - 1), EnumFacing.func_181076_a(enumfacing$axisdirection1, enumfacing$axis), EnumFacing.UP, loadingcache, blockportal$size.func_181101_b(), blockportal$size.func_181100_a(), 1);
         }
     }
 

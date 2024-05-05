@@ -14,13 +14,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.http.HttpPipeline;
-import net.optifine.http.HttpRequest;
-import net.optifine.http.HttpResponse;
-import net.optifine.player.CapeImageBuffer;
-import net.optifine.shaders.ShadersTex;
+import net.optifine.Config;
+import net.optifine.HttpPipeline;
+import net.optifine.HttpRequest;
+import net.optifine.HttpResponse;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +34,7 @@ public class ThreadDownloadImageData extends SimpleTexture
     private BufferedImage bufferedImage;
     private Thread imageThread;
     private boolean textureUploaded;
+    private static final String __OBFID = "CL_00001049";
     public Boolean imageFound = null;
     public boolean pipeline = false;
 
@@ -57,14 +57,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                 this.deleteGlTexture();
             }
 
-            if (Config.isShaders())
-            {
-                ShadersTex.loadSimpleTexture(super.getGlTextureId(), this.bufferedImage, false, false, Config.getResourceManager(), this.textureLocation, this.getMultiTexID());
-            }
-            else
-            {
-                TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
-            }
+            TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
         }
     }
 
@@ -108,7 +101,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                         this.setBufferedImage(this.imageBuffer.parseUserSkin(this.bufferedImage));
                     }
 
-                    this.loadingFinished();
+                    this.imageFound = Boolean.valueOf(this.bufferedImage != null);
                 }
                 catch (IOException ioexception)
                 {
@@ -127,6 +120,7 @@ public class ThreadDownloadImageData extends SimpleTexture
     {
         this.imageThread = new Thread("Texture Downloader #" + threadDownloadCounter.incrementAndGet())
         {
+            private static final String __OBFID = "CL_00001050";
             public void run()
             {
                 HttpURLConnection httpurlconnection = null;
@@ -186,7 +180,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                             httpurlconnection.disconnect();
                         }
 
-                        ThreadDownloadImageData.this.loadingFinished();
+                        ThreadDownloadImageData.this.imageFound = Boolean.valueOf(ThreadDownloadImageData.this.bufferedImage != null);
                     }
                 }
             }
@@ -248,23 +242,7 @@ public class ThreadDownloadImageData extends SimpleTexture
         }
         finally
         {
-            this.loadingFinished();
+            this.imageFound = Boolean.valueOf(this.bufferedImage != null);
         }
-    }
-
-    private void loadingFinished()
-    {
-        this.imageFound = Boolean.valueOf(this.bufferedImage != null);
-
-        if (this.imageBuffer instanceof CapeImageBuffer)
-        {
-            CapeImageBuffer capeimagebuffer = (CapeImageBuffer)this.imageBuffer;
-            capeimagebuffer.cleanup();
-        }
-    }
-
-    public IImageBuffer getImageBuffer()
-    {
-        return this.imageBuffer;
     }
 }

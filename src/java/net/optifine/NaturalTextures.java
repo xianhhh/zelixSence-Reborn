@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.src.Config;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.util.TextureUtils;
 
 public class NaturalTextures
 {
@@ -121,13 +119,13 @@ public class NaturalTextures
         }
     }
 
-    public static BakedQuad getNaturalTexture(BlockPos blockPosIn, BakedQuad quad)
+    public static BakedQuad getNaturalTexture(BlockPos p_getNaturalTexture_0_, BakedQuad p_getNaturalTexture_1_)
     {
-        TextureAtlasSprite textureatlassprite = quad.getSprite();
+        TextureAtlasSprite textureatlassprite = p_getNaturalTexture_1_.getSprite();
 
         if (textureatlassprite == null)
         {
-            return quad;
+            return p_getNaturalTexture_1_;
         }
         else
         {
@@ -135,12 +133,12 @@ public class NaturalTextures
 
             if (naturalproperties == null)
             {
-                return quad;
+                return p_getNaturalTexture_1_;
             }
             else
             {
-                int i = ConnectedTextures.getSide(quad.getFace());
-                int j = Config.getRandom(blockPosIn, i);
+                int i = ConnectedTextures.getSide(p_getNaturalTexture_1_.getFace());
+                int j = Config.getRandom(p_getNaturalTexture_0_, i);
                 int k = 0;
                 boolean flag = false;
 
@@ -159,20 +157,20 @@ public class NaturalTextures
                     flag = (j & 4) != 0;
                 }
 
-                return naturalproperties.getQuad(quad, k, flag);
+                return naturalproperties.getQuad(p_getNaturalTexture_1_, k, flag);
             }
         }
     }
 
-    public static NaturalProperties getNaturalProperties(TextureAtlasSprite icon)
+    public static NaturalProperties getNaturalProperties(TextureAtlasSprite p_getNaturalProperties_0_)
     {
-        if (!(icon instanceof TextureAtlasSprite))
+        if (!(p_getNaturalProperties_0_ instanceof TextureAtlasSprite))
         {
             return null;
         }
         else
         {
-            int i = icon.getIndexInMap();
+            int i = p_getNaturalProperties_0_.getIndexInMap();
 
             if (i >= 0 && i < propertiesByIndex.length)
             {

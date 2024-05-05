@@ -28,6 +28,9 @@ public class BlockSilverfish extends Block
         this.setCreativeTab(CreativeTabs.tabDecorations);
     }
 
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
     public int quantityDropped(Random random)
     {
         return 0;
@@ -63,6 +66,9 @@ public class BlockSilverfish extends Block
         }
     }
 
+    /**
+     * Spawns this Block's drops into the World as EntityItems.
+     */
     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
     {
         if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops"))
@@ -80,6 +86,9 @@ public class BlockSilverfish extends Block
         return iblockstate.getBlock().getMetaFromState(iblockstate);
     }
 
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
         for (BlockSilverfish.EnumType blocksilverfish$enumtype : BlockSilverfish.EnumType.values())
@@ -88,11 +97,17 @@ public class BlockSilverfish extends Block
         }
     }
 
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
     public IBlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState().withProperty(VARIANT, BlockSilverfish.EnumType.byMetadata(meta));
     }
 
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
     public int getMetaFromState(IBlockState state)
     {
         return ((BlockSilverfish.EnumType)state.getValue(VARIANT)).getMetadata();

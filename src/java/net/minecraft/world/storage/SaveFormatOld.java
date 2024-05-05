@@ -15,18 +15,25 @@ import org.apache.logging.log4j.Logger;
 public class SaveFormatOld implements ISaveFormat
 {
     private static final Logger logger = LogManager.getLogger();
+
+    /**
+     * Reference to the File object representing the directory for the world saves
+     */
     protected final File savesDirectory;
 
-    public SaveFormatOld(File savesDirectoryIn)
+    public SaveFormatOld(File p_i2147_1_)
     {
-        if (!savesDirectoryIn.exists())
+        if (!p_i2147_1_.exists())
         {
-            savesDirectoryIn.mkdirs();
+            p_i2147_1_.mkdirs();
         }
 
-        this.savesDirectory = savesDirectoryIn;
+        this.savesDirectory = p_i2147_1_;
     }
 
+    /**
+     * Returns the name of the save format.
+     */
     public String getName()
     {
         return "Old Format";
@@ -54,6 +61,9 @@ public class SaveFormatOld implements ISaveFormat
     {
     }
 
+    /**
+     * Returns the world's WorldInfo object
+     */
     public WorldInfo getWorldInfo(String saveName)
     {
         File file1 = new File(this.savesDirectory, saveName);
@@ -100,6 +110,10 @@ public class SaveFormatOld implements ISaveFormat
         }
     }
 
+    /**
+     * Renames the world by storing the new name in level.dat. It does *not* rename the directory containing the world
+     * data.
+     */
     public void renameWorld(String dirName, String newName)
     {
         File file1 = new File(this.savesDirectory, dirName);
@@ -125,9 +139,9 @@ public class SaveFormatOld implements ISaveFormat
         }
     }
 
-    public boolean isNewLevelIdAcceptable(String saveName)
+    public boolean func_154335_d(String p_154335_1_)
     {
-        File file1 = new File(this.savesDirectory, saveName);
+        File file1 = new File(this.savesDirectory, p_154335_1_);
 
         if (file1.exists())
         {
@@ -149,9 +163,13 @@ public class SaveFormatOld implements ISaveFormat
         }
     }
 
-    public boolean deleteWorldDirectory(String saveName)
+    /**
+     * @args: Takes one argument - the name of the directory of the world to delete. @desc: Delete the world by deleting
+     * the associated directory recursively.
+     */
+    public boolean deleteWorldDirectory(String p_75802_1_)
     {
-        File file1 = new File(this.savesDirectory, saveName);
+        File file1 = new File(this.savesDirectory, p_75802_1_);
 
         if (!file1.exists())
         {
@@ -159,7 +177,7 @@ public class SaveFormatOld implements ISaveFormat
         }
         else
         {
-            logger.info("Deleting level " + saveName);
+            logger.info("Deleting level " + p_75802_1_);
 
             for (int i = 1; i <= 5; ++i)
             {
@@ -189,6 +207,10 @@ public class SaveFormatOld implements ISaveFormat
         }
     }
 
+    /**
+     * @args: Takes one argument - the list of files and directories to delete. @desc: Deletes the files and directory
+     * listed in the list recursively.
+     */
     protected static boolean deleteFiles(File[] files)
     {
         for (int i = 0; i < files.length; ++i)
@@ -212,29 +234,41 @@ public class SaveFormatOld implements ISaveFormat
         return true;
     }
 
+    /**
+     * Returns back a loader for the specified save directory
+     */
     public ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata)
     {
         return new SaveHandler(this.savesDirectory, saveName, storePlayerdata);
     }
 
-    public boolean isConvertible(String saveName)
+    public boolean func_154334_a(String saveName)
     {
         return false;
     }
 
+    /**
+     * gets if the map is old chunk saving (true) or McRegion (false)
+     */
     public boolean isOldMapFormat(String saveName)
     {
         return false;
     }
 
+    /**
+     * converts the map to mcRegion
+     */
     public boolean convertMapFormat(String filename, IProgressUpdate progressCallback)
     {
         return false;
     }
 
-    public boolean canLoadWorld(String saveName)
+    /**
+     * Return whether the given world can be loaded.
+     */
+    public boolean canLoadWorld(String p_90033_1_)
     {
-        File file1 = new File(this.savesDirectory, saveName);
+        File file1 = new File(this.savesDirectory, p_90033_1_);
         return file1.isDirectory();
     }
 }

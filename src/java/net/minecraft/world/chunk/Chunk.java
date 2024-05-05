@@ -38,26 +38,69 @@ import org.apache.logging.log4j.Logger;
 public class Chunk
 {
     private static final Logger logger = LogManager.getLogger();
+
+    /**
+     * Used to store block IDs, block MSBs, Sky-light maps, Block-light maps, and metadata. Each entry corresponds to a
+     * logical segment of 16x16x16 blocks, stacked vertically.
+     */
     private final ExtendedBlockStorage[] storageArrays;
+
+    /**
+     * Contains a 16x16 mapping on the X/Z plane of the biome ID to which each colum belongs.
+     */
     private final byte[] blockBiomeArray;
+
+    /**
+     * A map, similar to heightMap, that tracks how far down precipitation can fall.
+     */
     private final int[] precipitationHeightMap;
+
+    /** Which columns need their skylightMaps updated. */
     private final boolean[] updateSkylightColumns;
+
+    /** Whether or not this Chunk is currently loaded into the World */
     private boolean isChunkLoaded;
+
+    /** Reference to the World object. */
     private final World worldObj;
     private final int[] heightMap;
+
+    /** The x coordinate of the chunk. */
     public final int xPosition;
+
+    /** The z coordinate of the chunk. */
     public final int zPosition;
     private boolean isGapLightingUpdated;
     private final Map<BlockPos, TileEntity> chunkTileEntityMap;
     private final ClassInheritanceMultiMap<Entity>[] entityLists;
+
+    /** Boolean value indicating if the terrain is populated. */
     private boolean isTerrainPopulated;
     private boolean isLightPopulated;
     private boolean field_150815_m;
+
+    /**
+     * Set to true if the chunk has been modified and needs to be updated internally.
+     */
     private boolean isModified;
+
+    /**
+     * Whether this Chunk has any Entities and thus requires saving on every tick
+     */
     private boolean hasEntities;
+
+    /** The time according to World.worldTime when this chunk was last saved */
     private long lastSaveTime;
+
+    /** Lowest value in the heightmap. */
     private int heightMapMinimum;
+
+    /** the cumulative number of ticks players have been in this chunk */
     private long inhabitedTime;
+
+    /**
+     * Contains the current round-robin relight check index, and is implied as the relight check location as well.
+     */
     private int queuedLightChecks;
     private ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
 
@@ -116,6 +159,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Checks whether the chunk is at the X/Z location specified
+     */
     public boolean isAtLocation(int x, int z)
     {
         return x == this.xPosition && z == this.zPosition;
@@ -126,11 +172,17 @@ public class Chunk
         return this.getHeightValue(pos.getX() & 15, pos.getZ() & 15);
     }
 
+    /**
+     * Returns the value in the height map at this x, z coordinate in the chunk
+     */
     public int getHeightValue(int x, int z)
     {
         return this.heightMap[z << 4 | x];
     }
 
+    /**
+     * Returns the topmost ExtendedBlockStorage instance for this Chunk that actually contains a block.
+     */
     public int getTopFilledSegment()
     {
         for (int i = this.storageArrays.length - 1; i >= 0; --i)
@@ -144,11 +196,17 @@ public class Chunk
         return 0;
     }
 
+    /**
+     * Returns the ExtendedBlockStorage array for this Chunk.
+     */
     public ExtendedBlockStorage[] getBlockStorageArray()
     {
         return this.storageArrays;
     }
 
+    /**
+     * Generates the height map for a chunk from scratch
+     */
     protected void generateHeightMap()
     {
         int i = this.getTopFilledSegment();
@@ -182,6 +240,9 @@ public class Chunk
         this.isModified = true;
     }
 
+    /**
+     * Generates the initial skylight map for the chunk upon generation or load.
+     */
     public void generateSkylightMap()
     {
         int i = this.getTopFilledSegment();
@@ -249,6 +310,9 @@ public class Chunk
         this.isModified = true;
     }
 
+    /**
+     * Propagates a given sky-visible block's light value downward and upward to neighboring blocks as necessary.
+     */
     private void propagateSkylightOcclusion(int x, int z)
     {
         this.updateSkylightColumns[x + z * 16] = true;
@@ -273,16 +337,16 @@ public class Chunk
                         int i1 = this.zPosition * 16 + j;
                         int j1 = Integer.MAX_VALUE;
 
-                        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+                        for (Object enumfacing : EnumFacing.Plane.HORIZONTAL)
                         {
-                            j1 = Math.min(j1, this.worldObj.getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(), i1 + enumfacing.getFrontOffsetZ()));
+                            j1 = Math.min(j1, this.worldObj.getChunksLowestHorizon(l + ((EnumFacing) enumfacing).getFrontOffsetX(), i1 + ((EnumFacing) enumfacing).getFrontOffsetZ()));
                         }
 
                         this.checkSkylightNeighborHeight(l, i1, j1);
 
-                        for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL)
+                        for (Object enumfacing1 : EnumFacing.Plane.HORIZONTAL)
                         {
-                            this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(), i1 + enumfacing1.getFrontOffsetZ(), k);
+                            this.checkSkylightNeighborHeight(l + ((EnumFacing) enumfacing1).getFrontOffsetX(), i1 + ((EnumFacing) enumfacing1).getFrontOffsetZ(), k);
                         }
 
                         if (p_150803_1_)
@@ -300,6 +364,9 @@ public class Chunk
         this.worldObj.theProfiler.endSection();
     }
 
+    /**
+     * Checks the height of a block next to a sky-visible block and schedules a lighting update as necessary.
+     */
     private void checkSkylightNeighborHeight(int x, int z, int maxValue)
     {
         int i = this.worldObj.getHeight(new BlockPos(x, 0, z)).getY();
@@ -327,6 +394,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Initiates the recalculation of both the block-light and sky-light for a given block inside a chunk.
+     */
     private void relightBlock(int x, int y, int z)
     {
         int i = this.heightMap[z << 4 | x] & 255;
@@ -423,9 +493,9 @@ public class Chunk
 
             if (!this.worldObj.provider.getHasNoSky())
             {
-                for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+                for (Object enumfacing : EnumFacing.Plane.HORIZONTAL)
                 {
-                    this.updateSkylightNeighborHeight(k + enumfacing.getFrontOffsetX(), l + enumfacing.getFrontOffsetZ(), j2, k2);
+                    this.updateSkylightNeighborHeight(k + ((EnumFacing) enumfacing).getFrontOffsetX(), l + ((EnumFacing) enumfacing).getFrontOffsetZ(), j2, k2);
                 }
 
                 this.updateSkylightNeighborHeight(k, l, j2, k2);
@@ -445,6 +515,9 @@ public class Chunk
         return this.getBlock0(x, y, z).getLightOpacity();
     }
 
+    /**
+     * Returns the block corresponding to the given coordinates inside a chunk.
+     */
     private Block getBlock0(int x, int y, int z)
     {
         Block block = Blocks.air;
@@ -563,6 +636,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Return the metadata corresponding to the given coordinates inside a chunk.
+     */
     private int getBlockMetadata(int x, int y, int z)
     {
         if (y >> 4 >= this.storageArrays.length)
@@ -765,6 +841,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Adds an entity to the chunk. Args: entity
+     */
     public void addEntity(Entity entityIn)
     {
         this.hasEntities = true;
@@ -796,11 +875,17 @@ public class Chunk
         this.entityLists[k].add(entityIn);
     }
 
+    /**
+     * removes entity using its y chunk coordinate as its index
+     */
     public void removeEntity(Entity entityIn)
     {
         this.removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
     }
 
+    /**
+     * Removes entity at the specified index from the entity array.
+     */
     public void removeEntityAtIndex(Entity entityIn, int p_76608_2_)
     {
         if (p_76608_2_ < 0)
@@ -895,6 +980,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Called when this Chunk is loaded by the ChunkProvider
+     */
     public void onChunkLoad()
     {
         this.isChunkLoaded = true;
@@ -911,6 +999,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Called when this Chunk is unloaded by the ChunkProvider
+     */
     public void onChunkUnload()
     {
         this.isChunkLoaded = false;
@@ -926,11 +1017,17 @@ public class Chunk
         }
     }
 
+    /**
+     * Sets the isModified flag for this Chunk
+     */
     public void setChunkModified()
     {
         this.isModified = true;
     }
 
+    /**
+     * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
+     */
     public void getEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > p_177414_4_)
     {
         int i = MathHelper.floor_double((aabb.minY - 2.0D) / 16.0D);
@@ -990,6 +1087,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Returns true if this Chunk needs to be saved
+     */
     public boolean needsSaving(boolean p_76601_1_)
     {
         if (p_76601_1_)
@@ -1017,68 +1117,68 @@ public class Chunk
         return false;
     }
 
-    public void populateChunk(IChunkProvider p_76624_1_, IChunkProvider p_76624_2_, int x, int z)
+    public void populateChunk(IChunkProvider p_76624_1_, IChunkProvider p_76624_2_, int p_76624_3_, int p_76624_4_)
     {
-        boolean flag = p_76624_1_.chunkExists(x, z - 1);
-        boolean flag1 = p_76624_1_.chunkExists(x + 1, z);
-        boolean flag2 = p_76624_1_.chunkExists(x, z + 1);
-        boolean flag3 = p_76624_1_.chunkExists(x - 1, z);
-        boolean flag4 = p_76624_1_.chunkExists(x - 1, z - 1);
-        boolean flag5 = p_76624_1_.chunkExists(x + 1, z + 1);
-        boolean flag6 = p_76624_1_.chunkExists(x - 1, z + 1);
-        boolean flag7 = p_76624_1_.chunkExists(x + 1, z - 1);
+        boolean flag = p_76624_1_.chunkExists(p_76624_3_, p_76624_4_ - 1);
+        boolean flag1 = p_76624_1_.chunkExists(p_76624_3_ + 1, p_76624_4_);
+        boolean flag2 = p_76624_1_.chunkExists(p_76624_3_, p_76624_4_ + 1);
+        boolean flag3 = p_76624_1_.chunkExists(p_76624_3_ - 1, p_76624_4_);
+        boolean flag4 = p_76624_1_.chunkExists(p_76624_3_ - 1, p_76624_4_ - 1);
+        boolean flag5 = p_76624_1_.chunkExists(p_76624_3_ + 1, p_76624_4_ + 1);
+        boolean flag6 = p_76624_1_.chunkExists(p_76624_3_ - 1, p_76624_4_ + 1);
+        boolean flag7 = p_76624_1_.chunkExists(p_76624_3_ + 1, p_76624_4_ - 1);
 
         if (flag1 && flag2 && flag5)
         {
             if (!this.isTerrainPopulated)
             {
-                p_76624_1_.populate(p_76624_2_, x, z);
+                p_76624_1_.populate(p_76624_2_, p_76624_3_, p_76624_4_);
             }
             else
             {
-                p_76624_1_.populateChunk(p_76624_2_, this, x, z);
+                p_76624_1_.func_177460_a(p_76624_2_, this, p_76624_3_, p_76624_4_);
             }
         }
 
         if (flag3 && flag2 && flag6)
         {
-            Chunk chunk = p_76624_1_.provideChunk(x - 1, z);
+            Chunk chunk = p_76624_1_.provideChunk(p_76624_3_ - 1, p_76624_4_);
 
             if (!chunk.isTerrainPopulated)
             {
-                p_76624_1_.populate(p_76624_2_, x - 1, z);
+                p_76624_1_.populate(p_76624_2_, p_76624_3_ - 1, p_76624_4_);
             }
             else
             {
-                p_76624_1_.populateChunk(p_76624_2_, chunk, x - 1, z);
+                p_76624_1_.func_177460_a(p_76624_2_, chunk, p_76624_3_ - 1, p_76624_4_);
             }
         }
 
         if (flag && flag1 && flag7)
         {
-            Chunk chunk1 = p_76624_1_.provideChunk(x, z - 1);
+            Chunk chunk1 = p_76624_1_.provideChunk(p_76624_3_, p_76624_4_ - 1);
 
             if (!chunk1.isTerrainPopulated)
             {
-                p_76624_1_.populate(p_76624_2_, x, z - 1);
+                p_76624_1_.populate(p_76624_2_, p_76624_3_, p_76624_4_ - 1);
             }
             else
             {
-                p_76624_1_.populateChunk(p_76624_2_, chunk1, x, z - 1);
+                p_76624_1_.func_177460_a(p_76624_2_, chunk1, p_76624_3_, p_76624_4_ - 1);
             }
         }
 
         if (flag4 && flag && flag3)
         {
-            Chunk chunk2 = p_76624_1_.provideChunk(x - 1, z - 1);
+            Chunk chunk2 = p_76624_1_.provideChunk(p_76624_3_ - 1, p_76624_4_ - 1);
 
             if (!chunk2.isTerrainPopulated)
             {
-                p_76624_1_.populate(p_76624_2_, x - 1, z - 1);
+                p_76624_1_.populate(p_76624_2_, p_76624_3_ - 1, p_76624_4_ - 1);
             }
             else
             {
-                p_76624_1_.populateChunk(p_76624_2_, chunk2, x - 1, z - 1);
+                p_76624_1_.func_177460_a(p_76624_2_, chunk2, p_76624_3_ - 1, p_76624_4_ - 1);
             }
         }
     }
@@ -1149,11 +1249,18 @@ public class Chunk
         return this.field_150815_m && this.isTerrainPopulated && this.isLightPopulated;
     }
 
+    /**
+     * Gets a ChunkCoordIntPair representing the Chunk's position.
+     */
     public ChunkCoordIntPair getChunkCoordIntPair()
     {
         return new ChunkCoordIntPair(this.xPosition, this.zPosition);
     }
 
+    /**
+     * Returns whether the ExtendedBlockStorages containing levels (in blocks) from arg 1 to arg 2 are fully empty
+     * (true) or not (false).
+     */
     public boolean getAreLevelsEmpty(int startY, int endY)
     {
         if (startY < 0)
@@ -1194,6 +1301,9 @@ public class Chunk
         }
     }
 
+    /**
+     * Initialize this chunk with new binary data.
+     */
     public void fillChunk(byte[] p_177439_1_, int p_177439_2_, boolean p_177439_3_)
     {
         int i = 0;
@@ -1286,11 +1396,18 @@ public class Chunk
         return biomegenbase1 == null ? BiomeGenBase.plains : biomegenbase1;
     }
 
+    /**
+     * Returns an array containing a 16x16 mapping on the X/Z of block positions in this Chunk to biome IDs.
+     */
     public byte[] getBiomeArray()
     {
         return this.blockBiomeArray;
     }
 
+    /**
+     * Accepts a 256-entry array that contains a 16x16 mapping on the X/Z plane of block positions in this Chunk to
+     * biome IDs.
+     */
     public void setBiomeArray(byte[] biomeArray)
     {
         if (this.blockBiomeArray.length != biomeArray.length)
@@ -1306,11 +1423,19 @@ public class Chunk
         }
     }
 
+    /**
+     * Resets the relight check index to 0 for this Chunk.
+     */
     public void resetRelightChecks()
     {
         this.queuedLightChecks = 0;
     }
 
+    /**
+     * Called once-per-chunk-per-tick, and advances the round-robin relight check index by up to 8 blocks at a time. In
+     * a worst-case scenario, can potentially take up to 25.6 seconds, calculated via (4096/8)/20, to re-check all
+     * blocks in a chunk, which may explain lagging light updates on initial world generation.
+     */
     public void enqueueRelightChecks()
     {
         BlockPos blockpos = new BlockPos(this.xPosition << 4, 0, this.zPosition << 4);
@@ -1358,7 +1483,7 @@ public class Chunk
 
         if (!this.worldObj.provider.getHasNoSky())
         {
-            if (this.worldObj.isAreaLoaded(blockpos.add(-1, 0, -1), blockpos.add(16, this.worldObj.getSeaLevel(), 16)))
+            if (this.worldObj.isAreaLoaded(blockpos.add(-1, 0, -1), blockpos.add(16, this.worldObj.func_181545_F(), 16)))
             {
                 label92:
 
@@ -1376,10 +1501,10 @@ public class Chunk
 
                 if (this.isLightPopulated)
                 {
-                    for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+                    for (Object enumfacing : EnumFacing.Plane.HORIZONTAL)
                     {
-                        int k = enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
-                        this.worldObj.getChunkFromBlockCoords(blockpos.offset(enumfacing, k)).func_180700_a(enumfacing.getOpposite());
+                        int k = ((EnumFacing) enumfacing).getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
+                        this.worldObj.getChunkFromBlockCoords(blockpos.offset((EnumFacing) enumfacing, k)).func_180700_a(((EnumFacing) enumfacing).getOpposite());
                     }
 
                     this.func_177441_y();
@@ -1402,32 +1527,32 @@ public class Chunk
         this.recheckGaps(false);
     }
 
-    private void func_180700_a(EnumFacing facing)
+    private void func_180700_a(EnumFacing p_180700_1_)
     {
         if (this.isTerrainPopulated)
         {
-            if (facing == EnumFacing.EAST)
+            if (p_180700_1_ == EnumFacing.EAST)
             {
                 for (int i = 0; i < 16; ++i)
                 {
                     this.func_150811_f(15, i);
                 }
             }
-            else if (facing == EnumFacing.WEST)
+            else if (p_180700_1_ == EnumFacing.WEST)
             {
                 for (int j = 0; j < 16; ++j)
                 {
                     this.func_150811_f(0, j);
                 }
             }
-            else if (facing == EnumFacing.SOUTH)
+            else if (p_180700_1_ == EnumFacing.SOUTH)
             {
                 for (int k = 0; k < 16; ++k)
                 {
                     this.func_150811_f(k, 15);
                 }
             }
-            else if (facing == EnumFacing.NORTH)
+            else if (p_180700_1_ == EnumFacing.NORTH)
             {
                 for (int l = 0; l < 16; ++l)
                 {
@@ -1444,12 +1569,12 @@ public class Chunk
         boolean flag1 = false;
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos((this.xPosition << 4) + x, 0, (this.zPosition << 4) + z);
 
-        for (int j = i + 16 - 1; j > this.worldObj.getSeaLevel() || j > 0 && !flag1; --j)
+        for (int j = i + 16 - 1; j > this.worldObj.func_181545_F() || j > 0 && !flag1; --j)
         {
-            blockpos$mutableblockpos.set(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
+            blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
             int k = this.getBlockLightOpacity(blockpos$mutableblockpos);
 
-            if (k == 255 && blockpos$mutableblockpos.getY() < this.worldObj.getSeaLevel())
+            if (k == 255 && blockpos$mutableblockpos.getY() < this.worldObj.func_181545_F())
             {
                 flag1 = true;
             }
@@ -1466,7 +1591,7 @@ public class Chunk
 
         for (int l = blockpos$mutableblockpos.getY(); l > 0; --l)
         {
-            blockpos$mutableblockpos.set(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
+            blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
 
             if (this.getBlock(blockpos$mutableblockpos).getLightValue() > 0)
             {

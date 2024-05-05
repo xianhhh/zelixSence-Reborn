@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 
 public class EntityMinecartHopper extends EntityMinecartContainer implements IHopper
 {
+    /** Whether this hopper minecart is being blocked by an activator rail. */
     private boolean isBlocked = true;
     private int transferTicker = -1;
     private BlockPos field_174900_c = BlockPos.ORIGIN;
@@ -27,9 +28,9 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         super(worldIn);
     }
 
-    public EntityMinecartHopper(World worldIn, double x, double y, double z)
+    public EntityMinecartHopper(World worldIn, double p_i1721_2_, double p_i1721_4_, double p_i1721_6_)
     {
-        super(worldIn, x, y, z);
+        super(worldIn, p_i1721_2_, p_i1721_4_, p_i1721_6_);
     }
 
     public EntityMinecart.EnumMinecartType getMinecartType()
@@ -47,11 +48,17 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         return 1;
     }
 
+    /**
+     * Returns the number of slots in the inventory.
+     */
     public int getSizeInventory()
     {
         return 5;
     }
 
+    /**
+     * First layer of player interaction
+     */
     public boolean interactFirst(EntityPlayer playerIn)
     {
         if (!this.worldObj.isRemote)
@@ -62,6 +69,9 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         return true;
     }
 
+    /**
+     * Called every tick the minecart is on an activator rail. Args: x, y, z, is the rail receiving power
+     */
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
     {
         boolean flag = !receivingPower;
@@ -72,36 +82,57 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         }
     }
 
+    /**
+     * Get whether this hopper minecart is being blocked by an activator rail.
+     */
     public boolean getBlocked()
     {
         return this.isBlocked;
     }
 
+    /**
+     * Set whether this hopper minecart is being blocked by an activator rail.
+     */
     public void setBlocked(boolean p_96110_1_)
     {
         this.isBlocked = p_96110_1_;
     }
 
+    /**
+     * Returns the worldObj for this tileEntity.
+     */
     public World getWorld()
     {
         return this.worldObj;
     }
 
+    /**
+     * Gets the world X position for this hopper entity.
+     */
     public double getXPos()
     {
         return this.posX;
     }
 
+    /**
+     * Gets the world Y position for this hopper entity.
+     */
     public double getYPos()
     {
         return this.posY + 0.5D;
     }
 
+    /**
+     * Gets the world Z position for this hopper entity.
+     */
     public double getZPos()
     {
         return this.posZ;
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         super.onUpdate();
@@ -151,9 +182,9 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         }
     }
 
-    public void killMinecart(DamageSource source)
+    public void killMinecart(DamageSource p_94095_1_)
     {
-        super.killMinecart(source);
+        super.killMinecart(p_94095_1_);
 
         if (this.worldObj.getGameRules().getBoolean("doEntityDrops"))
         {
@@ -161,23 +192,35 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
         }
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
         tagCompound.setInteger("TransferCooldown", this.transferTicker);
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         super.readEntityFromNBT(tagCompund);
         this.transferTicker = tagCompund.getInteger("TransferCooldown");
     }
 
+    /**
+     * Sets the transfer ticker, used to determine the delay between transfers.
+     */
     public void setTransferTicker(int p_98042_1_)
     {
         this.transferTicker = p_98042_1_;
     }
 
+    /**
+     * Returns whether the hopper cart can currently transfer an item.
+     */
     public boolean canTransfer()
     {
         return this.transferTicker > 0;

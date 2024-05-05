@@ -35,6 +35,9 @@ public abstract class StructureStart
         return this.components;
     }
 
+    /**
+     * Keeps iterating Structure Pieces and spawning them until the checks tell it to stop
+     */
     public void generateStructure(World worldIn, Random rand, StructureBoundingBox structurebb)
     {
         Iterator<StructureComponent> iterator = this.components.iterator();
@@ -50,6 +53,9 @@ public abstract class StructureStart
         }
     }
 
+    /**
+     * Calculates total bounding box based on components' bounding boxes and saves it to boundingBox
+     */
     protected void updateBoundingBox()
     {
         this.boundingBox = StructureBoundingBox.getNewBoundingBox();
@@ -107,9 +113,12 @@ public abstract class StructureStart
     {
     }
 
+    /**
+     * offsets the structure Bounding Boxes up to a certain height, typically 63 - 10
+     */
     protected void markAvailableHeight(World worldIn, Random rand, int p_75067_3_)
     {
-        int i = worldIn.getSeaLevel() - p_75067_3_;
+        int i = worldIn.func_181545_F() - p_75067_3_;
         int j = this.boundingBox.getYSize() + 1;
 
         if (j < i)
@@ -149,6 +158,9 @@ public abstract class StructureStart
         }
     }
 
+    /**
+     * currently only defined for Villages, returns true if Village has more than 2 non-road components
+     */
     public boolean isSizeableStructure()
     {
         return true;

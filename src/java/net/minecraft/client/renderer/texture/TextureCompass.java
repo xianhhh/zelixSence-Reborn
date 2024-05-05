@@ -4,17 +4,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.optifine.Config;
+import net.shadersmod.client.ShadersTex;
 
 public class TextureCompass extends TextureAtlasSprite
 {
+    /** Current compass heading in radians */
     public double currentAngle;
+
+    /** Speed and direction of compass rotation */
     public double angleDelta;
-    public static String locationSprite;
+    public static String field_176608_l;
+    private static final String __OBFID = "CL_00001071";
 
     public TextureCompass(String iconName)
     {
         super(iconName);
-        locationSprite = iconName;
+        field_176608_l = iconName;
     }
 
     public void updateAnimation()
@@ -31,6 +37,9 @@ public class TextureCompass extends TextureAtlasSprite
         }
     }
 
+    /**
+     * Updates the compass based on the given x,z coords and camera direction
+     */
     public void updateCompass(World worldIn, double p_94241_2_, double p_94241_4_, double p_94241_6_, boolean p_94241_8_, boolean p_94241_9_)
     {
         if (!this.framesTextureData.isEmpty())
@@ -85,7 +94,15 @@ public class TextureCompass extends TextureAtlasSprite
             if (i != this.frameCounter)
             {
                 this.frameCounter = i;
-                TextureUtil.uploadTextureMipmap((int[][])this.framesTextureData.get(this.frameCounter), this.width, this.height, this.originX, this.originY, false, false);
+
+                if (Config.isShaders())
+                {
+                    ShadersTex.uploadTexSub((int[][])((int[][])this.framesTextureData.get(this.frameCounter)), this.width, this.height, this.originX, this.originY, false, false);
+                }
+                else
+                {
+                    TextureUtil.uploadTextureMipmap((int[][])((int[][])this.framesTextureData.get(this.frameCounter)), this.width, this.height, this.originX, this.originY, false, false);
+                }
             }
         }
     }

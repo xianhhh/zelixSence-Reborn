@@ -6,10 +6,13 @@ import net.minecraft.util.MathHelper;
 
 public class EntityMoveHelper
 {
+    /** The EntityLiving that is being moved */
     protected EntityLiving entity;
     protected double posX;
     protected double posY;
     protected double posZ;
+
+    /** The speed at which the entity should move */
     protected double speed;
     protected boolean update;
 
@@ -31,6 +34,9 @@ public class EntityMoveHelper
         return this.speed;
     }
 
+    /**
+     * Sets the speed and location to move to
+     */
     public void setMoveTo(double x, double y, double z, double speedIn)
     {
         this.posX = x;
@@ -55,7 +61,7 @@ public class EntityMoveHelper
 
             if (d3 >= 2.500000277905201E-7D)
             {
-                float f = (float)(MathHelper.atan2(d1, d0) * 180.0D / Math.PI) - 90.0F;
+                float f = (float)(MathHelper.func_181159_b(d1, d0) * 180.0D / Math.PI) - 90.0F;
                 this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, f, 30.0F);
                 this.entity.setAIMoveSpeed((float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()));
 
@@ -67,6 +73,9 @@ public class EntityMoveHelper
         }
     }
 
+    /**
+     * Limits the given angle to a upper and lower limit.
+     */
     protected float limitAngle(float p_75639_1_, float p_75639_2_, float p_75639_3_)
     {
         float f = MathHelper.wrapAngleTo180_float(p_75639_2_ - p_75639_1_);

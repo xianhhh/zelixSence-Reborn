@@ -76,16 +76,25 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         this.dataWatcher.addObject(13, new Byte((byte)0));
     }
 
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
     protected String getLivingSound()
     {
         return "mob.skeleton.say";
     }
 
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
     protected String getHurtSound()
     {
         return "mob.skeleton.hurt";
     }
 
+    /**
+     * Returns the sound this mob makes on death.
+     */
     protected String getDeathSound()
     {
         return "mob.skeleton.death";
@@ -113,11 +122,18 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * Get this Entity's EnumCreatureAttribute
+     */
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.UNDEAD;
     }
 
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
     public void onLivingUpdate()
     {
         if (this.worldObj.isDaytime() && !this.worldObj.isRemote)
@@ -161,6 +177,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         super.onLivingUpdate();
     }
 
+    /**
+     * Handles updating while being ridden by an entity
+     */
     public void updateRidden()
     {
         super.updateRidden();
@@ -172,6 +191,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * Called when the mob's health reaches 0.
+     */
     public void onDeath(DamageSource cause)
     {
         super.onDeath(cause);
@@ -199,11 +221,14 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         return Items.arrow;
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
         if (this.getSkeletonType() == 1)
         {
-            int i = this.rand.nextInt(3 + lootingModifier) - 1;
+            int i = this.rand.nextInt(3 + p_70628_2_) - 1;
 
             for (int j = 0; j < i; ++j)
             {
@@ -212,7 +237,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
         else
         {
-            int k = this.rand.nextInt(3 + lootingModifier);
+            int k = this.rand.nextInt(3 + p_70628_2_);
 
             for (int i1 = 0; i1 < k; ++i1)
             {
@@ -220,7 +245,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
             }
         }
 
-        int l = this.rand.nextInt(3 + lootingModifier);
+        int l = this.rand.nextInt(3 + p_70628_2_);
 
         for (int j1 = 0; j1 < l; ++j1)
         {
@@ -228,6 +253,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * Causes this Entity to drop a random item.
+     */
     protected void addRandomDrop()
     {
         if (this.getSkeletonType() == 1)
@@ -236,12 +264,19 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * Gives armor or weapon for entity based on given DifficultyInstance
+     */
     protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty)
     {
         super.setEquipmentBasedOnDifficulty(difficulty);
         this.setCurrentItemOrArmor(0, new ItemStack(Items.bow));
     }
 
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
     {
         livingdata = super.onInitialSpawn(difficulty, livingdata);
@@ -276,6 +311,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         return livingdata;
     }
 
+    /**
+     * sets this entity's combat AI.
+     */
     public void setCombatTask()
     {
         this.tasks.removeTask(this.aiAttackOnCollide);
@@ -292,9 +330,12 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_)
+    /**
+     * Attack the specified entity using a ranged attack.
+     */
+    public void attackEntityWithRangedAttack(EntityLivingBase p_82196_1_, float p_82196_2_)
     {
-        EntityArrow entityarrow = new EntityArrow(this.worldObj, this, target, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
+        EntityArrow entityarrow = new EntityArrow(this.worldObj, this, p_82196_1_, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
         int i = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, this.getHeldItem());
         int j = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, this.getHeldItem());
         entityarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.getDifficulty().getDifficultyId() * 0.11F));
@@ -318,11 +359,17 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         this.worldObj.spawnEntityInWorld(entityarrow);
     }
 
+    /**
+     * Return this skeleton's type.
+     */
     public int getSkeletonType()
     {
         return this.dataWatcher.getWatchableObjectByte(13);
     }
 
+    /**
+     * Set this skeleton's type.
+     */
     public void setSkeletonType(int p_82201_1_)
     {
         this.dataWatcher.updateObject(13, Byte.valueOf((byte)p_82201_1_));
@@ -338,6 +385,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         super.readEntityFromNBT(tagCompund);
@@ -351,12 +401,18 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         this.setCombatTask();
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
         tagCompound.setByte("SkeletonType", (byte)this.getSkeletonType());
     }
 
+    /**
+     * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot
+     */
     public void setCurrentItemOrArmor(int slotIn, ItemStack stack)
     {
         super.setCurrentItemOrArmor(slotIn, stack);
@@ -372,6 +428,9 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         return this.getSkeletonType() == 1 ? super.getEyeHeight() : 1.74F;
     }
 
+    /**
+     * Returns the Y Offset of this entity.
+     */
     public double getYOffset()
     {
         return this.isChild() ? 0.0D : -0.35D;

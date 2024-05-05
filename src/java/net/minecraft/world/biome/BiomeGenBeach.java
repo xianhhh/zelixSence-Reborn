@@ -4,9 +4,9 @@ import net.minecraft.init.Blocks;
 
 public class BiomeGenBeach extends BiomeGenBase
 {
-    public BiomeGenBeach(int id)
+    public BiomeGenBeach(int p_i1969_1_)
     {
-        super(id);
+        super(p_i1969_1_);
         this.spawnableCreatureList.clear();
         this.topBlock = Blocks.sand.getDefaultState();
         this.fillerBlock = Blocks.sand.getDefaultState();

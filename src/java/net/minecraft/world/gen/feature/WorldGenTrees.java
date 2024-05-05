@@ -20,9 +20,17 @@ public class WorldGenTrees extends WorldGenAbstractTree
 {
     private static final IBlockState field_181653_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.OAK);
     private static final IBlockState field_181654_b = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+
+    /** The minimum height of a generated tree. */
     private final int minTreeHeight;
+
+    /** True if this tree should grow Vines. */
     private final boolean vinesGrow;
+
+    /** The metadata value of the wood to use in tree generation. */
     private final IBlockState metaWood;
+
+    /** The metadata value of the leaves to use in tree generation. */
     private final IBlockState metaLeaves;
 
     public WorldGenTrees(boolean p_i2027_1_)
@@ -68,7 +76,7 @@ public class WorldGenTrees extends WorldGenAbstractTree
                     {
                         if (j >= 0 && j < 256)
                         {
-                            if (!this.func_150523_a(worldIn.getBlockState(blockpos$mutableblockpos.set(l, j, i1)).getBlock()))
+                            if (!this.func_150523_a(worldIn.getBlockState(blockpos$mutableblockpos.func_181079_c(l, j, i1)).getBlock()))
                             {
                                 flag = false;
                             }
@@ -167,7 +175,7 @@ public class WorldGenTrees extends WorldGenAbstractTree
                             {
                                 for (int i5 = position.getZ() - k4; i5 <= position.getZ() + k4; ++i5)
                                 {
-                                    blockpos$mutableblockpos1.set(l4, k3, i5);
+                                    blockpos$mutableblockpos1.func_181079_c(l4, k3, i5);
 
                                     if (worldIn.getBlockState(blockpos$mutableblockpos1).getBlock().getMaterial() == Material.leaves)
                                     {
@@ -204,12 +212,12 @@ public class WorldGenTrees extends WorldGenAbstractTree
                         {
                             for (int l3 = 0; l3 < 2; ++l3)
                             {
-                                for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+                                for (Object enumfacing : EnumFacing.Plane.HORIZONTAL)
                                 {
                                     if (rand.nextInt(4 - l3) == 0)
                                     {
-                                        EnumFacing enumfacing1 = enumfacing.getOpposite();
-                                        this.func_181652_a(worldIn, rand.nextInt(3), position.add(enumfacing1.getFrontOffsetX(), i - 5 + l3, enumfacing1.getFrontOffsetZ()), enumfacing);
+                                        EnumFacing enumfacing1 = ((EnumFacing) enumfacing).getOpposite();
+                                        this.func_181652_a(worldIn, rand.nextInt(3), position.add(enumfacing1.getFrontOffsetX(), i - 5 + l3, enumfacing1.getFrontOffsetZ()), (EnumFacing) enumfacing);
                                     }
                                 }
                             }

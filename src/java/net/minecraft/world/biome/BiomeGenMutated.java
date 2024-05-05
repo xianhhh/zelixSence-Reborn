@@ -42,11 +42,14 @@ public class BiomeGenMutated extends BiomeGenBase
         this.baseBiome.theBiomeDecorator.decorate(worldIn, rand, this, pos);
     }
 
-    public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z, double noiseVal)
+    public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int p_180622_4_, int p_180622_5_, double p_180622_6_)
     {
-        this.baseBiome.genTerrainBlocks(worldIn, rand, chunkPrimerIn, x, z, noiseVal);
+        this.baseBiome.genTerrainBlocks(worldIn, rand, chunkPrimerIn, p_180622_4_, p_180622_5_, p_180622_6_);
     }
 
+    /**
+     * returns the chance a creature has to spawn.
+     */
     public float getSpawningChance()
     {
         return this.baseBiome.getSpawningChance();
@@ -72,6 +75,9 @@ public class BiomeGenMutated extends BiomeGenBase
         return this.baseBiome.getBiomeClass();
     }
 
+    /**
+     * returns true if the biome specified is equal to this biome
+     */
     public boolean isEqualTo(BiomeGenBase biome)
     {
         return this.baseBiome.isEqualTo(biome);

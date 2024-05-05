@@ -45,11 +45,17 @@ public class EntitySpider extends EntityMob
         this.targetTasks.addTask(3, new EntitySpider.AISpiderTarget(this, EntityIronGolem.class));
     }
 
+    /**
+     * Returns the Y offset from the entity's position for any entity riding this one.
+     */
     public double getMountedYOffset()
     {
         return (double)(this.height * 0.5F);
     }
 
+    /**
+     * Returns new PathNavigateGround instance
+     */
     protected PathNavigate getNewNavigator(World worldIn)
     {
         return new PathNavigateClimber(this, worldIn);
@@ -61,6 +67,9 @@ public class EntitySpider extends EntityMob
         this.dataWatcher.addObject(16, new Byte((byte)0));
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         super.onUpdate();
@@ -78,16 +87,25 @@ public class EntitySpider extends EntityMob
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.30000001192092896D);
     }
 
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
     protected String getLivingSound()
     {
         return "mob.spider.say";
     }
 
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
     protected String getHurtSound()
     {
         return "mob.spider.say";
     }
 
+    /**
+     * Returns the sound this mob makes on death.
+     */
     protected String getDeathSound()
     {
         return "mob.spider.death";
@@ -103,25 +121,37 @@ public class EntitySpider extends EntityMob
         return Items.string;
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
-        super.dropFewItems(wasRecentlyHit, lootingModifier);
+        super.dropFewItems(p_70628_1_, p_70628_2_);
 
-        if (wasRecentlyHit && (this.rand.nextInt(3) == 0 || this.rand.nextInt(1 + lootingModifier) > 0))
+        if (p_70628_1_ && (this.rand.nextInt(3) == 0 || this.rand.nextInt(1 + p_70628_2_) > 0))
         {
             this.dropItem(Items.spider_eye, 1);
         }
     }
 
+    /**
+     * returns true if this entity is by a ladder, false otherwise
+     */
     public boolean isOnLadder()
     {
         return this.isBesideClimbableBlock();
     }
 
+    /**
+     * Sets the Entity inside a web block.
+     */
     public void setInWeb()
     {
     }
 
+    /**
+     * Get this Entity's EnumCreatureAttribute
+     */
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.ARTHROPOD;
@@ -132,11 +162,19 @@ public class EntitySpider extends EntityMob
         return potioneffectIn.getPotionID() == Potion.poison.id ? false : super.isPotionApplicable(potioneffectIn);
     }
 
+    /**
+     * Returns true if the WatchableObject (Byte) is 0x01 otherwise returns false. The WatchableObject is updated using
+     * setBesideClimableBlock.
+     */
     public boolean isBesideClimbableBlock()
     {
         return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
     }
 
+    /**
+     * Updates the WatchableObject (Byte) created in entityInit(), setting it to 0x01 if par1 is true or 0x00 if it is
+     * false.
+     */
     public void setBesideClimbableBlock(boolean p_70839_1_)
     {
         byte b0 = this.dataWatcher.getWatchableObjectByte(16);
@@ -153,6 +191,10 @@ public class EntitySpider extends EntityMob
         this.dataWatcher.updateObject(16, Byte.valueOf(b0));
     }
 
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
     {
         livingdata = super.onInitialSpawn(difficulty, livingdata);
@@ -196,9 +238,9 @@ public class EntitySpider extends EntityMob
 
     static class AISpiderAttack extends EntityAIAttackOnCollide
     {
-        public AISpiderAttack(EntitySpider spider, Class <? extends Entity > targetClass)
+        public AISpiderAttack(EntitySpider p_i45819_1_, Class <? extends Entity > targetClass)
         {
-            super(spider, targetClass, 1.0D, true);
+            super(p_i45819_1_, targetClass, 1.0D, true);
         }
 
         public boolean continueExecuting()
@@ -224,9 +266,9 @@ public class EntitySpider extends EntityMob
 
     static class AISpiderTarget<T extends EntityLivingBase> extends EntityAINearestAttackableTarget
     {
-        public AISpiderTarget(EntitySpider spider, Class<T> classTarget)
+        public AISpiderTarget(EntitySpider p_i45818_1_, Class<T> classTarget)
         {
-            super(spider, classTarget, true);
+            super(p_i45818_1_, classTarget, true);
         }
 
         public boolean shouldExecute()

@@ -101,29 +101,29 @@ public class FallbackResourceManager implements IResourceManager
 
     static class InputStreamLeakedResourceLogger extends InputStream
     {
-        private final InputStream inputStream;
-        private final String message;
-        private boolean isClosed = false;
+        private final InputStream field_177330_a;
+        private final String field_177328_b;
+        private boolean field_177329_c = false;
 
-        public InputStreamLeakedResourceLogger(InputStream p_i46093_1_, ResourceLocation location, String resourcePack)
+        public InputStreamLeakedResourceLogger(InputStream p_i46093_1_, ResourceLocation location, String p_i46093_3_)
         {
-            this.inputStream = p_i46093_1_;
+            this.field_177330_a = p_i46093_1_;
             ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
             (new Exception()).printStackTrace(new PrintStream(bytearrayoutputstream));
-            this.message = "Leaked resource: \'" + location + "\' loaded from pack: \'" + resourcePack + "\'\n" + bytearrayoutputstream.toString();
+            this.field_177328_b = "Leaked resource: \'" + location + "\' loaded from pack: \'" + p_i46093_3_ + "\'\n" + bytearrayoutputstream.toString();
         }
 
         public void close() throws IOException
         {
-            this.inputStream.close();
-            this.isClosed = true;
+            this.field_177330_a.close();
+            this.field_177329_c = true;
         }
 
         protected void finalize() throws Throwable
         {
-            if (!this.isClosed)
+            if (!this.field_177329_c)
             {
-                FallbackResourceManager.logger.warn(this.message);
+                FallbackResourceManager.logger.warn(this.field_177328_b);
             }
 
             super.finalize();
@@ -131,7 +131,7 @@ public class FallbackResourceManager implements IResourceManager
 
         public int read() throws IOException
         {
-            return this.inputStream.read();
+            return this.field_177330_a.read();
         }
     }
 }

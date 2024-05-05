@@ -10,6 +10,7 @@ public class ImageBufferDownload implements IImageBuffer
     private int[] imageData;
     private int imageWidth;
     private int imageHeight;
+    private static final String __OBFID = "CL_00000956";
 
     public BufferedImage parseUserSkin(BufferedImage image)
     {
@@ -53,13 +54,13 @@ public class ImageBufferDownload implements IImageBuffer
 
             graphics.dispose();
             this.imageData = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
-            this.setAreaOpaque(0 * k, 0 * k, 32 * k, 16 * k);
-            this.setAreaTransparent(32 * k, 0 * k, 64 * k, 32 * k);
-            this.setAreaOpaque(0 * k, 16 * k, 64 * k, 32 * k);
-            this.setAreaTransparent(0 * k, 32 * k, 16 * k, 48 * k);
+            this.setAreaOpaque(0, 0, 32 * k, 16 * k);
+            this.setAreaTransparent(32 * k, 0, 64 * k, 32 * k);
+            this.setAreaOpaque(0, 16 * k, 64 * k, 32 * k);
+            this.setAreaTransparent(0, 32 * k, 16 * k, 48 * k);
             this.setAreaTransparent(16 * k, 32 * k, 40 * k, 48 * k);
             this.setAreaTransparent(40 * k, 32 * k, 56 * k, 48 * k);
-            this.setAreaTransparent(0 * k, 48 * k, 16 * k, 64 * k);
+            this.setAreaTransparent(0, 48 * k, 16 * k, 64 * k);
             this.setAreaOpaque(16 * k, 48 * k, 48 * k, 64 * k);
             this.setAreaTransparent(48 * k, 48 * k, 64 * k, 64 * k);
             return bufferedimage;
@@ -70,6 +71,11 @@ public class ImageBufferDownload implements IImageBuffer
     {
     }
 
+    /**
+     * Makes the given area of the image transparent if it was previously completely opaque (used to remove the outer
+     * layer of a skin around the head if it was saved all opaque; this would be redundant so it's assumed that the skin
+     * maker is just using an image editor without an alpha channel)
+     */
     private void setAreaTransparent(int p_78434_1_, int p_78434_2_, int p_78434_3_, int p_78434_4_)
     {
         if (!this.hasTransparency(p_78434_1_, p_78434_2_, p_78434_3_, p_78434_4_))
@@ -84,6 +90,9 @@ public class ImageBufferDownload implements IImageBuffer
         }
     }
 
+    /**
+     * Makes the given area of the image opaque
+     */
     private void setAreaOpaque(int p_78433_1_, int p_78433_2_, int p_78433_3_, int p_78433_4_)
     {
         for (int i = p_78433_1_; i < p_78433_3_; ++i)
@@ -95,6 +104,9 @@ public class ImageBufferDownload implements IImageBuffer
         }
     }
 
+    /**
+     * Returns true if the given area of the image contains transparent pixels
+     */
     private boolean hasTransparency(int p_78435_1_, int p_78435_2_, int p_78435_3_, int p_78435_4_)
     {
         for (int i = p_78435_1_; i < p_78435_3_; ++i)

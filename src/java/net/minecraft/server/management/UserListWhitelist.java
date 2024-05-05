@@ -29,16 +29,19 @@ public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEn
         return astring;
     }
 
+    /**
+     * Gets the key value for the given object
+     */
     protected String getObjectKey(GameProfile obj)
     {
         return obj.getId().toString();
     }
 
-    public GameProfile getBannedProfile(String name)
+    public GameProfile func_152706_a(String p_152706_1_)
     {
         for (UserListWhitelistEntry userlistwhitelistentry : this.getValues().values())
         {
-            if (name.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
+            if (p_152706_1_.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
             {
                 return (GameProfile)userlistwhitelistentry.getValue();
             }

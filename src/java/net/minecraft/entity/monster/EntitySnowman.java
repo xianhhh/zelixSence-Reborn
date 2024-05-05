@@ -42,6 +42,10 @@ public class EntitySnowman extends EntityGolem implements IRangedAttackMob
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.20000000298023224D);
     }
 
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
     public void onLivingUpdate()
     {
         super.onLivingUpdate();
@@ -82,7 +86,10 @@ public class EntitySnowman extends EntityGolem implements IRangedAttackMob
         return Items.snowball;
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
         int i = this.rand.nextInt(16);
 
@@ -92,13 +99,16 @@ public class EntitySnowman extends EntityGolem implements IRangedAttackMob
         }
     }
 
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_)
+    /**
+     * Attack the specified entity using a ranged attack.
+     */
+    public void attackEntityWithRangedAttack(EntityLivingBase p_82196_1_, float p_82196_2_)
     {
         EntitySnowball entitysnowball = new EntitySnowball(this.worldObj, this);
-        double d0 = target.posY + (double)target.getEyeHeight() - 1.100000023841858D;
-        double d1 = target.posX - this.posX;
+        double d0 = p_82196_1_.posY + (double)p_82196_1_.getEyeHeight() - 1.100000023841858D;
+        double d1 = p_82196_1_.posX - this.posX;
         double d2 = d0 - entitysnowball.posY;
-        double d3 = target.posZ - this.posZ;
+        double d3 = p_82196_1_.posZ - this.posZ;
         float f = MathHelper.sqrt_double(d1 * d1 + d3 * d3) * 0.2F;
         entitysnowball.setThrowableHeading(d1, d2 + (double)f, d3, 1.6F, 12.0F);
         this.playSound("random.bow", 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));

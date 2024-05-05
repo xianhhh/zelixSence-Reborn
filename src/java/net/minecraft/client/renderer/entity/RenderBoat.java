@@ -10,6 +10,8 @@ import net.minecraft.util.ResourceLocation;
 public class RenderBoat extends Render<EntityBoat>
 {
     private static final ResourceLocation boatTextures = new ResourceLocation("textures/entity/boat.png");
+
+    /** instance of ModelBoat for rendering */
     protected ModelBase modelBoat = new ModelBoat();
 
     public RenderBoat(RenderManager renderManagerIn)
@@ -18,6 +20,12 @@ public class RenderBoat extends Render<EntityBoat>
         this.shadowSize = 0.5F;
     }
 
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity>) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doe
+     */
     public void doRender(EntityBoat entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         GlStateManager.pushMatrix();
@@ -46,6 +54,9 @@ public class RenderBoat extends Render<EntityBoat>
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
 
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
     protected ResourceLocation getEntityTexture(EntityBoat entity)
     {
         return boatTextures;

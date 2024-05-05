@@ -10,6 +10,8 @@ public class VertexFormat
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<VertexFormatElement> elements;
     private final List<Integer> offsets;
+
+    /** The next available offset in this vertex format */
     private int nextOffset;
     private int colorElementOffset;
     private List<Integer> uvOffsetsById;
@@ -21,7 +23,7 @@ public class VertexFormat
 
         for (int i = 0; i < vertexFormatIn.getElementCount(); ++i)
         {
-            this.addElement(vertexFormatIn.getElement(i));
+            this.func_181721_a(vertexFormatIn.getElement(i));
         }
 
         this.nextOffset = vertexFormatIn.getNextOffset();
@@ -48,19 +50,19 @@ public class VertexFormat
     }
 
     @SuppressWarnings("incomplete-switch")
-    public VertexFormat addElement(VertexFormatElement element)
+    public VertexFormat func_181721_a(VertexFormatElement p_181721_1_)
     {
-        if (element.isPositionElement() && this.hasPosition())
+        if (p_181721_1_.isPositionElement() && this.hasPosition())
         {
             LOGGER.warn("VertexFormat error: Trying to add a position VertexFormatElement when one already exists, ignoring.");
             return this;
         }
         else
         {
-            this.elements.add(element);
+            this.elements.add(p_181721_1_);
             this.offsets.add(Integer.valueOf(this.nextOffset));
 
-            switch (element.getUsage())
+            switch (p_181721_1_.getUsage())
             {
                 case NORMAL:
                     this.normalElementOffset = this.nextOffset;
@@ -71,10 +73,10 @@ public class VertexFormat
                     break;
 
                 case UV:
-                    this.uvOffsetsById.add(element.getIndex(), Integer.valueOf(this.nextOffset));
+                    this.uvOffsetsById.add(p_181721_1_.getIndex(), Integer.valueOf(this.nextOffset));
             }
 
-            this.nextOffset += element.getSize();
+            this.nextOffset += p_181721_1_.getSize();
             return this;
         }
     }
@@ -143,7 +145,7 @@ public class VertexFormat
         return false;
     }
 
-    public int getIntegerSize()
+    public int func_181719_f()
     {
         return this.getNextOffset() / 4;
     }
@@ -168,7 +170,7 @@ public class VertexFormat
         return (VertexFormatElement)this.elements.get(index);
     }
 
-    public int getOffset(int p_181720_1_)
+    public int func_181720_d(int p_181720_1_)
     {
         return ((Integer)this.offsets.get(p_181720_1_)).intValue();
     }

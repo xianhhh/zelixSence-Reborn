@@ -81,13 +81,21 @@ public class WorldServer extends World implements IThreadListener
     private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet();
     private final Map<UUID, Entity> entitiesByUuid = Maps.<UUID, Entity>newHashMap();
     public ChunkProviderServer theChunkProviderServer;
+
+    /** Whether level saving is disabled or not */
     public boolean disableLevelSaving;
+
+    /** is false if there are no players */
     private boolean allPlayersSleeping;
     private int updateEntityTick;
+
+    /**
+     * the teleporter to use when the entity is being transferred into the dimension
+     */
     private final Teleporter worldTeleporter;
     private final SpawnerAnimals mobSpawner = new SpawnerAnimals();
     protected final VillageSiege villageSiege = new VillageSiege(this);
-    private WorldServer.ServerBlockEventList[] blockEventQueue = new WorldServer.ServerBlockEventList[] {new WorldServer.ServerBlockEventList(), new WorldServer.ServerBlockEventList()};
+    private WorldServer.ServerBlockEventList[] field_147490_S = new WorldServer.ServerBlockEventList[] {new WorldServer.ServerBlockEventList(), new WorldServer.ServerBlockEventList()};
     private int blockEventCacheIndex;
     private static final List<WeightedRandomChestContent> bonusChestContent = Lists.newArrayList(new WeightedRandomChestContent[] {new WeightedRandomChestContent(Items.stick, 0, 1, 3, 10), new WeightedRandomChestContent(Item.getItemFromBlock(Blocks.planks), 0, 1, 3, 10), new WeightedRandomChestContent(Item.getItemFromBlock(Blocks.log), 0, 1, 3, 10), new WeightedRandomChestContent(Items.stone_axe, 0, 1, 1, 3), new WeightedRandomChestContent(Items.wooden_axe, 0, 1, 1, 5), new WeightedRandomChestContent(Items.stone_pickaxe, 0, 1, 1, 3), new WeightedRandomChestContent(Items.wooden_pickaxe, 0, 1, 1, 5), new WeightedRandomChestContent(Items.apple, 0, 2, 3, 5), new WeightedRandomChestContent(Items.bread, 0, 2, 3, 3), new WeightedRandomChestContent(Item.getItemFromBlock(Blocks.log2), 0, 1, 3, 10)});
     private List<NextTickListEntry> pendingTickListEntriesThisTick = Lists.<NextTickListEntry>newArrayList();
@@ -152,6 +160,9 @@ public class WorldServer extends World implements IThreadListener
         return this;
     }
 
+    /**
+     * Runs a single tick for the world
+     */
     public void tick()
     {
         super.tick();
@@ -224,6 +235,9 @@ public class WorldServer extends World implements IThreadListener
         return list != null && !list.isEmpty() ? list.contains(spawnListEntry) : false;
     }
 
+    /**
+     * Updates the flag that indicates whether or not all players in the world are sleeping.
+     */
     public void updateAllPlayersSleepingFlag()
     {
         this.allPlayersSleeping = false;
@@ -292,11 +306,14 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * Sets a new spawn location by finding an uncovered block at a random (x,z) location in the chunk.
+     */
     public void setInitialSpawnLocation()
     {
         if (this.worldInfo.getSpawnY() <= 0)
         {
-            this.worldInfo.setSpawnY(this.getSeaLevel() + 1);
+            this.worldInfo.setSpawnY(this.func_181545_F() + 1);
         }
 
         int i = this.worldInfo.getSpawnX();
@@ -352,7 +369,7 @@ public class WorldServer extends World implements IThreadListener
                     int i1 = this.updateLCG >> 2;
                     BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(k + (i1 & 15), 0, l + (i1 >> 8 & 15)));
 
-                    if (this.isRainingAt(blockpos))
+                    if (this.canLightningStrike(blockpos))
                     {
                         this.addWeatherEffect(new EntityLightningBolt(this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()));
                     }
@@ -377,7 +394,7 @@ public class WorldServer extends World implements IThreadListener
                         this.setBlockState(blockpos2, Blocks.snow_layer.getDefaultState());
                     }
 
-                    if (this.isRaining() && this.getBiomeGenForCoords(blockpos1).canRain())
+                    if (this.isRaining() && this.getBiomeGenForCoords(blockpos1).canSpawnLightningBolt())
                     {
                         this.getBlockState(blockpos1).getBlock().fillWithRain(this, blockpos1);
                     }
@@ -503,6 +520,9 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * Updates (and cleans up) entities and tile entities
+     */
     public void updateEntities()
     {
         if (this.playerEntities.isEmpty())
@@ -520,11 +540,17 @@ public class WorldServer extends World implements IThreadListener
         super.updateEntities();
     }
 
+    /**
+     * Resets the updateEntityTick field to 0
+     */
     public void resetUpdateEntityTick()
     {
         this.updateEntityTick = 0;
     }
 
+    /**
+     * Runs through the list of updates to run and ticks them
+     */
     public boolean tickUpdates(boolean p_72955_1_)
     {
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
@@ -657,6 +683,10 @@ public class WorldServer extends World implements IThreadListener
         return list;
     }
 
+    /**
+     * Will update the entity in the world if the chunk the entity is in is currently loaded or its forced to update.
+     * Args: entity, forceUpdate
+     */
     public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate)
     {
         if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob))
@@ -682,6 +712,9 @@ public class WorldServer extends World implements IThreadListener
         return this.mcServer.getCanSpawnAnimals();
     }
 
+    /**
+     * Creates the chunk provider for this world. Called in the constructor. Retrieves provider from worldProvider?
+     */
     protected IChunkProvider createChunkProvider()
     {
         IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -762,7 +795,10 @@ public class WorldServer extends World implements IThreadListener
         this.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
     }
 
-    private void createSpawnPosition(WorldSettings settings)
+    /**
+     * creates a spawn position at random within 256 blocks of 0,0
+     */
+    private void createSpawnPosition(WorldSettings p_73052_1_)
     {
         if (!this.provider.canRespawnHere())
         {
@@ -810,13 +846,16 @@ public class WorldServer extends World implements IThreadListener
             this.worldInfo.setSpawn(new BlockPos(i, j, k));
             this.findingSpawnPoint = false;
 
-            if (settings.isBonusChestEnabled())
+            if (p_73052_1_.isBonusChestEnabled())
             {
                 this.createBonusChest();
             }
         }
     }
 
+    /**
+     * Creates the bonus chest in the world.
+     */
     protected void createBonusChest()
     {
         WorldGeneratorBonusChest worldgeneratorbonuschest = new WorldGeneratorBonusChest(bonusChestContent, 10);
@@ -834,11 +873,17 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * Returns null for anything other than the End
+     */
     public BlockPos getSpawnCoordinate()
     {
         return this.provider.getSpawnCoordinate();
     }
 
+    /**
+     * Saves all chunks to disk while updating progress bar.
+     */
     public void saveAllChunks(boolean p_73044_1_, IProgressUpdate progressCallback) throws MinecraftException
     {
         if (this.chunkProvider.canSave())
@@ -867,6 +912,9 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * saves chunk data - currently only called during execution of the Save All command
+     */
     public void saveChunkData()
     {
         if (this.chunkProvider.canSave())
@@ -875,6 +923,9 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * Saves the chunks to disk.
+     */
     protected void saveLevel() throws MinecraftException
     {
         this.checkSessionLock();
@@ -923,6 +974,9 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * adds a lightning bolt to the list of lightning bolts in this world.
+     */
     public boolean addWeatherEffect(Entity entityIn)
     {
         if (super.addWeatherEffect(entityIn))
@@ -936,11 +990,17 @@ public class WorldServer extends World implements IThreadListener
         }
     }
 
+    /**
+     * sends a Packet 38 (Entity Status) to all tracked players of that entity
+     */
     public void setEntityState(Entity entityIn, byte state)
     {
         this.getEntityTracker().func_151248_b(entityIn, new S19PacketEntityStatus(entityIn, state));
     }
 
+    /**
+     * returns a new explosion. Does initiation (at time of writing Explosion is not finished)
+     */
     public Explosion newExplosion(Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking)
     {
         Explosion explosion = new Explosion(this, entityIn, x, y, z, strength, isFlaming, isSmoking);
@@ -949,7 +1009,7 @@ public class WorldServer extends World implements IThreadListener
 
         if (!isSmoking)
         {
-            explosion.clearAffectedBlockPositions();
+            explosion.func_180342_d();
         }
 
         for (EntityPlayer entityplayer : this.playerEntities)
@@ -967,7 +1027,7 @@ public class WorldServer extends World implements IThreadListener
     {
         BlockEventData blockeventdata = new BlockEventData(pos, blockIn, eventID, eventParam);
 
-        for (BlockEventData blockeventdata1 : this.blockEventQueue[this.blockEventCacheIndex])
+        for (BlockEventData blockeventdata1 : this.field_147490_S[this.blockEventCacheIndex])
         {
             if (blockeventdata1.equals(blockeventdata))
             {
@@ -975,17 +1035,17 @@ public class WorldServer extends World implements IThreadListener
             }
         }
 
-        this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
+        this.field_147490_S[this.blockEventCacheIndex].add(blockeventdata);
     }
 
     private void sendQueuedBlockEvents()
     {
-        while (!this.blockEventQueue[this.blockEventCacheIndex].isEmpty())
+        while (!this.field_147490_S[this.blockEventCacheIndex].isEmpty())
         {
             int i = this.blockEventCacheIndex;
             this.blockEventCacheIndex ^= 1;
 
-            for (BlockEventData blockeventdata : this.blockEventQueue[i])
+            for (BlockEventData blockeventdata : this.field_147490_S[i])
             {
                 if (this.fireBlockEvent(blockeventdata))
                 {
@@ -993,7 +1053,7 @@ public class WorldServer extends World implements IThreadListener
                 }
             }
 
-            this.blockEventQueue[i].clear();
+            this.field_147490_S[i].clear();
         }
     }
 
@@ -1003,11 +1063,17 @@ public class WorldServer extends World implements IThreadListener
         return iblockstate.getBlock() == event.getBlock() ? iblockstate.getBlock().onBlockEventReceived(this, event.getPosition(), iblockstate, event.getEventID(), event.getEventParameter()) : false;
     }
 
+    /**
+     * Syncs all changes to disk and wait for completion.
+     */
     public void flush()
     {
         this.saveHandler.flush();
     }
 
+    /**
+     * Updates all weather states.
+     */
     protected void updateWeather()
     {
         boolean flag = this.isRaining();
@@ -1049,6 +1115,9 @@ public class WorldServer extends World implements IThreadListener
         return this.mcServer;
     }
 
+    /**
+     * Gets the EntityTracker
+     */
     public EntityTracker getEntityTracker()
     {
         return this.theEntityTracker;
@@ -1064,14 +1133,20 @@ public class WorldServer extends World implements IThreadListener
         return this.worldTeleporter;
     }
 
-    public void spawnParticle(EnumParticleTypes particleType, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
+    /**
+     * Spawns the desired particle and sends the necessary packets to the relevant connected players.
+     */
+    public void spawnParticle(EnumParticleTypes particleType, double xCoord, double yCoord, double zCoord, int numberOfParticles, double p_175739_9_, double p_175739_11_, double p_175739_13_, double p_175739_15_, int... p_175739_17_)
     {
-        this.spawnParticle(particleType, false, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
+        this.spawnParticle(particleType, false, xCoord, yCoord, zCoord, numberOfParticles, p_175739_9_, p_175739_11_, p_175739_13_, p_175739_15_, p_175739_17_);
     }
 
-    public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
+    /**
+     * Spawns the desired particle and sends the necessary packets to the relevant connected players.
+     */
+    public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... p_180505_18_)
     {
-        Packet packet = new S2APacketParticles(particleType, longDistance, (float)xCoord, (float)yCoord, (float)zCoord, (float)xOffset, (float)yOffset, (float)zOffset, (float)particleSpeed, numberOfParticles, particleArguments);
+        Packet packet = new S2APacketParticles(particleType, longDistance, (float)xCoord, (float)yCoord, (float)zCoord, (float)xOffset, (float)yOffset, (float)zOffset, (float)particleSpeed, numberOfParticles, p_180505_18_);
 
         for (int i = 0; i < this.playerEntities.size(); ++i)
         {

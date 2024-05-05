@@ -12,41 +12,41 @@ public class LayerBipedArmor extends LayerArmorBase<ModelBiped>
 
     protected void initArmor()
     {
-        this.modelLeggings = new ModelBiped(0.5F);
-        this.modelArmor = new ModelBiped(1.0F);
+        this.field_177189_c = new ModelBiped(0.5F);
+        this.field_177186_d = new ModelBiped(1.0F);
     }
 
-    protected void setModelPartVisible(ModelBiped model, int armorSlot)
+    protected void func_177179_a(ModelBiped p_177179_1_, int p_177179_2_)
     {
-        this.setModelVisible(model);
+        this.func_177194_a(p_177179_1_);
 
-        switch (armorSlot)
+        switch (p_177179_2_)
         {
             case 1:
-                model.bipedRightLeg.showModel = true;
-                model.bipedLeftLeg.showModel = true;
+                p_177179_1_.bipedRightLeg.showModel = true;
+                p_177179_1_.bipedLeftLeg.showModel = true;
                 break;
 
             case 2:
-                model.bipedBody.showModel = true;
-                model.bipedRightLeg.showModel = true;
-                model.bipedLeftLeg.showModel = true;
+                p_177179_1_.bipedBody.showModel = true;
+                p_177179_1_.bipedRightLeg.showModel = true;
+                p_177179_1_.bipedLeftLeg.showModel = true;
                 break;
 
             case 3:
-                model.bipedBody.showModel = true;
-                model.bipedRightArm.showModel = true;
-                model.bipedLeftArm.showModel = true;
+                p_177179_1_.bipedBody.showModel = true;
+                p_177179_1_.bipedRightArm.showModel = true;
+                p_177179_1_.bipedLeftArm.showModel = true;
                 break;
 
             case 4:
-                model.bipedHead.showModel = true;
-                model.bipedHeadwear.showModel = true;
+                p_177179_1_.bipedHead.showModel = true;
+                p_177179_1_.bipedHeadwear.showModel = true;
         }
     }
 
-    protected void setModelVisible(ModelBiped model)
+    protected void func_177194_a(ModelBiped p_177194_1_)
     {
-        model.setInvisible(false);
+        p_177194_1_.setInvisible(false);
     }
 }

@@ -15,6 +15,12 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
         super(renderManagerIn);
     }
 
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity>) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doe
+     */
     public void doRender(EntityLightningBolt entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         Tessellator tessellator = Tessellator.getInstance();
@@ -136,6 +142,9 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
         GlStateManager.enableTexture2D();
     }
 
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
     protected ResourceLocation getEntityTexture(EntityLightningBolt entity)
     {
         return null;

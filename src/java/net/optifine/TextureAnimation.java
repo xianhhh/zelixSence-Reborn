@@ -5,9 +5,7 @@ import java.util.Properties;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.util.TextureUtils;
 import org.lwjgl.opengl.GL11;
 
 public class TextureAnimation
@@ -21,89 +19,80 @@ public class TextureAnimation
     private int frameWidth = 0;
     private int frameHeight = 0;
     private TextureAnimationFrame[] frames = null;
-    private int currentFrameIndex = 0;
-    private boolean interpolate = false;
-    private int interpolateSkip = 0;
-    private ByteBuffer interpolateData = null;
+    private int activeFrame = 0;
     byte[] srcData = null;
     private ByteBuffer imageData = null;
-    private boolean active = true;
-    private boolean valid = true;
 
-    public TextureAnimation(String texFrom, byte[] srcData, String texTo, ResourceLocation locTexTo, int dstX, int dstY, int frameWidth, int frameHeight, Properties props)
+    public TextureAnimation(String p_i95_1_, byte[] p_i95_2_, String p_i95_3_, ResourceLocation p_i95_4_, int p_i95_5_, int p_i95_6_, int p_i95_7_, int p_i95_8_, Properties p_i95_9_, int p_i95_10_)
     {
-        this.srcTex = texFrom;
-        this.dstTex = texTo;
-        this.dstTexLoc = locTexTo;
-        this.dstX = dstX;
-        this.dstY = dstY;
-        this.frameWidth = frameWidth;
-        this.frameHeight = frameHeight;
-        int i = frameWidth * frameHeight * 4;
+        this.srcTex = p_i95_1_;
+        this.dstTex = p_i95_3_;
+        this.dstTexLoc = p_i95_4_;
+        this.dstX = p_i95_5_;
+        this.dstY = p_i95_6_;
+        this.frameWidth = p_i95_7_;
+        this.frameHeight = p_i95_8_;
+        int i = p_i95_7_ * p_i95_8_ * 4;
 
-        if (srcData.length % i != 0)
+        if (p_i95_2_.length % i != 0)
         {
-            Config.warn("Invalid animated texture length: " + srcData.length + ", frameWidth: " + frameWidth + ", frameHeight: " + frameHeight);
+            Config.warn("Invalid animated texture length: " + p_i95_2_.length + ", frameWidth: " + p_i95_7_ + ", frameHeight: " + p_i95_8_);
         }
 
-        this.srcData = srcData;
-        int j = srcData.length / i;
+        this.srcData = p_i95_2_;
+        int j = p_i95_2_.length / i;
 
-        if (props.get("tile.0") != null)
+        if (p_i95_9_.get("tile.0") != null)
         {
-            for (int k = 0; props.get("tile." + k) != null; ++k)
+            for (int k = 0; p_i95_9_.get("tile." + k) != null; ++k)
             {
                 j = k + 1;
             }
         }
 
-        String s2 = (String)props.get("duration");
-        int l = Math.max(Config.parseInt(s2, 1), 1);
+        String s2 = (String)p_i95_9_.get("duration");
+        int l = Config.parseInt(s2, p_i95_10_);
         this.frames = new TextureAnimationFrame[j];
 
         for (int i1 = 0; i1 < this.frames.length; ++i1)
         {
-            String s = (String)props.get("tile." + i1);
+            String s = (String)p_i95_9_.get("tile." + i1);
             int j1 = Config.parseInt(s, i1);
-            String s1 = (String)props.get("duration." + i1);
-            int k1 = Math.max(Config.parseInt(s1, l), 1);
+            String s1 = (String)p_i95_9_.get("duration." + i1);
+            int k1 = Config.parseInt(s1, l);
             TextureAnimationFrame textureanimationframe = new TextureAnimationFrame(j1, k1);
             this.frames[i1] = textureanimationframe;
-        }
-
-        this.interpolate = Config.parseBoolean(props.getProperty("interpolate"), false);
-        this.interpolateSkip = Config.parseInt(props.getProperty("skip"), 0);
-
-        if (this.interpolate)
-        {
-            this.interpolateData = GLAllocation.createDirectByteBuffer(i);
         }
     }
 
     public boolean nextFrame()
     {
-        TextureAnimationFrame textureanimationframe = this.getCurrentFrame();
-
-        if (textureanimationframe == null)
+        if (this.frames.length <= 0)
         {
             return false;
         }
         else
         {
+            if (this.activeFrame >= this.frames.length)
+            {
+                this.activeFrame = 0;
+            }
+
+            TextureAnimationFrame textureanimationframe = this.frames[this.activeFrame];
             ++textureanimationframe.counter;
 
             if (textureanimationframe.counter < textureanimationframe.duration)
             {
-                return this.interpolate;
+                return false;
             }
             else
             {
                 textureanimationframe.counter = 0;
-                ++this.currentFrameIndex;
+                ++this.activeFrame;
 
-                if (this.currentFrameIndex >= this.frames.length)
+                if (this.activeFrame >= this.frames.length)
                 {
-                    this.currentFrameIndex = 0;
+                    this.activeFrame = 0;
                 }
 
                 return true;
@@ -111,26 +100,21 @@ public class TextureAnimation
         }
     }
 
-    public TextureAnimationFrame getCurrentFrame()
-    {
-        return this.getFrame(this.currentFrameIndex);
-    }
-
-    public TextureAnimationFrame getFrame(int index)
+    public int getActiveFrameIndex()
     {
         if (this.frames.length <= 0)
         {
-            return null;
+            return 0;
         }
         else
         {
-            if (index < 0 || index >= this.frames.length)
+            if (this.activeFrame >= this.frames.length)
             {
-                index = 0;
+                this.activeFrame = 0;
             }
 
-            TextureAnimationFrame textureanimationframe = this.frames[index];
-            return textureanimationframe;
+            TextureAnimationFrame textureanimationframe = this.frames[this.activeFrame];
+            return textureanimationframe.index;
         }
     }
 
@@ -139,99 +123,49 @@ public class TextureAnimation
         return this.frames.length;
     }
 
-    public void updateTexture()
+    public boolean updateTexture()
     {
-        if (this.valid)
+        if (this.dstTextId < 0)
         {
-            if (this.dstTextId < 0)
+            ITextureObject itextureobject = TextureUtils.getTexture(this.dstTexLoc);
+
+            if (itextureobject == null)
             {
-                ITextureObject itextureobject = TextureUtils.getTexture(this.dstTexLoc);
-
-                if (itextureobject == null)
-                {
-                    this.valid = false;
-                    return;
-                }
-
-                this.dstTextId = itextureobject.getGlTextureId();
+                return false;
             }
 
-            if (this.imageData == null)
-            {
-                this.imageData = GLAllocation.createDirectByteBuffer(this.srcData.length);
-                this.imageData.put(this.srcData);
-                this.imageData.flip();
-                this.srcData = null;
-            }
-
-            this.active = SmartAnimations.isActive() ? SmartAnimations.isTextureRendered(this.dstTextId) : true;
-
-            if (this.nextFrame())
-            {
-                if (this.active)
-                {
-                    int j = this.frameWidth * this.frameHeight * 4;
-                    TextureAnimationFrame textureanimationframe = this.getCurrentFrame();
-
-                    if (textureanimationframe != null)
-                    {
-                        int i = j * textureanimationframe.index;
-
-                        if (i + j <= this.imageData.limit())
-                        {
-                            if (this.interpolate && textureanimationframe.counter > 0)
-                            {
-                                if (this.interpolateSkip <= 1 || textureanimationframe.counter % this.interpolateSkip == 0)
-                                {
-                                    TextureAnimationFrame textureanimationframe1 = this.getFrame(this.currentFrameIndex + 1);
-                                    double d0 = 1.0D * (double)textureanimationframe.counter / (double)textureanimationframe.duration;
-                                    this.updateTextureInerpolate(textureanimationframe, textureanimationframe1, d0);
-                                }
-                            }
-                            else
-                            {
-                                this.imageData.position(i);
-                                GlStateManager.bindTexture(this.dstTextId);
-                                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, this.dstX, this.dstY, this.frameWidth, this.frameHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)this.imageData);
-                            }
-                        }
-                    }
-                }
-            }
+            this.dstTextId = itextureobject.getGlTextureId();
         }
-    }
 
-    private void updateTextureInerpolate(TextureAnimationFrame frame1, TextureAnimationFrame frame2, double dd) {
-        int i = this.frameWidth * this.frameHeight * 4;
-        int j = i * frame1.index;
-
-        if (j + i <= this.imageData.limit())
+        if (this.imageData == null)
         {
-            int k = i * frame2.index;
+            this.imageData = GLAllocation.createDirectByteBuffer(this.srcData.length);
+            this.imageData.put(this.srcData);
+            this.srcData = null;
+        }
 
-            if (k + i <= this.imageData.limit())
+        if (!this.nextFrame())
+        {
+            return false;
+        }
+        else
+        {
+            int k = this.frameWidth * this.frameHeight * 4;
+            int i = this.getActiveFrameIndex();
+            int j = k * i;
+
+            if (j + k > this.imageData.capacity())
             {
-                this.interpolateData.clear();
-
-                for (int l = 0; l < i; ++l)
-                {
-                    int i1 = this.imageData.get(j + l) & 255;
-                    int j1 = this.imageData.get(k + l) & 255;
-                    int k1 = this.mix(i1, j1, dd);
-                    byte b0 = (byte)k1;
-                    this.interpolateData.put(b0);
-                }
-
-                this.interpolateData.flip();
+                return false;
+            }
+            else
+            {
+                this.imageData.position(j);
                 GlStateManager.bindTexture(this.dstTextId);
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, this.dstX, this.dstY, this.frameWidth, this.frameHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)this.interpolateData);
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, this.dstX, this.dstY, this.frameWidth, this.frameHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)this.imageData);
+                return true;
             }
         }
-    }
-
-    private int mix(int col1, int col2, double k)
-    {
-        return (int)((double)col1 * (1.0D - k) + (double)col2 * k);
     }
 
     public String getSrcTex()
@@ -247,10 +181,5 @@ public class TextureAnimation
     public ResourceLocation getDstTexLoc()
     {
         return this.dstTexLoc;
-    }
-
-    public boolean isActive()
-    {
-        return this.active;
     }
 }

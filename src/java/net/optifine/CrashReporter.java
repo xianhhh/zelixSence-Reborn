@@ -5,35 +5,14 @@ import java.util.Map;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.src.Config;
-import net.optifine.http.FileUploadThread;
-import net.optifine.http.IFileUploadListener;
-import net.optifine.shaders.Shaders;
+import net.shadersmod.client.Shaders;
 
 public class CrashReporter
 {
-    public static void onCrashReport(CrashReport crashReport, CrashReportCategory category)
+    public static void onCrashReport(CrashReport p_onCrashReport_0_, CrashReportCategory p_onCrashReport_1_)
     {
         try
         {
-            Throwable throwable = crashReport.getCrashCause();
-
-            if (throwable == null)
-            {
-                return;
-            }
-
-            if (throwable.getClass().getName().contains(".fml.client.SplashProgress"))
-            {
-                return;
-            }
-
-            if (throwable.getClass() == Throwable.class)
-            {
-                return;
-            }
-
-            extendCrashReport(category);
             GameSettings gamesettings = Config.getGameSettings();
 
             if (gamesettings == null)
@@ -46,18 +25,36 @@ public class CrashReporter
                 return;
             }
 
+            Throwable throwable = p_onCrashReport_0_.getCrashCause();
+
+            if (throwable == null)
+            {
+                return;
+            }
+
+            if (throwable.getClass() == Throwable.class)
+            {
+                return;
+            }
+
+            if (throwable.getClass().getName().contains(".fml.client.SplashProgress"))
+            {
+                return;
+            }
+
+            extendCrashReport(p_onCrashReport_1_);
             String s = "http://optifine.net/crashReport";
-            String s1 = makeReport(crashReport);
+            String s1 = makeReport(p_onCrashReport_0_);
             byte[] abyte = s1.getBytes("ASCII");
             IFileUploadListener ifileuploadlistener = new IFileUploadListener()
             {
-                public void fileUploadFinished(String url, byte[] content, Throwable exception)
+                public void fileUploadFinished(String p_fileUploadFinished_1_, byte[] p_fileUploadFinished_2_, Throwable p_fileUploadFinished_3_)
                 {
                 }
             };
             Map map = new HashMap();
             map.put("OF-Version", Config.getVersion());
-            map.put("OF-Summary", makeSummary(crashReport));
+            map.put("OF-Summary", makeSummary(p_onCrashReport_0_));
             FileUploadThread fileuploadthread = new FileUploadThread(s, map, abyte, ifileuploadlistener);
             fileuploadthread.setPriority(10);
             fileuploadthread.start();
@@ -69,20 +66,20 @@ public class CrashReporter
         }
     }
 
-    private static String makeReport(CrashReport crashReport)
+    private static String makeReport(CrashReport p_makeReport_0_)
     {
         StringBuffer stringbuffer = new StringBuffer();
         stringbuffer.append("OptiFineVersion: " + Config.getVersion() + "\n");
-        stringbuffer.append("Summary: " + makeSummary(crashReport) + "\n");
+        stringbuffer.append("Summary: " + makeSummary(p_makeReport_0_) + "\n");
         stringbuffer.append("\n");
-        stringbuffer.append(crashReport.getCompleteReport());
+        stringbuffer.append(p_makeReport_0_.getCompleteReport());
         stringbuffer.append("\n");
         return stringbuffer.toString();
     }
 
-    private static String makeSummary(CrashReport crashReport)
+    private static String makeSummary(CrashReport p_makeSummary_0_)
     {
-        Throwable throwable = crashReport.getCrashCause();
+        Throwable throwable = p_makeSummary_0_.getCrashCause();
 
         if (throwable == null)
         {
@@ -98,29 +95,28 @@ public class CrashReporter
                 s = astacktraceelement[0].toString().trim();
             }
 
-            String s1 = throwable.getClass().getName() + ": " + throwable.getMessage() + " (" + crashReport.getDescription() + ")" + " [" + s + "]";
+            String s1 = throwable.getClass().getName() + ": " + throwable.getMessage() + " (" + p_makeSummary_0_.getDescription() + ")" + " [" + s + "]";
             return s1;
         }
     }
 
-    public static void extendCrashReport(CrashReportCategory cat)
+    public static void extendCrashReport(CrashReportCategory p_extendCrashReport_0_)
     {
-        cat.addCrashSection("OptiFine Version", Config.getVersion());
-        cat.addCrashSection("OptiFine Build", Config.getBuild());
+        p_extendCrashReport_0_.addCrashSection("OptiFine Version", Config.getVersion());
 
         if (Config.getGameSettings() != null)
         {
-            cat.addCrashSection("Render Distance Chunks", "" + Config.getChunkViewDistance());
-            cat.addCrashSection("Mipmaps", "" + Config.getMipmapLevels());
-            cat.addCrashSection("Anisotropic Filtering", "" + Config.getAnisotropicFilterLevel());
-            cat.addCrashSection("Antialiasing", "" + Config.getAntialiasingLevel());
-            cat.addCrashSection("Multitexture", "" + Config.isMultiTexture());
+            p_extendCrashReport_0_.addCrashSection("Render Distance Chunks", "" + Config.getChunkViewDistance());
+            p_extendCrashReport_0_.addCrashSection("Mipmaps", "" + Config.getMipmapLevels());
+            p_extendCrashReport_0_.addCrashSection("Anisotropic Filtering", "" + Config.getAnisotropicFilterLevel());
+            p_extendCrashReport_0_.addCrashSection("Antialiasing", "" + Config.getAntialiasingLevel());
+            p_extendCrashReport_0_.addCrashSection("Multitexture", "" + Config.isMultiTexture());
         }
 
-        cat.addCrashSection("Shaders", "" + Shaders.getShaderPackName());
-        cat.addCrashSection("OpenGlVersion", "" + Config.openGlVersion);
-        cat.addCrashSection("OpenGlRenderer", "" + Config.openGlRenderer);
-        cat.addCrashSection("OpenGlVendor", "" + Config.openGlVendor);
-        cat.addCrashSection("CpuCount", "" + Config.getAvailableProcessors());
+        p_extendCrashReport_0_.addCrashSection("Shaders", "" + Shaders.getShaderPackName());
+        p_extendCrashReport_0_.addCrashSection("OpenGlVersion", "" + Config.openGlVersion);
+        p_extendCrashReport_0_.addCrashSection("OpenGlRenderer", "" + Config.openGlRenderer);
+        p_extendCrashReport_0_.addCrashSection("OpenGlVendor", "" + Config.openGlVendor);
+        p_extendCrashReport_0_.addCrashSection("CpuCount", "" + Config.getAvailableProcessors());
     }
 }

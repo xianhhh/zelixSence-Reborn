@@ -9,8 +9,8 @@ import net.minecraft.client.network.LanServerDetector;
 public class ServerSelectionList extends GuiListExtended
 {
     private final GuiMultiplayer owner;
-    private final List<ServerListEntryNormal> serverListInternet = Lists.<ServerListEntryNormal>newArrayList();
-    private final List<ServerListEntryLanDetected> serverListLan = Lists.<ServerListEntryLanDetected>newArrayList();
+    private final List<ServerListEntryNormal> field_148198_l = Lists.<ServerListEntryNormal>newArrayList();
+    private final List<ServerListEntryLanDetected> field_148199_m = Lists.<ServerListEntryLanDetected>newArrayList();
     private final GuiListExtended.IGuiListEntry lanScanEntry = new ServerListEntryLanScan();
     private int selectedSlotIndex = -1;
 
@@ -20,15 +20,18 @@ public class ServerSelectionList extends GuiListExtended
         this.owner = ownerIn;
     }
 
+    /**
+     * Gets the IGuiListEntry object for the given index
+     */
     public GuiListExtended.IGuiListEntry getListEntry(int index)
     {
-        if (index < this.serverListInternet.size())
+        if (index < this.field_148198_l.size())
         {
-            return (GuiListExtended.IGuiListEntry)this.serverListInternet.get(index);
+            return (GuiListExtended.IGuiListEntry)this.field_148198_l.get(index);
         }
         else
         {
-            index = index - this.serverListInternet.size();
+            index = index - this.field_148198_l.size();
 
             if (index == 0)
             {
@@ -37,14 +40,14 @@ public class ServerSelectionList extends GuiListExtended
             else
             {
                 --index;
-                return (GuiListExtended.IGuiListEntry)this.serverListLan.get(index);
+                return (GuiListExtended.IGuiListEntry)this.field_148199_m.get(index);
             }
         }
     }
 
     protected int getSize()
     {
-        return this.serverListInternet.size() + 1 + this.serverListLan.size();
+        return this.field_148198_l.size() + 1 + this.field_148199_m.size();
     }
 
     public void setSelectedSlotIndex(int selectedSlotIndexIn)
@@ -52,6 +55,9 @@ public class ServerSelectionList extends GuiListExtended
         this.selectedSlotIndex = selectedSlotIndexIn;
     }
 
+    /**
+     * Returns true if the element passed in is currently selected
+     */
     protected boolean isSelected(int slotIndex)
     {
         return slotIndex == this.selectedSlotIndex;
@@ -64,21 +70,21 @@ public class ServerSelectionList extends GuiListExtended
 
     public void func_148195_a(ServerList p_148195_1_)
     {
-        this.serverListInternet.clear();
+        this.field_148198_l.clear();
 
         for (int i = 0; i < p_148195_1_.countServers(); ++i)
         {
-            this.serverListInternet.add(new ServerListEntryNormal(this.owner, p_148195_1_.getServerData(i)));
+            this.field_148198_l.add(new ServerListEntryNormal(this.owner, p_148195_1_.getServerData(i)));
         }
     }
 
     public void func_148194_a(List<LanServerDetector.LanServer> p_148194_1_)
     {
-        this.serverListLan.clear();
+        this.field_148199_m.clear();
 
         for (LanServerDetector.LanServer lanserverdetector$lanserver : p_148194_1_)
         {
-            this.serverListLan.add(new ServerListEntryLanDetected(this.owner, lanserverdetector$lanserver));
+            this.field_148199_m.add(new ServerListEntryLanDetected(this.owner, lanserverdetector$lanserver));
         }
     }
 
@@ -87,6 +93,9 @@ public class ServerSelectionList extends GuiListExtended
         return super.getScrollBarX() + 30;
     }
 
+    /**
+     * Gets the width of the list
+     */
     public int getListWidth()
     {
         return super.getListWidth() + 85;

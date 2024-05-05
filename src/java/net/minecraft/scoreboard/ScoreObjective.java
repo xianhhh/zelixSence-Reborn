@@ -4,6 +4,8 @@ public class ScoreObjective
 {
     private final Scoreboard theScoreboard;
     private final String name;
+
+    /** The ScoreObjectiveCriteria for this objetive */
     private final IScoreObjectiveCriteria objectiveCriteria;
     private IScoreObjectiveCriteria.EnumRenderType renderType;
     private String displayName;
@@ -40,7 +42,7 @@ public class ScoreObjective
     public void setDisplayName(String nameIn)
     {
         this.displayName = nameIn;
-        this.theScoreboard.onObjectiveDisplayNameChanged(this);
+        this.theScoreboard.func_96532_b(this);
     }
 
     public IScoreObjectiveCriteria.EnumRenderType getRenderType()
@@ -51,6 +53,6 @@ public class ScoreObjective
     public void setRenderType(IScoreObjectiveCriteria.EnumRenderType type)
     {
         this.renderType = type;
-        this.theScoreboard.onObjectiveDisplayNameChanged(this);
+        this.theScoreboard.func_96532_b(this);
     }
 }

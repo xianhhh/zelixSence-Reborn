@@ -4,7 +4,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.src.Config;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 
@@ -14,33 +13,33 @@ public class NaturalProperties
     public boolean flip = false;
     private Map[] quadMaps = new Map[8];
 
-    public NaturalProperties(String type)
+    public NaturalProperties(String p_i68_1_)
     {
-        if (type.equals("4"))
+        if (p_i68_1_.equals("4"))
         {
             this.rotation = 4;
         }
-        else if (type.equals("2"))
+        else if (p_i68_1_.equals("2"))
         {
             this.rotation = 2;
         }
-        else if (type.equals("F"))
+        else if (p_i68_1_.equals("F"))
         {
             this.flip = true;
         }
-        else if (type.equals("4F"))
+        else if (p_i68_1_.equals("4F"))
         {
             this.rotation = 4;
             this.flip = true;
         }
-        else if (type.equals("2F"))
+        else if (p_i68_1_.equals("2F"))
         {
             this.rotation = 2;
             this.flip = true;
         }
         else
         {
-            Config.warn("NaturalTextures: Unknown type: " + type);
+            Config.warn("NaturalTextures: Unknown type: " + p_i68_1_);
         }
     }
 
@@ -49,13 +48,13 @@ public class NaturalProperties
         return this.rotation != 2 && this.rotation != 4 ? this.flip : true;
     }
 
-    public synchronized BakedQuad getQuad(BakedQuad quadIn, int rotate, boolean flipU)
+    public synchronized BakedQuad getQuad(BakedQuad p_getQuad_1_, int p_getQuad_2_, boolean p_getQuad_3_)
     {
-        int i = rotate;
+        int i = p_getQuad_2_;
 
-        if (flipU)
+        if (p_getQuad_3_)
         {
-            i = rotate | 4;
+            i = p_getQuad_2_ | 4;
         }
 
         if (i > 0 && i < this.quadMaps.length)
@@ -68,45 +67,47 @@ public class NaturalProperties
                 this.quadMaps[i] = map;
             }
 
-            BakedQuad bakedquad = (BakedQuad)map.get(quadIn);
+            BakedQuad bakedquad = (BakedQuad)map.get(p_getQuad_1_);
 
             if (bakedquad == null)
             {
-                bakedquad = this.makeQuad(quadIn, rotate, flipU);
-                map.put(quadIn, bakedquad);
+                bakedquad = this.makeQuad(p_getQuad_1_, p_getQuad_2_, p_getQuad_3_);
+                map.put(p_getQuad_1_, bakedquad);
             }
 
             return bakedquad;
         }
         else
         {
-            return quadIn;
+            return p_getQuad_1_;
         }
     }
 
-    private BakedQuad makeQuad(BakedQuad quad, int rotate, boolean flipU)
+    private BakedQuad makeQuad(BakedQuad p_makeQuad_1_, int p_makeQuad_2_, boolean p_makeQuad_3_)
     {
-        int[] aint = quad.getVertexData();
-        int i = quad.getTintIndex();
-        EnumFacing enumfacing = quad.getFace();
-        TextureAtlasSprite textureatlassprite = quad.getSprite();
+        int[] aint = p_makeQuad_1_.getVertexData();
+        int i = p_makeQuad_1_.getTintIndex();
+        EnumFacing enumfacing = p_makeQuad_1_.getFace();
+        TextureAtlasSprite textureatlassprite = p_makeQuad_1_.getSprite();
 
-        if (!this.isFullSprite(quad))
+        if (!this.isFullSprite(p_makeQuad_1_))
         {
-            rotate = 0;
+            return p_makeQuad_1_;
         }
-
-        aint = this.transformVertexData(aint, rotate, flipU);
-        BakedQuad bakedquad = new BakedQuad(aint, i, enumfacing, textureatlassprite);
-        return bakedquad;
+        else
+        {
+            aint = this.transformVertexData(aint, p_makeQuad_2_, p_makeQuad_3_);
+            BakedQuad bakedquad = new BakedQuad(aint, i, enumfacing, textureatlassprite);
+            return bakedquad;
+        }
     }
 
-    private int[] transformVertexData(int[] vertexData, int rotate, boolean flipU)
+    private int[] transformVertexData(int[] p_transformVertexData_1_, int p_transformVertexData_2_, boolean p_transformVertexData_3_)
     {
-        int[] aint = (int[])vertexData.clone();
-        int i = 4 - rotate;
+        int[] aint = (int[])p_transformVertexData_1_.clone();
+        int i = 4 - p_transformVertexData_2_;
 
-        if (flipU)
+        if (p_transformVertexData_3_)
         {
             i += 3;
         }
@@ -118,10 +119,10 @@ public class NaturalProperties
         {
             int l = k * j;
             int i1 = i * j;
-            aint[i1 + 4] = vertexData[l + 4];
-            aint[i1 + 4 + 1] = vertexData[l + 4 + 1];
+            aint[i1 + 4] = p_transformVertexData_1_[l + 4];
+            aint[i1 + 4 + 1] = p_transformVertexData_1_[l + 4 + 1];
 
-            if (flipU)
+            if (p_transformVertexData_3_)
             {
                 --i;
 
@@ -144,9 +145,9 @@ public class NaturalProperties
         return aint;
     }
 
-    private boolean isFullSprite(BakedQuad quad)
+    private boolean isFullSprite(BakedQuad p_isFullSprite_1_)
     {
-        TextureAtlasSprite textureatlassprite = quad.getSprite();
+        TextureAtlasSprite textureatlassprite = p_isFullSprite_1_.getSprite();
         float f = textureatlassprite.getMinU();
         float f1 = textureatlassprite.getMaxU();
         float f2 = f1 - f;
@@ -155,7 +156,7 @@ public class NaturalProperties
         float f5 = textureatlassprite.getMaxV();
         float f6 = f5 - f4;
         float f7 = f6 / 256.0F;
-        int[] aint = quad.getVertexData();
+        int[] aint = p_isFullSprite_1_.getVertexData();
         int i = aint.length / 4;
 
         for (int j = 0; j < 4; ++j)
@@ -178,9 +179,9 @@ public class NaturalProperties
         return true;
     }
 
-    private boolean equalsDelta(float x1, float x2, float deltaMax)
+    private boolean equalsDelta(float p_equalsDelta_1_, float p_equalsDelta_2_, float p_equalsDelta_3_)
     {
-        float f = MathHelper.abs(x1 - x2);
-        return f < deltaMax;
+        float f = MathHelper.abs(p_equalsDelta_1_ - p_equalsDelta_2_);
+        return f < p_equalsDelta_3_;
     }
 }

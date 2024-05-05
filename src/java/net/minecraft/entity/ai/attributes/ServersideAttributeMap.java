@@ -28,6 +28,9 @@ public class ServersideAttributeMap extends BaseAttributeMap
         return (ModifiableAttributeInstance)iattributeinstance;
     }
 
+    /**
+     * Registers an attribute with this AttributeMap, returns a modifiable AttributeInstance associated with this map
+     */
     public IAttributeInstance registerAttribute(IAttribute attribute)
     {
         IAttributeInstance iattributeinstance = super.registerAttribute(attribute);
@@ -40,19 +43,19 @@ public class ServersideAttributeMap extends BaseAttributeMap
         return iattributeinstance;
     }
 
-    protected IAttributeInstance func_180376_c(IAttribute attribute)
+    protected IAttributeInstance func_180376_c(IAttribute p_180376_1_)
     {
-        return new ModifiableAttributeInstance(this, attribute);
+        return new ModifiableAttributeInstance(this, p_180376_1_);
     }
 
-    public void func_180794_a(IAttributeInstance instance)
+    public void func_180794_a(IAttributeInstance p_180794_1_)
     {
-        if (instance.getAttribute().getShouldWatch())
+        if (p_180794_1_.getAttribute().getShouldWatch())
         {
-            this.attributeInstanceSet.add(instance);
+            this.attributeInstanceSet.add(p_180794_1_);
         }
 
-        for (IAttribute iattribute : this.field_180377_c.get(instance.getAttribute()))
+        for (IAttribute iattribute : this.field_180377_c.get(p_180794_1_.getAttribute()))
         {
             ModifiableAttributeInstance modifiableattributeinstance = this.getAttributeInstance(iattribute);
 

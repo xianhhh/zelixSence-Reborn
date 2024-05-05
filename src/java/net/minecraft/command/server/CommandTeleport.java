@@ -16,21 +16,33 @@ import net.minecraft.util.MathHelper;
 
 public class CommandTeleport extends CommandBase
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "tp";
     }
 
+    /**
+     * Return the required permission level for this command.
+     */
     public int getRequiredPermissionLevel()
     {
         return 2;
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.tp.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 1)
@@ -48,7 +60,7 @@ public class CommandTeleport extends CommandBase
             }
             else
             {
-                entity = getEntity(sender, args[0]);
+                entity = func_175768_b(sender, args[0]);
                 i = 1;
             }
 
@@ -140,7 +152,7 @@ public class CommandTeleport extends CommandBase
             }
             else
             {
-                Entity entity1 = getEntity(sender, args[args.length - 1]);
+                Entity entity1 = func_175768_b(sender, args[args.length - 1]);
 
                 if (entity1.worldObj != entity.worldObj)
                 {
@@ -170,6 +182,9 @@ public class CommandTeleport extends CommandBase
         return args.length != 1 && args.length != 2 ? null : getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
     }
 
+    /**
+     * Return whether the specified command parameter index is a username parameter.
+     */
     public boolean isUsernameIndex(String[] args, int index)
     {
         return index == 0;

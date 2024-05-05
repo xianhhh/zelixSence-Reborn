@@ -48,6 +48,9 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         }
     }
 
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
     public void update()
     {
         this.bookSpreadPrev = this.bookSpread;
@@ -58,7 +61,7 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         {
             double d0 = entityplayer.posX - (double)((float)this.pos.getX() + 0.5F);
             double d1 = entityplayer.posZ - (double)((float)this.pos.getZ() + 0.5F);
-            this.field_145924_q = (float)MathHelper.atan2(d1, d0);
+            this.field_145924_q = (float)MathHelper.func_181159_b(d1, d0);
             this.bookSpread += 0.1F;
 
             if (this.bookSpread < 0.5F || rand.nextInt(40) == 0)
@@ -125,11 +128,17 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         this.pageFlip += this.field_145929_l;
     }
 
+    /**
+     * Gets the name of this command sender (usually username, but possibly "Rcon")
+     */
     public String getName()
     {
         return this.hasCustomName() ? this.customName : "container.enchant";
     }
 
+    /**
+     * Returns true if this thing is named
+     */
     public boolean hasCustomName()
     {
         return this.customName != null && this.customName.length() > 0;
@@ -140,6 +149,9 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         this.customName = customNameIn;
     }
 
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
     public IChatComponent getDisplayName()
     {
         return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));

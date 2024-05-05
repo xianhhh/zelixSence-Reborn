@@ -19,11 +19,14 @@ public class EntityAIMoveIndoors extends EntityAIBase
         this.setMutexBits(1);
     }
 
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
     public boolean shouldExecute()
     {
         BlockPos blockpos = new BlockPos(this.entityObj);
 
-        if ((!this.entityObj.worldObj.isDaytime() || this.entityObj.worldObj.isRaining() && !this.entityObj.worldObj.getBiomeGenForCoords(blockpos).canRain()) && !this.entityObj.worldObj.provider.getHasNoSky())
+        if ((!this.entityObj.worldObj.isDaytime() || this.entityObj.worldObj.isRaining() && !this.entityObj.worldObj.getBiomeGenForCoords(blockpos).canSpawnLightningBolt()) && !this.entityObj.worldObj.provider.getHasNoSky())
         {
             if (this.entityObj.getRNG().nextInt(50) != 0)
             {
@@ -54,11 +57,17 @@ public class EntityAIMoveIndoors extends EntityAIBase
         }
     }
 
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
     public boolean continueExecuting()
     {
         return !this.entityObj.getNavigator().noPath();
     }
 
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
     public void startExecuting()
     {
         this.insidePosX = -1;
@@ -82,6 +91,9 @@ public class EntityAIMoveIndoors extends EntityAIBase
         }
     }
 
+    /**
+     * Resets the task
+     */
     public void resetTask()
     {
         this.insidePosX = this.doorInfo.getInsideBlockPos().getX();

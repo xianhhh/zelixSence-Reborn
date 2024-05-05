@@ -108,6 +108,10 @@ public class EntityFishHook extends Entity
     {
     }
 
+    /**
+     * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge
+     * length * 64 * renderDistanceWeight Args: distance
+     */
     public boolean isInRangeToRenderDist(double distance)
     {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
@@ -137,8 +141,8 @@ public class EntityFishHook extends Entity
         this.motionY = p_146035_3_;
         this.motionZ = p_146035_5_;
         float f1 = MathHelper.sqrt_double(p_146035_1_ * p_146035_1_ + p_146035_5_ * p_146035_5_);
-        this.prevRotationYaw = this.rotationYaw = (float)(MathHelper.atan2(p_146035_1_, p_146035_5_) * 180.0D / Math.PI);
-        this.prevRotationPitch = this.rotationPitch = (float)(MathHelper.atan2(p_146035_3_, (double)f1) * 180.0D / Math.PI);
+        this.prevRotationYaw = this.rotationYaw = (float)(MathHelper.func_181159_b(p_146035_1_, p_146035_5_) * 180.0D / Math.PI);
+        this.prevRotationPitch = this.rotationPitch = (float)(MathHelper.func_181159_b(p_146035_3_, (double)f1) * 180.0D / Math.PI);
         this.ticksInGround = 0;
     }
 
@@ -155,6 +159,9 @@ public class EntityFishHook extends Entity
         this.motionZ = this.clientMotionZ;
     }
 
+    /**
+     * Sets the velocity to the args. Args: x, y, z
+     */
     public void setVelocity(double x, double y, double z)
     {
         this.clientMotionX = this.motionX = x;
@@ -162,6 +169,9 @@ public class EntityFishHook extends Entity
         this.clientMotionZ = this.motionZ = z;
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         super.onUpdate();
@@ -299,9 +309,9 @@ public class EntityFishHook extends Entity
             {
                 this.moveEntity(this.motionX, this.motionY, this.motionZ);
                 float f5 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
+                this.rotationYaw = (float)(MathHelper.func_181159_b(this.motionX, this.motionZ) * 180.0D / Math.PI);
 
-                for (this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f5) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
+                for (this.rotationPitch = (float)(MathHelper.func_181159_b(this.motionY, (double)f5) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
                 {
                     ;
                 }
@@ -353,7 +363,7 @@ public class EntityFishHook extends Entity
                     int l = 1;
                     BlockPos blockpos = (new BlockPos(this)).up();
 
-                    if (this.rand.nextFloat() < 0.25F && this.worldObj.isRainingAt(blockpos))
+                    if (this.rand.nextFloat() < 0.25F && this.worldObj.canLightningStrike(blockpos))
                     {
                         l = 2;
                     }
@@ -479,6 +489,9 @@ public class EntityFishHook extends Entity
         }
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         tagCompound.setShort("xTile", (short)this.xTile);
@@ -490,6 +503,9 @@ public class EntityFishHook extends Entity
         tagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         this.xTile = tagCompund.getShort("xTile");
@@ -591,6 +607,9 @@ public class EntityFishHook extends Entity
         }
     }
 
+    /**
+     * Will get destroyed next tick.
+     */
     public void setDead()
     {
         super.setDead();

@@ -18,12 +18,15 @@ public class RenderPigZombie extends RenderBiped<EntityPigZombie>
         {
             protected void initArmor()
             {
-                this.modelLeggings = new ModelZombie(0.5F, true);
-                this.modelArmor = new ModelZombie(1.0F, true);
+                this.field_177189_c = new ModelZombie(0.5F, true);
+                this.field_177186_d = new ModelZombie(1.0F, true);
             }
         });
     }
 
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
     protected ResourceLocation getEntityTexture(EntityPigZombie entity)
     {
         return ZOMBIE_PIGMAN_TEXTURE;

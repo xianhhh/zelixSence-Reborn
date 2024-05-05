@@ -1,6 +1,5 @@
 package net.optifine;
 
-import net.minecraft.src.Config;
 import net.minecraft.util.Vec3;
 
 public class CustomColorFader
@@ -8,11 +7,11 @@ public class CustomColorFader
     private Vec3 color = null;
     private long timeUpdate = System.currentTimeMillis();
 
-    public Vec3 getColor(double x, double y, double z)
+    public Vec3 getColor(double p_getColor_1_, double p_getColor_3_, double p_getColor_5_)
     {
         if (this.color == null)
         {
-            this.color = new Vec3(x, y, z);
+            this.color = new Vec3(p_getColor_1_, p_getColor_3_, p_getColor_5_);
             return this.color;
         }
         else
@@ -28,7 +27,7 @@ public class CustomColorFader
             {
                 this.timeUpdate = i;
 
-                if (Math.abs(x - this.color.xCoord) < 0.004D && Math.abs(y - this.color.yCoord) < 0.004D && Math.abs(z - this.color.zCoord) < 0.004D)
+                if (Math.abs(p_getColor_1_ - this.color.xCoord) < 0.004D && Math.abs(p_getColor_3_ - this.color.yCoord) < 0.004D && Math.abs(p_getColor_5_ - this.color.zCoord) < 0.004D)
                 {
                     return this.color;
                 }
@@ -36,9 +35,9 @@ public class CustomColorFader
                 {
                     double d0 = (double)j * 0.001D;
                     d0 = Config.limit(d0, 0.0D, 1.0D);
-                    double d1 = x - this.color.xCoord;
-                    double d2 = y - this.color.yCoord;
-                    double d3 = z - this.color.zCoord;
+                    double d1 = p_getColor_1_ - this.color.xCoord;
+                    double d2 = p_getColor_3_ - this.color.yCoord;
+                    double d3 = p_getColor_5_ - this.color.zCoord;
                     double d4 = this.color.xCoord + d1 * d0;
                     double d5 = this.color.yCoord + d2 * d0;
                     double d6 = this.color.zCoord + d3 * d0;

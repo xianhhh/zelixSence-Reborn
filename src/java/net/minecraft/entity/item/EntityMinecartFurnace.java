@@ -25,9 +25,9 @@ public class EntityMinecartFurnace extends EntityMinecart
         super(worldIn);
     }
 
-    public EntityMinecartFurnace(World worldIn, double x, double y, double z)
+    public EntityMinecartFurnace(World worldIn, double p_i1719_2_, double p_i1719_4_, double p_i1719_6_)
     {
-        super(worldIn, x, y, z);
+        super(worldIn, p_i1719_2_, p_i1719_4_, p_i1719_6_);
     }
 
     public EntityMinecart.EnumMinecartType getMinecartType()
@@ -41,6 +41,9 @@ public class EntityMinecartFurnace extends EntityMinecart
         this.dataWatcher.addObject(16, new Byte((byte)0));
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         super.onUpdate();
@@ -63,16 +66,19 @@ public class EntityMinecartFurnace extends EntityMinecart
         }
     }
 
+    /**
+     * Get's the maximum speed for a minecart
+     */
     protected double getMaximumSpeed()
     {
         return 0.2D;
     }
 
-    public void killMinecart(DamageSource source)
+    public void killMinecart(DamageSource p_94095_1_)
     {
-        super.killMinecart(source);
+        super.killMinecart(p_94095_1_);
 
-        if (!source.isExplosion() && this.worldObj.getGameRules().getBoolean("doEntityDrops"))
+        if (!p_94095_1_.isExplosion() && this.worldObj.getGameRules().getBoolean("doEntityDrops"))
         {
             this.entityDropItem(new ItemStack(Blocks.furnace, 1), 0.0F);
         }
@@ -129,6 +135,9 @@ public class EntityMinecartFurnace extends EntityMinecart
         super.applyDrag();
     }
 
+    /**
+     * First layer of player interaction
+     */
     public boolean interactFirst(EntityPlayer playerIn)
     {
         ItemStack itemstack = playerIn.inventory.getCurrentItem();
@@ -148,6 +157,9 @@ public class EntityMinecartFurnace extends EntityMinecart
         return true;
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
@@ -156,6 +168,9 @@ public class EntityMinecartFurnace extends EntityMinecart
         tagCompound.setShort("Fuel", (short)this.fuel);
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         super.readEntityFromNBT(tagCompund);

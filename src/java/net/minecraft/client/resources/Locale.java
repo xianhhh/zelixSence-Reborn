@@ -15,16 +15,21 @@ import org.apache.commons.io.IOUtils;
 
 public class Locale
 {
+    /** Splits on "=" */
     private static final Splitter splitter = Splitter.on('=').limit(2);
     private static final Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
     Map<String, String> properties = Maps.<String, String>newHashMap();
     private boolean unicode;
 
-    public synchronized void loadLocaleDataFiles(IResourceManager resourceManager, List<String> languageList)
+    /**
+     * par2 is a list of languages. For each language $L and domain $D, attempts to load the resource $D:lang/$L.lang
+     */
+
+    public synchronized void loadLocaleDataFiles(IResourceManager resourceManager, List<String> p_135022_2_)
     {
         this.properties.clear();
 
-        for (String s : languageList)
+        for (String s : p_135022_2_)
         {
             String s1 = String.format("lang/%s.lang", new Object[] {s});
 
@@ -73,9 +78,12 @@ public class Locale
         this.unicode = (double)f > 0.1D;
     }
 
-    private void loadLocaleData(List<IResource> resourcesList) throws IOException
+    /**
+     * par1 is a list of Resources
+     */
+    private void loadLocaleData(List<IResource> p_135028_1_) throws IOException
     {
-        for (IResource iresource : resourcesList)
+        for (IResource iresource : p_135028_1_)
         {
             InputStream inputstream = iresource.getInputStream();
 
@@ -90,9 +98,9 @@ public class Locale
         }
     }
 
-    private void loadLocaleData(InputStream inputStreamIn) throws IOException
+    private void loadLocaleData(InputStream p_135021_1_) throws IOException
     {
-        for (String s : IOUtils.readLines(inputStreamIn, Charsets.UTF_8))
+        for (String s : IOUtils.readLines(p_135021_1_, Charsets.UTF_8))
         {
             if (!s.isEmpty() && s.charAt(0) != 35)
             {
@@ -108,12 +116,18 @@ public class Locale
         }
     }
 
-    private String translateKeyPrivate(String translateKey)
+    /**
+     * Returns the translation, or the key itself if the key could not be translated.
+     */
+    private String translateKeyPrivate(String p_135026_1_)
     {
-        String s = (String)this.properties.get(translateKey);
-        return s == null ? translateKey : s;
+        String s = (String)this.properties.get(p_135026_1_);
+        return s == null ? p_135026_1_ : s;
     }
 
+    /**
+     * Calls String.format(translateKey(key), params)
+     */
     public String formatMessage(String translateKey, Object[] parameters)
     {
         String s = this.translateKeyPrivate(translateKey);

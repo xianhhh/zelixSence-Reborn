@@ -54,12 +54,12 @@ public class EntityTracker
         this.maxTrackingDistanceThreshold = theWorldIn.getMinecraftServer().getConfigurationManager().getEntityViewDistance();
     }
 
-    public void trackEntity(Entity entityIn)
+    public void trackEntity(Entity p_72786_1_)
     {
-        if (entityIn instanceof EntityPlayerMP)
+        if (p_72786_1_ instanceof EntityPlayerMP)
         {
-            this.trackEntity(entityIn, 512, 2);
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
+            this.trackEntity(p_72786_1_, 512, 2);
+            EntityPlayerMP entityplayermp = (EntityPlayerMP)p_72786_1_;
 
             for (EntityTrackerEntry entitytrackerentry : this.trackedEntities)
             {
@@ -69,105 +69,105 @@ public class EntityTracker
                 }
             }
         }
-        else if (entityIn instanceof EntityFishHook)
+        else if (p_72786_1_ instanceof EntityFishHook)
         {
-            this.addEntityToTracker(entityIn, 64, 5, true);
+            this.addEntityToTracker(p_72786_1_, 64, 5, true);
         }
-        else if (entityIn instanceof EntityArrow)
+        else if (p_72786_1_ instanceof EntityArrow)
         {
-            this.addEntityToTracker(entityIn, 64, 20, false);
+            this.addEntityToTracker(p_72786_1_, 64, 20, false);
         }
-        else if (entityIn instanceof EntitySmallFireball)
+        else if (p_72786_1_ instanceof EntitySmallFireball)
         {
-            this.addEntityToTracker(entityIn, 64, 10, false);
+            this.addEntityToTracker(p_72786_1_, 64, 10, false);
         }
-        else if (entityIn instanceof EntityFireball)
+        else if (p_72786_1_ instanceof EntityFireball)
         {
-            this.addEntityToTracker(entityIn, 64, 10, false);
+            this.addEntityToTracker(p_72786_1_, 64, 10, false);
         }
-        else if (entityIn instanceof EntitySnowball)
+        else if (p_72786_1_ instanceof EntitySnowball)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityEnderPearl)
+        else if (p_72786_1_ instanceof EntityEnderPearl)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityEnderEye)
+        else if (p_72786_1_ instanceof EntityEnderEye)
         {
-            this.addEntityToTracker(entityIn, 64, 4, true);
+            this.addEntityToTracker(p_72786_1_, 64, 4, true);
         }
-        else if (entityIn instanceof EntityEgg)
+        else if (p_72786_1_ instanceof EntityEgg)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityPotion)
+        else if (p_72786_1_ instanceof EntityPotion)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityExpBottle)
+        else if (p_72786_1_ instanceof EntityExpBottle)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityFireworkRocket)
+        else if (p_72786_1_ instanceof EntityFireworkRocket)
         {
-            this.addEntityToTracker(entityIn, 64, 10, true);
+            this.addEntityToTracker(p_72786_1_, 64, 10, true);
         }
-        else if (entityIn instanceof EntityItem)
+        else if (p_72786_1_ instanceof EntityItem)
         {
-            this.addEntityToTracker(entityIn, 64, 20, true);
+            this.addEntityToTracker(p_72786_1_, 64, 20, true);
         }
-        else if (entityIn instanceof EntityMinecart)
+        else if (p_72786_1_ instanceof EntityMinecart)
         {
-            this.addEntityToTracker(entityIn, 80, 3, true);
+            this.addEntityToTracker(p_72786_1_, 80, 3, true);
         }
-        else if (entityIn instanceof EntityBoat)
+        else if (p_72786_1_ instanceof EntityBoat)
         {
-            this.addEntityToTracker(entityIn, 80, 3, true);
+            this.addEntityToTracker(p_72786_1_, 80, 3, true);
         }
-        else if (entityIn instanceof EntitySquid)
+        else if (p_72786_1_ instanceof EntitySquid)
         {
-            this.addEntityToTracker(entityIn, 64, 3, true);
+            this.addEntityToTracker(p_72786_1_, 64, 3, true);
         }
-        else if (entityIn instanceof EntityWither)
+        else if (p_72786_1_ instanceof EntityWither)
         {
-            this.addEntityToTracker(entityIn, 80, 3, false);
+            this.addEntityToTracker(p_72786_1_, 80, 3, false);
         }
-        else if (entityIn instanceof EntityBat)
+        else if (p_72786_1_ instanceof EntityBat)
         {
-            this.addEntityToTracker(entityIn, 80, 3, false);
+            this.addEntityToTracker(p_72786_1_, 80, 3, false);
         }
-        else if (entityIn instanceof EntityDragon)
+        else if (p_72786_1_ instanceof EntityDragon)
         {
-            this.addEntityToTracker(entityIn, 160, 3, true);
+            this.addEntityToTracker(p_72786_1_, 160, 3, true);
         }
-        else if (entityIn instanceof IAnimals)
+        else if (p_72786_1_ instanceof IAnimals)
         {
-            this.addEntityToTracker(entityIn, 80, 3, true);
+            this.addEntityToTracker(p_72786_1_, 80, 3, true);
         }
-        else if (entityIn instanceof EntityTNTPrimed)
+        else if (p_72786_1_ instanceof EntityTNTPrimed)
         {
-            this.addEntityToTracker(entityIn, 160, 10, true);
+            this.addEntityToTracker(p_72786_1_, 160, 10, true);
         }
-        else if (entityIn instanceof EntityFallingBlock)
+        else if (p_72786_1_ instanceof EntityFallingBlock)
         {
-            this.addEntityToTracker(entityIn, 160, 20, true);
+            this.addEntityToTracker(p_72786_1_, 160, 20, true);
         }
-        else if (entityIn instanceof EntityHanging)
+        else if (p_72786_1_ instanceof EntityHanging)
         {
-            this.addEntityToTracker(entityIn, 160, Integer.MAX_VALUE, false);
+            this.addEntityToTracker(p_72786_1_, 160, Integer.MAX_VALUE, false);
         }
-        else if (entityIn instanceof EntityArmorStand)
+        else if (p_72786_1_ instanceof EntityArmorStand)
         {
-            this.addEntityToTracker(entityIn, 160, 3, true);
+            this.addEntityToTracker(p_72786_1_, 160, 3, true);
         }
-        else if (entityIn instanceof EntityXPOrb)
+        else if (p_72786_1_ instanceof EntityXPOrb)
         {
-            this.addEntityToTracker(entityIn, 160, 20, true);
+            this.addEntityToTracker(p_72786_1_, 160, 20, true);
         }
-        else if (entityIn instanceof EntityEnderCrystal)
+        else if (p_72786_1_ instanceof EntityEnderCrystal)
         {
-            this.addEntityToTracker(entityIn, 256, Integer.MAX_VALUE, false);
+            this.addEntityToTracker(p_72786_1_, 256, Integer.MAX_VALUE, false);
         }
     }
 
@@ -176,6 +176,9 @@ public class EntityTracker
         this.addEntityToTracker(entityIn, trackingRange, updateFrequency, false);
     }
 
+    /**
+     * Args : Entity, trackingRange, updateFrequency, sendVelocityUpdates
+     */
     public void addEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates)
     {
         if (trackingRange > this.maxTrackingDistanceThreshold)

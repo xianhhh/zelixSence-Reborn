@@ -2,38 +2,31 @@ package net.minecraft.client.renderer.block.model;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.src.Config;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 import net.minecraftforge.client.model.pipeline.IVertexProducer;
-import net.optifine.model.QuadBounds;
-import net.optifine.reflect.Reflector;
+import net.optifine.Config;
+import net.optifine.Reflector;
 
 public class BakedQuad implements IVertexProducer
 {
+    /**
+     * Joined 4 vertex records, each has 7 fields (x, y, z, shadeColor, u, v, <unused>), see
+     * FaceBakery.storeVertexData()
+     */
     protected int[] vertexData;
     protected final int tintIndex;
-    protected EnumFacing face;
-    protected TextureAtlasSprite sprite;
+    protected final EnumFacing face;
+    private static final String __OBFID = "CL_00002512";
+    private TextureAtlasSprite sprite = null;
     private int[] vertexDataSingle = null;
-    private QuadBounds quadBounds;
-    private boolean quadEmissiveChecked;
-    private BakedQuad quadEmissive;
 
-    public BakedQuad(int[] p_i3_1_, int p_i3_2_, EnumFacing p_i3_3_, TextureAtlasSprite p_i3_4_)
+    public BakedQuad(int[] p_i9_1_, int p_i9_2_, EnumFacing p_i9_3_, TextureAtlasSprite p_i9_4_)
     {
-        this.vertexData = p_i3_1_;
-        this.tintIndex = p_i3_2_;
-        this.face = p_i3_3_;
-        this.sprite = p_i3_4_;
-        this.fixVertexData();
-    }
-
-    public BakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn)
-    {
-        this.vertexData = vertexDataIn;
-        this.tintIndex = tintIndexIn;
-        this.face = faceIn;
+        this.vertexData = p_i9_1_;
+        this.tintIndex = p_i9_2_;
+        this.face = p_i9_3_;
+        this.sprite = p_i9_4_;
         this.fixVertexData();
     }
 
@@ -45,6 +38,19 @@ public class BakedQuad implements IVertexProducer
         }
 
         return this.sprite;
+    }
+
+    public String toString()
+    {
+        return "vertex: " + this.vertexData.length / 7 + ", tint: " + this.tintIndex + ", facing: " + this.face + ", sprite: " + this.sprite;
+    }
+
+    public BakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn)
+    {
+        this.vertexData = vertexDataIn;
+        this.tintIndex = tintIndexIn;
+        this.face = faceIn;
+        this.fixVertexData();
     }
 
     public int[] getVertexData()
@@ -65,11 +71,6 @@ public class BakedQuad implements IVertexProducer
 
     public EnumFacing getFace()
     {
-        if (this.face == null)
-        {
-            this.face = FaceBakery.getFacingFromVertexData(this.getVertexData());
-        }
-
         return this.face;
     }
 
@@ -86,17 +87,19 @@ public class BakedQuad implements IVertexProducer
     private static int[] makeVertexDataSingle(int[] p_makeVertexDataSingle_0_, TextureAtlasSprite p_makeVertexDataSingle_1_)
     {
         int[] aint = (int[])p_makeVertexDataSingle_0_.clone();
-        int i = aint.length / 4;
+        int i = p_makeVertexDataSingle_1_.sheetWidth / p_makeVertexDataSingle_1_.getIconWidth();
+        int j = p_makeVertexDataSingle_1_.sheetHeight / p_makeVertexDataSingle_1_.getIconHeight();
+        int k = aint.length / 4;
 
-        for (int j = 0; j < 4; ++j)
+        for (int l = 0; l < 4; ++l)
         {
-            int k = j * i;
-            float f = Float.intBitsToFloat(aint[k + 4]);
-            float f1 = Float.intBitsToFloat(aint[k + 4 + 1]);
+            int i1 = l * k;
+            float f = Float.intBitsToFloat(aint[i1 + 4]);
+            float f1 = Float.intBitsToFloat(aint[i1 + 4 + 1]);
             float f2 = p_makeVertexDataSingle_1_.toSingleU(f);
             float f3 = p_makeVertexDataSingle_1_.toSingleV(f1);
-            aint[k + 4] = Float.floatToRawIntBits(f2);
-            aint[k + 4 + 1] = Float.floatToRawIntBits(f3);
+            aint[i1 + 4] = Float.floatToRawIntBits(f2);
+            aint[i1 + 4 + 1] = Float.floatToRawIntBits(f3);
         }
 
         return aint;
@@ -132,7 +135,7 @@ public class BakedQuad implements IVertexProducer
         return textureatlassprite;
     }
 
-    protected void fixVertexData()
+    private void fixVertexData()
     {
         if (Config.isShaders())
         {
@@ -173,73 +176,5 @@ public class BakedQuad implements IVertexProducer
         }
 
         return aint;
-    }
-
-    public QuadBounds getQuadBounds()
-    {
-        if (this.quadBounds == null)
-        {
-            this.quadBounds = new QuadBounds(this.getVertexData());
-        }
-
-        return this.quadBounds;
-    }
-
-    public float getMidX()
-    {
-        QuadBounds quadbounds = this.getQuadBounds();
-        return (quadbounds.getMaxX() + quadbounds.getMinX()) / 2.0F;
-    }
-
-    public double getMidY()
-    {
-        QuadBounds quadbounds = this.getQuadBounds();
-        return (double)((quadbounds.getMaxY() + quadbounds.getMinY()) / 2.0F);
-    }
-
-    public double getMidZ()
-    {
-        QuadBounds quadbounds = this.getQuadBounds();
-        return (double)((quadbounds.getMaxZ() + quadbounds.getMinZ()) / 2.0F);
-    }
-
-    public boolean isFaceQuad()
-    {
-        QuadBounds quadbounds = this.getQuadBounds();
-        return quadbounds.isFaceQuad(this.face);
-    }
-
-    public boolean isFullQuad()
-    {
-        QuadBounds quadbounds = this.getQuadBounds();
-        return quadbounds.isFullQuad(this.face);
-    }
-
-    public boolean isFullFaceQuad()
-    {
-        return this.isFullQuad() && this.isFaceQuad();
-    }
-
-    public BakedQuad getQuadEmissive()
-    {
-        if (this.quadEmissiveChecked)
-        {
-            return this.quadEmissive;
-        }
-        else
-        {
-            if (this.quadEmissive == null && this.sprite != null && this.sprite.spriteEmissive != null)
-            {
-                this.quadEmissive = new BreakingFour(this, this.sprite.spriteEmissive);
-            }
-
-            this.quadEmissiveChecked = true;
-            return this.quadEmissive;
-        }
-    }
-
-    public String toString()
-    {
-        return "vertex: " + this.vertexData.length / 7 + ", tint: " + this.tintIndex + ", facing: " + this.face + ", sprite: " + this.sprite;
     }
 }

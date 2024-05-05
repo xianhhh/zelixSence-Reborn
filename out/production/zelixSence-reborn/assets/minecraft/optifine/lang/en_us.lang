@@ -52,10 +52,6 @@ options.graphics.tooltip.3=  Fancy - higher quality, slower
 options.graphics.tooltip.4=Changes the appearance of clouds, leaves, water,
 options.graphics.tooltip.5=shadows and grass sides.
 
-of.options.renderDistance.tiny=Tiny
-of.options.renderDistance.short=Short
-of.options.renderDistance.normal=Normal
-of.options.renderDistance.far=Far
 of.options.renderDistance.extreme=Extreme
 
 options.renderDistance.tooltip.1=Visible distance
@@ -111,6 +107,10 @@ options.anaglyph.tooltip.1=3D Anaglyph
 options.anaglyph.tooltip.2=Enables a stereoscopic 3D effect using different colors
 options.anaglyph.tooltip.3=for each eye.
 options.anaglyph.tooltip.4=Requires red-cyan glasses for proper viewing.
+
+options.blockAlternatives.tooltip.1=Alternate Blocks
+options.blockAlternatives.tooltip.2=Uses alternative block models for some blocks.
+options.blockAlternatives.tooltip.3=Depends on the selected resource pack.
 
 of.options.ALTERNATE_BLOCKS=Alternate Blocks
 of.options.ALTERNATE_BLOCKS.tooltip.1=Alternate Blocks
@@ -318,12 +318,6 @@ of.options.CUSTOM_ENTITY_MODELS.tooltip.2=  ON - custom entity models (default),
 of.options.CUSTOM_ENTITY_MODELS.tooltip.3=  OFF - default entity models, faster
 of.options.CUSTOM_ENTITY_MODELS.tooltip.4=The custom entity models are supplied by the current
 of.options.CUSTOM_ENTITY_MODELS.tooltip.5=resource pack.
-
-of.options.CUSTOM_GUIS=Custom GUIs
-of.options.CUSTOM_GUIS.tooltip.1=Custom GUIs
-of.options.CUSTOM_GUIS.tooltip.2=  ON - custom GUIs (default), slower
-of.options.CUSTOM_GUIS.tooltip.3=  OFF - default GUIs, faster
-of.options.CUSTOM_GUIS.tooltip.4=The custom GUIs are supplied by the current resource pack.
 
 # Details
 

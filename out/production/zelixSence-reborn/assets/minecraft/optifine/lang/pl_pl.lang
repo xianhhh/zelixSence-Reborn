@@ -1,6 +1,5 @@
 # Contributors of Polish localization #
 #  Kamil7430 2016-03-14 -- 2017-03-12 #
-#  Puuska 2017.07.15 -- ?????         #
 
 # General
 of.general.ambiguous=dwuznaczny
@@ -56,20 +55,16 @@ options.graphics.tooltip.3=  Dokładna - wyższa jakość, mniejsza wydajność
 options.graphics.tooltip.4=Zmienia wygląd chmur, liści, wody,
 options.graphics.tooltip.5=cieni oraz boków bloków trawy.
 
-of.options.renderDistance.tiny=Najkrótsza
-of.options.renderDistance.short=Krótka
-of.options.renderDistance.normal=Normalna
-of.options.renderDistance.far=Długa
 of.options.renderDistance.extreme=Ekstremalna
 
 options.renderDistance.tooltip.1=Odległość renderowania
-options.renderDistance.tooltip.2=  2 Najkrótsza - 32m (najwyższa wydajność)
+options.renderDistance.tooltip.2=  2 Niewielka - 32m (najwyższa wydajność)
 options.renderDistance.tooltip.3=  4 Krótka - 64m (wysoka wydajność)
 options.renderDistance.tooltip.4=  8 Normalna - 128m
 options.renderDistance.tooltip.5=  16 Długa - 256m (niska wydajność)
 options.renderDistance.tooltip.6=  32 Ekstremalna - 512m (najniższa wydajność)
 options.renderDistance.tooltip.7=Odległość renderowania ekstremalna jest bardzo zasobożerna!
-options.renderDistance.tooltip.8=Wartości powyżej 16 Długa są zalecane tylko dla lokalnych światów.
+options.renderDistance.tooltip.8=Wartości powyżej 16 Długa są zalecane tylko do lokalnych światów.
 
 options.ao.tooltip.1=Gładkie oświetlenie
 options.ao.tooltip.2=  Wył. - brak wygładzania oświetlenia (wysoka wydajność)
@@ -94,7 +89,7 @@ options.viewBobbing.tooltip.1=Bardziej realistyczne poruszanie się.
 options.viewBobbing.tooltip.2=Gdy uzywasz mipmap, wyłącz tę opcję, aby podwyższyć wydajność.
 
 options.guiScale.tooltip.1=Wielkość Interfejsu
-options.guiScale.tooltip.2=Mniejszy interfejs może podwyższyć wydajność
+options.guiScale.tooltip.2=Mniejszy interfejs może podyższyć wydajność
 
 options.vbo.tooltip.1=Vertex Buffer Objects
 options.vbo.tooltip.2=Używa alternatywnej metody renderowania, która jest
@@ -111,6 +106,10 @@ options.anaglyph.tooltip.1=Anaglify 3D
 options.anaglyph.tooltip.2=Włącza stereoskopowy efekt 3D używając różnych kolorów
 options.anaglyph.tooltip.3=dla każdego oka.
 options.anaglyph.tooltip.4=Wymaga czerwono-niebieskich okularów.
+
+options.blockAlternatives.tooltip.1=Alternatywne bloki
+options.blockAlternatives.tooltip.2=Używa alternatywnych modeli dla niektóych bloków.
+options.blockAlternatives.tooltip.3=Bazowane na wybranyej paczce tekstur.
 
 of.options.ALTERNATE_BLOCKS=Alternatywne bloki
 of.options.blockAlternatives.tooltip.1=Alternatywne bloki
@@ -415,10 +414,10 @@ of.options.VIGNETTE.tooltip.6=szczególnie przy grze na pełnym ekranie.
 of.options.VIGNETTE.tooltip.7=Efekt winiety jest subtelny i może być
 of.options.VIGNETTE.tooltip.8=bezproblemowo wyłączony.
 
-of.options.DYNAMIC_FOV=Dynamiczny FOV
+of.options.DYNAMIC_FOV=Dynamiczne FOV
 of.options.DYNAMIC_FOV.tooltip.1=Dynamiczne FOV
-of.options.DYNAMIC_FOV.tooltip.2=  Wł. - włącza dynamiczny FOV (domyślne)
-of.options.DYNAMIC_FOV.tooltip.3=  Wył. - wyłącza dynamiczny FOV
+of.options.DYNAMIC_FOV.tooltip.2=  Wł. - włącza dynamiczne FOV (domyślne)
+of.options.DYNAMIC_FOV.tooltip.3=  Wył. - wyłącza dynamiczne FOV
 of.options.DYNAMIC_FOV.tooltip.4=Zmienia pole widzenia (FOV), gdy latasz 
 of.options.DYNAMIC_FOV.tooltip.5=sprintujesz lub naciągasz łuk.
 
@@ -514,7 +513,7 @@ of.options.FIREWORK_PARTICLES=Cząsteczki fajerwerków
 of.options.LAGOMETER=Lagomierz
 of.options.LAGOMETER.tooltip.1=Pokazuje lagomierz na ekranie debugowania (F3).
 of.options.LAGOMETER.tooltip.2=* Pomarańczowy - Zajęta pamięć
-of.options.LAGOMETER.tooltip.3=* Błękitny - Ticki
+of.options.LAGOMETER.tooltip.3=* Cyan - Ticki
 of.options.LAGOMETER.tooltip.4=* Niebieski - Zaplanowane działania
 of.options.LAGOMETER.tooltip.5=* Fioletowy - Przesyłanie chunków
 of.options.LAGOMETER.tooltip.6=* Czerwony - Aktualizacje chunków
@@ -535,8 +534,8 @@ of.options.WEATHER.tooltip.3=  Wył. - pogoda jest nieaktywna, wyższa wydajnoś
 of.options.WEATHER.tooltip.4=Pogoda kontroluje słońce, deszcz i burzę.
 of.options.WEATHER.tooltip.5=Kontrola pogody jest aktywna tylko w trybie jednoosobowym.
 
-of.options.time.dayOnly=Tylko dzień
-of.options.time.nightOnly=Tylko noc
+of.options.time.dayOnly=Jedynie dzień
+of.options.time.nightOnly=Jedynie noc
 
 of.options.TIME=Czas
 of.options.TIME.tooltip.1=Ustawienia cyklu dnia i nocy

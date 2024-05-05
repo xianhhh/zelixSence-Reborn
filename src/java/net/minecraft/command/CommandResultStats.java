@@ -12,20 +12,21 @@ import net.minecraft.world.World;
 
 public class CommandResultStats
 {
+    /** The number of result command result types that are possible. */
     private static final int NUM_RESULT_TYPES = CommandResultStats.Type.values().length;
     private static final String[] STRING_RESULT_TYPES = new String[NUM_RESULT_TYPES];
-    private String[] entitiesID;
-    private String[] objectives;
+    private String[] field_179675_c;
+    private String[] field_179673_d;
 
     public CommandResultStats()
     {
-        this.entitiesID = STRING_RESULT_TYPES;
-        this.objectives = STRING_RESULT_TYPES;
+        this.field_179675_c = STRING_RESULT_TYPES;
+        this.field_179673_d = STRING_RESULT_TYPES;
     }
 
-    public void setCommandStatScore(final ICommandSender sender, CommandResultStats.Type resultTypeIn, int scorePoint)
+    public void func_179672_a(final ICommandSender sender, CommandResultStats.Type resultTypeIn, int p_179672_3_)
     {
-        String s = this.entitiesID[resultTypeIn.getTypeID()];
+        String s = this.field_179675_c[resultTypeIn.getTypeID()];
 
         if (s != null)
         {
@@ -83,7 +84,7 @@ public class CommandResultStats
                 return;
             }
 
-            String s2 = this.objectives[resultTypeIn.getTypeID()];
+            String s2 = this.field_179673_d[resultTypeIn.getTypeID()];
 
             if (s2 != null)
             {
@@ -95,7 +96,7 @@ public class CommandResultStats
                     if (scoreboard.entityHasObjective(s1, scoreobjective))
                     {
                         Score score = scoreboard.getValueFromObjective(s1, scoreobjective);
-                        score.setScorePoints(scorePoint);
+                        score.setScorePoints(p_179672_3_);
                     }
                 }
             }
@@ -117,7 +118,7 @@ public class CommandResultStats
                 {
                     String s2 = nbttagcompound.getString(s);
                     String s3 = nbttagcompound.getString(s1);
-                    setScoreBoardStat(this, commandresultstats$type, s2, s3);
+                    func_179667_a(this, commandresultstats$type, s2, s3);
                 }
             }
         }
@@ -129,8 +130,8 @@ public class CommandResultStats
 
         for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values())
         {
-            String s = this.entitiesID[commandresultstats$type.getTypeID()];
-            String s1 = this.objectives[commandresultstats$type.getTypeID()];
+            String s = this.field_179675_c[commandresultstats$type.getTypeID()];
+            String s1 = this.field_179673_d[commandresultstats$type.getTypeID()];
 
             if (s != null && s1 != null)
             {
@@ -145,36 +146,36 @@ public class CommandResultStats
         }
     }
 
-    public static void setScoreBoardStat(CommandResultStats stats, CommandResultStats.Type resultType, String entityID, String objectiveName)
+    public static void func_179667_a(CommandResultStats stats, CommandResultStats.Type resultType, String p_179667_2_, String p_179667_3_)
     {
-        if (entityID != null && entityID.length() != 0 && objectiveName != null && objectiveName.length() != 0)
+        if (p_179667_2_ != null && p_179667_2_.length() != 0 && p_179667_3_ != null && p_179667_3_.length() != 0)
         {
-            if (stats.entitiesID == STRING_RESULT_TYPES || stats.objectives == STRING_RESULT_TYPES)
+            if (stats.field_179675_c == STRING_RESULT_TYPES || stats.field_179673_d == STRING_RESULT_TYPES)
             {
-                stats.entitiesID = new String[NUM_RESULT_TYPES];
-                stats.objectives = new String[NUM_RESULT_TYPES];
+                stats.field_179675_c = new String[NUM_RESULT_TYPES];
+                stats.field_179673_d = new String[NUM_RESULT_TYPES];
             }
 
-            stats.entitiesID[resultType.getTypeID()] = entityID;
-            stats.objectives[resultType.getTypeID()] = objectiveName;
+            stats.field_179675_c[resultType.getTypeID()] = p_179667_2_;
+            stats.field_179673_d[resultType.getTypeID()] = p_179667_3_;
         }
         else
         {
-            removeScoreBoardStat(stats, resultType);
+            func_179669_a(stats, resultType);
         }
     }
 
-    private static void removeScoreBoardStat(CommandResultStats resultStatsIn, CommandResultStats.Type resultTypeIn)
+    private static void func_179669_a(CommandResultStats resultStatsIn, CommandResultStats.Type resultTypeIn)
     {
-        if (resultStatsIn.entitiesID != STRING_RESULT_TYPES && resultStatsIn.objectives != STRING_RESULT_TYPES)
+        if (resultStatsIn.field_179675_c != STRING_RESULT_TYPES && resultStatsIn.field_179673_d != STRING_RESULT_TYPES)
         {
-            resultStatsIn.entitiesID[resultTypeIn.getTypeID()] = null;
-            resultStatsIn.objectives[resultTypeIn.getTypeID()] = null;
+            resultStatsIn.field_179675_c[resultTypeIn.getTypeID()] = null;
+            resultStatsIn.field_179673_d[resultTypeIn.getTypeID()] = null;
             boolean flag = true;
 
             for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values())
             {
-                if (resultStatsIn.entitiesID[commandresultstats$type.getTypeID()] != null && resultStatsIn.objectives[commandresultstats$type.getTypeID()] != null)
+                if (resultStatsIn.field_179675_c[commandresultstats$type.getTypeID()] != null && resultStatsIn.field_179673_d[commandresultstats$type.getTypeID()] != null)
                 {
                     flag = false;
                     break;
@@ -183,17 +184,17 @@ public class CommandResultStats
 
             if (flag)
             {
-                resultStatsIn.entitiesID = STRING_RESULT_TYPES;
-                resultStatsIn.objectives = STRING_RESULT_TYPES;
+                resultStatsIn.field_179675_c = STRING_RESULT_TYPES;
+                resultStatsIn.field_179673_d = STRING_RESULT_TYPES;
             }
         }
     }
 
-    public void addAllStats(CommandResultStats resultStatsIn)
+    public void func_179671_a(CommandResultStats resultStatsIn)
     {
         for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values())
         {
-            setScoreBoardStat(this, commandresultstats$type, resultStatsIn.entitiesID[commandresultstats$type.getTypeID()], resultStatsIn.objectives[commandresultstats$type.getTypeID()]);
+            func_179667_a(this, commandresultstats$type, resultStatsIn.field_179675_c[commandresultstats$type.getTypeID()], resultStatsIn.field_179673_d[commandresultstats$type.getTypeID()]);
         }
     }
 

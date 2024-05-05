@@ -111,6 +111,10 @@ options.anaglyph.tooltip.2=Aktivéiert ee stereoskopeschen 3D-Effekt duerch
 options.anaglyph.tooltip.3=benotze vun ënnerschiddleche Faarwe fir d'Aen.
 options.anaglyph.tooltip.4=Kann nëmme mat engem Roud-Turquoise-Brëll benotzt ginn.
 
+options.blockAlternatives.tooltip.1=Block Variatiounen
+options.blockAlternatives.tooltip.2=Benotz Variatioune fir puer Bléck
+options.blockAlternatives.tooltip.3=Hänkt vum ausgewielte Ressourcenpack of.
+
 of.options.ALTERNATE_BLOCKS=Block Variatiounen
 of.options.ALTERNATE_BLOCKS.tooltip.1=Block Variatiounen
 of.options.ALTERNATE_BLOCKS.tooltip.2=Benotz Variatioune fir puer Bléck

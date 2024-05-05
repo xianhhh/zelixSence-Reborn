@@ -1,26 +1,11 @@
 package net.optifine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.Entity;
-import net.minecraft.src.Config;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.optifine.config.ConnectedParser;
-import net.optifine.config.Matches;
-import net.optifine.config.RangeListInt;
-import net.optifine.render.Blender;
-import net.optifine.util.NumUtils;
-import net.optifine.util.SmoothFloat;
-import net.optifine.util.TextureUtils;
 
 public class CustomSkyLayer
 {
@@ -35,91 +20,42 @@ public class CustomSkyLayer
     private float[] axis;
     private RangeListInt days;
     private int daysLoop;
-    private boolean weatherClear;
-    private boolean weatherRain;
-    private boolean weatherThunder;
-    public BiomeGenBase[] biomes;
-    public RangeListInt heights;
-    private float transition;
-    private SmoothFloat smoothPositionBrightness;
     public int textureId;
-    private World lastWorld;
     public static final float[] DEFAULT_AXIS = new float[] {1.0F, 0.0F, 0.0F};
-    private static final String WEATHER_CLEAR = "clear";
-    private static final String WEATHER_RAIN = "rain";
-    private static final String WEATHER_THUNDER = "thunder";
 
-    public CustomSkyLayer(Properties props, String defSource)
+    public CustomSkyLayer(Properties p_i35_1_, String p_i35_2_)
     {
         this.axis = DEFAULT_AXIS;
         this.days = null;
         this.daysLoop = 8;
-        this.weatherClear = true;
-        this.weatherRain = false;
-        this.weatherThunder = false;
-        this.biomes = null;
-        this.heights = null;
-        this.transition = 1.0F;
-        this.smoothPositionBrightness = null;
         this.textureId = -1;
-        this.lastWorld = null;
         ConnectedParser connectedparser = new ConnectedParser("CustomSky");
-        this.source = props.getProperty("source", defSource);
-        this.startFadeIn = this.parseTime(props.getProperty("startFadeIn"));
-        this.endFadeIn = this.parseTime(props.getProperty("endFadeIn"));
-        this.startFadeOut = this.parseTime(props.getProperty("startFadeOut"));
-        this.endFadeOut = this.parseTime(props.getProperty("endFadeOut"));
-        this.blend = Blender.parseBlend(props.getProperty("blend"));
-        this.rotate = this.parseBoolean(props.getProperty("rotate"), true);
-        this.speed = this.parseFloat(props.getProperty("speed"), 1.0F);
-        this.axis = this.parseAxis(props.getProperty("axis"), DEFAULT_AXIS);
-        this.days = connectedparser.parseRangeListInt(props.getProperty("days"));
-        this.daysLoop = connectedparser.parseInt(props.getProperty("daysLoop"), 8);
-        List<String> list = this.parseWeatherList(props.getProperty("weather", "clear"));
-        this.weatherClear = list.contains("clear");
-        this.weatherRain = list.contains("rain");
-        this.weatherThunder = list.contains("thunder");
-        this.biomes = connectedparser.parseBiomes(props.getProperty("biomes"));
-        this.heights = connectedparser.parseRangeListInt(props.getProperty("heights"));
-        this.transition = this.parseFloat(props.getProperty("transition"), 1.0F);
+        this.source = p_i35_1_.getProperty("source", p_i35_2_);
+        this.startFadeIn = this.parseTime(p_i35_1_.getProperty("startFadeIn"));
+        this.endFadeIn = this.parseTime(p_i35_1_.getProperty("endFadeIn"));
+        this.startFadeOut = this.parseTime(p_i35_1_.getProperty("startFadeOut"));
+        this.endFadeOut = this.parseTime(p_i35_1_.getProperty("endFadeOut"));
+        this.blend = Blender.parseBlend(p_i35_1_.getProperty("blend"));
+        this.rotate = this.parseBoolean(p_i35_1_.getProperty("rotate"), true);
+        this.speed = this.parseFloat(p_i35_1_.getProperty("speed"), 1.0F);
+        this.axis = this.parseAxis(p_i35_1_.getProperty("axis"), DEFAULT_AXIS);
+        this.days = connectedparser.parseRangeListInt(p_i35_1_.getProperty("days"));
+        this.daysLoop = connectedparser.parseInt(p_i35_1_.getProperty("daysLoop"), 8);
     }
 
-    private List<String> parseWeatherList(String str)
+    private int parseTime(String p_parseTime_1_)
     {
-        List<String> list = Arrays.<String>asList(new String[] {"clear", "rain", "thunder"});
-        List<String> list1 = new ArrayList();
-        String[] astring = Config.tokenize(str, " ");
-
-        for (int i = 0; i < astring.length; ++i)
-        {
-            String s = astring[i];
-
-            if (!list.contains(s))
-            {
-                Config.warn("Unknown weather: " + s);
-            }
-            else
-            {
-                list1.add(s);
-            }
-        }
-
-        return list1;
-    }
-
-    private int parseTime(String str)
-    {
-        if (str == null)
+        if (p_parseTime_1_ == null)
         {
             return -1;
         }
         else
         {
-            String[] astring = Config.tokenize(str, ":");
+            String[] astring = Config.tokenize(p_parseTime_1_, ":");
 
             if (astring.length != 2)
             {
-                Config.warn("Invalid time: " + str);
+                Config.warn("Invalid time: " + p_parseTime_1_);
                 return -1;
             }
             else
@@ -143,48 +79,48 @@ public class CustomSkyLayer
                 }
                 else
                 {
-                    Config.warn("Invalid time: " + str);
+                    Config.warn("Invalid time: " + p_parseTime_1_);
                     return -1;
                 }
             }
         }
     }
 
-    private boolean parseBoolean(String str, boolean defVal)
+    private boolean parseBoolean(String p_parseBoolean_1_, boolean p_parseBoolean_2_)
     {
-        if (str == null)
+        if (p_parseBoolean_1_ == null)
         {
-            return defVal;
+            return p_parseBoolean_2_;
         }
-        else if (str.toLowerCase().equals("true"))
+        else if (p_parseBoolean_1_.toLowerCase().equals("true"))
         {
             return true;
         }
-        else if (str.toLowerCase().equals("false"))
+        else if (p_parseBoolean_1_.toLowerCase().equals("false"))
         {
             return false;
         }
         else
         {
-            Config.warn("Unknown boolean: " + str);
-            return defVal;
+            Config.warn("Unknown boolean: " + p_parseBoolean_1_);
+            return p_parseBoolean_2_;
         }
     }
 
-    private float parseFloat(String str, float defVal)
+    private float parseFloat(String p_parseFloat_1_, float p_parseFloat_2_)
     {
-        if (str == null)
+        if (p_parseFloat_1_ == null)
         {
-            return defVal;
+            return p_parseFloat_2_;
         }
         else
         {
-            float f = Config.parseFloat(str, Float.MIN_VALUE);
+            float f = Config.parseFloat(p_parseFloat_1_, Float.MIN_VALUE);
 
             if (f == Float.MIN_VALUE)
             {
-                Config.warn("Invalid value: " + str);
-                return defVal;
+                Config.warn("Invalid value: " + p_parseFloat_1_);
+                return p_parseFloat_2_;
             }
             else
             {
@@ -193,20 +129,20 @@ public class CustomSkyLayer
         }
     }
 
-    private float[] parseAxis(String str, float[] defVal)
+    private float[] parseAxis(String p_parseAxis_1_, float[] p_parseAxis_2_)
     {
-        if (str == null)
+        if (p_parseAxis_1_ == null)
         {
-            return defVal;
+            return p_parseAxis_2_;
         }
         else
         {
-            String[] astring = Config.tokenize(str, " ");
+            String[] astring = Config.tokenize(p_parseAxis_1_, " ");
 
             if (astring.length != 3)
             {
-                Config.warn("Invalid axis: " + str);
-                return defVal;
+                Config.warn("Invalid axis: " + p_parseAxis_1_);
+                return p_parseAxis_2_;
             }
             else
             {
@@ -218,14 +154,14 @@ public class CustomSkyLayer
 
                     if (afloat[i] == Float.MIN_VALUE)
                     {
-                        Config.warn("Invalid axis: " + str);
-                        return defVal;
+                        Config.warn("Invalid axis: " + p_parseAxis_1_);
+                        return p_parseAxis_2_;
                     }
 
                     if (afloat[i] < -1.0F || afloat[i] > 1.0F)
                     {
-                        Config.warn("Invalid axis values: " + str);
-                        return defVal;
+                        Config.warn("Invalid axis values: " + p_parseAxis_1_);
+                        return p_parseAxis_2_;
                     }
                 }
 
@@ -235,8 +171,8 @@ public class CustomSkyLayer
 
                 if (f2 * f2 + f * f + f1 * f1 < 1.0E-5F)
                 {
-                    Config.warn("Invalid axis values: " + str);
-                    return defVal;
+                    Config.warn("Invalid axis values: " + p_parseAxis_1_);
+                    return p_parseAxis_2_;
                 }
                 else
                 {
@@ -247,16 +183,16 @@ public class CustomSkyLayer
         }
     }
 
-    public boolean isValid(String path)
+    public boolean isValid(String p_isValid_1_)
     {
         if (this.source == null)
         {
-            Config.warn("No source texture: " + path);
+            Config.warn("No source texture: " + p_isValid_1_);
             return false;
         }
         else
         {
-            this.source = TextureUtils.fixResourcePath(this.source, TextureUtils.getBasePath(path));
+            this.source = TextureUtils.fixResourcePath(this.source, TextureUtils.getBasePath(p_isValid_1_));
 
             if (this.startFadeIn >= 0 && this.endFadeIn >= 0 && this.endFadeOut >= 0)
             {
@@ -305,48 +241,35 @@ public class CustomSkyLayer
         }
     }
 
-    private int normalizeTime(int timeMc)
+    private int normalizeTime(int p_normalizeTime_1_)
     {
-        while (timeMc >= 24000)
+        while (p_normalizeTime_1_ >= 24000)
         {
-            timeMc -= 24000;
+            p_normalizeTime_1_ -= 24000;
         }
 
-        while (timeMc < 0)
+        while (p_normalizeTime_1_ < 0)
         {
-            timeMc += 24000;
+            p_normalizeTime_1_ += 24000;
         }
 
-        return timeMc;
+        return p_normalizeTime_1_;
     }
 
-    public void render(World world, int timeOfDay, float celestialAngle, float rainStrength, float thunderStrength)
+    public void render(int p_render_1_, float p_render_2_, float p_render_3_)
     {
-        float f = this.getPositionBrightness(world);
-        float f1 = this.getWeatherBrightness(rainStrength, thunderStrength);
-        float f2 = this.getFadeBrightness(timeOfDay);
-        float f3 = f * f1 * f2;
-        f3 = Config.limit(f3, 0.0F, 1.0F);
+        float f = p_render_3_ * this.getFadeBrightness(p_render_1_);
+        f = Config.limit(f, 0.0F, 1.0F);
 
-        if (f3 >= 1.0E-4F)
+        if (f >= 1.0E-4F)
         {
             GlStateManager.bindTexture(this.textureId);
-            Blender.setupBlend(this.blend, f3);
+            Blender.setupBlend(this.blend, f);
             GlStateManager.pushMatrix();
 
             if (this.rotate)
             {
-                float f4 = 0.0F;
-
-                if (this.speed != (float)Math.round(this.speed))
-                {
-                    long i = (world.getWorldTime() + 18000L) / 24000L;
-                    double d0 = (double)(this.speed % 1.0F);
-                    double d1 = (double)i * d0;
-                    f4 = (float)(d1 % 1.0D);
-                }
-
-                GlStateManager.rotate(360.0F * (f4 + celestialAngle * this.speed), this.axis[0], this.axis[1], this.axis[2]);
+                GlStateManager.rotate(p_render_2_ * 360.0F * this.speed, this.axis[0], this.axis[1], this.axis[2]);
             }
 
             Tessellator tessellator = Tessellator.getInstance();
@@ -371,98 +294,22 @@ public class CustomSkyLayer
         }
     }
 
-    private float getPositionBrightness(World world)
+    private float getFadeBrightness(int p_getFadeBrightness_1_)
     {
-        if (this.biomes == null && this.heights == null)
-        {
-            return 1.0F;
-        }
-        else
-        {
-            float f = this.getPositionBrightnessRaw(world);
-
-            if (this.smoothPositionBrightness == null)
-            {
-                this.smoothPositionBrightness = new SmoothFloat(f, this.transition);
-            }
-
-            f = this.smoothPositionBrightness.getSmoothValue(f);
-            return f;
-        }
-    }
-
-    private float getPositionBrightnessRaw(World world)
-    {
-        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-
-        if (entity == null)
-        {
-            return 0.0F;
-        }
-        else
-        {
-            BlockPos blockpos = entity.getPosition();
-
-            if (this.biomes != null)
-            {
-                BiomeGenBase biomegenbase = world.getBiomeGenForCoords(blockpos);
-
-                if (biomegenbase == null)
-                {
-                    return 0.0F;
-                }
-
-                if (!Matches.biome(biomegenbase, this.biomes))
-                {
-                    return 0.0F;
-                }
-            }
-
-            return this.heights != null && !this.heights.isInRange(blockpos.getY()) ? 0.0F : 1.0F;
-        }
-    }
-
-    private float getWeatherBrightness(float rainStrength, float thunderStrength)
-    {
-        float f = 1.0F - rainStrength;
-        float f1 = rainStrength - thunderStrength;
-        float f2 = 0.0F;
-
-        if (this.weatherClear)
-        {
-            f2 += f;
-        }
-
-        if (this.weatherRain)
-        {
-            f2 += f1;
-        }
-
-        if (this.weatherThunder)
-        {
-            f2 += thunderStrength;
-        }
-
-        f2 = NumUtils.limit(f2, 0.0F, 1.0F);
-        return f2;
-    }
-
-    private float getFadeBrightness(int timeOfDay)
-    {
-        if (this.timeBetween(timeOfDay, this.startFadeIn, this.endFadeIn))
+        if (this.timeBetween(p_getFadeBrightness_1_, this.startFadeIn, this.endFadeIn))
         {
             int k = this.normalizeTime(this.endFadeIn - this.startFadeIn);
-            int l = this.normalizeTime(timeOfDay - this.startFadeIn);
+            int l = this.normalizeTime(p_getFadeBrightness_1_ - this.startFadeIn);
             return (float)l / (float)k;
         }
-        else if (this.timeBetween(timeOfDay, this.endFadeIn, this.startFadeOut))
+        else if (this.timeBetween(p_getFadeBrightness_1_, this.endFadeIn, this.startFadeOut))
         {
             return 1.0F;
         }
-        else if (this.timeBetween(timeOfDay, this.startFadeOut, this.endFadeOut))
+        else if (this.timeBetween(p_getFadeBrightness_1_, this.startFadeOut, this.endFadeOut))
         {
             int i = this.normalizeTime(this.endFadeOut - this.startFadeOut);
-            int j = this.normalizeTime(timeOfDay - this.startFadeOut);
+            int j = this.normalizeTime(p_getFadeBrightness_1_ - this.startFadeOut);
             return 1.0F - (float)j / (float)i;
         }
         else
@@ -471,28 +318,22 @@ public class CustomSkyLayer
         }
     }
 
-    private void renderSide(Tessellator tess, int side)
+    private void renderSide(Tessellator p_renderSide_1_, int p_renderSide_2_)
     {
-        WorldRenderer worldrenderer = tess.getWorldRenderer();
-        double d0 = (double)(side % 3) / 3.0D;
-        double d1 = (double)(side / 3) / 2.0D;
+        WorldRenderer worldrenderer = p_renderSide_1_.getWorldRenderer();
+        double d0 = (double)(p_renderSide_2_ % 3) / 3.0D;
+        double d1 = (double)(p_renderSide_2_ / 3) / 2.0D;
         worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
         worldrenderer.pos(-100.0D, -100.0D, -100.0D).tex(d0, d1).endVertex();
         worldrenderer.pos(-100.0D, -100.0D, 100.0D).tex(d0, d1 + 0.5D).endVertex();
         worldrenderer.pos(100.0D, -100.0D, 100.0D).tex(d0 + 0.3333333333333333D, d1 + 0.5D).endVertex();
         worldrenderer.pos(100.0D, -100.0D, -100.0D).tex(d0 + 0.3333333333333333D, d1).endVertex();
-        tess.draw();
+        p_renderSide_1_.draw();
     }
 
-    public boolean isActive(World world, int timeOfDay)
+    public boolean isActive(World p_isActive_1_, int p_isActive_2_)
     {
-        if (world != this.lastWorld)
-        {
-            this.lastWorld = world;
-            this.smoothPositionBrightness = null;
-        }
-
-        if (this.timeBetween(timeOfDay, this.endFadeOut, this.startFadeIn))
+        if (this.timeBetween(p_isActive_2_, this.endFadeOut, this.startFadeIn))
         {
             return false;
         }
@@ -500,7 +341,7 @@ public class CustomSkyLayer
         {
             if (this.days != null)
             {
-                long i = world.getWorldTime();
+                long i = p_isActive_1_.getWorldTime();
                 long j;
 
                 for (j = i - (long)this.startFadeIn; j < 0L; j += (long)(24000 * this.daysLoop))
@@ -521,13 +362,8 @@ public class CustomSkyLayer
         }
     }
 
-    private boolean timeBetween(int timeOfDay, int timeStart, int timeEnd)
+    private boolean timeBetween(int p_timeBetween_1_, int p_timeBetween_2_, int p_timeBetween_3_)
     {
-        return timeStart <= timeEnd ? timeOfDay >= timeStart && timeOfDay <= timeEnd : timeOfDay >= timeStart || timeOfDay <= timeEnd;
-    }
-
-    public String toString()
-    {
-        return "" + this.source + ", " + this.startFadeIn + "-" + this.endFadeIn + " " + this.startFadeOut + "-" + this.endFadeOut;
+        return p_timeBetween_2_ <= p_timeBetween_3_ ? p_timeBetween_1_ >= p_timeBetween_2_ && p_timeBetween_1_ <= p_timeBetween_3_ : p_timeBetween_1_ >= p_timeBetween_2_ || p_timeBetween_1_ <= p_timeBetween_3_;
     }
 }

@@ -68,20 +68,40 @@ public abstract class ServerConfigurationManager
     public static final File FILE_WHITELIST = new File("whitelist.json");
     private static final Logger logger = LogManager.getLogger();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
+
+    /** Reference to the MinecraftServer object. */
     private final MinecraftServer mcServer;
     private final List<EntityPlayerMP> playerEntityList = Lists.<EntityPlayerMP>newArrayList();
     private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = Maps.<UUID, EntityPlayerMP>newHashMap();
     private final UserListBans bannedPlayers;
     private final BanList bannedIPs;
+
+    /** A set containing the OPs. */
     private final UserListOps ops;
+
+    /** The Set of all whitelisted players. */
     private final UserListWhitelist whiteListedPlayers;
     private final Map<UUID, StatisticsFile> playerStatFiles;
+
+    /** Reference to the PlayerNBTManager object. */
     private IPlayerFileData playerNBTManagerObj;
+
+    /**
+     * Server setting to only allow OPs and whitelisted players to join the server.
+     */
     private boolean whiteListEnforced;
+
+    /** The maximum number of players that can be connected at a time. */
     protected int maxPlayers;
     private int viewDistance;
     private WorldSettings.GameType gameType;
+
+    /** True if all players are allowed to use commands (cheats). */
     private boolean commandsAllowedForAll;
+
+    /**
+     * index into playerEntities of player to ping, updated every tick; currently hardcoded to max at 200 players
+     */
     private int playerPingIndex;
 
     public ServerConfigurationManager(MinecraftServer server)
@@ -198,6 +218,9 @@ public abstract class ServerConfigurationManager
         }
     }
 
+    /**
+     * Sets the NBT manager to the one for the WorldServer given.
+     */
     public void setPlayerManager(WorldServer[] worldServers)
     {
         this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
@@ -250,6 +273,9 @@ public abstract class ServerConfigurationManager
         return PlayerManager.getFurthestViewableBlock(this.getViewDistance());
     }
 
+    /**
+     * called during player login. reads the player information from disk.
+     */
     public NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn)
     {
         NBTTagCompound nbttagcompound = this.mcServer.worldServers[0].getWorldInfo().getPlayerNBTTagCompound();
@@ -269,6 +295,9 @@ public abstract class ServerConfigurationManager
         return nbttagcompound1;
     }
 
+    /**
+     * also stores the NBTTags if this is an intergratedPlayerList
+     */
     protected void writePlayerData(EntityPlayerMP playerIn)
     {
         this.playerNBTManagerObj.writePlayerData(playerIn);
@@ -280,6 +309,9 @@ public abstract class ServerConfigurationManager
         }
     }
 
+    /**
+     * Called when a player successfully logs in. Reads player data from disk and inserts the player into the world.
+     */
     public void playerLoggedIn(EntityPlayerMP playerIn)
     {
         this.playerEntityList.add(playerIn);
@@ -296,11 +328,17 @@ public abstract class ServerConfigurationManager
         }
     }
 
+    /**
+     * using player's dimension, update their movement when in a vehicle (e.g. cart, boat)
+     */
     public void serverUpdateMountedMovingPlayer(EntityPlayerMP playerIn)
     {
         playerIn.getServerForPlayer().getPlayerManager().updateMountedMovingPlayer(playerIn);
     }
 
+    /**
+     * Called when a player disconnects from the game. Writes player data to disk and removes them from the world.
+     */
     public void playerLoggedOut(EntityPlayerMP playerIn)
     {
         playerIn.triggerAchievement(StatList.leaveGameStat);
@@ -328,6 +366,9 @@ public abstract class ServerConfigurationManager
         this.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, new EntityPlayerMP[] {playerIn}));
     }
 
+    /**
+     * checks ban-lists, then white-lists, then space for the server. Returns null on success, or an error message
+     */
     public String allowUserToConnect(SocketAddress address, GameProfile profile)
     {
         if (this.bannedPlayers.isBanned(profile))
@@ -360,10 +401,13 @@ public abstract class ServerConfigurationManager
         }
         else
         {
-            return this.playerEntityList.size() >= this.maxPlayers && !this.bypassesPlayerLimit(profile) ? "The server is full!" : null;
+            return this.playerEntityList.size() >= this.maxPlayers && !this.func_183023_f(profile) ? "The server is full!" : null;
         }
     }
 
+    /**
+     * also checks for multiple logins across servers
+     */
     public EntityPlayerMP createPlayerForUser(GameProfile profile)
     {
         UUID uuid = EntityPlayer.getUUID(profile);
@@ -405,6 +449,9 @@ public abstract class ServerConfigurationManager
         return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), profile, iteminworldmanager);
     }
 
+    /**
+     * Called on respawn
+     */
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd)
     {
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
@@ -430,7 +477,7 @@ public abstract class ServerConfigurationManager
         entityplayermp.playerNetServerHandler = playerIn.playerNetServerHandler;
         entityplayermp.clonePlayer(playerIn, conqueredEnd);
         entityplayermp.setEntityId(playerIn.getEntityId());
-        entityplayermp.setCommandStats(playerIn);
+        entityplayermp.func_174817_o(playerIn);
         WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
         this.setPlayerGameTypeBasedOnOther(entityplayermp, playerIn, worldserver);
 
@@ -471,6 +518,9 @@ public abstract class ServerConfigurationManager
         return entityplayermp;
     }
 
+    /**
+     * moves provided player from overworld to nether or vice versa
+     */
     public void transferPlayerToDimension(EntityPlayerMP playerIn, int dimension)
     {
         int i = playerIn.dimension;
@@ -493,34 +543,37 @@ public abstract class ServerConfigurationManager
         }
     }
 
-    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn)
+    /**
+     * Transfers an entity from a world to another world.
+     */
+    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer p_82448_3_, WorldServer p_82448_4_)
     {
         double d0 = entityIn.posX;
         double d1 = entityIn.posZ;
         double d2 = 8.0D;
         float f = entityIn.rotationYaw;
-        oldWorldIn.theProfiler.startSection("moving");
+        p_82448_3_.theProfiler.startSection("moving");
 
         if (entityIn.dimension == -1)
         {
-            d0 = MathHelper.clamp_double(d0 / d2, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-            d1 = MathHelper.clamp_double(d1 / d2, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            d0 = MathHelper.clamp_double(d0 / d2, p_82448_4_.getWorldBorder().minX() + 16.0D, p_82448_4_.getWorldBorder().maxX() - 16.0D);
+            d1 = MathHelper.clamp_double(d1 / d2, p_82448_4_.getWorldBorder().minZ() + 16.0D, p_82448_4_.getWorldBorder().maxZ() - 16.0D);
             entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
 
             if (entityIn.isEntityAlive())
             {
-                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+                p_82448_3_.updateEntityWithOptionalForce(entityIn, false);
             }
         }
         else if (entityIn.dimension == 0)
         {
-            d0 = MathHelper.clamp_double(d0 * d2, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-            d1 = MathHelper.clamp_double(d1 * d2, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            d0 = MathHelper.clamp_double(d0 * d2, p_82448_4_.getWorldBorder().minX() + 16.0D, p_82448_4_.getWorldBorder().maxX() - 16.0D);
+            d1 = MathHelper.clamp_double(d1 * d2, p_82448_4_.getWorldBorder().minZ() + 16.0D, p_82448_4_.getWorldBorder().maxZ() - 16.0D);
             entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
 
             if (entityIn.isEntityAlive())
             {
-                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+                p_82448_3_.updateEntityWithOptionalForce(entityIn, false);
             }
         }
         else
@@ -529,11 +582,11 @@ public abstract class ServerConfigurationManager
 
             if (p_82448_2_ == 1)
             {
-                blockpos = toWorldIn.getSpawnPoint();
+                blockpos = p_82448_4_.getSpawnPoint();
             }
             else
             {
-                blockpos = toWorldIn.getSpawnCoordinate();
+                blockpos = p_82448_4_.getSpawnCoordinate();
             }
 
             d0 = (double)blockpos.getX();
@@ -543,32 +596,35 @@ public abstract class ServerConfigurationManager
 
             if (entityIn.isEntityAlive())
             {
-                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+                p_82448_3_.updateEntityWithOptionalForce(entityIn, false);
             }
         }
 
-        oldWorldIn.theProfiler.endSection();
+        p_82448_3_.theProfiler.endSection();
 
         if (p_82448_2_ != 1)
         {
-            oldWorldIn.theProfiler.startSection("placing");
+            p_82448_3_.theProfiler.startSection("placing");
             d0 = (double)MathHelper.clamp_int((int)d0, -29999872, 29999872);
             d1 = (double)MathHelper.clamp_int((int)d1, -29999872, 29999872);
 
             if (entityIn.isEntityAlive())
             {
                 entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
-                toWorldIn.getDefaultTeleporter().placeInPortal(entityIn, f);
-                toWorldIn.spawnEntityInWorld(entityIn);
-                toWorldIn.updateEntityWithOptionalForce(entityIn, false);
+                p_82448_4_.getDefaultTeleporter().placeInPortal(entityIn, f);
+                p_82448_4_.spawnEntityInWorld(entityIn);
+                p_82448_4_.updateEntityWithOptionalForce(entityIn, false);
             }
 
-            oldWorldIn.theProfiler.endSection();
+            p_82448_3_.theProfiler.endSection();
         }
 
-        entityIn.setWorld(toWorldIn);
+        entityIn.setWorld(p_82448_4_);
     }
 
+    /**
+     * self explanitory
+     */
     public void onTick()
     {
         if (++this.playerPingIndex > 600)
@@ -662,6 +718,9 @@ public abstract class ServerConfigurationManager
         return s;
     }
 
+    /**
+     * Returns an array of the usernames of all the connected players.
+     */
     public String[] getAllUsernames()
     {
         String[] astring = new String[this.playerEntityList.size()];
@@ -698,7 +757,7 @@ public abstract class ServerConfigurationManager
 
     public void addOp(GameProfile profile)
     {
-        this.ops.addEntry(new UserListOpsEntry(profile, this.mcServer.getOpPermissionLevel(), this.ops.bypassesPlayerLimit(profile)));
+        this.ops.addEntry(new UserListOpsEntry(profile, this.mcServer.getOpPermissionLevel(), this.ops.func_183026_b(profile)));
     }
 
     public void removeOp(GameProfile profile)
@@ -729,11 +788,18 @@ public abstract class ServerConfigurationManager
         return null;
     }
 
+    /**
+     * params: x,y,z,r,dimension. The packet is sent to all players within r radius of x,y,z (r^2>x^2+y^2+z^2)
+     */
     public void sendToAllNear(double x, double y, double z, double radius, int dimension, Packet packetIn)
     {
         this.sendToAllNearExcept((EntityPlayer)null, x, y, z, radius, dimension, packetIn);
     }
 
+    /**
+     * params: srcPlayer,x,y,z,r,dimension. The packet is not sent to the srcPlayer, but all other players within the
+     * search radius
+     */
     public void sendToAllNearExcept(EntityPlayer p_148543_1_, double x, double y, double z, double radius, int dimension, Packet p_148543_11_)
     {
         for (int i = 0; i < this.playerEntityList.size(); ++i)
@@ -754,6 +820,9 @@ public abstract class ServerConfigurationManager
         }
     }
 
+    /**
+     * Saves all of the players' current states.
+     */
     public void saveAllPlayerData()
     {
         for (int i = 0; i < this.playerEntityList.size(); ++i)
@@ -792,10 +861,16 @@ public abstract class ServerConfigurationManager
         return this.ops.getKeys();
     }
 
+    /**
+     * Either does nothing, or calls readWhiteList.
+     */
     public void loadWhiteList()
     {
     }
 
+    /**
+     * Updates the time and weather for the given player to those of the given world
+     */
     public void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn)
     {
         WorldBorder worldborder = this.mcServer.worldServers[0].getWorldBorder();
@@ -810,6 +885,9 @@ public abstract class ServerConfigurationManager
         }
     }
 
+    /**
+     * sends the players inventory to himself
+     */
     public void syncPlayerInventory(EntityPlayerMP playerIn)
     {
         playerIn.sendContainerToPlayer(playerIn.inventoryContainer);
@@ -817,16 +895,25 @@ public abstract class ServerConfigurationManager
         playerIn.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(playerIn.inventory.currentItem));
     }
 
+    /**
+     * Returns the number of players currently on the server.
+     */
     public int getCurrentPlayerCount()
     {
         return this.playerEntityList.size();
     }
 
+    /**
+     * Returns the maximum number of players allowed on the server.
+     */
     public int getMaxPlayers()
     {
         return this.maxPlayers;
     }
 
+    /**
+     * Returns an array of usernames for which player.dat exists for.
+     */
     public String[] getAvailablePlayerDat()
     {
         return this.mcServer.worldServers[0].getSaveHandler().getPlayerNBTManager().getAvailablePlayerDat();
@@ -852,6 +939,9 @@ public abstract class ServerConfigurationManager
         return list;
     }
 
+    /**
+     * Gets the View Distance.
+     */
     public int getViewDistance()
     {
         return this.viewDistance;
@@ -862,6 +952,9 @@ public abstract class ServerConfigurationManager
         return this.mcServer;
     }
 
+    /**
+     * On integrated servers, returns the host's player data to be written to level.dat.
+     */
     public NBTTagCompound getHostPlayerData()
     {
         return null;
@@ -886,11 +979,17 @@ public abstract class ServerConfigurationManager
         p_72381_1_.theItemInWorldManager.initializeGameType(worldIn.getWorldInfo().getGameType());
     }
 
+    /**
+     * Sets whether all players are allowed to use commands (cheats) on the server.
+     */
     public void setCommandsAllowedForAll(boolean p_72387_1_)
     {
         this.commandsAllowedForAll = p_72387_1_;
     }
 
+    /**
+     * Kicks everyone with "Server closed" as reason.
+     */
     public void removeAllPlayers()
     {
         for (int i = 0; i < this.playerEntityList.size(); ++i)
@@ -906,6 +1005,9 @@ public abstract class ServerConfigurationManager
         this.sendPacketToAllPlayers(new S02PacketChat(component, b0));
     }
 
+    /**
+     * Sends the given string to every player as chat message.
+     */
     public void sendChatMsg(IChatComponent component)
     {
         this.sendChatMsgImpl(component, true);
@@ -955,17 +1057,20 @@ public abstract class ServerConfigurationManager
         }
     }
 
-    public List<EntityPlayerMP> getPlayerList()
+    public List<EntityPlayerMP> func_181057_v()
     {
         return this.playerEntityList;
     }
 
+    /**
+     * Get's the EntityPlayerMP object representing the player with the UUID.
+     */
     public EntityPlayerMP getPlayerByUUID(UUID playerUUID)
     {
         return (EntityPlayerMP)this.uuidToPlayerMap.get(playerUUID);
     }
 
-    public boolean bypassesPlayerLimit(GameProfile p_183023_1_)
+    public boolean func_183023_f(GameProfile p_183023_1_)
     {
         return false;
     }

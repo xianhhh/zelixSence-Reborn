@@ -31,7 +31,14 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
 {
     private static final UUID MODIFIER_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
     private static final AttributeModifier MODIFIER = (new AttributeModifier(MODIFIER_UUID, "Drinking speed penalty", -0.25D, 0)).setSaved(false);
+
+    /** List of items a witch should drop on death. */
     private static final Item[] witchDrops = new Item[] {Items.glowstone_dust, Items.sugar, Items.redstone, Items.spider_eye, Items.glass_bottle, Items.gunpowder, Items.stick, Items.stick};
+
+    /**
+     * Timer used as interval for a witch's attack, decremented every tick if aggressive and when reaches zero the witch
+     * will throw a potion at the target entity.
+     */
     private int witchAttackTimer;
 
     public EntityWitch(World worldIn)
@@ -53,26 +60,41 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         this.getDataWatcher().addObject(21, Byte.valueOf((byte)0));
     }
 
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
     protected String getLivingSound()
     {
         return null;
     }
 
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
     protected String getHurtSound()
     {
         return null;
     }
 
+    /**
+     * Returns the sound this mob makes on death.
+     */
     protected String getDeathSound()
     {
         return null;
     }
 
+    /**
+     * Set whether this witch is aggressive at an entity.
+     */
     public void setAggressive(boolean aggressive)
     {
         this.getDataWatcher().updateObject(21, Byte.valueOf((byte)(aggressive ? 1 : 0)));
     }
 
+    /**
+     * Return whether this witch is aggressive at an entity.
+     */
     public boolean getAggressive()
     {
         return this.getDataWatcher().getWatchableObjectByte(21) == 1;
@@ -85,6 +107,10 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
     }
 
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
     public void onLivingUpdate()
     {
         if (!this.worldObj.isRemote)
@@ -173,6 +199,9 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         }
     }
 
+    /**
+     * Reduces damage, depending on potions
+     */
     protected float applyPotionDamageCalculations(DamageSource source, float damage)
     {
         damage = super.applyPotionDamageCalculations(source, damage);
@@ -190,7 +219,10 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         return damage;
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
         int i = this.rand.nextInt(3) + 1;
 
@@ -199,9 +231,9 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
             int k = this.rand.nextInt(3);
             Item item = witchDrops[this.rand.nextInt(witchDrops.length)];
 
-            if (lootingModifier > 0)
+            if (p_70628_2_ > 0)
             {
-                k += this.rand.nextInt(lootingModifier + 1);
+                k += this.rand.nextInt(p_70628_2_ + 1);
             }
 
             for (int l = 0; l < k; ++l)
@@ -211,27 +243,30 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         }
     }
 
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_)
+    /**
+     * Attack the specified entity using a ranged attack.
+     */
+    public void attackEntityWithRangedAttack(EntityLivingBase p_82196_1_, float p_82196_2_)
     {
         if (!this.getAggressive())
         {
             EntityPotion entitypotion = new EntityPotion(this.worldObj, this, 32732);
-            double d0 = target.posY + (double)target.getEyeHeight() - 1.100000023841858D;
+            double d0 = p_82196_1_.posY + (double)p_82196_1_.getEyeHeight() - 1.100000023841858D;
             entitypotion.rotationPitch -= -20.0F;
-            double d1 = target.posX + target.motionX - this.posX;
+            double d1 = p_82196_1_.posX + p_82196_1_.motionX - this.posX;
             double d2 = d0 - this.posY;
-            double d3 = target.posZ + target.motionZ - this.posZ;
+            double d3 = p_82196_1_.posZ + p_82196_1_.motionZ - this.posZ;
             float f = MathHelper.sqrt_double(d1 * d1 + d3 * d3);
 
-            if (f >= 8.0F && !target.isPotionActive(Potion.moveSlowdown))
+            if (f >= 8.0F && !p_82196_1_.isPotionActive(Potion.moveSlowdown))
             {
                 entitypotion.setPotionDamage(32698);
             }
-            else if (target.getHealth() >= 8.0F && !target.isPotionActive(Potion.poison))
+            else if (p_82196_1_.getHealth() >= 8.0F && !p_82196_1_.isPotionActive(Potion.poison))
             {
                 entitypotion.setPotionDamage(32660);
             }
-            else if (f <= 3.0F && !target.isPotionActive(Potion.weakness) && this.rand.nextFloat() < 0.25F)
+            else if (f <= 3.0F && !p_82196_1_.isPotionActive(Potion.weakness) && this.rand.nextFloat() < 0.25F)
             {
                 entitypotion.setPotionDamage(32696);
             }

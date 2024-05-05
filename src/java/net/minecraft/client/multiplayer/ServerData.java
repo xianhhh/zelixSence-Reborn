@@ -8,24 +8,41 @@ public class ServerData
 {
     public String serverName;
     public String serverIP;
+
+    /**
+     * the string indicating number of players on and capacity of the server that is shown on the server browser (i.e.
+     * "5/20" meaning 5 slots used out of 20 slots total)
+     */
     public String populationInfo;
+
+    /**
+     * (better variable name would be 'hostname') server name as displayed in the server browser's second line (grey
+     * text)
+     */
     public String serverMOTD;
+
+    /** last server ping that showed up in the server browser */
     public long pingToServer;
     public int version = 47;
-    public String gameVersion = "1.8.9";
+
+    /** Game version for this server. */
+    public String gameVersion = "1.8.8";
     public boolean field_78841_f;
     public String playerList;
     private ServerData.ServerResourceMode resourceMode = ServerData.ServerResourceMode.PROMPT;
     private String serverIcon;
-    private boolean lanServer;
+    private boolean field_181042_l;
 
-    public ServerData(String name, String ip, boolean isLan)
+    public ServerData(String p_i46420_1_, String p_i46420_2_, boolean p_i46420_3_)
     {
-        this.serverName = name;
-        this.serverIP = ip;
-        this.lanServer = isLan;
+        this.serverName = p_i46420_1_;
+        this.serverIP = p_i46420_2_;
+        this.field_181042_l = p_i46420_3_;
     }
 
+    /**
+     * Returns an NBTTagCompound with the server's name, IP and maybe acceptTextures.
+     */
     public NBTTagCompound getNBTCompound()
     {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -59,6 +76,9 @@ public class ServerData
         this.resourceMode = mode;
     }
 
+    /**
+     * Takes an NBTTagCompound with 'name' and 'ip' keys, returns a ServerData instance.
+     */
     public static ServerData getServerDataFromNBTCompound(NBTTagCompound nbtCompound)
     {
         ServerData serverdata = new ServerData(nbtCompound.getString("name"), nbtCompound.getString("ip"), false);
@@ -87,6 +107,9 @@ public class ServerData
         return serverdata;
     }
 
+    /**
+     * Returns the base-64 encoded representation of the server's icon, or null if not available
+     */
     public String getBase64EncodedIconData()
     {
         return this.serverIcon;
@@ -97,9 +120,9 @@ public class ServerData
         this.serverIcon = icon;
     }
 
-    public boolean isOnLAN()
+    public boolean func_181041_d()
     {
-        return this.lanServer;
+        return this.field_181042_l;
     }
 
     public void copyFrom(ServerData serverDataIn)
@@ -108,7 +131,7 @@ public class ServerData
         this.serverName = serverDataIn.serverName;
         this.setResourceMode(serverDataIn.getResourceMode());
         this.serverIcon = serverDataIn.serverIcon;
-        this.lanServer = serverDataIn.lanServer;
+        this.field_181042_l = serverDataIn.field_181042_l;
     }
 
     public static enum ServerResourceMode
@@ -119,9 +142,9 @@ public class ServerData
 
         private final IChatComponent motd;
 
-        private ServerResourceMode(String name)
+        private ServerResourceMode(String p_i1053_3_)
         {
-            this.motd = new ChatComponentTranslation("addServer.resourcePack." + name, new Object[0]);
+            this.motd = new ChatComponentTranslation("addServer.resourcePack." + p_i1053_3_, new Object[0]);
         }
 
         public IChatComponent getMotd()

@@ -17,22 +17,22 @@ import org.apache.logging.log4j.Logger;
 
 public class EntityAIFindEntityNearestPlayer extends EntityAIBase
 {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private EntityLiving entityLiving;
-    private final Predicate<Entity> predicate;
-    private final EntityAINearestAttackableTarget.Sorter sorter;
-    private EntityLivingBase entityTarget;
+    private static final Logger field_179436_a = LogManager.getLogger();
+    private EntityLiving field_179434_b;
+    private final Predicate<Entity> field_179435_c;
+    private final EntityAINearestAttackableTarget.Sorter field_179432_d;
+    private EntityLivingBase field_179433_e;
 
-    public EntityAIFindEntityNearestPlayer(EntityLiving entityLivingIn)
+    public EntityAIFindEntityNearestPlayer(EntityLiving p_i45882_1_)
     {
-        this.entityLiving = entityLivingIn;
+        this.field_179434_b = p_i45882_1_;
 
-        if (entityLivingIn instanceof EntityCreature)
+        if (p_i45882_1_ instanceof EntityCreature)
         {
-            LOGGER.warn("Use NearestAttackableTargetGoal.class for PathfinerMob mobs!");
+            field_179436_a.warn("Use NearestAttackableTargetGoal.class for PathfinerMob mobs!");
         }
 
-        this.predicate = new Predicate<Entity>()
+        this.field_179435_c = new Predicate<Entity>()
         {
             public boolean apply(Entity p_apply_1_)
             {
@@ -46,7 +46,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
                 }
                 else
                 {
-                    double d0 = EntityAIFindEntityNearestPlayer.this.maxTargetRange();
+                    double d0 = EntityAIFindEntityNearestPlayer.this.func_179431_f();
 
                     if (p_apply_1_.isSneaking())
                     {
@@ -65,18 +65,21 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
                         d0 *= (double)(0.7F * f);
                     }
 
-                    return (double)p_apply_1_.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.entityLiving) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.entityLiving, (EntityLivingBase)p_apply_1_, false, true);
+                    return (double)p_apply_1_.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.field_179434_b) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.field_179434_b, (EntityLivingBase)p_apply_1_, false, true);
                 }
             }
         };
-        this.sorter = new EntityAINearestAttackableTarget.Sorter(entityLivingIn);
+        this.field_179432_d = new EntityAINearestAttackableTarget.Sorter(p_i45882_1_);
     }
 
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
     public boolean shouldExecute()
     {
-        double d0 = this.maxTargetRange();
-        List<EntityPlayer> list = this.entityLiving.worldObj.<EntityPlayer>getEntitiesWithinAABB(EntityPlayer.class, this.entityLiving.getEntityBoundingBox().expand(d0, 4.0D, d0), this.predicate);
-        Collections.sort(list, this.sorter);
+        double d0 = this.func_179431_f();
+        List<EntityPlayer> list = this.field_179434_b.worldObj.<EntityPlayer>getEntitiesWithinAABB(EntityPlayer.class, this.field_179434_b.getEntityBoundingBox().expand(d0, 4.0D, d0), this.field_179435_c);
+        Collections.sort(list, this.field_179432_d);
 
         if (list.isEmpty())
         {
@@ -84,14 +87,17 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
         }
         else
         {
-            this.entityTarget = (EntityLivingBase)list.get(0);
+            this.field_179433_e = (EntityLivingBase)list.get(0);
             return true;
         }
     }
 
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
     public boolean continueExecuting()
     {
-        EntityLivingBase entitylivingbase = this.entityLiving.getAttackTarget();
+        EntityLivingBase entitylivingbase = this.field_179434_b.getAttackTarget();
 
         if (entitylivingbase == null)
         {
@@ -107,7 +113,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
         }
         else
         {
-            Team team = this.entityLiving.getTeam();
+            Team team = this.field_179434_b.getTeam();
             Team team1 = entitylivingbase.getTeam();
 
             if (team != null && team1 == team)
@@ -116,27 +122,33 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
             }
             else
             {
-                double d0 = this.maxTargetRange();
-                return this.entityLiving.getDistanceSqToEntity(entitylivingbase) > d0 * d0 ? false : !(entitylivingbase instanceof EntityPlayerMP) || !((EntityPlayerMP)entitylivingbase).theItemInWorldManager.isCreative();
+                double d0 = this.func_179431_f();
+                return this.field_179434_b.getDistanceSqToEntity(entitylivingbase) > d0 * d0 ? false : !(entitylivingbase instanceof EntityPlayerMP) || !((EntityPlayerMP)entitylivingbase).theItemInWorldManager.isCreative();
             }
         }
     }
 
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
     public void startExecuting()
     {
-        this.entityLiving.setAttackTarget(this.entityTarget);
+        this.field_179434_b.setAttackTarget(this.field_179433_e);
         super.startExecuting();
     }
 
+    /**
+     * Resets the task
+     */
     public void resetTask()
     {
-        this.entityLiving.setAttackTarget((EntityLivingBase)null);
+        this.field_179434_b.setAttackTarget((EntityLivingBase)null);
         super.startExecuting();
     }
 
-    protected double maxTargetRange()
+    protected double func_179431_f()
     {
-        IAttributeInstance iattributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.followRange);
+        IAttributeInstance iattributeinstance = this.field_179434_b.getEntityAttribute(SharedMonsterAttributes.followRange);
         return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();
     }
 }

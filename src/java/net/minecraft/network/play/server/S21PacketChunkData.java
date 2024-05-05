@@ -25,9 +25,12 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient>
         this.chunkX = chunkIn.xPosition;
         this.chunkZ = chunkIn.zPosition;
         this.field_149279_g = p_i45196_2_;
-        this.extractedData = getExtractedData(chunkIn, p_i45196_2_, !chunkIn.getWorld().provider.getHasNoSky(), p_i45196_3_);
+        this.extractedData = func_179756_a(chunkIn, p_i45196_2_, !chunkIn.getWorld().provider.getHasNoSky(), p_i45196_3_);
     }
 
+    /**
+     * Reads the raw packet data from the data stream.
+     */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
         this.chunkX = buf.readInt();
@@ -38,6 +41,9 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient>
         this.extractedData.data = buf.readByteArray();
     }
 
+    /**
+     * Writes the raw packet data to the data stream.
+     */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
         buf.writeInt(this.chunkX);
@@ -47,12 +53,15 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient>
         buf.writeByteArray(this.extractedData.data);
     }
 
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
     public void processPacket(INetHandlerPlayClient handler)
     {
         handler.handleChunkData(this);
     }
 
-    public byte[] getExtractedDataBytes()
+    public byte[] func_149272_d()
     {
         return this.extractedData.data;
     }
@@ -66,7 +75,7 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient>
         return i + j + k + l;
     }
 
-    public static S21PacketChunkData.Extracted getExtractedData(Chunk p_179756_0_, boolean p_179756_1_, boolean p_179756_2_, int p_179756_3_)
+    public static S21PacketChunkData.Extracted func_179756_a(Chunk p_179756_0_, boolean p_179756_1_, boolean p_179756_2_, int p_179756_3_)
     {
         ExtendedBlockStorage[] aextendedblockstorage = p_179756_0_.getBlockStorageArray();
         S21PacketChunkData.Extracted s21packetchunkdata$extracted = new S21PacketChunkData.Extracted();

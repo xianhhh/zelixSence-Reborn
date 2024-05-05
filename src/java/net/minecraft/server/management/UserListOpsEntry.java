@@ -6,31 +6,34 @@ import java.util.UUID;
 
 public class UserListOpsEntry extends UserListEntry<GameProfile>
 {
-    private final int permissionLevel;
-    private final boolean bypassesPlayerLimit;
+    private final int field_152645_a;
+    private final boolean field_183025_b;
 
-    public UserListOpsEntry(GameProfile player, int permissionLevelIn, boolean bypassesPlayerLimitIn)
+    public UserListOpsEntry(GameProfile p_i46492_1_, int p_i46492_2_, boolean p_i46492_3_)
     {
-        super(player);
-        this.permissionLevel = permissionLevelIn;
-        this.bypassesPlayerLimit = bypassesPlayerLimitIn;
+        super(p_i46492_1_);
+        this.field_152645_a = p_i46492_2_;
+        this.field_183025_b = p_i46492_3_;
     }
 
     public UserListOpsEntry(JsonObject p_i1150_1_)
     {
-        super(constructProfile(p_i1150_1_), p_i1150_1_);
-        this.permissionLevel = p_i1150_1_.has("level") ? p_i1150_1_.get("level").getAsInt() : 0;
-        this.bypassesPlayerLimit = p_i1150_1_.has("bypassesPlayerLimit") && p_i1150_1_.get("bypassesPlayerLimit").getAsBoolean();
+        super(func_152643_b(p_i1150_1_), p_i1150_1_);
+        this.field_152645_a = p_i1150_1_.has("level") ? p_i1150_1_.get("level").getAsInt() : 0;
+        this.field_183025_b = p_i1150_1_.has("bypassesPlayerLimit") && p_i1150_1_.get("bypassesPlayerLimit").getAsBoolean();
     }
 
+    /**
+     * Gets the permission level of the user, as defined in the "level" attribute of the ops.json file
+     */
     public int getPermissionLevel()
     {
-        return this.permissionLevel;
+        return this.field_152645_a;
     }
 
-    public boolean bypassesPlayerLimit()
+    public boolean func_183024_b()
     {
-        return this.bypassesPlayerLimit;
+        return this.field_183025_b;
     }
 
     protected void onSerialization(JsonObject data)
@@ -40,12 +43,12 @@ public class UserListOpsEntry extends UserListEntry<GameProfile>
             data.addProperty("uuid", ((GameProfile)this.getValue()).getId() == null ? "" : ((GameProfile)this.getValue()).getId().toString());
             data.addProperty("name", ((GameProfile)this.getValue()).getName());
             super.onSerialization(data);
-            data.addProperty("level", (Number)Integer.valueOf(this.permissionLevel));
-            data.addProperty("bypassesPlayerLimit", Boolean.valueOf(this.bypassesPlayerLimit));
+            data.addProperty("level", (Number)Integer.valueOf(this.field_152645_a));
+            data.addProperty("bypassesPlayerLimit", Boolean.valueOf(this.field_183025_b));
         }
     }
 
-    private static GameProfile constructProfile(JsonObject p_152643_0_)
+    private static GameProfile func_152643_b(JsonObject p_152643_0_)
     {
         if (p_152643_0_.has("uuid") && p_152643_0_.has("name"))
         {

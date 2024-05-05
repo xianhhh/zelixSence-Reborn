@@ -62,7 +62,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Client IO #%d").setDaemon(true).build());
         }
     };
-    public static final LazyLoadBase<EpollEventLoopGroup> CLIENT_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>()
+    public static final LazyLoadBase<EpollEventLoopGroup> field_181125_e = new LazyLoadBase<EpollEventLoopGroup>()
     {
         protected EpollEventLoopGroup load()
         {
@@ -78,10 +78,18 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
     };
     private final EnumPacketDirection direction;
     private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
-    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock field_181680_j = new ReentrantReadWriteLock();
+
+    /** The active channel */
     private Channel channel;
+
+    /** The address of the remote party */
     private SocketAddress socketAddress;
+
+    /** The INetHandler instance responsible for processing received packets */
     private INetHandler packetListener;
+
+    /** A String indicating why the network has shutdown. */
     private IChatComponent terminationReason;
     private boolean isEncrypted;
     private boolean disconnected;
@@ -107,6 +115,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
     }
 
+    /**
+     * Sets the new connection state and registers which packets this channel may send and receive
+     */
     public void setConnectionState(EnumConnectionState newState)
     {
         this.channel.attr(attrKeyConnectionState).set(newState);
@@ -150,6 +161,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
     }
 
+    /**
+     * Sets the NetHandler for this NetworkManager, no checks are made if this handler is suitable for the particular
+     * connection state (protocol)
+     */
     public void setNetHandler(INetHandler handler)
     {
         Validate.notNull(handler, "packetListener", new Object[0]);
@@ -166,7 +181,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
         else
         {
-            this.readWriteLock.writeLock().lock();
+            this.field_181680_j.writeLock().lock();
 
             try
             {
@@ -174,7 +189,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
             }
             finally
             {
-                this.readWriteLock.writeLock().unlock();
+                this.field_181680_j.writeLock().unlock();
             }
         }
     }
@@ -188,7 +203,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
         else
         {
-            this.readWriteLock.writeLock().lock();
+            this.field_181680_j.writeLock().lock();
 
             try
             {
@@ -196,11 +211,15 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
             }
             finally
             {
-                this.readWriteLock.writeLock().unlock();
+                this.field_181680_j.writeLock().unlock();
             }
         }
     }
 
+    /**
+     * Will commit the packet to the channel. If the current thread 'owns' the channel it will write and flush the
+     * packet, otherwise it will add a task for the channel eventloop thread to do that.
+     */
     private void dispatchPacket(final Packet inPacket, final GenericFutureListener <? extends Future <? super Void >> [] futureListeners)
     {
         final EnumConnectionState enumconnectionstate = EnumConnectionState.getFromPacket(inPacket);
@@ -252,11 +271,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
     }
 
+    /**
+     * Will iterate through the outboundPacketQueue and dispatch all Packets
+     */
     private void flushOutboundQueue()
     {
         if (this.channel != null && this.channel.isOpen())
         {
-            this.readWriteLock.readLock().lock();
+            this.field_181680_j.readLock().lock();
 
             try
             {
@@ -268,11 +290,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
             }
             finally
             {
-                this.readWriteLock.readLock().unlock();
+                this.field_181680_j.readLock().unlock();
             }
         }
     }
 
+    /**
+     * Checks timeouts and processes all packets received
+     */
     public void processReceivedPackets()
     {
         this.flushOutboundQueue();
@@ -285,11 +310,17 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         this.channel.flush();
     }
 
+    /**
+     * Returns the socket address of the remote side. Server-only.
+     */
     public SocketAddress getRemoteAddress()
     {
         return this.socketAddress;
     }
 
+    /**
+     * Closes the channel, the parameter can be used for an exit message (not certain how it gets sent)
+     */
     public void closeChannel(IChatComponent message)
     {
         if (this.channel.isOpen())
@@ -299,21 +330,25 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         }
     }
 
+    /**
+     * True if this NetworkManager uses a memory connection (single player game). False may imply both an active TCP
+     * connection or simply no active connection at all
+     */
     public boolean isLocalChannel()
     {
         return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
     }
 
-    public static NetworkManager createNetworkManagerAndConnect(InetAddress address, int serverPort, boolean useNativeTransport)
+    public static NetworkManager func_181124_a(InetAddress p_181124_0_, int p_181124_1_, boolean p_181124_2_)
     {
         final NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
         Class <? extends SocketChannel > oclass;
         LazyLoadBase <? extends EventLoopGroup > lazyloadbase;
 
-        if (Epoll.isAvailable() && useNativeTransport)
+        if (Epoll.isAvailable() && p_181124_2_)
         {
             oclass = EpollSocketChannel.class;
-            lazyloadbase = CLIENT_EPOLL_EVENTLOOP;
+            lazyloadbase = field_181125_e;
         }
         else
         {
@@ -336,10 +371,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
 
                 p_initChannel_1_.pipeline().addLast((String)"timeout", (ChannelHandler)(new ReadTimeoutHandler(30))).addLast((String)"splitter", (ChannelHandler)(new MessageDeserializer2())).addLast((String)"decoder", (ChannelHandler)(new MessageDeserializer(EnumPacketDirection.CLIENTBOUND))).addLast((String)"prepender", (ChannelHandler)(new MessageSerializer2())).addLast((String)"encoder", (ChannelHandler)(new MessageSerializer(EnumPacketDirection.SERVERBOUND))).addLast((String)"packet_handler", (ChannelHandler)networkmanager);
             }
-        })).channel(oclass)).connect(address, serverPort).syncUninterruptibly();
+        })).channel(oclass)).connect(p_181124_0_, p_181124_1_).syncUninterruptibly();
         return networkmanager;
     }
 
+    /**
+     * Prepares a clientside NetworkManager: establishes a connection to the socket supplied and configures the channel
+     * pipeline. Returns the newly created instance.
+     */
     public static NetworkManager provideLocalClient(SocketAddress address)
     {
         final NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
@@ -353,6 +392,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         return networkmanager;
     }
 
+    /**
+     * Adds an encoder+decoder to the channel pipeline. The parameter is the secret key used for encrypted communication
+     */
     public void enableEncryption(SecretKey key)
     {
         this.isEncrypted = true;
@@ -365,6 +407,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         return this.isEncrypted;
     }
 
+    /**
+     * Returns true if this NetworkManager has an active channel, false otherwise
+     */
     public boolean isChannelOpen()
     {
         return this.channel != null && this.channel.isOpen();
@@ -375,16 +420,25 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         return this.channel == null;
     }
 
+    /**
+     * Gets the current handler for processing packets
+     */
     public INetHandler getNetHandler()
     {
         return this.packetListener;
     }
 
+    /**
+     * If this channel is closed, returns the exit message, null otherwise.
+     */
     public IChatComponent getExitMessage()
     {
         return this.terminationReason;
     }
 
+    /**
+     * Switches the channel to manual reading modus
+     */
     public void disableAutoRead()
     {
         this.channel.config().setAutoRead(false);

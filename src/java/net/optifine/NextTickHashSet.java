@@ -21,37 +21,37 @@ public class NextTickHashSet extends TreeSet
     private int maxZ = Integer.MIN_VALUE;
     private static final int UNDEFINED = Integer.MIN_VALUE;
 
-    public NextTickHashSet(Set oldSet)
+    public NextTickHashSet(Set p_i70_1_)
     {
-        for (Object object : oldSet)
+        for (Object object : p_i70_1_)
         {
             this.add(object);
         }
     }
 
-    public boolean contains(Object obj)
+    public boolean contains(Object p_contains_1_)
     {
-        if (!(obj instanceof NextTickListEntry))
+        if (!(p_contains_1_ instanceof NextTickListEntry))
         {
             return false;
         }
         else
         {
-            NextTickListEntry nextticklistentry = (NextTickListEntry)obj;
+            NextTickListEntry nextticklistentry = (NextTickListEntry)p_contains_1_;
             Set set = this.getSubSet(nextticklistentry, false);
             return set == null ? false : set.contains(nextticklistentry);
         }
     }
 
-    public boolean add(Object obj)
+    public boolean add(Object p_add_1_)
     {
-        if (!(obj instanceof NextTickListEntry))
+        if (!(p_add_1_ instanceof NextTickListEntry))
         {
             return false;
         }
         else
         {
-            NextTickListEntry nextticklistentry = (NextTickListEntry)obj;
+            NextTickListEntry nextticklistentry = (NextTickListEntry)p_add_1_;
 
             if (nextticklistentry == null)
             {
@@ -61,7 +61,7 @@ public class NextTickHashSet extends TreeSet
             {
                 Set set = this.getSubSet(nextticklistentry, true);
                 boolean flag = set.add(nextticklistentry);
-                boolean flag1 = super.add(obj);
+                boolean flag1 = super.add(p_add_1_);
 
                 if (flag != flag1)
                 {
@@ -75,15 +75,15 @@ public class NextTickHashSet extends TreeSet
         }
     }
 
-    public boolean remove(Object obj)
+    public boolean remove(Object p_remove_1_)
     {
-        if (!(obj instanceof NextTickListEntry))
+        if (!(p_remove_1_ instanceof NextTickListEntry))
         {
             return false;
         }
         else
         {
-            NextTickListEntry nextticklistentry = (NextTickListEntry)obj;
+            NextTickListEntry nextticklistentry = (NextTickListEntry)p_remove_1_;
             Set set = this.getSubSet(nextticklistentry, false);
 
             if (set == null)
@@ -107,27 +107,27 @@ public class NextTickHashSet extends TreeSet
         }
     }
 
-    private Set getSubSet(NextTickListEntry entry, boolean autoCreate)
+    private Set getSubSet(NextTickListEntry p_getSubSet_1_, boolean p_getSubSet_2_)
     {
-        if (entry == null)
+        if (p_getSubSet_1_ == null)
         {
             return null;
         }
         else
         {
-            BlockPos blockpos = entry.position;
+            BlockPos blockpos = p_getSubSet_1_.position;
             int i = blockpos.getX() >> 4;
             int j = blockpos.getZ() >> 4;
-            return this.getSubSet(i, j, autoCreate);
+            return this.getSubSet(i, j, p_getSubSet_2_);
         }
     }
 
-    private Set getSubSet(int cx, int cz, boolean autoCreate)
+    private Set getSubSet(int p_getSubSet_1_, int p_getSubSet_2_, boolean p_getSubSet_3_)
     {
-        long i = ChunkCoordIntPair.chunkXZ2Int(cx, cz);
+        long i = ChunkCoordIntPair.chunkXZ2Int(p_getSubSet_1_, p_getSubSet_2_);
         HashSet hashset = (HashSet)this.longHashMap.getValueByKey(i);
 
-        if (hashset == null && autoCreate)
+        if (hashset == null && p_getSubSet_3_)
         {
             hashset = new HashSet();
             this.longHashMap.add(i, hashset);
@@ -182,12 +182,12 @@ public class NextTickHashSet extends TreeSet
         }
     }
 
-    public void setIteratorLimits(int minX, int minZ, int maxX, int maxZ)
+    public void setIteratorLimits(int p_setIteratorLimits_1_, int p_setIteratorLimits_2_, int p_setIteratorLimits_3_, int p_setIteratorLimits_4_)
     {
-        this.minX = Math.min(minX, maxX);
-        this.minZ = Math.min(minZ, maxZ);
-        this.maxX = Math.max(minX, maxX);
-        this.maxZ = Math.max(minZ, maxZ);
+        this.minX = Math.min(p_setIteratorLimits_1_, p_setIteratorLimits_3_);
+        this.minZ = Math.min(p_setIteratorLimits_2_, p_setIteratorLimits_4_);
+        this.maxX = Math.max(p_setIteratorLimits_1_, p_setIteratorLimits_3_);
+        this.maxZ = Math.max(p_setIteratorLimits_2_, p_setIteratorLimits_4_);
     }
 
     public void clearIteratorLimits()

@@ -56,6 +56,9 @@ public class StructureStrongholdPieces
         MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.StairsStraight.class, "SHSSD");
     }
 
+    /**
+     * sets up Arrays with the Structure pieces and their weights
+     */
     public static void prepareStructurePieces()
     {
         structurePieceList = Lists.<StructureStrongholdPieces.PieceWeight>newArrayList();

@@ -11,9 +11,9 @@ public class UserListWhitelistEntry extends UserListEntry<GameProfile>
         super(profile);
     }
 
-    public UserListWhitelistEntry(JsonObject json)
+    public UserListWhitelistEntry(JsonObject p_i1130_1_)
     {
-        super(gameProfileFromJsonObject(json), json);
+        super(gameProfileFromJsonObject(p_i1130_1_), p_i1130_1_);
     }
 
     protected void onSerialization(JsonObject data)
@@ -26,11 +26,11 @@ public class UserListWhitelistEntry extends UserListEntry<GameProfile>
         }
     }
 
-    private static GameProfile gameProfileFromJsonObject(JsonObject json)
+    private static GameProfile gameProfileFromJsonObject(JsonObject p_152646_0_)
     {
-        if (json.has("uuid") && json.has("name"))
+        if (p_152646_0_.has("uuid") && p_152646_0_.has("name"))
         {
-            String s = json.get("uuid").getAsString();
+            String s = p_152646_0_.get("uuid").getAsString();
             UUID uuid;
 
             try
@@ -42,7 +42,7 @@ public class UserListWhitelistEntry extends UserListEntry<GameProfile>
                 return null;
             }
 
-            return new GameProfile(uuid, json.get("name").getAsString());
+            return new GameProfile(uuid, p_152646_0_.get("name").getAsString());
         }
         else
         {

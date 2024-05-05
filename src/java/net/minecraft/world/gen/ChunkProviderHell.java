@@ -27,17 +27,34 @@ import net.minecraft.world.gen.structure.MapGenNetherBridge;
 
 public class ChunkProviderHell implements IChunkProvider
 {
+    /** Is the world that the nether is getting generated. */
     private final World worldObj;
     private final boolean field_177466_i;
     private final Random hellRNG;
+
+    /**
+     * Holds the noise used to determine whether slowsand can be generated at a location
+     */
     private double[] slowsandNoise = new double[256];
     private double[] gravelNoise = new double[256];
+
+    /**
+     * Holds the noise used to determine whether something other than netherrack can be generated at a location
+     */
     private double[] netherrackExclusivityNoise = new double[256];
     private double[] noiseField;
+
+    /** A NoiseGeneratorOctaves used in generating nether terrain */
     private final NoiseGeneratorOctaves netherNoiseGen1;
     private final NoiseGeneratorOctaves netherNoiseGen2;
     private final NoiseGeneratorOctaves netherNoiseGen3;
+
+    /** Determines whether slowsand or gravel can be generated at a location */
     private final NoiseGeneratorOctaves slowsandGravelNoiseGen;
+
+    /**
+     * Determines whether something other than nettherack can be generated at a location
+     */
     private final NoiseGeneratorOctaves netherrackExculsivityNoiseGen;
     public final NoiseGeneratorOctaves netherNoiseGen6;
     public final NoiseGeneratorOctaves netherNoiseGen7;
@@ -57,11 +74,11 @@ public class ChunkProviderHell implements IChunkProvider
     double[] noiseData4;
     double[] noiseData5;
 
-    public ChunkProviderHell(World worldIn, boolean p_i45637_2_, long seed)
+    public ChunkProviderHell(World worldIn, boolean p_i45637_2_, long p_i45637_3_)
     {
         this.worldObj = worldIn;
         this.field_177466_i = p_i45637_2_;
-        this.hellRNG = new Random(seed);
+        this.hellRNG = new Random(p_i45637_3_);
         this.netherNoiseGen1 = new NoiseGeneratorOctaves(this.hellRNG, 16);
         this.netherNoiseGen2 = new NoiseGeneratorOctaves(this.hellRNG, 16);
         this.netherNoiseGen3 = new NoiseGeneratorOctaves(this.hellRNG, 8);
@@ -69,13 +86,13 @@ public class ChunkProviderHell implements IChunkProvider
         this.netherrackExculsivityNoiseGen = new NoiseGeneratorOctaves(this.hellRNG, 4);
         this.netherNoiseGen6 = new NoiseGeneratorOctaves(this.hellRNG, 10);
         this.netherNoiseGen7 = new NoiseGeneratorOctaves(this.hellRNG, 16);
-        worldIn.setSeaLevel(63);
+        worldIn.func_181544_b(63);
     }
 
     public void func_180515_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_)
     {
         int i = 4;
-        int j = this.worldObj.getSeaLevel() / 2 + 1;
+        int j = this.worldObj.func_181545_F() / 2 + 1;
         int k = i + 1;
         int l = 17;
         int i1 = i + 1;
@@ -148,7 +165,7 @@ public class ChunkProviderHell implements IChunkProvider
 
     public void func_180516_b(int p_180516_1_, int p_180516_2_, ChunkPrimer p_180516_3_)
     {
-        int i = this.worldObj.getSeaLevel() + 1;
+        int i = this.worldObj.func_181545_F() + 1;
         double d0 = 0.03125D;
         this.slowsandNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.slowsandNoise, p_180516_1_ * 16, p_180516_2_ * 16, 0, 16, 16, 1, d0, d0, 1.0D);
         this.gravelNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.gravelNoise, p_180516_1_ * 16, 109, p_180516_2_ * 16, 16, 1, 16, d0, 1.0D, d0);
@@ -237,6 +254,10 @@ public class ChunkProviderHell implements IChunkProvider
         }
     }
 
+    /**
+     * Will return back a chunk, if it doesn't exist and its not a MP client it will generates all the blocks for the
+     * specified chunk from the map seed and chunk seed
+     */
     public Chunk provideChunk(int x, int z)
     {
         this.hellRNG.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
@@ -263,6 +284,10 @@ public class ChunkProviderHell implements IChunkProvider
         return chunk;
     }
 
+    /**
+     * generates a subset of the level's terrain data. Takes 7 arguments: the [empty] noise array, the position, and the
+     * size.
+     */
     private double[] initializeNoiseField(double[] p_73164_1_, int p_73164_2_, int p_73164_3_, int p_73164_4_, int p_73164_5_, int p_73164_6_, int p_73164_7_)
     {
         if (p_73164_1_ == null)
@@ -348,16 +373,22 @@ public class ChunkProviderHell implements IChunkProvider
         return p_73164_1_;
     }
 
+    /**
+     * Checks to see if a chunk exists at x, z
+     */
     public boolean chunkExists(int x, int z)
     {
         return true;
     }
 
-    public void populate(IChunkProvider chunkProvider, int x, int z)
+    /**
+     * Populates chunk with ores etc etc
+     */
+    public void populate(IChunkProvider p_73153_1_, int p_73153_2_, int p_73153_3_)
     {
         BlockFalling.fallInstantly = true;
-        BlockPos blockpos = new BlockPos(x * 16, 0, z * 16);
-        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(x, z);
+        BlockPos blockpos = new BlockPos(p_73153_2_ * 16, 0, p_73153_3_ * 16);
+        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(p_73153_2_, p_73153_3_);
         this.genNetherBridge.generateStructure(this.worldObj, this.hellRNG, chunkcoordintpair);
 
         for (int i = 0; i < 8; ++i)
@@ -403,30 +434,47 @@ public class ChunkProviderHell implements IChunkProvider
         BlockFalling.fallInstantly = false;
     }
 
-    public boolean populateChunk(IChunkProvider chunkProvider, Chunk chunkIn, int x, int z)
+    public boolean func_177460_a(IChunkProvider p_177460_1_, Chunk p_177460_2_, int p_177460_3_, int p_177460_4_)
     {
         return false;
     }
 
-    public boolean saveChunks(boolean saveAllChunks, IProgressUpdate progressCallback)
+    /**
+     * Two modes of operation: if passed true, save all Chunks in one go.  If passed false, save up to two chunks.
+     * Return true if all chunks have been saved.
+     */
+    public boolean saveChunks(boolean p_73151_1_, IProgressUpdate progressCallback)
     {
         return true;
     }
 
+    /**
+     * Save extra data not associated with any Chunk.  Not saved during autosave, only during world unload.  Currently
+     * unimplemented.
+     */
     public void saveExtraData()
     {
     }
 
+    /**
+     * Unloads chunks that are marked to be unloaded. This is not guaranteed to unload every such chunk.
+     */
     public boolean unloadQueuedChunks()
     {
         return false;
     }
 
+    /**
+     * Returns if the IChunkProvider supports saving.
+     */
     public boolean canSave()
     {
         return true;
     }
 
+    /**
+     * Converts the instance data to a readable string.
+     */
     public String makeString()
     {
         return "HellRandomLevelSource";
@@ -441,7 +489,7 @@ public class ChunkProviderHell implements IChunkProvider
                 return this.genNetherBridge.getSpawnList();
             }
 
-            if (this.genNetherBridge.isPositionInStructure(this.worldObj, pos) && this.worldObj.getBlockState(pos.down()).getBlock() == Blocks.nether_brick)
+            if (this.genNetherBridge.func_175796_a(this.worldObj, pos) && this.worldObj.getBlockState(pos.down()).getBlock() == Blocks.nether_brick)
             {
                 return this.genNetherBridge.getSpawnList();
             }
@@ -461,9 +509,9 @@ public class ChunkProviderHell implements IChunkProvider
         return 0;
     }
 
-    public void recreateStructures(Chunk chunkIn, int x, int z)
+    public void recreateStructures(Chunk p_180514_1_, int p_180514_2_, int p_180514_3_)
     {
-        this.genNetherBridge.generate(this, this.worldObj, x, z, (ChunkPrimer)null);
+        this.genNetherBridge.generate(this, this.worldObj, p_180514_2_, p_180514_3_, (ChunkPrimer)null);
     }
 
     public Chunk provideChunk(BlockPos blockPosIn)

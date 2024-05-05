@@ -3,11 +3,11 @@ package net.minecraft.client.renderer.chunk;
 import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.EnumSet;
-import java.util.Queue;
 import java.util.Set;
+
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.IntegerCache;
+import net.optifine.IntegerCache;
 
 public class VisGraph
 {
@@ -17,6 +17,7 @@ public class VisGraph
     private final BitSet field_178612_d = new BitSet(4096);
     private static final int[] field_178613_e = new int[1352];
     private int field_178611_f = 4096;
+    private static final String __OBFID = "CL_00002450";
 
     public void func_178606_a(BlockPos pos)
     {
@@ -60,22 +61,22 @@ public class VisGraph
         return setvisibility;
     }
 
-    public Set<EnumFacing> func_178609_b(BlockPos pos)
+    public Set func_178609_b(BlockPos pos)
     {
         return this.func_178604_a(getIndex(pos));
     }
 
-    private Set<EnumFacing> func_178604_a(int p_178604_1_)
+    private Set func_178604_a(int p_178604_1_)
     {
-        Set<EnumFacing> set = EnumSet.<EnumFacing>noneOf(EnumFacing.class);
-        Queue<Integer> queue = new ArrayDeque(384);
-        queue.add(IntegerCache.getInteger(p_178604_1_));
+        EnumSet enumset = EnumSet.noneOf(EnumFacing.class);
+        ArrayDeque arraydeque = new ArrayDeque(384);
+        arraydeque.add(IntegerCache.valueOf(p_178604_1_));
         this.field_178612_d.set(p_178604_1_, true);
 
-        while (!((Queue)queue).isEmpty())
+        while (!arraydeque.isEmpty())
         {
-            int i = ((Integer)queue.poll()).intValue();
-            this.func_178610_a(i, set);
+            int i = ((Integer)arraydeque.poll()).intValue();
+            this.func_178610_a(i, enumset);
 
             for (EnumFacing enumfacing : EnumFacing.VALUES)
             {
@@ -84,15 +85,15 @@ public class VisGraph
                 if (j >= 0 && !this.field_178612_d.get(j))
                 {
                     this.field_178612_d.set(j, true);
-                    queue.add(IntegerCache.getInteger(j));
+                    arraydeque.add(IntegerCache.valueOf(j));
                 }
             }
         }
 
-        return set;
+        return enumset;
     }
 
-    private void func_178610_a(int p_178610_1_, Set<EnumFacing> p_178610_2_)
+    private void func_178610_a(int p_178610_1_, Set p_178610_2_)
     {
         int i = p_178610_1_ >> 0 & 15;
 
@@ -130,9 +131,9 @@ public class VisGraph
 
     private int func_178603_a(int p_178603_1_, EnumFacing p_178603_2_)
     {
-        switch (p_178603_2_)
+        switch (VisGraph.VisGraph$1.field_178617_a[p_178603_2_.ordinal()])
         {
-            case DOWN:
+            case 1:
                 if ((p_178603_1_ >> 8 & 15) == 0)
                 {
                     return -1;
@@ -140,7 +141,7 @@ public class VisGraph
 
                 return p_178603_1_ - field_178615_c;
 
-            case UP:
+            case 2:
                 if ((p_178603_1_ >> 8 & 15) == 15)
                 {
                     return -1;
@@ -148,7 +149,7 @@ public class VisGraph
 
                 return p_178603_1_ + field_178615_c;
 
-            case NORTH:
+            case 3:
                 if ((p_178603_1_ >> 4 & 15) == 0)
                 {
                     return -1;
@@ -156,7 +157,7 @@ public class VisGraph
 
                 return p_178603_1_ - field_178614_b;
 
-            case SOUTH:
+            case 4:
                 if ((p_178603_1_ >> 4 & 15) == 15)
                 {
                     return -1;
@@ -164,7 +165,7 @@ public class VisGraph
 
                 return p_178603_1_ + field_178614_b;
 
-            case WEST:
+            case 5:
                 if ((p_178603_1_ >> 0 & 15) == 0)
                 {
                     return -1;
@@ -172,7 +173,7 @@ public class VisGraph
 
                 return p_178603_1_ - field_178616_a;
 
-            case EAST:
+            case 6:
                 if ((p_178603_1_ >> 0 & 15) == 15)
                 {
                     return -1;
@@ -187,21 +188,84 @@ public class VisGraph
 
     static
     {
+        boolean flag = false;
+        boolean flag1 = true;
         int i = 0;
-        int j = 15;
-        int k = 0;
 
-        for (int l = 0; l < 16; ++l)
+        for (int j = 0; j < 16; ++j)
         {
-            for (int i1 = 0; i1 < 16; ++i1)
+            for (int k = 0; k < 16; ++k)
             {
-                for (int j1 = 0; j1 < 16; ++j1)
+                for (int l = 0; l < 16; ++l)
                 {
-                    if (l == 0 || l == 15 || i1 == 0 || i1 == 15 || j1 == 0 || j1 == 15)
+                    if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15)
                     {
-                        field_178613_e[k++] = getIndex(l, i1, j1);
+                        field_178613_e[i++] = getIndex(j, k, l);
                     }
                 }
+            }
+        }
+    }
+
+    static final class VisGraph$1
+    {
+        static final int[] field_178617_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00002449";
+
+        static
+        {
+            try
+            {
+                field_178617_a[EnumFacing.DOWN.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var6)
+            {
+                ;
+            }
+
+            try
+            {
+                field_178617_a[EnumFacing.UP.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var5)
+            {
+                ;
+            }
+
+            try
+            {
+                field_178617_a[EnumFacing.NORTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                field_178617_a[EnumFacing.SOUTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_178617_a[EnumFacing.WEST.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_178617_a[EnumFacing.EAST.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
             }
         }
     }

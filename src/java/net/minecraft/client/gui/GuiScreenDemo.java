@@ -14,6 +14,10 @@ public class GuiScreenDemo extends GuiScreen
     private static final Logger logger = LogManager.getLogger();
     private static final ResourceLocation field_146348_f = new ResourceLocation("textures/gui/demo_background.png");
 
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
     public void initGui()
     {
         this.buttonList.clear();
@@ -22,6 +26,9 @@ public class GuiScreenDemo extends GuiScreen
         this.buttonList.add(new GuiButton(2, this.width / 2 + 2, this.height / 2 + 62 + i, 114, 20, I18n.format("demo.help.later", new Object[0])));
     }
 
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
     protected void actionPerformed(GuiButton button) throws IOException
     {
         switch (button.id)
@@ -48,11 +55,17 @@ public class GuiScreenDemo extends GuiScreen
         }
     }
 
+    /**
+     * Called from the main game loop to update the screen.
+     */
     public void updateScreen()
     {
         super.updateScreen();
     }
 
+    /**
+     * Draws either a gradient over the background screen (when it exists) or a flat gradient over background.png
+     */
     public void drawDefaultBackground()
     {
         super.drawDefaultBackground();
@@ -63,6 +76,9 @@ public class GuiScreenDemo extends GuiScreen
         this.drawTexturedModalRect(i, j, 0, 0, 248, 166);
     }
 
+    /**
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();

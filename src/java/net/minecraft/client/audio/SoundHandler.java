@@ -130,7 +130,7 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
             String s = soundlist$soundentry.getSoundEntryName();
             ResourceLocation resourcelocation = new ResourceLocation(s);
             final String s1 = s.contains(":") ? resourcelocation.getResourceDomain() : location.getResourceDomain();
-            ISoundEventAccessor<SoundPoolEntry> isoundeventaccessor;
+            Object lvt_10_1_;
 
             switch (soundlist$soundentry.getSoundEntryType())
             {
@@ -157,11 +157,11 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
                         IOUtils.closeQuietly(inputstream);
                     }
 
-                    isoundeventaccessor = new SoundEventAccessor(new SoundPoolEntry(resourcelocation1, (double)soundlist$soundentry.getSoundEntryPitch(), (double)soundlist$soundentry.getSoundEntryVolume(), soundlist$soundentry.isStreaming()), soundlist$soundentry.getSoundEntryWeight());
+                    lvt_10_1_ = new SoundEventAccessor(new SoundPoolEntry(resourcelocation1, (double)soundlist$soundentry.getSoundEntryPitch(), (double)soundlist$soundentry.getSoundEntryVolume(), soundlist$soundentry.isStreaming()), soundlist$soundentry.getSoundEntryWeight());
                     break;
 
                 case SOUND_EVENT:
-                    isoundeventaccessor = new ISoundEventAccessor<SoundPoolEntry>()
+                    lvt_10_1_ = new ISoundEventAccessor<SoundPoolEntry>()
                     {
                         final ResourceLocation field_148726_a = new ResourceLocation(s1, soundlist$soundentry.getSoundEntryName());
                         public int getWeight()
@@ -181,7 +181,7 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
                     throw new IllegalStateException("IN YOU FACE");
             }
 
-            soundeventaccessorcomposite.addSoundToEventPool(isoundeventaccessor);
+            soundeventaccessorcomposite.addSoundToEventPool((ISoundEventAccessor<SoundPoolEntry>)lvt_10_1_);
         }
     }
 
@@ -190,11 +190,17 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
         return (SoundEventAccessorComposite)this.sndRegistry.getObject(location);
     }
 
+    /**
+     * Play a sound
+     */
     public void playSound(ISound sound)
     {
         this.sndManager.playSound(sound);
     }
 
+    /**
+     * Plays the sound in n ticks
+     */
     public void playDelayedSound(ISound sound, int delay)
     {
         this.sndManager.playDelayedSound(sound, delay);
@@ -220,6 +226,9 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
         this.sndManager.unloadSoundSystem();
     }
 
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
     public void update()
     {
         this.sndManager.updateAllSounds();
@@ -245,6 +254,9 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
         this.sndManager.stopSound(p_147683_1_);
     }
 
+    /**
+     * Returns a random sound from one or more categories
+     */
     public SoundEventAccessorComposite getRandomSoundFromCategories(SoundCategory... categories)
     {
         List<SoundEventAccessorComposite> list = Lists.<SoundEventAccessorComposite>newArrayList();

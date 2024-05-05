@@ -142,7 +142,7 @@ public class ItemMap extends ItemMapBase
                                                     while (true)
                                                     {
                                                         --k4;
-                                                        iblockstate = chunk.getBlockState(blockpos$mutableblockpos.set(i4 + i3, k4, j4 + j3));
+                                                        iblockstate = chunk.getBlockState(blockpos$mutableblockpos.func_181079_c(i4 + i3, k4, j4 + j3));
 
                                                         if (iblockstate.getBlock().getMapColor(iblockstate) != MapColor.airColor || k4 <= 0)
                                                         {
@@ -228,6 +228,10 @@ public class ItemMap extends ItemMapBase
         }
     }
 
+    /**
+     * Called each tick as long the item is on a player inventory. Uses by maps to check if is on a player hand and
+     * update it's contents.
+     */
     public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
         if (!worldIn.isRemote)
@@ -252,6 +256,9 @@ public class ItemMap extends ItemMapBase
         return this.getMapData(stack, worldIn).getMapPacket(stack, worldIn, player);
     }
 
+    /**
+     * Called when item is crafted/smelted. Used only by maps so far.
+     */
     public void onCreated(ItemStack stack, World worldIn, EntityPlayer playerIn)
     {
         if (stack.hasTagCompound() && stack.getTagCompound().getBoolean("map_is_scaling"))
@@ -273,6 +280,9 @@ public class ItemMap extends ItemMapBase
         }
     }
 
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         MapData mapdata = this.getMapData(stack, playerIn.worldObj);

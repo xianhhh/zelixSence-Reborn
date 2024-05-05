@@ -45,21 +45,30 @@ public class BlockSign extends BlockContainer
         return true;
     }
 
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
     public boolean isOpaqueCube()
     {
         return false;
     }
 
-    public boolean canSpawnInBlock()
+    public boolean func_181623_g()
     {
         return true;
     }
 
+    /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     */
     public TileEntity createNewTileEntity(World worldIn, int meta)
     {
         return new TileEntitySign();
     }
 
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.sign;
@@ -85,6 +94,6 @@ public class BlockSign extends BlockContainer
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
+        return !this.func_181087_e(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
     }
 }

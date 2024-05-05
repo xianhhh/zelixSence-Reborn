@@ -13,6 +13,8 @@ import net.minecraft.world.biome.BiomeGenBase;
 public class MapGenVillage extends MapGenStructure
 {
     public static final List<BiomeGenBase> villageSpawnBiomes = Arrays.<BiomeGenBase>asList(new BiomeGenBase[] {BiomeGenBase.plains, BiomeGenBase.desert, BiomeGenBase.savanna});
+
+    /** World terrain type, 0 for normal, 1 for flat map */
     private int terrainType;
     private int field_82665_g;
     private int field_82666_h;
@@ -94,11 +96,11 @@ public class MapGenVillage extends MapGenStructure
         {
         }
 
-        public Start(World worldIn, Random rand, int x, int z, int size)
+        public Start(World worldIn, Random rand, int x, int z, int p_i2092_5_)
         {
             super(x, z);
-            List<StructureVillagePieces.PieceWeight> list = StructureVillagePieces.getStructureVillageWeightedPieceList(rand, size);
-            StructureVillagePieces.Start structurevillagepieces$start = new StructureVillagePieces.Start(worldIn.getWorldChunkManager(), 0, rand, (x << 4) + 2, (z << 4) + 2, list, size);
+            List<StructureVillagePieces.PieceWeight> list = StructureVillagePieces.getStructureVillageWeightedPieceList(rand, p_i2092_5_);
+            StructureVillagePieces.Start structurevillagepieces$start = new StructureVillagePieces.Start(worldIn.getWorldChunkManager(), 0, rand, (x << 4) + 2, (z << 4) + 2, list, p_i2092_5_);
             this.components.add(structurevillagepieces$start);
             structurevillagepieces$start.buildComponent(structurevillagepieces$start, this.components, rand);
             List<StructureComponent> list1 = structurevillagepieces$start.field_74930_j;

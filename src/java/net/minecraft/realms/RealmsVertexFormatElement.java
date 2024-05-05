@@ -6,9 +6,9 @@ public class RealmsVertexFormatElement
 {
     private VertexFormatElement v;
 
-    public RealmsVertexFormatElement(VertexFormatElement vIn)
+    public RealmsVertexFormatElement(VertexFormatElement p_i46463_1_)
     {
-        this.v = vIn;
+        this.v = p_i46463_1_;
     }
 
     public VertexFormatElement getVertexFormatElement()

@@ -40,6 +40,9 @@ public class S27PacketExplosion implements Packet<INetHandlerPlayClient>
         }
     }
 
+    /**
+     * Reads the raw packet data from the data stream.
+     */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
         this.posX = (double)buf.readFloat();
@@ -65,6 +68,9 @@ public class S27PacketExplosion implements Packet<INetHandlerPlayClient>
         this.field_149159_h = buf.readFloat();
     }
 
+    /**
+     * Writes the raw packet data to the data stream.
+     */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
         buf.writeFloat((float)this.posX);
@@ -91,6 +97,9 @@ public class S27PacketExplosion implements Packet<INetHandlerPlayClient>
         buf.writeFloat(this.field_149159_h);
     }
 
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
     public void processPacket(INetHandlerPlayClient handler)
     {
         handler.handleExplosion(this);

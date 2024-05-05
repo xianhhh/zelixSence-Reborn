@@ -8,12 +8,8 @@ import java.util.List;
 import java.util.Properties;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.optifine.render.Blender;
-import net.optifine.util.PropertiesOrdered;
-import net.optifine.util.TextureUtils;
 
 public class CustomSky
 {
@@ -59,7 +55,7 @@ public class CustomSky
                         break;
                     }
 
-                    Properties properties = new PropertiesOrdered();
+                    Properties properties = new Properties();
                     properties.load(inputstream);
                     inputstream.close();
                     Config.dbg("CustomSky properties: " + s2);
@@ -119,55 +115,53 @@ public class CustomSky
         }
     }
 
-    public static void renderSky(World world, TextureManager re, float partialTicks)
+    public static void renderSky(World p_renderSky_0_, TextureManager p_renderSky_1_, float p_renderSky_2_, float p_renderSky_3_)
     {
         if (worldSkyLayers != null)
         {
-            int i = world.provider.getDimensionId();
-
-            if (i >= 0 && i < worldSkyLayers.length)
+            if (Config.getGameSettings().renderDistanceChunks >= 8)
             {
-                CustomSkyLayer[] acustomskylayer = worldSkyLayers[i];
+                int i = p_renderSky_0_.provider.getDimensionId();
 
-                if (acustomskylayer != null)
+                if (i >= 0 && i < worldSkyLayers.length)
                 {
-                    long j = world.getWorldTime();
-                    int k = (int)(j % 24000L);
-                    float f = world.getCelestialAngle(partialTicks);
-                    float f1 = world.getRainStrength(partialTicks);
-                    float f2 = world.getThunderStrength(partialTicks);
+                    CustomSkyLayer[] acustomskylayer = worldSkyLayers[i];
 
-                    if (f1 > 0.0F)
+                    if (acustomskylayer != null)
                     {
-                        f2 /= f1;
-                    }
+                        long j = p_renderSky_0_.getWorldTime();
+                        int k = (int)(j % 24000L);
 
-                    for (int l = 0; l < acustomskylayer.length; ++l)
-                    {
-                        CustomSkyLayer customskylayer = acustomskylayer[l];
-
-                        if (customskylayer.isActive(world, k))
+                        for (int l = 0; l < acustomskylayer.length; ++l)
                         {
-                            customskylayer.render(world, k, f, f1, f2);
-                        }
-                    }
+                            CustomSkyLayer customskylayer = acustomskylayer[l];
 
-                    float f3 = 1.0F - f1;
-                    Blender.clearBlend(f3);
+                            if (customskylayer.isActive(p_renderSky_0_, k))
+                            {
+                                customskylayer.render(k, p_renderSky_2_, p_renderSky_3_);
+                            }
+                        }
+
+                        Blender.clearBlend(p_renderSky_3_);
+                    }
                 }
             }
         }
     }
 
-    public static boolean hasSkyLayers(World world)
+    public static boolean hasSkyLayers(World p_hasSkyLayers_0_)
     {
         if (worldSkyLayers == null)
         {
             return false;
         }
+        else if (Config.getGameSettings().renderDistanceChunks < 8)
+        {
+            return false;
+        }
         else
         {
-            int i = world.provider.getDimensionId();
+            int i = p_hasSkyLayers_0_.provider.getDimensionId();
 
             if (i >= 0 && i < worldSkyLayers.length)
             {

@@ -18,9 +18,16 @@ import org.apache.logging.log4j.Logger;
 public class ChunkProviderClient implements IChunkProvider
 {
     private static final Logger logger = LogManager.getLogger();
+
+    /**
+     * The completely empty chunk used by ChunkProviderClient when chunkMapping doesn't contain the requested
+     * coordinates.
+     */
     private Chunk blankChunk;
-    private LongHashMap<Chunk> chunkMapping = new LongHashMap();
+    private LongHashMap chunkMapping = new LongHashMap();
     private List<Chunk> chunkListing = Lists.<Chunk>newArrayList();
+
+    /** Reference to the World object. */
     private World worldObj;
 
     public ChunkProviderClient(World worldIn)
@@ -29,48 +36,73 @@ public class ChunkProviderClient implements IChunkProvider
         this.worldObj = worldIn;
     }
 
+    /**
+     * Checks to see if a chunk exists at x, z
+     */
     public boolean chunkExists(int x, int z)
     {
         return true;
     }
 
-    public void unloadChunk(int x, int z)
+    /**
+     * Unload chunk from ChunkProviderClient's hashmap. Called in response to a Packet50PreChunk with its mode field set
+     * to false
+     */
+    public void unloadChunk(int p_73234_1_, int p_73234_2_)
     {
-        Chunk chunk = this.provideChunk(x, z);
+        Chunk chunk = this.provideChunk(p_73234_1_, p_73234_2_);
 
         if (!chunk.isEmpty())
         {
             chunk.onChunkUnload();
         }
 
-        this.chunkMapping.remove(ChunkCoordIntPair.chunkXZ2Int(x, z));
+        this.chunkMapping.remove(ChunkCoordIntPair.chunkXZ2Int(p_73234_1_, p_73234_2_));
         this.chunkListing.remove(chunk);
     }
 
-    public Chunk loadChunk(int chunkX, int chunkZ)
+    /**
+     * loads or generates the chunk at the chunk location specified
+     */
+    public Chunk loadChunk(int p_73158_1_, int p_73158_2_)
     {
-        Chunk chunk = new Chunk(this.worldObj, chunkX, chunkZ);
-        this.chunkMapping.add(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ), chunk);
+        Chunk chunk = new Chunk(this.worldObj, p_73158_1_, p_73158_2_);
+        this.chunkMapping.add(ChunkCoordIntPair.chunkXZ2Int(p_73158_1_, p_73158_2_), chunk);
         this.chunkListing.add(chunk);
         chunk.setChunkLoaded(true);
         return chunk;
     }
 
+    /**
+     * Will return back a chunk, if it doesn't exist and its not a MP client it will generates all the blocks for the
+     * specified chunk from the map seed and chunk seed
+     */
     public Chunk provideChunk(int x, int z)
     {
         Chunk chunk = (Chunk)this.chunkMapping.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
         return chunk == null ? this.blankChunk : chunk;
     }
 
-    public boolean saveChunks(boolean saveAllChunks, IProgressUpdate progressCallback)
+    /**
+     * Two modes of operation: if passed true, save all Chunks in one go.  If passed false, save up to two chunks.
+     * Return true if all chunks have been saved.
+     */
+    public boolean saveChunks(boolean p_73151_1_, IProgressUpdate progressCallback)
     {
         return true;
     }
 
+    /**
+     * Save extra data not associated with any Chunk.  Not saved during autosave, only during world unload.  Currently
+     * unimplemented.
+     */
     public void saveExtraData()
     {
     }
 
+    /**
+     * Unloads chunks that are marked to be unloaded. This is not guaranteed to unload every such chunk.
+     */
     public boolean unloadQueuedChunks()
     {
         long i = System.currentTimeMillis();
@@ -88,20 +120,29 @@ public class ChunkProviderClient implements IChunkProvider
         return false;
     }
 
+    /**
+     * Returns if the IChunkProvider supports saving.
+     */
     public boolean canSave()
     {
         return false;
     }
 
-    public void populate(IChunkProvider chunkProvider, int x, int z)
+    /**
+     * Populates chunk with ores etc etc
+     */
+    public void populate(IChunkProvider p_73153_1_, int p_73153_2_, int p_73153_3_)
     {
     }
 
-    public boolean populateChunk(IChunkProvider chunkProvider, Chunk chunkIn, int x, int z)
+    public boolean func_177460_a(IChunkProvider p_177460_1_, Chunk p_177460_2_, int p_177460_3_, int p_177460_4_)
     {
         return false;
     }
 
+    /**
+     * Converts the instance data to a readable string.
+     */
     public String makeString()
     {
         return "MultiplayerChunkCache: " + this.chunkMapping.getNumHashElements() + ", " + this.chunkListing.size();
@@ -122,7 +163,7 @@ public class ChunkProviderClient implements IChunkProvider
         return this.chunkListing.size();
     }
 
-    public void recreateStructures(Chunk chunkIn, int x, int z)
+    public void recreateStructures(Chunk p_180514_1_, int p_180514_2_, int p_180514_3_)
     {
     }
 

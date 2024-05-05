@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 
 public class EntityFlameFX extends EntityFX
 {
+    /** the scale of the flame FX */
     private float flameScale;
 
     protected EntityFlameFX(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn)
@@ -25,11 +26,14 @@ public class EntityFlameFX extends EntityFX
         this.setParticleTextureIndex(48);
     }
 
-    public void renderParticle(WorldRenderer worldRendererIn, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
+    /**
+     * Renders the particle
+     */
+    public void renderParticle(WorldRenderer worldRendererIn, Entity entityIn, float partialTicks, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
         float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge;
         this.particleScale = this.flameScale * (1.0F - f * f * 0.5F);
-        super.renderParticle(worldRendererIn, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+        super.renderParticle(worldRendererIn, entityIn, partialTicks, p_180434_4_, p_180434_5_, p_180434_6_, p_180434_7_, p_180434_8_);
     }
 
     public int getBrightnessForRender(float partialTicks)
@@ -49,6 +53,9 @@ public class EntityFlameFX extends EntityFX
         return j | k << 16;
     }
 
+    /**
+     * Gets how bright this entity is.
+     */
     public float getBrightness(float partialTicks)
     {
         float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge;
@@ -57,6 +64,9 @@ public class EntityFlameFX extends EntityFX
         return f1 * f + (1.0F - f);
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         this.prevPosX = this.posX;

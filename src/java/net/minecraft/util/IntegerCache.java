@@ -2,20 +2,20 @@ package net.minecraft.util;
 
 public class IntegerCache
 {
-    private static final Integer[] CACHE = new Integer[65535];
+    private static final Integer[] field_181757_a = new Integer[65535];
 
-    public static Integer getInteger(int value)
+    public static Integer func_181756_a(int p_181756_0_)
     {
-        return value >= 0 && value < CACHE.length ? CACHE[value] : new Integer(value);
+        return p_181756_0_ > 0 && p_181756_0_ < field_181757_a.length ? field_181757_a[p_181756_0_] : Integer.valueOf(p_181756_0_);
     }
 
     static
     {
         int i = 0;
 
-        for (int j = CACHE.length; i < j; ++i)
+        for (int j = field_181757_a.length; i < j; ++i)
         {
-            CACHE[i] = Integer.valueOf(i);
+            field_181757_a[i] = Integer.valueOf(i);
         }
     }
 }

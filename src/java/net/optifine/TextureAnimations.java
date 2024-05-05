@@ -14,17 +14,11 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
-import net.optifine.util.PropertiesOrdered;
-import net.optifine.util.ResUtils;
-import net.optifine.util.TextureUtils;
 
 public class TextureAnimations
 {
     private static TextureAnimation[] textureAnimations = null;
-    private static int countAnimationsActive = 0;
-    private static int frameCountAnimations = 0;
 
     public static void reset()
     {
@@ -34,55 +28,45 @@ public class TextureAnimations
     public static void update()
     {
         textureAnimations = null;
-        countAnimationsActive = 0;
         IResourcePack[] airesourcepack = Config.getResourcePacks();
         textureAnimations = getTextureAnimations(airesourcepack);
-        updateAnimations();
+
+        if (Config.isAnimatedTextures())
+        {
+            updateAnimations();
+        }
+    }
+
+    public static void updateCustomAnimations()
+    {
+        if (textureAnimations != null)
+        {
+            if (Config.isAnimatedTextures())
+            {
+                updateAnimations();
+            }
+        }
     }
 
     public static void updateAnimations()
     {
-        if (textureAnimations != null && Config.isAnimatedTextures())
+        if (textureAnimations != null)
         {
-            int i = 0;
-
-            for (int j = 0; j < textureAnimations.length; ++j)
+            for (int i = 0; i < textureAnimations.length; ++i)
             {
-                TextureAnimation textureanimation = textureAnimations[j];
+                TextureAnimation textureanimation = textureAnimations[i];
                 textureanimation.updateTexture();
-
-                if (textureanimation.isActive())
-                {
-                    ++i;
-                }
             }
-
-            int k = Config.getMinecraft().entityRenderer.frameCount;
-
-            if (k != frameCountAnimations)
-            {
-                countAnimationsActive = i;
-                frameCountAnimations = k;
-            }
-
-            if (SmartAnimations.isActive())
-            {
-                SmartAnimations.resetTexturesRendered();
-            }
-        }
-        else
-        {
-            countAnimationsActive = 0;
         }
     }
 
-    private static TextureAnimation[] getTextureAnimations(IResourcePack[] rps)
+    public static TextureAnimation[] getTextureAnimations(IResourcePack[] p_getTextureAnimations_0_)
     {
         List list = new ArrayList();
 
-        for (int i = 0; i < rps.length; ++i)
+        for (int i = 0; i < p_getTextureAnimations_0_.length; ++i)
         {
-            IResourcePack iresourcepack = rps[i];
+            IResourcePack iresourcepack = p_getTextureAnimations_0_[i];
             TextureAnimation[] atextureanimation = getTextureAnimations(iresourcepack);
 
             if (atextureanimation != null)
@@ -95,9 +79,9 @@ public class TextureAnimations
         return atextureanimation1;
     }
 
-    private static TextureAnimation[] getTextureAnimations(IResourcePack rp)
+    public static TextureAnimation[] getTextureAnimations(IResourcePack p_getTextureAnimations_0_)
     {
-        String[] astring = ResUtils.collectFiles(rp, (String)"mcpatcher/anim/", (String)".properties", (String[])null);
+        String[] astring = ResUtils.collectFiles(p_getTextureAnimations_0_, (String)"mcpatcher/anim", (String)".properties", (String[])null);
 
         if (astring.length <= 0)
         {
@@ -115,17 +99,16 @@ public class TextureAnimations
                 try
                 {
                     ResourceLocation resourcelocation = new ResourceLocation(s);
-                    InputStream inputstream = rp.getInputStream(resourcelocation);
-                    Properties properties = new PropertiesOrdered();
+                    InputStream inputstream = p_getTextureAnimations_0_.getInputStream(resourcelocation);
+                    Properties properties = new Properties();
                     properties.load(inputstream);
-                    inputstream.close();
                     TextureAnimation textureanimation = makeTextureAnimation(properties, resourcelocation);
 
                     if (textureanimation != null)
                     {
                         ResourceLocation resourcelocation1 = new ResourceLocation(textureanimation.getDstTex());
 
-                        if (Config.getDefiningResourcePack(resourcelocation1) != rp)
+                        if (Config.getDefiningResourcePack(resourcelocation1) != p_getTextureAnimations_0_)
                         {
                             Config.dbg("Skipped: " + s + ", target texture not loaded from same resource pack");
                         }
@@ -150,14 +133,14 @@ public class TextureAnimations
         }
     }
 
-    private static TextureAnimation makeTextureAnimation(Properties props, ResourceLocation propLoc)
+    public static TextureAnimation makeTextureAnimation(Properties p_makeTextureAnimation_0_, ResourceLocation p_makeTextureAnimation_1_)
     {
-        String s = props.getProperty("from");
-        String s1 = props.getProperty("to");
-        int i = Config.parseInt(props.getProperty("x"), -1);
-        int j = Config.parseInt(props.getProperty("y"), -1);
-        int k = Config.parseInt(props.getProperty("w"), -1);
-        int l = Config.parseInt(props.getProperty("h"), -1);
+        String s = p_makeTextureAnimation_0_.getProperty("from");
+        String s1 = p_makeTextureAnimation_0_.getProperty("to");
+        int i = Config.parseInt(p_makeTextureAnimation_0_.getProperty("x"), -1);
+        int j = Config.parseInt(p_makeTextureAnimation_0_.getProperty("y"), -1);
+        int k = Config.parseInt(p_makeTextureAnimation_0_.getProperty("w"), -1);
+        int l = Config.parseInt(p_makeTextureAnimation_0_.getProperty("h"), -1);
 
         if (s != null && s1 != null)
         {
@@ -165,7 +148,7 @@ public class TextureAnimations
             {
                 s = s.trim();
                 s1 = s1.trim();
-                String s2 = TextureUtils.getBasePath(propLoc.getResourcePath());
+                String s2 = TextureUtils.getBasePath(p_makeTextureAnimation_1_.getResourcePath());
                 s = TextureUtils.fixResourcePath(s, s2);
                 s1 = TextureUtils.fixResourcePath(s1, s2);
                 byte[] abyte = getCustomTextureData(s, k);
@@ -177,49 +160,17 @@ public class TextureAnimations
                 }
                 else
                 {
-                    int i1 = abyte.length / 4;
-                    int j1 = i1 / (k * l);
-                    int k1 = j1 * k * l;
+                    ResourceLocation resourcelocation = new ResourceLocation(s1);
 
-                    if (i1 != k1)
+                    if (!Config.hasResource(resourcelocation))
                     {
-                        Config.warn("TextureAnimation: Source texture has invalid number of frames: " + s + ", frames: " + (float)i1 / (float)(k * l));
+                        Config.warn("TextureAnimation: Target texture not found: " + s1);
                         return null;
                     }
                     else
                     {
-                        ResourceLocation resourcelocation = new ResourceLocation(s1);
-
-                        try
-                        {
-                            InputStream inputstream = Config.getResourceStream(resourcelocation);
-
-                            if (inputstream == null)
-                            {
-                                Config.warn("TextureAnimation: Target texture not found: " + s1);
-                                return null;
-                            }
-                            else
-                            {
-                                BufferedImage bufferedimage = readTextureImage(inputstream);
-
-                                if (i + k <= bufferedimage.getWidth() && j + l <= bufferedimage.getHeight())
-                                {
-                                    TextureAnimation textureanimation = new TextureAnimation(s, abyte, s1, resourcelocation, i, j, k, l, props);
-                                    return textureanimation;
-                                }
-                                else
-                                {
-                                    Config.warn("TextureAnimation: Animation coordinates are outside the target texture: " + s1);
-                                    return null;
-                                }
-                            }
-                        }
-                        catch (IOException var17)
-                        {
-                            Config.warn("TextureAnimation: Target texture not found: " + s1);
-                            return null;
-                        }
+                        TextureAnimation textureanimation = new TextureAnimation(s, abyte, s1, resourcelocation, i, j, k, l, p_makeTextureAnimation_0_, 1);
+                        return textureanimation;
                     }
                 }
             }
@@ -236,25 +187,25 @@ public class TextureAnimations
         }
     }
 
-    private static byte[] getCustomTextureData(String imagePath, int tileWidth)
+    public static byte[] getCustomTextureData(String p_getCustomTextureData_0_, int p_getCustomTextureData_1_)
     {
-        byte[] abyte = loadImage(imagePath, tileWidth);
+        byte[] abyte = loadImage(p_getCustomTextureData_0_, p_getCustomTextureData_1_);
 
         if (abyte == null)
         {
-            abyte = loadImage("/anim" + imagePath, tileWidth);
+            abyte = loadImage("/anim" + p_getCustomTextureData_0_, p_getCustomTextureData_1_);
         }
 
         return abyte;
     }
 
-    private static byte[] loadImage(String name, int targetWidth)
+    private static byte[] loadImage(String p_loadImage_0_, int p_loadImage_1_)
     {
         GameSettings gamesettings = Config.getGameSettings();
 
         try
         {
-            ResourceLocation resourcelocation = new ResourceLocation(name);
+            ResourceLocation resourcelocation = new ResourceLocation(p_loadImage_0_);
             InputStream inputstream = Config.getResourceStream(resourcelocation);
 
             if (inputstream == null)
@@ -272,11 +223,11 @@ public class TextureAnimations
                 }
                 else
                 {
-                    if (targetWidth > 0 && bufferedimage.getWidth() != targetWidth)
+                    if (p_loadImage_1_ > 0 && bufferedimage.getWidth() != p_loadImage_1_)
                     {
                         double d0 = (double)(bufferedimage.getHeight() / bufferedimage.getWidth());
-                        int j = (int)((double)targetWidth * d0);
-                        bufferedimage = scaleBufferedImage(bufferedimage, targetWidth, j);
+                        int j = (int)((double)p_loadImage_1_ * d0);
+                        bufferedimage = scaleBufferedImage(bufferedimage, p_loadImage_1_, j);
                     }
 
                     int k2 = bufferedimage.getWidth();
@@ -323,29 +274,19 @@ public class TextureAnimations
         }
     }
 
-    private static BufferedImage readTextureImage(InputStream par1InputStream) throws IOException
+    private static BufferedImage readTextureImage(InputStream p_readTextureImage_0_) throws IOException
     {
-        BufferedImage bufferedimage = ImageIO.read(par1InputStream);
-        par1InputStream.close();
+        BufferedImage bufferedimage = ImageIO.read(p_readTextureImage_0_);
+        p_readTextureImage_0_.close();
         return bufferedimage;
     }
 
-    private static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height)
+    public static BufferedImage scaleBufferedImage(BufferedImage p_scaleBufferedImage_0_, int p_scaleBufferedImage_1_, int p_scaleBufferedImage_2_)
     {
-        BufferedImage bufferedimage = new BufferedImage(width, height, 2);
+        BufferedImage bufferedimage = new BufferedImage(p_scaleBufferedImage_1_, p_scaleBufferedImage_2_, 2);
         Graphics2D graphics2d = bufferedimage.createGraphics();
         graphics2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2d.drawImage(image, 0, 0, width, height, (ImageObserver)null);
+        graphics2d.drawImage(p_scaleBufferedImage_0_, 0, 0, p_scaleBufferedImage_1_, p_scaleBufferedImage_2_, (ImageObserver)null);
         return bufferedimage;
-    }
-
-    public static int getCountAnimations()
-    {
-        return textureAnimations == null ? 0 : textureAnimations.length;
-    }
-
-    public static int getCountAnimationsActive()
-    {
-        return countAnimationsActive;
     }
 }

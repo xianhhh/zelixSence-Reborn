@@ -40,19 +40,24 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
     private final MinecraftServer server;
     public final NetworkManager networkManager;
     private NetHandlerLoginServer.LoginState currentLoginState = NetHandlerLoginServer.LoginState.HELLO;
+
+    /** How long has player been trying to login into the server. */
     private int connectionTimer;
     private GameProfile loginGameProfile;
     private String serverId = "";
     private SecretKey secretKey;
-    private EntityPlayerMP player;
+    private EntityPlayerMP field_181025_l;
 
-    public NetHandlerLoginServer(MinecraftServer serverIn, NetworkManager networkManagerIn)
+    public NetHandlerLoginServer(MinecraftServer p_i45298_1_, NetworkManager p_i45298_2_)
     {
-        this.server = serverIn;
-        this.networkManager = networkManagerIn;
+        this.server = p_i45298_1_;
+        this.networkManager = p_i45298_2_;
         RANDOM.nextBytes(this.verifyToken);
     }
 
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
     public void update()
     {
         if (this.currentLoginState == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT)
@@ -66,8 +71,8 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
             if (entityplayermp == null)
             {
                 this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-                this.server.getConfigurationManager().initializeConnectionToPlayer(this.networkManager, this.player);
-                this.player = null;
+                this.server.getConfigurationManager().initializeConnectionToPlayer(this.networkManager, this.field_181025_l);
+                this.field_181025_l = null;
             }
         }
 
@@ -126,7 +131,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
             if (entityplayermp != null)
             {
                 this.currentLoginState = NetHandlerLoginServer.LoginState.DELAY_ACCEPT;
-                this.player = this.server.getConfigurationManager().createPlayerForUser(this.loginGameProfile);
+                this.field_181025_l = this.server.getConfigurationManager().createPlayerForUser(this.loginGameProfile);
             }
             else
             {
@@ -135,6 +140,9 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
         }
     }
 
+    /**
+     * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
+     */
     public void onDisconnect(IChatComponent reason)
     {
         logger.info(this.getConnectionInfo() + " lost connection: " + reason.getUnformattedText());

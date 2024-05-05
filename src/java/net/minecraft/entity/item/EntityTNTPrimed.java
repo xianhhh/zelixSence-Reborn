@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 
 public class EntityTNTPrimed extends Entity
 {
+    /** How long the fuse is */
     public int fuse;
     private EntityLivingBase tntPlacedBy;
 
@@ -18,35 +19,45 @@ public class EntityTNTPrimed extends Entity
         this.setSize(0.98F, 0.98F);
     }
 
-    public EntityTNTPrimed(World worldIn, double x, double y, double z, EntityLivingBase igniter)
+    public EntityTNTPrimed(World worldIn, double p_i1730_2_, double p_i1730_4_, double p_i1730_6_, EntityLivingBase p_i1730_8_)
     {
         this(worldIn);
-        this.setPosition(x, y, z);
+        this.setPosition(p_i1730_2_, p_i1730_4_, p_i1730_6_);
         float f = (float)(Math.random() * Math.PI * 2.0D);
         this.motionX = (double)(-((float)Math.sin((double)f)) * 0.02F);
         this.motionY = 0.20000000298023224D;
         this.motionZ = (double)(-((float)Math.cos((double)f)) * 0.02F);
         this.fuse = 80;
-        this.prevPosX = x;
-        this.prevPosY = y;
-        this.prevPosZ = z;
-        this.tntPlacedBy = igniter;
+        this.prevPosX = p_i1730_2_;
+        this.prevPosY = p_i1730_4_;
+        this.prevPosZ = p_i1730_6_;
+        this.tntPlacedBy = p_i1730_8_;
     }
 
     protected void entityInit()
     {
     }
 
+    /**
+     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
+     * prevent them from trampling crops
+     */
     protected boolean canTriggerWalking()
     {
         return false;
     }
 
+    /**
+     * Returns true if other Entities should be prevented from moving through this Entity.
+     */
     public boolean canBeCollidedWith()
     {
         return !this.isDead;
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         this.prevPosX = this.posX;
@@ -87,16 +98,25 @@ public class EntityTNTPrimed extends Entity
         this.worldObj.createExplosion(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, f, true);
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         tagCompound.setByte("Fuse", (byte)this.fuse);
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         this.fuse = tagCompund.getByte("Fuse");
     }
 
+    /**
+     * returns null or the entityliving it was placed or ignited by
+     */
     public EntityLivingBase getTntPlacedBy()
     {
         return this.tntPlacedBy;

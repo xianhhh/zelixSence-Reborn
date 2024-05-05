@@ -8,8 +8,18 @@ import net.minecraft.util.MathHelper;
 public class EntityLookHelper
 {
     private EntityLiving entity;
+
+    /**
+     * The amount of change that is made each update for an entity facing a direction.
+     */
     private float deltaLookYaw;
+
+    /**
+     * The amount of change that is made each update for an entity facing a direction.
+     */
     private float deltaLookPitch;
+
+    /** Whether or not the entity is trying to look at something. */
     private boolean isLooking;
     private double posX;
     private double posY;
@@ -20,6 +30,9 @@ public class EntityLookHelper
         this.entity = entitylivingIn;
     }
 
+    /**
+     * Sets position to look at using entity
+     */
     public void setLookPositionWithEntity(Entity entityIn, float deltaYaw, float deltaPitch)
     {
         this.posX = entityIn.posX;
@@ -39,6 +52,9 @@ public class EntityLookHelper
         this.isLooking = true;
     }
 
+    /**
+     * Sets position to look at
+     */
     public void setLookPosition(double x, double y, double z, float deltaYaw, float deltaPitch)
     {
         this.posX = x;
@@ -49,6 +65,9 @@ public class EntityLookHelper
         this.isLooking = true;
     }
 
+    /**
+     * Updates look
+     */
     public void onUpdateLook()
     {
         this.entity.rotationPitch = 0.0F;
@@ -60,8 +79,8 @@ public class EntityLookHelper
             double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
             double d2 = this.posZ - this.entity.posZ;
             double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);
-            float f = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI) - 90.0F;
-            float f1 = (float)(-(MathHelper.atan2(d1, d3) * 180.0D / Math.PI));
+            float f = (float)(MathHelper.func_181159_b(d2, d0) * 180.0D / Math.PI) - 90.0F;
+            float f1 = (float)(-(MathHelper.func_181159_b(d1, d3) * 180.0D / Math.PI));
             this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, f1, this.deltaLookPitch);
             this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, f, this.deltaLookYaw);
         }

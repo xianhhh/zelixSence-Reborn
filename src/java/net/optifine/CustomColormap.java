@@ -10,18 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockStateBase;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.src.Config;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.optifine.config.ConnectedParser;
-import net.optifine.config.MatchBlock;
-import net.optifine.config.Matches;
-import net.optifine.util.TextureUtils;
 
 public class CustomColormap implements CustomColors.IColorizer
 {
@@ -52,52 +46,47 @@ public class CustomColormap implements CustomColors.IColorizer
     public static final String KEY_Y_VARIANCE = "yVariance";
     public static final String KEY_Y_OFFSET = "yOffset";
 
-    public CustomColormap(Properties props, String path, int width, int height, String formatDefault)
+    public CustomColormap(Properties p_i33_1_, String p_i33_2_, int p_i33_3_, int p_i33_4_, String p_i33_5_)
     {
         ConnectedParser connectedparser = new ConnectedParser("Colormap");
-        this.name = connectedparser.parseName(path);
-        this.basePath = connectedparser.parseBasePath(path);
-        this.format = this.parseFormat(props.getProperty("format", formatDefault));
-        this.matchBlocks = connectedparser.parseMatchBlocks(props.getProperty("blocks"));
-        this.source = parseTexture(props.getProperty("source"), path, this.basePath);
-        this.color = ConnectedParser.parseColor(props.getProperty("color"), -1);
-        this.yVariance = connectedparser.parseInt(props.getProperty("yVariance"), 0);
-        this.yOffset = connectedparser.parseInt(props.getProperty("yOffset"), 0);
-        this.width = width;
-        this.height = height;
+        this.name = connectedparser.parseName(p_i33_2_);
+        this.basePath = connectedparser.parseBasePath(p_i33_2_);
+        this.format = this.parseFormat(p_i33_1_.getProperty("format", p_i33_5_));
+        this.matchBlocks = connectedparser.parseMatchBlocks(p_i33_1_.getProperty("blocks"));
+        this.source = parseTexture(p_i33_1_.getProperty("source"), p_i33_2_, this.basePath);
+        this.color = ConnectedParser.parseColor(p_i33_1_.getProperty("color"), -1);
+        this.yVariance = connectedparser.parseInt(p_i33_1_.getProperty("yVariance"), 0);
+        this.yOffset = connectedparser.parseInt(p_i33_1_.getProperty("yOffset"), 0);
+        this.width = p_i33_3_;
+        this.height = p_i33_4_;
     }
 
-    private int parseFormat(String str)
+    private int parseFormat(String p_parseFormat_1_)
     {
-        if (str == null)
+        if (p_parseFormat_1_ == null)
         {
             return 0;
         }
+        else if (p_parseFormat_1_.equals("vanilla"))
+        {
+            return 0;
+        }
+        else if (p_parseFormat_1_.equals("grid"))
+        {
+            return 1;
+        }
+        else if (p_parseFormat_1_.equals("fixed"))
+        {
+            return 2;
+        }
         else
         {
-            str = str.trim();
-
-            if (str.equals("vanilla"))
-            {
-                return 0;
-            }
-            else if (str.equals("grid"))
-            {
-                return 1;
-            }
-            else if (str.equals("fixed"))
-            {
-                return 2;
-            }
-            else
-            {
-                warn("Unknown format: " + str);
-                return -1;
-            }
+            warn("Unknown format: " + p_parseFormat_1_);
+            return -1;
         }
     }
 
-    public boolean isValid(String path)
+    public boolean isValid(String p_isValid_1_)
     {
         if (this.format != 0 && this.format != 1)
         {
@@ -115,7 +104,7 @@ public class CustomColormap implements CustomColors.IColorizer
         {
             if (this.source == null)
             {
-                warn("Source not defined: " + path);
+                warn("Source not defined: " + p_isValid_1_);
                 return false;
             }
 
@@ -143,7 +132,7 @@ public class CustomColormap implements CustomColors.IColorizer
         return true;
     }
 
-    public boolean isValidMatchBlocks(String path)
+    public boolean isValidMatchBlocks(String p_isValidMatchBlocks_1_)
     {
         if (this.matchBlocks == null)
         {
@@ -151,7 +140,7 @@ public class CustomColormap implements CustomColors.IColorizer
 
             if (this.matchBlocks == null)
             {
-                warn("Match blocks not defined: " + path);
+                warn("Match blocks not defined: " + p_isValidMatchBlocks_1_);
                 return false;
             }
         }
@@ -244,39 +233,38 @@ public class CustomColormap implements CustomColors.IColorizer
         }
     }
 
-    private static void dbg(String str)
+    private static void dbg(String p_dbg_0_)
     {
-        Config.dbg("CustomColors: " + str);
+        Config.dbg("CustomColors: " + p_dbg_0_);
     }
 
-    private static void warn(String str)
+    private static void warn(String p_warn_0_)
     {
-        Config.warn("CustomColors: " + str);
+        Config.warn("CustomColors: " + p_warn_0_);
     }
 
-    private static String parseTexture(String texStr, String path, String basePath)
+    private static String parseTexture(String p_parseTexture_0_, String p_parseTexture_1_, String p_parseTexture_2_)
     {
-        if (texStr != null)
+        if (p_parseTexture_0_ != null)
         {
-            texStr = texStr.trim();
             String s1 = ".png";
 
-            if (texStr.endsWith(s1))
+            if (p_parseTexture_0_.endsWith(s1))
             {
-                texStr = texStr.substring(0, texStr.length() - s1.length());
+                p_parseTexture_0_ = p_parseTexture_0_.substring(0, p_parseTexture_0_.length() - s1.length());
             }
 
-            texStr = fixTextureName(texStr, basePath);
-            return texStr;
+            p_parseTexture_0_ = fixTextureName(p_parseTexture_0_, p_parseTexture_2_);
+            return p_parseTexture_0_;
         }
         else
         {
-            String s = path;
-            int i = path.lastIndexOf(47);
+            String s = p_parseTexture_1_;
+            int i = p_parseTexture_1_.lastIndexOf(47);
 
             if (i >= 0)
             {
-                s = path.substring(i + 1);
+                s = p_parseTexture_1_.substring(i + 1);
             }
 
             int j = s.lastIndexOf(46);
@@ -286,43 +274,43 @@ public class CustomColormap implements CustomColors.IColorizer
                 s = s.substring(0, j);
             }
 
-            s = fixTextureName(s, basePath);
+            s = fixTextureName(s, p_parseTexture_2_);
             return s;
         }
     }
 
-    private static String fixTextureName(String iconName, String basePath)
+    private static String fixTextureName(String p_fixTextureName_0_, String p_fixTextureName_1_)
     {
-        iconName = TextureUtils.fixResourcePath(iconName, basePath);
+        p_fixTextureName_0_ = TextureUtils.fixResourcePath(p_fixTextureName_0_, p_fixTextureName_1_);
 
-        if (!iconName.startsWith(basePath) && !iconName.startsWith("textures/") && !iconName.startsWith("mcpatcher/"))
+        if (!p_fixTextureName_0_.startsWith(p_fixTextureName_1_) && !p_fixTextureName_0_.startsWith("textures/") && !p_fixTextureName_0_.startsWith("mcpatcher/"))
         {
-            iconName = basePath + "/" + iconName;
+            p_fixTextureName_0_ = p_fixTextureName_1_ + "/" + p_fixTextureName_0_;
         }
 
-        if (iconName.endsWith(".png"))
+        if (p_fixTextureName_0_.endsWith(".png"))
         {
-            iconName = iconName.substring(0, iconName.length() - 4);
+            p_fixTextureName_0_ = p_fixTextureName_0_.substring(0, p_fixTextureName_0_.length() - 4);
         }
 
         String s = "textures/blocks/";
 
-        if (iconName.startsWith(s))
+        if (p_fixTextureName_0_.startsWith(s))
         {
-            iconName = iconName.substring(s.length());
+            p_fixTextureName_0_ = p_fixTextureName_0_.substring(s.length());
         }
 
-        if (iconName.startsWith("/"))
+        if (p_fixTextureName_0_.startsWith("/"))
         {
-            iconName = iconName.substring(1);
+            p_fixTextureName_0_ = p_fixTextureName_0_.substring(1);
         }
 
-        return iconName;
+        return p_fixTextureName_0_;
     }
 
-    public boolean matchesBlock(BlockStateBase blockState)
+    public boolean matchesBlock(BlockStateBase p_matchesBlock_1_)
     {
-        return Matches.block(blockState, this.matchBlocks);
+        return Matches.block(p_matchesBlock_1_, this.matchBlocks);
     }
 
     public int getColorRandom()
@@ -338,17 +326,17 @@ public class CustomColormap implements CustomColors.IColorizer
         }
     }
 
-    public int getColor(int index)
+    public int getColor(int p_getColor_1_)
     {
-        index = Config.limit(index, 0, this.colors.length - 1);
-        return this.colors[index] & 16777215;
+        p_getColor_1_ = Config.limit(p_getColor_1_, 0, this.colors.length - 1);
+        return this.colors[p_getColor_1_] & 16777215;
     }
 
-    public int getColor(int cx, int cy)
+    public int getColor(int p_getColor_1_, int p_getColor_2_)
     {
-        cx = Config.limit(cx, 0, this.width - 1);
-        cy = Config.limit(cy, 0, this.height - 1);
-        return this.colors[cy * this.width + cx] & 16777215;
+        p_getColor_1_ = Config.limit(p_getColor_1_, 0, this.width - 1);
+        p_getColor_2_ = Config.limit(p_getColor_2_, 0, this.height - 1);
+        return this.colors[p_getColor_2_ * this.width + p_getColor_1_] & 16777215;
     }
 
     public float[][] getColorsRgb()
@@ -361,15 +349,10 @@ public class CustomColormap implements CustomColors.IColorizer
         return this.colorsRgb;
     }
 
-    public int getColor(IBlockState blockState, IBlockAccess blockAccess, BlockPos blockPos)
+    public int getColor(IBlockAccess p_getColor_1_, BlockPos p_getColor_2_)
     {
-        return this.getColor(blockAccess, blockPos);
-    }
-
-    public int getColor(IBlockAccess blockAccess, BlockPos blockPos)
-    {
-        BiomeGenBase biomegenbase = CustomColors.getColorBiome(blockAccess, blockPos);
-        return this.getColor(biomegenbase, blockPos);
+        BiomeGenBase biomegenbase = CustomColors.getColorBiome(p_getColor_1_, p_getColor_2_);
+        return this.getColor(biomegenbase, p_getColor_2_);
     }
 
     public boolean isColorConstant()
@@ -377,12 +360,12 @@ public class CustomColormap implements CustomColors.IColorizer
         return this.format == 2;
     }
 
-    public int getColor(BiomeGenBase biome, BlockPos blockPos)
+    public int getColor(BiomeGenBase p_getColor_1_, BlockPos p_getColor_2_)
     {
-        return this.format == 0 ? this.getColorVanilla(biome, blockPos) : (this.format == 1 ? this.getColorGrid(biome, blockPos) : this.color);
+        return this.format == 0 ? this.getColorVanilla(p_getColor_1_, p_getColor_2_) : (this.format == 1 ? this.getColorGrid(p_getColor_1_, p_getColor_2_) : this.color);
     }
 
-    public int getColorSmooth(IBlockAccess blockAccess, double x, double y, double z, int radius)
+    public int getColorSmooth(IBlockAccess p_getColorSmooth_1_, double p_getColorSmooth_2_, double p_getColorSmooth_4_, double p_getColorSmooth_6_, int p_getColorSmooth_8_)
     {
         if (this.format == 2)
         {
@@ -390,21 +373,21 @@ public class CustomColormap implements CustomColors.IColorizer
         }
         else
         {
-            int i = MathHelper.floor_double(x);
-            int j = MathHelper.floor_double(y);
-            int k = MathHelper.floor_double(z);
+            int i = MathHelper.floor_double(p_getColorSmooth_2_);
+            int j = MathHelper.floor_double(p_getColorSmooth_4_);
+            int k = MathHelper.floor_double(p_getColorSmooth_6_);
             int l = 0;
             int i1 = 0;
             int j1 = 0;
             int k1 = 0;
             BlockPosM blockposm = new BlockPosM(0, 0, 0);
 
-            for (int l1 = i - radius; l1 <= i + radius; ++l1)
+            for (int l1 = i - p_getColorSmooth_8_; l1 <= i + p_getColorSmooth_8_; ++l1)
             {
-                for (int i2 = k - radius; i2 <= k + radius; ++i2)
+                for (int i2 = k - p_getColorSmooth_8_; i2 <= k + p_getColorSmooth_8_; ++i2)
                 {
                     blockposm.setXyz(l1, j, i2);
-                    int j2 = this.getColor((IBlockAccess)blockAccess, blockposm);
+                    int j2 = this.getColor((IBlockAccess)p_getColorSmooth_1_, blockposm);
                     l += j2 >> 16 & 255;
                     i1 += j2 >> 8 & 255;
                     j1 += j2 & 255;
@@ -419,24 +402,24 @@ public class CustomColormap implements CustomColors.IColorizer
         }
     }
 
-    private int getColorVanilla(BiomeGenBase biome, BlockPos blockPos)
+    private int getColorVanilla(BiomeGenBase p_getColorVanilla_1_, BlockPos p_getColorVanilla_2_)
     {
-        double d0 = (double)MathHelper.clamp_float(biome.getFloatTemperature(blockPos), 0.0F, 1.0F);
-        double d1 = (double)MathHelper.clamp_float(biome.getFloatRainfall(), 0.0F, 1.0F);
+        double d0 = (double)MathHelper.clamp_float(p_getColorVanilla_1_.getFloatTemperature(p_getColorVanilla_2_), 0.0F, 1.0F);
+        double d1 = (double)MathHelper.clamp_float(p_getColorVanilla_1_.getFloatRainfall(), 0.0F, 1.0F);
         d1 = d1 * d0;
         int i = (int)((1.0D - d0) * (double)(this.width - 1));
         int j = (int)((1.0D - d1) * (double)(this.height - 1));
         return this.getColor(i, j);
     }
 
-    private int getColorGrid(BiomeGenBase biome, BlockPos blockPos)
+    private int getColorGrid(BiomeGenBase p_getColorGrid_1_, BlockPos p_getColorGrid_2_)
     {
-        int i = biome.biomeID;
-        int j = blockPos.getY() - this.yOffset;
+        int i = p_getColorGrid_1_.biomeID;
+        int j = p_getColorGrid_2_.getY() - this.yOffset;
 
         if (this.yVariance > 0)
         {
-            int k = blockPos.getX() << 16 + blockPos.getZ();
+            int k = p_getColorGrid_2_.getX() << 16 + p_getColorGrid_2_.getZ();
             int l = Config.intHash(k);
             int i1 = this.yVariance * 2 + 1;
             int j1 = (l & 255) % i1 - this.yVariance;
@@ -461,13 +444,13 @@ public class CustomColormap implements CustomColors.IColorizer
         return this.height;
     }
 
-    private static float[][] toRgb(int[] cols)
+    private static float[][] toRgb(int[] p_toRgb_0_)
     {
-        float[][] afloat = new float[cols.length][3];
+        float[][] afloat = new float[p_toRgb_0_.length][3];
 
-        for (int i = 0; i < cols.length; ++i)
+        for (int i = 0; i < p_toRgb_0_.length; ++i)
         {
-            int j = cols[i];
+            int j = p_toRgb_0_[i];
             float f = (float)(j >> 16 & 255) / 255.0F;
             float f1 = (float)(j >> 8 & 255) / 255.0F;
             float f2 = (float)(j & 255) / 255.0F;
@@ -480,34 +463,34 @@ public class CustomColormap implements CustomColors.IColorizer
         return afloat;
     }
 
-    public void addMatchBlock(MatchBlock mb)
+    public void addMatchBlock(MatchBlock p_addMatchBlock_1_)
     {
         if (this.matchBlocks == null)
         {
             this.matchBlocks = new MatchBlock[0];
         }
 
-        this.matchBlocks = (MatchBlock[])((MatchBlock[])Config.addObjectToArray(this.matchBlocks, mb));
+        this.matchBlocks = (MatchBlock[])((MatchBlock[])Config.addObjectToArray(this.matchBlocks, p_addMatchBlock_1_));
     }
 
-    public void addMatchBlock(int blockId, int metadata)
+    public void addMatchBlock(int p_addMatchBlock_1_, int p_addMatchBlock_2_)
     {
-        MatchBlock matchblock = this.getMatchBlock(blockId);
+        MatchBlock matchblock = this.getMatchBlock(p_addMatchBlock_1_);
 
         if (matchblock != null)
         {
-            if (metadata >= 0)
+            if (p_addMatchBlock_2_ >= 0)
             {
-                matchblock.addMetadata(metadata);
+                matchblock.addMetadata(p_addMatchBlock_2_);
             }
         }
         else
         {
-            this.addMatchBlock(new MatchBlock(blockId, metadata));
+            this.addMatchBlock(new MatchBlock(p_addMatchBlock_1_, p_addMatchBlock_2_));
         }
     }
 
-    private MatchBlock getMatchBlock(int blockId)
+    private MatchBlock getMatchBlock(int p_getMatchBlock_1_)
     {
         if (this.matchBlocks == null)
         {
@@ -519,7 +502,7 @@ public class CustomColormap implements CustomColors.IColorizer
             {
                 MatchBlock matchblock = this.matchBlocks[i];
 
-                if (matchblock.getBlockId() == blockId)
+                if (matchblock.getBlockId() == p_getMatchBlock_1_)
                 {
                     return matchblock;
                 }

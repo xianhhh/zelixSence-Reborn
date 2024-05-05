@@ -29,14 +29,20 @@ public class EntityHeartFX extends EntityFX
         this.setParticleTextureIndex(80);
     }
 
-    public void renderParticle(WorldRenderer worldRendererIn, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
+    /**
+     * Renders the particle
+     */
+    public void renderParticle(WorldRenderer worldRendererIn, Entity entityIn, float partialTicks, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
         float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge * 32.0F;
         f = MathHelper.clamp_float(f, 0.0F, 1.0F);
         this.particleScale = this.particleScaleOverTime * f;
-        super.renderParticle(worldRendererIn, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+        super.renderParticle(worldRendererIn, entityIn, partialTicks, p_180434_4_, p_180434_5_, p_180434_6_, p_180434_7_, p_180434_8_);
     }
 
+    /**
+     * Called to update the entity's position/logic.
+     */
     public void onUpdate()
     {
         this.prevPosX = this.posX;

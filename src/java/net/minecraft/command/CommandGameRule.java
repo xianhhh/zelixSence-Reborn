@@ -10,21 +10,33 @@ import net.minecraft.world.GameRules;
 
 public class CommandGameRule extends CommandBase
 {
+    /**
+     * Gets the name of the command
+     */
     public String getCommandName()
     {
         return "gamerule";
     }
 
+    /**
+     * Return the required permission level for this command.
+     */
     public int getRequiredPermissionLevel()
     {
         return 2;
     }
 
+    /**
+     * Gets the usage string for the command.
+     */
     public String getCommandUsage(ICommandSender sender)
     {
         return "commands.gamerule.usage";
     }
 
+    /**
+     * Callback when the command is invoked
+     */
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         GameRules gamerules = this.getGameRules();
@@ -60,13 +72,13 @@ public class CommandGameRule extends CommandBase
         }
     }
 
-    public static void func_175773_a(GameRules rules, String p_175773_1_)
+    public static void func_175773_a(GameRules p_175773_0_, String p_175773_1_)
     {
         if ("reducedDebugInfo".equals(p_175773_1_))
         {
-            byte b0 = (byte)(rules.getBoolean(p_175773_1_) ? 22 : 23);
+            byte b0 = (byte)(p_175773_0_.getBoolean(p_175773_1_) ? 22 : 23);
 
-            for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager().getPlayerList())
+            for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager().func_181057_v())
             {
                 entityplayermp.playerNetServerHandler.sendPacket(new S19PacketEntityStatus(entityplayermp, b0));
             }
@@ -95,6 +107,9 @@ public class CommandGameRule extends CommandBase
         }
     }
 
+    /**
+     * Return the game rule set this command should be able to manipulate.
+     */
     private GameRules getGameRules()
     {
         return MinecraftServer.getServer().worldServerForDimension(0).getGameRules();

@@ -205,13 +205,16 @@ public class EntityRabbit extends EntityAnimal
         this.field_175537_bp = this.onGround;
     }
 
+    /**
+     * Attempts to create sprinting particles if the entity is sprinting and not in water.
+     */
     public void spawnRunningParticles()
     {
     }
 
     private void calculateRotationYaw(double x, double z)
     {
-        this.rotationYaw = (float)(MathHelper.atan2(z - this.posZ, x - this.posX) * 180.0D / Math.PI) - 90.0F;
+        this.rotationYaw = (float)(MathHelper.func_181159_b(z - this.posZ, x - this.posX) * 180.0D / Math.PI) - 90.0F;
     }
 
     private void func_175518_cr()
@@ -235,6 +238,10 @@ public class EntityRabbit extends EntityAnimal
         this.func_175520_cs();
     }
 
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
     public void onLivingUpdate()
     {
         super.onLivingUpdate();
@@ -262,6 +269,9 @@ public class EntityRabbit extends EntityAnimal
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.30000001192092896D);
     }
 
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
@@ -269,6 +279,9 @@ public class EntityRabbit extends EntityAnimal
         tagCompound.setInteger("MoreCarrotTicks", this.carrotTicks);
     }
 
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
     public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
         super.readEntityFromNBT(tagCompund);
@@ -281,16 +294,25 @@ public class EntityRabbit extends EntityAnimal
         return "mob.rabbit.hop";
     }
 
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
     protected String getLivingSound()
     {
         return "mob.rabbit.idle";
     }
 
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
     protected String getHurtSound()
     {
         return "mob.rabbit.hurt";
     }
 
+    /**
+     * Returns the sound this mob makes on death.
+     */
     protected String getDeathSound()
     {
         return "mob.rabbit.death";
@@ -309,24 +331,36 @@ public class EntityRabbit extends EntityAnimal
         }
     }
 
+    /**
+     * Returns the current armor value as determined by a call to InventoryPlayer.getTotalArmorValue
+     */
     public int getTotalArmorValue()
     {
         return this.getRabbitType() == 99 ? 8 : super.getTotalArmorValue();
     }
 
+    /**
+     * Called when the entity is attacked.
+     */
     public boolean attackEntityFrom(DamageSource source, float amount)
     {
         return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
     }
 
+    /**
+     * Causes this Entity to drop a random item.
+     */
     protected void addRandomDrop()
     {
         this.entityDropItem(new ItemStack(Items.rabbit_foot, 1), 0.0F);
     }
 
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    /**
+     * Drop 0-2 items of this living's type
+     */
+    protected void dropFewItems(boolean p_70628_1_, int p_70628_2_)
     {
-        int i = this.rand.nextInt(2) + this.rand.nextInt(1 + lootingModifier);
+        int i = this.rand.nextInt(2) + this.rand.nextInt(1 + p_70628_2_);
 
         for (int j = 0; j < i; ++j)
         {
@@ -365,6 +399,10 @@ public class EntityRabbit extends EntityAnimal
         return entityrabbit;
     }
 
+    /**
+     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
+     * the animal type)
+     */
     public boolean isBreedingItem(ItemStack stack)
     {
         return stack != null && this.isRabbitBreedingItem(stack.getItem());
@@ -394,6 +432,10 @@ public class EntityRabbit extends EntityAnimal
         this.dataWatcher.updateObject(18, Byte.valueOf((byte)rabbitTypeId));
     }
 
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
     {
         livingdata = super.onInitialSpawn(difficulty, livingdata);
@@ -420,11 +462,17 @@ public class EntityRabbit extends EntityAnimal
         return livingdata;
     }
 
+    /**
+     * Returns true if {@link net.minecraft.entity.passive.EntityRabbit#carrotTicks carrotTicks} has reached zero
+     */
     private boolean isCarrotEaten()
     {
         return this.carrotTicks == 0;
     }
 
+    /**
+     * Returns duration of the current {@link net.minecraft.entity.passive.EntityRabbit.EnumMoveType move type}
+     */
     protected int getMoveTypeDuration()
     {
         return this.moveType.getDuration();
@@ -454,10 +502,10 @@ public class EntityRabbit extends EntityAnimal
     {
         private EntityRabbit entityInstance;
 
-        public AIAvoidEntity(EntityRabbit rabbit, Class<T> p_i46403_2_, float p_i46403_3_, double p_i46403_4_, double p_i46403_6_)
+        public AIAvoidEntity(EntityRabbit p_i46403_1_, Class<T> p_i46403_2_, float p_i46403_3_, double p_i46403_4_, double p_i46403_6_)
         {
-            super(rabbit, p_i46403_2_, p_i46403_3_, p_i46403_4_, p_i46403_6_);
-            this.entityInstance = rabbit;
+            super(p_i46403_1_, p_i46403_2_, p_i46403_3_, p_i46403_4_, p_i46403_6_);
+            this.entityInstance = p_i46403_1_;
         }
 
         public void updateTask()
@@ -468,9 +516,9 @@ public class EntityRabbit extends EntityAnimal
 
     static class AIEvilAttack extends EntityAIAttackOnCollide
     {
-        public AIEvilAttack(EntityRabbit rabbit)
+        public AIEvilAttack(EntityRabbit p_i45867_1_)
         {
-            super(rabbit, EntityLivingBase.class, 1.4D, true);
+            super(p_i45867_1_, EntityLivingBase.class, 1.4D, true);
         }
 
         protected double func_179512_a(EntityLivingBase attackTarget)
@@ -483,10 +531,10 @@ public class EntityRabbit extends EntityAnimal
     {
         private EntityRabbit theEntity;
 
-        public AIPanic(EntityRabbit rabbit, double speedIn)
+        public AIPanic(EntityRabbit p_i45861_1_, double speedIn)
         {
-            super(rabbit, speedIn);
-            this.theEntity = rabbit;
+            super(p_i45861_1_, speedIn);
+            this.theEntity = p_i45861_1_;
         }
 
         public void updateTask()
@@ -498,27 +546,27 @@ public class EntityRabbit extends EntityAnimal
 
     static class AIRaidFarm extends EntityAIMoveToBlock
     {
-        private final EntityRabbit rabbit;
+        private final EntityRabbit field_179500_c;
         private boolean field_179498_d;
         private boolean field_179499_e = false;
 
-        public AIRaidFarm(EntityRabbit rabbitIn)
+        public AIRaidFarm(EntityRabbit p_i45860_1_)
         {
-            super(rabbitIn, 0.699999988079071D, 16);
-            this.rabbit = rabbitIn;
+            super(p_i45860_1_, 0.699999988079071D, 16);
+            this.field_179500_c = p_i45860_1_;
         }
 
         public boolean shouldExecute()
         {
             if (this.runDelay <= 0)
             {
-                if (!this.rabbit.worldObj.getGameRules().getBoolean("mobGriefing"))
+                if (!this.field_179500_c.worldObj.getGameRules().getBoolean("mobGriefing"))
                 {
                     return false;
                 }
 
                 this.field_179499_e = false;
-                this.field_179498_d = this.rabbit.isCarrotEaten();
+                this.field_179498_d = this.field_179500_c.isCarrotEaten();
             }
 
             return super.shouldExecute();
@@ -542,11 +590,11 @@ public class EntityRabbit extends EntityAnimal
         public void updateTask()
         {
             super.updateTask();
-            this.rabbit.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.rabbit.getVerticalFaceSpeed());
+            this.field_179500_c.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.field_179500_c.getVerticalFaceSpeed());
 
             if (this.getIsAboveDestination())
             {
-                World world = this.rabbit.worldObj;
+                World world = this.field_179500_c.worldObj;
                 BlockPos blockpos = this.destinationBlock.up();
                 IBlockState iblockstate = world.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
@@ -555,7 +603,7 @@ public class EntityRabbit extends EntityAnimal
                 {
                     world.setBlockState(blockpos, Blocks.air.getDefaultState(), 2);
                     world.destroyBlock(blockpos, true);
-                    this.rabbit.createEatingParticles();
+                    this.field_179500_c.createEatingParticles();
                 }
 
                 this.field_179499_e = false;
@@ -666,10 +714,10 @@ public class EntityRabbit extends EntityAnimal
     {
         private EntityRabbit theEntity;
 
-        public RabbitMoveHelper(EntityRabbit rabbit)
+        public RabbitMoveHelper(EntityRabbit p_i45862_1_)
         {
-            super(rabbit);
-            this.theEntity = rabbit;
+            super(p_i45862_1_);
+            this.theEntity = p_i45862_1_;
         }
 
         public void onUpdateMoveHelper()
