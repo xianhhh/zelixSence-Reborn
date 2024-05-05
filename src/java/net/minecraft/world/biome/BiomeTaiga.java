@@ -18,84 +18,108 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class BiomeTaiga extends Biome {
-   private static final WorldGenTaiga1 field_150639_aC = new WorldGenTaiga1();
-   private static final WorldGenTaiga2 field_150640_aD = new WorldGenTaiga2(false);
-   private static final WorldGenMegaPineTree field_150641_aE = new WorldGenMegaPineTree(false, false);
-   private static final WorldGenMegaPineTree field_150642_aF = new WorldGenMegaPineTree(false, true);
-   private static final WorldGenBlockBlob field_150643_aG = new WorldGenBlockBlob(Blocks.field_150341_Y, 0);
-   private final BiomeTaiga.Type field_150644_aH;
+public class BiomeTaiga extends Biome
+{
+    private static final WorldGenTaiga1 PINE_GENERATOR = new WorldGenTaiga1();
+    private static final WorldGenTaiga2 SPRUCE_GENERATOR = new WorldGenTaiga2(false);
+    private static final WorldGenMegaPineTree MEGA_PINE_GENERATOR = new WorldGenMegaPineTree(false, false);
+    private static final WorldGenMegaPineTree MEGA_SPRUCE_GENERATOR = new WorldGenMegaPineTree(false, true);
+    private static final WorldGenBlockBlob FOREST_ROCK_GENERATOR = new WorldGenBlockBlob(Blocks.MOSSY_COBBLESTONE, 0);
+    private final BiomeTaiga.Type type;
 
-   public BiomeTaiga(BiomeTaiga.Type p_i46694_1_, Biome.BiomeProperties p_i46694_2_) {
-      super(p_i46694_2_);
-      this.field_150644_aH = p_i46694_1_;
-      this.field_76762_K.add(new Biome.SpawnListEntry(EntityWolf.class, 8, 4, 4));
-      this.field_76762_K.add(new Biome.SpawnListEntry(EntityRabbit.class, 4, 2, 3));
-      this.field_76760_I.field_76832_z = 10;
-      if (p_i46694_1_ != BiomeTaiga.Type.MEGA && p_i46694_1_ != BiomeTaiga.Type.MEGA_SPRUCE) {
-         this.field_76760_I.field_76803_B = 1;
-         this.field_76760_I.field_76798_D = 1;
-      } else {
-         this.field_76760_I.field_76803_B = 7;
-         this.field_76760_I.field_76804_C = 1;
-         this.field_76760_I.field_76798_D = 3;
-      }
+    public BiomeTaiga(BiomeTaiga.Type typeIn, Biome.BiomeProperties properties)
+    {
+        super(properties);
+        this.type = typeIn;
+        this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityWolf.class, 8, 4, 4));
+        this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityRabbit.class, 4, 2, 3));
+        this.theBiomeDecorator.treesPerChunk = 10;
 
-   }
+        if (typeIn != BiomeTaiga.Type.MEGA && typeIn != BiomeTaiga.Type.MEGA_SPRUCE)
+        {
+            this.theBiomeDecorator.grassPerChunk = 1;
+            this.theBiomeDecorator.mushroomsPerChunk = 1;
+        }
+        else
+        {
+            this.theBiomeDecorator.grassPerChunk = 7;
+            this.theBiomeDecorator.deadBushPerChunk = 1;
+            this.theBiomeDecorator.mushroomsPerChunk = 3;
+        }
+    }
 
-   public WorldGenAbstractTree func_150567_a(Random p_150567_1_) {
-      if ((this.field_150644_aH == BiomeTaiga.Type.MEGA || this.field_150644_aH == BiomeTaiga.Type.MEGA_SPRUCE) && p_150567_1_.nextInt(3) == 0) {
-         return this.field_150644_aH != BiomeTaiga.Type.MEGA_SPRUCE && p_150567_1_.nextInt(13) != 0 ? field_150641_aE : field_150642_aF;
-      } else {
-         return (WorldGenAbstractTree)(p_150567_1_.nextInt(3) == 0 ? field_150639_aC : field_150640_aD);
-      }
-   }
+    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    {
+        if ((this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) && rand.nextInt(3) == 0)
+        {
+            return this.type != BiomeTaiga.Type.MEGA_SPRUCE && rand.nextInt(13) != 0 ? MEGA_PINE_GENERATOR : MEGA_SPRUCE_GENERATOR;
+        }
+        else
+        {
+            return (WorldGenAbstractTree)(rand.nextInt(3) == 0 ? PINE_GENERATOR : SPRUCE_GENERATOR);
+        }
+    }
 
-   public WorldGenerator func_76730_b(Random p_76730_1_) {
-      return p_76730_1_.nextInt(5) > 0 ? new WorldGenTallGrass(BlockTallGrass.EnumType.FERN) : new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
-   }
+    /**
+     * Gets a WorldGen appropriate for this biome.
+     */
+    public WorldGenerator getRandomWorldGenForGrass(Random rand)
+    {
+        return rand.nextInt(5) > 0 ? new WorldGenTallGrass(BlockTallGrass.EnumType.FERN) : new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
+    }
 
-   public void func_180624_a(World p_180624_1_, Random p_180624_2_, BlockPos p_180624_3_) {
-      if (this.field_150644_aH == BiomeTaiga.Type.MEGA || this.field_150644_aH == BiomeTaiga.Type.MEGA_SPRUCE) {
-         int i = p_180624_2_.nextInt(3);
+    public void decorate(World worldIn, Random rand, BlockPos pos)
+    {
+        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE)
+        {
+            int i = rand.nextInt(3);
 
-         for(int j = 0; j < i; ++j) {
-            int k = p_180624_2_.nextInt(16) + 8;
-            int l = p_180624_2_.nextInt(16) + 8;
-            BlockPos blockpos = p_180624_1_.func_175645_m(p_180624_3_.func_177982_a(k, 0, l));
-            field_150643_aG.func_180709_b(p_180624_1_, p_180624_2_, blockpos);
-         }
-      }
+            for (int j = 0; j < i; ++j)
+            {
+                int k = rand.nextInt(16) + 8;
+                int l = rand.nextInt(16) + 8;
+                BlockPos blockpos = worldIn.getHeight(pos.add(k, 0, l));
+                FOREST_ROCK_GENERATOR.generate(worldIn, rand, blockpos);
+            }
+        }
 
-      field_180280_ag.func_180710_a(BlockDoublePlant.EnumPlantType.FERN);
+        DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.FERN);
 
-      for(int i1 = 0; i1 < 7; ++i1) {
-         int j1 = p_180624_2_.nextInt(16) + 8;
-         int k1 = p_180624_2_.nextInt(16) + 8;
-         int l1 = p_180624_2_.nextInt(p_180624_1_.func_175645_m(p_180624_3_.func_177982_a(j1, 0, k1)).func_177956_o() + 32);
-         field_180280_ag.func_180709_b(p_180624_1_, p_180624_2_, p_180624_3_.func_177982_a(j1, l1, k1));
-      }
+        for (int i1 = 0; i1 < 7; ++i1)
+        {
+            int j1 = rand.nextInt(16) + 8;
+            int k1 = rand.nextInt(16) + 8;
+            int l1 = rand.nextInt(worldIn.getHeight(pos.add(j1, 0, k1)).getY() + 32);
+            DOUBLE_PLANT_GENERATOR.generate(worldIn, rand, pos.add(j1, l1, k1));
+        }
 
-      super.func_180624_a(p_180624_1_, p_180624_2_, p_180624_3_);
-   }
+        super.decorate(worldIn, rand, pos);
+    }
 
-   public void func_180622_a(World p_180622_1_, Random p_180622_2_, ChunkPrimer p_180622_3_, int p_180622_4_, int p_180622_5_, double p_180622_6_) {
-      if (this.field_150644_aH == BiomeTaiga.Type.MEGA || this.field_150644_aH == BiomeTaiga.Type.MEGA_SPRUCE) {
-         this.field_76752_A = Blocks.field_150349_c.func_176223_P();
-         this.field_76753_B = Blocks.field_150346_d.func_176223_P();
-         if (p_180622_6_ > 1.75D) {
-            this.field_76752_A = Blocks.field_150346_d.func_176223_P().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.COARSE_DIRT);
-         } else if (p_180622_6_ > -0.95D) {
-            this.field_76752_A = Blocks.field_150346_d.func_176223_P().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.PODZOL);
-         }
-      }
+    public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z, double noiseVal)
+    {
+        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE)
+        {
+            this.topBlock = Blocks.GRASS.getDefaultState();
+            this.fillerBlock = Blocks.DIRT.getDefaultState();
 
-      this.func_180628_b(p_180622_1_, p_180622_2_, p_180622_3_, p_180622_4_, p_180622_5_, p_180622_6_);
-   }
+            if (noiseVal > 1.75D)
+            {
+                this.topBlock = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
+            }
+            else if (noiseVal > -0.95D)
+            {
+                this.topBlock = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
+            }
+        }
 
-   public static enum Type {
-      NORMAL,
-      MEGA,
-      MEGA_SPRUCE;
-   }
+        this.generateBiomeTerrain(worldIn, rand, chunkPrimerIn, x, z, noiseVal);
+    }
+
+    public static enum Type
+    {
+        NORMAL,
+        MEGA,
+        MEGA_SPRUCE;
+    }
 }

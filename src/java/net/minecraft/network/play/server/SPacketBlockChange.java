@@ -9,37 +9,54 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SPacketBlockChange implements Packet<INetHandlerPlayClient> {
-   private BlockPos field_179828_a;
-   private IBlockState field_148883_d;
+public class SPacketBlockChange implements Packet<INetHandlerPlayClient>
+{
+    private BlockPos blockPosition;
+    private IBlockState blockState;
 
-   public SPacketBlockChange() {
-   }
+    public SPacketBlockChange()
+    {
+    }
 
-   public SPacketBlockChange(World p_i46965_1_, BlockPos p_i46965_2_) {
-      this.field_179828_a = p_i46965_2_;
-      this.field_148883_d = p_i46965_1_.func_180495_p(p_i46965_2_);
-   }
+    public SPacketBlockChange(World worldIn, BlockPos posIn)
+    {
+        this.blockPosition = posIn;
+        this.blockState = worldIn.getBlockState(posIn);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179828_a = p_148837_1_.func_179259_c();
-      this.field_148883_d = Block.field_176229_d.func_148745_a(p_148837_1_.func_150792_a());
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.blockPosition = buf.readBlockPos();
+        this.blockState = Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer());
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179255_a(this.field_179828_a);
-      p_148840_1_.func_150787_b(Block.field_176229_d.func_148747_b(this.field_148883_d));
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeBlockPos(this.blockPosition);
+        buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(this.blockState));
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147234_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleBlockChange(this);
+    }
 
-   public IBlockState func_180728_a() {
-      return this.field_148883_d;
-   }
+    public IBlockState getBlockState()
+    {
+        return this.blockState;
+    }
 
-   public BlockPos func_179827_b() {
-      return this.field_179828_a;
-   }
+    public BlockPos getBlockPosition()
+    {
+        return this.blockPosition;
+    }
 }

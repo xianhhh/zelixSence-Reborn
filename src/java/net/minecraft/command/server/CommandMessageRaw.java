@@ -14,40 +14,68 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentUtils;
 
-public class CommandMessageRaw extends CommandBase {
-   public String func_71517_b() {
-      return "tellraw";
-   }
+public class CommandMessageRaw extends CommandBase
+{
+    /**
+     * Gets the name of the command
+     */
+    public String getCommandName()
+    {
+        return "tellraw";
+    }
 
-   public int func_82362_a() {
-      return 2;
-   }
+    /**
+     * Return the required permission level for this command.
+     */
+    public int getRequiredPermissionLevel()
+    {
+        return 2;
+    }
 
-   public String func_71518_a(ICommandSender p_71518_1_) {
-      return "commands.tellraw.usage";
-   }
+    /**
+     * Gets the usage string for the command.
+     */
+    public String getCommandUsage(ICommandSender sender)
+    {
+        return "commands.tellraw.usage";
+    }
 
-   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
-      if (p_184881_3_.length < 2) {
-         throw new WrongUsageException("commands.tellraw.usage", new Object[0]);
-      } else {
-         EntityPlayer entityplayer = func_184888_a(p_184881_1_, p_184881_2_, p_184881_3_[0]);
-         String s = func_180529_a(p_184881_3_, 1);
+    /**
+     * Callback for when the command is executed
+     */
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length < 2)
+        {
+            throw new WrongUsageException("commands.tellraw.usage", new Object[0]);
+        }
+        else
+        {
+            EntityPlayer entityplayer = getPlayer(server, sender, args[0]);
+            String s = buildString(args, 1);
 
-         try {
-            ITextComponent itextcomponent = ITextComponent.Serializer.func_150699_a(s);
-            entityplayer.func_145747_a(TextComponentUtils.func_179985_a(p_184881_2_, itextcomponent, entityplayer));
-         } catch (JsonParseException jsonparseexception) {
-            throw func_184889_a(jsonparseexception);
-         }
-      }
-   }
+            try
+            {
+                ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+                entityplayer.addChatMessage(TextComponentUtils.processComponent(sender, itextcomponent, entityplayer));
+            }
+            catch (JsonParseException jsonparseexception)
+            {
+                throw toSyntaxException(jsonparseexception);
+            }
+        }
+    }
 
-   public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_) {
-      return p_184883_3_.length == 1 ? func_71530_a(p_184883_3_, p_184883_1_.func_71213_z()) : Collections.emptyList();
-   }
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+    }
 
-   public boolean func_82358_a(String[] p_82358_1_, int p_82358_2_) {
-      return p_82358_2_ == 0;
-   }
+    /**
+     * Return whether the specified command parameter index is a username parameter.
+     */
+    public boolean isUsernameIndex(String[] args, int index)
+    {
+        return index == 0;
+    }
 }

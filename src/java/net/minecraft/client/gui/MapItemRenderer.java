@@ -14,131 +14,162 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
 
-public class MapItemRenderer {
-   private static final ResourceLocation field_148253_a = new ResourceLocation("textures/map/map_icons.png");
-   private final TextureManager field_148251_b;
-   private final Map<String, MapItemRenderer.Instance> field_148252_c = Maps.<String, MapItemRenderer.Instance>newHashMap();
+public class MapItemRenderer
+{
+    private static final ResourceLocation TEXTURE_MAP_ICONS = new ResourceLocation("textures/map/map_icons.png");
+    private final TextureManager textureManager;
+    private final Map<String, MapItemRenderer.Instance> loadedMaps = Maps.<String, MapItemRenderer.Instance>newHashMap();
 
-   public MapItemRenderer(TextureManager p_i45009_1_) {
-      this.field_148251_b = p_i45009_1_;
-   }
+    public MapItemRenderer(TextureManager textureManagerIn)
+    {
+        this.textureManager = textureManagerIn;
+    }
 
-   public void func_148246_a(MapData p_148246_1_) {
-      this.func_148248_b(p_148246_1_).func_148236_a();
-   }
+    /**
+     * Updates a map texture
+     */
+    public void updateMapTexture(MapData mapdataIn)
+    {
+        this.getMapRendererInstance(mapdataIn).updateMapTexture();
+    }
 
-   public void func_148250_a(MapData p_148250_1_, boolean p_148250_2_) {
-      this.func_148248_b(p_148250_1_).func_148237_a(p_148250_2_);
-   }
+    public void renderMap(MapData mapdataIn, boolean p_148250_2_)
+    {
+        this.getMapRendererInstance(mapdataIn).render(p_148250_2_);
+    }
 
-   private MapItemRenderer.Instance func_148248_b(MapData p_148248_1_) {
-      MapItemRenderer.Instance mapitemrenderer$instance = this.field_148252_c.get(p_148248_1_.field_76190_i);
-      if (mapitemrenderer$instance == null) {
-         mapitemrenderer$instance = new MapItemRenderer.Instance(p_148248_1_);
-         this.field_148252_c.put(p_148248_1_.field_76190_i, mapitemrenderer$instance);
-      }
+    /**
+     * Returns {@link net.minecraft.client.gui.MapItemRenderer.Instance MapItemRenderer.Instance} with given map data
+     */
+    private MapItemRenderer.Instance getMapRendererInstance(MapData mapdataIn)
+    {
+        MapItemRenderer.Instance mapitemrenderer$instance = this.loadedMaps.get(mapdataIn.mapName);
 
-      return mapitemrenderer$instance;
-   }
+        if (mapitemrenderer$instance == null)
+        {
+            mapitemrenderer$instance = new MapItemRenderer.Instance(mapdataIn);
+            this.loadedMaps.put(mapdataIn.mapName, mapitemrenderer$instance);
+        }
 
-   @Nullable
-   public MapItemRenderer.Instance func_191205_a(String p_191205_1_) {
-      return this.field_148252_c.get(p_191205_1_);
-   }
+        return mapitemrenderer$instance;
+    }
 
-   public void func_148249_a() {
-      for(MapItemRenderer.Instance mapitemrenderer$instance : this.field_148252_c.values()) {
-         this.field_148251_b.func_147645_c(mapitemrenderer$instance.field_148240_d);
-      }
+    @Nullable
+    public MapItemRenderer.Instance func_191205_a(String p_191205_1_)
+    {
+        return this.loadedMaps.get(p_191205_1_);
+    }
 
-      this.field_148252_c.clear();
-   }
+    /**
+     * Clears the currently loaded maps and removes their corresponding textures
+     */
+    public void clearLoadedMaps()
+    {
+        for (MapItemRenderer.Instance mapitemrenderer$instance : this.loadedMaps.values())
+        {
+            this.textureManager.deleteTexture(mapitemrenderer$instance.location);
+        }
 
-   @Nullable
-   public MapData func_191207_a(@Nullable MapItemRenderer.Instance p_191207_1_) {
-      return p_191207_1_ != null ? p_191207_1_.field_148242_b : null;
-   }
+        this.loadedMaps.clear();
+    }
 
-   class Instance {
-      private final MapData field_148242_b;
-      private final DynamicTexture field_148243_c;
-      private final ResourceLocation field_148240_d;
-      private final int[] field_148241_e;
+    @Nullable
+    public MapData func_191207_a(@Nullable MapItemRenderer.Instance p_191207_1_)
+    {
+        return p_191207_1_ != null ? p_191207_1_.mapData : null;
+    }
 
-      private Instance(MapData p_i45007_2_) {
-         this.field_148242_b = p_i45007_2_;
-         this.field_148243_c = new DynamicTexture(128, 128);
-         this.field_148241_e = this.field_148243_c.func_110565_c();
-         this.field_148240_d = MapItemRenderer.this.field_148251_b.func_110578_a("map/" + p_i45007_2_.field_76190_i, this.field_148243_c);
+    class Instance
+    {
+        private final MapData mapData;
+        private final DynamicTexture mapTexture;
+        private final ResourceLocation location;
+        private final int[] mapTextureData;
 
-         for(int i = 0; i < this.field_148241_e.length; ++i) {
-            this.field_148241_e[i] = 0;
-         }
+        private Instance(MapData mapdataIn)
+        {
+            this.mapData = mapdataIn;
+            this.mapTexture = new DynamicTexture(128, 128);
+            this.mapTextureData = this.mapTexture.getTextureData();
+            this.location = MapItemRenderer.this.textureManager.getDynamicTextureLocation("map/" + mapdataIn.mapName, this.mapTexture);
 
-      }
-
-      private void func_148236_a() {
-         for(int i = 0; i < 16384; ++i) {
-            int j = this.field_148242_b.field_76198_e[i] & 255;
-            if (j / 4 == 0) {
-               this.field_148241_e[i] = (i + i / 128 & 1) * 8 + 16 << 24;
-            } else {
-               this.field_148241_e[i] = MapColor.field_76281_a[j / 4].func_151643_b(j & 3);
+            for (int i = 0; i < this.mapTextureData.length; ++i)
+            {
+                this.mapTextureData[i] = 0;
             }
-         }
+        }
 
-         this.field_148243_c.func_110564_a();
-      }
+        private void updateMapTexture()
+        {
+            for (int i = 0; i < 16384; ++i)
+            {
+                int j = this.mapData.colors[i] & 255;
 
-      private void func_148237_a(boolean p_148237_1_) {
-         int i = 0;
-         int j = 0;
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         float f = 0.0F;
-         MapItemRenderer.this.field_148251_b.func_110577_a(this.field_148240_d);
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-         GlStateManager.func_179118_c();
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
-         bufferbuilder.func_181662_b(0.0D, 128.0D, -0.009999999776482582D).func_187315_a(0.0D, 1.0D).func_181675_d();
-         bufferbuilder.func_181662_b(128.0D, 128.0D, -0.009999999776482582D).func_187315_a(1.0D, 1.0D).func_181675_d();
-         bufferbuilder.func_181662_b(128.0D, 0.0D, -0.009999999776482582D).func_187315_a(1.0D, 0.0D).func_181675_d();
-         bufferbuilder.func_181662_b(0.0D, 0.0D, -0.009999999776482582D).func_187315_a(0.0D, 0.0D).func_181675_d();
-         tessellator.func_78381_a();
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179084_k();
-         MapItemRenderer.this.field_148251_b.func_110577_a(MapItemRenderer.field_148253_a);
-         int k = 0;
-
-         for(MapDecoration mapdecoration : this.field_148242_b.field_76203_h.values()) {
-            if (!p_148237_1_ || mapdecoration.func_191180_f()) {
-               GlStateManager.func_179094_E();
-               GlStateManager.func_179109_b(0.0F + (float)mapdecoration.func_176112_b() / 2.0F + 64.0F, 0.0F + (float)mapdecoration.func_176113_c() / 2.0F + 64.0F, -0.02F);
-               GlStateManager.func_179114_b((float)(mapdecoration.func_176111_d() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
-               GlStateManager.func_179152_a(4.0F, 4.0F, 3.0F);
-               GlStateManager.func_179109_b(-0.125F, 0.125F, 0.0F);
-               byte b0 = mapdecoration.func_176110_a();
-               float f1 = (float)(b0 % 4 + 0) / 4.0F;
-               float f2 = (float)(b0 / 4 + 0) / 4.0F;
-               float f3 = (float)(b0 % 4 + 1) / 4.0F;
-               float f4 = (float)(b0 / 4 + 1) / 4.0F;
-               bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
-               float f5 = -0.001F;
-               bufferbuilder.func_181662_b(-1.0D, 1.0D, (double)((float)k * -0.001F)).func_187315_a((double)f1, (double)f2).func_181675_d();
-               bufferbuilder.func_181662_b(1.0D, 1.0D, (double)((float)k * -0.001F)).func_187315_a((double)f3, (double)f2).func_181675_d();
-               bufferbuilder.func_181662_b(1.0D, -1.0D, (double)((float)k * -0.001F)).func_187315_a((double)f3, (double)f4).func_181675_d();
-               bufferbuilder.func_181662_b(-1.0D, -1.0D, (double)((float)k * -0.001F)).func_187315_a((double)f1, (double)f4).func_181675_d();
-               tessellator.func_78381_a();
-               GlStateManager.func_179121_F();
-               ++k;
+                if (j / 4 == 0)
+                {
+                    this.mapTextureData[i] = (i + i / 128 & 1) * 8 + 16 << 24;
+                }
+                else
+                {
+                    this.mapTextureData[i] = MapColor.COLORS[j / 4].getMapColor(j & 3);
+                }
             }
-         }
 
-         GlStateManager.func_179094_E();
-         GlStateManager.func_179109_b(0.0F, 0.0F, -0.04F);
-         GlStateManager.func_179152_a(1.0F, 1.0F, 1.0F);
-         GlStateManager.func_179121_F();
-      }
-   }
+            this.mapTexture.updateDynamicTexture();
+        }
+
+        private void render(boolean noOverlayRendering)
+        {
+            int i = 0;
+            int j = 0;
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
+            float f = 0.0F;
+            MapItemRenderer.this.textureManager.bindTexture(this.location);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            GlStateManager.disableAlpha();
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+            bufferbuilder.pos(0.0D, 128.0D, -0.009999999776482582D).tex(0.0D, 1.0D).endVertex();
+            bufferbuilder.pos(128.0D, 128.0D, -0.009999999776482582D).tex(1.0D, 1.0D).endVertex();
+            bufferbuilder.pos(128.0D, 0.0D, -0.009999999776482582D).tex(1.0D, 0.0D).endVertex();
+            bufferbuilder.pos(0.0D, 0.0D, -0.009999999776482582D).tex(0.0D, 0.0D).endVertex();
+            tessellator.draw();
+            GlStateManager.enableAlpha();
+            GlStateManager.disableBlend();
+            MapItemRenderer.this.textureManager.bindTexture(MapItemRenderer.TEXTURE_MAP_ICONS);
+            int k = 0;
+
+            for (MapDecoration mapdecoration : this.mapData.mapDecorations.values())
+            {
+                if (!noOverlayRendering || mapdecoration.func_191180_f())
+                {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(0.0F + (float)mapdecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapdecoration.getY() / 2.0F + 64.0F, -0.02F);
+                    GlStateManager.rotate((float)(mapdecoration.getRotation() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
+                    GlStateManager.scale(4.0F, 4.0F, 3.0F);
+                    GlStateManager.translate(-0.125F, 0.125F, 0.0F);
+                    byte b0 = mapdecoration.getType();
+                    float f1 = (float)(b0 % 4 + 0) / 4.0F;
+                    float f2 = (float)(b0 / 4 + 0) / 4.0F;
+                    float f3 = (float)(b0 % 4 + 1) / 4.0F;
+                    float f4 = (float)(b0 / 4 + 1) / 4.0F;
+                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                    float f5 = -0.001F;
+                    bufferbuilder.pos(-1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f2).endVertex();
+                    bufferbuilder.pos(1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f2).endVertex();
+                    bufferbuilder.pos(1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f4).endVertex();
+                    bufferbuilder.pos(-1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f4).endVertex();
+                    tessellator.draw();
+                    GlStateManager.popMatrix();
+                    ++k;
+                }
+            }
+
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, 0.0F, -0.04F);
+            GlStateManager.scale(1.0F, 1.0F, 1.0F);
+            GlStateManager.popMatrix();
+        }
+    }
 }

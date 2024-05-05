@@ -4,20 +4,30 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderHusk extends RenderZombie {
-   private static final ResourceLocation field_190086_r = new ResourceLocation("textures/entity/zombie/husk.png");
+public class RenderHusk extends RenderZombie
+{
+    private static final ResourceLocation HUSK_ZOMBIE_TEXTURES = new ResourceLocation("textures/entity/zombie/husk.png");
 
-   public RenderHusk(RenderManager p_i47204_1_) {
-      super(p_i47204_1_);
-   }
+    public RenderHusk(RenderManager p_i47204_1_)
+    {
+        super(p_i47204_1_);
+    }
 
-   protected void func_77041_b(EntityZombie p_77041_1_, float p_77041_2_) {
-      float f = 1.0625F;
-      GlStateManager.func_179152_a(1.0625F, 1.0625F, 1.0625F);
-      super.func_77041_b(p_77041_1_, p_77041_2_);
-   }
+    /**
+     * Allows the render to do state modifications necessary before the model is rendered.
+     */
+    protected void preRenderCallback(EntityZombie entitylivingbaseIn, float partialTickTime)
+    {
+        float f = 1.0625F;
+        GlStateManager.scale(1.0625F, 1.0625F, 1.0625F);
+        super.preRenderCallback(entitylivingbaseIn, partialTickTime);
+    }
 
-   protected ResourceLocation func_110775_a(EntityZombie p_110775_1_) {
-      return field_190086_r;
-   }
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(EntityZombie entity)
+    {
+        return HUSK_ZOMBIE_TEXTURES;
+    }
 }

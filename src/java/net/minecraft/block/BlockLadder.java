@@ -17,113 +17,178 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockLadder extends Block {
-   public static final PropertyDirection field_176382_a = BlockHorizontal.field_185512_D;
-   protected static final AxisAlignedBB field_185687_b = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.1875D, 1.0D, 1.0D);
-   protected static final AxisAlignedBB field_185688_c = new AxisAlignedBB(0.8125D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-   protected static final AxisAlignedBB field_185689_d = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.1875D);
-   protected static final AxisAlignedBB field_185690_e = new AxisAlignedBB(0.0D, 0.0D, 0.8125D, 1.0D, 1.0D, 1.0D);
+public class BlockLadder extends Block
+{
+    public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    protected static final AxisAlignedBB LADDER_EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.1875D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB LADDER_WEST_AABB = new AxisAlignedBB(0.8125D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB LADDER_SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.1875D);
+    protected static final AxisAlignedBB LADDER_NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.8125D, 1.0D, 1.0D, 1.0D);
 
-   protected BlockLadder() {
-      super(Material.field_151594_q);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176382_a, EnumFacing.NORTH));
-      this.func_149647_a(CreativeTabs.field_78031_c);
-   }
+    protected BlockLadder()
+    {
+        super(Material.CIRCUITS);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
 
-   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
-      switch((EnumFacing)p_185496_1_.func_177229_b(field_176382_a)) {
-      case NORTH:
-         return field_185690_e;
-      case SOUTH:
-         return field_185689_d;
-      case WEST:
-         return field_185688_c;
-      case EAST:
-      default:
-         return field_185687_b;
-      }
-   }
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        switch ((EnumFacing)state.getValue(FACING))
+        {
+            case NORTH:
+                return LADDER_NORTH_AABB;
 
-   public boolean func_149662_c(IBlockState p_149662_1_) {
-      return false;
-   }
+            case SOUTH:
+                return LADDER_SOUTH_AABB;
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+            case WEST:
+                return LADDER_WEST_AABB;
 
-   public boolean func_176198_a(World p_176198_1_, BlockPos p_176198_2_, EnumFacing p_176198_3_) {
-      if (this.func_193392_c(p_176198_1_, p_176198_2_.func_177976_e(), p_176198_3_)) {
-         return true;
-      } else if (this.func_193392_c(p_176198_1_, p_176198_2_.func_177974_f(), p_176198_3_)) {
-         return true;
-      } else if (this.func_193392_c(p_176198_1_, p_176198_2_.func_177978_c(), p_176198_3_)) {
-         return true;
-      } else {
-         return this.func_193392_c(p_176198_1_, p_176198_2_.func_177968_d(), p_176198_3_);
-      }
-   }
+            case EAST:
+            default:
+                return LADDER_EAST_AABB;
+        }
+    }
 
-   private boolean func_193392_c(World p_193392_1_, BlockPos p_193392_2_, EnumFacing p_193392_3_) {
-      IBlockState iblockstate = p_193392_1_.func_180495_p(p_193392_2_);
-      boolean flag = func_193382_c(iblockstate.func_177230_c());
-      return !flag && iblockstate.func_193401_d(p_193392_1_, p_193392_2_, p_193392_3_) == BlockFaceShape.SOLID && !iblockstate.func_185897_m();
-   }
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public IBlockState func_180642_a(World p_180642_1_, BlockPos p_180642_2_, EnumFacing p_180642_3_, float p_180642_4_, float p_180642_5_, float p_180642_6_, int p_180642_7_, EntityLivingBase p_180642_8_) {
-      if (p_180642_3_.func_176740_k().func_176722_c() && this.func_193392_c(p_180642_1_, p_180642_2_.func_177972_a(p_180642_3_.func_176734_d()), p_180642_3_)) {
-         return this.func_176223_P().func_177226_a(field_176382_a, p_180642_3_);
-      } else {
-         for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            if (this.func_193392_c(p_180642_1_, p_180642_2_.func_177972_a(enumfacing.func_176734_d()), enumfacing)) {
-               return this.func_176223_P().func_177226_a(field_176382_a, enumfacing);
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
+
+    /**
+     * Check whether this Block can be placed on the given side
+     */
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
+    {
+        if (this.func_193392_c(worldIn, pos.west(), side))
+        {
+            return true;
+        }
+        else if (this.func_193392_c(worldIn, pos.east(), side))
+        {
+            return true;
+        }
+        else if (this.func_193392_c(worldIn, pos.north(), side))
+        {
+            return true;
+        }
+        else
+        {
+            return this.func_193392_c(worldIn, pos.south(), side);
+        }
+    }
+
+    private boolean func_193392_c(World p_193392_1_, BlockPos p_193392_2_, EnumFacing p_193392_3_)
+    {
+        IBlockState iblockstate = p_193392_1_.getBlockState(p_193392_2_);
+        boolean flag = func_193382_c(iblockstate.getBlock());
+        return !flag && iblockstate.func_193401_d(p_193392_1_, p_193392_2_, p_193392_3_) == BlockFaceShape.SOLID && !iblockstate.canProvidePower();
+    }
+
+    /**
+     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
+     * IBlockstate
+     */
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        if (facing.getAxis().isHorizontal() && this.func_193392_c(worldIn, pos.offset(facing.getOpposite()), facing))
+        {
+            return this.getDefaultState().withProperty(FACING, facing);
+        }
+        else
+        {
+            for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+            {
+                if (this.func_193392_c(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
+                {
+                    return this.getDefaultState().withProperty(FACING, enumfacing);
+                }
             }
-         }
 
-         return this.func_176223_P();
-      }
-   }
+            return this.getDefaultState();
+        }
+    }
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      EnumFacing enumfacing = (EnumFacing)p_189540_1_.func_177229_b(field_176382_a);
-      if (!this.func_193392_c(p_189540_2_, p_189540_3_.func_177972_a(enumfacing.func_176734_d()), enumfacing)) {
-         this.func_176226_b(p_189540_2_, p_189540_3_, p_189540_1_, 0);
-         p_189540_2_.func_175698_g(p_189540_3_);
-      }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
-      super.func_189540_a(p_189540_1_, p_189540_2_, p_189540_3_, p_189540_4_, p_189540_5_);
-   }
+        if (!this.func_193392_c(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
+        {
+            this.dropBlockAsItem(worldIn, pos, state, 0);
+            worldIn.setBlockToAir(pos);
+        }
 
-   public BlockRenderLayer func_180664_k() {
-      return BlockRenderLayer.CUTOUT;
-   }
+        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      EnumFacing enumfacing = EnumFacing.func_82600_a(p_176203_1_);
-      if (enumfacing.func_176740_k() == EnumFacing.Axis.Y) {
-         enumfacing = EnumFacing.NORTH;
-      }
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
+    }
 
-      return this.func_176223_P().func_177226_a(field_176382_a, enumfacing);
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        EnumFacing enumfacing = EnumFacing.getFront(meta);
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      return ((EnumFacing)p_176201_1_.func_177229_b(field_176382_a)).func_176745_a();
-   }
+        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
+        {
+            enumfacing = EnumFacing.NORTH;
+        }
 
-   public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-      return p_185499_1_.func_177226_a(field_176382_a, p_185499_2_.func_185831_a((EnumFacing)p_185499_1_.func_177229_b(field_176382_a)));
-   }
+        return this.getDefaultState().withProperty(FACING, enumfacing);
+    }
 
-   public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-      return p_185471_1_.func_185907_a(p_185471_2_.func_185800_a((EnumFacing)p_185471_1_.func_177229_b(field_176382_a)));
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((EnumFacing)state.getValue(FACING)).getIndex();
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176382_a});
-   }
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
 
-   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
-      return BlockFaceShape.UNDEFINED;
-   }
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 }

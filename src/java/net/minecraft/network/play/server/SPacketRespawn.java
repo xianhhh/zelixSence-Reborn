@@ -8,57 +8,77 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 
-public class SPacketRespawn implements Packet<INetHandlerPlayClient> {
-   private int field_149088_a;
-   private EnumDifficulty field_149086_b;
-   private GameType field_149087_c;
-   private WorldType field_149085_d;
+public class SPacketRespawn implements Packet<INetHandlerPlayClient>
+{
+    private int dimensionID;
+    private EnumDifficulty difficulty;
+    private GameType gameType;
+    private WorldType worldType;
 
-   public SPacketRespawn() {
-   }
+    public SPacketRespawn()
+    {
+    }
 
-   public SPacketRespawn(int p_i46923_1_, EnumDifficulty p_i46923_2_, WorldType p_i46923_3_, GameType p_i46923_4_) {
-      this.field_149088_a = p_i46923_1_;
-      this.field_149086_b = p_i46923_2_;
-      this.field_149087_c = p_i46923_4_;
-      this.field_149085_d = p_i46923_3_;
-   }
+    public SPacketRespawn(int dimensionIdIn, EnumDifficulty difficultyIn, WorldType worldTypeIn, GameType gameModeIn)
+    {
+        this.dimensionID = dimensionIdIn;
+        this.difficulty = difficultyIn;
+        this.gameType = gameModeIn;
+        this.worldType = worldTypeIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147280_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleRespawn(this);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149088_a = p_148837_1_.readInt();
-      this.field_149086_b = EnumDifficulty.func_151523_a(p_148837_1_.readUnsignedByte());
-      this.field_149087_c = GameType.func_77146_a(p_148837_1_.readUnsignedByte());
-      this.field_149085_d = WorldType.func_77130_a(p_148837_1_.func_150789_c(16));
-      if (this.field_149085_d == null) {
-         this.field_149085_d = WorldType.field_77137_b;
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.dimensionID = buf.readInt();
+        this.difficulty = EnumDifficulty.getDifficultyEnum(buf.readUnsignedByte());
+        this.gameType = GameType.getByID(buf.readUnsignedByte());
+        this.worldType = WorldType.parseWorldType(buf.readStringFromBuffer(16));
 
-   }
+        if (this.worldType == null)
+        {
+            this.worldType = WorldType.DEFAULT;
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeInt(this.field_149088_a);
-      p_148840_1_.writeByte(this.field_149086_b.func_151525_a());
-      p_148840_1_.writeByte(this.field_149087_c.func_77148_a());
-      p_148840_1_.func_180714_a(this.field_149085_d.func_77127_a());
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeInt(this.dimensionID);
+        buf.writeByte(this.difficulty.getDifficultyId());
+        buf.writeByte(this.gameType.getID());
+        buf.writeString(this.worldType.getWorldTypeName());
+    }
 
-   public int func_149082_c() {
-      return this.field_149088_a;
-   }
+    public int getDimensionID()
+    {
+        return this.dimensionID;
+    }
 
-   public EnumDifficulty func_149081_d() {
-      return this.field_149086_b;
-   }
+    public EnumDifficulty getDifficulty()
+    {
+        return this.difficulty;
+    }
 
-   public GameType func_149083_e() {
-      return this.field_149087_c;
-   }
+    public GameType getGameType()
+    {
+        return this.gameType;
+    }
 
-   public WorldType func_149080_f() {
-      return this.field_149085_d;
-   }
+    public WorldType getWorldType()
+    {
+        return this.worldType;
+    }
 }

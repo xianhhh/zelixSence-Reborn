@@ -9,162 +9,211 @@ import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
-public class ModifiableAttributeInstance implements IAttributeInstance {
-   private final AbstractAttributeMap field_111138_a;
-   private final IAttribute field_111136_b;
-   private final Map<Integer, Set<AttributeModifier>> field_111137_c = Maps.<Integer, Set<AttributeModifier>>newHashMap();
-   private final Map<String, Set<AttributeModifier>> field_111134_d = Maps.<String, Set<AttributeModifier>>newHashMap();
-   private final Map<UUID, AttributeModifier> field_111135_e = Maps.<UUID, AttributeModifier>newHashMap();
-   private double field_111132_f;
-   private boolean field_111133_g = true;
-   private double field_111139_h;
+public class ModifiableAttributeInstance implements IAttributeInstance
+{
+    /** The BaseAttributeMap this attributeInstance can be found in */
+    private final AbstractAttributeMap attributeMap;
 
-   public ModifiableAttributeInstance(AbstractAttributeMap p_i1608_1_, IAttribute p_i1608_2_) {
-      this.field_111138_a = p_i1608_1_;
-      this.field_111136_b = p_i1608_2_;
-      this.field_111132_f = p_i1608_2_.func_111110_b();
+    /** The Attribute this is an instance of */
+    private final IAttribute genericAttribute;
+    private final Map<Integer, Set<AttributeModifier>> mapByOperation = Maps.<Integer, Set<AttributeModifier>>newHashMap();
+    private final Map<String, Set<AttributeModifier>> mapByName = Maps.<String, Set<AttributeModifier>>newHashMap();
+    private final Map<UUID, AttributeModifier> mapByUUID = Maps.<UUID, AttributeModifier>newHashMap();
+    private double baseValue;
+    private boolean needsUpdate = true;
+    private double cachedValue;
 
-      for(int i = 0; i < 3; ++i) {
-         this.field_111137_c.put(Integer.valueOf(i), Sets.newHashSet());
-      }
+    public ModifiableAttributeInstance(AbstractAttributeMap attributeMapIn, IAttribute genericAttributeIn)
+    {
+        this.attributeMap = attributeMapIn;
+        this.genericAttribute = genericAttributeIn;
+        this.baseValue = genericAttributeIn.getDefaultValue();
 
-   }
+        for (int i = 0; i < 3; ++i)
+        {
+            this.mapByOperation.put(Integer.valueOf(i), Sets.newHashSet());
+        }
+    }
 
-   public IAttribute func_111123_a() {
-      return this.field_111136_b;
-   }
+    /**
+     * Get the Attribute this is an instance of
+     */
+    public IAttribute getAttribute()
+    {
+        return this.genericAttribute;
+    }
 
-   public double func_111125_b() {
-      return this.field_111132_f;
-   }
+    public double getBaseValue()
+    {
+        return this.baseValue;
+    }
 
-   public void func_111128_a(double p_111128_1_) {
-      if (p_111128_1_ != this.func_111125_b()) {
-         this.field_111132_f = p_111128_1_;
-         this.func_111131_f();
-      }
-   }
+    public void setBaseValue(double baseValue)
+    {
+        if (baseValue != this.getBaseValue())
+        {
+            this.baseValue = baseValue;
+            this.flagForUpdate();
+        }
+    }
 
-   public Collection<AttributeModifier> func_111130_a(int p_111130_1_) {
-      return (Collection)this.field_111137_c.get(Integer.valueOf(p_111130_1_));
-   }
+    public Collection<AttributeModifier> getModifiersByOperation(int operation)
+    {
+        return (Collection)this.mapByOperation.get(Integer.valueOf(operation));
+    }
 
-   public Collection<AttributeModifier> func_111122_c() {
-      Set<AttributeModifier> set = Sets.<AttributeModifier>newHashSet();
+    public Collection<AttributeModifier> getModifiers()
+    {
+        Set<AttributeModifier> set = Sets.<AttributeModifier>newHashSet();
 
-      for(int i = 0; i < 3; ++i) {
-         set.addAll(this.func_111130_a(i));
-      }
+        for (int i = 0; i < 3; ++i)
+        {
+            set.addAll(this.getModifiersByOperation(i));
+        }
 
-      return set;
-   }
+        return set;
+    }
 
-   @Nullable
-   public AttributeModifier func_111127_a(UUID p_111127_1_) {
-      return this.field_111135_e.get(p_111127_1_);
-   }
+    @Nullable
 
-   public boolean func_180374_a(AttributeModifier p_180374_1_) {
-      return this.field_111135_e.get(p_180374_1_.func_111167_a()) != null;
-   }
+    /**
+     * Returns attribute modifier, if any, by the given UUID
+     */
+    public AttributeModifier getModifier(UUID uuid)
+    {
+        return this.mapByUUID.get(uuid);
+    }
 
-   public void func_111121_a(AttributeModifier p_111121_1_) {
-      if (this.func_111127_a(p_111121_1_.func_111167_a()) != null) {
-         throw new IllegalArgumentException("Modifier is already applied on this attribute!");
-      } else {
-         Set<AttributeModifier> set = (Set)this.field_111134_d.get(p_111121_1_.func_111166_b());
-         if (set == null) {
-            set = Sets.<AttributeModifier>newHashSet();
-            this.field_111134_d.put(p_111121_1_.func_111166_b(), set);
-         }
+    public boolean hasModifier(AttributeModifier modifier)
+    {
+        return this.mapByUUID.get(modifier.getID()) != null;
+    }
 
-         (this.field_111137_c.get(Integer.valueOf(p_111121_1_.func_111169_c()))).add(p_111121_1_);
-         set.add(p_111121_1_);
-         this.field_111135_e.put(p_111121_1_.func_111167_a(), p_111121_1_);
-         this.func_111131_f();
-      }
-   }
+    public void applyModifier(AttributeModifier modifier)
+    {
+        if (this.getModifier(modifier.getID()) != null)
+        {
+            throw new IllegalArgumentException("Modifier is already applied on this attribute!");
+        }
+        else
+        {
+            Set<AttributeModifier> set = (Set)this.mapByName.get(modifier.getName());
 
-   protected void func_111131_f() {
-      this.field_111133_g = true;
-      this.field_111138_a.func_180794_a(this);
-   }
+            if (set == null)
+            {
+                set = Sets.<AttributeModifier>newHashSet();
+                this.mapByName.put(modifier.getName(), set);
+            }
 
-   public void func_111124_b(AttributeModifier p_111124_1_) {
-      for(int i = 0; i < 3; ++i) {
-         Set<AttributeModifier> set = (Set)this.field_111137_c.get(Integer.valueOf(i));
-         set.remove(p_111124_1_);
-      }
+            (this.mapByOperation.get(Integer.valueOf(modifier.getOperation()))).add(modifier);
+            set.add(modifier);
+            this.mapByUUID.put(modifier.getID(), modifier);
+            this.flagForUpdate();
+        }
+    }
 
-      Set<AttributeModifier> set1 = (Set)this.field_111134_d.get(p_111124_1_.func_111166_b());
-      if (set1 != null) {
-         set1.remove(p_111124_1_);
-         if (set1.isEmpty()) {
-            this.field_111134_d.remove(p_111124_1_.func_111166_b());
-         }
-      }
+    protected void flagForUpdate()
+    {
+        this.needsUpdate = true;
+        this.attributeMap.onAttributeModified(this);
+    }
 
-      this.field_111135_e.remove(p_111124_1_.func_111167_a());
-      this.func_111131_f();
-   }
+    public void removeModifier(AttributeModifier modifier)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            Set<AttributeModifier> set = (Set)this.mapByOperation.get(Integer.valueOf(i));
+            set.remove(modifier);
+        }
 
-   public void func_188479_b(UUID p_188479_1_) {
-      AttributeModifier attributemodifier = this.func_111127_a(p_188479_1_);
-      if (attributemodifier != null) {
-         this.func_111124_b(attributemodifier);
-      }
+        Set<AttributeModifier> set1 = (Set)this.mapByName.get(modifier.getName());
 
-   }
+        if (set1 != null)
+        {
+            set1.remove(modifier);
 
-   public void func_142049_d() {
-      Collection<AttributeModifier> collection = this.func_111122_c();
-      if (collection != null) {
-         for(AttributeModifier attributemodifier : Lists.newArrayList(collection)) {
-            this.func_111124_b(attributemodifier);
-         }
+            if (set1.isEmpty())
+            {
+                this.mapByName.remove(modifier.getName());
+            }
+        }
 
-      }
-   }
+        this.mapByUUID.remove(modifier.getID());
+        this.flagForUpdate();
+    }
 
-   public double func_111126_e() {
-      if (this.field_111133_g) {
-         this.field_111139_h = this.func_111129_g();
-         this.field_111133_g = false;
-      }
+    public void removeModifier(UUID p_188479_1_)
+    {
+        AttributeModifier attributemodifier = this.getModifier(p_188479_1_);
 
-      return this.field_111139_h;
-   }
+        if (attributemodifier != null)
+        {
+            this.removeModifier(attributemodifier);
+        }
+    }
 
-   private double func_111129_g() {
-      double d0 = this.func_111125_b();
+    public void removeAllModifiers()
+    {
+        Collection<AttributeModifier> collection = this.getModifiers();
 
-      for(AttributeModifier attributemodifier : this.func_180375_b(0)) {
-         d0 += attributemodifier.func_111164_d();
-      }
+        if (collection != null)
+        {
+            for (AttributeModifier attributemodifier : Lists.newArrayList(collection))
+            {
+                this.removeModifier(attributemodifier);
+            }
+        }
+    }
 
-      double d1 = d0;
+    public double getAttributeValue()
+    {
+        if (this.needsUpdate)
+        {
+            this.cachedValue = this.computeValue();
+            this.needsUpdate = false;
+        }
 
-      for(AttributeModifier attributemodifier1 : this.func_180375_b(1)) {
-         d1 += d0 * attributemodifier1.func_111164_d();
-      }
+        return this.cachedValue;
+    }
 
-      for(AttributeModifier attributemodifier2 : this.func_180375_b(2)) {
-         d1 *= 1.0D + attributemodifier2.func_111164_d();
-      }
+    private double computeValue()
+    {
+        double d0 = this.getBaseValue();
 
-      return this.field_111136_b.func_111109_a(d1);
-   }
+        for (AttributeModifier attributemodifier : this.getAppliedModifiers(0))
+        {
+            d0 += attributemodifier.getAmount();
+        }
 
-   private Collection<AttributeModifier> func_180375_b(int p_180375_1_) {
-      Set<AttributeModifier> set = Sets.newHashSet(this.func_111130_a(p_180375_1_));
+        double d1 = d0;
 
-      for(IAttribute iattribute = this.field_111136_b.func_180372_d(); iattribute != null; iattribute = iattribute.func_180372_d()) {
-         IAttributeInstance iattributeinstance = this.field_111138_a.func_111151_a(iattribute);
-         if (iattributeinstance != null) {
-            set.addAll(iattributeinstance.func_111130_a(p_180375_1_));
-         }
-      }
+        for (AttributeModifier attributemodifier1 : this.getAppliedModifiers(1))
+        {
+            d1 += d0 * attributemodifier1.getAmount();
+        }
 
-      return set;
-   }
+        for (AttributeModifier attributemodifier2 : this.getAppliedModifiers(2))
+        {
+            d1 *= 1.0D + attributemodifier2.getAmount();
+        }
+
+        return this.genericAttribute.clampValue(d1);
+    }
+
+    private Collection<AttributeModifier> getAppliedModifiers(int operation)
+    {
+        Set<AttributeModifier> set = Sets.newHashSet(this.getModifiersByOperation(operation));
+
+        for (IAttribute iattribute = this.genericAttribute.getParent(); iattribute != null; iattribute = iattribute.getParent())
+        {
+            IAttributeInstance iattributeinstance = this.attributeMap.getAttributeInstance(iattribute);
+
+            if (iattributeinstance != null)
+            {
+                set.addAll(iattributeinstance.getModifiersByOperation(operation));
+            }
+        }
+
+        return set;
+    }
 }

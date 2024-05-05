@@ -11,250 +11,350 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 
-public class FlyingNodeProcessor extends WalkNodeProcessor {
-   public void func_186315_a(IBlockAccess p_186315_1_, EntityLiving p_186315_2_) {
-      super.func_186315_a(p_186315_1_, p_186315_2_);
-      this.field_176183_h = p_186315_2_.func_184643_a(PathNodeType.WATER);
-   }
+public class FlyingNodeProcessor extends WalkNodeProcessor
+{
+    public void initProcessor(IBlockAccess sourceIn, EntityLiving mob)
+    {
+        super.initProcessor(sourceIn, mob);
+        this.avoidsWater = mob.getPathPriority(PathNodeType.WATER);
+    }
 
-   public void func_176163_a() {
-      this.field_186326_b.func_184644_a(PathNodeType.WATER, this.field_176183_h);
-      super.func_176163_a();
-   }
+    /**
+     * This method is called when all nodes have been processed and PathEntity is created.
+     *  {@link net.minecraft.world.pathfinder.WalkNodeProcessor WalkNodeProcessor} uses this to change its field {@link
+     * net.minecraft.world.pathfinder.WalkNodeProcessor#avoidsWater avoidsWater}
+     */
+    public void postProcess()
+    {
+        this.entity.setPathPriority(PathNodeType.WATER, this.avoidsWater);
+        super.postProcess();
+    }
 
-   public PathPoint func_186318_b() {
-      int i;
-      if (this.func_186322_e() && this.field_186326_b.func_70090_H()) {
-         i = (int)this.field_186326_b.func_174813_aQ().field_72338_b;
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(MathHelper.func_76128_c(this.field_186326_b.field_70165_t), i, MathHelper.func_76128_c(this.field_186326_b.field_70161_v));
+    public PathPoint getStart()
+    {
+        int i;
 
-         for(Block block = this.field_176169_a.func_180495_p(blockpos$mutableblockpos).func_177230_c(); block == Blocks.field_150358_i || block == Blocks.field_150355_j; block = this.field_176169_a.func_180495_p(blockpos$mutableblockpos).func_177230_c()) {
-            ++i;
-            blockpos$mutableblockpos.func_181079_c(MathHelper.func_76128_c(this.field_186326_b.field_70165_t), i, MathHelper.func_76128_c(this.field_186326_b.field_70161_v));
-         }
-      } else {
-         i = MathHelper.func_76128_c(this.field_186326_b.func_174813_aQ().field_72338_b + 0.5D);
-      }
+        if (this.getCanSwim() && this.entity.isInWater())
+        {
+            i = (int)this.entity.getEntityBoundingBox().minY;
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ));
 
-      BlockPos blockpos1 = new BlockPos(this.field_186326_b);
-      PathNodeType pathnodetype1 = this.func_192558_a(this.field_186326_b, blockpos1.func_177958_n(), i, blockpos1.func_177952_p());
-      if (this.field_186326_b.func_184643_a(pathnodetype1) < 0.0F) {
-         Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-         set.add(new BlockPos(this.field_186326_b.func_174813_aQ().field_72340_a, (double)i, this.field_186326_b.func_174813_aQ().field_72339_c));
-         set.add(new BlockPos(this.field_186326_b.func_174813_aQ().field_72340_a, (double)i, this.field_186326_b.func_174813_aQ().field_72334_f));
-         set.add(new BlockPos(this.field_186326_b.func_174813_aQ().field_72336_d, (double)i, this.field_186326_b.func_174813_aQ().field_72339_c));
-         set.add(new BlockPos(this.field_186326_b.func_174813_aQ().field_72336_d, (double)i, this.field_186326_b.func_174813_aQ().field_72334_f));
-
-         for(BlockPos blockpos : set) {
-            PathNodeType pathnodetype = this.func_192559_a(this.field_186326_b, blockpos);
-            if (this.field_186326_b.func_184643_a(pathnodetype) >= 0.0F) {
-               return super.func_176159_a(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p());
+            for (Block block = this.blockaccess.getBlockState(blockpos$mutableblockpos).getBlock(); block == Blocks.FLOWING_WATER || block == Blocks.WATER; block = this.blockaccess.getBlockState(blockpos$mutableblockpos).getBlock())
+            {
+                ++i;
+                blockpos$mutableblockpos.setPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ));
             }
-         }
-      }
+        }
+        else
+        {
+            i = MathHelper.floor(this.entity.getEntityBoundingBox().minY + 0.5D);
+        }
 
-      return super.func_176159_a(blockpos1.func_177958_n(), i, blockpos1.func_177952_p());
-   }
+        BlockPos blockpos1 = new BlockPos(this.entity);
+        PathNodeType pathnodetype1 = this.func_192558_a(this.entity, blockpos1.getX(), i, blockpos1.getZ());
 
-   public PathPoint func_186325_a(double p_186325_1_, double p_186325_3_, double p_186325_5_) {
-      return super.func_176159_a(MathHelper.func_76128_c(p_186325_1_), MathHelper.func_76128_c(p_186325_3_), MathHelper.func_76128_c(p_186325_5_));
-   }
+        if (this.entity.getPathPriority(pathnodetype1) < 0.0F)
+        {
+            Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+            set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, (double)i, this.entity.getEntityBoundingBox().minZ));
+            set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, (double)i, this.entity.getEntityBoundingBox().maxZ));
+            set.add(new BlockPos(this.entity.getEntityBoundingBox().maxX, (double)i, this.entity.getEntityBoundingBox().minZ));
+            set.add(new BlockPos(this.entity.getEntityBoundingBox().maxX, (double)i, this.entity.getEntityBoundingBox().maxZ));
 
-   public int func_186320_a(PathPoint[] p_186320_1_, PathPoint p_186320_2_, PathPoint p_186320_3_, float p_186320_4_) {
-      int i = 0;
-      PathPoint pathpoint = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c + 1);
-      PathPoint pathpoint1 = this.func_176159_a(p_186320_2_.field_75839_a - 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c);
-      PathPoint pathpoint2 = this.func_176159_a(p_186320_2_.field_75839_a + 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c);
-      PathPoint pathpoint3 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c - 1);
-      PathPoint pathpoint4 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b + 1, p_186320_2_.field_75838_c);
-      PathPoint pathpoint5 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b - 1, p_186320_2_.field_75838_c);
-      if (pathpoint != null && !pathpoint.field_75842_i && pathpoint.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint;
-      }
+            for (BlockPos blockpos : set)
+            {
+                PathNodeType pathnodetype = this.func_192559_a(this.entity, blockpos);
 
-      if (pathpoint1 != null && !pathpoint1.field_75842_i && pathpoint1.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint1;
-      }
+                if (this.entity.getPathPriority(pathnodetype) >= 0.0F)
+                {
+                    return super.openPoint(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                }
+            }
+        }
 
-      if (pathpoint2 != null && !pathpoint2.field_75842_i && pathpoint2.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint2;
-      }
+        return super.openPoint(blockpos1.getX(), i, blockpos1.getZ());
+    }
 
-      if (pathpoint3 != null && !pathpoint3.field_75842_i && pathpoint3.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint3;
-      }
+    /**
+     * Returns PathPoint for given coordinates
+     */
+    public PathPoint getPathPointToCoords(double x, double y, double z)
+    {
+        return super.openPoint(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+    }
 
-      if (pathpoint4 != null && !pathpoint4.field_75842_i && pathpoint4.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint4;
-      }
+    public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance)
+    {
+        int i = 0;
+        PathPoint pathpoint = this.openPoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord + 1);
+        PathPoint pathpoint1 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord);
+        PathPoint pathpoint2 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord);
+        PathPoint pathpoint3 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord - 1);
+        PathPoint pathpoint4 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord);
+        PathPoint pathpoint5 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord);
 
-      if (pathpoint5 != null && !pathpoint5.field_75842_i && pathpoint5.func_75829_a(p_186320_3_) < p_186320_4_) {
-         p_186320_1_[i++] = pathpoint5;
-      }
+        if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint;
+        }
 
-      boolean flag = pathpoint3 == null || pathpoint3.field_186286_l != 0.0F;
-      boolean flag1 = pathpoint == null || pathpoint.field_186286_l != 0.0F;
-      boolean flag2 = pathpoint2 == null || pathpoint2.field_186286_l != 0.0F;
-      boolean flag3 = pathpoint1 == null || pathpoint1.field_186286_l != 0.0F;
-      boolean flag4 = pathpoint4 == null || pathpoint4.field_186286_l != 0.0F;
-      boolean flag5 = pathpoint5 == null || pathpoint5.field_186286_l != 0.0F;
-      if (flag && flag3) {
-         PathPoint pathpoint6 = this.func_176159_a(p_186320_2_.field_75839_a - 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c - 1);
-         if (pathpoint6 != null && !pathpoint6.field_75842_i && pathpoint6.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint6;
-         }
-      }
+        if (pathpoint1 != null && !pathpoint1.visited && pathpoint1.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint1;
+        }
 
-      if (flag && flag2) {
-         PathPoint pathpoint7 = this.func_176159_a(p_186320_2_.field_75839_a + 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c - 1);
-         if (pathpoint7 != null && !pathpoint7.field_75842_i && pathpoint7.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint7;
-         }
-      }
+        if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint2;
+        }
 
-      if (flag1 && flag3) {
-         PathPoint pathpoint8 = this.func_176159_a(p_186320_2_.field_75839_a - 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c + 1);
-         if (pathpoint8 != null && !pathpoint8.field_75842_i && pathpoint8.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint8;
-         }
-      }
+        if (pathpoint3 != null && !pathpoint3.visited && pathpoint3.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint3;
+        }
 
-      if (flag1 && flag2) {
-         PathPoint pathpoint9 = this.func_176159_a(p_186320_2_.field_75839_a + 1, p_186320_2_.field_75837_b, p_186320_2_.field_75838_c + 1);
-         if (pathpoint9 != null && !pathpoint9.field_75842_i && pathpoint9.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint9;
-         }
-      }
+        if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint4;
+        }
 
-      if (flag && flag4) {
-         PathPoint pathpoint10 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b + 1, p_186320_2_.field_75838_c - 1);
-         if (pathpoint10 != null && !pathpoint10.field_75842_i && pathpoint10.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint10;
-         }
-      }
+        if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceTo(targetPoint) < maxDistance)
+        {
+            pathOptions[i++] = pathpoint5;
+        }
 
-      if (flag1 && flag4) {
-         PathPoint pathpoint11 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b + 1, p_186320_2_.field_75838_c + 1);
-         if (pathpoint11 != null && !pathpoint11.field_75842_i && pathpoint11.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint11;
-         }
-      }
+        boolean flag = pathpoint3 == null || pathpoint3.costMalus != 0.0F;
+        boolean flag1 = pathpoint == null || pathpoint.costMalus != 0.0F;
+        boolean flag2 = pathpoint2 == null || pathpoint2.costMalus != 0.0F;
+        boolean flag3 = pathpoint1 == null || pathpoint1.costMalus != 0.0F;
+        boolean flag4 = pathpoint4 == null || pathpoint4.costMalus != 0.0F;
+        boolean flag5 = pathpoint5 == null || pathpoint5.costMalus != 0.0F;
 
-      if (flag2 && flag4) {
-         PathPoint pathpoint12 = this.func_176159_a(p_186320_2_.field_75839_a + 1, p_186320_2_.field_75837_b + 1, p_186320_2_.field_75838_c);
-         if (pathpoint12 != null && !pathpoint12.field_75842_i && pathpoint12.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint12;
-         }
-      }
+        if (flag && flag3)
+        {
+            PathPoint pathpoint6 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord - 1);
 
-      if (flag3 && flag4) {
-         PathPoint pathpoint13 = this.func_176159_a(p_186320_2_.field_75839_a - 1, p_186320_2_.field_75837_b + 1, p_186320_2_.field_75838_c);
-         if (pathpoint13 != null && !pathpoint13.field_75842_i && pathpoint13.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint13;
-         }
-      }
+            if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint6;
+            }
+        }
 
-      if (flag && flag5) {
-         PathPoint pathpoint14 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b - 1, p_186320_2_.field_75838_c - 1);
-         if (pathpoint14 != null && !pathpoint14.field_75842_i && pathpoint14.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint14;
-         }
-      }
+        if (flag && flag2)
+        {
+            PathPoint pathpoint7 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord - 1);
 
-      if (flag1 && flag5) {
-         PathPoint pathpoint15 = this.func_176159_a(p_186320_2_.field_75839_a, p_186320_2_.field_75837_b - 1, p_186320_2_.field_75838_c + 1);
-         if (pathpoint15 != null && !pathpoint15.field_75842_i && pathpoint15.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint15;
-         }
-      }
+            if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint7;
+            }
+        }
 
-      if (flag2 && flag5) {
-         PathPoint pathpoint16 = this.func_176159_a(p_186320_2_.field_75839_a + 1, p_186320_2_.field_75837_b - 1, p_186320_2_.field_75838_c);
-         if (pathpoint16 != null && !pathpoint16.field_75842_i && pathpoint16.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint16;
-         }
-      }
+        if (flag1 && flag3)
+        {
+            PathPoint pathpoint8 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord + 1);
 
-      if (flag3 && flag5) {
-         PathPoint pathpoint17 = this.func_176159_a(p_186320_2_.field_75839_a - 1, p_186320_2_.field_75837_b - 1, p_186320_2_.field_75838_c);
-         if (pathpoint17 != null && !pathpoint17.field_75842_i && pathpoint17.func_75829_a(p_186320_3_) < p_186320_4_) {
-            p_186320_1_[i++] = pathpoint17;
-         }
-      }
+            if (pathpoint8 != null && !pathpoint8.visited && pathpoint8.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint8;
+            }
+        }
 
-      return i;
-   }
+        if (flag1 && flag2)
+        {
+            PathPoint pathpoint9 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord + 1);
 
-   @Nullable
-   protected PathPoint func_176159_a(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
-      PathPoint pathpoint = null;
-      PathNodeType pathnodetype = this.func_192558_a(this.field_186326_b, p_176159_1_, p_176159_2_, p_176159_3_);
-      float f = this.field_186326_b.func_184643_a(pathnodetype);
-      if (f >= 0.0F) {
-         pathpoint = super.func_176159_a(p_176159_1_, p_176159_2_, p_176159_3_);
-         pathpoint.field_186287_m = pathnodetype;
-         pathpoint.field_186286_l = Math.max(pathpoint.field_186286_l, f);
-         if (pathnodetype == PathNodeType.WALKABLE) {
-            ++pathpoint.field_186286_l;
-         }
-      }
+            if (pathpoint9 != null && !pathpoint9.visited && pathpoint9.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint9;
+            }
+        }
 
-      return pathnodetype != PathNodeType.OPEN && pathnodetype != PathNodeType.WALKABLE ? pathpoint : pathpoint;
-   }
+        if (flag && flag4)
+        {
+            PathPoint pathpoint10 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord - 1);
 
-   public PathNodeType func_186319_a(IBlockAccess p_186319_1_, int p_186319_2_, int p_186319_3_, int p_186319_4_, EntityLiving p_186319_5_, int p_186319_6_, int p_186319_7_, int p_186319_8_, boolean p_186319_9_, boolean p_186319_10_) {
-      EnumSet<PathNodeType> enumset = EnumSet.<PathNodeType>noneOf(PathNodeType.class);
-      PathNodeType pathnodetype = PathNodeType.BLOCKED;
-      BlockPos blockpos = new BlockPos(p_186319_5_);
-      pathnodetype = this.func_193577_a(p_186319_1_, p_186319_2_, p_186319_3_, p_186319_4_, p_186319_6_, p_186319_7_, p_186319_8_, p_186319_9_, p_186319_10_, enumset, pathnodetype, blockpos);
-      if (enumset.contains(PathNodeType.FENCE)) {
-         return PathNodeType.FENCE;
-      } else {
-         PathNodeType pathnodetype1 = PathNodeType.BLOCKED;
+            if (pathpoint10 != null && !pathpoint10.visited && pathpoint10.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint10;
+            }
+        }
 
-         for(PathNodeType pathnodetype2 : enumset) {
-            if (p_186319_5_.func_184643_a(pathnodetype2) < 0.0F) {
-               return pathnodetype2;
+        if (flag1 && flag4)
+        {
+            PathPoint pathpoint11 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord + 1);
+
+            if (pathpoint11 != null && !pathpoint11.visited && pathpoint11.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint11;
+            }
+        }
+
+        if (flag2 && flag4)
+        {
+            PathPoint pathpoint12 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord + 1, currentPoint.zCoord);
+
+            if (pathpoint12 != null && !pathpoint12.visited && pathpoint12.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint12;
+            }
+        }
+
+        if (flag3 && flag4)
+        {
+            PathPoint pathpoint13 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord + 1, currentPoint.zCoord);
+
+            if (pathpoint13 != null && !pathpoint13.visited && pathpoint13.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint13;
+            }
+        }
+
+        if (flag && flag5)
+        {
+            PathPoint pathpoint14 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord - 1);
+
+            if (pathpoint14 != null && !pathpoint14.visited && pathpoint14.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint14;
+            }
+        }
+
+        if (flag1 && flag5)
+        {
+            PathPoint pathpoint15 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord + 1);
+
+            if (pathpoint15 != null && !pathpoint15.visited && pathpoint15.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint15;
+            }
+        }
+
+        if (flag2 && flag5)
+        {
+            PathPoint pathpoint16 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord - 1, currentPoint.zCoord);
+
+            if (pathpoint16 != null && !pathpoint16.visited && pathpoint16.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint16;
+            }
+        }
+
+        if (flag3 && flag5)
+        {
+            PathPoint pathpoint17 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord - 1, currentPoint.zCoord);
+
+            if (pathpoint17 != null && !pathpoint17.visited && pathpoint17.distanceTo(targetPoint) < maxDistance)
+            {
+                pathOptions[i++] = pathpoint17;
+            }
+        }
+
+        return i;
+    }
+
+    @Nullable
+
+    /**
+     * Returns a mapped point or creates and adds one
+     */
+    protected PathPoint openPoint(int x, int y, int z)
+    {
+        PathPoint pathpoint = null;
+        PathNodeType pathnodetype = this.func_192558_a(this.entity, x, y, z);
+        float f = this.entity.getPathPriority(pathnodetype);
+
+        if (f >= 0.0F)
+        {
+            pathpoint = super.openPoint(x, y, z);
+            pathpoint.nodeType = pathnodetype;
+            pathpoint.costMalus = Math.max(pathpoint.costMalus, f);
+
+            if (pathnodetype == PathNodeType.WALKABLE)
+            {
+                ++pathpoint.costMalus;
+            }
+        }
+
+        return pathnodetype != PathNodeType.OPEN && pathnodetype != PathNodeType.WALKABLE ? pathpoint : pathpoint;
+    }
+
+    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn)
+    {
+        EnumSet<PathNodeType> enumset = EnumSet.<PathNodeType>noneOf(PathNodeType.class);
+        PathNodeType pathnodetype = PathNodeType.BLOCKED;
+        BlockPos blockpos = new BlockPos(entitylivingIn);
+        pathnodetype = this.func_193577_a(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
+
+        if (enumset.contains(PathNodeType.FENCE))
+        {
+            return PathNodeType.FENCE;
+        }
+        else
+        {
+            PathNodeType pathnodetype1 = PathNodeType.BLOCKED;
+
+            for (PathNodeType pathnodetype2 : enumset)
+            {
+                if (entitylivingIn.getPathPriority(pathnodetype2) < 0.0F)
+                {
+                    return pathnodetype2;
+                }
+
+                if (entitylivingIn.getPathPriority(pathnodetype2) >= entitylivingIn.getPathPriority(pathnodetype1))
+                {
+                    pathnodetype1 = pathnodetype2;
+                }
             }
 
-            if (p_186319_5_.func_184643_a(pathnodetype2) >= p_186319_5_.func_184643_a(pathnodetype1)) {
-               pathnodetype1 = pathnodetype2;
+            if (pathnodetype == PathNodeType.OPEN && entitylivingIn.getPathPriority(pathnodetype1) == 0.0F)
+            {
+                return PathNodeType.OPEN;
             }
-         }
-
-         if (pathnodetype == PathNodeType.OPEN && p_186319_5_.func_184643_a(pathnodetype1) == 0.0F) {
-            return PathNodeType.OPEN;
-         } else {
-            return pathnodetype1;
-         }
-      }
-   }
-
-   public PathNodeType func_186330_a(IBlockAccess p_186330_1_, int p_186330_2_, int p_186330_3_, int p_186330_4_) {
-      PathNodeType pathnodetype = this.func_189553_b(p_186330_1_, p_186330_2_, p_186330_3_, p_186330_4_);
-      if (pathnodetype == PathNodeType.OPEN && p_186330_3_ >= 1) {
-         Block block = p_186330_1_.func_180495_p(new BlockPos(p_186330_2_, p_186330_3_ - 1, p_186330_4_)).func_177230_c();
-         PathNodeType pathnodetype1 = this.func_189553_b(p_186330_1_, p_186330_2_, p_186330_3_ - 1, p_186330_4_);
-         if (pathnodetype1 != PathNodeType.DAMAGE_FIRE && block != Blocks.field_189877_df && pathnodetype1 != PathNodeType.LAVA) {
-            if (pathnodetype1 == PathNodeType.DAMAGE_CACTUS) {
-               pathnodetype = PathNodeType.DAMAGE_CACTUS;
-            } else {
-               pathnodetype = pathnodetype1 != PathNodeType.WALKABLE && pathnodetype1 != PathNodeType.OPEN && pathnodetype1 != PathNodeType.WATER ? PathNodeType.WALKABLE : PathNodeType.OPEN;
+            else
+            {
+                return pathnodetype1;
             }
-         } else {
-            pathnodetype = PathNodeType.DAMAGE_FIRE;
-         }
-      }
+        }
+    }
 
-      pathnodetype = this.func_193578_a(p_186330_1_, p_186330_2_, p_186330_3_, p_186330_4_, pathnodetype);
-      return pathnodetype;
-   }
+    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z)
+    {
+        PathNodeType pathnodetype = this.getPathNodeTypeRaw(blockaccessIn, x, y, z);
 
-   private PathNodeType func_192559_a(EntityLiving p_192559_1_, BlockPos p_192559_2_) {
-      return this.func_192558_a(p_192559_1_, p_192559_2_.func_177958_n(), p_192559_2_.func_177956_o(), p_192559_2_.func_177952_p());
-   }
+        if (pathnodetype == PathNodeType.OPEN && y >= 1)
+        {
+            Block block = blockaccessIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
+            PathNodeType pathnodetype1 = this.getPathNodeTypeRaw(blockaccessIn, x, y - 1, z);
 
-   private PathNodeType func_192558_a(EntityLiving p_192558_1_, int p_192558_2_, int p_192558_3_, int p_192558_4_) {
-      return this.func_186319_a(this.field_176169_a, p_192558_2_, p_192558_3_, p_192558_4_, p_192558_1_, this.field_176168_c, this.field_176165_d, this.field_176166_e, this.func_186324_d(), this.func_186323_c());
-   }
+            if (pathnodetype1 != PathNodeType.DAMAGE_FIRE && block != Blocks.MAGMA && pathnodetype1 != PathNodeType.LAVA)
+            {
+                if (pathnodetype1 == PathNodeType.DAMAGE_CACTUS)
+                {
+                    pathnodetype = PathNodeType.DAMAGE_CACTUS;
+                }
+                else
+                {
+                    pathnodetype = pathnodetype1 != PathNodeType.WALKABLE && pathnodetype1 != PathNodeType.OPEN && pathnodetype1 != PathNodeType.WATER ? PathNodeType.WALKABLE : PathNodeType.OPEN;
+                }
+            }
+            else
+            {
+                pathnodetype = PathNodeType.DAMAGE_FIRE;
+            }
+        }
+
+        pathnodetype = this.func_193578_a(blockaccessIn, x, y, z, pathnodetype);
+        return pathnodetype;
+    }
+
+    private PathNodeType func_192559_a(EntityLiving p_192559_1_, BlockPos p_192559_2_)
+    {
+        return this.func_192558_a(p_192559_1_, p_192559_2_.getX(), p_192559_2_.getY(), p_192559_2_.getZ());
+    }
+
+    private PathNodeType func_192558_a(EntityLiving p_192558_1_, int p_192558_2_, int p_192558_3_, int p_192558_4_)
+    {
+        return this.getPathNodeType(this.blockaccess, p_192558_2_, p_192558_3_, p_192558_4_, p_192558_1_, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanBreakDoors(), this.getCanEnterDoors());
+    }
 }

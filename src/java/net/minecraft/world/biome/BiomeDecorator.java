@@ -23,309 +23,461 @@ import net.minecraft.world.gen.feature.WorldGenSand;
 import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class BiomeDecorator {
-   protected boolean field_185425_a;
-   protected BlockPos field_180294_c;
-   protected ChunkGeneratorSettings field_180293_d;
-   protected WorldGenerator field_76809_f = new WorldGenClay(4);
-   protected WorldGenerator field_76810_g = new WorldGenSand(Blocks.field_150354_m, 7);
-   protected WorldGenerator field_76822_h = new WorldGenSand(Blocks.field_150351_n, 6);
-   protected WorldGenerator field_76823_i;
-   protected WorldGenerator field_76820_j;
-   protected WorldGenerator field_180296_j;
-   protected WorldGenerator field_180297_k;
-   protected WorldGenerator field_180295_l;
-   protected WorldGenerator field_76821_k;
-   protected WorldGenerator field_76818_l;
-   protected WorldGenerator field_76819_m;
-   protected WorldGenerator field_180299_p;
-   protected WorldGenerator field_180298_q;
-   protected WorldGenerator field_76831_p;
-   protected WorldGenFlowers field_150514_p = new WorldGenFlowers(Blocks.field_150327_N, BlockFlower.EnumFlowerType.DANDELION);
-   protected WorldGenerator field_76828_s = new WorldGenBush(Blocks.field_150338_P);
-   protected WorldGenerator field_76827_t = new WorldGenBush(Blocks.field_150337_Q);
-   protected WorldGenerator field_76826_u = new WorldGenBigMushroom();
-   protected WorldGenerator field_76825_v = new WorldGenReed();
-   protected WorldGenerator field_76824_w = new WorldGenCactus();
-   protected WorldGenerator field_76834_x = new WorldGenWaterlily();
-   protected int field_76833_y;
-   protected int field_76832_z;
-   protected float field_189870_A = 0.1F;
-   protected int field_76802_A = 2;
-   protected int field_76803_B = 1;
-   protected int field_76804_C;
-   protected int field_76798_D;
-   protected int field_76799_E;
-   protected int field_76800_F;
-   protected int field_76801_G = 1;
-   protected int field_76805_H = 3;
-   protected int field_76806_I = 1;
-   protected int field_76807_J;
-   public boolean field_76808_K = true;
+public class BiomeDecorator
+{
+    protected boolean decorating;
+    protected BlockPos chunkPos;
+    protected ChunkGeneratorSettings chunkProviderSettings;
 
-   public void func_180292_a(World p_180292_1_, Random p_180292_2_, Biome p_180292_3_, BlockPos p_180292_4_) {
-      if (this.field_185425_a) {
-         throw new RuntimeException("Already decorating");
-      } else {
-         this.field_180293_d = ChunkGeneratorSettings.Factory.func_177865_a(p_180292_1_.func_72912_H().func_82571_y()).func_177864_b();
-         this.field_180294_c = p_180292_4_;
-         this.field_76823_i = new WorldGenMinable(Blocks.field_150346_d.func_176223_P(), this.field_180293_d.field_177789_I);
-         this.field_76820_j = new WorldGenMinable(Blocks.field_150351_n.func_176223_P(), this.field_180293_d.field_177785_M);
-         this.field_180296_j = new WorldGenMinable(Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.GRANITE), this.field_180293_d.field_177796_Q);
-         this.field_180297_k = new WorldGenMinable(Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.DIORITE), this.field_180293_d.field_177792_U);
-         this.field_180295_l = new WorldGenMinable(Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.ANDESITE), this.field_180293_d.field_177800_Y);
-         this.field_76821_k = new WorldGenMinable(Blocks.field_150365_q.func_176223_P(), this.field_180293_d.field_177844_ac);
-         this.field_76818_l = new WorldGenMinable(Blocks.field_150366_p.func_176223_P(), this.field_180293_d.field_177848_ag);
-         this.field_76819_m = new WorldGenMinable(Blocks.field_150352_o.func_176223_P(), this.field_180293_d.field_177828_ak);
-         this.field_180299_p = new WorldGenMinable(Blocks.field_150450_ax.func_176223_P(), this.field_180293_d.field_177836_ao);
-         this.field_180298_q = new WorldGenMinable(Blocks.field_150482_ag.func_176223_P(), this.field_180293_d.field_177814_as);
-         this.field_76831_p = new WorldGenMinable(Blocks.field_150369_x.func_176223_P(), this.field_180293_d.field_177822_aw);
-         this.func_150513_a(p_180292_3_, p_180292_1_, p_180292_2_);
-         this.field_185425_a = false;
-      }
-   }
+    /** The clay generator. */
+    protected WorldGenerator clayGen = new WorldGenClay(4);
 
-   protected void func_150513_a(Biome p_150513_1_, World p_150513_2_, Random p_150513_3_) {
-      this.func_76797_b(p_150513_2_, p_150513_3_);
+    /** The sand generator. */
+    protected WorldGenerator sandGen = new WorldGenSand(Blocks.SAND, 7);
 
-      for(int i = 0; i < this.field_76805_H; ++i) {
-         int j = p_150513_3_.nextInt(16) + 8;
-         int k = p_150513_3_.nextInt(16) + 8;
-         this.field_76810_g.func_180709_b(p_150513_2_, p_150513_3_, p_150513_2_.func_175672_r(this.field_180294_c.func_177982_a(j, 0, k)));
-      }
+    /** The gravel generator. */
+    protected WorldGenerator gravelAsSandGen = new WorldGenSand(Blocks.GRAVEL, 6);
 
-      for(int i1 = 0; i1 < this.field_76806_I; ++i1) {
-         int l1 = p_150513_3_.nextInt(16) + 8;
-         int i6 = p_150513_3_.nextInt(16) + 8;
-         this.field_76809_f.func_180709_b(p_150513_2_, p_150513_3_, p_150513_2_.func_175672_r(this.field_180294_c.func_177982_a(l1, 0, i6)));
-      }
+    /** The dirt generator. */
+    protected WorldGenerator dirtGen;
+    protected WorldGenerator gravelGen;
+    protected WorldGenerator graniteGen;
+    protected WorldGenerator dioriteGen;
+    protected WorldGenerator andesiteGen;
+    protected WorldGenerator coalGen;
+    protected WorldGenerator ironGen;
 
-      for(int j1 = 0; j1 < this.field_76801_G; ++j1) {
-         int i2 = p_150513_3_.nextInt(16) + 8;
-         int j6 = p_150513_3_.nextInt(16) + 8;
-         this.field_76822_h.func_180709_b(p_150513_2_, p_150513_3_, p_150513_2_.func_175672_r(this.field_180294_c.func_177982_a(i2, 0, j6)));
-      }
+    /** Field that holds gold WorldGenMinable */
+    protected WorldGenerator goldGen;
+    protected WorldGenerator redstoneGen;
+    protected WorldGenerator diamondGen;
 
-      int k1 = this.field_76832_z;
-      if (p_150513_3_.nextFloat() < this.field_189870_A) {
-         ++k1;
-      }
+    /** Field that holds Lapis WorldGenMinable */
+    protected WorldGenerator lapisGen;
+    protected WorldGenFlowers yellowFlowerGen = new WorldGenFlowers(Blocks.YELLOW_FLOWER, BlockFlower.EnumFlowerType.DANDELION);
 
-      for(int j2 = 0; j2 < k1; ++j2) {
-         int k6 = p_150513_3_.nextInt(16) + 8;
-         int l = p_150513_3_.nextInt(16) + 8;
-         WorldGenAbstractTree worldgenabstracttree = p_150513_1_.func_150567_a(p_150513_3_);
-         worldgenabstracttree.func_175904_e();
-         BlockPos blockpos = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(k6, 0, l));
-         if (worldgenabstracttree.func_180709_b(p_150513_2_, p_150513_3_, blockpos)) {
-            worldgenabstracttree.func_180711_a(p_150513_2_, p_150513_3_, blockpos);
-         }
-      }
+    /** Field that holds mushroomBrown WorldGenFlowers */
+    protected WorldGenerator mushroomBrownGen = new WorldGenBush(Blocks.BROWN_MUSHROOM);
 
-      for(int k2 = 0; k2 < this.field_76807_J; ++k2) {
-         int l6 = p_150513_3_.nextInt(16) + 8;
-         int k10 = p_150513_3_.nextInt(16) + 8;
-         this.field_76826_u.func_180709_b(p_150513_2_, p_150513_3_, p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(l6, 0, k10)));
-      }
+    /** Field that holds mushroomRed WorldGenFlowers */
+    protected WorldGenerator mushroomRedGen = new WorldGenBush(Blocks.RED_MUSHROOM);
 
-      for(int l2 = 0; l2 < this.field_76802_A; ++l2) {
-         int i7 = p_150513_3_.nextInt(16) + 8;
-         int l10 = p_150513_3_.nextInt(16) + 8;
-         int j14 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(i7, 0, l10)).func_177956_o() + 32;
-         if (j14 > 0) {
-            int k17 = p_150513_3_.nextInt(j14);
-            BlockPos blockpos1 = this.field_180294_c.func_177982_a(i7, k17, l10);
-            BlockFlower.EnumFlowerType blockflower$enumflowertype = p_150513_1_.func_180623_a(p_150513_3_, blockpos1);
-            BlockFlower blockflower = blockflower$enumflowertype.func_176964_a().func_180346_a();
-            if (blockflower.func_176223_P().func_185904_a() != Material.field_151579_a) {
-               this.field_150514_p.func_175914_a(blockflower, blockflower$enumflowertype);
-               this.field_150514_p.func_180709_b(p_150513_2_, p_150513_3_, blockpos1);
+    /** Field that holds big mushroom generator */
+    protected WorldGenerator bigMushroomGen = new WorldGenBigMushroom();
+
+    /** Field that holds WorldGenReed */
+    protected WorldGenerator reedGen = new WorldGenReed();
+
+    /** Field that holds WorldGenCactus */
+    protected WorldGenerator cactusGen = new WorldGenCactus();
+
+    /** The water lily generation! */
+    protected WorldGenerator waterlilyGen = new WorldGenWaterlily();
+
+    /** Amount of waterlilys per chunk. */
+    protected int waterlilyPerChunk;
+
+    /**
+     * The number of trees to attempt to generate per chunk. Up to 10 in forests, none in deserts.
+     */
+    protected int treesPerChunk;
+    protected float extraTreeChance = 0.1F;
+
+    /**
+     * The number of yellow flower patches to generate per chunk. The game generates much less than this number, since
+     * it attempts to generate them at a random altitude.
+     */
+    protected int flowersPerChunk = 2;
+
+    /** The amount of tall grass to generate per chunk. */
+    protected int grassPerChunk = 1;
+
+    /**
+     * The number of dead bushes to generate per chunk. Used in deserts and swamps.
+     */
+    protected int deadBushPerChunk;
+
+    /**
+     * The number of extra mushroom patches per chunk. It generates 1/4 this number in brown mushroom patches, and 1/8
+     * this number in red mushroom patches. These mushrooms go beyond the default base number of mushrooms.
+     */
+    protected int mushroomsPerChunk;
+
+    /**
+     * The number of reeds to generate per chunk. Reeds won't generate if the randomly selected placement is unsuitable.
+     */
+    protected int reedsPerChunk;
+
+    /**
+     * The number of cactus plants to generate per chunk. Cacti only work on sand.
+     */
+    protected int cactiPerChunk;
+
+    /**
+     * The number of sand patches to generate per chunk. Sand patches only generate when part of it is underwater.
+     */
+    protected int sandPerChunk = 1;
+
+    /**
+     * The number of sand patches to generate per chunk. Sand patches only generate when part of it is underwater. There
+     * appear to be two separate fields for this.
+     */
+    protected int sandPerChunk2 = 3;
+
+    /**
+     * The number of clay patches to generate per chunk. Only generates when part of it is underwater.
+     */
+    protected int clayPerChunk = 1;
+
+    /** Amount of big mushrooms per chunk */
+    protected int bigMushroomsPerChunk;
+
+    /** True if decorator should generate surface lava & water */
+    public boolean generateLakes = true;
+
+    public void decorate(World worldIn, Random random, Biome biome, BlockPos pos)
+    {
+        if (this.decorating)
+        {
+            throw new RuntimeException("Already decorating");
+        }
+        else
+        {
+            this.chunkProviderSettings = ChunkGeneratorSettings.Factory.jsonToFactory(worldIn.getWorldInfo().getGeneratorOptions()).build();
+            this.chunkPos = pos;
+            this.dirtGen = new WorldGenMinable(Blocks.DIRT.getDefaultState(), this.chunkProviderSettings.dirtSize);
+            this.gravelGen = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), this.chunkProviderSettings.gravelSize);
+            this.graniteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), this.chunkProviderSettings.graniteSize);
+            this.dioriteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), this.chunkProviderSettings.dioriteSize);
+            this.andesiteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), this.chunkProviderSettings.andesiteSize);
+            this.coalGen = new WorldGenMinable(Blocks.COAL_ORE.getDefaultState(), this.chunkProviderSettings.coalSize);
+            this.ironGen = new WorldGenMinable(Blocks.IRON_ORE.getDefaultState(), this.chunkProviderSettings.ironSize);
+            this.goldGen = new WorldGenMinable(Blocks.GOLD_ORE.getDefaultState(), this.chunkProviderSettings.goldSize);
+            this.redstoneGen = new WorldGenMinable(Blocks.REDSTONE_ORE.getDefaultState(), this.chunkProviderSettings.redstoneSize);
+            this.diamondGen = new WorldGenMinable(Blocks.DIAMOND_ORE.getDefaultState(), this.chunkProviderSettings.diamondSize);
+            this.lapisGen = new WorldGenMinable(Blocks.LAPIS_ORE.getDefaultState(), this.chunkProviderSettings.lapisSize);
+            this.genDecorations(biome, worldIn, random);
+            this.decorating = false;
+        }
+    }
+
+    protected void genDecorations(Biome biomeIn, World worldIn, Random random)
+    {
+        this.generateOres(worldIn, random);
+
+        for (int i = 0; i < this.sandPerChunk2; ++i)
+        {
+            int j = random.nextInt(16) + 8;
+            int k = random.nextInt(16) + 8;
+            this.sandGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(j, 0, k)));
+        }
+
+        for (int i1 = 0; i1 < this.clayPerChunk; ++i1)
+        {
+            int l1 = random.nextInt(16) + 8;
+            int i6 = random.nextInt(16) + 8;
+            this.clayGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(l1, 0, i6)));
+        }
+
+        for (int j1 = 0; j1 < this.sandPerChunk; ++j1)
+        {
+            int i2 = random.nextInt(16) + 8;
+            int j6 = random.nextInt(16) + 8;
+            this.gravelAsSandGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(i2, 0, j6)));
+        }
+
+        int k1 = this.treesPerChunk;
+
+        if (random.nextFloat() < this.extraTreeChance)
+        {
+            ++k1;
+        }
+
+        for (int j2 = 0; j2 < k1; ++j2)
+        {
+            int k6 = random.nextInt(16) + 8;
+            int l = random.nextInt(16) + 8;
+            WorldGenAbstractTree worldgenabstracttree = biomeIn.genBigTreeChance(random);
+            worldgenabstracttree.setDecorationDefaults();
+            BlockPos blockpos = worldIn.getHeight(this.chunkPos.add(k6, 0, l));
+
+            if (worldgenabstracttree.generate(worldIn, random, blockpos))
+            {
+                worldgenabstracttree.generateSaplings(worldIn, random, blockpos);
             }
-         }
-      }
+        }
 
-      for(int i3 = 0; i3 < this.field_76803_B; ++i3) {
-         int j7 = p_150513_3_.nextInt(16) + 8;
-         int i11 = p_150513_3_.nextInt(16) + 8;
-         int k14 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(j7, 0, i11)).func_177956_o() * 2;
-         if (k14 > 0) {
-            int l17 = p_150513_3_.nextInt(k14);
-            p_150513_1_.func_76730_b(p_150513_3_).func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(j7, l17, i11));
-         }
-      }
+        for (int k2 = 0; k2 < this.bigMushroomsPerChunk; ++k2)
+        {
+            int l6 = random.nextInt(16) + 8;
+            int k10 = random.nextInt(16) + 8;
+            this.bigMushroomGen.generate(worldIn, random, worldIn.getHeight(this.chunkPos.add(l6, 0, k10)));
+        }
 
-      for(int j3 = 0; j3 < this.field_76804_C; ++j3) {
-         int k7 = p_150513_3_.nextInt(16) + 8;
-         int j11 = p_150513_3_.nextInt(16) + 8;
-         int l14 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(k7, 0, j11)).func_177956_o() * 2;
-         if (l14 > 0) {
-            int i18 = p_150513_3_.nextInt(l14);
-            (new WorldGenDeadBush()).func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(k7, i18, j11));
-         }
-      }
+        for (int l2 = 0; l2 < this.flowersPerChunk; ++l2)
+        {
+            int i7 = random.nextInt(16) + 8;
+            int l10 = random.nextInt(16) + 8;
+            int j14 = worldIn.getHeight(this.chunkPos.add(i7, 0, l10)).getY() + 32;
 
-      for(int k3 = 0; k3 < this.field_76833_y; ++k3) {
-         int l7 = p_150513_3_.nextInt(16) + 8;
-         int k11 = p_150513_3_.nextInt(16) + 8;
-         int i15 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(l7, 0, k11)).func_177956_o() * 2;
-         if (i15 > 0) {
-            int j18 = p_150513_3_.nextInt(i15);
+            if (j14 > 0)
+            {
+                int k17 = random.nextInt(j14);
+                BlockPos blockpos1 = this.chunkPos.add(i7, k17, l10);
+                BlockFlower.EnumFlowerType blockflower$enumflowertype = biomeIn.pickRandomFlower(random, blockpos1);
+                BlockFlower blockflower = blockflower$enumflowertype.getBlockType().getBlock();
 
-            BlockPos blockpos4;
-            BlockPos blockpos7;
-            for(blockpos4 = this.field_180294_c.func_177982_a(l7, j18, k11); blockpos4.func_177956_o() > 0; blockpos4 = blockpos7) {
-               blockpos7 = blockpos4.func_177977_b();
-               if (!p_150513_2_.func_175623_d(blockpos7)) {
-                  break;
-               }
+                if (blockflower.getDefaultState().getMaterial() != Material.AIR)
+                {
+                    this.yellowFlowerGen.setGeneratedBlock(blockflower, blockflower$enumflowertype);
+                    this.yellowFlowerGen.generate(worldIn, random, blockpos1);
+                }
+            }
+        }
+
+        for (int i3 = 0; i3 < this.grassPerChunk; ++i3)
+        {
+            int j7 = random.nextInt(16) + 8;
+            int i11 = random.nextInt(16) + 8;
+            int k14 = worldIn.getHeight(this.chunkPos.add(j7, 0, i11)).getY() * 2;
+
+            if (k14 > 0)
+            {
+                int l17 = random.nextInt(k14);
+                biomeIn.getRandomWorldGenForGrass(random).generate(worldIn, random, this.chunkPos.add(j7, l17, i11));
+            }
+        }
+
+        for (int j3 = 0; j3 < this.deadBushPerChunk; ++j3)
+        {
+            int k7 = random.nextInt(16) + 8;
+            int j11 = random.nextInt(16) + 8;
+            int l14 = worldIn.getHeight(this.chunkPos.add(k7, 0, j11)).getY() * 2;
+
+            if (l14 > 0)
+            {
+                int i18 = random.nextInt(l14);
+                (new WorldGenDeadBush()).generate(worldIn, random, this.chunkPos.add(k7, i18, j11));
+            }
+        }
+
+        for (int k3 = 0; k3 < this.waterlilyPerChunk; ++k3)
+        {
+            int l7 = random.nextInt(16) + 8;
+            int k11 = random.nextInt(16) + 8;
+            int i15 = worldIn.getHeight(this.chunkPos.add(l7, 0, k11)).getY() * 2;
+
+            if (i15 > 0)
+            {
+                int j18 = random.nextInt(i15);
+                BlockPos blockpos4;
+                BlockPos blockpos7;
+
+                for (blockpos4 = this.chunkPos.add(l7, j18, k11); blockpos4.getY() > 0; blockpos4 = blockpos7)
+                {
+                    blockpos7 = blockpos4.down();
+
+                    if (!worldIn.isAirBlock(blockpos7))
+                    {
+                        break;
+                    }
+                }
+
+                this.waterlilyGen.generate(worldIn, random, blockpos4);
+            }
+        }
+
+        for (int l3 = 0; l3 < this.mushroomsPerChunk; ++l3)
+        {
+            if (random.nextInt(4) == 0)
+            {
+                int i8 = random.nextInt(16) + 8;
+                int l11 = random.nextInt(16) + 8;
+                BlockPos blockpos2 = worldIn.getHeight(this.chunkPos.add(i8, 0, l11));
+                this.mushroomBrownGen.generate(worldIn, random, blockpos2);
             }
 
-            this.field_76834_x.func_180709_b(p_150513_2_, p_150513_3_, blockpos4);
-         }
-      }
+            if (random.nextInt(8) == 0)
+            {
+                int j8 = random.nextInt(16) + 8;
+                int i12 = random.nextInt(16) + 8;
+                int j15 = worldIn.getHeight(this.chunkPos.add(j8, 0, i12)).getY() * 2;
 
-      for(int l3 = 0; l3 < this.field_76798_D; ++l3) {
-         if (p_150513_3_.nextInt(4) == 0) {
-            int i8 = p_150513_3_.nextInt(16) + 8;
-            int l11 = p_150513_3_.nextInt(16) + 8;
-            BlockPos blockpos2 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(i8, 0, l11));
-            this.field_76828_s.func_180709_b(p_150513_2_, p_150513_3_, blockpos2);
-         }
-
-         if (p_150513_3_.nextInt(8) == 0) {
-            int j8 = p_150513_3_.nextInt(16) + 8;
-            int i12 = p_150513_3_.nextInt(16) + 8;
-            int j15 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(j8, 0, i12)).func_177956_o() * 2;
-            if (j15 > 0) {
-               int k18 = p_150513_3_.nextInt(j15);
-               BlockPos blockpos5 = this.field_180294_c.func_177982_a(j8, k18, i12);
-               this.field_76827_t.func_180709_b(p_150513_2_, p_150513_3_, blockpos5);
+                if (j15 > 0)
+                {
+                    int k18 = random.nextInt(j15);
+                    BlockPos blockpos5 = this.chunkPos.add(j8, k18, i12);
+                    this.mushroomRedGen.generate(worldIn, random, blockpos5);
+                }
             }
-         }
-      }
+        }
 
-      if (p_150513_3_.nextInt(4) == 0) {
-         int i4 = p_150513_3_.nextInt(16) + 8;
-         int k8 = p_150513_3_.nextInt(16) + 8;
-         int j12 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(i4, 0, k8)).func_177956_o() * 2;
-         if (j12 > 0) {
-            int k15 = p_150513_3_.nextInt(j12);
-            this.field_76828_s.func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(i4, k15, k8));
-         }
-      }
+        if (random.nextInt(4) == 0)
+        {
+            int i4 = random.nextInt(16) + 8;
+            int k8 = random.nextInt(16) + 8;
+            int j12 = worldIn.getHeight(this.chunkPos.add(i4, 0, k8)).getY() * 2;
 
-      if (p_150513_3_.nextInt(8) == 0) {
-         int j4 = p_150513_3_.nextInt(16) + 8;
-         int l8 = p_150513_3_.nextInt(16) + 8;
-         int k12 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(j4, 0, l8)).func_177956_o() * 2;
-         if (k12 > 0) {
-            int l15 = p_150513_3_.nextInt(k12);
-            this.field_76827_t.func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(j4, l15, l8));
-         }
-      }
-
-      for(int k4 = 0; k4 < this.field_76799_E; ++k4) {
-         int i9 = p_150513_3_.nextInt(16) + 8;
-         int l12 = p_150513_3_.nextInt(16) + 8;
-         int i16 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(i9, 0, l12)).func_177956_o() * 2;
-         if (i16 > 0) {
-            int l18 = p_150513_3_.nextInt(i16);
-            this.field_76825_v.func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(i9, l18, l12));
-         }
-      }
-
-      for(int l4 = 0; l4 < 10; ++l4) {
-         int j9 = p_150513_3_.nextInt(16) + 8;
-         int i13 = p_150513_3_.nextInt(16) + 8;
-         int j16 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(j9, 0, i13)).func_177956_o() * 2;
-         if (j16 > 0) {
-            int i19 = p_150513_3_.nextInt(j16);
-            this.field_76825_v.func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(j9, i19, i13));
-         }
-      }
-
-      if (p_150513_3_.nextInt(32) == 0) {
-         int i5 = p_150513_3_.nextInt(16) + 8;
-         int k9 = p_150513_3_.nextInt(16) + 8;
-         int j13 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(i5, 0, k9)).func_177956_o() * 2;
-         if (j13 > 0) {
-            int k16 = p_150513_3_.nextInt(j13);
-            (new WorldGenPumpkin()).func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(i5, k16, k9));
-         }
-      }
-
-      for(int j5 = 0; j5 < this.field_76800_F; ++j5) {
-         int l9 = p_150513_3_.nextInt(16) + 8;
-         int k13 = p_150513_3_.nextInt(16) + 8;
-         int l16 = p_150513_2_.func_175645_m(this.field_180294_c.func_177982_a(l9, 0, k13)).func_177956_o() * 2;
-         if (l16 > 0) {
-            int j19 = p_150513_3_.nextInt(l16);
-            this.field_76824_w.func_180709_b(p_150513_2_, p_150513_3_, this.field_180294_c.func_177982_a(l9, j19, k13));
-         }
-      }
-
-      if (this.field_76808_K) {
-         for(int k5 = 0; k5 < 50; ++k5) {
-            int i10 = p_150513_3_.nextInt(16) + 8;
-            int l13 = p_150513_3_.nextInt(16) + 8;
-            int i17 = p_150513_3_.nextInt(248) + 8;
-            if (i17 > 0) {
-               int k19 = p_150513_3_.nextInt(i17);
-               BlockPos blockpos6 = this.field_180294_c.func_177982_a(i10, k19, l13);
-               (new WorldGenLiquids(Blocks.field_150358_i)).func_180709_b(p_150513_2_, p_150513_3_, blockpos6);
+            if (j12 > 0)
+            {
+                int k15 = random.nextInt(j12);
+                this.mushroomBrownGen.generate(worldIn, random, this.chunkPos.add(i4, k15, k8));
             }
-         }
+        }
 
-         for(int l5 = 0; l5 < 20; ++l5) {
-            int j10 = p_150513_3_.nextInt(16) + 8;
-            int i14 = p_150513_3_.nextInt(16) + 8;
-            int j17 = p_150513_3_.nextInt(p_150513_3_.nextInt(p_150513_3_.nextInt(240) + 8) + 8);
-            BlockPos blockpos3 = this.field_180294_c.func_177982_a(j10, j17, i14);
-            (new WorldGenLiquids(Blocks.field_150356_k)).func_180709_b(p_150513_2_, p_150513_3_, blockpos3);
-         }
-      }
+        if (random.nextInt(8) == 0)
+        {
+            int j4 = random.nextInt(16) + 8;
+            int l8 = random.nextInt(16) + 8;
+            int k12 = worldIn.getHeight(this.chunkPos.add(j4, 0, l8)).getY() * 2;
 
-   }
+            if (k12 > 0)
+            {
+                int l15 = random.nextInt(k12);
+                this.mushroomRedGen.generate(worldIn, random, this.chunkPos.add(j4, l15, l8));
+            }
+        }
 
-   protected void func_76797_b(World p_76797_1_, Random p_76797_2_) {
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177790_J, this.field_76823_i, this.field_180293_d.field_177791_K, this.field_180293_d.field_177784_L);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177786_N, this.field_76820_j, this.field_180293_d.field_177787_O, this.field_180293_d.field_177797_P);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177795_V, this.field_180297_k, this.field_180293_d.field_177794_W, this.field_180293_d.field_177801_X);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177799_R, this.field_180296_j, this.field_180293_d.field_177798_S, this.field_180293_d.field_177793_T);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177802_Z, this.field_180295_l, this.field_180293_d.field_177846_aa, this.field_180293_d.field_177847_ab);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177845_ad, this.field_76821_k, this.field_180293_d.field_177851_ae, this.field_180293_d.field_177853_af);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177849_ah, this.field_76818_l, this.field_180293_d.field_177832_ai, this.field_180293_d.field_177834_aj);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177830_al, this.field_76819_m, this.field_180293_d.field_177840_am, this.field_180293_d.field_177842_an);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177838_ap, this.field_180299_p, this.field_180293_d.field_177818_aq, this.field_180293_d.field_177816_ar);
-      this.func_76795_a(p_76797_1_, p_76797_2_, this.field_180293_d.field_177812_at, this.field_180298_q, this.field_180293_d.field_177826_au, this.field_180293_d.field_177824_av);
-      this.func_76793_b(p_76797_1_, p_76797_2_, this.field_180293_d.field_177820_ax, this.field_76831_p, this.field_180293_d.field_177807_ay, this.field_180293_d.field_177805_az);
-   }
+        for (int k4 = 0; k4 < this.reedsPerChunk; ++k4)
+        {
+            int i9 = random.nextInt(16) + 8;
+            int l12 = random.nextInt(16) + 8;
+            int i16 = worldIn.getHeight(this.chunkPos.add(i9, 0, l12)).getY() * 2;
 
-   protected void func_76795_a(World p_76795_1_, Random p_76795_2_, int p_76795_3_, WorldGenerator p_76795_4_, int p_76795_5_, int p_76795_6_) {
-      if (p_76795_6_ < p_76795_5_) {
-         int i = p_76795_5_;
-         p_76795_5_ = p_76795_6_;
-         p_76795_6_ = i;
-      } else if (p_76795_6_ == p_76795_5_) {
-         if (p_76795_5_ < 255) {
-            ++p_76795_6_;
-         } else {
-            --p_76795_5_;
-         }
-      }
+            if (i16 > 0)
+            {
+                int l18 = random.nextInt(i16);
+                this.reedGen.generate(worldIn, random, this.chunkPos.add(i9, l18, l12));
+            }
+        }
 
-      for(int j = 0; j < p_76795_3_; ++j) {
-         BlockPos blockpos = this.field_180294_c.func_177982_a(p_76795_2_.nextInt(16), p_76795_2_.nextInt(p_76795_6_ - p_76795_5_) + p_76795_5_, p_76795_2_.nextInt(16));
-         p_76795_4_.func_180709_b(p_76795_1_, p_76795_2_, blockpos);
-      }
+        for (int l4 = 0; l4 < 10; ++l4)
+        {
+            int j9 = random.nextInt(16) + 8;
+            int i13 = random.nextInt(16) + 8;
+            int j16 = worldIn.getHeight(this.chunkPos.add(j9, 0, i13)).getY() * 2;
 
-   }
+            if (j16 > 0)
+            {
+                int i19 = random.nextInt(j16);
+                this.reedGen.generate(worldIn, random, this.chunkPos.add(j9, i19, i13));
+            }
+        }
 
-   protected void func_76793_b(World p_76793_1_, Random p_76793_2_, int p_76793_3_, WorldGenerator p_76793_4_, int p_76793_5_, int p_76793_6_) {
-      for(int i = 0; i < p_76793_3_; ++i) {
-         BlockPos blockpos = this.field_180294_c.func_177982_a(p_76793_2_.nextInt(16), p_76793_2_.nextInt(p_76793_6_) + p_76793_2_.nextInt(p_76793_6_) + p_76793_5_ - p_76793_6_, p_76793_2_.nextInt(16));
-         p_76793_4_.func_180709_b(p_76793_1_, p_76793_2_, blockpos);
-      }
+        if (random.nextInt(32) == 0)
+        {
+            int i5 = random.nextInt(16) + 8;
+            int k9 = random.nextInt(16) + 8;
+            int j13 = worldIn.getHeight(this.chunkPos.add(i5, 0, k9)).getY() * 2;
 
-   }
+            if (j13 > 0)
+            {
+                int k16 = random.nextInt(j13);
+                (new WorldGenPumpkin()).generate(worldIn, random, this.chunkPos.add(i5, k16, k9));
+            }
+        }
+
+        for (int j5 = 0; j5 < this.cactiPerChunk; ++j5)
+        {
+            int l9 = random.nextInt(16) + 8;
+            int k13 = random.nextInt(16) + 8;
+            int l16 = worldIn.getHeight(this.chunkPos.add(l9, 0, k13)).getY() * 2;
+
+            if (l16 > 0)
+            {
+                int j19 = random.nextInt(l16);
+                this.cactusGen.generate(worldIn, random, this.chunkPos.add(l9, j19, k13));
+            }
+        }
+
+        if (this.generateLakes)
+        {
+            for (int k5 = 0; k5 < 50; ++k5)
+            {
+                int i10 = random.nextInt(16) + 8;
+                int l13 = random.nextInt(16) + 8;
+                int i17 = random.nextInt(248) + 8;
+
+                if (i17 > 0)
+                {
+                    int k19 = random.nextInt(i17);
+                    BlockPos blockpos6 = this.chunkPos.add(i10, k19, l13);
+                    (new WorldGenLiquids(Blocks.FLOWING_WATER)).generate(worldIn, random, blockpos6);
+                }
+            }
+
+            for (int l5 = 0; l5 < 20; ++l5)
+            {
+                int j10 = random.nextInt(16) + 8;
+                int i14 = random.nextInt(16) + 8;
+                int j17 = random.nextInt(random.nextInt(random.nextInt(240) + 8) + 8);
+                BlockPos blockpos3 = this.chunkPos.add(j10, j17, i14);
+                (new WorldGenLiquids(Blocks.FLOWING_LAVA)).generate(worldIn, random, blockpos3);
+            }
+        }
+    }
+
+    /**
+     * Generates ores in the current chunk
+     */
+    protected void generateOres(World worldIn, Random random)
+    {
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.dirtCount, this.dirtGen, this.chunkProviderSettings.dirtMinHeight, this.chunkProviderSettings.dirtMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.gravelCount, this.gravelGen, this.chunkProviderSettings.gravelMinHeight, this.chunkProviderSettings.gravelMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.dioriteCount, this.dioriteGen, this.chunkProviderSettings.dioriteMinHeight, this.chunkProviderSettings.dioriteMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.graniteCount, this.graniteGen, this.chunkProviderSettings.graniteMinHeight, this.chunkProviderSettings.graniteMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.andesiteCount, this.andesiteGen, this.chunkProviderSettings.andesiteMinHeight, this.chunkProviderSettings.andesiteMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.coalCount, this.coalGen, this.chunkProviderSettings.coalMinHeight, this.chunkProviderSettings.coalMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.ironCount, this.ironGen, this.chunkProviderSettings.ironMinHeight, this.chunkProviderSettings.ironMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.goldCount, this.goldGen, this.chunkProviderSettings.goldMinHeight, this.chunkProviderSettings.goldMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.redstoneCount, this.redstoneGen, this.chunkProviderSettings.redstoneMinHeight, this.chunkProviderSettings.redstoneMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.diamondCount, this.diamondGen, this.chunkProviderSettings.diamondMinHeight, this.chunkProviderSettings.diamondMaxHeight);
+        this.genStandardOre2(worldIn, random, this.chunkProviderSettings.lapisCount, this.lapisGen, this.chunkProviderSettings.lapisCenterHeight, this.chunkProviderSettings.lapisSpread);
+    }
+
+    /**
+     * Standard ore generation helper. Vanilla uses this to generate most ores.
+     * The main difference between this and {@link #genStandardOre2} is that this takes min and max heights, while
+     * genStandardOre2 takes center and spread.
+     */
+    protected void genStandardOre1(World worldIn, Random random, int blockCount, WorldGenerator generator, int minHeight, int maxHeight)
+    {
+        if (maxHeight < minHeight)
+        {
+            int i = minHeight;
+            minHeight = maxHeight;
+            maxHeight = i;
+        }
+        else if (maxHeight == minHeight)
+        {
+            if (minHeight < 255)
+            {
+                ++maxHeight;
+            }
+            else
+            {
+                --minHeight;
+            }
+        }
+
+        for (int j = 0; j < blockCount; ++j)
+        {
+            BlockPos blockpos = this.chunkPos.add(random.nextInt(16), random.nextInt(maxHeight - minHeight) + minHeight, random.nextInt(16));
+            generator.generate(worldIn, random, blockpos);
+        }
+    }
+
+    /**
+     * Standard ore generation helper. Vanilla uses this to generate Lapis Lazuli.
+     * The main difference between this and {@link #genStandardOre1} is that this takes takes center and spread, while
+     * genStandardOre1 takes min and max heights.
+     */
+    protected void genStandardOre2(World worldIn, Random random, int blockCount, WorldGenerator generator, int centerHeight, int spread)
+    {
+        for (int i = 0; i < blockCount; ++i)
+        {
+            BlockPos blockpos = this.chunkPos.add(random.nextInt(16), random.nextInt(spread) + random.nextInt(spread) + centerHeight - spread, random.nextInt(16));
+            generator.generate(worldIn, random, blockpos);
+        }
+    }
 }

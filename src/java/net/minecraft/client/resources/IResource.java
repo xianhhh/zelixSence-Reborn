@@ -6,15 +6,16 @@ import javax.annotation.Nullable;
 import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.util.ResourceLocation;
 
-public interface IResource extends Closeable {
-   ResourceLocation func_177241_a();
+public interface IResource extends Closeable
+{
+    ResourceLocation getResourceLocation();
 
-   InputStream func_110527_b();
+    InputStream getInputStream();
 
-   boolean func_110528_c();
+    boolean hasMetadata();
 
-   @Nullable
-   <T extends IMetadataSection> T func_110526_a(String var1);
+    @Nullable
+    <T extends IMetadataSection> T getMetadata(String sectionName);
 
-   String func_177240_d();
+    String getResourcePackName();
 }

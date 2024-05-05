@@ -7,16 +7,23 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class BlockCompressedPowered extends Block {
-   public BlockCompressedPowered(Material p_i46386_1_, MapColor p_i46386_2_) {
-      super(p_i46386_1_, p_i46386_2_);
-   }
+public class BlockCompressedPowered extends Block
+{
+    public BlockCompressedPowered(Material materialIn, MapColor color)
+    {
+        super(materialIn, color);
+    }
 
-   public boolean func_149744_f(IBlockState p_149744_1_) {
-      return true;
-   }
+    /**
+     * Can this block provide power. Only wire currently seems to have this change based on its state.
+     */
+    public boolean canProvidePower(IBlockState state)
+    {
+        return true;
+    }
 
-   public int func_180656_a(IBlockState p_180656_1_, IBlockAccess p_180656_2_, BlockPos p_180656_3_, EnumFacing p_180656_4_) {
-      return 15;
-   }
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+        return 15;
+    }
 }

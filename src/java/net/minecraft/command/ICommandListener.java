@@ -1,5 +1,9 @@
 package net.minecraft.command;
 
-public interface ICommandListener {
-   void func_152372_a(ICommandSender var1, ICommand var2, int var3, String var4, Object... var5);
+public interface ICommandListener
+{
+    /**
+     * Send an informative message to the server operators
+     */
+    void notifyListener(ICommandSender sender, ICommand command, int flags, String translationKey, Object... translationArgs);
 }

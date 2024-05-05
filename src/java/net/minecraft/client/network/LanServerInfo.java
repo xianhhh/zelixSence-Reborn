@@ -2,26 +2,36 @@ package net.minecraft.client.network;
 
 import net.minecraft.client.Minecraft;
 
-public class LanServerInfo {
-   private final String field_77492_a;
-   private final String field_77490_b;
-   private long field_77491_c;
+public class LanServerInfo
+{
+    private final String lanServerMotd;
+    private final String lanServerIpPort;
 
-   public LanServerInfo(String p_i47130_1_, String p_i47130_2_) {
-      this.field_77492_a = p_i47130_1_;
-      this.field_77490_b = p_i47130_2_;
-      this.field_77491_c = Minecraft.func_71386_F();
-   }
+    /** Last time this LanServer was seen. */
+    private long timeLastSeen;
 
-   public String func_77487_a() {
-      return this.field_77492_a;
-   }
+    public LanServerInfo(String p_i47130_1_, String p_i47130_2_)
+    {
+        this.lanServerMotd = p_i47130_1_;
+        this.lanServerIpPort = p_i47130_2_;
+        this.timeLastSeen = Minecraft.getSystemTime();
+    }
 
-   public String func_77488_b() {
-      return this.field_77490_b;
-   }
+    public String getServerMotd()
+    {
+        return this.lanServerMotd;
+    }
 
-   public void func_77489_c() {
-      this.field_77491_c = Minecraft.func_71386_F();
-   }
+    public String getServerIpPort()
+    {
+        return this.lanServerIpPort;
+    }
+
+    /**
+     * Updates the time this LanServer was last seen.
+     */
+    public void updateLastSeen()
+    {
+        this.timeLastSeen = Minecraft.getSystemTime();
+    }
 }

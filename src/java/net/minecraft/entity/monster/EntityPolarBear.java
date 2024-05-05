@@ -34,238 +34,313 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityPolarBear extends EntityAnimal {
-   private static final DataParameter<Boolean> field_189798_bx = EntityDataManager.<Boolean>func_187226_a(EntityPolarBear.class, DataSerializers.field_187198_h);
-   private float field_189799_by;
-   private float field_189800_bz;
-   private int field_189797_bB;
+public class EntityPolarBear extends EntityAnimal
+{
+    private static final DataParameter<Boolean> IS_STANDING = EntityDataManager.<Boolean>createKey(EntityPolarBear.class, DataSerializers.BOOLEAN);
+    private float clientSideStandAnimation0;
+    private float clientSideStandAnimation;
+    private int warningSoundTicks;
 
-   public EntityPolarBear(World p_i47154_1_) {
-      super(p_i47154_1_);
-      this.func_70105_a(1.3F, 1.4F);
-   }
+    public EntityPolarBear(World worldIn)
+    {
+        super(worldIn);
+        this.setSize(1.3F, 1.4F);
+    }
 
-   public EntityAgeable func_90011_a(EntityAgeable p_90011_1_) {
-      return new EntityPolarBear(this.field_70170_p);
-   }
+    public EntityAgeable createChild(EntityAgeable ageable)
+    {
+        return new EntityPolarBear(this.world);
+    }
 
-   public boolean func_70877_b(ItemStack p_70877_1_) {
-      return false;
-   }
+    /**
+     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
+     * the animal type)
+     */
+    public boolean isBreedingItem(ItemStack stack)
+    {
+        return false;
+    }
 
-   protected void func_184651_r() {
-      super.func_184651_r();
-      this.field_70714_bg.func_75776_a(0, new EntityAISwimming(this));
-      this.field_70714_bg.func_75776_a(1, new EntityPolarBear.AIMeleeAttack());
-      this.field_70714_bg.func_75776_a(1, new EntityPolarBear.AIPanic());
-      this.field_70714_bg.func_75776_a(4, new EntityAIFollowParent(this, 1.25D));
-      this.field_70714_bg.func_75776_a(5, new EntityAIWander(this, 1.0D));
-      this.field_70714_bg.func_75776_a(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-      this.field_70714_bg.func_75776_a(7, new EntityAILookIdle(this));
-      this.field_70715_bh.func_75776_a(1, new EntityPolarBear.AIHurtByTarget());
-      this.field_70715_bh.func_75776_a(2, new EntityPolarBear.AIAttackPlayer());
-   }
+    protected void initEntityAI()
+    {
+        super.initEntityAI();
+        this.tasks.addTask(0, new EntityAISwimming(this));
+        this.tasks.addTask(1, new EntityPolarBear.AIMeleeAttack());
+        this.tasks.addTask(1, new EntityPolarBear.AIPanic());
+        this.tasks.addTask(4, new EntityAIFollowParent(this, 1.25D));
+        this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        this.tasks.addTask(7, new EntityAILookIdle(this));
+        this.targetTasks.addTask(1, new EntityPolarBear.AIHurtByTarget());
+        this.targetTasks.addTask(2, new EntityPolarBear.AIAttackPlayer());
+    }
 
-   protected void func_110147_ax() {
-      super.func_110147_ax();
-      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(30.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111265_b).func_111128_a(20.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
-      this.func_110140_aT().func_111150_b(SharedMonsterAttributes.field_111264_e);
-      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(6.0D);
-   }
+    protected void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(20.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+    }
 
-   protected SoundEvent func_184639_G() {
-      return this.func_70631_g_() ? SoundEvents.field_190027_es : SoundEvents.field_190026_er;
-   }
+    protected SoundEvent getAmbientSound()
+    {
+        return this.isChild() ? SoundEvents.ENTITY_POLAR_BEAR_BABY_AMBIENT : SoundEvents.ENTITY_POLAR_BEAR_AMBIENT;
+    }
 
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      return SoundEvents.field_190029_eu;
-   }
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        return SoundEvents.ENTITY_POLAR_BEAR_HURT;
+    }
 
-   protected SoundEvent func_184615_bR() {
-      return SoundEvents.field_190028_et;
-   }
+    protected SoundEvent getDeathSound()
+    {
+        return SoundEvents.ENTITY_POLAR_BEAR_DEATH;
+    }
 
-   protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_) {
-      this.func_184185_a(SoundEvents.field_190030_ev, 0.15F, 1.0F);
-   }
+    protected void playStepSound(BlockPos pos, Block blockIn)
+    {
+        this.playSound(SoundEvents.ENTITY_POLAR_BEAR_STEP, 0.15F, 1.0F);
+    }
 
-   protected void func_189796_de() {
-      if (this.field_189797_bB <= 0) {
-         this.func_184185_a(SoundEvents.field_190031_ew, 1.0F, 1.0F);
-         this.field_189797_bB = 40;
-      }
+    protected void playWarningSound()
+    {
+        if (this.warningSoundTicks <= 0)
+        {
+            this.playSound(SoundEvents.ENTITY_POLAR_BEAR_WARNING, 1.0F, 1.0F);
+            this.warningSoundTicks = 40;
+        }
+    }
 
-   }
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_POLAR_BEAR;
+    }
 
-   @Nullable
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_189969_E;
-   }
+    protected void entityInit()
+    {
+        super.entityInit();
+        this.dataManager.register(IS_STANDING, Boolean.valueOf(false));
+    }
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-      this.field_70180_af.func_187214_a(field_189798_bx, Boolean.valueOf(false));
-   }
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        super.onUpdate();
 
-   public void func_70071_h_() {
-      super.func_70071_h_();
-      if (this.field_70170_p.field_72995_K) {
-         this.field_189799_by = this.field_189800_bz;
-         if (this.func_189793_df()) {
-            this.field_189800_bz = MathHelper.func_76131_a(this.field_189800_bz + 1.0F, 0.0F, 6.0F);
-         } else {
-            this.field_189800_bz = MathHelper.func_76131_a(this.field_189800_bz - 1.0F, 0.0F, 6.0F);
-         }
-      }
+        if (this.world.isRemote)
+        {
+            this.clientSideStandAnimation0 = this.clientSideStandAnimation;
 
-      if (this.field_189797_bB > 0) {
-         --this.field_189797_bB;
-      }
-
-   }
-
-   public boolean func_70652_k(Entity p_70652_1_) {
-      boolean flag = p_70652_1_.func_70097_a(DamageSource.func_76358_a(this), (float)((int)this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111126_e()));
-      if (flag) {
-         this.func_174815_a(this, p_70652_1_);
-      }
-
-      return flag;
-   }
-
-   public boolean func_189793_df() {
-      return ((Boolean)this.field_70180_af.func_187225_a(field_189798_bx)).booleanValue();
-   }
-
-   public void func_189794_p(boolean p_189794_1_) {
-      this.field_70180_af.func_187227_b(field_189798_bx, Boolean.valueOf(p_189794_1_));
-   }
-
-   public float func_189795_r(float p_189795_1_) {
-      return (this.field_189799_by + (this.field_189800_bz - this.field_189799_by) * p_189795_1_) / 6.0F;
-   }
-
-   protected float func_189749_co() {
-      return 0.98F;
-   }
-
-   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, IEntityLivingData p_180482_2_) {
-      if (p_180482_2_ instanceof EntityPolarBear.GroupData) {
-         if (((EntityPolarBear.GroupData)p_180482_2_).field_190101_a) {
-            this.func_70873_a(-24000);
-         }
-      } else {
-         EntityPolarBear.GroupData entitypolarbear$groupdata = new EntityPolarBear.GroupData();
-         entitypolarbear$groupdata.field_190101_a = true;
-         p_180482_2_ = entitypolarbear$groupdata;
-      }
-
-      return p_180482_2_;
-   }
-
-   class AIAttackPlayer extends EntityAINearestAttackableTarget<EntityPlayer> {
-      public AIAttackPlayer() {
-         super(EntityPolarBear.this, EntityPlayer.class, 20, true, true, (Predicate)null);
-      }
-
-      public boolean func_75250_a() {
-         if (EntityPolarBear.this.func_70631_g_()) {
-            return false;
-         } else {
-            if (super.func_75250_a()) {
-               for(EntityPolarBear entitypolarbear : EntityPolarBear.this.field_70170_p.func_72872_a(EntityPolarBear.class, EntityPolarBear.this.func_174813_aQ().func_72314_b(8.0D, 4.0D, 8.0D))) {
-                  if (entitypolarbear.func_70631_g_()) {
-                     return true;
-                  }
-               }
+            if (this.isStanding())
+            {
+                this.clientSideStandAnimation = MathHelper.clamp(this.clientSideStandAnimation + 1.0F, 0.0F, 6.0F);
             }
-
-            EntityPolarBear.this.func_70624_b((EntityLivingBase)null);
-            return false;
-         }
-      }
-
-      protected double func_111175_f() {
-         return super.func_111175_f() * 0.5D;
-      }
-   }
-
-   class AIHurtByTarget extends EntityAIHurtByTarget {
-      public AIHurtByTarget() {
-         super(EntityPolarBear.this, false);
-      }
-
-      public void func_75249_e() {
-         super.func_75249_e();
-         if (EntityPolarBear.this.func_70631_g_()) {
-            this.func_190105_f();
-            this.func_75251_c();
-         }
-
-      }
-
-      protected void func_179446_a(EntityCreature p_179446_1_, EntityLivingBase p_179446_2_) {
-         if (p_179446_1_ instanceof EntityPolarBear && !p_179446_1_.func_70631_g_()) {
-            super.func_179446_a(p_179446_1_, p_179446_2_);
-         }
-
-      }
-   }
-
-   class AIMeleeAttack extends EntityAIAttackMelee {
-      public AIMeleeAttack() {
-         super(EntityPolarBear.this, 1.25D, true);
-      }
-
-      protected void func_190102_a(EntityLivingBase p_190102_1_, double p_190102_2_) {
-         double d0 = this.func_179512_a(p_190102_1_);
-         if (p_190102_2_ <= d0 && this.field_75439_d <= 0) {
-            this.field_75439_d = 20;
-            this.field_75441_b.func_70652_k(p_190102_1_);
-            EntityPolarBear.this.func_189794_p(false);
-         } else if (p_190102_2_ <= d0 * 2.0D) {
-            if (this.field_75439_d <= 0) {
-               EntityPolarBear.this.func_189794_p(false);
-               this.field_75439_d = 20;
+            else
+            {
+                this.clientSideStandAnimation = MathHelper.clamp(this.clientSideStandAnimation - 1.0F, 0.0F, 6.0F);
             }
+        }
 
-            if (this.field_75439_d <= 10) {
-               EntityPolarBear.this.func_189794_p(true);
-               EntityPolarBear.this.func_189796_de();
+        if (this.warningSoundTicks > 0)
+        {
+            --this.warningSoundTicks;
+        }
+    }
+
+    public boolean attackEntityAsMob(Entity entityIn)
+    {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
+
+        if (flag)
+        {
+            this.applyEnchantments(this, entityIn);
+        }
+
+        return flag;
+    }
+
+    public boolean isStanding()
+    {
+        return ((Boolean)this.dataManager.get(IS_STANDING)).booleanValue();
+    }
+
+    public void setStanding(boolean standing)
+    {
+        this.dataManager.set(IS_STANDING, Boolean.valueOf(standing));
+    }
+
+    public float getStandingAnimationScale(float p_189795_1_)
+    {
+        return (this.clientSideStandAnimation0 + (this.clientSideStandAnimation - this.clientSideStandAnimation0) * p_189795_1_) / 6.0F;
+    }
+
+    protected float getWaterSlowDown()
+    {
+        return 0.98F;
+    }
+
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
+    {
+        if (livingdata instanceof EntityPolarBear.GroupData)
+        {
+            if (((EntityPolarBear.GroupData)livingdata).madeParent)
+            {
+                this.setGrowingAge(-24000);
             }
-         } else {
-            this.field_75439_d = 20;
-            EntityPolarBear.this.func_189794_p(false);
-         }
+        }
+        else
+        {
+            EntityPolarBear.GroupData entitypolarbear$groupdata = new EntityPolarBear.GroupData();
+            entitypolarbear$groupdata.madeParent = true;
+            livingdata = entitypolarbear$groupdata;
+        }
 
-      }
+        return livingdata;
+    }
 
-      public void func_75251_c() {
-         EntityPolarBear.this.func_189794_p(false);
-         super.func_75251_c();
-      }
+    class AIAttackPlayer extends EntityAINearestAttackableTarget<EntityPlayer>
+    {
+        public AIAttackPlayer()
+        {
+            super(EntityPolarBear.this, EntityPlayer.class, 20, true, true, (Predicate)null);
+        }
 
-      protected double func_179512_a(EntityLivingBase p_179512_1_) {
-         return (double)(4.0F + p_179512_1_.field_70130_N);
-      }
-   }
+        public boolean shouldExecute()
+        {
+            if (EntityPolarBear.this.isChild())
+            {
+                return false;
+            }
+            else
+            {
+                if (super.shouldExecute())
+                {
+                    for (EntityPolarBear entitypolarbear : EntityPolarBear.this.world.getEntitiesWithinAABB(EntityPolarBear.class, EntityPolarBear.this.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D)))
+                    {
+                        if (entitypolarbear.isChild())
+                        {
+                            return true;
+                        }
+                    }
+                }
 
-   class AIPanic extends EntityAIPanic {
-      public AIPanic() {
-         super(EntityPolarBear.this, 2.0D);
-      }
+                EntityPolarBear.this.setAttackTarget((EntityLivingBase)null);
+                return false;
+            }
+        }
 
-      public boolean func_75250_a() {
-         return !EntityPolarBear.this.func_70631_g_() && !EntityPolarBear.this.func_70027_ad() ? false : super.func_75250_a();
-      }
-   }
+        protected double getTargetDistance()
+        {
+            return super.getTargetDistance() * 0.5D;
+        }
+    }
 
-   static class GroupData implements IEntityLivingData {
-      public boolean field_190101_a;
+    class AIHurtByTarget extends EntityAIHurtByTarget
+    {
+        public AIHurtByTarget()
+        {
+            super(EntityPolarBear.this, false);
+        }
 
-      private GroupData() {
-      }
-   }
+        public void startExecuting()
+        {
+            super.startExecuting();
+
+            if (EntityPolarBear.this.isChild())
+            {
+                this.alertOthers();
+                this.resetTask();
+            }
+        }
+
+        protected void setEntityAttackTarget(EntityCreature creatureIn, EntityLivingBase entityLivingBaseIn)
+        {
+            if (creatureIn instanceof EntityPolarBear && !creatureIn.isChild())
+            {
+                super.setEntityAttackTarget(creatureIn, entityLivingBaseIn);
+            }
+        }
+    }
+
+    class AIMeleeAttack extends EntityAIAttackMelee
+    {
+        public AIMeleeAttack()
+        {
+            super(EntityPolarBear.this, 1.25D, true);
+        }
+
+        protected void checkAndPerformAttack(EntityLivingBase p_190102_1_, double p_190102_2_)
+        {
+            double d0 = this.getAttackReachSqr(p_190102_1_);
+
+            if (p_190102_2_ <= d0 && this.attackTick <= 0)
+            {
+                this.attackTick = 20;
+                this.attacker.attackEntityAsMob(p_190102_1_);
+                EntityPolarBear.this.setStanding(false);
+            }
+            else if (p_190102_2_ <= d0 * 2.0D)
+            {
+                if (this.attackTick <= 0)
+                {
+                    EntityPolarBear.this.setStanding(false);
+                    this.attackTick = 20;
+                }
+
+                if (this.attackTick <= 10)
+                {
+                    EntityPolarBear.this.setStanding(true);
+                    EntityPolarBear.this.playWarningSound();
+                }
+            }
+            else
+            {
+                this.attackTick = 20;
+                EntityPolarBear.this.setStanding(false);
+            }
+        }
+
+        public void resetTask()
+        {
+            EntityPolarBear.this.setStanding(false);
+            super.resetTask();
+        }
+
+        protected double getAttackReachSqr(EntityLivingBase attackTarget)
+        {
+            return (double)(4.0F + attackTarget.width);
+        }
+    }
+
+    class AIPanic extends EntityAIPanic
+    {
+        public AIPanic()
+        {
+            super(EntityPolarBear.this, 2.0D);
+        }
+
+        public boolean shouldExecute()
+        {
+            return !EntityPolarBear.this.isChild() && !EntityPolarBear.this.isBurning() ? false : super.shouldExecute();
+        }
+    }
+
+    static class GroupData implements IEntityLivingData
+    {
+        public boolean madeParent;
+
+        private GroupData()
+        {
+        }
+    }
 }

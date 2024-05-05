@@ -10,110 +10,156 @@ import net.minecraft.client.resources.Language;
 import net.minecraft.client.resources.LanguageManager;
 import net.minecraft.client.settings.GameSettings;
 
-public class GuiLanguage extends GuiScreen {
-   protected GuiScreen field_146453_a;
-   private GuiLanguage.List field_146450_f;
-   private final GameSettings field_146451_g;
-   private final LanguageManager field_146454_h;
-   private GuiOptionButton field_146455_i;
-   private GuiOptionButton field_146452_r;
+public class GuiLanguage extends GuiScreen
+{
+    /** The parent Gui screen */
+    protected GuiScreen parentScreen;
 
-   public GuiLanguage(GuiScreen p_i1043_1_, GameSettings p_i1043_2_, LanguageManager p_i1043_3_) {
-      this.field_146453_a = p_i1043_1_;
-      this.field_146451_g = p_i1043_2_;
-      this.field_146454_h = p_i1043_3_;
-   }
+    /** The List GuiSlot object reference. */
+    private GuiLanguage.List list;
 
-   public void func_73866_w_() {
-      this.field_146455_i = (GuiOptionButton)this.func_189646_b(new GuiOptionButton(100, this.field_146294_l / 2 - 155, this.field_146295_m - 38, GameSettings.Options.FORCE_UNICODE_FONT, this.field_146451_g.func_74297_c(GameSettings.Options.FORCE_UNICODE_FONT)));
-      this.field_146452_r = (GuiOptionButton)this.func_189646_b(new GuiOptionButton(6, this.field_146294_l / 2 - 155 + 160, this.field_146295_m - 38, I18n.func_135052_a("gui.done")));
-      this.field_146450_f = new GuiLanguage.List(this.field_146297_k);
-      this.field_146450_f.func_148134_d(7, 8);
-   }
+    /** Reference to the GameSettings object. */
+    private final GameSettings game_settings_3;
 
-   public void func_146274_d() throws IOException {
-      super.func_146274_d();
-      this.field_146450_f.func_178039_p();
-   }
+    /** Reference to the LanguageManager object. */
+    private final LanguageManager languageManager;
 
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-      if (p_146284_1_.field_146124_l) {
-         switch(p_146284_1_.field_146127_k) {
-         case 5:
-            break;
-         case 6:
-            this.field_146297_k.func_147108_a(this.field_146453_a);
-            break;
-         case 100:
-            if (p_146284_1_ instanceof GuiOptionButton) {
-               this.field_146451_g.func_74306_a(((GuiOptionButton)p_146284_1_).func_146136_c(), 1);
-               p_146284_1_.field_146126_j = this.field_146451_g.func_74297_c(GameSettings.Options.FORCE_UNICODE_FONT);
-               ScaledResolution scaledresolution = new ScaledResolution(this.field_146297_k);
-               int i = scaledresolution.func_78326_a();
-               int j = scaledresolution.func_78328_b();
-               this.func_146280_a(this.field_146297_k, i, j);
+    /**
+     * A button which allows the user to determine if the Unicode font should be forced.
+     */
+    private GuiOptionButton forceUnicodeFontBtn;
+
+    /** The button to confirm the current settings. */
+    private GuiOptionButton confirmSettingsBtn;
+
+    public GuiLanguage(GuiScreen screen, GameSettings gameSettingsObj, LanguageManager manager)
+    {
+        this.parentScreen = screen;
+        this.game_settings_3 = gameSettingsObj;
+        this.languageManager = manager;
+    }
+
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        this.forceUnicodeFontBtn = (GuiOptionButton)this.addButton(new GuiOptionButton(100, this.width / 2 - 155, this.height - 38, GameSettings.Options.FORCE_UNICODE_FONT, this.game_settings_3.getKeyBinding(GameSettings.Options.FORCE_UNICODE_FONT)));
+        this.confirmSettingsBtn = (GuiOptionButton)this.addButton(new GuiOptionButton(6, this.width / 2 - 155 + 160, this.height - 38, I18n.format("gui.done")));
+        this.list = new GuiLanguage.List(this.mc);
+        this.list.registerScrollButtons(7, 8);
+    }
+
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        super.handleMouseInput();
+        this.list.handleMouseInput();
+    }
+
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.enabled)
+        {
+            switch (button.id)
+            {
+                case 5:
+                    break;
+
+                case 6:
+                    this.mc.displayGuiScreen(this.parentScreen);
+                    break;
+
+                case 100:
+                    if (button instanceof GuiOptionButton)
+                    {
+                        this.game_settings_3.setOptionValue(((GuiOptionButton)button).returnEnumOptions(), 1);
+                        button.displayString = this.game_settings_3.getKeyBinding(GameSettings.Options.FORCE_UNICODE_FONT);
+                        ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+                        int i = scaledresolution.getScaledWidth();
+                        int j = scaledresolution.getScaledHeight();
+                        this.setWorldAndResolution(this.mc, i, j);
+                    }
+
+                    break;
+
+                default:
+                    this.list.actionPerformed(button);
             }
-            break;
-         default:
-            this.field_146450_f.func_148147_a(p_146284_1_);
-         }
+        }
+    }
 
-      }
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.list.drawScreen(mouseX, mouseY, partialTicks);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("options.language"), this.width / 2, 16, 16777215);
+        this.drawCenteredString(this.fontRendererObj, "(" + I18n.format("options.languageWarning") + ")", this.width / 2, this.height - 56, 8421504);
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.field_146450_f.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("options.language"), this.field_146294_l / 2, 16, 16777215);
-      this.func_73732_a(this.field_146289_q, "(" + I18n.func_135052_a("options.languageWarning") + ")", this.field_146294_l / 2, this.field_146295_m - 56, 8421504);
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-   }
+    class List extends GuiSlot
+    {
+        private final java.util.List<String> langCodeList = Lists.<String>newArrayList();
+        private final Map<String, Language> languageMap = Maps.<String, Language>newHashMap();
 
-   class List extends GuiSlot {
-      private final java.util.List<String> field_148176_l = Lists.<String>newArrayList();
-      private final Map<String, Language> field_148177_m = Maps.<String, Language>newHashMap();
+        public List(Minecraft mcIn)
+        {
+            super(mcIn, GuiLanguage.this.width, GuiLanguage.this.height, 32, GuiLanguage.this.height - 65 + 4, 18);
 
-      public List(Minecraft p_i45519_2_) {
-         super(p_i45519_2_, GuiLanguage.this.field_146294_l, GuiLanguage.this.field_146295_m, 32, GuiLanguage.this.field_146295_m - 65 + 4, 18);
+            for (Language language : GuiLanguage.this.languageManager.getLanguages())
+            {
+                this.languageMap.put(language.getLanguageCode(), language);
+                this.langCodeList.add(language.getLanguageCode());
+            }
+        }
 
-         for(Language language : GuiLanguage.this.field_146454_h.func_135040_d()) {
-            this.field_148177_m.put(language.func_135034_a(), language);
-            this.field_148176_l.add(language.func_135034_a());
-         }
+        protected int getSize()
+        {
+            return this.langCodeList.size();
+        }
 
-      }
+        protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
+        {
+            Language language = this.languageMap.get(this.langCodeList.get(slotIndex));
+            GuiLanguage.this.languageManager.setCurrentLanguage(language);
+            GuiLanguage.this.game_settings_3.language = language.getLanguageCode();
+            this.mc.refreshResources();
+            GuiLanguage.this.fontRendererObj.setUnicodeFlag(GuiLanguage.this.languageManager.isCurrentLocaleUnicode() || GuiLanguage.this.game_settings_3.forceUnicodeFont);
+            GuiLanguage.this.fontRendererObj.setBidiFlag(GuiLanguage.this.languageManager.isCurrentLanguageBidirectional());
+            GuiLanguage.this.confirmSettingsBtn.displayString = I18n.format("gui.done");
+            GuiLanguage.this.forceUnicodeFontBtn.displayString = GuiLanguage.this.game_settings_3.getKeyBinding(GameSettings.Options.FORCE_UNICODE_FONT);
+            GuiLanguage.this.game_settings_3.saveOptions();
+        }
 
-      protected int func_148127_b() {
-         return this.field_148176_l.size();
-      }
+        protected boolean isSelected(int slotIndex)
+        {
+            return ((String)this.langCodeList.get(slotIndex)).equals(GuiLanguage.this.languageManager.getCurrentLanguage().getLanguageCode());
+        }
 
-      protected void func_148144_a(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_) {
-         Language language = this.field_148177_m.get(this.field_148176_l.get(p_148144_1_));
-         GuiLanguage.this.field_146454_h.func_135045_a(language);
-         GuiLanguage.this.field_146451_g.field_74363_ab = language.func_135034_a();
-         this.field_148161_k.func_110436_a();
-         GuiLanguage.this.field_146289_q.func_78264_a(GuiLanguage.this.field_146454_h.func_135042_a() || GuiLanguage.this.field_146451_g.field_151455_aw);
-         GuiLanguage.this.field_146289_q.func_78275_b(GuiLanguage.this.field_146454_h.func_135044_b());
-         GuiLanguage.this.field_146452_r.field_146126_j = I18n.func_135052_a("gui.done");
-         GuiLanguage.this.field_146455_i.field_146126_j = GuiLanguage.this.field_146451_g.func_74297_c(GameSettings.Options.FORCE_UNICODE_FONT);
-         GuiLanguage.this.field_146451_g.func_74303_b();
-      }
+        protected int getContentHeight()
+        {
+            return this.getSize() * 18;
+        }
 
-      protected boolean func_148131_a(int p_148131_1_) {
-         return ((String)this.field_148176_l.get(p_148131_1_)).equals(GuiLanguage.this.field_146454_h.func_135041_c().func_135034_a());
-      }
+        protected void drawBackground()
+        {
+            GuiLanguage.this.drawDefaultBackground();
+        }
 
-      protected int func_148138_e() {
-         return this.func_148127_b() * 18;
-      }
-
-      protected void func_148123_a() {
-         GuiLanguage.this.func_146276_q_();
-      }
-
-      protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_) {
-         GuiLanguage.this.field_146289_q.func_78275_b(true);
-         GuiLanguage.this.func_73732_a(GuiLanguage.this.field_146289_q, ((Language)this.field_148177_m.get(this.field_148176_l.get(p_192637_1_))).toString(), this.field_148155_a / 2, p_192637_3_ + 1, 16777215);
-         GuiLanguage.this.field_146289_q.func_78275_b(GuiLanguage.this.field_146454_h.func_135041_c().func_135035_b());
-      }
-   }
+        protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
+        {
+            GuiLanguage.this.fontRendererObj.setBidiFlag(true);
+            GuiLanguage.this.drawCenteredString(GuiLanguage.this.fontRendererObj, ((Language)this.languageMap.get(this.langCodeList.get(p_192637_1_))).toString(), this.width / 2, p_192637_3_ + 1, 16777215);
+            GuiLanguage.this.fontRendererObj.setBidiFlag(GuiLanguage.this.languageManager.getCurrentLanguage().isBidirectional());
+        }
+    }
 }

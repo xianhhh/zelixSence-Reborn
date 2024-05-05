@@ -7,13 +7,19 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class BlockHardenedClay extends Block {
-   public BlockHardenedClay() {
-      super(Material.field_151576_e);
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+public class BlockHardenedClay extends Block
+{
+    public BlockHardenedClay()
+    {
+        super(Material.ROCK);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
-      return MapColor.field_151676_q;
-   }
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    {
+        return MapColor.ADOBE;
+    }
 }

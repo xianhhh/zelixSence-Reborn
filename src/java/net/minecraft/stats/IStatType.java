@@ -1,5 +1,9 @@
 package net.minecraft.stats;
 
-public interface IStatType {
-   String func_75843_a(int var1);
+public interface IStatType
+{
+    /**
+     * Formats a given stat for human consumption.
+     */
+    String format(int number);
 }

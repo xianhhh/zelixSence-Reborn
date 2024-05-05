@@ -4,11 +4,22 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public interface IPlayerFileData {
-   void func_75753_a(EntityPlayer var1);
+public interface IPlayerFileData
+{
+    /**
+     * Writes the player data to disk from the specified PlayerEntityMP.
+     */
+    void writePlayerData(EntityPlayer player);
 
-   @Nullable
-   NBTTagCompound func_75752_b(EntityPlayer var1);
+    @Nullable
 
-   String[] func_75754_f();
+    /**
+     * Reads the player data from disk into the specified PlayerEntityMP.
+     */
+    NBTTagCompound readPlayerData(EntityPlayer player);
+
+    /**
+     * Returns an array of usernames for which player.dat exists for.
+     */
+    String[] getAvailablePlayerDat();
 }

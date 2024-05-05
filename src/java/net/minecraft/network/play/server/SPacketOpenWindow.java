@@ -6,79 +6,104 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 
-public class SPacketOpenWindow implements Packet<INetHandlerPlayClient> {
-   private int field_148909_a;
-   private String field_148907_b;
-   private ITextComponent field_148908_c;
-   private int field_148905_d;
-   private int field_148904_f;
+public class SPacketOpenWindow implements Packet<INetHandlerPlayClient>
+{
+    private int windowId;
+    private String inventoryType;
+    private ITextComponent windowTitle;
+    private int slotCount;
+    private int entityId;
 
-   public SPacketOpenWindow() {
-   }
+    public SPacketOpenWindow()
+    {
+    }
 
-   public SPacketOpenWindow(int p_i46954_1_, String p_i46954_2_, ITextComponent p_i46954_3_) {
-      this(p_i46954_1_, p_i46954_2_, p_i46954_3_, 0);
-   }
+    public SPacketOpenWindow(int windowIdIn, String inventoryTypeIn, ITextComponent windowTitleIn)
+    {
+        this(windowIdIn, inventoryTypeIn, windowTitleIn, 0);
+    }
 
-   public SPacketOpenWindow(int p_i46955_1_, String p_i46955_2_, ITextComponent p_i46955_3_, int p_i46955_4_) {
-      this.field_148909_a = p_i46955_1_;
-      this.field_148907_b = p_i46955_2_;
-      this.field_148908_c = p_i46955_3_;
-      this.field_148905_d = p_i46955_4_;
-   }
+    public SPacketOpenWindow(int windowIdIn, String inventoryTypeIn, ITextComponent windowTitleIn, int slotCountIn)
+    {
+        this.windowId = windowIdIn;
+        this.inventoryType = inventoryTypeIn;
+        this.windowTitle = windowTitleIn;
+        this.slotCount = slotCountIn;
+    }
 
-   public SPacketOpenWindow(int p_i46956_1_, String p_i46956_2_, ITextComponent p_i46956_3_, int p_i46956_4_, int p_i46956_5_) {
-      this(p_i46956_1_, p_i46956_2_, p_i46956_3_, p_i46956_4_);
-      this.field_148904_f = p_i46956_5_;
-   }
+    public SPacketOpenWindow(int windowIdIn, String inventoryTypeIn, ITextComponent windowTitleIn, int slotCountIn, int entityIdIn)
+    {
+        this(windowIdIn, inventoryTypeIn, windowTitleIn, slotCountIn);
+        this.entityId = entityIdIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147265_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleOpenWindow(this);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_148909_a = p_148837_1_.readUnsignedByte();
-      this.field_148907_b = p_148837_1_.func_150789_c(32);
-      this.field_148908_c = p_148837_1_.func_179258_d();
-      this.field_148905_d = p_148837_1_.readUnsignedByte();
-      if (this.field_148907_b.equals("EntityHorse")) {
-         this.field_148904_f = p_148837_1_.readInt();
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.windowId = buf.readUnsignedByte();
+        this.inventoryType = buf.readStringFromBuffer(32);
+        this.windowTitle = buf.readTextComponent();
+        this.slotCount = buf.readUnsignedByte();
 
-   }
+        if (this.inventoryType.equals("EntityHorse"))
+        {
+            this.entityId = buf.readInt();
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeByte(this.field_148909_a);
-      p_148840_1_.func_180714_a(this.field_148907_b);
-      p_148840_1_.func_179256_a(this.field_148908_c);
-      p_148840_1_.writeByte(this.field_148905_d);
-      if (this.field_148907_b.equals("EntityHorse")) {
-         p_148840_1_.writeInt(this.field_148904_f);
-      }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeByte(this.windowId);
+        buf.writeString(this.inventoryType);
+        buf.writeTextComponent(this.windowTitle);
+        buf.writeByte(this.slotCount);
 
-   }
+        if (this.inventoryType.equals("EntityHorse"))
+        {
+            buf.writeInt(this.entityId);
+        }
+    }
 
-   public int func_148901_c() {
-      return this.field_148909_a;
-   }
+    public int getWindowId()
+    {
+        return this.windowId;
+    }
 
-   public String func_148902_e() {
-      return this.field_148907_b;
-   }
+    public String getGuiId()
+    {
+        return this.inventoryType;
+    }
 
-   public ITextComponent func_179840_c() {
-      return this.field_148908_c;
-   }
+    public ITextComponent getWindowTitle()
+    {
+        return this.windowTitle;
+    }
 
-   public int func_148898_f() {
-      return this.field_148905_d;
-   }
+    public int getSlotCount()
+    {
+        return this.slotCount;
+    }
 
-   public int func_148897_h() {
-      return this.field_148904_f;
-   }
+    public int getEntityId()
+    {
+        return this.entityId;
+    }
 
-   public boolean func_148900_g() {
-      return this.field_148905_d > 0;
-   }
+    public boolean hasSlots()
+    {
+        return this.slotCount > 0;
+    }
 }

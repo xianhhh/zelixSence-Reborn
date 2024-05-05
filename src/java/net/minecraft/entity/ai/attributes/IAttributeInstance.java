@@ -4,29 +4,37 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
-public interface IAttributeInstance {
-   IAttribute func_111123_a();
+public interface IAttributeInstance
+{
+    /**
+     * Get the Attribute this is an instance of
+     */
+    IAttribute getAttribute();
 
-   double func_111125_b();
+    double getBaseValue();
 
-   void func_111128_a(double var1);
+    void setBaseValue(double baseValue);
 
-   Collection<AttributeModifier> func_111130_a(int var1);
+    Collection<AttributeModifier> getModifiersByOperation(int operation);
 
-   Collection<AttributeModifier> func_111122_c();
+    Collection<AttributeModifier> getModifiers();
 
-   boolean func_180374_a(AttributeModifier var1);
+    boolean hasModifier(AttributeModifier modifier);
 
-   @Nullable
-   AttributeModifier func_111127_a(UUID var1);
+    @Nullable
 
-   void func_111121_a(AttributeModifier var1);
+    /**
+     * Returns attribute modifier, if any, by the given UUID
+     */
+    AttributeModifier getModifier(UUID uuid);
 
-   void func_111124_b(AttributeModifier var1);
+    void applyModifier(AttributeModifier modifier);
 
-   void func_188479_b(UUID var1);
+    void removeModifier(AttributeModifier modifier);
 
-   void func_142049_d();
+    void removeModifier(UUID p_188479_1_);
 
-   double func_111126_e();
+    void removeAllModifiers();
+
+    double getAttributeValue();
 }

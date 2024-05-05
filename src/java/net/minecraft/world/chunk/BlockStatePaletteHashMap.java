@@ -6,61 +6,77 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IntIdentityHashBiMap;
 
-public class BlockStatePaletteHashMap implements IBlockStatePalette {
-   private final IntIdentityHashBiMap<IBlockState> field_186046_a;
-   private final IBlockStatePaletteResizer field_186047_b;
-   private final int field_186048_c;
+public class BlockStatePaletteHashMap implements IBlockStatePalette
+{
+    private final IntIdentityHashBiMap<IBlockState> statePaletteMap;
+    private final IBlockStatePaletteResizer paletteResizer;
+    private final int bits;
 
-   public BlockStatePaletteHashMap(int p_i47089_1_, IBlockStatePaletteResizer p_i47089_2_) {
-      this.field_186048_c = p_i47089_1_;
-      this.field_186047_b = p_i47089_2_;
-      this.field_186046_a = new IntIdentityHashBiMap<IBlockState>(1 << p_i47089_1_);
-   }
+    public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer p_i47089_2_)
+    {
+        this.bits = bitsIn;
+        this.paletteResizer = p_i47089_2_;
+        this.statePaletteMap = new IntIdentityHashBiMap<IBlockState>(1 << bitsIn);
+    }
 
-   public int func_186041_a(IBlockState p_186041_1_) {
-      int i = this.field_186046_a.func_186815_a(p_186041_1_);
-      if (i == -1) {
-         i = this.field_186046_a.func_186808_c(p_186041_1_);
-         if (i >= 1 << this.field_186048_c) {
-            i = this.field_186047_b.func_186008_a(this.field_186048_c + 1, p_186041_1_);
-         }
-      }
+    public int idFor(IBlockState state)
+    {
+        int i = this.statePaletteMap.getId(state);
 
-      return i;
-   }
+        if (i == -1)
+        {
+            i = this.statePaletteMap.add(state);
 
-   @Nullable
-   public IBlockState func_186039_a(int p_186039_1_) {
-      return this.field_186046_a.func_186813_a(p_186039_1_);
-   }
+            if (i >= 1 << this.bits)
+            {
+                i = this.paletteResizer.onResize(this.bits + 1, state);
+            }
+        }
 
-   public void func_186038_a(PacketBuffer p_186038_1_) {
-      this.field_186046_a.func_186812_a();
-      int i = p_186038_1_.func_150792_a();
+        return i;
+    }
 
-      for(int j = 0; j < i; ++j) {
-         this.field_186046_a.func_186808_c(Block.field_176229_d.func_148745_a(p_186038_1_.func_150792_a()));
-      }
+    @Nullable
 
-   }
+    /**
+     * Gets the block state by the palette id.
+     */
+    public IBlockState getBlockState(int indexKey)
+    {
+        return this.statePaletteMap.get(indexKey);
+    }
 
-   public void func_186037_b(PacketBuffer p_186037_1_) {
-      int i = this.field_186046_a.func_186810_b();
-      p_186037_1_.func_150787_b(i);
+    public void read(PacketBuffer buf)
+    {
+        this.statePaletteMap.clear();
+        int i = buf.readVarIntFromBuffer();
 
-      for(int j = 0; j < i; ++j) {
-         p_186037_1_.func_150787_b(Block.field_176229_d.func_148747_b(this.field_186046_a.func_186813_a(j)));
-      }
+        for (int j = 0; j < i; ++j)
+        {
+            this.statePaletteMap.add(Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer()));
+        }
+    }
 
-   }
+    public void write(PacketBuffer buf)
+    {
+        int i = this.statePaletteMap.size();
+        buf.writeVarIntToBuffer(i);
 
-   public int func_186040_a() {
-      int i = PacketBuffer.func_150790_a(this.field_186046_a.func_186810_b());
+        for (int j = 0; j < i; ++j)
+        {
+            buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
+        }
+    }
 
-      for(int j = 0; j < this.field_186046_a.func_186810_b(); ++j) {
-         i += PacketBuffer.func_150790_a(Block.field_176229_d.func_148747_b(this.field_186046_a.func_186813_a(j)));
-      }
+    public int getSerializedState()
+    {
+        int i = PacketBuffer.getVarIntSize(this.statePaletteMap.size());
 
-      return i;
-   }
+        for (int j = 0; j < this.statePaletteMap.size(); ++j)
+        {
+            i += PacketBuffer.getVarIntSize(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
+        }
+
+        return i;
+    }
 }

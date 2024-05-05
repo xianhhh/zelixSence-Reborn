@@ -10,87 +10,110 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketSpawnPlayer implements Packet<INetHandlerPlayClient> {
-   private int field_148957_a;
-   private UUID field_179820_b;
-   private double field_148956_c;
-   private double field_148953_d;
-   private double field_148954_e;
-   private byte field_148951_f;
-   private byte field_148952_g;
-   private EntityDataManager field_148960_i;
-   private List<EntityDataManager.DataEntry<?>> field_148958_j;
+public class SPacketSpawnPlayer implements Packet<INetHandlerPlayClient>
+{
+    private int entityId;
+    private UUID uniqueId;
+    private double x;
+    private double y;
+    private double z;
+    private byte yaw;
+    private byte pitch;
+    private EntityDataManager watcher;
+    private List < EntityDataManager.DataEntry<? >> dataManagerEntries;
 
-   public SPacketSpawnPlayer() {
-   }
+    public SPacketSpawnPlayer()
+    {
+    }
 
-   public SPacketSpawnPlayer(EntityPlayer p_i46971_1_) {
-      this.field_148957_a = p_i46971_1_.func_145782_y();
-      this.field_179820_b = p_i46971_1_.func_146103_bH().getId();
-      this.field_148956_c = p_i46971_1_.field_70165_t;
-      this.field_148953_d = p_i46971_1_.field_70163_u;
-      this.field_148954_e = p_i46971_1_.field_70161_v;
-      this.field_148951_f = (byte)((int)(p_i46971_1_.field_70177_z * 256.0F / 360.0F));
-      this.field_148952_g = (byte)((int)(p_i46971_1_.field_70125_A * 256.0F / 360.0F));
-      this.field_148960_i = p_i46971_1_.func_184212_Q();
-   }
+    public SPacketSpawnPlayer(EntityPlayer player)
+    {
+        this.entityId = player.getEntityId();
+        this.uniqueId = player.getGameProfile().getId();
+        this.x = player.posX;
+        this.y = player.posY;
+        this.z = player.posZ;
+        this.yaw = (byte)((int)(player.rotationYaw * 256.0F / 360.0F));
+        this.pitch = (byte)((int)(player.rotationPitch * 256.0F / 360.0F));
+        this.watcher = player.getDataManager();
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_148957_a = p_148837_1_.func_150792_a();
-      this.field_179820_b = p_148837_1_.func_179253_g();
-      this.field_148956_c = p_148837_1_.readDouble();
-      this.field_148953_d = p_148837_1_.readDouble();
-      this.field_148954_e = p_148837_1_.readDouble();
-      this.field_148951_f = p_148837_1_.readByte();
-      this.field_148952_g = p_148837_1_.readByte();
-      this.field_148958_j = EntityDataManager.func_187215_b(p_148837_1_);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityId = buf.readVarIntFromBuffer();
+        this.uniqueId = buf.readUuid();
+        this.x = buf.readDouble();
+        this.y = buf.readDouble();
+        this.z = buf.readDouble();
+        this.yaw = buf.readByte();
+        this.pitch = buf.readByte();
+        this.dataManagerEntries = EntityDataManager.readEntries(buf);
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_148957_a);
-      p_148840_1_.func_179252_a(this.field_179820_b);
-      p_148840_1_.writeDouble(this.field_148956_c);
-      p_148840_1_.writeDouble(this.field_148953_d);
-      p_148840_1_.writeDouble(this.field_148954_e);
-      p_148840_1_.writeByte(this.field_148951_f);
-      p_148840_1_.writeByte(this.field_148952_g);
-      this.field_148960_i.func_187216_a(p_148840_1_);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeUuid(this.uniqueId);
+        buf.writeDouble(this.x);
+        buf.writeDouble(this.y);
+        buf.writeDouble(this.z);
+        buf.writeByte(this.yaw);
+        buf.writeByte(this.pitch);
+        this.watcher.writeEntries(buf);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147237_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleSpawnPlayer(this);
+    }
 
-   @Nullable
-   public List<EntityDataManager.DataEntry<?>> func_148944_c() {
-      return this.field_148958_j;
-   }
+    @Nullable
+    public List < EntityDataManager.DataEntry<? >> getDataManagerEntries()
+    {
+        return this.dataManagerEntries;
+    }
 
-   public int func_148943_d() {
-      return this.field_148957_a;
-   }
+    public int getEntityID()
+    {
+        return this.entityId;
+    }
 
-   public UUID func_179819_c() {
-      return this.field_179820_b;
-   }
+    public UUID getUniqueId()
+    {
+        return this.uniqueId;
+    }
 
-   public double func_186898_d() {
-      return this.field_148956_c;
-   }
+    public double getX()
+    {
+        return this.x;
+    }
 
-   public double func_186897_e() {
-      return this.field_148953_d;
-   }
+    public double getY()
+    {
+        return this.y;
+    }
 
-   public double func_186899_f() {
-      return this.field_148954_e;
-   }
+    public double getZ()
+    {
+        return this.z;
+    }
 
-   public byte func_148941_i() {
-      return this.field_148951_f;
-   }
+    public byte getYaw()
+    {
+        return this.yaw;
+    }
 
-   public byte func_148945_j() {
-      return this.field_148952_g;
-   }
+    public byte getPitch()
+    {
+        return this.pitch;
+    }
 }

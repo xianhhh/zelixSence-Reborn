@@ -218,2445 +218,3334 @@ import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
 
-public class Minecraft implements IThreadListener, ISnooperInfo {
-   private static final Logger field_147123_G = LogManager.getLogger();
-   private static final ResourceLocation field_110444_H = new ResourceLocation("textures/gui/title/mojang.png");
-   public static final boolean field_142025_a = Util.func_110647_a() == Util.EnumOS.OSX;
-   public static byte[] field_71444_a = new byte[10485760];
-   private static final List<DisplayMode> field_110445_I = Lists.newArrayList(new DisplayMode(2560, 1600), new DisplayMode(2880, 1800));
-   private final File field_130070_K;
-   private final PropertyMap field_152356_J;
-   private final PropertyMap field_181038_N;
-   private ServerData field_71422_O;
-   private TextureManager field_71446_o;
-   private static Minecraft field_71432_P;
-   private final DataFixer field_184131_U;
-   public PlayerControllerMP field_71442_b;
-   private boolean field_71431_Q;
-   private final boolean field_175619_R = true;
-   private boolean field_71434_R;
-   private CrashReport field_71433_S;
-   public int field_71443_c;
-   public int field_71440_d;
-   private boolean field_181541_X;
-   private final Timer field_71428_T = new Timer(20.0F);
-   private final Snooper field_71427_U = new Snooper("client", this, MinecraftServer.func_130071_aq());
-   public WorldClient field_71441_e;
-   public RenderGlobal field_71438_f;
-   private RenderManager field_175616_W;
-   private RenderItem field_175621_X;
-   private ItemRenderer field_175620_Y;
-   public EntityPlayerSP field_71439_g;
-   @Nullable
-   private Entity field_175622_Z;
-   public Entity field_147125_j;
-   public ParticleManager field_71452_i;
-   private SearchTreeManager field_193995_ae = new SearchTreeManager();
-   private final Session field_71449_j;
-   private boolean field_71445_n;
-   private float field_193996_ah;
-   public FontRenderer field_71466_p;
-   public FontRenderer field_71464_q;
-   @Nullable
-   public GuiScreen field_71462_r;
-   public LoadingScreenRenderer field_71461_s;
-   public EntityRenderer field_71460_t;
-   public DebugRenderer field_184132_p;
-   private int field_71429_W;
-   private final int field_71436_X;
-   private final int field_71435_Y;
-   @Nullable
-   private IntegratedServer field_71437_Z;
-   public GuiIngame field_71456_v;
-   public boolean field_71454_w;
-   public RayTraceResult field_71476_x;
-   public GameSettings field_71474_y;
-   public CreativeSettings field_191950_u;
-   public MouseHelper field_71417_B;
-   public final File field_71412_D;
-   private final File field_110446_Y;
-   private final String field_110447_Z;
-   private final String field_184130_ao;
-   private final Proxy field_110453_aa;
-   private ISaveFormat field_71469_aa;
-   private static int field_71470_ab;
-   private int field_71467_ac;
-   private String field_71475_ae;
-   private int field_71477_af;
-   public boolean field_71415_G;
-   long field_71423_H = func_71386_F();
-   private int field_71457_ai;
-   public final FrameTimer field_181542_y = new FrameTimer();
-   long field_181543_z = System.nanoTime();
-   private final boolean field_147129_ai;
-   private final boolean field_71459_aj;
-   @Nullable
-   private NetworkManager field_71453_ak;
-   private boolean field_71455_al;
-   public final Profiler field_71424_I = new Profiler();
-   private long field_83002_am = -1L;
-   private IReloadableResourceManager field_110451_am;
-   private final MetadataSerializer field_110452_an = new MetadataSerializer();
-   private final List<IResourcePack> field_110449_ao = Lists.<IResourcePack>newArrayList();
-   private final DefaultResourcePack field_110450_ap;
-   private ResourcePackRepository field_110448_aq;
-   private LanguageManager field_135017_as;
-   private BlockColors field_184127_aH;
-   private ItemColors field_184128_aI;
-   private Framebuffer field_147124_at;
-   private TextureMap field_147128_au;
-   private SoundHandler field_147127_av;
-   private MusicTicker field_147126_aw;
-   private ResourceLocation field_152354_ay;
-   private final MinecraftSessionService field_152355_az;
-   private SkinManager field_152350_aA;
-   private final Queue<FutureTask<?>> field_152351_aB = Queues.<FutureTask<?>>newArrayDeque();
-   private final Thread field_152352_aC = Thread.currentThread();
-   private ModelManager field_175617_aL;
-   private BlockRendererDispatcher field_175618_aM;
-   private final GuiToast field_193034_aS;
-   volatile boolean field_71425_J = true;
-   public String field_71426_K = "";
-   public boolean field_175612_E = true;
-   private long field_71419_L = func_71386_F();
-   private int field_71420_M;
-   private boolean field_184129_aV;
-   private final Tutorial field_193035_aW;
-   long field_71421_N = -1L;
-   private String field_71465_an = "root";
-
-   public Minecraft(GameConfiguration p_i45547_1_) {
-      field_71432_P = this;
-      this.field_71412_D = p_i45547_1_.field_178744_c.field_178760_a;
-      this.field_110446_Y = p_i45547_1_.field_178744_c.field_178759_c;
-      this.field_130070_K = p_i45547_1_.field_178744_c.field_178758_b;
-      this.field_110447_Z = p_i45547_1_.field_178741_d.field_178755_b;
-      this.field_184130_ao = p_i45547_1_.field_178741_d.field_187053_c;
-      this.field_152356_J = p_i45547_1_.field_178745_a.field_178750_b;
-      this.field_181038_N = p_i45547_1_.field_178745_a.field_181172_c;
-      this.field_110450_ap = new DefaultResourcePack(p_i45547_1_.field_178744_c.func_187052_a());
-      this.field_110453_aa = p_i45547_1_.field_178745_a.field_178751_c == null ? Proxy.NO_PROXY : p_i45547_1_.field_178745_a.field_178751_c;
-      this.field_152355_az = (new YggdrasilAuthenticationService(this.field_110453_aa, UUID.randomUUID().toString())).createMinecraftSessionService();
-      this.field_71449_j = p_i45547_1_.field_178745_a.field_178752_a;
-      field_147123_G.info("Setting user: {}", (Object)this.field_71449_j.func_111285_a());
-      field_147123_G.debug("(Session ID is {})", (Object)this.field_71449_j.func_111286_b());
-      this.field_71459_aj = p_i45547_1_.field_178741_d.field_178756_a;
-      this.field_71443_c = p_i45547_1_.field_178743_b.field_178764_a > 0 ? p_i45547_1_.field_178743_b.field_178764_a : 1;
-      this.field_71440_d = p_i45547_1_.field_178743_b.field_178762_b > 0 ? p_i45547_1_.field_178743_b.field_178762_b : 1;
-      this.field_71436_X = p_i45547_1_.field_178743_b.field_178764_a;
-      this.field_71435_Y = p_i45547_1_.field_178743_b.field_178762_b;
-      this.field_71431_Q = p_i45547_1_.field_178743_b.field_178763_c;
-      this.field_147129_ai = func_147122_X();
-      this.field_71437_Z = null;
-      if (p_i45547_1_.field_178742_e.field_178754_a != null) {
-         this.field_71475_ae = p_i45547_1_.field_178742_e.field_178754_a;
-         this.field_71477_af = p_i45547_1_.field_178742_e.field_178753_b;
-      }
-
-      ImageIO.setUseCache(false);
-      Locale.setDefault(Locale.ROOT);
-      Bootstrap.func_151354_b();
-      TextComponentKeybind.field_193637_b = KeyBinding::func_193626_b;
-      this.field_184131_U = DataFixesManager.func_188279_a();
-      this.field_193034_aS = new GuiToast(this);
-      this.field_193035_aW = new Tutorial(this);
-   }
-
-   public void func_99999_d() {
-      this.field_71425_J = true;
-
-      try {
-         this.func_71384_a();
-      } catch (Throwable throwable) {
-         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Initializing game");
-         crashreport.func_85058_a("Initialization");
-         this.func_71377_b(this.func_71396_d(crashreport));
-         return;
-      }
-
-      while(true) {
-         try {
-            if (!this.field_71425_J) {
-               break;
-            }
-
-            if (!this.field_71434_R || this.field_71433_S == null) {
-               try {
-                  this.func_71411_J();
-               } catch (OutOfMemoryError var10) {
-                  this.func_71398_f();
-                  this.func_147108_a(new GuiMemoryErrorScreen());
-                  System.gc();
-               }
-               continue;
-            }
-
-            this.func_71377_b(this.field_71433_S);
-         } catch (MinecraftError var12) {
-            break;
-         } catch (ReportedException reportedexception) {
-            this.func_71396_d(reportedexception.func_71575_a());
-            this.func_71398_f();
-            field_147123_G.fatal("Reported exception thrown!", (Throwable)reportedexception);
-            this.func_71377_b(reportedexception.func_71575_a());
-            break;
-         } catch (Throwable throwable1) {
-            CrashReport crashreport1 = this.func_71396_d(new CrashReport("Unexpected error", throwable1));
-            this.func_71398_f();
-            field_147123_G.fatal("Unreported exception thrown!", throwable1);
-            this.func_71377_b(crashreport1);
-            break;
-         } finally {
-            this.func_71405_e();
-         }
-
-         return;
-      }
-
-   }
-
-   private void func_71384_a() throws LWJGLException, IOException {
-      this.field_71474_y = new GameSettings(this, this.field_71412_D);
-      this.field_191950_u = new CreativeSettings(this, this.field_71412_D);
-      this.field_110449_ao.add(this.field_110450_ap);
-      this.func_71389_H();
-      if (this.field_71474_y.field_92119_C > 0 && this.field_71474_y.field_92118_B > 0) {
-         this.field_71443_c = this.field_71474_y.field_92118_B;
-         this.field_71440_d = this.field_71474_y.field_92119_C;
-      }
-
-      field_147123_G.info("LWJGL Version: {}", (Object)Sys.getVersion());
-      this.func_175594_ao();
-      this.func_175605_an();
-      this.func_175609_am();
-      OpenGlHelper.func_77474_a();
-      this.field_147124_at = new Framebuffer(this.field_71443_c, this.field_71440_d, true);
-      this.field_147124_at.func_147604_a(0.0F, 0.0F, 0.0F, 0.0F);
-      this.func_175608_ak();
-      this.field_110448_aq = new ResourcePackRepository(this.field_130070_K, new File(this.field_71412_D, "server-resource-packs"), this.field_110450_ap, this.field_110452_an, this.field_71474_y);
-      this.field_110451_am = new SimpleReloadableResourceManager(this.field_110452_an);
-      this.field_135017_as = new LanguageManager(this.field_110452_an, this.field_71474_y.field_74363_ab);
-      this.field_110451_am.func_110542_a(this.field_135017_as);
-      this.func_110436_a();
-      this.field_71446_o = new TextureManager(this.field_110451_am);
-      this.field_110451_am.func_110542_a(this.field_71446_o);
-      this.func_180510_a(this.field_71446_o);
-      this.field_152350_aA = new SkinManager(this.field_71446_o, new File(this.field_110446_Y, "skins"), this.field_152355_az);
-      this.field_71469_aa = new AnvilSaveConverter(new File(this.field_71412_D, "saves"), this.field_184131_U);
-      this.field_147127_av = new SoundHandler(this.field_110451_am, this.field_71474_y);
-      this.field_110451_am.func_110542_a(this.field_147127_av);
-      this.field_147126_aw = new MusicTicker(this);
-      this.field_71466_p = new FontRenderer(this.field_71474_y, new ResourceLocation("textures/font/ascii.png"), this.field_71446_o, false);
-      if (this.field_71474_y.field_74363_ab != null) {
-         this.field_71466_p.func_78264_a(this.func_152349_b());
-         this.field_71466_p.func_78275_b(this.field_135017_as.func_135044_b());
-      }
-
-      this.field_71464_q = new FontRenderer(this.field_71474_y, new ResourceLocation("textures/font/ascii_sga.png"), this.field_71446_o, false);
-      this.field_110451_am.func_110542_a(this.field_71466_p);
-      this.field_110451_am.func_110542_a(this.field_71464_q);
-      this.field_110451_am.func_110542_a(new GrassColorReloadListener());
-      this.field_110451_am.func_110542_a(new FoliageColorReloadListener());
-      this.field_71417_B = new MouseHelper();
-      this.func_71361_d("Pre startup");
-      GlStateManager.func_179098_w();
-      GlStateManager.func_179103_j(7425);
-      GlStateManager.func_179151_a(1.0D);
-      GlStateManager.func_179126_j();
-      GlStateManager.func_179143_c(515);
-      GlStateManager.func_179141_d();
-      GlStateManager.func_179092_a(516, 0.1F);
-      GlStateManager.func_187407_a(GlStateManager.CullFace.BACK);
-      GlStateManager.func_179128_n(5889);
-      GlStateManager.func_179096_D();
-      GlStateManager.func_179128_n(5888);
-      this.func_71361_d("Startup");
-      this.field_147128_au = new TextureMap("textures");
-      this.field_147128_au.func_147633_a(this.field_71474_y.field_151442_I);
-      this.field_71446_o.func_110580_a(TextureMap.field_110575_b, this.field_147128_au);
-      this.field_71446_o.func_110577_a(TextureMap.field_110575_b);
-      this.field_147128_au.func_174937_a(false, this.field_71474_y.field_151442_I > 0);
-      this.field_175617_aL = new ModelManager(this.field_147128_au);
-      this.field_110451_am.func_110542_a(this.field_175617_aL);
-      this.field_184127_aH = BlockColors.func_186723_a();
-      this.field_184128_aI = ItemColors.func_186729_a(this.field_184127_aH);
-      this.field_175621_X = new RenderItem(this.field_71446_o, this.field_175617_aL, this.field_184128_aI);
-      this.field_175616_W = new RenderManager(this.field_71446_o, this.field_175621_X);
-      this.field_175620_Y = new ItemRenderer(this);
-      this.field_110451_am.func_110542_a(this.field_175621_X);
-      this.field_71460_t = new EntityRenderer(this, this.field_110451_am);
-      this.field_110451_am.func_110542_a(this.field_71460_t);
-      this.field_175618_aM = new BlockRendererDispatcher(this.field_175617_aL.func_174954_c(), this.field_184127_aH);
-      this.field_110451_am.func_110542_a(this.field_175618_aM);
-      this.field_71438_f = new RenderGlobal(this);
-      this.field_110451_am.func_110542_a(this.field_71438_f);
-      this.func_193986_ar();
-      this.field_110451_am.func_110542_a(this.field_193995_ae);
-      GlStateManager.func_179083_b(0, 0, this.field_71443_c, this.field_71440_d);
-      this.field_71452_i = new ParticleManager(this.field_71441_e, this.field_71446_o);
-      this.func_71361_d("Post startup");
-      this.field_71456_v = new GuiIngame(this);
-      if (this.field_71475_ae != null) {
-         this.func_147108_a(new GuiConnecting(new GuiMainMenu(), this, this.field_71475_ae, this.field_71477_af));
-      } else {
-         this.func_147108_a(new GuiMainMenu());
-      }
-
-      this.field_71446_o.func_147645_c(this.field_152354_ay);
-      this.field_152354_ay = null;
-      this.field_71461_s = new LoadingScreenRenderer(this);
-      this.field_184132_p = new DebugRenderer(this);
-      if (this.field_71474_y.field_74353_u && !this.field_71431_Q) {
-         this.func_71352_k();
-      }
-
-      try {
-         Display.setVSyncEnabled(this.field_71474_y.field_74352_v);
-      } catch (OpenGLException var2) {
-         this.field_71474_y.field_74352_v = false;
-         this.field_71474_y.func_74303_b();
-      }
-
-      this.field_71438_f.func_174966_b();
-   }
-
-   private void func_193986_ar() {
-      SearchTree<ItemStack> searchtree = new SearchTree<ItemStack>((p_193988_0_) -> {
-         return (List)p_193988_0_.func_82840_a((EntityPlayer)null, ITooltipFlag.TooltipFlags.NORMAL).stream().map(TextFormatting::func_110646_a).map(String::trim).filter((p_193984_0_) -> {
-            return !p_193984_0_.isEmpty();
-         }).collect(Collectors.toList());
-      }, (p_193985_0_) -> {
-         return Collections.singleton(Item.field_150901_e.func_177774_c(p_193985_0_.func_77973_b()));
-      });
-      NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191196_a();
-
-      for(Item item : Item.field_150901_e) {
-         item.func_150895_a(CreativeTabs.field_78027_g, nonnulllist);
-      }
-
-      nonnulllist.forEach(searchtree::func_194043_a);
-      SearchTree<RecipeList> searchtree1 = new SearchTree<RecipeList>((p_193990_0_) -> {
-         return (List)p_193990_0_.func_192711_b().stream().flatMap((p_193993_0_) -> {
-            return p_193993_0_.func_77571_b().func_82840_a((EntityPlayer)null, ITooltipFlag.TooltipFlags.NORMAL).stream();
-         }).map(TextFormatting::func_110646_a).map(String::trim).filter((p_193994_0_) -> {
-            return !p_193994_0_.isEmpty();
-         }).collect(Collectors.toList());
-      }, (p_193991_0_) -> {
-         return (List)p_193991_0_.func_192711_b().stream().map((p_193992_0_) -> {
-            return Item.field_150901_e.func_177774_c(p_193992_0_.func_77571_b().func_77973_b());
-         }).collect(Collectors.toList());
-      });
-      RecipeBookClient.field_194087_f.forEach(searchtree1::func_194043_a);
-      this.field_193995_ae.func_194009_a(SearchTreeManager.field_194011_a, searchtree);
-      this.field_193995_ae.func_194009_a(SearchTreeManager.field_194012_b, searchtree1);
-   }
-
-   private void func_175608_ak() {
-      this.field_110452_an.func_110504_a(new TextureMetadataSectionSerializer(), TextureMetadataSection.class);
-      this.field_110452_an.func_110504_a(new FontMetadataSectionSerializer(), FontMetadataSection.class);
-      this.field_110452_an.func_110504_a(new AnimationMetadataSectionSerializer(), AnimationMetadataSection.class);
-      this.field_110452_an.func_110504_a(new PackMetadataSectionSerializer(), PackMetadataSection.class);
-      this.field_110452_an.func_110504_a(new LanguageMetadataSectionSerializer(), LanguageMetadataSection.class);
-   }
-
-   private void func_175609_am() throws LWJGLException {
-      Display.setResizable(true);
-      Display.setTitle("Minecraft 1.12.2");
-
-      try {
-         Display.create((new PixelFormat()).withDepthBits(24));
-      } catch (LWJGLException lwjglexception) {
-         field_147123_G.error("Couldn't set pixel format", (Throwable)lwjglexception);
-
-         try {
-            Thread.sleep(1000L);
-         } catch (InterruptedException var3) {
-            ;
-         }
-
-         if (this.field_71431_Q) {
-            this.func_110441_Q();
-         }
-
-         Display.create();
-      }
-
-   }
-
-   private void func_175605_an() throws LWJGLException {
-      if (this.field_71431_Q) {
-         Display.setFullscreen(true);
-         DisplayMode displaymode = Display.getDisplayMode();
-         this.field_71443_c = Math.max(1, displaymode.getWidth());
-         this.field_71440_d = Math.max(1, displaymode.getHeight());
-      } else {
-         Display.setDisplayMode(new DisplayMode(this.field_71443_c, this.field_71440_d));
-      }
-
-   }
-
-   private void func_175594_ao() {
-      Util.EnumOS util$enumos = Util.func_110647_a();
-      if (util$enumos != Util.EnumOS.OSX) {
-         InputStream inputstream = null;
-         InputStream inputstream1 = null;
-
-         try {
-            inputstream = this.field_110450_ap.func_152780_c(new ResourceLocation("icons/icon_16x16.png"));
-            inputstream1 = this.field_110450_ap.func_152780_c(new ResourceLocation("icons/icon_32x32.png"));
-            if (inputstream != null && inputstream1 != null) {
-               Display.setIcon(new ByteBuffer[]{this.func_152340_a(inputstream), this.func_152340_a(inputstream1)});
-            }
-         } catch (IOException ioexception) {
-            field_147123_G.error("Couldn't set icon", (Throwable)ioexception);
-         } finally {
-            IOUtils.closeQuietly(inputstream);
-            IOUtils.closeQuietly(inputstream1);
-         }
-      }
-
-   }
-
-   private static boolean func_147122_X() {
-      String[] astring = new String[]{"sun.arch.data.model", "com.ibm.vm.bitmode", "os.arch"};
-
-      for(String s : astring) {
-         String s1 = System.getProperty(s);
-         if (s1 != null && s1.contains("64")) {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
-   public Framebuffer func_147110_a() {
-      return this.field_147124_at;
-   }
-
-   public String func_175600_c() {
-      return this.field_110447_Z;
-   }
-
-   public String func_184123_d() {
-      return this.field_184130_ao;
-   }
-
-   private void func_71389_H() {
-      Thread thread = new Thread("Timer hack thread") {
-         public void run() {
-            while(Minecraft.this.field_71425_J) {
-               try {
-                  Thread.sleep(2147483647L);
-               } catch (InterruptedException var2) {
-                  ;
-               }
-            }
-
-         }
-      };
-      thread.setDaemon(true);
-      thread.start();
-   }
-
-   public void func_71404_a(CrashReport p_71404_1_) {
-      this.field_71434_R = true;
-      this.field_71433_S = p_71404_1_;
-   }
-
-   public void func_71377_b(CrashReport p_71377_1_) {
-      File file1 = new File(func_71410_x().field_71412_D, "crash-reports");
-      File file2 = new File(file1, "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-client.txt");
-      Bootstrap.func_179870_a(p_71377_1_.func_71502_e());
-      if (p_71377_1_.func_71497_f() != null) {
-         Bootstrap.func_179870_a("#@!@# Game crashed! Crash report saved to: #@!@# " + p_71377_1_.func_71497_f());
-         System.exit(-1);
-      } else if (p_71377_1_.func_147149_a(file2)) {
-         Bootstrap.func_179870_a("#@!@# Game crashed! Crash report saved to: #@!@# " + file2.getAbsolutePath());
-         System.exit(-1);
-      } else {
-         Bootstrap.func_179870_a("#@?@# Game crashed! Crash report could not be saved. #@?@#");
-         System.exit(-2);
-      }
-
-   }
-
-   public boolean func_152349_b() {
-      return this.field_135017_as.func_135042_a() || this.field_71474_y.field_151455_aw;
-   }
-
-   public void func_110436_a() {
-      List<IResourcePack> list = Lists.newArrayList(this.field_110449_ao);
-      if (this.field_71437_Z != null) {
-         this.field_71437_Z.func_193031_aM();
-      }
-
-      for(ResourcePackRepository.Entry resourcepackrepository$entry : this.field_110448_aq.func_110613_c()) {
-         list.add(resourcepackrepository$entry.func_110514_c());
-      }
-
-      if (this.field_110448_aq.func_148530_e() != null) {
-         list.add(this.field_110448_aq.func_148530_e());
-      }
-
-      try {
-         this.field_110451_am.func_110541_a(list);
-      } catch (RuntimeException runtimeexception) {
-         field_147123_G.info("Caught error stitching, removing all assigned resourcepacks", (Throwable)runtimeexception);
-         list.clear();
-         list.addAll(this.field_110449_ao);
-         this.field_110448_aq.func_148527_a(Collections.emptyList());
-         this.field_110451_am.func_110541_a(list);
-         this.field_71474_y.field_151453_l.clear();
-         this.field_71474_y.field_183018_l.clear();
-         this.field_71474_y.func_74303_b();
-      }
-
-      this.field_135017_as.func_135043_a(list);
-      if (this.field_71438_f != null) {
-         this.field_71438_f.func_72712_a();
-      }
-
-   }
-
-   private ByteBuffer func_152340_a(InputStream p_152340_1_) throws IOException {
-      BufferedImage bufferedimage = ImageIO.read(p_152340_1_);
-      int[] aint = bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), (int[])null, 0, bufferedimage.getWidth());
-      ByteBuffer bytebuffer = ByteBuffer.allocate(4 * aint.length);
-
-      for(int i : aint) {
-         bytebuffer.putInt(i << 8 | i >> 24 & 255);
-      }
-
-      bytebuffer.flip();
-      return bytebuffer;
-   }
-
-   private void func_110441_Q() throws LWJGLException {
-      Set<DisplayMode> set = Sets.<DisplayMode>newHashSet();
-      Collections.addAll(set, Display.getAvailableDisplayModes());
-      DisplayMode displaymode = Display.getDesktopDisplayMode();
-      if (!set.contains(displaymode) && Util.func_110647_a() == Util.EnumOS.OSX) {
-         label52:
-         for(DisplayMode displaymode1 : field_110445_I) {
-            boolean flag = true;
-
-            for(DisplayMode displaymode2 : set) {
-               if (displaymode2.getBitsPerPixel() == 32 && displaymode2.getWidth() == displaymode1.getWidth() && displaymode2.getHeight() == displaymode1.getHeight()) {
-                  flag = false;
-                  break;
-               }
-            }
-
-            if (!flag) {
-               Iterator iterator = set.iterator();
-
-               DisplayMode displaymode3;
-               while(true) {
-                  if (!iterator.hasNext()) {
-                     continue label52;
-                  }
-
-                  displaymode3 = (DisplayMode)iterator.next();
-                  if (displaymode3.getBitsPerPixel() == 32 && displaymode3.getWidth() == displaymode1.getWidth() / 2 && displaymode3.getHeight() == displaymode1.getHeight() / 2) {
-                     break;
-                  }
-               }
-
-               displaymode = displaymode3;
-            }
-         }
-      }
-
-      Display.setDisplayMode(displaymode);
-      this.field_71443_c = displaymode.getWidth();
-      this.field_71440_d = displaymode.getHeight();
-   }
-
-   private void func_180510_a(TextureManager p_180510_1_) throws LWJGLException {
-      ScaledResolution scaledresolution = new ScaledResolution(this);
-      int i = scaledresolution.func_78325_e();
-      Framebuffer framebuffer = new Framebuffer(scaledresolution.func_78326_a() * i, scaledresolution.func_78328_b() * i, true);
-      framebuffer.func_147610_a(false);
-      GlStateManager.func_179128_n(5889);
-      GlStateManager.func_179096_D();
-      GlStateManager.func_179130_a(0.0D, (double)scaledresolution.func_78326_a(), (double)scaledresolution.func_78328_b(), 0.0D, 1000.0D, 3000.0D);
-      GlStateManager.func_179128_n(5888);
-      GlStateManager.func_179096_D();
-      GlStateManager.func_179109_b(0.0F, 0.0F, -2000.0F);
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179106_n();
-      GlStateManager.func_179097_i();
-      GlStateManager.func_179098_w();
-      InputStream inputstream = null;
-
-      try {
-         inputstream = this.field_110450_ap.func_110590_a(field_110444_H);
-         this.field_152354_ay = p_180510_1_.func_110578_a("logo", new DynamicTexture(ImageIO.read(inputstream)));
-         p_180510_1_.func_110577_a(this.field_152354_ay);
-      } catch (IOException ioexception) {
-         field_147123_G.error("Unable to load logo: {}", field_110444_H, ioexception);
-      } finally {
-         IOUtils.closeQuietly(inputstream);
-      }
-
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      bufferbuilder.func_181662_b(0.0D, (double)this.field_71440_d, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
-      bufferbuilder.func_181662_b((double)this.field_71443_c, (double)this.field_71440_d, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
-      bufferbuilder.func_181662_b((double)this.field_71443_c, 0.0D, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
-      bufferbuilder.func_181662_b(0.0D, 0.0D, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
-      tessellator.func_78381_a();
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      int j = 256;
-      int k = 256;
-      this.func_181536_a((scaledresolution.func_78326_a() - 256) / 2, (scaledresolution.func_78328_b() - 256) / 2, 0, 0, 256, 256, 255, 255, 255, 255);
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179106_n();
-      framebuffer.func_147609_e();
-      framebuffer.func_147615_c(scaledresolution.func_78326_a() * i, scaledresolution.func_78328_b() * i);
-      GlStateManager.func_179141_d();
-      GlStateManager.func_179092_a(516, 0.1F);
-      this.func_175601_h();
-   }
-
-   public void func_181536_a(int p_181536_1_, int p_181536_2_, int p_181536_3_, int p_181536_4_, int p_181536_5_, int p_181536_6_, int p_181536_7_, int p_181536_8_, int p_181536_9_, int p_181536_10_) {
-      BufferBuilder bufferbuilder = Tessellator.func_178181_a().func_178180_c();
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      float f = 0.00390625F;
-      float f1 = 0.00390625F;
-      bufferbuilder.func_181662_b((double)p_181536_1_, (double)(p_181536_2_ + p_181536_6_), 0.0D).func_187315_a((double)((float)p_181536_3_ * 0.00390625F), (double)((float)(p_181536_4_ + p_181536_6_) * 0.00390625F)).func_181669_b(p_181536_7_, p_181536_8_, p_181536_9_, p_181536_10_).func_181675_d();
-      bufferbuilder.func_181662_b((double)(p_181536_1_ + p_181536_5_), (double)(p_181536_2_ + p_181536_6_), 0.0D).func_187315_a((double)((float)(p_181536_3_ + p_181536_5_) * 0.00390625F), (double)((float)(p_181536_4_ + p_181536_6_) * 0.00390625F)).func_181669_b(p_181536_7_, p_181536_8_, p_181536_9_, p_181536_10_).func_181675_d();
-      bufferbuilder.func_181662_b((double)(p_181536_1_ + p_181536_5_), (double)p_181536_2_, 0.0D).func_187315_a((double)((float)(p_181536_3_ + p_181536_5_) * 0.00390625F), (double)((float)p_181536_4_ * 0.00390625F)).func_181669_b(p_181536_7_, p_181536_8_, p_181536_9_, p_181536_10_).func_181675_d();
-      bufferbuilder.func_181662_b((double)p_181536_1_, (double)p_181536_2_, 0.0D).func_187315_a((double)((float)p_181536_3_ * 0.00390625F), (double)((float)p_181536_4_ * 0.00390625F)).func_181669_b(p_181536_7_, p_181536_8_, p_181536_9_, p_181536_10_).func_181675_d();
-      Tessellator.func_178181_a().func_78381_a();
-   }
-
-   public ISaveFormat func_71359_d() {
-      return this.field_71469_aa;
-   }
-
-   public void func_147108_a(@Nullable GuiScreen p_147108_1_) {
-      if (this.field_71462_r != null) {
-         this.field_71462_r.func_146281_b();
-      }
-
-      if (p_147108_1_ == null && this.field_71441_e == null) {
-         p_147108_1_ = new GuiMainMenu();
-      } else if (p_147108_1_ == null && this.field_71439_g.func_110143_aJ() <= 0.0F) {
-         p_147108_1_ = new GuiGameOver((ITextComponent)null);
-      }
-
-      if (p_147108_1_ instanceof GuiMainMenu || p_147108_1_ instanceof GuiMultiplayer) {
-         this.field_71474_y.field_74330_P = false;
-         this.field_71456_v.func_146158_b().func_146231_a(true);
-      }
-
-      this.field_71462_r = p_147108_1_;
-      if (p_147108_1_ != null) {
-         this.func_71364_i();
-         KeyBinding.func_74506_a();
-
-         while(Mouse.next()) {
-            ;
-         }
-
-         while(Keyboard.next()) {
-            ;
-         }
-
-         ScaledResolution scaledresolution = new ScaledResolution(this);
-         int i = scaledresolution.func_78326_a();
-         int j = scaledresolution.func_78328_b();
-         p_147108_1_.func_146280_a(this, i, j);
-         this.field_71454_w = false;
-      } else {
-         this.field_147127_av.func_147687_e();
-         this.func_71381_h();
-      }
-
-   }
-
-   private void func_71361_d(String p_71361_1_) {
-      int i = GlStateManager.func_187434_L();
-      if (i != 0) {
-         String s = GLU.gluErrorString(i);
-         field_147123_G.error("########## GL ERROR ##########");
-         field_147123_G.error("@ {}", (Object)p_71361_1_);
-         field_147123_G.error("{}: {}", Integer.valueOf(i), s);
-      }
-
-   }
-
-   public void func_71405_e() {
-      try {
-         field_147123_G.info("Stopping!");
-
-         try {
-            this.func_71403_a((WorldClient)null);
-         } catch (Throwable var5) {
-            ;
-         }
-
-         this.field_147127_av.func_147685_d();
-      } finally {
-         Display.destroy();
-         if (!this.field_71434_R) {
-            System.exit(0);
-         }
-
-      }
-
-      System.gc();
-   }
-
-   private void func_71411_J() throws IOException {
-      long i = System.nanoTime();
-      this.field_71424_I.func_76320_a("root");
-      if (Display.isCreated() && Display.isCloseRequested()) {
-         this.func_71400_g();
-      }
-
-      this.field_71428_T.func_74275_a();
-      this.field_71424_I.func_76320_a("scheduledExecutables");
-      synchronized(this.field_152351_aB) {
-         while(!this.field_152351_aB.isEmpty()) {
-            Util.func_181617_a(this.field_152351_aB.poll(), field_147123_G);
-         }
-      }
-
-      this.field_71424_I.func_76319_b();
-      long l = System.nanoTime();
-      this.field_71424_I.func_76320_a("tick");
-
-      for(int j = 0; j < Math.min(10, this.field_71428_T.field_74280_b); ++j) {
-         this.func_71407_l();
-      }
-
-      this.field_71424_I.func_76318_c("preRenderErrors");
-      long i1 = System.nanoTime() - l;
-      this.func_71361_d("Pre render");
-      this.field_71424_I.func_76318_c("sound");
-      this.field_147127_av.func_147691_a(this.field_71439_g, this.field_71428_T.field_194147_b);
-      this.field_71424_I.func_76319_b();
-      this.field_71424_I.func_76320_a("render");
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179086_m(16640);
-      this.field_147124_at.func_147610_a(true);
-      this.field_71424_I.func_76320_a("display");
-      GlStateManager.func_179098_w();
-      this.field_71424_I.func_76319_b();
-      if (!this.field_71454_w) {
-         this.field_71424_I.func_76318_c("gameRenderer");
-         this.field_71460_t.func_181560_a(this.field_71445_n ? this.field_193996_ah : this.field_71428_T.field_194147_b, i);
-         this.field_71424_I.func_76318_c("toasts");
-         this.field_193034_aS.func_191783_a(new ScaledResolution(this));
-         this.field_71424_I.func_76319_b();
-      }
-
-      this.field_71424_I.func_76319_b();
-      if (this.field_71474_y.field_74330_P && this.field_71474_y.field_74329_Q && !this.field_71474_y.field_74319_N) {
-         if (!this.field_71424_I.field_76327_a) {
-            this.field_71424_I.func_76317_a();
-         }
-
-         this.field_71424_I.field_76327_a = true;
-         this.func_71366_a(i1);
-      } else {
-         this.field_71424_I.field_76327_a = false;
-         this.field_71421_N = System.nanoTime();
-      }
-
-      this.field_147124_at.func_147609_e();
-      GlStateManager.func_179121_F();
-      GlStateManager.func_179094_E();
-      this.field_147124_at.func_147615_c(this.field_71443_c, this.field_71440_d);
-      GlStateManager.func_179121_F();
-      GlStateManager.func_179094_E();
-      this.field_71460_t.func_152430_c(this.field_71428_T.field_194147_b);
-      GlStateManager.func_179121_F();
-      this.field_71424_I.func_76320_a("root");
-      this.func_175601_h();
-      Thread.yield();
-      this.func_71361_d("Post render");
-      ++this.field_71420_M;
-      boolean flag = this.func_71356_B() && this.field_71462_r != null && this.field_71462_r.func_73868_f() && !this.field_71437_Z.func_71344_c();
-      if (this.field_71445_n != flag) {
-         if (this.field_71445_n) {
-            this.field_193996_ah = this.field_71428_T.field_194147_b;
-         } else {
-            this.field_71428_T.field_194147_b = this.field_193996_ah;
-         }
-
-         this.field_71445_n = flag;
-      }
-
-      long k = System.nanoTime();
-      this.field_181542_y.func_181747_a(k - this.field_181543_z);
-      this.field_181543_z = k;
-
-      while(func_71386_F() >= this.field_71419_L + 1000L) {
-         field_71470_ab = this.field_71420_M;
-         this.field_71426_K = String.format("%d fps (%d chunk update%s) T: %s%s%s%s%s", field_71470_ab, RenderChunk.field_178592_a, RenderChunk.field_178592_a == 1 ? "" : "s", (float)this.field_71474_y.field_74350_i == GameSettings.Options.FRAMERATE_LIMIT.func_148267_f() ? "inf" : this.field_71474_y.field_74350_i, this.field_71474_y.field_74352_v ? " vsync" : "", this.field_71474_y.field_74347_j ? "" : " fast", this.field_71474_y.field_74345_l == 0 ? "" : (this.field_71474_y.field_74345_l == 1 ? " fast-clouds" : " fancy-clouds"), OpenGlHelper.func_176075_f() ? " vbo" : "");
-         RenderChunk.field_178592_a = 0;
-         this.field_71419_L += 1000L;
-         this.field_71420_M = 0;
-         this.field_71427_U.func_76471_b();
-         if (!this.field_71427_U.func_76468_d()) {
-            this.field_71427_U.func_76463_a();
-         }
-      }
-
-      if (this.func_147107_h()) {
-         this.field_71424_I.func_76320_a("fpslimit_wait");
-         Display.sync(this.func_90020_K());
-         this.field_71424_I.func_76319_b();
-      }
-
-      this.field_71424_I.func_76319_b();
-   }
-
-   public void func_175601_h() {
-      this.field_71424_I.func_76320_a("display_update");
-      Display.update();
-      this.field_71424_I.func_76319_b();
-      this.func_175604_i();
-   }
-
-   protected void func_175604_i() {
-      if (!this.field_71431_Q && Display.wasResized()) {
-         int i = this.field_71443_c;
-         int j = this.field_71440_d;
-         this.field_71443_c = Display.getWidth();
-         this.field_71440_d = Display.getHeight();
-         if (this.field_71443_c != i || this.field_71440_d != j) {
-            if (this.field_71443_c <= 0) {
-               this.field_71443_c = 1;
-            }
-
-            if (this.field_71440_d <= 0) {
-               this.field_71440_d = 1;
-            }
-
-            this.func_71370_a(this.field_71443_c, this.field_71440_d);
-         }
-      }
-
-   }
-
-   public int func_90020_K() {
-      return this.field_71441_e == null && this.field_71462_r != null ? 30 : this.field_71474_y.field_74350_i;
-   }
-
-   public boolean func_147107_h() {
-      return (float)this.func_90020_K() < GameSettings.Options.FRAMERATE_LIMIT.func_148267_f();
-   }
-
-   public void func_71398_f() {
-      try {
-         field_71444_a = new byte[0];
-         this.field_71438_f.func_72728_f();
-      } catch (Throwable var3) {
-         ;
-      }
-
-      try {
-         System.gc();
-         this.func_71403_a((WorldClient)null);
-      } catch (Throwable var2) {
-         ;
-      }
-
-      System.gc();
-   }
-
-   private void func_71383_b(int p_71383_1_) {
-      List<Profiler.Result> list = this.field_71424_I.func_76321_b(this.field_71465_an);
-      if (!list.isEmpty()) {
-         Profiler.Result profiler$result = list.remove(0);
-         if (p_71383_1_ == 0) {
-            if (!profiler$result.field_76331_c.isEmpty()) {
-               int i = this.field_71465_an.lastIndexOf(46);
-               if (i >= 0) {
-                  this.field_71465_an = this.field_71465_an.substring(0, i);
-               }
-            }
-         } else {
-            --p_71383_1_;
-            if (p_71383_1_ < list.size() && !"unspecified".equals((list.get(p_71383_1_)).field_76331_c)) {
-               if (!this.field_71465_an.isEmpty()) {
-                  this.field_71465_an = this.field_71465_an + ".";
-               }
-
-               this.field_71465_an = this.field_71465_an + (list.get(p_71383_1_)).field_76331_c;
-            }
-         }
-
-      }
-   }
-
-   private void func_71366_a(long p_71366_1_) {
-      if (this.field_71424_I.field_76327_a) {
-         List<Profiler.Result> list = this.field_71424_I.func_76321_b(this.field_71465_an);
-         Profiler.Result profiler$result = list.remove(0);
-         GlStateManager.func_179086_m(256);
-         GlStateManager.func_179128_n(5889);
-         GlStateManager.func_179142_g();
-         GlStateManager.func_179096_D();
-         GlStateManager.func_179130_a(0.0D, (double)this.field_71443_c, (double)this.field_71440_d, 0.0D, 1000.0D, 3000.0D);
-         GlStateManager.func_179128_n(5888);
-         GlStateManager.func_179096_D();
-         GlStateManager.func_179109_b(0.0F, 0.0F, -2000.0F);
-         GlStateManager.func_187441_d(1.0F);
-         GlStateManager.func_179090_x();
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         int i = 160;
-         int j = this.field_71443_c - 160 - 10;
-         int k = this.field_71440_d - 320;
-         GlStateManager.func_179147_l();
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-         bufferbuilder.func_181662_b((double)((float)j - 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0D).func_181669_b(200, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)((float)j - 176.0F), (double)(k + 320), 0.0D).func_181669_b(200, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)((float)j + 176.0F), (double)(k + 320), 0.0D).func_181669_b(200, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)((float)j + 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0D).func_181669_b(200, 0, 0, 0).func_181675_d();
-         tessellator.func_78381_a();
-         GlStateManager.func_179084_k();
-         double d0 = 0.0D;
-
-         for(int l = 0; l < list.size(); ++l) {
-            Profiler.Result profiler$result1 = list.get(l);
-            int i1 = MathHelper.func_76128_c(profiler$result1.field_76332_a / 4.0D) + 1;
-            bufferbuilder.func_181668_a(6, DefaultVertexFormats.field_181706_f);
-            int j1 = profiler$result1.func_76329_a();
-            int k1 = j1 >> 16 & 255;
-            int l1 = j1 >> 8 & 255;
-            int i2 = j1 & 255;
-            bufferbuilder.func_181662_b((double)j, (double)k, 0.0D).func_181669_b(k1, l1, i2, 255).func_181675_d();
-
-            for(int j2 = i1; j2 >= 0; --j2) {
-               float f = (float)((d0 + profiler$result1.field_76332_a * (double)j2 / (double)i1) * 6.2831854820251465D / 100.0D);
-               float f1 = MathHelper.func_76126_a(f) * 160.0F;
-               float f2 = MathHelper.func_76134_b(f) * 160.0F * 0.5F;
-               bufferbuilder.func_181662_b((double)((float)j + f1), (double)((float)k - f2), 0.0D).func_181669_b(k1, l1, i2, 255).func_181675_d();
-            }
-
-            tessellator.func_78381_a();
-            bufferbuilder.func_181668_a(5, DefaultVertexFormats.field_181706_f);
-
-            for(int i3 = i1; i3 >= 0; --i3) {
-               float f3 = (float)((d0 + profiler$result1.field_76332_a * (double)i3 / (double)i1) * 6.2831854820251465D / 100.0D);
-               float f4 = MathHelper.func_76126_a(f3) * 160.0F;
-               float f5 = MathHelper.func_76134_b(f3) * 160.0F * 0.5F;
-               bufferbuilder.func_181662_b((double)((float)j + f4), (double)((float)k - f5), 0.0D).func_181669_b(k1 >> 1, l1 >> 1, i2 >> 1, 255).func_181675_d();
-               bufferbuilder.func_181662_b((double)((float)j + f4), (double)((float)k - f5 + 10.0F), 0.0D).func_181669_b(k1 >> 1, l1 >> 1, i2 >> 1, 255).func_181675_d();
-            }
-
-            tessellator.func_78381_a();
-            d0 += profiler$result1.field_76332_a;
-         }
-
-         DecimalFormat decimalformat = new DecimalFormat("##0.00");
-         GlStateManager.func_179098_w();
-         String s = "";
-         if (!"unspecified".equals(profiler$result.field_76331_c)) {
-            s = s + "[0] ";
-         }
-
-         if (profiler$result.field_76331_c.isEmpty()) {
-            s = s + "ROOT ";
-         } else {
-            s = s + profiler$result.field_76331_c + ' ';
-         }
-
-         int l2 = 16777215;
-         this.field_71466_p.func_175063_a(s, (float)(j - 160), (float)(k - 80 - 16), 16777215);
-         s = decimalformat.format(profiler$result.field_76330_b) + "%";
-         this.field_71466_p.func_175063_a(s, (float)(j + 160 - this.field_71466_p.func_78256_a(s)), (float)(k - 80 - 16), 16777215);
-
-         for(int k2 = 0; k2 < list.size(); ++k2) {
-            Profiler.Result profiler$result2 = list.get(k2);
-            StringBuilder stringbuilder = new StringBuilder();
-            if ("unspecified".equals(profiler$result2.field_76331_c)) {
-               stringbuilder.append("[?] ");
-            } else {
-               stringbuilder.append("[").append(k2 + 1).append("] ");
-            }
-
-            String s1 = stringbuilder.append(profiler$result2.field_76331_c).toString();
-            this.field_71466_p.func_175063_a(s1, (float)(j - 160), (float)(k + 80 + k2 * 8 + 20), profiler$result2.func_76329_a());
-            s1 = decimalformat.format(profiler$result2.field_76332_a) + "%";
-            this.field_71466_p.func_175063_a(s1, (float)(j + 160 - 50 - this.field_71466_p.func_78256_a(s1)), (float)(k + 80 + k2 * 8 + 20), profiler$result2.func_76329_a());
-            s1 = decimalformat.format(profiler$result2.field_76330_b) + "%";
-            this.field_71466_p.func_175063_a(s1, (float)(j + 160 - this.field_71466_p.func_78256_a(s1)), (float)(k + 80 + k2 * 8 + 20), profiler$result2.func_76329_a());
-         }
-
-      }
-   }
-
-   public void func_71400_g() {
-      this.field_71425_J = false;
-   }
-
-   public void func_71381_h() {
-      if (Display.isActive()) {
-         if (!this.field_71415_G) {
-            if (!field_142025_a) {
-               KeyBinding.func_186704_a();
-            }
-
-            this.field_71415_G = true;
-            this.field_71417_B.func_74372_a();
-            this.func_147108_a((GuiScreen)null);
-            this.field_71429_W = 10000;
-         }
-      }
-   }
-
-   public void func_71364_i() {
-      if (this.field_71415_G) {
-         this.field_71415_G = false;
-         this.field_71417_B.func_74373_b();
-      }
-   }
-
-   public void func_71385_j() {
-      if (this.field_71462_r == null) {
-         this.func_147108_a(new GuiIngameMenu());
-         if (this.func_71356_B() && !this.field_71437_Z.func_71344_c()) {
-            this.field_147127_av.func_147689_b();
-         }
-
-      }
-   }
-
-   private void func_147115_a(boolean p_147115_1_) {
-      if (!p_147115_1_) {
-         this.field_71429_W = 0;
-      }
-
-      if (this.field_71429_W <= 0 && !this.field_71439_g.func_184587_cr()) {
-         if (p_147115_1_ && this.field_71476_x != null && this.field_71476_x.field_72313_a == RayTraceResult.Type.BLOCK) {
-            BlockPos blockpos = this.field_71476_x.func_178782_a();
-            if (this.field_71441_e.func_180495_p(blockpos).func_185904_a() != Material.field_151579_a && this.field_71442_b.func_180512_c(blockpos, this.field_71476_x.field_178784_b)) {
-               this.field_71452_i.func_180532_a(blockpos, this.field_71476_x.field_178784_b);
-               this.field_71439_g.func_184609_a(EnumHand.MAIN_HAND);
-            }
-
-         } else {
-            this.field_71442_b.func_78767_c();
-         }
-      }
-   }
-
-   private void func_147116_af() {
-      if (this.field_71429_W <= 0) {
-         if (this.field_71476_x == null) {
-            field_147123_G.error("Null returned as 'hitResult', this shouldn't happen!");
-            if (this.field_71442_b.func_78762_g()) {
-               this.field_71429_W = 10;
-            }
-
-         } else if (!this.field_71439_g.func_184838_M()) {
-            switch(this.field_71476_x.field_72313_a) {
-            case ENTITY:
-               this.field_71442_b.func_78764_a(this.field_71439_g, this.field_71476_x.field_72308_g);
-               break;
-            case BLOCK:
-               BlockPos blockpos = this.field_71476_x.func_178782_a();
-               if (this.field_71441_e.func_180495_p(blockpos).func_185904_a() != Material.field_151579_a) {
-                  this.field_71442_b.func_180511_b(blockpos, this.field_71476_x.field_178784_b);
-                  break;
-               }
-            case MISS:
-               if (this.field_71442_b.func_78762_g()) {
-                  this.field_71429_W = 10;
-               }
-
-               this.field_71439_g.func_184821_cY();
-            }
-
-            this.field_71439_g.func_184609_a(EnumHand.MAIN_HAND);
-         }
-      }
-   }
-
-   private void func_147121_ag() {
-      if (!this.field_71442_b.func_181040_m()) {
-         this.field_71467_ac = 4;
-         if (!this.field_71439_g.func_184838_M()) {
-            if (this.field_71476_x == null) {
-               field_147123_G.warn("Null returned as 'hitResult', this shouldn't happen!");
-            }
-
-            for(EnumHand enumhand : EnumHand.values()) {
-               ItemStack itemstack = this.field_71439_g.func_184586_b(enumhand);
-               if (this.field_71476_x != null) {
-                  switch(this.field_71476_x.field_72313_a) {
-                  case ENTITY:
-                     if (this.field_71442_b.func_187102_a(this.field_71439_g, this.field_71476_x.field_72308_g, this.field_71476_x, enumhand) == EnumActionResult.SUCCESS) {
-                        return;
-                     }
-
-                     if (this.field_71442_b.func_187097_a(this.field_71439_g, this.field_71476_x.field_72308_g, enumhand) == EnumActionResult.SUCCESS) {
-                        return;
-                     }
-                     break;
-                  case BLOCK:
-                     BlockPos blockpos = this.field_71476_x.func_178782_a();
-                     if (this.field_71441_e.func_180495_p(blockpos).func_185904_a() != Material.field_151579_a) {
-                        int i = itemstack.func_190916_E();
-                        EnumActionResult enumactionresult = this.field_71442_b.func_187099_a(this.field_71439_g, this.field_71441_e, blockpos, this.field_71476_x.field_178784_b, this.field_71476_x.field_72307_f, enumhand);
-                        if (enumactionresult == EnumActionResult.SUCCESS) {
-                           this.field_71439_g.func_184609_a(enumhand);
-                           if (!itemstack.func_190926_b() && (itemstack.func_190916_E() != i || this.field_71442_b.func_78758_h())) {
-                              this.field_71460_t.field_78516_c.func_187460_a(enumhand);
-                           }
-
-                           return;
+public class Minecraft implements IThreadListener, ISnooperInfo
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final ResourceLocation LOCATION_MOJANG_PNG = new ResourceLocation("textures/gui/title/mojang.png");
+    public static final boolean IS_RUNNING_ON_MAC = Util.getOSType() == Util.EnumOS.OSX;
+
+    /** A 10MiB preallocation to ensure the heap is reasonably sized. */
+    public static byte[] memoryReserve = new byte[10485760];
+    private static final List<DisplayMode> MAC_DISPLAY_MODES = Lists.newArrayList(new DisplayMode(2560, 1600), new DisplayMode(2880, 1800));
+    private final File fileResourcepacks;
+    private final PropertyMap twitchDetails;
+
+    /** The player's GameProfile properties */
+    private final PropertyMap profileProperties;
+    private ServerData currentServerData;
+
+    /** The RenderEngine instance used by Minecraft */
+    private TextureManager renderEngine;
+
+    /**
+     * Set to 'this' in Minecraft constructor; used by some settings get methods
+     */
+    private static Minecraft theMinecraft;
+    private final DataFixer dataFixer;
+    public PlayerControllerMP playerController;
+    private boolean fullscreen;
+    private final boolean enableGLErrorChecking = true;
+    private boolean hasCrashed;
+
+    /** Instance of CrashReport. */
+    private CrashReport crashReporter;
+    public int displayWidth;
+    public int displayHeight;
+
+    /** True if the player is connected to a realms server */
+    private boolean connectedToRealms;
+    private final Timer timer = new Timer(20.0F);
+
+    /** Instance of PlayerUsageSnooper. */
+    private final Snooper usageSnooper = new Snooper("client", this, MinecraftServer.getCurrentTimeMillis());
+    public WorldClient world;
+    public RenderGlobal renderGlobal;
+    private RenderManager renderManager;
+    private RenderItem renderItem;
+    private ItemRenderer itemRenderer;
+    public EntityPlayerSP player;
+    @Nullable
+    private Entity renderViewEntity;
+    public Entity pointedEntity;
+    public ParticleManager effectRenderer;
+    private SearchTreeManager field_193995_ae = new SearchTreeManager();
+    private final Session session;
+    private boolean isGamePaused;
+    private float field_193996_ah;
+
+    /** The font renderer used for displaying and measuring text */
+    public FontRenderer fontRendererObj;
+    public FontRenderer standardGalacticFontRenderer;
+    @Nullable
+
+    /** The GuiScreen that's being displayed at the moment. */
+    public GuiScreen currentScreen;
+    public LoadingScreenRenderer loadingScreen;
+    public EntityRenderer entityRenderer;
+    public DebugRenderer debugRenderer;
+
+    /** Mouse left click counter */
+    private int leftClickCounter;
+
+    /** Display width */
+    private final int tempDisplayWidth;
+
+    /** Display height */
+    private final int tempDisplayHeight;
+    @Nullable
+
+    /** Instance of IntegratedServer. */
+    private IntegratedServer theIntegratedServer;
+    public GuiIngame ingameGUI;
+
+    /** Skip render world */
+    public boolean skipRenderWorld;
+
+    /** The ray trace hit that the mouse is over. */
+    public RayTraceResult objectMouseOver;
+
+    /** The game settings that currently hold effect. */
+    public GameSettings gameSettings;
+    public CreativeSettings field_191950_u;
+
+    /** Mouse helper instance. */
+    public MouseHelper mouseHelper;
+    public final File mcDataDir;
+    private final File fileAssets;
+    private final String launchedVersion;
+    private final String versionType;
+    private final Proxy proxy;
+    private ISaveFormat saveLoader;
+
+    /**
+     * This is set to fpsCounter every debug screen update, and is shown on the debug screen. It's also sent as part of
+     * the usage snooping.
+     */
+    private static int debugFPS;
+
+    /**
+     * When you place a block, it's set to 6, decremented once per tick, when it's 0, you can place another block.
+     */
+    private int rightClickDelayTimer;
+    private String serverName;
+    private int serverPort;
+
+    /**
+     * Does the actual gameplay have focus. If so then mouse and keys will effect the player instead of menus.
+     */
+    public boolean inGameHasFocus;
+    long systemTime = getSystemTime();
+
+    /** Join player counter */
+    private int joinPlayerCounter;
+
+    /** The FrameTimer's instance */
+    public final FrameTimer frameTimer = new FrameTimer();
+
+    /** Time in nanoseconds of when the class is loaded */
+    long startNanoTime = System.nanoTime();
+    private final boolean jvm64bit;
+    private final boolean isDemo;
+    @Nullable
+    private NetworkManager myNetworkManager;
+    private boolean integratedServerIsRunning;
+
+    /** The profiler instance */
+    public final Profiler mcProfiler = new Profiler();
+
+    /**
+     * Keeps track of how long the debug crash keycombo (F3+C) has been pressed for, in order to crash after 10 seconds.
+     */
+    private long debugCrashKeyPressTime = -1L;
+    private IReloadableResourceManager mcResourceManager;
+    private final MetadataSerializer metadataSerializer_ = new MetadataSerializer();
+    private final List<IResourcePack> defaultResourcePacks = Lists.<IResourcePack>newArrayList();
+    private final DefaultResourcePack mcDefaultResourcePack;
+    private ResourcePackRepository mcResourcePackRepository;
+    private LanguageManager mcLanguageManager;
+    private BlockColors blockColors;
+    private ItemColors itemColors;
+    private Framebuffer framebufferMc;
+    private TextureMap textureMapBlocks;
+    private SoundHandler mcSoundHandler;
+    private MusicTicker mcMusicTicker;
+    private ResourceLocation mojangLogo;
+    private final MinecraftSessionService sessionService;
+    private SkinManager skinManager;
+    private final Queue < FutureTask<? >> scheduledTasks = Queues. < FutureTask<? >> newArrayDeque();
+    private final Thread mcThread = Thread.currentThread();
+    private ModelManager modelManager;
+
+    /**
+     * The BlockRenderDispatcher instance that will be used based off gamesettings
+     */
+    private BlockRendererDispatcher blockRenderDispatcher;
+    private final GuiToast field_193034_aS;
+
+    /**
+     * Set to true to keep the game loop running. Set to false by shutdown() to allow the game loop to exit cleanly.
+     */
+    volatile boolean running = true;
+
+    /** String that shows the debug information */
+    public String debug = "";
+    public boolean renderChunksMany = true;
+
+    /** Approximate time (in ms) of last update to debug string */
+    private long debugUpdateTime = getSystemTime();
+
+    /** holds the current fps */
+    private int fpsCounter;
+    private boolean actionKeyF3;
+    private final Tutorial field_193035_aW;
+    long prevFrameTime = -1L;
+
+    /** Profiler currently displayed in the debug screen pie chart */
+    private String debugProfilerName = "root";
+
+    public Minecraft(GameConfiguration gameConfig)
+    {
+        theMinecraft = this;
+        this.mcDataDir = gameConfig.folderInfo.mcDataDir;
+        this.fileAssets = gameConfig.folderInfo.assetsDir;
+        this.fileResourcepacks = gameConfig.folderInfo.resourcePacksDir;
+        this.launchedVersion = gameConfig.gameInfo.version;
+        this.versionType = gameConfig.gameInfo.versionType;
+        this.twitchDetails = gameConfig.userInfo.userProperties;
+        this.profileProperties = gameConfig.userInfo.profileProperties;
+        this.mcDefaultResourcePack = new DefaultResourcePack(gameConfig.folderInfo.getAssetsIndex());
+        this.proxy = gameConfig.userInfo.proxy == null ? Proxy.NO_PROXY : gameConfig.userInfo.proxy;
+        this.sessionService = (new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString())).createMinecraftSessionService();
+        this.session = gameConfig.userInfo.session;
+        LOGGER.info("Setting user: {}", (Object)this.session.getUsername());
+        LOGGER.debug("(Session ID is {})", (Object)this.session.getSessionID());
+        this.isDemo = gameConfig.gameInfo.isDemo;
+        this.displayWidth = gameConfig.displayInfo.width > 0 ? gameConfig.displayInfo.width : 1;
+        this.displayHeight = gameConfig.displayInfo.height > 0 ? gameConfig.displayInfo.height : 1;
+        this.tempDisplayWidth = gameConfig.displayInfo.width;
+        this.tempDisplayHeight = gameConfig.displayInfo.height;
+        this.fullscreen = gameConfig.displayInfo.fullscreen;
+        this.jvm64bit = isJvm64bit();
+        this.theIntegratedServer = null;
+
+        if (gameConfig.serverInfo.serverName != null)
+        {
+            this.serverName = gameConfig.serverInfo.serverName;
+            this.serverPort = gameConfig.serverInfo.serverPort;
+        }
+
+        ImageIO.setUseCache(false);
+        Locale.setDefault(Locale.ROOT);
+        Bootstrap.register();
+        TextComponentKeybind.field_193637_b = KeyBinding::func_193626_b;
+        this.dataFixer = DataFixesManager.createFixer();
+        this.field_193034_aS = new GuiToast(this);
+        this.field_193035_aW = new Tutorial(this);
+    }
+
+    public void run()
+    {
+        this.running = true;
+
+        try
+        {
+            this.startGame();
+        }
+        catch (Throwable throwable)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Initializing game");
+            crashreport.makeCategory("Initialization");
+            this.displayCrashReport(this.addGraphicsAndWorldToCrashReport(crashreport));
+            return;
+        }
+
+        while (true)
+        {
+            try
+            {
+                while (this.running)
+                {
+                    if (!this.hasCrashed || this.crashReporter == null)
+                    {
+                        try
+                        {
+                            this.runGameLoop();
                         }
-                     }
-                  }
-               }
-
-               if (!itemstack.func_190926_b() && this.field_71442_b.func_187101_a(this.field_71439_g, this.field_71441_e, enumhand) == EnumActionResult.SUCCESS) {
-                  this.field_71460_t.field_78516_c.func_187460_a(enumhand);
-                  return;
-               }
+                        catch (OutOfMemoryError var10)
+                        {
+                            this.freeMemory();
+                            this.displayGuiScreen(new GuiMemoryErrorScreen());
+                            System.gc();
+                        }
+                    }
+                    else
+                    {
+                        this.displayCrashReport(this.crashReporter);
+                    }
+                }
+            }
+            catch (MinecraftError var12)
+            {
+                break;
+            }
+            catch (ReportedException reportedexception)
+            {
+                this.addGraphicsAndWorldToCrashReport(reportedexception.getCrashReport());
+                this.freeMemory();
+                LOGGER.fatal("Reported exception thrown!", (Throwable)reportedexception);
+                this.displayCrashReport(reportedexception.getCrashReport());
+                break;
+            }
+            catch (Throwable throwable1)
+            {
+                CrashReport crashreport1 = this.addGraphicsAndWorldToCrashReport(new CrashReport("Unexpected error", throwable1));
+                this.freeMemory();
+                LOGGER.fatal("Unreported exception thrown!", throwable1);
+                this.displayCrashReport(crashreport1);
+                break;
+            }
+            finally
+            {
+                this.shutdownMinecraftApplet();
             }
 
-         }
-      }
-   }
+            return;
+        }
+    }
 
-   public void func_71352_k() {
-      try {
-         this.field_71431_Q = !this.field_71431_Q;
-         this.field_71474_y.field_74353_u = this.field_71431_Q;
-         if (this.field_71431_Q) {
-            this.func_110441_Q();
-            this.field_71443_c = Display.getDisplayMode().getWidth();
-            this.field_71440_d = Display.getDisplayMode().getHeight();
-            if (this.field_71443_c <= 0) {
-               this.field_71443_c = 1;
+    /**
+     * Starts the game: initializes the canvas, the title, the settings, etcetera.
+     */
+    private void startGame() throws LWJGLException, IOException
+    {
+        this.gameSettings = new GameSettings(this, this.mcDataDir);
+        this.field_191950_u = new CreativeSettings(this, this.mcDataDir);
+        this.defaultResourcePacks.add(this.mcDefaultResourcePack);
+        this.startTimerHackThread();
+
+        if (this.gameSettings.overrideHeight > 0 && this.gameSettings.overrideWidth > 0)
+        {
+            this.displayWidth = this.gameSettings.overrideWidth;
+            this.displayHeight = this.gameSettings.overrideHeight;
+        }
+
+        LOGGER.info("LWJGL Version: {}", (Object)Sys.getVersion());
+        this.setWindowIcon();
+        this.setInitialDisplayMode();
+        this.createDisplay();
+        OpenGlHelper.initializeTextures();
+        this.framebufferMc = new Framebuffer(this.displayWidth, this.displayHeight, true);
+        this.framebufferMc.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+        this.registerMetadataSerializers();
+        this.mcResourcePackRepository = new ResourcePackRepository(this.fileResourcepacks, new File(this.mcDataDir, "server-resource-packs"), this.mcDefaultResourcePack, this.metadataSerializer_, this.gameSettings);
+        this.mcResourceManager = new SimpleReloadableResourceManager(this.metadataSerializer_);
+        this.mcLanguageManager = new LanguageManager(this.metadataSerializer_, this.gameSettings.language);
+        this.mcResourceManager.registerReloadListener(this.mcLanguageManager);
+        this.refreshResources();
+        this.renderEngine = new TextureManager(this.mcResourceManager);
+        this.mcResourceManager.registerReloadListener(this.renderEngine);
+        this.drawSplashScreen(this.renderEngine);
+        this.skinManager = new SkinManager(this.renderEngine, new File(this.fileAssets, "skins"), this.sessionService);
+        this.saveLoader = new AnvilSaveConverter(new File(this.mcDataDir, "saves"), this.dataFixer);
+        this.mcSoundHandler = new SoundHandler(this.mcResourceManager, this.gameSettings);
+        this.mcResourceManager.registerReloadListener(this.mcSoundHandler);
+        this.mcMusicTicker = new MusicTicker(this);
+        this.fontRendererObj = new FontRenderer(this.gameSettings, new ResourceLocation("textures/font/ascii.png"), this.renderEngine, false);
+
+        if (this.gameSettings.language != null)
+        {
+            this.fontRendererObj.setUnicodeFlag(this.isUnicode());
+            this.fontRendererObj.setBidiFlag(this.mcLanguageManager.isCurrentLanguageBidirectional());
+        }
+
+        this.standardGalacticFontRenderer = new FontRenderer(this.gameSettings, new ResourceLocation("textures/font/ascii_sga.png"), this.renderEngine, false);
+        this.mcResourceManager.registerReloadListener(this.fontRendererObj);
+        this.mcResourceManager.registerReloadListener(this.standardGalacticFontRenderer);
+        this.mcResourceManager.registerReloadListener(new GrassColorReloadListener());
+        this.mcResourceManager.registerReloadListener(new FoliageColorReloadListener());
+        this.mouseHelper = new MouseHelper();
+        this.checkGLError("Pre startup");
+        GlStateManager.enableTexture2D();
+        GlStateManager.shadeModel(7425);
+        GlStateManager.clearDepth(1.0D);
+        GlStateManager.enableDepth();
+        GlStateManager.depthFunc(515);
+        GlStateManager.enableAlpha();
+        GlStateManager.alphaFunc(516, 0.1F);
+        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
+        GlStateManager.matrixMode(5889);
+        GlStateManager.loadIdentity();
+        GlStateManager.matrixMode(5888);
+        this.checkGLError("Startup");
+        this.textureMapBlocks = new TextureMap("textures");
+        this.textureMapBlocks.setMipmapLevels(this.gameSettings.mipmapLevels);
+        this.renderEngine.loadTickableTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, this.textureMapBlocks);
+        this.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        this.textureMapBlocks.setBlurMipmapDirect(false, this.gameSettings.mipmapLevels > 0);
+        this.modelManager = new ModelManager(this.textureMapBlocks);
+        this.mcResourceManager.registerReloadListener(this.modelManager);
+        this.blockColors = BlockColors.init();
+        this.itemColors = ItemColors.init(this.blockColors);
+        this.renderItem = new RenderItem(this.renderEngine, this.modelManager, this.itemColors);
+        this.renderManager = new RenderManager(this.renderEngine, this.renderItem);
+        this.itemRenderer = new ItemRenderer(this);
+        this.mcResourceManager.registerReloadListener(this.renderItem);
+        this.entityRenderer = new EntityRenderer(this, this.mcResourceManager);
+        this.mcResourceManager.registerReloadListener(this.entityRenderer);
+        this.blockRenderDispatcher = new BlockRendererDispatcher(this.modelManager.getBlockModelShapes(), this.blockColors);
+        this.mcResourceManager.registerReloadListener(this.blockRenderDispatcher);
+        this.renderGlobal = new RenderGlobal(this);
+        this.mcResourceManager.registerReloadListener(this.renderGlobal);
+        this.func_193986_ar();
+        this.mcResourceManager.registerReloadListener(this.field_193995_ae);
+        GlStateManager.viewport(0, 0, this.displayWidth, this.displayHeight);
+        this.effectRenderer = new ParticleManager(this.world, this.renderEngine);
+        this.checkGLError("Post startup");
+        this.ingameGUI = new GuiIngame(this);
+
+        if (this.serverName != null)
+        {
+            this.displayGuiScreen(new GuiConnecting(new GuiMainMenu(), this, this.serverName, this.serverPort));
+        }
+        else
+        {
+            this.displayGuiScreen(new GuiMainMenu());
+        }
+
+        this.renderEngine.deleteTexture(this.mojangLogo);
+        this.mojangLogo = null;
+        this.loadingScreen = new LoadingScreenRenderer(this);
+        this.debugRenderer = new DebugRenderer(this);
+
+        if (this.gameSettings.fullScreen && !this.fullscreen)
+        {
+            this.toggleFullscreen();
+        }
+
+        try
+        {
+            Display.setVSyncEnabled(this.gameSettings.enableVsync);
+        }
+        catch (OpenGLException var2)
+        {
+            this.gameSettings.enableVsync = false;
+            this.gameSettings.saveOptions();
+        }
+
+        this.renderGlobal.makeEntityOutlineShader();
+    }
+
+    private void func_193986_ar()
+    {
+        SearchTree<ItemStack> searchtree = new SearchTree<ItemStack>((p_193988_0_) ->
+        {
+            return (List)p_193988_0_.getTooltip((EntityPlayer)null, ITooltipFlag.TooltipFlags.NORMAL).stream().map(TextFormatting::getTextWithoutFormattingCodes).map(String::trim).filter((p_193984_0_) -> {
+                return !p_193984_0_.isEmpty();
+            }).collect(Collectors.toList());
+        }, (p_193985_0_) ->
+        {
+            return Collections.singleton(Item.REGISTRY.getNameForObject(p_193985_0_.getItem()));
+        });
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191196_a();
+
+        for (Item item : Item.REGISTRY)
+        {
+            item.getSubItems(CreativeTabs.SEARCH, nonnulllist);
+        }
+
+        nonnulllist.forEach(searchtree::func_194043_a);
+        SearchTree<RecipeList> searchtree1 = new SearchTree<RecipeList>((p_193990_0_) ->
+        {
+            return (List)p_193990_0_.func_192711_b().stream().flatMap((p_193993_0_) -> {
+                return p_193993_0_.getRecipeOutput().getTooltip((EntityPlayer)null, ITooltipFlag.TooltipFlags.NORMAL).stream();
+            }).map(TextFormatting::getTextWithoutFormattingCodes).map(String::trim).filter((p_193994_0_) -> {
+                return !p_193994_0_.isEmpty();
+            }).collect(Collectors.toList());
+        }, (p_193991_0_) ->
+        {
+            return (List)p_193991_0_.func_192711_b().stream().map((p_193992_0_) -> {
+                return Item.REGISTRY.getNameForObject(p_193992_0_.getRecipeOutput().getItem());
+            }).collect(Collectors.toList());
+        });
+        RecipeBookClient.field_194087_f.forEach(searchtree1::func_194043_a);
+        this.field_193995_ae.func_194009_a(SearchTreeManager.field_194011_a, searchtree);
+        this.field_193995_ae.func_194009_a(SearchTreeManager.field_194012_b, searchtree1);
+    }
+
+    private void registerMetadataSerializers()
+    {
+        this.metadataSerializer_.registerMetadataSectionType(new TextureMetadataSectionSerializer(), TextureMetadataSection.class);
+        this.metadataSerializer_.registerMetadataSectionType(new FontMetadataSectionSerializer(), FontMetadataSection.class);
+        this.metadataSerializer_.registerMetadataSectionType(new AnimationMetadataSectionSerializer(), AnimationMetadataSection.class);
+        this.metadataSerializer_.registerMetadataSectionType(new PackMetadataSectionSerializer(), PackMetadataSection.class);
+        this.metadataSerializer_.registerMetadataSectionType(new LanguageMetadataSectionSerializer(), LanguageMetadataSection.class);
+    }
+
+    private void createDisplay() throws LWJGLException
+    {
+        Display.setResizable(true);
+        Display.setTitle("Minecraft 1.12.2");
+
+        try
+        {
+            Display.create((new PixelFormat()).withDepthBits(24));
+        }
+        catch (LWJGLException lwjglexception)
+        {
+            LOGGER.error("Couldn't set pixel format", (Throwable)lwjglexception);
+
+            try
+            {
+                Thread.sleep(1000L);
+            }
+            catch (InterruptedException var3)
+            {
+                ;
             }
 
-            if (this.field_71440_d <= 0) {
-               this.field_71440_d = 1;
-            }
-         } else {
-            Display.setDisplayMode(new DisplayMode(this.field_71436_X, this.field_71435_Y));
-            this.field_71443_c = this.field_71436_X;
-            this.field_71440_d = this.field_71435_Y;
-            if (this.field_71443_c <= 0) {
-               this.field_71443_c = 1;
+            if (this.fullscreen)
+            {
+                this.updateDisplayMode();
             }
 
-            if (this.field_71440_d <= 0) {
-               this.field_71440_d = 1;
+            Display.create();
+        }
+    }
+
+    private void setInitialDisplayMode() throws LWJGLException
+    {
+        if (this.fullscreen)
+        {
+            Display.setFullscreen(true);
+            DisplayMode displaymode = Display.getDisplayMode();
+            this.displayWidth = Math.max(1, displaymode.getWidth());
+            this.displayHeight = Math.max(1, displaymode.getHeight());
+        }
+        else
+        {
+            Display.setDisplayMode(new DisplayMode(this.displayWidth, this.displayHeight));
+        }
+    }
+
+    private void setWindowIcon()
+    {
+        Util.EnumOS util$enumos = Util.getOSType();
+
+        if (util$enumos != Util.EnumOS.OSX)
+        {
+            InputStream inputstream = null;
+            InputStream inputstream1 = null;
+
+            try
+            {
+                inputstream = this.mcDefaultResourcePack.getInputStreamAssets(new ResourceLocation("icons/icon_16x16.png"));
+                inputstream1 = this.mcDefaultResourcePack.getInputStreamAssets(new ResourceLocation("icons/icon_32x32.png"));
+
+                if (inputstream != null && inputstream1 != null)
+                {
+                    Display.setIcon(new ByteBuffer[] {this.readImageToBuffer(inputstream), this.readImageToBuffer(inputstream1)});
+                }
             }
-         }
-
-         if (this.field_71462_r != null) {
-            this.func_71370_a(this.field_71443_c, this.field_71440_d);
-         } else {
-            this.func_147119_ah();
-         }
-
-         Display.setFullscreen(this.field_71431_Q);
-         Display.setVSyncEnabled(this.field_71474_y.field_74352_v);
-         this.func_175601_h();
-      } catch (Exception exception) {
-         field_147123_G.error("Couldn't toggle fullscreen", (Throwable)exception);
-      }
-
-   }
-
-   private void func_71370_a(int p_71370_1_, int p_71370_2_) {
-      this.field_71443_c = Math.max(1, p_71370_1_);
-      this.field_71440_d = Math.max(1, p_71370_2_);
-      if (this.field_71462_r != null) {
-         ScaledResolution scaledresolution = new ScaledResolution(this);
-         this.field_71462_r.func_175273_b(this, scaledresolution.func_78326_a(), scaledresolution.func_78328_b());
-      }
-
-      this.field_71461_s = new LoadingScreenRenderer(this);
-      this.func_147119_ah();
-   }
-
-   private void func_147119_ah() {
-      this.field_147124_at.func_147613_a(this.field_71443_c, this.field_71440_d);
-      if (this.field_71460_t != null) {
-         this.field_71460_t.func_147704_a(this.field_71443_c, this.field_71440_d);
-      }
-
-   }
-
-   public MusicTicker func_181535_r() {
-      return this.field_147126_aw;
-   }
-
-   public void func_71407_l() throws IOException {
-      if (this.field_71467_ac > 0) {
-         --this.field_71467_ac;
-      }
-
-      this.field_71424_I.func_76320_a("gui");
-      if (!this.field_71445_n) {
-         this.field_71456_v.func_73831_a();
-      }
-
-      this.field_71424_I.func_76319_b();
-      this.field_71460_t.func_78473_a(1.0F);
-      this.field_193035_aW.func_193297_a(this.field_71441_e, this.field_71476_x);
-      this.field_71424_I.func_76320_a("gameMode");
-      if (!this.field_71445_n && this.field_71441_e != null) {
-         this.field_71442_b.func_78765_e();
-      }
-
-      this.field_71424_I.func_76318_c("textures");
-      if (this.field_71441_e != null) {
-         this.field_71446_o.func_110550_d();
-      }
-
-      if (this.field_71462_r == null && this.field_71439_g != null) {
-         if (this.field_71439_g.func_110143_aJ() <= 0.0F && !(this.field_71462_r instanceof GuiGameOver)) {
-            this.func_147108_a((GuiScreen)null);
-         } else if (this.field_71439_g.func_70608_bn() && this.field_71441_e != null) {
-            this.func_147108_a(new GuiSleepMP());
-         }
-      } else if (this.field_71462_r != null && this.field_71462_r instanceof GuiSleepMP && !this.field_71439_g.func_70608_bn()) {
-         this.func_147108_a((GuiScreen)null);
-      }
-
-      if (this.field_71462_r != null) {
-         this.field_71429_W = 10000;
-      }
-
-      if (this.field_71462_r != null) {
-         try {
-            this.field_71462_r.func_146269_k();
-         } catch (Throwable throwable1) {
-            CrashReport crashreport = CrashReport.func_85055_a(throwable1, "Updating screen events");
-            CrashReportCategory crashreportcategory = crashreport.func_85058_a("Affected screen");
-            crashreportcategory.func_189529_a("Screen name", new ICrashReportDetail<String>() {
-               public String call() throws Exception {
-                  return Minecraft.this.field_71462_r.getClass().getCanonicalName();
-               }
-            });
-            throw new ReportedException(crashreport);
-         }
-
-         if (this.field_71462_r != null) {
-            try {
-               this.field_71462_r.func_73876_c();
-            } catch (Throwable throwable) {
-               CrashReport crashreport1 = CrashReport.func_85055_a(throwable, "Ticking screen");
-               CrashReportCategory crashreportcategory1 = crashreport1.func_85058_a("Affected screen");
-               crashreportcategory1.func_189529_a("Screen name", new ICrashReportDetail<String>() {
-                  public String call() throws Exception {
-                     return Minecraft.this.field_71462_r.getClass().getCanonicalName();
-                  }
-               });
-               throw new ReportedException(crashreport1);
+            catch (IOException ioexception)
+            {
+                LOGGER.error("Couldn't set icon", (Throwable)ioexception);
             }
-         }
-      }
-
-      if (this.field_71462_r == null || this.field_71462_r.field_146291_p) {
-         this.field_71424_I.func_76318_c("mouse");
-         this.func_184124_aB();
-         if (this.field_71429_W > 0) {
-            --this.field_71429_W;
-         }
-
-         this.field_71424_I.func_76318_c("keyboard");
-         this.func_184118_az();
-      }
-
-      if (this.field_71441_e != null) {
-         if (this.field_71439_g != null) {
-            ++this.field_71457_ai;
-            if (this.field_71457_ai == 30) {
-               this.field_71457_ai = 0;
-               this.field_71441_e.func_72897_h(this.field_71439_g);
+            finally
+            {
+                IOUtils.closeQuietly(inputstream);
+                IOUtils.closeQuietly(inputstream1);
             }
-         }
+        }
+    }
 
-         this.field_71424_I.func_76318_c("gameRenderer");
-         if (!this.field_71445_n) {
-            this.field_71460_t.func_78464_a();
-         }
+    private static boolean isJvm64bit()
+    {
+        String[] astring = new String[] {"sun.arch.data.model", "com.ibm.vm.bitmode", "os.arch"};
 
-         this.field_71424_I.func_76318_c("levelRenderer");
-         if (!this.field_71445_n) {
-            this.field_71438_f.func_72734_e();
-         }
+        for (String s : astring)
+        {
+            String s1 = System.getProperty(s);
 
-         this.field_71424_I.func_76318_c("level");
-         if (!this.field_71445_n) {
-            if (this.field_71441_e.func_175658_ac() > 0) {
-               this.field_71441_e.func_175702_c(this.field_71441_e.func_175658_ac() - 1);
+            if (s1 != null && s1.contains("64"))
+            {
+                return true;
             }
+        }
 
-            this.field_71441_e.func_72939_s();
-         }
-      } else if (this.field_71460_t.func_147702_a()) {
-         this.field_71460_t.func_181022_b();
-      }
+        return false;
+    }
 
-      if (!this.field_71445_n) {
-         this.field_147126_aw.func_73660_a();
-         this.field_147127_av.func_73660_a();
-      }
+    public Framebuffer getFramebuffer()
+    {
+        return this.framebufferMc;
+    }
 
-      if (this.field_71441_e != null) {
-         if (!this.field_71445_n) {
-            this.field_71441_e.func_72891_a(this.field_71441_e.func_175659_aa() != EnumDifficulty.PEACEFUL, true);
-            this.field_193035_aW.func_193303_d();
+    public String getVersion()
+    {
+        return this.launchedVersion;
+    }
 
-            try {
-               this.field_71441_e.func_72835_b();
-            } catch (Throwable throwable2) {
-               CrashReport crashreport2 = CrashReport.func_85055_a(throwable2, "Exception in world tick");
-               if (this.field_71441_e == null) {
-                  CrashReportCategory crashreportcategory2 = crashreport2.func_85058_a("Affected level");
-                  crashreportcategory2.func_71507_a("Problem", "Level is null!");
-               } else {
-                  this.field_71441_e.func_72914_a(crashreport2);
-               }
+    public String getVersionType()
+    {
+        return this.versionType;
+    }
 
-               throw new ReportedException(crashreport2);
+    private void startTimerHackThread()
+    {
+        Thread thread = new Thread("Timer hack thread")
+        {
+            public void run()
+            {
+                while (Minecraft.this.running)
+                {
+                    try
+                    {
+                        Thread.sleep(2147483647L);
+                    }
+                    catch (InterruptedException var2)
+                    {
+                        ;
+                    }
+                }
             }
-         }
+        };
+        thread.setDaemon(true);
+        thread.start();
+    }
 
-         this.field_71424_I.func_76318_c("animateTick");
-         if (!this.field_71445_n && this.field_71441_e != null) {
-            this.field_71441_e.func_73029_E(MathHelper.func_76128_c(this.field_71439_g.field_70165_t), MathHelper.func_76128_c(this.field_71439_g.field_70163_u), MathHelper.func_76128_c(this.field_71439_g.field_70161_v));
-         }
+    public void crashed(CrashReport crash)
+    {
+        this.hasCrashed = true;
+        this.crashReporter = crash;
+    }
 
-         this.field_71424_I.func_76318_c("particles");
-         if (!this.field_71445_n) {
-            this.field_71452_i.func_78868_a();
-         }
-      } else if (this.field_71453_ak != null) {
-         this.field_71424_I.func_76318_c("pendingConnection");
-         this.field_71453_ak.func_74428_b();
-      }
+    /**
+     * Wrapper around displayCrashReportInternal
+     */
+    public void displayCrashReport(CrashReport crashReportIn)
+    {
+        File file1 = new File(getMinecraft().mcDataDir, "crash-reports");
+        File file2 = new File(file1, "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-client.txt");
+        Bootstrap.printToSYSOUT(crashReportIn.getCompleteReport());
 
-      this.field_71424_I.func_76319_b();
-      this.field_71423_H = func_71386_F();
-   }
+        if (crashReportIn.getFile() != null)
+        {
+            Bootstrap.printToSYSOUT("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReportIn.getFile());
+            System.exit(-1);
+        }
+        else if (crashReportIn.saveToFile(file2))
+        {
+            Bootstrap.printToSYSOUT("#@!@# Game crashed! Crash report saved to: #@!@# " + file2.getAbsolutePath());
+            System.exit(-1);
+        }
+        else
+        {
+            Bootstrap.printToSYSOUT("#@?@# Game crashed! Crash report could not be saved. #@?@#");
+            System.exit(-2);
+        }
+    }
 
-   private void func_184118_az() throws IOException {
-      while(Keyboard.next()) {
-         int i = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
-         if (this.field_83002_am > 0L) {
-            if (func_71386_F() - this.field_83002_am >= 6000L) {
-               throw new ReportedException(new CrashReport("Manually triggered debug crash", new Throwable()));
+    public boolean isUnicode()
+    {
+        return this.mcLanguageManager.isCurrentLocaleUnicode() || this.gameSettings.forceUnicodeFont;
+    }
+
+    public void refreshResources()
+    {
+        List<IResourcePack> list = Lists.newArrayList(this.defaultResourcePacks);
+
+        if (this.theIntegratedServer != null)
+        {
+            this.theIntegratedServer.func_193031_aM();
+        }
+
+        for (ResourcePackRepository.Entry resourcepackrepository$entry : this.mcResourcePackRepository.getRepositoryEntries())
+        {
+            list.add(resourcepackrepository$entry.getResourcePack());
+        }
+
+        if (this.mcResourcePackRepository.getResourcePackInstance() != null)
+        {
+            list.add(this.mcResourcePackRepository.getResourcePackInstance());
+        }
+
+        try
+        {
+            this.mcResourceManager.reloadResources(list);
+        }
+        catch (RuntimeException runtimeexception)
+        {
+            LOGGER.info("Caught error stitching, removing all assigned resourcepacks", (Throwable)runtimeexception);
+            list.clear();
+            list.addAll(this.defaultResourcePacks);
+            this.mcResourcePackRepository.setRepositories(Collections.emptyList());
+            this.mcResourceManager.reloadResources(list);
+            this.gameSettings.resourcePacks.clear();
+            this.gameSettings.incompatibleResourcePacks.clear();
+            this.gameSettings.saveOptions();
+        }
+
+        this.mcLanguageManager.parseLanguageMetadata(list);
+
+        if (this.renderGlobal != null)
+        {
+            this.renderGlobal.loadRenderers();
+        }
+    }
+
+    private ByteBuffer readImageToBuffer(InputStream imageStream) throws IOException
+    {
+        BufferedImage bufferedimage = ImageIO.read(imageStream);
+        int[] aint = bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), (int[])null, 0, bufferedimage.getWidth());
+        ByteBuffer bytebuffer = ByteBuffer.allocate(4 * aint.length);
+
+        for (int i : aint)
+        {
+            bytebuffer.putInt(i << 8 | i >> 24 & 255);
+        }
+
+        bytebuffer.flip();
+        return bytebuffer;
+    }
+
+    private void updateDisplayMode() throws LWJGLException
+    {
+        Set<DisplayMode> set = Sets.<DisplayMode>newHashSet();
+        Collections.addAll(set, Display.getAvailableDisplayModes());
+        DisplayMode displaymode = Display.getDesktopDisplayMode();
+
+        if (!set.contains(displaymode) && Util.getOSType() == Util.EnumOS.OSX)
+        {
+            label52:
+
+            for (DisplayMode displaymode1 : MAC_DISPLAY_MODES)
+            {
+                boolean flag = true;
+
+                for (DisplayMode displaymode2 : set)
+                {
+                    if (displaymode2.getBitsPerPixel() == 32 && displaymode2.getWidth() == displaymode1.getWidth() && displaymode2.getHeight() == displaymode1.getHeight())
+                    {
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if (!flag)
+                {
+                    Iterator iterator = set.iterator();
+                    DisplayMode displaymode3;
+
+                    while (true)
+                    {
+                        if (!iterator.hasNext())
+                        {
+                            continue label52;
+                        }
+
+                        displaymode3 = (DisplayMode)iterator.next();
+
+                        if (displaymode3.getBitsPerPixel() == 32 && displaymode3.getWidth() == displaymode1.getWidth() / 2 && displaymode3.getHeight() == displaymode1.getHeight() / 2)
+                        {
+                            break;
+                        }
+                    }
+
+                    displaymode = displaymode3;
+                }
             }
+        }
 
-            if (!Keyboard.isKeyDown(46) || !Keyboard.isKeyDown(61)) {
-               this.field_83002_am = -1L;
-            }
-         } else if (Keyboard.isKeyDown(46) && Keyboard.isKeyDown(61)) {
-            this.field_184129_aV = true;
-            this.field_83002_am = func_71386_F();
-         }
+        Display.setDisplayMode(displaymode);
+        this.displayWidth = displaymode.getWidth();
+        this.displayHeight = displaymode.getHeight();
+    }
 
-         this.func_152348_aa();
-         if (this.field_71462_r != null) {
-            this.field_71462_r.func_146282_l();
-         }
+    private void drawSplashScreen(TextureManager textureManagerInstance) throws LWJGLException
+    {
+        ScaledResolution scaledresolution = new ScaledResolution(this);
+        int i = scaledresolution.getScaleFactor();
+        Framebuffer framebuffer = new Framebuffer(scaledresolution.getScaledWidth() * i, scaledresolution.getScaledHeight() * i, true);
+        framebuffer.bindFramebuffer(false);
+        GlStateManager.matrixMode(5889);
+        GlStateManager.loadIdentity();
+        GlStateManager.ortho(0.0D, (double)scaledresolution.getScaledWidth(), (double)scaledresolution.getScaledHeight(), 0.0D, 1000.0D, 3000.0D);
+        GlStateManager.matrixMode(5888);
+        GlStateManager.loadIdentity();
+        GlStateManager.translate(0.0F, 0.0F, -2000.0F);
+        GlStateManager.disableLighting();
+        GlStateManager.disableFog();
+        GlStateManager.disableDepth();
+        GlStateManager.enableTexture2D();
+        InputStream inputstream = null;
 
-         boolean flag = Keyboard.getEventKeyState();
-         if (flag) {
-            if (i == 62 && this.field_71460_t != null) {
-               this.field_71460_t.func_175071_c();
-            }
+        try
+        {
+            inputstream = this.mcDefaultResourcePack.getInputStream(LOCATION_MOJANG_PNG);
+            this.mojangLogo = textureManagerInstance.getDynamicTextureLocation("logo", new DynamicTexture(ImageIO.read(inputstream)));
+            textureManagerInstance.bindTexture(this.mojangLogo);
+        }
+        catch (IOException ioexception)
+        {
+            LOGGER.error("Unable to load logo: {}", LOCATION_MOJANG_PNG, ioexception);
+        }
+        finally
+        {
+            IOUtils.closeQuietly(inputstream);
+        }
 
-            boolean flag1 = false;
-            if (this.field_71462_r == null) {
-               if (i == 1) {
-                  this.func_71385_j();
-               }
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos(0.0D, (double)this.displayHeight, 0.0D).tex(0.0D, 0.0D).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.pos((double)this.displayWidth, (double)this.displayHeight, 0.0D).tex(0.0D, 0.0D).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.pos((double)this.displayWidth, 0.0D, 0.0D).tex(0.0D, 0.0D).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.pos(0.0D, 0.0D, 0.0D).tex(0.0D, 0.0D).color(255, 255, 255, 255).endVertex();
+        tessellator.draw();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        int j = 256;
+        int k = 256;
+        this.draw((scaledresolution.getScaledWidth() - 256) / 2, (scaledresolution.getScaledHeight() - 256) / 2, 0, 0, 256, 256, 255, 255, 255, 255);
+        GlStateManager.disableLighting();
+        GlStateManager.disableFog();
+        framebuffer.unbindFramebuffer();
+        framebuffer.framebufferRender(scaledresolution.getScaledWidth() * i, scaledresolution.getScaledHeight() * i);
+        GlStateManager.enableAlpha();
+        GlStateManager.alphaFunc(516, 0.1F);
+        this.updateDisplay();
+    }
 
-               flag1 = Keyboard.isKeyDown(61) && this.func_184122_c(i);
-               this.field_184129_aV |= flag1;
-               if (i == 59) {
-                  this.field_71474_y.field_74319_N = !this.field_71474_y.field_74319_N;
-               }
-            }
+    /**
+     * Draw with the WorldRenderer
+     */
+    public void draw(int posX, int posY, int texU, int texV, int width, int height, int red, int green, int blue, int alpha)
+    {
+        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        float f = 0.00390625F;
+        float f1 = 0.00390625F;
+        bufferbuilder.pos((double)posX, (double)(posY + height), 0.0D).tex((double)((float)texU * 0.00390625F), (double)((float)(texV + height) * 0.00390625F)).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos((double)(posX + width), (double)(posY + height), 0.0D).tex((double)((float)(texU + width) * 0.00390625F), (double)((float)(texV + height) * 0.00390625F)).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos((double)(posX + width), (double)posY, 0.0D).tex((double)((float)(texU + width) * 0.00390625F), (double)((float)texV * 0.00390625F)).color(red, green, blue, alpha).endVertex();
+        bufferbuilder.pos((double)posX, (double)posY, 0.0D).tex((double)((float)texU * 0.00390625F), (double)((float)texV * 0.00390625F)).color(red, green, blue, alpha).endVertex();
+        Tessellator.getInstance().draw();
+    }
 
-            if (flag1) {
-               KeyBinding.func_74510_a(i, false);
-            } else {
-               KeyBinding.func_74510_a(i, true);
-               KeyBinding.func_74507_a(i);
-            }
+    /**
+     * Returns the save loader that is currently being used
+     */
+    public ISaveFormat getSaveLoader()
+    {
+        return this.saveLoader;
+    }
 
-            if (this.field_71474_y.field_74329_Q) {
-               if (i == 11) {
-                  this.func_71383_b(0);
-               }
+    /**
+     * Sets the argument GuiScreen as the main (topmost visible) screen.
+     */
+    public void displayGuiScreen(@Nullable GuiScreen guiScreenIn)
+    {
+        if (this.currentScreen != null)
+        {
+            this.currentScreen.onGuiClosed();
+        }
 
-               for(int j = 0; j < 9; ++j) {
-                  if (i == 2 + j) {
-                     this.func_71383_b(j + 1);
-                  }
-               }
-            }
-         } else {
-            KeyBinding.func_74510_a(i, false);
-            if (i == 61) {
-               if (this.field_184129_aV) {
-                  this.field_184129_aV = false;
-               } else {
-                  this.field_71474_y.field_74330_P = !this.field_71474_y.field_74330_P;
-                  this.field_71474_y.field_74329_Q = this.field_71474_y.field_74330_P && GuiScreen.func_146272_n();
-                  this.field_71474_y.field_181657_aC = this.field_71474_y.field_74330_P && GuiScreen.func_175283_s();
-               }
-            }
-         }
-      }
+        if (guiScreenIn == null && this.world == null)
+        {
+            guiScreenIn = new GuiMainMenu();
+        }
+        else if (guiScreenIn == null && this.player.getHealth() <= 0.0F)
+        {
+            guiScreenIn = new GuiGameOver((ITextComponent)null);
+        }
 
-      this.func_184117_aA();
-   }
+        if (guiScreenIn instanceof GuiMainMenu || guiScreenIn instanceof GuiMultiplayer)
+        {
+            this.gameSettings.showDebugInfo = false;
+            this.ingameGUI.getChatGUI().clearChatMessages(true);
+        }
 
-   private boolean func_184122_c(int p_184122_1_) {
-      if (p_184122_1_ == 30) {
-         this.field_71438_f.func_72712_a();
-         this.func_190521_a("debug.reload_chunks.message");
-         return true;
-      } else if (p_184122_1_ == 48) {
-         boolean flag1 = !this.field_175616_W.func_178634_b();
-         this.field_175616_W.func_178629_b(flag1);
-         this.func_190521_a(flag1 ? "debug.show_hitboxes.on" : "debug.show_hitboxes.off");
-         return true;
-      } else if (p_184122_1_ == 32) {
-         if (this.field_71456_v != null) {
-            this.field_71456_v.func_146158_b().func_146231_a(false);
-         }
+        this.currentScreen = guiScreenIn;
 
-         return true;
-      } else if (p_184122_1_ == 33) {
-         this.field_71474_y.func_74306_a(GameSettings.Options.RENDER_DISTANCE, GuiScreen.func_146272_n() ? -1 : 1);
-         this.func_190521_a("debug.cycle_renderdistance.message", this.field_71474_y.field_151451_c);
-         return true;
-      } else if (p_184122_1_ == 34) {
-         boolean flag = this.field_184132_p.func_190075_b();
-         this.func_190521_a(flag ? "debug.chunk_boundaries.on" : "debug.chunk_boundaries.off");
-         return true;
-      } else if (p_184122_1_ == 35) {
-         this.field_71474_y.field_82882_x = !this.field_71474_y.field_82882_x;
-         this.func_190521_a(this.field_71474_y.field_82882_x ? "debug.advanced_tooltips.on" : "debug.advanced_tooltips.off");
-         this.field_71474_y.func_74303_b();
-         return true;
-      } else if (p_184122_1_ == 49) {
-         if (!this.field_71439_g.func_70003_b(2, "")) {
-            this.func_190521_a("debug.creative_spectator.error");
-         } else if (this.field_71439_g.func_184812_l_()) {
-            this.field_71439_g.func_71165_d("/gamemode spectator");
-         } else if (this.field_71439_g.func_175149_v()) {
-            this.field_71439_g.func_71165_d("/gamemode creative");
-         }
+        if (guiScreenIn != null)
+        {
+            this.setIngameNotInFocus();
+            KeyBinding.unPressAllKeys();
 
-         return true;
-      } else if (p_184122_1_ == 25) {
-         this.field_71474_y.field_82881_y = !this.field_71474_y.field_82881_y;
-         this.field_71474_y.func_74303_b();
-         this.func_190521_a(this.field_71474_y.field_82881_y ? "debug.pause_focus.on" : "debug.pause_focus.off");
-         return true;
-      } else if (p_184122_1_ == 16) {
-         this.func_190521_a("debug.help.message");
-         GuiNewChat guinewchat = this.field_71456_v.func_146158_b();
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.reload_chunks.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.show_hitboxes.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.clear_chat.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.cycle_renderdistance.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.chunk_boundaries.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.advanced_tooltips.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.creative_spectator.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.pause_focus.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.help.help", new Object[0]));
-         guinewchat.func_146227_a(new TextComponentTranslation("debug.reload_resourcepacks.help", new Object[0]));
-         return true;
-      } else if (p_184122_1_ == 20) {
-         this.func_190521_a("debug.reload_resourcepacks.message");
-         this.func_110436_a();
-         return true;
-      } else {
-         return false;
-      }
-   }
-
-   private void func_184117_aA() {
-      for(; this.field_71474_y.field_151457_aa.func_151468_f(); this.field_71438_f.func_174979_m()) {
-         ++this.field_71474_y.field_74320_O;
-         if (this.field_71474_y.field_74320_O > 2) {
-            this.field_71474_y.field_74320_O = 0;
-         }
-
-         if (this.field_71474_y.field_74320_O == 0) {
-            this.field_71460_t.func_175066_a(this.func_175606_aa());
-         } else if (this.field_71474_y.field_74320_O == 1) {
-            this.field_71460_t.func_175066_a((Entity)null);
-         }
-      }
-
-      while(this.field_71474_y.field_151458_ab.func_151468_f()) {
-         this.field_71474_y.field_74326_T = !this.field_71474_y.field_74326_T;
-      }
-
-      for(int i = 0; i < 9; ++i) {
-         boolean flag = this.field_71474_y.field_193629_ap.func_151470_d();
-         boolean flag1 = this.field_71474_y.field_193630_aq.func_151470_d();
-         if (this.field_71474_y.field_151456_ac[i].func_151468_f()) {
-            if (this.field_71439_g.func_175149_v()) {
-               this.field_71456_v.func_175187_g().func_175260_a(i);
-            } else if (!this.field_71439_g.func_184812_l_() || this.field_71462_r != null || !flag1 && !flag) {
-               this.field_71439_g.field_71071_by.field_70461_c = i;
-            } else {
-               GuiContainerCreative.func_192044_a(this, i, flag1, flag);
-            }
-         }
-      }
-
-      while(this.field_71474_y.field_151445_Q.func_151468_f()) {
-         if (this.field_71442_b.func_110738_j()) {
-            this.field_71439_g.func_175163_u();
-         } else {
-            this.field_193035_aW.func_193296_a();
-            this.func_147108_a(new GuiInventory(this.field_71439_g));
-         }
-      }
-
-      while(this.field_71474_y.field_194146_ao.func_151468_f()) {
-         this.func_147108_a(new GuiScreenAdvancements(this.field_71439_g.field_71174_a.func_191982_f()));
-      }
-
-      while(this.field_71474_y.field_186718_X.func_151468_f()) {
-         if (!this.field_71439_g.func_175149_v()) {
-            this.func_147114_u().func_147297_a(new CPacketPlayerDigging(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, BlockPos.field_177992_a, EnumFacing.DOWN));
-         }
-      }
-
-      while(this.field_71474_y.field_74316_C.func_151468_f()) {
-         if (!this.field_71439_g.func_175149_v()) {
-            this.field_71439_g.func_71040_bB(GuiScreen.func_146271_m());
-         }
-      }
-
-      boolean flag2 = this.field_71474_y.field_74343_n != EntityPlayer.EnumChatVisibility.HIDDEN;
-      if (flag2) {
-         while(this.field_71474_y.field_74310_D.func_151468_f()) {
-            this.func_147108_a(new GuiChat());
-         }
-
-         if (this.field_71462_r == null && this.field_71474_y.field_74323_J.func_151468_f()) {
-            this.func_147108_a(new GuiChat("/"));
-         }
-      }
-
-      if (this.field_71439_g.func_184587_cr()) {
-         if (!this.field_71474_y.field_74313_G.func_151470_d()) {
-            this.field_71442_b.func_78766_c(this.field_71439_g);
-         }
-
-         label109:
-         while(true) {
-            if (!this.field_71474_y.field_74312_F.func_151468_f()) {
-               while(this.field_71474_y.field_74313_G.func_151468_f()) {
-                  ;
-               }
-
-               while(true) {
-                  if (this.field_71474_y.field_74322_I.func_151468_f()) {
-                     continue;
-                  }
-                  break label109;
-               }
-            }
-         }
-      } else {
-         while(this.field_71474_y.field_74312_F.func_151468_f()) {
-            this.func_147116_af();
-         }
-
-         while(this.field_71474_y.field_74313_G.func_151468_f()) {
-            this.func_147121_ag();
-         }
-
-         while(this.field_71474_y.field_74322_I.func_151468_f()) {
-            this.func_147112_ai();
-         }
-      }
-
-      if (this.field_71474_y.field_74313_G.func_151470_d() && this.field_71467_ac == 0 && !this.field_71439_g.func_184587_cr()) {
-         this.func_147121_ag();
-      }
-
-      this.func_147115_a(this.field_71462_r == null && this.field_71474_y.field_74312_F.func_151470_d() && this.field_71415_G);
-   }
-
-   private void func_184124_aB() throws IOException {
-      while(Mouse.next()) {
-         int i = Mouse.getEventButton();
-         KeyBinding.func_74510_a(i - 100, Mouse.getEventButtonState());
-         if (Mouse.getEventButtonState()) {
-            if (this.field_71439_g.func_175149_v() && i == 2) {
-               this.field_71456_v.func_175187_g().func_175261_b();
-            } else {
-               KeyBinding.func_74507_a(i - 100);
-            }
-         }
-
-         long j = func_71386_F() - this.field_71423_H;
-         if (j <= 200L) {
-            int k = Mouse.getEventDWheel();
-            if (k != 0) {
-               if (this.field_71439_g.func_175149_v()) {
-                  k = k < 0 ? -1 : 1;
-                  if (this.field_71456_v.func_175187_g().func_175262_a()) {
-                     this.field_71456_v.func_175187_g().func_175259_b(-k);
-                  } else {
-                     float f = MathHelper.func_76131_a(this.field_71439_g.field_71075_bZ.func_75093_a() + (float)k * 0.005F, 0.0F, 0.2F);
-                     this.field_71439_g.field_71075_bZ.func_75092_a(f);
-                  }
-               } else {
-                  this.field_71439_g.field_71071_by.func_70453_c(k);
-               }
+            while (Mouse.next())
+            {
+                ;
             }
 
-            if (this.field_71462_r == null) {
-               if (!this.field_71415_G && Mouse.getEventButtonState()) {
-                  this.func_71381_h();
-               }
-            } else if (this.field_71462_r != null) {
-               this.field_71462_r.func_146274_d();
+            while (Keyboard.next())
+            {
+                ;
             }
-         }
-      }
 
-   }
+            ScaledResolution scaledresolution = new ScaledResolution(this);
+            int i = scaledresolution.getScaledWidth();
+            int j = scaledresolution.getScaledHeight();
+            guiScreenIn.setWorldAndResolution(this, i, j);
+            this.skipRenderWorld = false;
+        }
+        else
+        {
+            this.mcSoundHandler.resumeSounds();
+            this.setIngameFocus();
+        }
+    }
 
-   private void func_190521_a(String p_190521_1_, Object... p_190521_2_) {
-      this.field_71456_v.func_146158_b().func_146227_a((new TextComponentString("")).func_150257_a((new TextComponentTranslation("debug.prefix", new Object[0])).func_150255_a((new Style()).func_150238_a(TextFormatting.YELLOW).func_150227_a(Boolean.valueOf(true)))).func_150258_a(" ").func_150257_a(new TextComponentTranslation(p_190521_1_, p_190521_2_)));
-   }
+    /**
+     * Checks for an OpenGL error. If there is one, prints the error ID and error string.
+     */
+    private void checkGLError(String message)
+    {
+        int i = GlStateManager.glGetError();
 
-   public void func_71371_a(String p_71371_1_, String p_71371_2_, @Nullable WorldSettings p_71371_3_) {
-      this.func_71403_a((WorldClient)null);
-      System.gc();
-      ISaveHandler isavehandler = this.field_71469_aa.func_75804_a(p_71371_1_, false);
-      WorldInfo worldinfo = isavehandler.func_75757_d();
-      if (worldinfo == null && p_71371_3_ != null) {
-         worldinfo = new WorldInfo(p_71371_3_, p_71371_1_);
-         isavehandler.func_75761_a(worldinfo);
-      }
+        if (i != 0)
+        {
+            String s = GLU.gluErrorString(i);
+            LOGGER.error("########## GL ERROR ##########");
+            LOGGER.error("@ {}", (Object)message);
+            LOGGER.error("{}: {}", Integer.valueOf(i), s);
+        }
+    }
 
-      if (p_71371_3_ == null) {
-         p_71371_3_ = new WorldSettings(worldinfo);
-      }
+    /**
+     * Shuts down the minecraft applet by stopping the resource downloads, and clearing up GL stuff; called when the
+     * application (or web page) is exited.
+     */
+    public void shutdownMinecraftApplet()
+    {
+        try
+        {
+            LOGGER.info("Stopping!");
 
-      try {
-         YggdrasilAuthenticationService yggdrasilauthenticationservice = new YggdrasilAuthenticationService(this.field_110453_aa, UUID.randomUUID().toString());
-         MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
-         GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
-         PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(this.field_71412_D, MinecraftServer.field_152367_a.getName()));
-         TileEntitySkull.func_184293_a(playerprofilecache);
-         TileEntitySkull.func_184294_a(minecraftsessionservice);
-         PlayerProfileCache.func_187320_a(false);
-         this.field_71437_Z = new IntegratedServer(this, p_71371_1_, p_71371_2_, p_71371_3_, yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, playerprofilecache);
-         this.field_71437_Z.func_71256_s();
-         this.field_71455_al = true;
-      } catch (Throwable throwable) {
-         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Starting integrated server");
-         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Starting integrated server");
-         crashreportcategory.func_71507_a("Level ID", p_71371_1_);
-         crashreportcategory.func_71507_a("Level Name", p_71371_2_);
-         throw new ReportedException(crashreport);
-      }
+            try
+            {
+                this.loadWorld((WorldClient)null);
+            }
+            catch (Throwable var5)
+            {
+                ;
+            }
 
-      this.field_71461_s.func_73720_a(I18n.func_135052_a("menu.loadingLevel"));
+            this.mcSoundHandler.unloadSounds();
+        }
+        finally
+        {
+            Display.destroy();
 
-      while(!this.field_71437_Z.func_71200_ad()) {
-         String s = this.field_71437_Z.func_71195_b_();
-         if (s != null) {
-            this.field_71461_s.func_73719_c(I18n.func_135052_a(s));
-         } else {
-            this.field_71461_s.func_73719_c("");
-         }
+            if (!this.hasCrashed)
+            {
+                System.exit(0);
+            }
+        }
 
-         try {
-            Thread.sleep(200L);
-         } catch (InterruptedException var10) {
+        System.gc();
+    }
+
+    /**
+     * Called repeatedly from run()
+     */
+    private void runGameLoop() throws IOException
+    {
+        long i = System.nanoTime();
+        this.mcProfiler.startSection("root");
+
+        if (Display.isCreated() && Display.isCloseRequested())
+        {
+            this.shutdown();
+        }
+
+        this.timer.updateTimer();
+        this.mcProfiler.startSection("scheduledExecutables");
+
+        synchronized (this.scheduledTasks)
+        {
+            while (!this.scheduledTasks.isEmpty())
+            {
+                Util.runTask(this.scheduledTasks.poll(), LOGGER);
+            }
+        }
+
+        this.mcProfiler.endSection();
+        long l = System.nanoTime();
+        this.mcProfiler.startSection("tick");
+
+        for (int j = 0; j < Math.min(10, this.timer.elapsedTicks); ++j)
+        {
+            this.runTick();
+        }
+
+        this.mcProfiler.endStartSection("preRenderErrors");
+        long i1 = System.nanoTime() - l;
+        this.checkGLError("Pre render");
+        this.mcProfiler.endStartSection("sound");
+        this.mcSoundHandler.setListener(this.player, this.timer.field_194147_b);
+        this.mcProfiler.endSection();
+        this.mcProfiler.startSection("render");
+        GlStateManager.pushMatrix();
+        GlStateManager.clear(16640);
+        this.framebufferMc.bindFramebuffer(true);
+        this.mcProfiler.startSection("display");
+        GlStateManager.enableTexture2D();
+        this.mcProfiler.endSection();
+
+        if (!this.skipRenderWorld)
+        {
+            this.mcProfiler.endStartSection("gameRenderer");
+            this.entityRenderer.updateCameraAndRender(this.isGamePaused ? this.field_193996_ah : this.timer.field_194147_b, i);
+            this.mcProfiler.endStartSection("toasts");
+            this.field_193034_aS.func_191783_a(new ScaledResolution(this));
+            this.mcProfiler.endSection();
+        }
+
+        this.mcProfiler.endSection();
+
+        if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI)
+        {
+            if (!this.mcProfiler.profilingEnabled)
+            {
+                this.mcProfiler.clearProfiling();
+            }
+
+            this.mcProfiler.profilingEnabled = true;
+            this.displayDebugInfo(i1);
+        }
+        else
+        {
+            this.mcProfiler.profilingEnabled = false;
+            this.prevFrameTime = System.nanoTime();
+        }
+
+        this.framebufferMc.unbindFramebuffer();
+        GlStateManager.popMatrix();
+        GlStateManager.pushMatrix();
+        this.framebufferMc.framebufferRender(this.displayWidth, this.displayHeight);
+        GlStateManager.popMatrix();
+        GlStateManager.pushMatrix();
+        this.entityRenderer.renderStreamIndicator(this.timer.field_194147_b);
+        GlStateManager.popMatrix();
+        this.mcProfiler.startSection("root");
+        this.updateDisplay();
+        Thread.yield();
+        this.checkGLError("Post render");
+        ++this.fpsCounter;
+        boolean flag = this.isSingleplayer() && this.currentScreen != null && this.currentScreen.doesGuiPauseGame() && !this.theIntegratedServer.getPublic();
+
+        if (this.isGamePaused != flag)
+        {
+            if (this.isGamePaused)
+            {
+                this.field_193996_ah = this.timer.field_194147_b;
+            }
+            else
+            {
+                this.timer.field_194147_b = this.field_193996_ah;
+            }
+
+            this.isGamePaused = flag;
+        }
+
+        long k = System.nanoTime();
+        this.frameTimer.addFrame(k - this.startNanoTime);
+        this.startNanoTime = k;
+
+        while (getSystemTime() >= this.debugUpdateTime + 1000L)
+        {
+            debugFPS = this.fpsCounter;
+            this.debug = String.format("%d fps (%d chunk update%s) T: %s%s%s%s%s", debugFPS, RenderChunk.renderChunksUpdated, RenderChunk.renderChunksUpdated == 1 ? "" : "s", (float)this.gameSettings.limitFramerate == GameSettings.Options.FRAMERATE_LIMIT.getValueMax() ? "inf" : this.gameSettings.limitFramerate, this.gameSettings.enableVsync ? " vsync" : "", this.gameSettings.fancyGraphics ? "" : " fast", this.gameSettings.clouds == 0 ? "" : (this.gameSettings.clouds == 1 ? " fast-clouds" : " fancy-clouds"), OpenGlHelper.useVbo() ? " vbo" : "");
+            RenderChunk.renderChunksUpdated = 0;
+            this.debugUpdateTime += 1000L;
+            this.fpsCounter = 0;
+            this.usageSnooper.addMemoryStatsToSnooper();
+
+            if (!this.usageSnooper.isSnooperRunning())
+            {
+                this.usageSnooper.startSnooper();
+            }
+        }
+
+        if (this.isFramerateLimitBelowMax())
+        {
+            this.mcProfiler.startSection("fpslimit_wait");
+            Display.sync(this.getLimitFramerate());
+            this.mcProfiler.endSection();
+        }
+
+        this.mcProfiler.endSection();
+    }
+
+    public void updateDisplay()
+    {
+        this.mcProfiler.startSection("display_update");
+        Display.update();
+        this.mcProfiler.endSection();
+        this.checkWindowResize();
+    }
+
+    protected void checkWindowResize()
+    {
+        if (!this.fullscreen && Display.wasResized())
+        {
+            int i = this.displayWidth;
+            int j = this.displayHeight;
+            this.displayWidth = Display.getWidth();
+            this.displayHeight = Display.getHeight();
+
+            if (this.displayWidth != i || this.displayHeight != j)
+            {
+                if (this.displayWidth <= 0)
+                {
+                    this.displayWidth = 1;
+                }
+
+                if (this.displayHeight <= 0)
+                {
+                    this.displayHeight = 1;
+                }
+
+                this.resize(this.displayWidth, this.displayHeight);
+            }
+        }
+    }
+
+    public int getLimitFramerate()
+    {
+        return this.world == null && this.currentScreen != null ? 30 : this.gameSettings.limitFramerate;
+    }
+
+    public boolean isFramerateLimitBelowMax()
+    {
+        return (float)this.getLimitFramerate() < GameSettings.Options.FRAMERATE_LIMIT.getValueMax();
+    }
+
+    public void freeMemory()
+    {
+        try
+        {
+            memoryReserve = new byte[0];
+            this.renderGlobal.deleteAllDisplayLists();
+        }
+        catch (Throwable var3)
+        {
             ;
-         }
-      }
+        }
 
-      this.func_147108_a(new GuiScreenWorking());
-      SocketAddress socketaddress = this.field_71437_Z.func_147137_ag().func_151270_a();
-      NetworkManager networkmanager = NetworkManager.func_150722_a(socketaddress);
-      networkmanager.func_150719_a(new NetHandlerLoginClient(networkmanager, this, (GuiScreen)null));
-      networkmanager.func_179290_a(new C00Handshake(socketaddress.toString(), 0, EnumConnectionState.LOGIN));
-      networkmanager.func_179290_a(new CPacketLoginStart(this.func_110432_I().func_148256_e()));
-      this.field_71453_ak = networkmanager;
-   }
+        try
+        {
+            System.gc();
+            this.loadWorld((WorldClient)null);
+        }
+        catch (Throwable var2)
+        {
+            ;
+        }
 
-   public void func_71403_a(@Nullable WorldClient p_71403_1_) {
-      this.func_71353_a(p_71403_1_, "");
-   }
+        System.gc();
+    }
 
-   public void func_71353_a(@Nullable WorldClient p_71353_1_, String p_71353_2_) {
-      if (p_71353_1_ == null) {
-         NetHandlerPlayClient nethandlerplayclient = this.func_147114_u();
-         if (nethandlerplayclient != null) {
-            nethandlerplayclient.func_147296_c();
-         }
+    /**
+     * Update debugProfilerName in response to number keys in debug screen
+     */
+    private void updateDebugProfilerName(int keyCount)
+    {
+        List<Profiler.Result> list = this.mcProfiler.getProfilingData(this.debugProfilerName);
 
-         if (this.field_71437_Z != null && this.field_71437_Z.func_175578_N()) {
-            this.field_71437_Z.func_71263_m();
-         }
+        if (!list.isEmpty())
+        {
+            Profiler.Result profiler$result = list.remove(0);
 
-         this.field_71437_Z = null;
-         this.field_71460_t.func_190564_k();
-         this.field_71442_b = null;
-         NarratorChatListener.field_193643_a.func_193642_b();
-      }
+            if (keyCount == 0)
+            {
+                if (!profiler$result.profilerName.isEmpty())
+                {
+                    int i = this.debugProfilerName.lastIndexOf(46);
 
-      this.field_175622_Z = null;
-      this.field_71453_ak = null;
-      if (this.field_71461_s != null) {
-         this.field_71461_s.func_73721_b(p_71353_2_);
-         this.field_71461_s.func_73719_c("");
-      }
+                    if (i >= 0)
+                    {
+                        this.debugProfilerName = this.debugProfilerName.substring(0, i);
+                    }
+                }
+            }
+            else
+            {
+                --keyCount;
 
-      if (p_71353_1_ == null && this.field_71441_e != null) {
-         this.field_110448_aq.func_148529_f();
-         this.field_71456_v.func_181029_i();
-         this.func_71351_a((ServerData)null);
-         this.field_71455_al = false;
-      }
+                if (keyCount < list.size() && !"unspecified".equals((list.get(keyCount)).profilerName))
+                {
+                    if (!this.debugProfilerName.isEmpty())
+                    {
+                        this.debugProfilerName = this.debugProfilerName + ".";
+                    }
 
-      this.field_147127_av.func_147690_c();
-      this.field_71441_e = p_71353_1_;
-      if (this.field_71438_f != null) {
-         this.field_71438_f.func_72732_a(p_71353_1_);
-      }
+                    this.debugProfilerName = this.debugProfilerName + (list.get(keyCount)).profilerName;
+                }
+            }
+        }
+    }
 
-      if (this.field_71452_i != null) {
-         this.field_71452_i.func_78870_a(p_71353_1_);
-      }
+    /**
+     * Parameter appears to be unused
+     */
+    private void displayDebugInfo(long elapsedTicksTime)
+    {
+        if (this.mcProfiler.profilingEnabled)
+        {
+            List<Profiler.Result> list = this.mcProfiler.getProfilingData(this.debugProfilerName);
+            Profiler.Result profiler$result = list.remove(0);
+            GlStateManager.clear(256);
+            GlStateManager.matrixMode(5889);
+            GlStateManager.enableColorMaterial();
+            GlStateManager.loadIdentity();
+            GlStateManager.ortho(0.0D, (double)this.displayWidth, (double)this.displayHeight, 0.0D, 1000.0D, 3000.0D);
+            GlStateManager.matrixMode(5888);
+            GlStateManager.loadIdentity();
+            GlStateManager.translate(0.0F, 0.0F, -2000.0F);
+            GlStateManager.glLineWidth(1.0F);
+            GlStateManager.disableTexture2D();
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
+            int i = 160;
+            int j = this.displayWidth - 160 - 10;
+            int k = this.displayHeight - 320;
+            GlStateManager.enableBlend();
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+            bufferbuilder.pos((double)((float)j - 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0D).color(200, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)((float)j - 176.0F), (double)(k + 320), 0.0D).color(200, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)((float)j + 176.0F), (double)(k + 320), 0.0D).color(200, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)((float)j + 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0D).color(200, 0, 0, 0).endVertex();
+            tessellator.draw();
+            GlStateManager.disableBlend();
+            double d0 = 0.0D;
 
-      TileEntityRendererDispatcher.field_147556_a.func_147543_a(p_71353_1_);
-      if (p_71353_1_ != null) {
-         if (!this.field_71455_al) {
-            AuthenticationService authenticationservice = new YggdrasilAuthenticationService(this.field_110453_aa, UUID.randomUUID().toString());
-            MinecraftSessionService minecraftsessionservice = authenticationservice.createMinecraftSessionService();
-            GameProfileRepository gameprofilerepository = authenticationservice.createProfileRepository();
-            PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(this.field_71412_D, MinecraftServer.field_152367_a.getName()));
-            TileEntitySkull.func_184293_a(playerprofilecache);
-            TileEntitySkull.func_184294_a(minecraftsessionservice);
-            PlayerProfileCache.func_187320_a(false);
-         }
+            for (int l = 0; l < list.size(); ++l)
+            {
+                Profiler.Result profiler$result1 = list.get(l);
+                int i1 = MathHelper.floor(profiler$result1.usePercentage / 4.0D) + 1;
+                bufferbuilder.begin(6, DefaultVertexFormats.POSITION_COLOR);
+                int j1 = profiler$result1.getColor();
+                int k1 = j1 >> 16 & 255;
+                int l1 = j1 >> 8 & 255;
+                int i2 = j1 & 255;
+                bufferbuilder.pos((double)j, (double)k, 0.0D).color(k1, l1, i2, 255).endVertex();
 
-         if (this.field_71439_g == null) {
-            this.field_71439_g = this.field_71442_b.func_192830_a(p_71353_1_, new StatisticsManager(), new RecipeBookClient());
-            this.field_71442_b.func_78745_b(this.field_71439_g);
-         }
+                for (int j2 = i1; j2 >= 0; --j2)
+                {
+                    float f = (float)((d0 + profiler$result1.usePercentage * (double)j2 / (double)i1) * (Math.PI * 2D) / 100.0D);
+                    float f1 = MathHelper.sin(f) * 160.0F;
+                    float f2 = MathHelper.cos(f) * 160.0F * 0.5F;
+                    bufferbuilder.pos((double)((float)j + f1), (double)((float)k - f2), 0.0D).color(k1, l1, i2, 255).endVertex();
+                }
 
-         this.field_71439_g.func_70065_x();
-         p_71353_1_.func_72838_d(this.field_71439_g);
-         this.field_71439_g.field_71158_b = new MovementInputFromOptions(this.field_71474_y);
-         this.field_71442_b.func_78748_a(this.field_71439_g);
-         this.field_175622_Z = this.field_71439_g;
-      } else {
-         this.field_71469_aa.func_75800_d();
-         this.field_71439_g = null;
-      }
+                tessellator.draw();
+                bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
 
-      System.gc();
-      this.field_71423_H = 0L;
-   }
+                for (int i3 = i1; i3 >= 0; --i3)
+                {
+                    float f3 = (float)((d0 + profiler$result1.usePercentage * (double)i3 / (double)i1) * (Math.PI * 2D) / 100.0D);
+                    float f4 = MathHelper.sin(f3) * 160.0F;
+                    float f5 = MathHelper.cos(f3) * 160.0F * 0.5F;
+                    bufferbuilder.pos((double)((float)j + f4), (double)((float)k - f5), 0.0D).color(k1 >> 1, l1 >> 1, i2 >> 1, 255).endVertex();
+                    bufferbuilder.pos((double)((float)j + f4), (double)((float)k - f5 + 10.0F), 0.0D).color(k1 >> 1, l1 >> 1, i2 >> 1, 255).endVertex();
+                }
 
-   public void func_71354_a(int p_71354_1_) {
-      this.field_71441_e.func_72974_f();
-      this.field_71441_e.func_73022_a();
-      int i = 0;
-      String s = null;
-      if (this.field_71439_g != null) {
-         i = this.field_71439_g.func_145782_y();
-         this.field_71441_e.func_72900_e(this.field_71439_g);
-         s = this.field_71439_g.func_142021_k();
-      }
-
-      this.field_175622_Z = null;
-      EntityPlayerSP entityplayersp = this.field_71439_g;
-      this.field_71439_g = this.field_71442_b.func_192830_a(this.field_71441_e, this.field_71439_g == null ? new StatisticsManager() : this.field_71439_g.func_146107_m(), this.field_71439_g == null ? new RecipeBook() : this.field_71439_g.func_192035_E());
-      this.field_71439_g.func_184212_Q().func_187218_a(entityplayersp.func_184212_Q().func_187231_c());
-      this.field_71439_g.field_71093_bK = p_71354_1_;
-      this.field_175622_Z = this.field_71439_g;
-      this.field_71439_g.func_70065_x();
-      this.field_71439_g.func_175158_f(s);
-      this.field_71441_e.func_72838_d(this.field_71439_g);
-      this.field_71442_b.func_78745_b(this.field_71439_g);
-      this.field_71439_g.field_71158_b = new MovementInputFromOptions(this.field_71474_y);
-      this.field_71439_g.func_145769_d(i);
-      this.field_71442_b.func_78748_a(this.field_71439_g);
-      this.field_71439_g.func_175150_k(entityplayersp.func_175140_cp());
-      if (this.field_71462_r instanceof GuiGameOver) {
-         this.func_147108_a((GuiScreen)null);
-      }
-
-   }
-
-   public final boolean func_71355_q() {
-      return this.field_71459_aj;
-   }
-
-   @Nullable
-   public NetHandlerPlayClient func_147114_u() {
-      return this.field_71439_g == null ? null : this.field_71439_g.field_71174_a;
-   }
-
-   public static boolean func_71382_s() {
-      return field_71432_P == null || !field_71432_P.field_71474_y.field_74319_N;
-   }
-
-   public static boolean func_71375_t() {
-      return field_71432_P != null && field_71432_P.field_71474_y.field_74347_j;
-   }
-
-   public static boolean func_71379_u() {
-      return field_71432_P != null && field_71432_P.field_71474_y.field_74348_k != 0;
-   }
-
-   private void func_147112_ai() {
-      if (this.field_71476_x != null && this.field_71476_x.field_72313_a != RayTraceResult.Type.MISS) {
-         boolean flag = this.field_71439_g.field_71075_bZ.field_75098_d;
-         TileEntity tileentity = null;
-         ItemStack itemstack;
-         if (this.field_71476_x.field_72313_a == RayTraceResult.Type.BLOCK) {
-            BlockPos blockpos = this.field_71476_x.func_178782_a();
-            IBlockState iblockstate = this.field_71441_e.func_180495_p(blockpos);
-            Block block = iblockstate.func_177230_c();
-            if (iblockstate.func_185904_a() == Material.field_151579_a) {
-               return;
+                tessellator.draw();
+                d0 += profiler$result1.usePercentage;
             }
 
-            itemstack = block.func_185473_a(this.field_71441_e, blockpos, iblockstate);
-            if (itemstack.func_190926_b()) {
-               return;
-            }
-
-            if (flag && GuiScreen.func_146271_m() && block.func_149716_u()) {
-               tileentity = this.field_71441_e.func_175625_s(blockpos);
-            }
-         } else {
-            if (this.field_71476_x.field_72313_a != RayTraceResult.Type.ENTITY || this.field_71476_x.field_72308_g == null || !flag) {
-               return;
-            }
-
-            if (this.field_71476_x.field_72308_g instanceof EntityPainting) {
-               itemstack = new ItemStack(Items.field_151159_an);
-            } else if (this.field_71476_x.field_72308_g instanceof EntityLeashKnot) {
-               itemstack = new ItemStack(Items.field_151058_ca);
-            } else if (this.field_71476_x.field_72308_g instanceof EntityItemFrame) {
-               EntityItemFrame entityitemframe = (EntityItemFrame)this.field_71476_x.field_72308_g;
-               ItemStack itemstack1 = entityitemframe.func_82335_i();
-               if (itemstack1.func_190926_b()) {
-                  itemstack = new ItemStack(Items.field_151160_bD);
-               } else {
-                  itemstack = itemstack1.func_77946_l();
-               }
-            } else if (this.field_71476_x.field_72308_g instanceof EntityMinecart) {
-               EntityMinecart entityminecart = (EntityMinecart)this.field_71476_x.field_72308_g;
-               Item item1;
-               switch(entityminecart.func_184264_v()) {
-               case FURNACE:
-                  item1 = Items.field_151109_aJ;
-                  break;
-               case CHEST:
-                  item1 = Items.field_151108_aI;
-                  break;
-               case TNT:
-                  item1 = Items.field_151142_bV;
-                  break;
-               case HOPPER:
-                  item1 = Items.field_151140_bW;
-                  break;
-               case COMMAND_BLOCK:
-                  item1 = Items.field_151095_cc;
-                  break;
-               default:
-                  item1 = Items.field_151143_au;
-               }
-
-               itemstack = new ItemStack(item1);
-            } else if (this.field_71476_x.field_72308_g instanceof EntityBoat) {
-               itemstack = new ItemStack(((EntityBoat)this.field_71476_x.field_72308_g).func_184455_j());
-            } else if (this.field_71476_x.field_72308_g instanceof EntityArmorStand) {
-               itemstack = new ItemStack(Items.field_179565_cj);
-            } else if (this.field_71476_x.field_72308_g instanceof EntityEnderCrystal) {
-               itemstack = new ItemStack(Items.field_185158_cP);
-            } else {
-               ResourceLocation resourcelocation = EntityList.func_191301_a(this.field_71476_x.field_72308_g);
-               if (resourcelocation == null || !EntityList.field_75627_a.containsKey(resourcelocation)) {
-                  return;
-               }
-
-               itemstack = new ItemStack(Items.field_151063_bx);
-               ItemMonsterPlacer.func_185078_a(itemstack, resourcelocation);
-            }
-         }
-
-         if (itemstack.func_190926_b()) {
+            DecimalFormat decimalformat = new DecimalFormat("##0.00");
+            GlStateManager.enableTexture2D();
             String s = "";
-            if (this.field_71476_x.field_72313_a == RayTraceResult.Type.BLOCK) {
-               s = ((ResourceLocation)Block.field_149771_c.func_177774_c(this.field_71441_e.func_180495_p(this.field_71476_x.func_178782_a()).func_177230_c())).toString();
-            } else if (this.field_71476_x.field_72313_a == RayTraceResult.Type.ENTITY) {
-               s = EntityList.func_191301_a(this.field_71476_x.field_72308_g).toString();
+
+            if (!"unspecified".equals(profiler$result.profilerName))
+            {
+                s = s + "[0] ";
             }
 
-            field_147123_G.warn("Picking on: [{}] {} gave null item", this.field_71476_x.field_72313_a, s);
-         } else {
-            InventoryPlayer inventoryplayer = this.field_71439_g.field_71071_by;
-            if (tileentity != null) {
-               this.func_184119_a(itemstack, tileentity);
+            if (profiler$result.profilerName.isEmpty())
+            {
+                s = s + "ROOT ";
+            }
+            else
+            {
+                s = s + profiler$result.profilerName + ' ';
             }
 
-            int i = inventoryplayer.func_184429_b(itemstack);
-            if (flag) {
-               inventoryplayer.func_184434_a(itemstack);
-               this.field_71442_b.func_78761_a(this.field_71439_g.func_184586_b(EnumHand.MAIN_HAND), 36 + inventoryplayer.field_70461_c);
-            } else if (i != -1) {
-               if (InventoryPlayer.func_184435_e(i)) {
-                  inventoryplayer.field_70461_c = i;
-               } else {
-                  this.field_71442_b.func_187100_a(i);
-               }
+            int l2 = 16777215;
+            this.fontRendererObj.drawStringWithShadow(s, (float)(j - 160), (float)(k - 80 - 16), 16777215);
+            s = decimalformat.format(profiler$result.totalUsePercentage) + "%";
+            this.fontRendererObj.drawStringWithShadow(s, (float)(j + 160 - this.fontRendererObj.getStringWidth(s)), (float)(k - 80 - 16), 16777215);
+
+            for (int k2 = 0; k2 < list.size(); ++k2)
+            {
+                Profiler.Result profiler$result2 = list.get(k2);
+                StringBuilder stringbuilder = new StringBuilder();
+
+                if ("unspecified".equals(profiler$result2.profilerName))
+                {
+                    stringbuilder.append("[?] ");
+                }
+                else
+                {
+                    stringbuilder.append("[").append(k2 + 1).append("] ");
+                }
+
+                String s1 = stringbuilder.append(profiler$result2.profilerName).toString();
+                this.fontRendererObj.drawStringWithShadow(s1, (float)(j - 160), (float)(k + 80 + k2 * 8 + 20), profiler$result2.getColor());
+                s1 = decimalformat.format(profiler$result2.usePercentage) + "%";
+                this.fontRendererObj.drawStringWithShadow(s1, (float)(j + 160 - 50 - this.fontRendererObj.getStringWidth(s1)), (float)(k + 80 + k2 * 8 + 20), profiler$result2.getColor());
+                s1 = decimalformat.format(profiler$result2.totalUsePercentage) + "%";
+                this.fontRendererObj.drawStringWithShadow(s1, (float)(j + 160 - this.fontRendererObj.getStringWidth(s1)), (float)(k + 80 + k2 * 8 + 20), profiler$result2.getColor());
+            }
+        }
+    }
+
+    /**
+     * Called when the window is closing. Sets 'running' to false which allows the game loop to exit cleanly.
+     */
+    public void shutdown()
+    {
+        this.running = false;
+    }
+
+    /**
+     * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen
+     * currently displayed
+     */
+    public void setIngameFocus()
+    {
+        if (Display.isActive())
+        {
+            if (!this.inGameHasFocus)
+            {
+                if (!IS_RUNNING_ON_MAC)
+                {
+                    KeyBinding.updateKeyBindState();
+                }
+
+                this.inGameHasFocus = true;
+                this.mouseHelper.grabMouseCursor();
+                this.displayGuiScreen((GuiScreen)null);
+                this.leftClickCounter = 10000;
+            }
+        }
+    }
+
+    /**
+     * Resets the player keystate, disables the ingame focus, and ungrabs the mouse cursor.
+     */
+    public void setIngameNotInFocus()
+    {
+        if (this.inGameHasFocus)
+        {
+            this.inGameHasFocus = false;
+            this.mouseHelper.ungrabMouseCursor();
+        }
+    }
+
+    /**
+     * Displays the ingame menu
+     */
+    public void displayInGameMenu()
+    {
+        if (this.currentScreen == null)
+        {
+            this.displayGuiScreen(new GuiIngameMenu());
+
+            if (this.isSingleplayer() && !this.theIntegratedServer.getPublic())
+            {
+                this.mcSoundHandler.pauseSounds();
+            }
+        }
+    }
+
+    private void sendClickBlockToController(boolean leftClick)
+    {
+        if (!leftClick)
+        {
+            this.leftClickCounter = 0;
+        }
+
+        if (this.leftClickCounter <= 0 && !this.player.isHandActive())
+        {
+            if (leftClick && this.objectMouseOver != null && this.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+            {
+                BlockPos blockpos = this.objectMouseOver.getBlockPos();
+
+                if (this.world.getBlockState(blockpos).getMaterial() != Material.AIR && this.playerController.onPlayerDamageBlock(blockpos, this.objectMouseOver.sideHit))
+                {
+                    this.effectRenderer.addBlockHitEffects(blockpos, this.objectMouseOver.sideHit);
+                    this.player.swingArm(EnumHand.MAIN_HAND);
+                }
+            }
+            else
+            {
+                this.playerController.resetBlockRemoving();
+            }
+        }
+    }
+
+    private void clickMouse()
+    {
+        if (this.leftClickCounter <= 0)
+        {
+            if (this.objectMouseOver == null)
+            {
+                LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
+
+                if (this.playerController.isNotCreative())
+                {
+                    this.leftClickCounter = 10;
+                }
+            }
+            else if (!this.player.isRowingBoat())
+            {
+                switch (this.objectMouseOver.typeOfHit)
+                {
+                    case ENTITY:
+                        this.playerController.attackEntity(this.player, this.objectMouseOver.entityHit);
+                        break;
+
+                    case BLOCK:
+                        BlockPos blockpos = this.objectMouseOver.getBlockPos();
+
+                        if (this.world.getBlockState(blockpos).getMaterial() != Material.AIR)
+                        {
+                            this.playerController.clickBlock(blockpos, this.objectMouseOver.sideHit);
+                            break;
+                        }
+
+                    case MISS:
+                        if (this.playerController.isNotCreative())
+                        {
+                            this.leftClickCounter = 10;
+                        }
+
+                        this.player.resetCooldown();
+                }
+
+                this.player.swingArm(EnumHand.MAIN_HAND);
+            }
+        }
+    }
+
+    @SuppressWarnings("incomplete-switch")
+
+    /**
+     * Called when user clicked he's mouse right button (place)
+     */
+    private void rightClickMouse()
+    {
+        if (!this.playerController.getIsHittingBlock())
+        {
+            this.rightClickDelayTimer = 4;
+
+            if (!this.player.isRowingBoat())
+            {
+                if (this.objectMouseOver == null)
+                {
+                    LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
+                }
+
+                for (EnumHand enumhand : EnumHand.values())
+                {
+                    ItemStack itemstack = this.player.getHeldItem(enumhand);
+
+                    if (this.objectMouseOver != null)
+                    {
+                        switch (this.objectMouseOver.typeOfHit)
+                        {
+                            case ENTITY:
+                                if (this.playerController.interactWithEntity(this.player, this.objectMouseOver.entityHit, this.objectMouseOver, enumhand) == EnumActionResult.SUCCESS)
+                                {
+                                    return;
+                                }
+
+                                if (this.playerController.interactWithEntity(this.player, this.objectMouseOver.entityHit, enumhand) == EnumActionResult.SUCCESS)
+                                {
+                                    return;
+                                }
+
+                                break;
+
+                            case BLOCK:
+                                BlockPos blockpos = this.objectMouseOver.getBlockPos();
+
+                                if (this.world.getBlockState(blockpos).getMaterial() != Material.AIR)
+                                {
+                                    int i = itemstack.func_190916_E();
+                                    EnumActionResult enumactionresult = this.playerController.processRightClickBlock(this.player, this.world, blockpos, this.objectMouseOver.sideHit, this.objectMouseOver.hitVec, enumhand);
+
+                                    if (enumactionresult == EnumActionResult.SUCCESS)
+                                    {
+                                        this.player.swingArm(enumhand);
+
+                                        if (!itemstack.func_190926_b() && (itemstack.func_190916_E() != i || this.playerController.isInCreativeMode()))
+                                        {
+                                            this.entityRenderer.itemRenderer.resetEquippedProgress(enumhand);
+                                        }
+
+                                        return;
+                                    }
+                                }
+                        }
+                    }
+
+                    if (!itemstack.func_190926_b() && this.playerController.processRightClick(this.player, this.world, enumhand) == EnumActionResult.SUCCESS)
+                    {
+                        this.entityRenderer.itemRenderer.resetEquippedProgress(enumhand);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Toggles fullscreen mode.
+     */
+    public void toggleFullscreen()
+    {
+        try
+        {
+            this.fullscreen = !this.fullscreen;
+            this.gameSettings.fullScreen = this.fullscreen;
+
+            if (this.fullscreen)
+            {
+                this.updateDisplayMode();
+                this.displayWidth = Display.getDisplayMode().getWidth();
+                this.displayHeight = Display.getDisplayMode().getHeight();
+
+                if (this.displayWidth <= 0)
+                {
+                    this.displayWidth = 1;
+                }
+
+                if (this.displayHeight <= 0)
+                {
+                    this.displayHeight = 1;
+                }
+            }
+            else
+            {
+                Display.setDisplayMode(new DisplayMode(this.tempDisplayWidth, this.tempDisplayHeight));
+                this.displayWidth = this.tempDisplayWidth;
+                this.displayHeight = this.tempDisplayHeight;
+
+                if (this.displayWidth <= 0)
+                {
+                    this.displayWidth = 1;
+                }
+
+                if (this.displayHeight <= 0)
+                {
+                    this.displayHeight = 1;
+                }
             }
 
-         }
-      }
-   }
-
-   private ItemStack func_184119_a(ItemStack p_184119_1_, TileEntity p_184119_2_) {
-      NBTTagCompound nbttagcompound = p_184119_2_.func_189515_b(new NBTTagCompound());
-      if (p_184119_1_.func_77973_b() == Items.field_151144_bL && nbttagcompound.func_74764_b("Owner")) {
-         NBTTagCompound nbttagcompound2 = nbttagcompound.func_74775_l("Owner");
-         NBTTagCompound nbttagcompound3 = new NBTTagCompound();
-         nbttagcompound3.func_74782_a("SkullOwner", nbttagcompound2);
-         p_184119_1_.func_77982_d(nbttagcompound3);
-         return p_184119_1_;
-      } else {
-         p_184119_1_.func_77983_a("BlockEntityTag", nbttagcompound);
-         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-         NBTTagList nbttaglist = new NBTTagList();
-         nbttaglist.func_74742_a(new NBTTagString("(+NBT)"));
-         nbttagcompound1.func_74782_a("Lore", nbttaglist);
-         p_184119_1_.func_77983_a("display", nbttagcompound1);
-         return p_184119_1_;
-      }
-   }
-
-   public CrashReport func_71396_d(CrashReport p_71396_1_) {
-      p_71396_1_.func_85056_g().func_189529_a("Launched Version", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return Minecraft.this.field_110447_Z;
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("LWJGL", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return Sys.getVersion();
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("OpenGL", new ICrashReportDetail<String>() {
-         public String call() {
-            return GlStateManager.func_187416_u(7937) + " GL version " + GlStateManager.func_187416_u(7938) + ", " + GlStateManager.func_187416_u(7936);
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("GL Caps", new ICrashReportDetail<String>() {
-         public String call() {
-            return OpenGlHelper.func_153172_c();
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Using VBOs", new ICrashReportDetail<String>() {
-         public String call() {
-            return Minecraft.this.field_71474_y.field_178881_t ? "Yes" : "No";
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Is Modded", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            String s = ClientBrandRetriever.getClientModName();
-            if (!"vanilla".equals(s)) {
-               return "Definitely; Client brand changed to '" + s + "'";
-            } else {
-               return Minecraft.class.getSigners() == null ? "Very likely; Jar signature invalidated" : "Probably not. Jar signature remains and client brand is untouched.";
+            if (this.currentScreen != null)
+            {
+                this.resize(this.displayWidth, this.displayHeight);
             }
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Type", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return "Client (map_client.txt)";
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Resource Packs", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            StringBuilder stringbuilder = new StringBuilder();
-
-            for(String s : Minecraft.this.field_71474_y.field_151453_l) {
-               if (stringbuilder.length() > 0) {
-                  stringbuilder.append(", ");
-               }
-
-               stringbuilder.append(s);
-               if (Minecraft.this.field_71474_y.field_183018_l.contains(s)) {
-                  stringbuilder.append(" (incompatible)");
-               }
+            else
+            {
+                this.updateFramebufferSize();
             }
 
-            return stringbuilder.toString();
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Current Language", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return Minecraft.this.field_135017_as.func_135041_c().toString();
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("Profiler Position", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return Minecraft.this.field_71424_I.field_76327_a ? Minecraft.this.field_71424_I.func_76322_c() : "N/A (disabled)";
-         }
-      });
-      p_71396_1_.func_85056_g().func_189529_a("CPU", new ICrashReportDetail<String>() {
-         public String call() throws Exception {
-            return OpenGlHelper.func_183029_j();
-         }
-      });
-      if (this.field_71441_e != null) {
-         this.field_71441_e.func_72914_a(p_71396_1_);
-      }
+            Display.setFullscreen(this.fullscreen);
+            Display.setVSyncEnabled(this.gameSettings.enableVsync);
+            this.updateDisplay();
+        }
+        catch (Exception exception)
+        {
+            LOGGER.error("Couldn't toggle fullscreen", (Throwable)exception);
+        }
+    }
 
-      return p_71396_1_;
-   }
+    /**
+     * Called to resize the current screen.
+     */
+    private void resize(int width, int height)
+    {
+        this.displayWidth = Math.max(1, width);
+        this.displayHeight = Math.max(1, height);
 
-   public static Minecraft func_71410_x() {
-      return field_71432_P;
-   }
+        if (this.currentScreen != null)
+        {
+            ScaledResolution scaledresolution = new ScaledResolution(this);
+            this.currentScreen.onResize(this, scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight());
+        }
 
-   public ListenableFuture<Object> func_175603_A() {
-      return this.func_152344_a(new Runnable() {
-         public void run() {
-            Minecraft.this.func_110436_a();
-         }
-      });
-   }
+        this.loadingScreen = new LoadingScreenRenderer(this);
+        this.updateFramebufferSize();
+    }
 
-   public void func_70000_a(Snooper p_70000_1_) {
-      p_70000_1_.func_152768_a("fps", Integer.valueOf(field_71470_ab));
-      p_70000_1_.func_152768_a("vsync_enabled", Boolean.valueOf(this.field_71474_y.field_74352_v));
-      p_70000_1_.func_152768_a("display_frequency", Integer.valueOf(Display.getDisplayMode().getFrequency()));
-      p_70000_1_.func_152768_a("display_type", this.field_71431_Q ? "fullscreen" : "windowed");
-      p_70000_1_.func_152768_a("run_time", Long.valueOf((MinecraftServer.func_130071_aq() - p_70000_1_.func_130105_g()) / 60L * 1000L));
-      p_70000_1_.func_152768_a("current_action", this.func_181538_aA());
-      p_70000_1_.func_152768_a("language", this.field_71474_y.field_74363_ab == null ? "en_us" : this.field_71474_y.field_74363_ab);
-      String s = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? "little" : "big";
-      p_70000_1_.func_152768_a("endianness", s);
-      p_70000_1_.func_152768_a("subtitles", Boolean.valueOf(this.field_71474_y.field_186717_N));
-      p_70000_1_.func_152768_a("touch", this.field_71474_y.field_85185_A ? "touch" : "mouse");
-      p_70000_1_.func_152768_a("resource_packs", Integer.valueOf(this.field_110448_aq.func_110613_c().size()));
-      int i = 0;
+    private void updateFramebufferSize()
+    {
+        this.framebufferMc.createBindFramebuffer(this.displayWidth, this.displayHeight);
 
-      for(ResourcePackRepository.Entry resourcepackrepository$entry : this.field_110448_aq.func_110613_c()) {
-         p_70000_1_.func_152768_a("resource_pack[" + i++ + "]", resourcepackrepository$entry.func_110515_d());
-      }
+        if (this.entityRenderer != null)
+        {
+            this.entityRenderer.updateShaderGroupSize(this.displayWidth, this.displayHeight);
+        }
+    }
 
-      if (this.field_71437_Z != null && this.field_71437_Z.func_80003_ah() != null) {
-         p_70000_1_.func_152768_a("snooper_partner", this.field_71437_Z.func_80003_ah().func_80006_f());
-      }
+    /**
+     * Return the musicTicker's instance
+     */
+    public MusicTicker getMusicTicker()
+    {
+        return this.mcMusicTicker;
+    }
 
-   }
+    /**
+     * Runs the current tick.
+     */
+    public void runTick() throws IOException
+    {
+        if (this.rightClickDelayTimer > 0)
+        {
+            --this.rightClickDelayTimer;
+        }
 
-   private String func_181538_aA() {
-      if (this.field_71437_Z != null) {
-         return this.field_71437_Z.func_71344_c() ? "hosting_lan" : "singleplayer";
-      } else if (this.field_71422_O != null) {
-         return this.field_71422_O.func_181041_d() ? "playing_lan" : "multiplayer";
-      } else {
-         return "out_of_game";
-      }
-   }
+        this.mcProfiler.startSection("gui");
 
-   public void func_70001_b(Snooper p_70001_1_) {
-      p_70001_1_.func_152767_b("opengl_version", GlStateManager.func_187416_u(7938));
-      p_70001_1_.func_152767_b("opengl_vendor", GlStateManager.func_187416_u(7936));
-      p_70001_1_.func_152767_b("client_brand", ClientBrandRetriever.getClientModName());
-      p_70001_1_.func_152767_b("launched_version", this.field_110447_Z);
-      ContextCapabilities contextcapabilities = GLContext.getCapabilities();
-      p_70001_1_.func_152767_b("gl_caps[ARB_arrays_of_arrays]", Boolean.valueOf(contextcapabilities.GL_ARB_arrays_of_arrays));
-      p_70001_1_.func_152767_b("gl_caps[ARB_base_instance]", Boolean.valueOf(contextcapabilities.GL_ARB_base_instance));
-      p_70001_1_.func_152767_b("gl_caps[ARB_blend_func_extended]", Boolean.valueOf(contextcapabilities.GL_ARB_blend_func_extended));
-      p_70001_1_.func_152767_b("gl_caps[ARB_clear_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_clear_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_color_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_color_buffer_float));
-      p_70001_1_.func_152767_b("gl_caps[ARB_compatibility]", Boolean.valueOf(contextcapabilities.GL_ARB_compatibility));
-      p_70001_1_.func_152767_b("gl_caps[ARB_compressed_texture_pixel_storage]", Boolean.valueOf(contextcapabilities.GL_ARB_compressed_texture_pixel_storage));
-      p_70001_1_.func_152767_b("gl_caps[ARB_compute_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_compute_shader));
-      p_70001_1_.func_152767_b("gl_caps[ARB_copy_buffer]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_buffer));
-      p_70001_1_.func_152767_b("gl_caps[ARB_copy_image]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_image));
-      p_70001_1_.func_152767_b("gl_caps[ARB_depth_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_buffer_float));
-      p_70001_1_.func_152767_b("gl_caps[ARB_compute_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_compute_shader));
-      p_70001_1_.func_152767_b("gl_caps[ARB_copy_buffer]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_buffer));
-      p_70001_1_.func_152767_b("gl_caps[ARB_copy_image]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_image));
-      p_70001_1_.func_152767_b("gl_caps[ARB_depth_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_buffer_float));
-      p_70001_1_.func_152767_b("gl_caps[ARB_depth_clamp]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_clamp));
-      p_70001_1_.func_152767_b("gl_caps[ARB_depth_texture]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_texture));
-      p_70001_1_.func_152767_b("gl_caps[ARB_draw_buffers]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_buffers));
-      p_70001_1_.func_152767_b("gl_caps[ARB_draw_buffers_blend]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_buffers_blend));
-      p_70001_1_.func_152767_b("gl_caps[ARB_draw_elements_base_vertex]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_elements_base_vertex));
-      p_70001_1_.func_152767_b("gl_caps[ARB_draw_indirect]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_indirect));
-      p_70001_1_.func_152767_b("gl_caps[ARB_draw_instanced]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_instanced));
-      p_70001_1_.func_152767_b("gl_caps[ARB_explicit_attrib_location]", Boolean.valueOf(contextcapabilities.GL_ARB_explicit_attrib_location));
-      p_70001_1_.func_152767_b("gl_caps[ARB_explicit_uniform_location]", Boolean.valueOf(contextcapabilities.GL_ARB_explicit_uniform_location));
-      p_70001_1_.func_152767_b("gl_caps[ARB_fragment_layer_viewport]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_layer_viewport));
-      p_70001_1_.func_152767_b("gl_caps[ARB_fragment_program]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_program));
-      p_70001_1_.func_152767_b("gl_caps[ARB_fragment_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_shader));
-      p_70001_1_.func_152767_b("gl_caps[ARB_fragment_program_shadow]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_program_shadow));
-      p_70001_1_.func_152767_b("gl_caps[ARB_framebuffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_framebuffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_framebuffer_sRGB]", Boolean.valueOf(contextcapabilities.GL_ARB_framebuffer_sRGB));
-      p_70001_1_.func_152767_b("gl_caps[ARB_geometry_shader4]", Boolean.valueOf(contextcapabilities.GL_ARB_geometry_shader4));
-      p_70001_1_.func_152767_b("gl_caps[ARB_gpu_shader5]", Boolean.valueOf(contextcapabilities.GL_ARB_gpu_shader5));
-      p_70001_1_.func_152767_b("gl_caps[ARB_half_float_pixel]", Boolean.valueOf(contextcapabilities.GL_ARB_half_float_pixel));
-      p_70001_1_.func_152767_b("gl_caps[ARB_half_float_vertex]", Boolean.valueOf(contextcapabilities.GL_ARB_half_float_vertex));
-      p_70001_1_.func_152767_b("gl_caps[ARB_instanced_arrays]", Boolean.valueOf(contextcapabilities.GL_ARB_instanced_arrays));
-      p_70001_1_.func_152767_b("gl_caps[ARB_map_buffer_alignment]", Boolean.valueOf(contextcapabilities.GL_ARB_map_buffer_alignment));
-      p_70001_1_.func_152767_b("gl_caps[ARB_map_buffer_range]", Boolean.valueOf(contextcapabilities.GL_ARB_map_buffer_range));
-      p_70001_1_.func_152767_b("gl_caps[ARB_multisample]", Boolean.valueOf(contextcapabilities.GL_ARB_multisample));
-      p_70001_1_.func_152767_b("gl_caps[ARB_multitexture]", Boolean.valueOf(contextcapabilities.GL_ARB_multitexture));
-      p_70001_1_.func_152767_b("gl_caps[ARB_occlusion_query2]", Boolean.valueOf(contextcapabilities.GL_ARB_occlusion_query2));
-      p_70001_1_.func_152767_b("gl_caps[ARB_pixel_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_pixel_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_seamless_cube_map]", Boolean.valueOf(contextcapabilities.GL_ARB_seamless_cube_map));
-      p_70001_1_.func_152767_b("gl_caps[ARB_shader_objects]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_objects));
-      p_70001_1_.func_152767_b("gl_caps[ARB_shader_stencil_export]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_stencil_export));
-      p_70001_1_.func_152767_b("gl_caps[ARB_shader_texture_lod]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_texture_lod));
-      p_70001_1_.func_152767_b("gl_caps[ARB_shadow]", Boolean.valueOf(contextcapabilities.GL_ARB_shadow));
-      p_70001_1_.func_152767_b("gl_caps[ARB_shadow_ambient]", Boolean.valueOf(contextcapabilities.GL_ARB_shadow_ambient));
-      p_70001_1_.func_152767_b("gl_caps[ARB_stencil_texturing]", Boolean.valueOf(contextcapabilities.GL_ARB_stencil_texturing));
-      p_70001_1_.func_152767_b("gl_caps[ARB_sync]", Boolean.valueOf(contextcapabilities.GL_ARB_sync));
-      p_70001_1_.func_152767_b("gl_caps[ARB_tessellation_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_tessellation_shader));
-      p_70001_1_.func_152767_b("gl_caps[ARB_texture_border_clamp]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_border_clamp));
-      p_70001_1_.func_152767_b("gl_caps[ARB_texture_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_texture_cube_map]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_cube_map));
-      p_70001_1_.func_152767_b("gl_caps[ARB_texture_cube_map_array]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_cube_map_array));
-      p_70001_1_.func_152767_b("gl_caps[ARB_texture_non_power_of_two]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_non_power_of_two));
-      p_70001_1_.func_152767_b("gl_caps[ARB_uniform_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_uniform_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_vertex_blend]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_blend));
-      p_70001_1_.func_152767_b("gl_caps[ARB_vertex_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[ARB_vertex_program]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_program));
-      p_70001_1_.func_152767_b("gl_caps[ARB_vertex_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_shader));
-      p_70001_1_.func_152767_b("gl_caps[EXT_bindable_uniform]", Boolean.valueOf(contextcapabilities.GL_EXT_bindable_uniform));
-      p_70001_1_.func_152767_b("gl_caps[EXT_blend_equation_separate]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_equation_separate));
-      p_70001_1_.func_152767_b("gl_caps[EXT_blend_func_separate]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_func_separate));
-      p_70001_1_.func_152767_b("gl_caps[EXT_blend_minmax]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_minmax));
-      p_70001_1_.func_152767_b("gl_caps[EXT_blend_subtract]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_subtract));
-      p_70001_1_.func_152767_b("gl_caps[EXT_draw_instanced]", Boolean.valueOf(contextcapabilities.GL_EXT_draw_instanced));
-      p_70001_1_.func_152767_b("gl_caps[EXT_framebuffer_multisample]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_multisample));
-      p_70001_1_.func_152767_b("gl_caps[EXT_framebuffer_object]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_object));
-      p_70001_1_.func_152767_b("gl_caps[EXT_framebuffer_sRGB]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_sRGB));
-      p_70001_1_.func_152767_b("gl_caps[EXT_geometry_shader4]", Boolean.valueOf(contextcapabilities.GL_EXT_geometry_shader4));
-      p_70001_1_.func_152767_b("gl_caps[EXT_gpu_program_parameters]", Boolean.valueOf(contextcapabilities.GL_EXT_gpu_program_parameters));
-      p_70001_1_.func_152767_b("gl_caps[EXT_gpu_shader4]", Boolean.valueOf(contextcapabilities.GL_EXT_gpu_shader4));
-      p_70001_1_.func_152767_b("gl_caps[EXT_multi_draw_arrays]", Boolean.valueOf(contextcapabilities.GL_EXT_multi_draw_arrays));
-      p_70001_1_.func_152767_b("gl_caps[EXT_packed_depth_stencil]", Boolean.valueOf(contextcapabilities.GL_EXT_packed_depth_stencil));
-      p_70001_1_.func_152767_b("gl_caps[EXT_paletted_texture]", Boolean.valueOf(contextcapabilities.GL_EXT_paletted_texture));
-      p_70001_1_.func_152767_b("gl_caps[EXT_rescale_normal]", Boolean.valueOf(contextcapabilities.GL_EXT_rescale_normal));
-      p_70001_1_.func_152767_b("gl_caps[EXT_separate_shader_objects]", Boolean.valueOf(contextcapabilities.GL_EXT_separate_shader_objects));
-      p_70001_1_.func_152767_b("gl_caps[EXT_shader_image_load_store]", Boolean.valueOf(contextcapabilities.GL_EXT_shader_image_load_store));
-      p_70001_1_.func_152767_b("gl_caps[EXT_shadow_funcs]", Boolean.valueOf(contextcapabilities.GL_EXT_shadow_funcs));
-      p_70001_1_.func_152767_b("gl_caps[EXT_shared_texture_palette]", Boolean.valueOf(contextcapabilities.GL_EXT_shared_texture_palette));
-      p_70001_1_.func_152767_b("gl_caps[EXT_stencil_clear_tag]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_clear_tag));
-      p_70001_1_.func_152767_b("gl_caps[EXT_stencil_two_side]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_two_side));
-      p_70001_1_.func_152767_b("gl_caps[EXT_stencil_wrap]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_wrap));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_3d]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_3d));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_array]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_array));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_buffer_object]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_buffer_object));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_integer]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_integer));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_lod_bias]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_lod_bias));
-      p_70001_1_.func_152767_b("gl_caps[EXT_texture_sRGB]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_sRGB));
-      p_70001_1_.func_152767_b("gl_caps[EXT_vertex_shader]", Boolean.valueOf(contextcapabilities.GL_EXT_vertex_shader));
-      p_70001_1_.func_152767_b("gl_caps[EXT_vertex_weighting]", Boolean.valueOf(contextcapabilities.GL_EXT_vertex_weighting));
-      p_70001_1_.func_152767_b("gl_caps[gl_max_vertex_uniforms]", Integer.valueOf(GlStateManager.func_187397_v(35658)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_caps[gl_max_fragment_uniforms]", Integer.valueOf(GlStateManager.func_187397_v(35657)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_caps[gl_max_vertex_attribs]", Integer.valueOf(GlStateManager.func_187397_v(34921)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_caps[gl_max_vertex_texture_image_units]", Integer.valueOf(GlStateManager.func_187397_v(35660)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_caps[gl_max_texture_image_units]", Integer.valueOf(GlStateManager.func_187397_v(34930)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_caps[gl_max_array_texture_layers]", Integer.valueOf(GlStateManager.func_187397_v(35071)));
-      GlStateManager.func_187434_L();
-      p_70001_1_.func_152767_b("gl_max_texture_size", Integer.valueOf(func_71369_N()));
-      GameProfile gameprofile = this.field_71449_j.func_148256_e();
-      if (gameprofile != null && gameprofile.getId() != null) {
-         p_70001_1_.func_152767_b("uuid", Hashing.sha1().hashBytes(gameprofile.getId().toString().getBytes(Charsets.ISO_8859_1)).toString());
-      }
+        if (!this.isGamePaused)
+        {
+            this.ingameGUI.updateTick();
+        }
 
-   }
+        this.mcProfiler.endSection();
+        this.entityRenderer.getMouseOver(1.0F);
+        this.field_193035_aW.func_193297_a(this.world, this.objectMouseOver);
+        this.mcProfiler.startSection("gameMode");
 
-   public static int func_71369_N() {
-      for(int i = 16384; i > 0; i >>= 1) {
-         GlStateManager.func_187419_a(32868, 0, 6408, i, i, 0, 6408, 5121, (IntBuffer)null);
-         int j = GlStateManager.func_187411_c(32868, 0, 4096);
-         if (j != 0) {
-            return i;
-         }
-      }
+        if (!this.isGamePaused && this.world != null)
+        {
+            this.playerController.updateController();
+        }
 
-      return -1;
-   }
+        this.mcProfiler.endStartSection("textures");
 
-   public boolean func_70002_Q() {
-      return this.field_71474_y.field_74355_t;
-   }
+        if (this.world != null)
+        {
+            this.renderEngine.tick();
+        }
 
-   public void func_71351_a(ServerData p_71351_1_) {
-      this.field_71422_O = p_71351_1_;
-   }
+        if (this.currentScreen == null && this.player != null)
+        {
+            if (this.player.getHealth() <= 0.0F && !(this.currentScreen instanceof GuiGameOver))
+            {
+                this.displayGuiScreen((GuiScreen)null);
+            }
+            else if (this.player.isPlayerSleeping() && this.world != null)
+            {
+                this.displayGuiScreen(new GuiSleepMP());
+            }
+        }
+        else if (this.currentScreen != null && this.currentScreen instanceof GuiSleepMP && !this.player.isPlayerSleeping())
+        {
+            this.displayGuiScreen((GuiScreen)null);
+        }
 
-   @Nullable
-   public ServerData func_147104_D() {
-      return this.field_71422_O;
-   }
+        if (this.currentScreen != null)
+        {
+            this.leftClickCounter = 10000;
+        }
 
-   public boolean func_71387_A() {
-      return this.field_71455_al;
-   }
-
-   public boolean func_71356_B() {
-      return this.field_71455_al && this.field_71437_Z != null;
-   }
-
-   @Nullable
-   public IntegratedServer func_71401_C() {
-      return this.field_71437_Z;
-   }
-
-   public static void func_71363_D() {
-      if (field_71432_P != null) {
-         IntegratedServer integratedserver = field_71432_P.func_71401_C();
-         if (integratedserver != null) {
-            integratedserver.func_71260_j();
-         }
-
-      }
-   }
-
-   public Snooper func_71378_E() {
-      return this.field_71427_U;
-   }
-
-   public static long func_71386_F() {
-      return Sys.getTime() * 1000L / Sys.getTimerResolution();
-   }
-
-   public boolean func_71372_G() {
-      return this.field_71431_Q;
-   }
-
-   public Session func_110432_I() {
-      return this.field_71449_j;
-   }
-
-   public PropertyMap func_181037_M() {
-      if (this.field_181038_N.isEmpty()) {
-         GameProfile gameprofile = this.func_152347_ac().fillProfileProperties(this.field_71449_j.func_148256_e(), false);
-         this.field_181038_N.putAll(gameprofile.getProperties());
-      }
-
-      return this.field_181038_N;
-   }
-
-   public Proxy func_110437_J() {
-      return this.field_110453_aa;
-   }
-
-   public TextureManager func_110434_K() {
-      return this.field_71446_o;
-   }
-
-   public IResourceManager func_110442_L() {
-      return this.field_110451_am;
-   }
-
-   public ResourcePackRepository func_110438_M() {
-      return this.field_110448_aq;
-   }
-
-   public LanguageManager func_135016_M() {
-      return this.field_135017_as;
-   }
-
-   public TextureMap func_147117_R() {
-      return this.field_147128_au;
-   }
-
-   public boolean func_147111_S() {
-      return this.field_147129_ai;
-   }
-
-   public boolean func_147113_T() {
-      return this.field_71445_n;
-   }
-
-   public SoundHandler func_147118_V() {
-      return this.field_147127_av;
-   }
-
-   public MusicTicker.MusicType func_147109_W() {
-      if (this.field_71462_r instanceof GuiWinGame) {
-         return MusicTicker.MusicType.CREDITS;
-      } else if (this.field_71439_g != null) {
-         if (this.field_71439_g.field_70170_p.field_73011_w instanceof WorldProviderHell) {
-            return MusicTicker.MusicType.NETHER;
-         } else if (this.field_71439_g.field_70170_p.field_73011_w instanceof WorldProviderEnd) {
-            return this.field_71456_v.func_184046_j().func_184054_d() ? MusicTicker.MusicType.END_BOSS : MusicTicker.MusicType.END;
-         } else {
-            return this.field_71439_g.field_71075_bZ.field_75098_d && this.field_71439_g.field_71075_bZ.field_75101_c ? MusicTicker.MusicType.CREATIVE : MusicTicker.MusicType.GAME;
-         }
-      } else {
-         return MusicTicker.MusicType.MENU;
-      }
-   }
-
-   public void func_152348_aa() {
-      int i = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
-      if (i != 0 && !Keyboard.isRepeatEvent()) {
-         if (!(this.field_71462_r instanceof GuiControls) || ((GuiControls)this.field_71462_r).field_152177_g <= func_71386_F() - 20L) {
-            if (Keyboard.getEventKeyState()) {
-               if (i == this.field_71474_y.field_152395_am.func_151463_i()) {
-                  this.func_71352_k();
-               } else if (i == this.field_71474_y.field_151447_Z.func_151463_i()) {
-                  this.field_71456_v.func_146158_b().func_146227_a(ScreenShotHelper.func_148260_a(this.field_71412_D, this.field_71443_c, this.field_71440_d, this.field_147124_at));
-               } else if (i == 48 && GuiScreen.func_146271_m() && (this.field_71462_r == null || this.field_71462_r != null && !this.field_71462_r.func_193976_p())) {
-                  this.field_71474_y.func_74306_a(GameSettings.Options.NARRATOR, 1);
-                  if (this.field_71462_r instanceof ScreenChatOptions) {
-                     ((ScreenChatOptions)this.field_71462_r).func_193024_a();
-                  }
-               }
+        if (this.currentScreen != null)
+        {
+            try
+            {
+                this.currentScreen.handleInput();
+            }
+            catch (Throwable throwable1)
+            {
+                CrashReport crashreport = CrashReport.makeCrashReport(throwable1, "Updating screen events");
+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Affected screen");
+                crashreportcategory.setDetail("Screen name", new ICrashReportDetail<String>()
+                {
+                    public String call() throws Exception
+                    {
+                        return Minecraft.this.currentScreen.getClass().getCanonicalName();
+                    }
+                });
+                throw new ReportedException(crashreport);
             }
 
-         }
-      }
-   }
+            if (this.currentScreen != null)
+            {
+                try
+                {
+                    this.currentScreen.updateScreen();
+                }
+                catch (Throwable throwable)
+                {
+                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Ticking screen");
+                    CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Affected screen");
+                    crashreportcategory1.setDetail("Screen name", new ICrashReportDetail<String>()
+                    {
+                        public String call() throws Exception
+                        {
+                            return Minecraft.this.currentScreen.getClass().getCanonicalName();
+                        }
+                    });
+                    throw new ReportedException(crashreport1);
+                }
+            }
+        }
 
-   public MinecraftSessionService func_152347_ac() {
-      return this.field_152355_az;
-   }
+        if (this.currentScreen == null || this.currentScreen.allowUserInput)
+        {
+            this.mcProfiler.endStartSection("mouse");
+            this.runTickMouse();
 
-   public SkinManager func_152342_ad() {
-      return this.field_152350_aA;
-   }
+            if (this.leftClickCounter > 0)
+            {
+                --this.leftClickCounter;
+            }
 
-   @Nullable
-   public Entity func_175606_aa() {
-      return this.field_175622_Z;
-   }
+            this.mcProfiler.endStartSection("keyboard");
+            this.runTickKeyboard();
+        }
 
-   public void func_175607_a(Entity p_175607_1_) {
-      this.field_175622_Z = p_175607_1_;
-      this.field_71460_t.func_175066_a(p_175607_1_);
-   }
+        if (this.world != null)
+        {
+            if (this.player != null)
+            {
+                ++this.joinPlayerCounter;
 
-   public <V> ListenableFuture<V> func_152343_a(Callable<V> p_152343_1_) {
-      Validate.notNull(p_152343_1_);
-      if (this.func_152345_ab()) {
-         try {
-            return Futures.<V>immediateFuture(p_152343_1_.call());
-         } catch (Exception exception) {
-            return Futures.immediateFailedCheckedFuture(exception);
-         }
-      } else {
-         ListenableFutureTask<V> listenablefuturetask = ListenableFutureTask.<V>create(p_152343_1_);
-         synchronized(this.field_152351_aB) {
-            this.field_152351_aB.add(listenablefuturetask);
-            return listenablefuturetask;
-         }
-      }
-   }
+                if (this.joinPlayerCounter == 30)
+                {
+                    this.joinPlayerCounter = 0;
+                    this.world.joinEntityInSurroundings(this.player);
+                }
+            }
 
-   public ListenableFuture<Object> func_152344_a(Runnable p_152344_1_) {
-      Validate.notNull(p_152344_1_);
-      return this.<Object>func_152343_a(Executors.callable(p_152344_1_));
-   }
+            this.mcProfiler.endStartSection("gameRenderer");
 
-   public boolean func_152345_ab() {
-      return Thread.currentThread() == this.field_152352_aC;
-   }
+            if (!this.isGamePaused)
+            {
+                this.entityRenderer.updateRenderer();
+            }
 
-   public BlockRendererDispatcher func_175602_ab() {
-      return this.field_175618_aM;
-   }
+            this.mcProfiler.endStartSection("levelRenderer");
 
-   public RenderManager func_175598_ae() {
-      return this.field_175616_W;
-   }
+            if (!this.isGamePaused)
+            {
+                this.renderGlobal.updateClouds();
+            }
 
-   public RenderItem func_175599_af() {
-      return this.field_175621_X;
-   }
+            this.mcProfiler.endStartSection("level");
 
-   public ItemRenderer func_175597_ag() {
-      return this.field_175620_Y;
-   }
+            if (!this.isGamePaused)
+            {
+                if (this.world.getLastLightningBolt() > 0)
+                {
+                    this.world.setLastLightningBolt(this.world.getLastLightningBolt() - 1);
+                }
 
-   public <T> ISearchTree<T> func_193987_a(SearchTreeManager.Key<T> p_193987_1_) {
-      return this.field_193995_ae.<T>func_194010_a(p_193987_1_);
-   }
+                this.world.updateEntities();
+            }
+        }
+        else if (this.entityRenderer.isShaderActive())
+        {
+            this.entityRenderer.stopUseShader();
+        }
 
-   public static int func_175610_ah() {
-      return field_71470_ab;
-   }
+        if (!this.isGamePaused)
+        {
+            this.mcMusicTicker.update();
+            this.mcSoundHandler.update();
+        }
 
-   public FrameTimer func_181539_aj() {
-      return this.field_181542_y;
-   }
+        if (this.world != null)
+        {
+            if (!this.isGamePaused)
+            {
+                this.world.setAllowedSpawnTypes(this.world.getDifficulty() != EnumDifficulty.PEACEFUL, true);
+                this.field_193035_aW.func_193303_d();
 
-   public boolean func_181540_al() {
-      return this.field_181541_X;
-   }
+                try
+                {
+                    this.world.tick();
+                }
+                catch (Throwable throwable2)
+                {
+                    CrashReport crashreport2 = CrashReport.makeCrashReport(throwable2, "Exception in world tick");
 
-   public void func_181537_a(boolean p_181537_1_) {
-      this.field_181541_X = p_181537_1_;
-   }
+                    if (this.world == null)
+                    {
+                        CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Affected level");
+                        crashreportcategory2.addCrashSection("Problem", "Level is null!");
+                    }
+                    else
+                    {
+                        this.world.addWorldInfoToCrashReport(crashreport2);
+                    }
 
-   public DataFixer func_184126_aj() {
-      return this.field_184131_U;
-   }
+                    throw new ReportedException(crashreport2);
+                }
+            }
 
-   public float func_184121_ak() {
-      return this.field_71428_T.field_194147_b;
-   }
+            this.mcProfiler.endStartSection("animateTick");
 
-   public float func_193989_ak() {
-      return this.field_71428_T.field_194148_c;
-   }
+            if (!this.isGamePaused && this.world != null)
+            {
+                this.world.doVoidFogParticles(MathHelper.floor(this.player.posX), MathHelper.floor(this.player.posY), MathHelper.floor(this.player.posZ));
+            }
 
-   public BlockColors func_184125_al() {
-      return this.field_184127_aH;
-   }
+            this.mcProfiler.endStartSection("particles");
 
-   public boolean func_189648_am() {
-      return this.field_71439_g != null && this.field_71439_g.func_175140_cp() || this.field_71474_y.field_178879_v;
-   }
+            if (!this.isGamePaused)
+            {
+                this.effectRenderer.updateEffects();
+            }
+        }
+        else if (this.myNetworkManager != null)
+        {
+            this.mcProfiler.endStartSection("pendingConnection");
+            this.myNetworkManager.processReceivedPackets();
+        }
 
-   public GuiToast func_193033_an() {
-      return this.field_193034_aS;
-   }
+        this.mcProfiler.endSection();
+        this.systemTime = getSystemTime();
+    }
 
-   public Tutorial func_193032_ao() {
-      return this.field_193035_aW;
-   }
+    private void runTickKeyboard() throws IOException
+    {
+        while (Keyboard.next())
+        {
+            int i = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
+
+            if (this.debugCrashKeyPressTime > 0L)
+            {
+                if (getSystemTime() - this.debugCrashKeyPressTime >= 6000L)
+                {
+                    throw new ReportedException(new CrashReport("Manually triggered debug crash", new Throwable()));
+                }
+
+                if (!Keyboard.isKeyDown(46) || !Keyboard.isKeyDown(61))
+                {
+                    this.debugCrashKeyPressTime = -1L;
+                }
+            }
+            else if (Keyboard.isKeyDown(46) && Keyboard.isKeyDown(61))
+            {
+                this.actionKeyF3 = true;
+                this.debugCrashKeyPressTime = getSystemTime();
+            }
+
+            this.dispatchKeypresses();
+
+            if (this.currentScreen != null)
+            {
+                this.currentScreen.handleKeyboardInput();
+            }
+
+            boolean flag = Keyboard.getEventKeyState();
+
+            if (flag)
+            {
+                if (i == 62 && this.entityRenderer != null)
+                {
+                    this.entityRenderer.switchUseShader();
+                }
+
+                boolean flag1 = false;
+
+                if (this.currentScreen == null)
+                {
+                    if (i == 1)
+                    {
+                        this.displayInGameMenu();
+                    }
+
+                    flag1 = Keyboard.isKeyDown(61) && this.processKeyF3(i);
+                    this.actionKeyF3 |= flag1;
+
+                    if (i == 59)
+                    {
+                        this.gameSettings.hideGUI = !this.gameSettings.hideGUI;
+                    }
+                }
+
+                if (flag1)
+                {
+                    KeyBinding.setKeyBindState(i, false);
+                }
+                else
+                {
+                    KeyBinding.setKeyBindState(i, true);
+                    KeyBinding.onTick(i);
+                }
+
+                if (this.gameSettings.showDebugProfilerChart)
+                {
+                    if (i == 11)
+                    {
+                        this.updateDebugProfilerName(0);
+                    }
+
+                    for (int j = 0; j < 9; ++j)
+                    {
+                        if (i == 2 + j)
+                        {
+                            this.updateDebugProfilerName(j + 1);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                KeyBinding.setKeyBindState(i, false);
+
+                if (i == 61)
+                {
+                    if (this.actionKeyF3)
+                    {
+                        this.actionKeyF3 = false;
+                    }
+                    else
+                    {
+                        this.gameSettings.showDebugInfo = !this.gameSettings.showDebugInfo;
+                        this.gameSettings.showDebugProfilerChart = this.gameSettings.showDebugInfo && GuiScreen.isShiftKeyDown();
+                        this.gameSettings.showLagometer = this.gameSettings.showDebugInfo && GuiScreen.isAltKeyDown();
+                    }
+                }
+            }
+        }
+
+        this.processKeyBinds();
+    }
+
+    private boolean processKeyF3(int p_184122_1_)
+    {
+        if (p_184122_1_ == 30)
+        {
+            this.renderGlobal.loadRenderers();
+            this.func_190521_a("debug.reload_chunks.message");
+            return true;
+        }
+        else if (p_184122_1_ == 48)
+        {
+            boolean flag1 = !this.renderManager.isDebugBoundingBox();
+            this.renderManager.setDebugBoundingBox(flag1);
+            this.func_190521_a(flag1 ? "debug.show_hitboxes.on" : "debug.show_hitboxes.off");
+            return true;
+        }
+        else if (p_184122_1_ == 32)
+        {
+            if (this.ingameGUI != null)
+            {
+                this.ingameGUI.getChatGUI().clearChatMessages(false);
+            }
+
+            return true;
+        }
+        else if (p_184122_1_ == 33)
+        {
+            this.gameSettings.setOptionValue(GameSettings.Options.RENDER_DISTANCE, GuiScreen.isShiftKeyDown() ? -1 : 1);
+            this.func_190521_a("debug.cycle_renderdistance.message", this.gameSettings.renderDistanceChunks);
+            return true;
+        }
+        else if (p_184122_1_ == 34)
+        {
+            boolean flag = this.debugRenderer.toggleDebugScreen();
+            this.func_190521_a(flag ? "debug.chunk_boundaries.on" : "debug.chunk_boundaries.off");
+            return true;
+        }
+        else if (p_184122_1_ == 35)
+        {
+            this.gameSettings.advancedItemTooltips = !this.gameSettings.advancedItemTooltips;
+            this.func_190521_a(this.gameSettings.advancedItemTooltips ? "debug.advanced_tooltips.on" : "debug.advanced_tooltips.off");
+            this.gameSettings.saveOptions();
+            return true;
+        }
+        else if (p_184122_1_ == 49)
+        {
+            if (!this.player.canCommandSenderUseCommand(2, ""))
+            {
+                this.func_190521_a("debug.creative_spectator.error");
+            }
+            else if (this.player.isCreative())
+            {
+                this.player.sendChatMessage("/gamemode spectator");
+            }
+            else if (this.player.isSpectator())
+            {
+                this.player.sendChatMessage("/gamemode creative");
+            }
+
+            return true;
+        }
+        else if (p_184122_1_ == 25)
+        {
+            this.gameSettings.pauseOnLostFocus = !this.gameSettings.pauseOnLostFocus;
+            this.gameSettings.saveOptions();
+            this.func_190521_a(this.gameSettings.pauseOnLostFocus ? "debug.pause_focus.on" : "debug.pause_focus.off");
+            return true;
+        }
+        else if (p_184122_1_ == 16)
+        {
+            this.func_190521_a("debug.help.message");
+            GuiNewChat guinewchat = this.ingameGUI.getChatGUI();
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.reload_chunks.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.show_hitboxes.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.clear_chat.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.cycle_renderdistance.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.chunk_boundaries.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.advanced_tooltips.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.creative_spectator.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.pause_focus.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.help.help", new Object[0]));
+            guinewchat.printChatMessage(new TextComponentTranslation("debug.reload_resourcepacks.help", new Object[0]));
+            return true;
+        }
+        else if (p_184122_1_ == 20)
+        {
+            this.func_190521_a("debug.reload_resourcepacks.message");
+            this.refreshResources();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void processKeyBinds()
+    {
+        for (; this.gameSettings.keyBindTogglePerspective.isPressed(); this.renderGlobal.setDisplayListEntitiesDirty())
+        {
+            ++this.gameSettings.thirdPersonView;
+
+            if (this.gameSettings.thirdPersonView > 2)
+            {
+                this.gameSettings.thirdPersonView = 0;
+            }
+
+            if (this.gameSettings.thirdPersonView == 0)
+            {
+                this.entityRenderer.loadEntityShader(this.getRenderViewEntity());
+            }
+            else if (this.gameSettings.thirdPersonView == 1)
+            {
+                this.entityRenderer.loadEntityShader((Entity)null);
+            }
+        }
+
+        while (this.gameSettings.keyBindSmoothCamera.isPressed())
+        {
+            this.gameSettings.smoothCamera = !this.gameSettings.smoothCamera;
+        }
+
+        for (int i = 0; i < 9; ++i)
+        {
+            boolean flag = this.gameSettings.field_193629_ap.isKeyDown();
+            boolean flag1 = this.gameSettings.field_193630_aq.isKeyDown();
+
+            if (this.gameSettings.keyBindsHotbar[i].isPressed())
+            {
+                if (this.player.isSpectator())
+                {
+                    this.ingameGUI.getSpectatorGui().onHotbarSelected(i);
+                }
+                else if (!this.player.isCreative() || this.currentScreen != null || !flag1 && !flag)
+                {
+                    this.player.inventory.currentItem = i;
+                }
+                else
+                {
+                    GuiContainerCreative.func_192044_a(this, i, flag1, flag);
+                }
+            }
+        }
+
+        while (this.gameSettings.keyBindInventory.isPressed())
+        {
+            if (this.playerController.isRidingHorse())
+            {
+                this.player.sendHorseInventory();
+            }
+            else
+            {
+                this.field_193035_aW.func_193296_a();
+                this.displayGuiScreen(new GuiInventory(this.player));
+            }
+        }
+
+        while (this.gameSettings.field_194146_ao.isPressed())
+        {
+            this.displayGuiScreen(new GuiScreenAdvancements(this.player.connection.func_191982_f()));
+        }
+
+        while (this.gameSettings.keyBindSwapHands.isPressed())
+        {
+            if (!this.player.isSpectator())
+            {
+                this.getConnection().sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, BlockPos.ORIGIN, EnumFacing.DOWN));
+            }
+        }
+
+        while (this.gameSettings.keyBindDrop.isPressed())
+        {
+            if (!this.player.isSpectator())
+            {
+                this.player.dropItem(GuiScreen.isCtrlKeyDown());
+            }
+        }
+
+        boolean flag2 = this.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN;
+
+        if (flag2)
+        {
+            while (this.gameSettings.keyBindChat.isPressed())
+            {
+                this.displayGuiScreen(new GuiChat());
+            }
+
+            if (this.currentScreen == null && this.gameSettings.keyBindCommand.isPressed())
+            {
+                this.displayGuiScreen(new GuiChat("/"));
+            }
+        }
+
+        if (this.player.isHandActive())
+        {
+            if (!this.gameSettings.keyBindUseItem.isKeyDown())
+            {
+                this.playerController.onStoppedUsingItem(this.player);
+            }
+
+            label109:
+
+            while (true)
+            {
+                if (!this.gameSettings.keyBindAttack.isPressed())
+                {
+                    while (this.gameSettings.keyBindUseItem.isPressed())
+                    {
+                        ;
+                    }
+
+                    while (true)
+                    {
+                        if (this.gameSettings.keyBindPickBlock.isPressed())
+                        {
+                            continue;
+                        }
+
+                        break label109;
+                    }
+                }
+            }
+        }
+        else
+        {
+            while (this.gameSettings.keyBindAttack.isPressed())
+            {
+                this.clickMouse();
+            }
+
+            while (this.gameSettings.keyBindUseItem.isPressed())
+            {
+                this.rightClickMouse();
+            }
+
+            while (this.gameSettings.keyBindPickBlock.isPressed())
+            {
+                this.middleClickMouse();
+            }
+        }
+
+        if (this.gameSettings.keyBindUseItem.isKeyDown() && this.rightClickDelayTimer == 0 && !this.player.isHandActive())
+        {
+            this.rightClickMouse();
+        }
+
+        this.sendClickBlockToController(this.currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus);
+    }
+
+    private void runTickMouse() throws IOException
+    {
+        while (Mouse.next())
+        {
+            int i = Mouse.getEventButton();
+            KeyBinding.setKeyBindState(i - 100, Mouse.getEventButtonState());
+
+            if (Mouse.getEventButtonState())
+            {
+                if (this.player.isSpectator() && i == 2)
+                {
+                    this.ingameGUI.getSpectatorGui().onMiddleClick();
+                }
+                else
+                {
+                    KeyBinding.onTick(i - 100);
+                }
+            }
+
+            long j = getSystemTime() - this.systemTime;
+
+            if (j <= 200L)
+            {
+                int k = Mouse.getEventDWheel();
+
+                if (k != 0)
+                {
+                    if (this.player.isSpectator())
+                    {
+                        k = k < 0 ? -1 : 1;
+
+                        if (this.ingameGUI.getSpectatorGui().isMenuActive())
+                        {
+                            this.ingameGUI.getSpectatorGui().onMouseScroll(-k);
+                        }
+                        else
+                        {
+                            float f = MathHelper.clamp(this.player.capabilities.getFlySpeed() + (float)k * 0.005F, 0.0F, 0.2F);
+                            this.player.capabilities.setFlySpeed(f);
+                        }
+                    }
+                    else
+                    {
+                        this.player.inventory.changeCurrentItem(k);
+                    }
+                }
+
+                if (this.currentScreen == null)
+                {
+                    if (!this.inGameHasFocus && Mouse.getEventButtonState())
+                    {
+                        this.setIngameFocus();
+                    }
+                }
+                else if (this.currentScreen != null)
+                {
+                    this.currentScreen.handleMouseInput();
+                }
+            }
+        }
+    }
+
+    private void func_190521_a(String p_190521_1_, Object... p_190521_2_)
+    {
+        this.ingameGUI.getChatGUI().printChatMessage((new TextComponentString("")).appendSibling((new TextComponentTranslation("debug.prefix", new Object[0])).setStyle((new Style()).setColor(TextFormatting.YELLOW).setBold(Boolean.valueOf(true)))).appendText(" ").appendSibling(new TextComponentTranslation(p_190521_1_, p_190521_2_)));
+    }
+
+    /**
+     * Arguments: World foldername,  World ingame name, WorldSettings
+     */
+    public void launchIntegratedServer(String folderName, String worldName, @Nullable WorldSettings worldSettingsIn)
+    {
+        this.loadWorld((WorldClient)null);
+        System.gc();
+        ISaveHandler isavehandler = this.saveLoader.getSaveLoader(folderName, false);
+        WorldInfo worldinfo = isavehandler.loadWorldInfo();
+
+        if (worldinfo == null && worldSettingsIn != null)
+        {
+            worldinfo = new WorldInfo(worldSettingsIn, folderName);
+            isavehandler.saveWorldInfo(worldinfo);
+        }
+
+        if (worldSettingsIn == null)
+        {
+            worldSettingsIn = new WorldSettings(worldinfo);
+        }
+
+        try
+        {
+            YggdrasilAuthenticationService yggdrasilauthenticationservice = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+            MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
+            GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
+            PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(this.mcDataDir, MinecraftServer.USER_CACHE_FILE.getName()));
+            TileEntitySkull.setProfileCache(playerprofilecache);
+            TileEntitySkull.setSessionService(minecraftsessionservice);
+            PlayerProfileCache.setOnlineMode(false);
+            this.theIntegratedServer = new IntegratedServer(this, folderName, worldName, worldSettingsIn, yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, playerprofilecache);
+            this.theIntegratedServer.startServerThread();
+            this.integratedServerIsRunning = true;
+        }
+        catch (Throwable throwable)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Starting integrated server");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Starting integrated server");
+            crashreportcategory.addCrashSection("Level ID", folderName);
+            crashreportcategory.addCrashSection("Level Name", worldName);
+            throw new ReportedException(crashreport);
+        }
+
+        this.loadingScreen.displaySavingString(I18n.format("menu.loadingLevel"));
+
+        while (!this.theIntegratedServer.serverIsInRunLoop())
+        {
+            String s = this.theIntegratedServer.getUserMessage();
+
+            if (s != null)
+            {
+                this.loadingScreen.displayLoadingString(I18n.format(s));
+            }
+            else
+            {
+                this.loadingScreen.displayLoadingString("");
+            }
+
+            try
+            {
+                Thread.sleep(200L);
+            }
+            catch (InterruptedException var10)
+            {
+                ;
+            }
+        }
+
+        this.displayGuiScreen(new GuiScreenWorking());
+        SocketAddress socketaddress = this.theIntegratedServer.getNetworkSystem().addLocalEndpoint();
+        NetworkManager networkmanager = NetworkManager.provideLocalClient(socketaddress);
+        networkmanager.setNetHandler(new NetHandlerLoginClient(networkmanager, this, (GuiScreen)null));
+        networkmanager.sendPacket(new C00Handshake(socketaddress.toString(), 0, EnumConnectionState.LOGIN));
+        networkmanager.sendPacket(new CPacketLoginStart(this.getSession().getProfile()));
+        this.myNetworkManager = networkmanager;
+    }
+
+    /**
+     * unloads the current world first
+     */
+    public void loadWorld(@Nullable WorldClient worldClientIn)
+    {
+        this.loadWorld(worldClientIn, "");
+    }
+
+    /**
+     * par2Str is displayed on the loading screen to the user unloads the current world first
+     */
+    public void loadWorld(@Nullable WorldClient worldClientIn, String loadingMessage)
+    {
+        if (worldClientIn == null)
+        {
+            NetHandlerPlayClient nethandlerplayclient = this.getConnection();
+
+            if (nethandlerplayclient != null)
+            {
+                nethandlerplayclient.cleanup();
+            }
+
+            if (this.theIntegratedServer != null && this.theIntegratedServer.isAnvilFileSet())
+            {
+                this.theIntegratedServer.initiateShutdown();
+            }
+
+            this.theIntegratedServer = null;
+            this.entityRenderer.func_190564_k();
+            this.playerController = null;
+            NarratorChatListener.field_193643_a.func_193642_b();
+        }
+
+        this.renderViewEntity = null;
+        this.myNetworkManager = null;
+
+        if (this.loadingScreen != null)
+        {
+            this.loadingScreen.resetProgressAndMessage(loadingMessage);
+            this.loadingScreen.displayLoadingString("");
+        }
+
+        if (worldClientIn == null && this.world != null)
+        {
+            this.mcResourcePackRepository.clearResourcePack();
+            this.ingameGUI.resetPlayersOverlayFooterHeader();
+            this.setServerData((ServerData)null);
+            this.integratedServerIsRunning = false;
+        }
+
+        this.mcSoundHandler.stopSounds();
+        this.world = worldClientIn;
+
+        if (this.renderGlobal != null)
+        {
+            this.renderGlobal.setWorldAndLoadRenderers(worldClientIn);
+        }
+
+        if (this.effectRenderer != null)
+        {
+            this.effectRenderer.clearEffects(worldClientIn);
+        }
+
+        TileEntityRendererDispatcher.instance.setWorld(worldClientIn);
+
+        if (worldClientIn != null)
+        {
+            if (!this.integratedServerIsRunning)
+            {
+                AuthenticationService authenticationservice = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+                MinecraftSessionService minecraftsessionservice = authenticationservice.createMinecraftSessionService();
+                GameProfileRepository gameprofilerepository = authenticationservice.createProfileRepository();
+                PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(this.mcDataDir, MinecraftServer.USER_CACHE_FILE.getName()));
+                TileEntitySkull.setProfileCache(playerprofilecache);
+                TileEntitySkull.setSessionService(minecraftsessionservice);
+                PlayerProfileCache.setOnlineMode(false);
+            }
+
+            if (this.player == null)
+            {
+                this.player = this.playerController.func_192830_a(worldClientIn, new StatisticsManager(), new RecipeBookClient());
+                this.playerController.flipPlayer(this.player);
+            }
+
+            this.player.preparePlayerToSpawn();
+            worldClientIn.spawnEntityInWorld(this.player);
+            this.player.movementInput = new MovementInputFromOptions(this.gameSettings);
+            this.playerController.setPlayerCapabilities(this.player);
+            this.renderViewEntity = this.player;
+        }
+        else
+        {
+            this.saveLoader.flushCache();
+            this.player = null;
+        }
+
+        System.gc();
+        this.systemTime = 0L;
+    }
+
+    public void setDimensionAndSpawnPlayer(int dimension)
+    {
+        this.world.setInitialSpawnLocation();
+        this.world.removeAllEntities();
+        int i = 0;
+        String s = null;
+
+        if (this.player != null)
+        {
+            i = this.player.getEntityId();
+            this.world.removeEntity(this.player);
+            s = this.player.getServerBrand();
+        }
+
+        this.renderViewEntity = null;
+        EntityPlayerSP entityplayersp = this.player;
+        this.player = this.playerController.func_192830_a(this.world, this.player == null ? new StatisticsManager() : this.player.getStatFileWriter(), this.player == null ? new RecipeBook() : this.player.func_192035_E());
+        this.player.getDataManager().setEntryValues(entityplayersp.getDataManager().getAll());
+        this.player.dimension = dimension;
+        this.renderViewEntity = this.player;
+        this.player.preparePlayerToSpawn();
+        this.player.setServerBrand(s);
+        this.world.spawnEntityInWorld(this.player);
+        this.playerController.flipPlayer(this.player);
+        this.player.movementInput = new MovementInputFromOptions(this.gameSettings);
+        this.player.setEntityId(i);
+        this.playerController.setPlayerCapabilities(this.player);
+        this.player.setReducedDebug(entityplayersp.hasReducedDebug());
+
+        if (this.currentScreen instanceof GuiGameOver)
+        {
+            this.displayGuiScreen((GuiScreen)null);
+        }
+    }
+
+    /**
+     * Gets whether this is a demo or not.
+     */
+    public final boolean isDemo()
+    {
+        return this.isDemo;
+    }
+
+    @Nullable
+    public NetHandlerPlayClient getConnection()
+    {
+        return this.player == null ? null : this.player.connection;
+    }
+
+    public static boolean isGuiEnabled()
+    {
+        return theMinecraft == null || !theMinecraft.gameSettings.hideGUI;
+    }
+
+    public static boolean isFancyGraphicsEnabled()
+    {
+        return theMinecraft != null && theMinecraft.gameSettings.fancyGraphics;
+    }
+
+    /**
+     * Returns if ambient occlusion is enabled
+     */
+    public static boolean isAmbientOcclusionEnabled()
+    {
+        return theMinecraft != null && theMinecraft.gameSettings.ambientOcclusion != 0;
+    }
+
+    /**
+     * Called when user clicked he's mouse middle button (pick block)
+     */
+    private void middleClickMouse()
+    {
+        if (this.objectMouseOver != null && this.objectMouseOver.typeOfHit != RayTraceResult.Type.MISS)
+        {
+            boolean flag = this.player.capabilities.isCreativeMode;
+            TileEntity tileentity = null;
+            ItemStack itemstack;
+
+            if (this.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+            {
+                BlockPos blockpos = this.objectMouseOver.getBlockPos();
+                IBlockState iblockstate = this.world.getBlockState(blockpos);
+                Block block = iblockstate.getBlock();
+
+                if (iblockstate.getMaterial() == Material.AIR)
+                {
+                    return;
+                }
+
+                itemstack = block.getItem(this.world, blockpos, iblockstate);
+
+                if (itemstack.func_190926_b())
+                {
+                    return;
+                }
+
+                if (flag && GuiScreen.isCtrlKeyDown() && block.hasTileEntity())
+                {
+                    tileentity = this.world.getTileEntity(blockpos);
+                }
+            }
+            else
+            {
+                if (this.objectMouseOver.typeOfHit != RayTraceResult.Type.ENTITY || this.objectMouseOver.entityHit == null || !flag)
+                {
+                    return;
+                }
+
+                if (this.objectMouseOver.entityHit instanceof EntityPainting)
+                {
+                    itemstack = new ItemStack(Items.PAINTING);
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityLeashKnot)
+                {
+                    itemstack = new ItemStack(Items.LEAD);
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityItemFrame)
+                {
+                    EntityItemFrame entityitemframe = (EntityItemFrame)this.objectMouseOver.entityHit;
+                    ItemStack itemstack1 = entityitemframe.getDisplayedItem();
+
+                    if (itemstack1.func_190926_b())
+                    {
+                        itemstack = new ItemStack(Items.ITEM_FRAME);
+                    }
+                    else
+                    {
+                        itemstack = itemstack1.copy();
+                    }
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityMinecart)
+                {
+                    EntityMinecart entityminecart = (EntityMinecart)this.objectMouseOver.entityHit;
+                    Item item1;
+
+                    switch (entityminecart.getType())
+                    {
+                        case FURNACE:
+                            item1 = Items.FURNACE_MINECART;
+                            break;
+
+                        case CHEST:
+                            item1 = Items.CHEST_MINECART;
+                            break;
+
+                        case TNT:
+                            item1 = Items.TNT_MINECART;
+                            break;
+
+                        case HOPPER:
+                            item1 = Items.HOPPER_MINECART;
+                            break;
+
+                        case COMMAND_BLOCK:
+                            item1 = Items.COMMAND_BLOCK_MINECART;
+                            break;
+
+                        default:
+                            item1 = Items.MINECART;
+                    }
+
+                    itemstack = new ItemStack(item1);
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityBoat)
+                {
+                    itemstack = new ItemStack(((EntityBoat)this.objectMouseOver.entityHit).getItemBoat());
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityArmorStand)
+                {
+                    itemstack = new ItemStack(Items.ARMOR_STAND);
+                }
+                else if (this.objectMouseOver.entityHit instanceof EntityEnderCrystal)
+                {
+                    itemstack = new ItemStack(Items.END_CRYSTAL);
+                }
+                else
+                {
+                    ResourceLocation resourcelocation = EntityList.func_191301_a(this.objectMouseOver.entityHit);
+
+                    if (resourcelocation == null || !EntityList.ENTITY_EGGS.containsKey(resourcelocation))
+                    {
+                        return;
+                    }
+
+                    itemstack = new ItemStack(Items.SPAWN_EGG);
+                    ItemMonsterPlacer.applyEntityIdToItemStack(itemstack, resourcelocation);
+                }
+            }
+
+            if (itemstack.func_190926_b())
+            {
+                String s = "";
+
+                if (this.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+                {
+                    s = ((ResourceLocation)Block.REGISTRY.getNameForObject(this.world.getBlockState(this.objectMouseOver.getBlockPos()).getBlock())).toString();
+                }
+                else if (this.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
+                {
+                    s = EntityList.func_191301_a(this.objectMouseOver.entityHit).toString();
+                }
+
+                LOGGER.warn("Picking on: [{}] {} gave null item", this.objectMouseOver.typeOfHit, s);
+            }
+            else
+            {
+                InventoryPlayer inventoryplayer = this.player.inventory;
+
+                if (tileentity != null)
+                {
+                    this.storeTEInStack(itemstack, tileentity);
+                }
+
+                int i = inventoryplayer.getSlotFor(itemstack);
+
+                if (flag)
+                {
+                    inventoryplayer.setPickedItemStack(itemstack);
+                    this.playerController.sendSlotPacket(this.player.getHeldItem(EnumHand.MAIN_HAND), 36 + inventoryplayer.currentItem);
+                }
+                else if (i != -1)
+                {
+                    if (InventoryPlayer.isHotbar(i))
+                    {
+                        inventoryplayer.currentItem = i;
+                    }
+                    else
+                    {
+                        this.playerController.pickItem(i);
+                    }
+                }
+            }
+        }
+    }
+
+    private ItemStack storeTEInStack(ItemStack stack, TileEntity te)
+    {
+        NBTTagCompound nbttagcompound = te.writeToNBT(new NBTTagCompound());
+
+        if (stack.getItem() == Items.SKULL && nbttagcompound.hasKey("Owner"))
+        {
+            NBTTagCompound nbttagcompound2 = nbttagcompound.getCompoundTag("Owner");
+            NBTTagCompound nbttagcompound3 = new NBTTagCompound();
+            nbttagcompound3.setTag("SkullOwner", nbttagcompound2);
+            stack.setTagCompound(nbttagcompound3);
+            return stack;
+        }
+        else
+        {
+            stack.setTagInfo("BlockEntityTag", nbttagcompound);
+            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+            NBTTagList nbttaglist = new NBTTagList();
+            nbttaglist.appendTag(new NBTTagString("(+NBT)"));
+            nbttagcompound1.setTag("Lore", nbttaglist);
+            stack.setTagInfo("display", nbttagcompound1);
+            return stack;
+        }
+    }
+
+    /**
+     * adds core server Info (GL version , Texture pack, isModded, type), and the worldInfo to the crash report
+     */
+    public CrashReport addGraphicsAndWorldToCrashReport(CrashReport theCrash)
+    {
+        theCrash.getCategory().setDetail("Launched Version", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return Minecraft.this.launchedVersion;
+            }
+        });
+        theCrash.getCategory().setDetail("LWJGL", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return Sys.getVersion();
+            }
+        });
+        theCrash.getCategory().setDetail("OpenGL", new ICrashReportDetail<String>()
+        {
+            public String call()
+            {
+                return GlStateManager.glGetString(7937) + " GL version " + GlStateManager.glGetString(7938) + ", " + GlStateManager.glGetString(7936);
+            }
+        });
+        theCrash.getCategory().setDetail("GL Caps", new ICrashReportDetail<String>()
+        {
+            public String call()
+            {
+                return OpenGlHelper.getLogText();
+            }
+        });
+        theCrash.getCategory().setDetail("Using VBOs", new ICrashReportDetail<String>()
+        {
+            public String call()
+            {
+                return Minecraft.this.gameSettings.useVbo ? "Yes" : "No";
+            }
+        });
+        theCrash.getCategory().setDetail("Is Modded", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                String s = ClientBrandRetriever.getClientModName();
+
+                if (!"vanilla".equals(s))
+                {
+                    return "Definitely; Client brand changed to '" + s + "'";
+                }
+                else
+                {
+                    return Minecraft.class.getSigners() == null ? "Very likely; Jar signature invalidated" : "Probably not. Jar signature remains and client brand is untouched.";
+                }
+            }
+        });
+        theCrash.getCategory().setDetail("Type", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return "Client (map_client.txt)";
+            }
+        });
+        theCrash.getCategory().setDetail("Resource Packs", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                StringBuilder stringbuilder = new StringBuilder();
+
+                for (String s : Minecraft.this.gameSettings.resourcePacks)
+                {
+                    if (stringbuilder.length() > 0)
+                    {
+                        stringbuilder.append(", ");
+                    }
+
+                    stringbuilder.append(s);
+
+                    if (Minecraft.this.gameSettings.incompatibleResourcePacks.contains(s))
+                    {
+                        stringbuilder.append(" (incompatible)");
+                    }
+                }
+
+                return stringbuilder.toString();
+            }
+        });
+        theCrash.getCategory().setDetail("Current Language", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return Minecraft.this.mcLanguageManager.getCurrentLanguage().toString();
+            }
+        });
+        theCrash.getCategory().setDetail("Profiler Position", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return Minecraft.this.mcProfiler.profilingEnabled ? Minecraft.this.mcProfiler.getNameOfLastSection() : "N/A (disabled)";
+            }
+        });
+        theCrash.getCategory().setDetail("CPU", new ICrashReportDetail<String>()
+        {
+            public String call() throws Exception
+            {
+                return OpenGlHelper.getCpu();
+            }
+        });
+
+        if (this.world != null)
+        {
+            this.world.addWorldInfoToCrashReport(theCrash);
+        }
+
+        return theCrash;
+    }
+
+    /**
+     * Return the singleton Minecraft instance for the game
+     */
+    public static Minecraft getMinecraft()
+    {
+        return theMinecraft;
+    }
+
+    public ListenableFuture<Object> scheduleResourcesRefresh()
+    {
+        return this.addScheduledTask(new Runnable()
+        {
+            public void run()
+            {
+                Minecraft.this.refreshResources();
+            }
+        });
+    }
+
+    public void addServerStatsToSnooper(Snooper playerSnooper)
+    {
+        playerSnooper.addClientStat("fps", Integer.valueOf(debugFPS));
+        playerSnooper.addClientStat("vsync_enabled", Boolean.valueOf(this.gameSettings.enableVsync));
+        playerSnooper.addClientStat("display_frequency", Integer.valueOf(Display.getDisplayMode().getFrequency()));
+        playerSnooper.addClientStat("display_type", this.fullscreen ? "fullscreen" : "windowed");
+        playerSnooper.addClientStat("run_time", Long.valueOf((MinecraftServer.getCurrentTimeMillis() - playerSnooper.getMinecraftStartTimeMillis()) / 60L * 1000L));
+        playerSnooper.addClientStat("current_action", this.getCurrentAction());
+        playerSnooper.addClientStat("language", this.gameSettings.language == null ? "en_us" : this.gameSettings.language);
+        String s = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? "little" : "big";
+        playerSnooper.addClientStat("endianness", s);
+        playerSnooper.addClientStat("subtitles", Boolean.valueOf(this.gameSettings.showSubtitles));
+        playerSnooper.addClientStat("touch", this.gameSettings.touchscreen ? "touch" : "mouse");
+        playerSnooper.addClientStat("resource_packs", Integer.valueOf(this.mcResourcePackRepository.getRepositoryEntries().size()));
+        int i = 0;
+
+        for (ResourcePackRepository.Entry resourcepackrepository$entry : this.mcResourcePackRepository.getRepositoryEntries())
+        {
+            playerSnooper.addClientStat("resource_pack[" + i++ + "]", resourcepackrepository$entry.getResourcePackName());
+        }
+
+        if (this.theIntegratedServer != null && this.theIntegratedServer.getPlayerUsageSnooper() != null)
+        {
+            playerSnooper.addClientStat("snooper_partner", this.theIntegratedServer.getPlayerUsageSnooper().getUniqueID());
+        }
+    }
+
+    /**
+     * Return the current action's name
+     */
+    private String getCurrentAction()
+    {
+        if (this.theIntegratedServer != null)
+        {
+            return this.theIntegratedServer.getPublic() ? "hosting_lan" : "singleplayer";
+        }
+        else if (this.currentServerData != null)
+        {
+            return this.currentServerData.isOnLAN() ? "playing_lan" : "multiplayer";
+        }
+        else
+        {
+            return "out_of_game";
+        }
+    }
+
+    public void addServerTypeToSnooper(Snooper playerSnooper)
+    {
+        playerSnooper.addStatToSnooper("opengl_version", GlStateManager.glGetString(7938));
+        playerSnooper.addStatToSnooper("opengl_vendor", GlStateManager.glGetString(7936));
+        playerSnooper.addStatToSnooper("client_brand", ClientBrandRetriever.getClientModName());
+        playerSnooper.addStatToSnooper("launched_version", this.launchedVersion);
+        ContextCapabilities contextcapabilities = GLContext.getCapabilities();
+        playerSnooper.addStatToSnooper("gl_caps[ARB_arrays_of_arrays]", Boolean.valueOf(contextcapabilities.GL_ARB_arrays_of_arrays));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_base_instance]", Boolean.valueOf(contextcapabilities.GL_ARB_base_instance));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_blend_func_extended]", Boolean.valueOf(contextcapabilities.GL_ARB_blend_func_extended));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_clear_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_clear_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_color_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_color_buffer_float));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_compatibility]", Boolean.valueOf(contextcapabilities.GL_ARB_compatibility));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_compressed_texture_pixel_storage]", Boolean.valueOf(contextcapabilities.GL_ARB_compressed_texture_pixel_storage));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_compute_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_compute_shader));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_copy_buffer]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_buffer));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_copy_image]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_image));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_depth_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_buffer_float));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_compute_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_compute_shader));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_copy_buffer]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_buffer));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_copy_image]", Boolean.valueOf(contextcapabilities.GL_ARB_copy_image));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_depth_buffer_float]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_buffer_float));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_depth_clamp]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_clamp));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_depth_texture]", Boolean.valueOf(contextcapabilities.GL_ARB_depth_texture));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_draw_buffers]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_buffers));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_draw_buffers_blend]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_buffers_blend));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_draw_elements_base_vertex]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_elements_base_vertex));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_draw_indirect]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_indirect));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_draw_instanced]", Boolean.valueOf(contextcapabilities.GL_ARB_draw_instanced));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_explicit_attrib_location]", Boolean.valueOf(contextcapabilities.GL_ARB_explicit_attrib_location));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_explicit_uniform_location]", Boolean.valueOf(contextcapabilities.GL_ARB_explicit_uniform_location));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_fragment_layer_viewport]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_layer_viewport));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_fragment_program]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_program));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_fragment_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_shader));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_fragment_program_shadow]", Boolean.valueOf(contextcapabilities.GL_ARB_fragment_program_shadow));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_framebuffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_framebuffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_framebuffer_sRGB]", Boolean.valueOf(contextcapabilities.GL_ARB_framebuffer_sRGB));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_geometry_shader4]", Boolean.valueOf(contextcapabilities.GL_ARB_geometry_shader4));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_gpu_shader5]", Boolean.valueOf(contextcapabilities.GL_ARB_gpu_shader5));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_half_float_pixel]", Boolean.valueOf(contextcapabilities.GL_ARB_half_float_pixel));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_half_float_vertex]", Boolean.valueOf(contextcapabilities.GL_ARB_half_float_vertex));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_instanced_arrays]", Boolean.valueOf(contextcapabilities.GL_ARB_instanced_arrays));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_map_buffer_alignment]", Boolean.valueOf(contextcapabilities.GL_ARB_map_buffer_alignment));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_map_buffer_range]", Boolean.valueOf(contextcapabilities.GL_ARB_map_buffer_range));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_multisample]", Boolean.valueOf(contextcapabilities.GL_ARB_multisample));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_multitexture]", Boolean.valueOf(contextcapabilities.GL_ARB_multitexture));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_occlusion_query2]", Boolean.valueOf(contextcapabilities.GL_ARB_occlusion_query2));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_pixel_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_pixel_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_seamless_cube_map]", Boolean.valueOf(contextcapabilities.GL_ARB_seamless_cube_map));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_shader_objects]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_objects));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_shader_stencil_export]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_stencil_export));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_shader_texture_lod]", Boolean.valueOf(contextcapabilities.GL_ARB_shader_texture_lod));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_shadow]", Boolean.valueOf(contextcapabilities.GL_ARB_shadow));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_shadow_ambient]", Boolean.valueOf(contextcapabilities.GL_ARB_shadow_ambient));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_stencil_texturing]", Boolean.valueOf(contextcapabilities.GL_ARB_stencil_texturing));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_sync]", Boolean.valueOf(contextcapabilities.GL_ARB_sync));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_tessellation_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_tessellation_shader));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_texture_border_clamp]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_border_clamp));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_texture_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_texture_cube_map]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_cube_map));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_texture_cube_map_array]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_cube_map_array));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_texture_non_power_of_two]", Boolean.valueOf(contextcapabilities.GL_ARB_texture_non_power_of_two));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_uniform_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_uniform_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_vertex_blend]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_blend));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_vertex_buffer_object]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_vertex_program]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_program));
+        playerSnooper.addStatToSnooper("gl_caps[ARB_vertex_shader]", Boolean.valueOf(contextcapabilities.GL_ARB_vertex_shader));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_bindable_uniform]", Boolean.valueOf(contextcapabilities.GL_EXT_bindable_uniform));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_blend_equation_separate]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_equation_separate));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_blend_func_separate]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_func_separate));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_blend_minmax]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_minmax));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_blend_subtract]", Boolean.valueOf(contextcapabilities.GL_EXT_blend_subtract));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_draw_instanced]", Boolean.valueOf(contextcapabilities.GL_EXT_draw_instanced));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_framebuffer_multisample]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_multisample));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_framebuffer_object]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_framebuffer_sRGB]", Boolean.valueOf(contextcapabilities.GL_EXT_framebuffer_sRGB));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_geometry_shader4]", Boolean.valueOf(contextcapabilities.GL_EXT_geometry_shader4));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_gpu_program_parameters]", Boolean.valueOf(contextcapabilities.GL_EXT_gpu_program_parameters));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_gpu_shader4]", Boolean.valueOf(contextcapabilities.GL_EXT_gpu_shader4));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_multi_draw_arrays]", Boolean.valueOf(contextcapabilities.GL_EXT_multi_draw_arrays));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_packed_depth_stencil]", Boolean.valueOf(contextcapabilities.GL_EXT_packed_depth_stencil));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_paletted_texture]", Boolean.valueOf(contextcapabilities.GL_EXT_paletted_texture));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_rescale_normal]", Boolean.valueOf(contextcapabilities.GL_EXT_rescale_normal));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_separate_shader_objects]", Boolean.valueOf(contextcapabilities.GL_EXT_separate_shader_objects));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_shader_image_load_store]", Boolean.valueOf(contextcapabilities.GL_EXT_shader_image_load_store));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_shadow_funcs]", Boolean.valueOf(contextcapabilities.GL_EXT_shadow_funcs));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_shared_texture_palette]", Boolean.valueOf(contextcapabilities.GL_EXT_shared_texture_palette));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_stencil_clear_tag]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_clear_tag));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_stencil_two_side]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_two_side));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_stencil_wrap]", Boolean.valueOf(contextcapabilities.GL_EXT_stencil_wrap));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_3d]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_3d));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_array]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_array));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_buffer_object]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_buffer_object));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_integer]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_integer));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_lod_bias]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_lod_bias));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_texture_sRGB]", Boolean.valueOf(contextcapabilities.GL_EXT_texture_sRGB));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_vertex_shader]", Boolean.valueOf(contextcapabilities.GL_EXT_vertex_shader));
+        playerSnooper.addStatToSnooper("gl_caps[EXT_vertex_weighting]", Boolean.valueOf(contextcapabilities.GL_EXT_vertex_weighting));
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_vertex_uniforms]", Integer.valueOf(GlStateManager.glGetInteger(35658)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_fragment_uniforms]", Integer.valueOf(GlStateManager.glGetInteger(35657)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_vertex_attribs]", Integer.valueOf(GlStateManager.glGetInteger(34921)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_vertex_texture_image_units]", Integer.valueOf(GlStateManager.glGetInteger(35660)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_texture_image_units]", Integer.valueOf(GlStateManager.glGetInteger(34930)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_caps[gl_max_array_texture_layers]", Integer.valueOf(GlStateManager.glGetInteger(35071)));
+        GlStateManager.glGetError();
+        playerSnooper.addStatToSnooper("gl_max_texture_size", Integer.valueOf(getGLMaximumTextureSize()));
+        GameProfile gameprofile = this.session.getProfile();
+
+        if (gameprofile != null && gameprofile.getId() != null)
+        {
+            playerSnooper.addStatToSnooper("uuid", Hashing.sha1().hashBytes(gameprofile.getId().toString().getBytes(Charsets.ISO_8859_1)).toString());
+        }
+    }
+
+    /**
+     * Used in the usage snooper.
+     */
+    public static int getGLMaximumTextureSize()
+    {
+        for (int i = 16384; i > 0; i >>= 1)
+        {
+            GlStateManager.glTexImage2D(32868, 0, 6408, i, i, 0, 6408, 5121, (IntBuffer)null);
+            int j = GlStateManager.glGetTexLevelParameteri(32868, 0, 4096);
+
+            if (j != 0)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Returns whether snooping is enabled or not.
+     */
+    public boolean isSnooperEnabled()
+    {
+        return this.gameSettings.snooperEnabled;
+    }
+
+    /**
+     * Set the current ServerData instance.
+     */
+    public void setServerData(ServerData serverDataIn)
+    {
+        this.currentServerData = serverDataIn;
+    }
+
+    @Nullable
+    public ServerData getCurrentServerData()
+    {
+        return this.currentServerData;
+    }
+
+    public boolean isIntegratedServerRunning()
+    {
+        return this.integratedServerIsRunning;
+    }
+
+    /**
+     * Returns true if there is only one player playing, and the current server is the integrated one.
+     */
+    public boolean isSingleplayer()
+    {
+        return this.integratedServerIsRunning && this.theIntegratedServer != null;
+    }
+
+    @Nullable
+
+    /**
+     * Returns the currently running integrated server
+     */
+    public IntegratedServer getIntegratedServer()
+    {
+        return this.theIntegratedServer;
+    }
+
+    public static void stopIntegratedServer()
+    {
+        if (theMinecraft != null)
+        {
+            IntegratedServer integratedserver = theMinecraft.getIntegratedServer();
+
+            if (integratedserver != null)
+            {
+                integratedserver.stopServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the PlayerUsageSnooper instance.
+     */
+    public Snooper getPlayerUsageSnooper()
+    {
+        return this.usageSnooper;
+    }
+
+    /**
+     * Gets the system time in milliseconds.
+     */
+    public static long getSystemTime()
+    {
+        return Sys.getTime() * 1000L / Sys.getTimerResolution();
+    }
+
+    /**
+     * Returns whether we're in full screen or not.
+     */
+    public boolean isFullScreen()
+    {
+        return this.fullscreen;
+    }
+
+    public Session getSession()
+    {
+        return this.session;
+    }
+
+    /**
+     * Return the player's GameProfile properties
+     */
+    public PropertyMap getProfileProperties()
+    {
+        if (this.profileProperties.isEmpty())
+        {
+            GameProfile gameprofile = this.getSessionService().fillProfileProperties(this.session.getProfile(), false);
+            this.profileProperties.putAll(gameprofile.getProperties());
+        }
+
+        return this.profileProperties;
+    }
+
+    public Proxy getProxy()
+    {
+        return this.proxy;
+    }
+
+    public TextureManager getTextureManager()
+    {
+        return this.renderEngine;
+    }
+
+    public IResourceManager getResourceManager()
+    {
+        return this.mcResourceManager;
+    }
+
+    public ResourcePackRepository getResourcePackRepository()
+    {
+        return this.mcResourcePackRepository;
+    }
+
+    public LanguageManager getLanguageManager()
+    {
+        return this.mcLanguageManager;
+    }
+
+    public TextureMap getTextureMapBlocks()
+    {
+        return this.textureMapBlocks;
+    }
+
+    public boolean isJava64bit()
+    {
+        return this.jvm64bit;
+    }
+
+    public boolean isGamePaused()
+    {
+        return this.isGamePaused;
+    }
+
+    public SoundHandler getSoundHandler()
+    {
+        return this.mcSoundHandler;
+    }
+
+    public MusicTicker.MusicType getAmbientMusicType()
+    {
+        if (this.currentScreen instanceof GuiWinGame)
+        {
+            return MusicTicker.MusicType.CREDITS;
+        }
+        else if (this.player != null)
+        {
+            if (this.player.world.provider instanceof WorldProviderHell)
+            {
+                return MusicTicker.MusicType.NETHER;
+            }
+            else if (this.player.world.provider instanceof WorldProviderEnd)
+            {
+                return this.ingameGUI.getBossOverlay().shouldPlayEndBossMusic() ? MusicTicker.MusicType.END_BOSS : MusicTicker.MusicType.END;
+            }
+            else
+            {
+                return this.player.capabilities.isCreativeMode && this.player.capabilities.allowFlying ? MusicTicker.MusicType.CREATIVE : MusicTicker.MusicType.GAME;
+            }
+        }
+        else
+        {
+            return MusicTicker.MusicType.MENU;
+        }
+    }
+
+    public void dispatchKeypresses()
+    {
+        int i = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
+
+        if (i != 0 && !Keyboard.isRepeatEvent())
+        {
+            if (!(this.currentScreen instanceof GuiControls) || ((GuiControls)this.currentScreen).time <= getSystemTime() - 20L)
+            {
+                if (Keyboard.getEventKeyState())
+                {
+                    if (i == this.gameSettings.keyBindFullscreen.getKeyCode())
+                    {
+                        this.toggleFullscreen();
+                    }
+                    else if (i == this.gameSettings.keyBindScreenshot.getKeyCode())
+                    {
+                        this.ingameGUI.getChatGUI().printChatMessage(ScreenShotHelper.saveScreenshot(this.mcDataDir, this.displayWidth, this.displayHeight, this.framebufferMc));
+                    }
+                    else if (i == 48 && GuiScreen.isCtrlKeyDown() && (this.currentScreen == null || this.currentScreen != null && !this.currentScreen.func_193976_p()))
+                    {
+                        this.gameSettings.setOptionValue(GameSettings.Options.NARRATOR, 1);
+
+                        if (this.currentScreen instanceof ScreenChatOptions)
+                        {
+                            ((ScreenChatOptions)this.currentScreen).func_193024_a();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public MinecraftSessionService getSessionService()
+    {
+        return this.sessionService;
+    }
+
+    public SkinManager getSkinManager()
+    {
+        return this.skinManager;
+    }
+
+    @Nullable
+    public Entity getRenderViewEntity()
+    {
+        return this.renderViewEntity;
+    }
+
+    public void setRenderViewEntity(Entity viewingEntity)
+    {
+        this.renderViewEntity = viewingEntity;
+        this.entityRenderer.loadEntityShader(viewingEntity);
+    }
+
+    public <V> ListenableFuture<V> addScheduledTask(Callable<V> callableToSchedule)
+    {
+        Validate.notNull(callableToSchedule);
+
+        if (this.isCallingFromMinecraftThread())
+        {
+            try
+            {
+                return Futures.<V>immediateFuture(callableToSchedule.call());
+            }
+            catch (Exception exception)
+            {
+                return Futures.immediateFailedCheckedFuture(exception);
+            }
+        }
+        else
+        {
+            ListenableFutureTask<V> listenablefuturetask = ListenableFutureTask.<V>create(callableToSchedule);
+
+            synchronized (this.scheduledTasks)
+            {
+                this.scheduledTasks.add(listenablefuturetask);
+                return listenablefuturetask;
+            }
+        }
+    }
+
+    public ListenableFuture<Object> addScheduledTask(Runnable runnableToSchedule)
+    {
+        Validate.notNull(runnableToSchedule);
+        return this.<Object>addScheduledTask(Executors.callable(runnableToSchedule));
+    }
+
+    public boolean isCallingFromMinecraftThread()
+    {
+        return Thread.currentThread() == this.mcThread;
+    }
+
+    public BlockRendererDispatcher getBlockRendererDispatcher()
+    {
+        return this.blockRenderDispatcher;
+    }
+
+    public RenderManager getRenderManager()
+    {
+        return this.renderManager;
+    }
+
+    public RenderItem getRenderItem()
+    {
+        return this.renderItem;
+    }
+
+    public ItemRenderer getItemRenderer()
+    {
+        return this.itemRenderer;
+    }
+
+    public <T> ISearchTree<T> func_193987_a(SearchTreeManager.Key<T> p_193987_1_)
+    {
+        return this.field_193995_ae.<T>func_194010_a(p_193987_1_);
+    }
+
+    public static int getDebugFPS()
+    {
+        return debugFPS;
+    }
+
+    /**
+     * Return the FrameTimer's instance
+     */
+    public FrameTimer getFrameTimer()
+    {
+        return this.frameTimer;
+    }
+
+    /**
+     * Return true if the player is connected to a realms server
+     */
+    public boolean isConnectedToRealms()
+    {
+        return this.connectedToRealms;
+    }
+
+    /**
+     * Set if the player is connected to a realms server
+     */
+    public void setConnectedToRealms(boolean isConnected)
+    {
+        this.connectedToRealms = isConnected;
+    }
+
+    public DataFixer getDataFixer()
+    {
+        return this.dataFixer;
+    }
+
+    public float getRenderPartialTicks()
+    {
+        return this.timer.field_194147_b;
+    }
+
+    public float func_193989_ak()
+    {
+        return this.timer.field_194148_c;
+    }
+
+    public BlockColors getBlockColors()
+    {
+        return this.blockColors;
+    }
+
+    /**
+     * Whether to use reduced debug info
+     */
+    public boolean isReducedDebug()
+    {
+        return this.player != null && this.player.hasReducedDebug() || this.gameSettings.reducedDebugInfo;
+    }
+
+    public GuiToast func_193033_an()
+    {
+        return this.field_193034_aS;
+    }
+
+    public Tutorial func_193032_ao()
+    {
+        return this.field_193035_aW;
+    }
 }

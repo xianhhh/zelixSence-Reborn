@@ -15,124 +15,170 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockRedstoneOre extends Block {
-   private final boolean field_150187_a;
+public class BlockRedstoneOre extends Block
+{
+    private final boolean isOn;
 
-   public BlockRedstoneOre(boolean p_i45420_1_) {
-      super(Material.field_151576_e);
-      if (p_i45420_1_) {
-         this.func_149675_a(true);
-      }
+    public BlockRedstoneOre(boolean isOn)
+    {
+        super(Material.ROCK);
 
-      this.field_150187_a = p_i45420_1_;
-   }
+        if (isOn)
+        {
+            this.setTickRandomly(true);
+        }
 
-   public int func_149738_a(World p_149738_1_) {
-      return 30;
-   }
+        this.isOn = isOn;
+    }
 
-   public void func_180649_a(World p_180649_1_, BlockPos p_180649_2_, EntityPlayer p_180649_3_) {
-      this.func_176352_d(p_180649_1_, p_180649_2_);
-      super.func_180649_a(p_180649_1_, p_180649_2_, p_180649_3_);
-   }
+    /**
+     * How many world ticks before ticking
+     */
+    public int tickRate(World worldIn)
+    {
+        return 30;
+    }
 
-   public void func_176199_a(World p_176199_1_, BlockPos p_176199_2_, Entity p_176199_3_) {
-      this.func_176352_d(p_176199_1_, p_176199_2_);
-      super.func_176199_a(p_176199_1_, p_176199_2_, p_176199_3_);
-   }
+    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
+    {
+        this.activate(worldIn, pos);
+        super.onBlockClicked(worldIn, pos, playerIn);
+    }
 
-   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
-      this.func_176352_d(p_180639_1_, p_180639_2_);
-      return super.func_180639_a(p_180639_1_, p_180639_2_, p_180639_3_, p_180639_4_, p_180639_5_, p_180639_6_, p_180639_7_, p_180639_8_, p_180639_9_);
-   }
+    /**
+     * Triggered whenever an entity collides with this block (enters into the block)
+     */
+    public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
+    {
+        this.activate(worldIn, pos);
+        super.onEntityWalk(worldIn, pos, entityIn);
+    }
 
-   private void func_176352_d(World p_176352_1_, BlockPos p_176352_2_) {
-      this.func_180691_e(p_176352_1_, p_176352_2_);
-      if (this == Blocks.field_150450_ax) {
-         p_176352_1_.func_175656_a(p_176352_2_, Blocks.field_150439_ay.func_176223_P());
-      }
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
+    {
+        this.activate(worldIn, pos);
+        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY);
+    }
 
-   }
+    private void activate(World worldIn, BlockPos pos)
+    {
+        this.spawnParticles(worldIn, pos);
 
-   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
-      if (this == Blocks.field_150439_ay) {
-         p_180650_1_.func_175656_a(p_180650_2_, Blocks.field_150450_ax.func_176223_P());
-      }
+        if (this == Blocks.REDSTONE_ORE)
+        {
+            worldIn.setBlockState(pos, Blocks.LIT_REDSTONE_ORE.getDefaultState());
+        }
+    }
 
-   }
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        if (this == Blocks.LIT_REDSTONE_ORE)
+        {
+            worldIn.setBlockState(pos, Blocks.REDSTONE_ORE.getDefaultState());
+        }
+    }
 
-   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
-      return Items.field_151137_ax;
-   }
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    {
+        return Items.REDSTONE;
+    }
 
-   public int func_149679_a(int p_149679_1_, Random p_149679_2_) {
-      return this.func_149745_a(p_149679_2_) + p_149679_2_.nextInt(p_149679_1_ + 1);
-   }
+    /**
+     * Get the quantity dropped based on the given fortune level
+     */
+    public int quantityDroppedWithBonus(int fortune, Random random)
+    {
+        return this.quantityDropped(random) + random.nextInt(fortune + 1);
+    }
 
-   public int func_149745_a(Random p_149745_1_) {
-      return 4 + p_149745_1_.nextInt(2);
-   }
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
+    public int quantityDropped(Random random)
+    {
+        return 4 + random.nextInt(2);
+    }
 
-   public void func_180653_a(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_) {
-      super.func_180653_a(p_180653_1_, p_180653_2_, p_180653_3_, p_180653_4_, p_180653_5_);
-      if (this.func_180660_a(p_180653_3_, p_180653_1_.field_73012_v, p_180653_5_) != Item.func_150898_a(this)) {
-         int i = 1 + p_180653_1_.field_73012_v.nextInt(5);
-         this.func_180637_b(p_180653_1_, p_180653_2_, i);
-      }
+    /**
+     * Spawns this Block's drops into the World as EntityItems.
+     */
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    {
+        super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
 
-   }
+        if (this.getItemDropped(state, worldIn.rand, fortune) != Item.getItemFromBlock(this))
+        {
+            int i = 1 + worldIn.rand.nextInt(5);
+            this.dropXpOnBlockBreak(worldIn, pos, i);
+        }
+    }
 
-   public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_) {
-      if (this.field_150187_a) {
-         this.func_180691_e(p_180655_2_, p_180655_3_);
-      }
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        if (this.isOn)
+        {
+            this.spawnParticles(worldIn, pos);
+        }
+    }
 
-   }
+    private void spawnParticles(World worldIn, BlockPos pos)
+    {
+        Random random = worldIn.rand;
+        double d0 = 0.0625D;
 
-   private void func_180691_e(World p_180691_1_, BlockPos p_180691_2_) {
-      Random random = p_180691_1_.field_73012_v;
-      double d0 = 0.0625D;
+        for (int i = 0; i < 6; ++i)
+        {
+            double d1 = (double)((float)pos.getX() + random.nextFloat());
+            double d2 = (double)((float)pos.getY() + random.nextFloat());
+            double d3 = (double)((float)pos.getZ() + random.nextFloat());
 
-      for(int i = 0; i < 6; ++i) {
-         double d1 = (double)((float)p_180691_2_.func_177958_n() + random.nextFloat());
-         double d2 = (double)((float)p_180691_2_.func_177956_o() + random.nextFloat());
-         double d3 = (double)((float)p_180691_2_.func_177952_p() + random.nextFloat());
-         if (i == 0 && !p_180691_1_.func_180495_p(p_180691_2_.func_177984_a()).func_185914_p()) {
-            d2 = (double)p_180691_2_.func_177956_o() + 0.0625D + 1.0D;
-         }
+            if (i == 0 && !worldIn.getBlockState(pos.up()).isOpaqueCube())
+            {
+                d2 = (double)pos.getY() + 0.0625D + 1.0D;
+            }
 
-         if (i == 1 && !p_180691_1_.func_180495_p(p_180691_2_.func_177977_b()).func_185914_p()) {
-            d2 = (double)p_180691_2_.func_177956_o() - 0.0625D;
-         }
+            if (i == 1 && !worldIn.getBlockState(pos.down()).isOpaqueCube())
+            {
+                d2 = (double)pos.getY() - 0.0625D;
+            }
 
-         if (i == 2 && !p_180691_1_.func_180495_p(p_180691_2_.func_177968_d()).func_185914_p()) {
-            d3 = (double)p_180691_2_.func_177952_p() + 0.0625D + 1.0D;
-         }
+            if (i == 2 && !worldIn.getBlockState(pos.south()).isOpaqueCube())
+            {
+                d3 = (double)pos.getZ() + 0.0625D + 1.0D;
+            }
 
-         if (i == 3 && !p_180691_1_.func_180495_p(p_180691_2_.func_177978_c()).func_185914_p()) {
-            d3 = (double)p_180691_2_.func_177952_p() - 0.0625D;
-         }
+            if (i == 3 && !worldIn.getBlockState(pos.north()).isOpaqueCube())
+            {
+                d3 = (double)pos.getZ() - 0.0625D;
+            }
 
-         if (i == 4 && !p_180691_1_.func_180495_p(p_180691_2_.func_177974_f()).func_185914_p()) {
-            d1 = (double)p_180691_2_.func_177958_n() + 0.0625D + 1.0D;
-         }
+            if (i == 4 && !worldIn.getBlockState(pos.east()).isOpaqueCube())
+            {
+                d1 = (double)pos.getX() + 0.0625D + 1.0D;
+            }
 
-         if (i == 5 && !p_180691_1_.func_180495_p(p_180691_2_.func_177976_e()).func_185914_p()) {
-            d1 = (double)p_180691_2_.func_177958_n() - 0.0625D;
-         }
+            if (i == 5 && !worldIn.getBlockState(pos.west()).isOpaqueCube())
+            {
+                d1 = (double)pos.getX() - 0.0625D;
+            }
 
-         if (d1 < (double)p_180691_2_.func_177958_n() || d1 > (double)(p_180691_2_.func_177958_n() + 1) || d2 < 0.0D || d2 > (double)(p_180691_2_.func_177956_o() + 1) || d3 < (double)p_180691_2_.func_177952_p() || d3 > (double)(p_180691_2_.func_177952_p() + 1)) {
-            p_180691_1_.func_175688_a(EnumParticleTypes.REDSTONE, d1, d2, d3, 0.0D, 0.0D, 0.0D);
-         }
-      }
+            if (d1 < (double)pos.getX() || d1 > (double)(pos.getX() + 1) || d2 < 0.0D || d2 > (double)(pos.getY() + 1) || d3 < (double)pos.getZ() || d3 > (double)(pos.getZ() + 1))
+            {
+                worldIn.spawnParticle(EnumParticleTypes.REDSTONE, d1, d2, d3, 0.0D, 0.0D, 0.0D);
+            }
+        }
+    }
 
-   }
+    protected ItemStack getSilkTouchDrop(IBlockState state)
+    {
+        return new ItemStack(Blocks.REDSTONE_ORE);
+    }
 
-   protected ItemStack func_180643_i(IBlockState p_180643_1_) {
-      return new ItemStack(Blocks.field_150450_ax);
-   }
-
-   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
-      return new ItemStack(Item.func_150898_a(Blocks.field_150450_ax), 1, this.func_180651_a(p_185473_3_));
-   }
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        return new ItemStack(Item.getItemFromBlock(Blocks.REDSTONE_ORE), 1, this.damageDropped(state));
+    }
 }

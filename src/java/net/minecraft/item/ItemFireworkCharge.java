@@ -8,103 +8,136 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-public class ItemFireworkCharge extends Item {
-   public static NBTBase func_150903_a(ItemStack p_150903_0_, String p_150903_1_) {
-      if (p_150903_0_.func_77942_o()) {
-         NBTTagCompound nbttagcompound = p_150903_0_.func_77978_p().func_74775_l("Explosion");
-         if (nbttagcompound != null) {
-            return nbttagcompound.func_74781_a(p_150903_1_);
-         }
-      }
+public class ItemFireworkCharge extends Item
+{
+    public static NBTBase getExplosionTag(ItemStack stack, String key)
+    {
+        if (stack.hasTagCompound())
+        {
+            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("Explosion");
 
-      return null;
-   }
+            if (nbttagcompound != null)
+            {
+                return nbttagcompound.getTag(key);
+            }
+        }
 
-   public void func_77624_a(ItemStack p_77624_1_, @Nullable World p_77624_2_, List<String> p_77624_3_, ITooltipFlag p_77624_4_) {
-      if (p_77624_1_.func_77942_o()) {
-         NBTTagCompound nbttagcompound = p_77624_1_.func_77978_p().func_74775_l("Explosion");
-         if (nbttagcompound != null) {
-            func_150902_a(nbttagcompound, p_77624_3_);
-         }
-      }
+        return null;
+    }
 
-   }
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    {
+        if (stack.hasTagCompound())
+        {
+            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("Explosion");
 
-   public static void func_150902_a(NBTTagCompound p_150902_0_, List<String> p_150902_1_) {
-      byte b0 = p_150902_0_.func_74771_c("Type");
-      if (b0 >= 0 && b0 <= 4) {
-         p_150902_1_.add(I18n.func_74838_a("item.fireworksCharge.type." + b0).trim());
-      } else {
-         p_150902_1_.add(I18n.func_74838_a("item.fireworksCharge.type").trim());
-      }
+            if (nbttagcompound != null)
+            {
+                addExplosionInfo(nbttagcompound, tooltip);
+            }
+        }
+    }
 
-      int[] aint = p_150902_0_.func_74759_k("Colors");
-      if (aint.length > 0) {
-         boolean flag = true;
-         String s = "";
+    public static void addExplosionInfo(NBTTagCompound nbt, List<String> tooltip)
+    {
+        byte b0 = nbt.getByte("Type");
 
-         for(int i : aint) {
-            if (!flag) {
-               s = s + ", ";
+        if (b0 >= 0 && b0 <= 4)
+        {
+            tooltip.add(I18n.translateToLocal("item.fireworksCharge.type." + b0).trim());
+        }
+        else
+        {
+            tooltip.add(I18n.translateToLocal("item.fireworksCharge.type").trim());
+        }
+
+        int[] aint = nbt.getIntArray("Colors");
+
+        if (aint.length > 0)
+        {
+            boolean flag = true;
+            String s = "";
+
+            for (int i : aint)
+            {
+                if (!flag)
+                {
+                    s = s + ", ";
+                }
+
+                flag = false;
+                boolean flag1 = false;
+
+                for (int j = 0; j < ItemDye.DYE_COLORS.length; ++j)
+                {
+                    if (i == ItemDye.DYE_COLORS[j])
+                    {
+                        flag1 = true;
+                        s = s + I18n.translateToLocal("item.fireworksCharge." + EnumDyeColor.byDyeDamage(j).getUnlocalizedName());
+                        break;
+                    }
+                }
+
+                if (!flag1)
+                {
+                    s = s + I18n.translateToLocal("item.fireworksCharge.customColor");
+                }
             }
 
-            flag = false;
-            boolean flag1 = false;
+            tooltip.add(s);
+        }
 
-            for(int j = 0; j < ItemDye.field_150922_c.length; ++j) {
-               if (i == ItemDye.field_150922_c[j]) {
-                  flag1 = true;
-                  s = s + I18n.func_74838_a("item.fireworksCharge." + EnumDyeColor.func_176766_a(j).func_176762_d());
-                  break;
-               }
+        int[] aint1 = nbt.getIntArray("FadeColors");
+
+        if (aint1.length > 0)
+        {
+            boolean flag2 = true;
+            String s1 = I18n.translateToLocal("item.fireworksCharge.fadeTo") + " ";
+
+            for (int l : aint1)
+            {
+                if (!flag2)
+                {
+                    s1 = s1 + ", ";
+                }
+
+                flag2 = false;
+                boolean flag5 = false;
+
+                for (int k = 0; k < 16; ++k)
+                {
+                    if (l == ItemDye.DYE_COLORS[k])
+                    {
+                        flag5 = true;
+                        s1 = s1 + I18n.translateToLocal("item.fireworksCharge." + EnumDyeColor.byDyeDamage(k).getUnlocalizedName());
+                        break;
+                    }
+                }
+
+                if (!flag5)
+                {
+                    s1 = s1 + I18n.translateToLocal("item.fireworksCharge.customColor");
+                }
             }
 
-            if (!flag1) {
-               s = s + I18n.func_74838_a("item.fireworksCharge.customColor");
-            }
-         }
+            tooltip.add(s1);
+        }
 
-         p_150902_1_.add(s);
-      }
+        boolean flag3 = nbt.getBoolean("Trail");
 
-      int[] aint1 = p_150902_0_.func_74759_k("FadeColors");
-      if (aint1.length > 0) {
-         boolean flag2 = true;
-         String s1 = I18n.func_74838_a("item.fireworksCharge.fadeTo") + " ";
+        if (flag3)
+        {
+            tooltip.add(I18n.translateToLocal("item.fireworksCharge.trail"));
+        }
 
-         for(int l : aint1) {
-            if (!flag2) {
-               s1 = s1 + ", ";
-            }
+        boolean flag4 = nbt.getBoolean("Flicker");
 
-            flag2 = false;
-            boolean flag5 = false;
-
-            for(int k = 0; k < 16; ++k) {
-               if (l == ItemDye.field_150922_c[k]) {
-                  flag5 = true;
-                  s1 = s1 + I18n.func_74838_a("item.fireworksCharge." + EnumDyeColor.func_176766_a(k).func_176762_d());
-                  break;
-               }
-            }
-
-            if (!flag5) {
-               s1 = s1 + I18n.func_74838_a("item.fireworksCharge.customColor");
-            }
-         }
-
-         p_150902_1_.add(s1);
-      }
-
-      boolean flag3 = p_150902_0_.func_74767_n("Trail");
-      if (flag3) {
-         p_150902_1_.add(I18n.func_74838_a("item.fireworksCharge.trail"));
-      }
-
-      boolean flag4 = p_150902_0_.func_74767_n("Flicker");
-      if (flag4) {
-         p_150902_1_.add(I18n.func_74838_a("item.fireworksCharge.flicker"));
-      }
-
-   }
+        if (flag4)
+        {
+            tooltip.add(I18n.translateToLocal("item.fireworksCharge.flicker"));
+        }
+    }
 }

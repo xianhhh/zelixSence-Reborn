@@ -3,98 +3,129 @@ package net.minecraft.village;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public class VillageDoorInfo {
-   private final BlockPos field_179859_a;
-   private final BlockPos field_179857_b;
-   private final EnumFacing field_179858_c;
-   private int field_75475_f;
-   private boolean field_75476_g;
-   private int field_75482_h;
+public class VillageDoorInfo
+{
+    /** a block representing the door. Could be either upper or lower part */
+    private final BlockPos doorBlockPos;
+    private final BlockPos insideBlock;
 
-   public VillageDoorInfo(BlockPos p_i45871_1_, int p_i45871_2_, int p_i45871_3_, int p_i45871_4_) {
-      this(p_i45871_1_, func_179854_a(p_i45871_2_, p_i45871_3_), p_i45871_4_);
-   }
+    /** the inside direction is where can see less sky */
+    private final EnumFacing insideDirection;
+    private int lastActivityTimestamp;
+    private boolean isDetachedFromVillageFlag;
+    private int doorOpeningRestrictionCounter;
 
-   private static EnumFacing func_179854_a(int p_179854_0_, int p_179854_1_) {
-      if (p_179854_0_ < 0) {
-         return EnumFacing.WEST;
-      } else if (p_179854_0_ > 0) {
-         return EnumFacing.EAST;
-      } else {
-         return p_179854_1_ < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
-      }
-   }
+    public VillageDoorInfo(BlockPos pos, int deltaX, int deltaZ, int timestamp)
+    {
+        this(pos, getFaceDirection(deltaX, deltaZ), timestamp);
+    }
 
-   public VillageDoorInfo(BlockPos p_i45872_1_, EnumFacing p_i45872_2_, int p_i45872_3_) {
-      this.field_179859_a = p_i45872_1_;
-      this.field_179858_c = p_i45872_2_;
-      this.field_179857_b = p_i45872_1_.func_177967_a(p_i45872_2_, 2);
-      this.field_75475_f = p_i45872_3_;
-   }
+    private static EnumFacing getFaceDirection(int deltaX, int deltaZ)
+    {
+        if (deltaX < 0)
+        {
+            return EnumFacing.WEST;
+        }
+        else if (deltaX > 0)
+        {
+            return EnumFacing.EAST;
+        }
+        else
+        {
+            return deltaZ < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+        }
+    }
 
-   public int func_75474_b(int p_75474_1_, int p_75474_2_, int p_75474_3_) {
-      return (int)this.field_179859_a.func_177954_c((double)p_75474_1_, (double)p_75474_2_, (double)p_75474_3_);
-   }
+    public VillageDoorInfo(BlockPos pos, EnumFacing facing, int timestamp)
+    {
+        this.doorBlockPos = pos;
+        this.insideDirection = facing;
+        this.insideBlock = pos.offset(facing, 2);
+        this.lastActivityTimestamp = timestamp;
+    }
 
-   public int func_179848_a(BlockPos p_179848_1_) {
-      return (int)p_179848_1_.func_177951_i(this.func_179852_d());
-   }
+    /**
+     * Returns the squared distance between this door and the given coordinate.
+     */
+    public int getDistanceSquared(int x, int y, int z)
+    {
+        return (int)this.doorBlockPos.distanceSq((double)x, (double)y, (double)z);
+    }
 
-   public int func_179846_b(BlockPos p_179846_1_) {
-      return (int)this.field_179857_b.func_177951_i(p_179846_1_);
-   }
+    public int getDistanceToDoorBlockSq(BlockPos pos)
+    {
+        return (int)pos.distanceSq(this.getDoorBlockPos());
+    }
 
-   public boolean func_179850_c(BlockPos p_179850_1_) {
-      int i = p_179850_1_.func_177958_n() - this.field_179859_a.func_177958_n();
-      int j = p_179850_1_.func_177952_p() - this.field_179859_a.func_177956_o();
-      return i * this.field_179858_c.func_82601_c() + j * this.field_179858_c.func_82599_e() >= 0;
-   }
+    public int getDistanceToInsideBlockSq(BlockPos pos)
+    {
+        return (int)this.insideBlock.distanceSq(pos);
+    }
 
-   public void func_75466_d() {
-      this.field_75482_h = 0;
-   }
+    public boolean isInsideSide(BlockPos pos)
+    {
+        int i = pos.getX() - this.doorBlockPos.getX();
+        int j = pos.getZ() - this.doorBlockPos.getY();
+        return i * this.insideDirection.getFrontOffsetX() + j * this.insideDirection.getFrontOffsetZ() >= 0;
+    }
 
-   public void func_75470_e() {
-      ++this.field_75482_h;
-   }
+    public void resetDoorOpeningRestrictionCounter()
+    {
+        this.doorOpeningRestrictionCounter = 0;
+    }
 
-   public int func_75468_f() {
-      return this.field_75482_h;
-   }
+    public void incrementDoorOpeningRestrictionCounter()
+    {
+        ++this.doorOpeningRestrictionCounter;
+    }
 
-   public BlockPos func_179852_d() {
-      return this.field_179859_a;
-   }
+    public int getDoorOpeningRestrictionCounter()
+    {
+        return this.doorOpeningRestrictionCounter;
+    }
 
-   public BlockPos func_179856_e() {
-      return this.field_179857_b;
-   }
+    public BlockPos getDoorBlockPos()
+    {
+        return this.doorBlockPos;
+    }
 
-   public int func_179847_f() {
-      return this.field_179858_c.func_82601_c() * 2;
-   }
+    public BlockPos getInsideBlockPos()
+    {
+        return this.insideBlock;
+    }
 
-   public int func_179855_g() {
-      return this.field_179858_c.func_82599_e() * 2;
-   }
+    public int getInsideOffsetX()
+    {
+        return this.insideDirection.getFrontOffsetX() * 2;
+    }
 
-   public int func_75473_b() {
-      return this.field_75475_f;
-   }
+    public int getInsideOffsetZ()
+    {
+        return this.insideDirection.getFrontOffsetZ() * 2;
+    }
 
-   public void func_179849_a(int p_179849_1_) {
-      this.field_75475_f = p_179849_1_;
-   }
+    public int getInsidePosY()
+    {
+        return this.lastActivityTimestamp;
+    }
 
-   public boolean func_179851_i() {
-      return this.field_75476_g;
-   }
+    public void setLastActivityTimestamp(int timestamp)
+    {
+        this.lastActivityTimestamp = timestamp;
+    }
 
-   public void func_179853_a(boolean p_179853_1_) {
-      this.field_75476_g = p_179853_1_;
-   }
+    public boolean getIsDetachedFromVillageFlag()
+    {
+        return this.isDetachedFromVillageFlag;
+    }
 
-   public EnumFacing func_188567_j() {
-      return this.field_179858_c;
-   }
+    public void setIsDetachedFromVillageFlag(boolean detached)
+    {
+        this.isDetachedFromVillageFlag = detached;
+    }
+
+    public EnumFacing getInsideDirection()
+    {
+        return this.insideDirection;
+    }
 }

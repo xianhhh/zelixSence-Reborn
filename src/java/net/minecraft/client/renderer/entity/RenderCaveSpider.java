@@ -4,19 +4,29 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderCaveSpider extends RenderSpider<EntityCaveSpider> {
-   private static final ResourceLocation field_110893_a = new ResourceLocation("textures/entity/spider/cave_spider.png");
+public class RenderCaveSpider extends RenderSpider<EntityCaveSpider>
+{
+    private static final ResourceLocation CAVE_SPIDER_TEXTURES = new ResourceLocation("textures/entity/spider/cave_spider.png");
 
-   public RenderCaveSpider(RenderManager p_i46189_1_) {
-      super(p_i46189_1_);
-      this.field_76989_e *= 0.7F;
-   }
+    public RenderCaveSpider(RenderManager renderManagerIn)
+    {
+        super(renderManagerIn);
+        this.shadowSize *= 0.7F;
+    }
 
-   protected void func_77041_b(EntityCaveSpider p_77041_1_, float p_77041_2_) {
-      GlStateManager.func_179152_a(0.7F, 0.7F, 0.7F);
-   }
+    /**
+     * Allows the render to do state modifications necessary before the model is rendered.
+     */
+    protected void preRenderCallback(EntityCaveSpider entitylivingbaseIn, float partialTickTime)
+    {
+        GlStateManager.scale(0.7F, 0.7F, 0.7F);
+    }
 
-   protected ResourceLocation func_110775_a(EntityCaveSpider p_110775_1_) {
-      return field_110893_a;
-   }
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(EntityCaveSpider entity)
+    {
+        return CAVE_SPIDER_TEXTURES;
+    }
 }

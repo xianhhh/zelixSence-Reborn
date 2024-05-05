@@ -4,57 +4,79 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
+import optifine.Config;
+import shadersmod.client.SVertexFormat;
 
-public class TexturedQuad {
-   public PositionTextureVertex[] field_78239_a;
-   public int field_78237_b;
-   private boolean field_78238_c;
+public class TexturedQuad
+{
+    public PositionTextureVertex[] vertexPositions;
+    public int nVertices;
+    private boolean invertNormal;
 
-   public TexturedQuad(PositionTextureVertex[] p_i46364_1_) {
-      this.field_78239_a = p_i46364_1_;
-      this.field_78237_b = p_i46364_1_.length;
-   }
+    public TexturedQuad(PositionTextureVertex[] vertices)
+    {
+        this.vertexPositions = vertices;
+        this.nVertices = vertices.length;
+    }
 
-   public TexturedQuad(PositionTextureVertex[] p_i1153_1_, int p_i1153_2_, int p_i1153_3_, int p_i1153_4_, int p_i1153_5_, float p_i1153_6_, float p_i1153_7_) {
-      this(p_i1153_1_);
-      float f = 0.0F / p_i1153_6_;
-      float f1 = 0.0F / p_i1153_7_;
-      p_i1153_1_[0] = p_i1153_1_[0].func_78240_a((float)p_i1153_4_ / p_i1153_6_ - f, (float)p_i1153_3_ / p_i1153_7_ + f1);
-      p_i1153_1_[1] = p_i1153_1_[1].func_78240_a((float)p_i1153_2_ / p_i1153_6_ + f, (float)p_i1153_3_ / p_i1153_7_ + f1);
-      p_i1153_1_[2] = p_i1153_1_[2].func_78240_a((float)p_i1153_2_ / p_i1153_6_ + f, (float)p_i1153_5_ / p_i1153_7_ - f1);
-      p_i1153_1_[3] = p_i1153_1_[3].func_78240_a((float)p_i1153_4_ / p_i1153_6_ - f, (float)p_i1153_5_ / p_i1153_7_ - f1);
-   }
+    public TexturedQuad(PositionTextureVertex[] vertices, int texcoordU1, int texcoordV1, int texcoordU2, int texcoordV2, float textureWidth, float textureHeight)
+    {
+        this(vertices);
+        float f = 0.0F / textureWidth;
+        float f1 = 0.0F / textureHeight;
+        vertices[0] = vertices[0].setTexturePosition((float)texcoordU2 / textureWidth - f, (float)texcoordV1 / textureHeight + f1);
+        vertices[1] = vertices[1].setTexturePosition((float)texcoordU1 / textureWidth + f, (float)texcoordV1 / textureHeight + f1);
+        vertices[2] = vertices[2].setTexturePosition((float)texcoordU1 / textureWidth + f, (float)texcoordV2 / textureHeight - f1);
+        vertices[3] = vertices[3].setTexturePosition((float)texcoordU2 / textureWidth - f, (float)texcoordV2 / textureHeight - f1);
+    }
 
-   public void func_78235_a() {
-      PositionTextureVertex[] apositiontexturevertex = new PositionTextureVertex[this.field_78239_a.length];
+    public void flipFace()
+    {
+        PositionTextureVertex[] apositiontexturevertex = new PositionTextureVertex[this.vertexPositions.length];
 
-      for(int i = 0; i < this.field_78239_a.length; ++i) {
-         apositiontexturevertex[i] = this.field_78239_a[this.field_78239_a.length - i - 1];
-      }
+        for (int i = 0; i < this.vertexPositions.length; ++i)
+        {
+            apositiontexturevertex[i] = this.vertexPositions[this.vertexPositions.length - i - 1];
+        }
 
-      this.field_78239_a = apositiontexturevertex;
-   }
+        this.vertexPositions = apositiontexturevertex;
+    }
 
-   public void func_178765_a(BufferBuilder p_178765_1_, float p_178765_2_) {
-      Vec3d vec3d = this.field_78239_a[1].field_78243_a.func_72444_a(this.field_78239_a[0].field_78243_a);
-      Vec3d vec3d1 = this.field_78239_a[1].field_78243_a.func_72444_a(this.field_78239_a[2].field_78243_a);
-      Vec3d vec3d2 = vec3d1.func_72431_c(vec3d).func_72432_b();
-      float f = (float)vec3d2.field_72450_a;
-      float f1 = (float)vec3d2.field_72448_b;
-      float f2 = (float)vec3d2.field_72449_c;
-      if (this.field_78238_c) {
-         f = -f;
-         f1 = -f1;
-         f2 = -f2;
-      }
+    /**
+     * Draw this primitve. This is typically called only once as the generated drawing instructions are saved by the
+     * renderer and reused later.
+     */
+    public void draw(BufferBuilder renderer, float scale)
+    {
+        Vec3d vec3d = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[0].vector3D);
+        Vec3d vec3d1 = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[2].vector3D);
+        Vec3d vec3d2 = vec3d1.crossProduct(vec3d).normalize();
+        float f = (float)vec3d2.xCoord;
+        float f1 = (float)vec3d2.yCoord;
+        float f2 = (float)vec3d2.zCoord;
 
-      p_178765_1_.func_181668_a(7, DefaultVertexFormats.field_181703_c);
+        if (this.invertNormal)
+        {
+            f = -f;
+            f1 = -f1;
+            f2 = -f2;
+        }
 
-      for(int i = 0; i < 4; ++i) {
-         PositionTextureVertex positiontexturevertex = this.field_78239_a[i];
-         p_178765_1_.func_181662_b(positiontexturevertex.field_78243_a.field_72450_a * (double)p_178765_2_, positiontexturevertex.field_78243_a.field_72448_b * (double)p_178765_2_, positiontexturevertex.field_78243_a.field_72449_c * (double)p_178765_2_).func_187315_a((double)positiontexturevertex.field_78241_b, (double)positiontexturevertex.field_78242_c).func_181663_c(f, f1, f2).func_181675_d();
-      }
+        if (Config.isShaders())
+        {
+            renderer.begin(7, SVertexFormat.defVertexFormatTextured);
+        }
+        else
+        {
+            renderer.begin(7, DefaultVertexFormats.OLDMODEL_POSITION_TEX_NORMAL);
+        }
 
-      Tessellator.func_178181_a().func_78381_a();
-   }
+        for (int i = 0; i < 4; ++i)
+        {
+            PositionTextureVertex positiontexturevertex = this.vertexPositions[i];
+            renderer.pos(positiontexturevertex.vector3D.xCoord * (double)scale, positiontexturevertex.vector3D.yCoord * (double)scale, positiontexturevertex.vector3D.zCoord * (double)scale).tex((double)positiontexturevertex.texturePositionX, (double)positiontexturevertex.texturePositionY).normal(f, f1, f2).endVertex();
+        }
+
+        Tessellator.getInstance().draw();
+    }
 }

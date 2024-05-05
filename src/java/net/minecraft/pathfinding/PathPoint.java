@@ -3,98 +3,141 @@ package net.minecraft.pathfinding;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
 
-public class PathPoint {
-   public final int field_75839_a;
-   public final int field_75837_b;
-   public final int field_75838_c;
-   private final int field_75840_j;
-   public int field_75835_d = -1;
-   public float field_75836_e;
-   public float field_75833_f;
-   public float field_75834_g;
-   public PathPoint field_75841_h;
-   public boolean field_75842_i;
-   public float field_186284_j;
-   public float field_186285_k;
-   public float field_186286_l;
-   public PathNodeType field_186287_m = PathNodeType.BLOCKED;
+public class PathPoint
+{
+    /** The x coordinate of this point */
+    public final int xCoord;
 
-   public PathPoint(int p_i2135_1_, int p_i2135_2_, int p_i2135_3_) {
-      this.field_75839_a = p_i2135_1_;
-      this.field_75837_b = p_i2135_2_;
-      this.field_75838_c = p_i2135_3_;
-      this.field_75840_j = func_75830_a(p_i2135_1_, p_i2135_2_, p_i2135_3_);
-   }
+    /** The y coordinate of this point */
+    public final int yCoord;
 
-   public PathPoint func_186283_a(int p_186283_1_, int p_186283_2_, int p_186283_3_) {
-      PathPoint pathpoint = new PathPoint(p_186283_1_, p_186283_2_, p_186283_3_);
-      pathpoint.field_75835_d = this.field_75835_d;
-      pathpoint.field_75836_e = this.field_75836_e;
-      pathpoint.field_75833_f = this.field_75833_f;
-      pathpoint.field_75834_g = this.field_75834_g;
-      pathpoint.field_75841_h = this.field_75841_h;
-      pathpoint.field_75842_i = this.field_75842_i;
-      pathpoint.field_186284_j = this.field_186284_j;
-      pathpoint.field_186285_k = this.field_186285_k;
-      pathpoint.field_186286_l = this.field_186286_l;
-      pathpoint.field_186287_m = this.field_186287_m;
-      return pathpoint;
-   }
+    /** The z coordinate of this point */
+    public final int zCoord;
 
-   public static int func_75830_a(int p_75830_0_, int p_75830_1_, int p_75830_2_) {
-      return p_75830_1_ & 255 | (p_75830_0_ & 32767) << 8 | (p_75830_2_ & 32767) << 24 | (p_75830_0_ < 0 ? Integer.MIN_VALUE : 0) | (p_75830_2_ < 0 ? '\u8000' : 0);
-   }
+    /** A hash of the coordinates used to identify this point */
+    private final int hash;
 
-   public float func_75829_a(PathPoint p_75829_1_) {
-      float f = (float)(p_75829_1_.field_75839_a - this.field_75839_a);
-      float f1 = (float)(p_75829_1_.field_75837_b - this.field_75837_b);
-      float f2 = (float)(p_75829_1_.field_75838_c - this.field_75838_c);
-      return MathHelper.func_76129_c(f * f + f1 * f1 + f2 * f2);
-   }
+    /** The index of this point in its assigned path */
+    public int index = -1;
 
-   public float func_75832_b(PathPoint p_75832_1_) {
-      float f = (float)(p_75832_1_.field_75839_a - this.field_75839_a);
-      float f1 = (float)(p_75832_1_.field_75837_b - this.field_75837_b);
-      float f2 = (float)(p_75832_1_.field_75838_c - this.field_75838_c);
-      return f * f + f1 * f1 + f2 * f2;
-   }
+    /** The distance along the path to this point */
+    public float totalPathDistance;
 
-   public float func_186281_c(PathPoint p_186281_1_) {
-      float f = (float)Math.abs(p_186281_1_.field_75839_a - this.field_75839_a);
-      float f1 = (float)Math.abs(p_186281_1_.field_75837_b - this.field_75837_b);
-      float f2 = (float)Math.abs(p_186281_1_.field_75838_c - this.field_75838_c);
-      return f + f1 + f2;
-   }
+    /** The linear distance to the next point */
+    public float distanceToNext;
 
-   public boolean equals(Object p_equals_1_) {
-      if (!(p_equals_1_ instanceof PathPoint)) {
-         return false;
-      } else {
-         PathPoint pathpoint = (PathPoint)p_equals_1_;
-         return this.field_75840_j == pathpoint.field_75840_j && this.field_75839_a == pathpoint.field_75839_a && this.field_75837_b == pathpoint.field_75837_b && this.field_75838_c == pathpoint.field_75838_c;
-      }
-   }
+    /** The distance to the target */
+    public float distanceToTarget;
 
-   public int hashCode() {
-      return this.field_75840_j;
-   }
+    /** The point preceding this in its assigned path */
+    public PathPoint previous;
 
-   public boolean func_75831_a() {
-      return this.field_75835_d >= 0;
-   }
+    /** True if the pathfinder has already visited this point */
+    public boolean visited;
+    public float distanceFromOrigin;
+    public float cost;
+    public float costMalus;
+    public PathNodeType nodeType = PathNodeType.BLOCKED;
 
-   public String toString() {
-      return this.field_75839_a + ", " + this.field_75837_b + ", " + this.field_75838_c;
-   }
+    public PathPoint(int x, int y, int z)
+    {
+        this.xCoord = x;
+        this.yCoord = y;
+        this.zCoord = z;
+        this.hash = makeHash(x, y, z);
+    }
 
-   public static PathPoint func_186282_b(PacketBuffer p_186282_0_) {
-      PathPoint pathpoint = new PathPoint(p_186282_0_.readInt(), p_186282_0_.readInt(), p_186282_0_.readInt());
-      pathpoint.field_186284_j = p_186282_0_.readFloat();
-      pathpoint.field_186285_k = p_186282_0_.readFloat();
-      pathpoint.field_186286_l = p_186282_0_.readFloat();
-      pathpoint.field_75842_i = p_186282_0_.readBoolean();
-      pathpoint.field_186287_m = PathNodeType.values()[p_186282_0_.readInt()];
-      pathpoint.field_75834_g = p_186282_0_.readFloat();
-      return pathpoint;
-   }
+    public PathPoint cloneMove(int x, int y, int z)
+    {
+        PathPoint pathpoint = new PathPoint(x, y, z);
+        pathpoint.index = this.index;
+        pathpoint.totalPathDistance = this.totalPathDistance;
+        pathpoint.distanceToNext = this.distanceToNext;
+        pathpoint.distanceToTarget = this.distanceToTarget;
+        pathpoint.previous = this.previous;
+        pathpoint.visited = this.visited;
+        pathpoint.distanceFromOrigin = this.distanceFromOrigin;
+        pathpoint.cost = this.cost;
+        pathpoint.costMalus = this.costMalus;
+        pathpoint.nodeType = this.nodeType;
+        return pathpoint;
+    }
+
+    public static int makeHash(int x, int y, int z)
+    {
+        return y & 255 | (x & 32767) << 8 | (z & 32767) << 24 | (x < 0 ? Integer.MIN_VALUE : 0) | (z < 0 ? 32768 : 0);
+    }
+
+    /**
+     * Returns the linear distance to another path point
+     */
+    public float distanceTo(PathPoint pathpointIn)
+    {
+        float f = (float)(pathpointIn.xCoord - this.xCoord);
+        float f1 = (float)(pathpointIn.yCoord - this.yCoord);
+        float f2 = (float)(pathpointIn.zCoord - this.zCoord);
+        return MathHelper.sqrt(f * f + f1 * f1 + f2 * f2);
+    }
+
+    /**
+     * Returns the squared distance to another path point
+     */
+    public float distanceToSquared(PathPoint pathpointIn)
+    {
+        float f = (float)(pathpointIn.xCoord - this.xCoord);
+        float f1 = (float)(pathpointIn.yCoord - this.yCoord);
+        float f2 = (float)(pathpointIn.zCoord - this.zCoord);
+        return f * f + f1 * f1 + f2 * f2;
+    }
+
+    public float distanceManhattan(PathPoint p_186281_1_)
+    {
+        float f = (float)Math.abs(p_186281_1_.xCoord - this.xCoord);
+        float f1 = (float)Math.abs(p_186281_1_.yCoord - this.yCoord);
+        float f2 = (float)Math.abs(p_186281_1_.zCoord - this.zCoord);
+        return f + f1 + f2;
+    }
+
+    public boolean equals(Object p_equals_1_)
+    {
+        if (!(p_equals_1_ instanceof PathPoint))
+        {
+            return false;
+        }
+        else
+        {
+            PathPoint pathpoint = (PathPoint)p_equals_1_;
+            return this.hash == pathpoint.hash && this.xCoord == pathpoint.xCoord && this.yCoord == pathpoint.yCoord && this.zCoord == pathpoint.zCoord;
+        }
+    }
+
+    public int hashCode()
+    {
+        return this.hash;
+    }
+
+    /**
+     * Returns true if this point has already been assigned to a path
+     */
+    public boolean isAssigned()
+    {
+        return this.index >= 0;
+    }
+
+    public String toString()
+    {
+        return this.xCoord + ", " + this.yCoord + ", " + this.zCoord;
+    }
+
+    public static PathPoint createFromBuffer(PacketBuffer buf)
+    {
+        PathPoint pathpoint = new PathPoint(buf.readInt(), buf.readInt(), buf.readInt());
+        pathpoint.distanceFromOrigin = buf.readFloat();
+        pathpoint.cost = buf.readFloat();
+        pathpoint.costMalus = buf.readFloat();
+        pathpoint.visited = buf.readBoolean();
+        pathpoint.nodeType = PathNodeType.values()[buf.readInt()];
+        pathpoint.distanceToTarget = buf.readFloat();
+        return pathpoint;
+    }
 }

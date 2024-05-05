@@ -4,38 +4,60 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.util.math.Vec3d;
 
-public class PhaseHover extends PhaseBase {
-   private Vec3d field_188680_b;
+public class PhaseHover extends PhaseBase
+{
+    private Vec3d targetLocation;
 
-   public PhaseHover(EntityDragon p_i46790_1_) {
-      super(p_i46790_1_);
-   }
+    public PhaseHover(EntityDragon dragonIn)
+    {
+        super(dragonIn);
+    }
 
-   public void func_188659_c() {
-      if (this.field_188680_b == null) {
-         this.field_188680_b = new Vec3d(this.field_188661_a.field_70165_t, this.field_188661_a.field_70163_u, this.field_188661_a.field_70161_v);
-      }
+    /**
+     * Gives the phase a chance to update its status.
+     * Called by dragon's onLivingUpdate. Only used when !worldObj.isRemote.
+     */
+    public void doLocalUpdate()
+    {
+        if (this.targetLocation == null)
+        {
+            this.targetLocation = new Vec3d(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+        }
+    }
 
-   }
+    public boolean getIsStationary()
+    {
+        return true;
+    }
 
-   public boolean func_188654_a() {
-      return true;
-   }
+    /**
+     * Called when this phase is set to active
+     */
+    public void initPhase()
+    {
+        this.targetLocation = null;
+    }
 
-   public void func_188660_d() {
-      this.field_188680_b = null;
-   }
+    /**
+     * Returns the maximum amount dragon may rise or fall during this phase
+     */
+    public float getMaxRiseOrFall()
+    {
+        return 1.0F;
+    }
 
-   public float func_188651_f() {
-      return 1.0F;
-   }
+    @Nullable
 
-   @Nullable
-   public Vec3d func_188650_g() {
-      return this.field_188680_b;
-   }
+    /**
+     * Returns the location the dragon is flying toward
+     */
+    public Vec3d getTargetLocation()
+    {
+        return this.targetLocation;
+    }
 
-   public PhaseList<PhaseHover> func_188652_i() {
-      return PhaseList.field_188751_k;
-   }
+    public PhaseList<PhaseHover> getPhaseList()
+    {
+        return PhaseList.HOVER;
+    }
 }

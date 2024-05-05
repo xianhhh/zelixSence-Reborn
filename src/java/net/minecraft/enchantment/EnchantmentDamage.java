@@ -9,60 +9,120 @@ import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 
-public class EnchantmentDamage extends Enchantment {
-   private static final String[] field_77359_A = new String[]{"all", "undead", "arthropods"};
-   private static final int[] field_77360_B = new int[]{1, 5, 5};
-   private static final int[] field_77362_C = new int[]{11, 8, 8};
-   private static final int[] field_77358_D = new int[]{20, 20, 20};
-   public final int field_77361_a;
+public class EnchantmentDamage extends Enchantment
+{
+    /** Holds the name to be translated of each protection type. */
+    private static final String[] PROTECTION_NAME = new String[] {"all", "undead", "arthropods"};
 
-   public EnchantmentDamage(Enchantment.Rarity p_i46734_1_, int p_i46734_2_, EntityEquipmentSlot... p_i46734_3_) {
-      super(p_i46734_1_, EnumEnchantmentType.WEAPON, p_i46734_3_);
-      this.field_77361_a = p_i46734_2_;
-   }
+    /**
+     * Holds the base factor of enchantability needed to be able to use the enchant.
+     */
+    private static final int[] BASE_ENCHANTABILITY = new int[] {1, 5, 5};
 
-   public int func_77321_a(int p_77321_1_) {
-      return field_77360_B[this.field_77361_a] + (p_77321_1_ - 1) * field_77362_C[this.field_77361_a];
-   }
+    /**
+     * Holds how much each level increased the enchantability factor to be able to use this enchant.
+     */
+    private static final int[] LEVEL_ENCHANTABILITY = new int[] {11, 8, 8};
 
-   public int func_77317_b(int p_77317_1_) {
-      return this.func_77321_a(p_77317_1_) + field_77358_D[this.field_77361_a];
-   }
+    /**
+     * Used on the formula of base enchantability, this is the 'window' factor of values to be able to use thing
+     * enchant.
+     */
+    private static final int[] THRESHOLD_ENCHANTABILITY = new int[] {20, 20, 20};
 
-   public int func_77325_b() {
-      return 5;
-   }
+    /**
+     * Defines the type of damage of the enchantment, 0 = all, 1 = undead, 3 = arthropods
+     */
+    public final int damageType;
 
-   public float func_152376_a(int p_152376_1_, EnumCreatureAttribute p_152376_2_) {
-      if (this.field_77361_a == 0) {
-         return 1.0F + (float)Math.max(0, p_152376_1_ - 1) * 0.5F;
-      } else if (this.field_77361_a == 1 && p_152376_2_ == EnumCreatureAttribute.UNDEAD) {
-         return (float)p_152376_1_ * 2.5F;
-      } else {
-         return this.field_77361_a == 2 && p_152376_2_ == EnumCreatureAttribute.ARTHROPOD ? (float)p_152376_1_ * 2.5F : 0.0F;
-      }
-   }
+    public EnchantmentDamage(Enchantment.Rarity rarityIn, int damageTypeIn, EntityEquipmentSlot... slots)
+    {
+        super(rarityIn, EnumEnchantmentType.WEAPON, slots);
+        this.damageType = damageTypeIn;
+    }
 
-   public String func_77320_a() {
-      return "enchantment.damage." + field_77359_A[this.field_77361_a];
-   }
+    /**
+     * Returns the minimal value of enchantability needed on the enchantment level passed.
+     */
+    public int getMinEnchantability(int enchantmentLevel)
+    {
+        return BASE_ENCHANTABILITY[this.damageType] + (enchantmentLevel - 1) * LEVEL_ENCHANTABILITY[this.damageType];
+    }
 
-   public boolean func_77326_a(Enchantment p_77326_1_) {
-      return !(p_77326_1_ instanceof EnchantmentDamage);
-   }
+    /**
+     * Returns the maximum value of enchantability nedded on the enchantment level passed.
+     */
+    public int getMaxEnchantability(int enchantmentLevel)
+    {
+        return this.getMinEnchantability(enchantmentLevel) + THRESHOLD_ENCHANTABILITY[this.damageType];
+    }
 
-   public boolean func_92089_a(ItemStack p_92089_1_) {
-      return p_92089_1_.func_77973_b() instanceof ItemAxe ? true : super.func_92089_a(p_92089_1_);
-   }
+    /**
+     * Returns the maximum level that the enchantment can have.
+     */
+    public int getMaxLevel()
+    {
+        return 5;
+    }
 
-   public void func_151368_a(EntityLivingBase p_151368_1_, Entity p_151368_2_, int p_151368_3_) {
-      if (p_151368_2_ instanceof EntityLivingBase) {
-         EntityLivingBase entitylivingbase = (EntityLivingBase)p_151368_2_;
-         if (this.field_77361_a == 2 && entitylivingbase.func_70668_bt() == EnumCreatureAttribute.ARTHROPOD) {
-            int i = 20 + p_151368_1_.func_70681_au().nextInt(10 * p_151368_3_);
-            entitylivingbase.func_70690_d(new PotionEffect(MobEffects.field_76421_d, i, 3));
-         }
-      }
+    /**
+     * Calculates the additional damage that will be dealt by an item with this enchantment. This alternative to
+     * calcModifierDamage is sensitive to the targets EnumCreatureAttribute.
+     */
+    public float calcDamageByCreature(int level, EnumCreatureAttribute creatureType)
+    {
+        if (this.damageType == 0)
+        {
+            return 1.0F + (float)Math.max(0, level - 1) * 0.5F;
+        }
+        else if (this.damageType == 1 && creatureType == EnumCreatureAttribute.UNDEAD)
+        {
+            return (float)level * 2.5F;
+        }
+        else
+        {
+            return this.damageType == 2 && creatureType == EnumCreatureAttribute.ARTHROPOD ? (float)level * 2.5F : 0.0F;
+        }
+    }
 
-   }
+    /**
+     * Return the name of key in translation table of this enchantment.
+     */
+    public String getName()
+    {
+        return "enchantment.damage." + PROTECTION_NAME[this.damageType];
+    }
+
+    /**
+     * Determines if the enchantment passed can be applyied together with this enchantment.
+     */
+    public boolean canApplyTogether(Enchantment ench)
+    {
+        return !(ench instanceof EnchantmentDamage);
+    }
+
+    /**
+     * Determines if this enchantment can be applied to a specific ItemStack.
+     */
+    public boolean canApply(ItemStack stack)
+    {
+        return stack.getItem() instanceof ItemAxe ? true : super.canApply(stack);
+    }
+
+    /**
+     * Called whenever a mob is damaged with an item that has this enchantment on it.
+     */
+    public void onEntityDamaged(EntityLivingBase user, Entity target, int level)
+    {
+        if (target instanceof EntityLivingBase)
+        {
+            EntityLivingBase entitylivingbase = (EntityLivingBase)target;
+
+            if (this.damageType == 2 && entitylivingbase.getCreatureAttribute() == EnumCreatureAttribute.ARTHROPOD)
+            {
+                int i = 20 + user.getRNG().nextInt(10 * level);
+                entitylivingbase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, i, 3));
+            }
+        }
+    }
 }

@@ -9,45 +9,60 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderSnowball<T extends Entity> extends Render<T> {
-   protected final Item field_177084_a;
-   private final RenderItem field_177083_e;
+public class RenderSnowball<T extends Entity> extends Render<T>
+{
+    protected final Item item;
+    private final RenderItem itemRenderer;
 
-   public RenderSnowball(RenderManager p_i46137_1_, Item p_i46137_2_, RenderItem p_i46137_3_) {
-      super(p_i46137_1_);
-      this.field_177084_a = p_i46137_2_;
-      this.field_177083_e = p_i46137_3_;
-   }
+    public RenderSnowball(RenderManager renderManagerIn, Item itemIn, RenderItem itemRendererIn)
+    {
+        super(renderManagerIn);
+        this.item = itemIn;
+        this.itemRenderer = itemRendererIn;
+    }
 
-   public void func_76986_a(T p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179109_b((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
-      GlStateManager.func_179091_B();
-      GlStateManager.func_179114_b(-this.field_76990_c.field_78735_i, 0.0F, 1.0F, 0.0F);
-      GlStateManager.func_179114_b((float)(this.field_76990_c.field_78733_k.field_74320_O == 2 ? -1 : 1) * this.field_76990_c.field_78732_j, 1.0F, 0.0F, 0.0F);
-      GlStateManager.func_179114_b(180.0F, 0.0F, 1.0F, 0.0F);
-      this.func_110776_a(TextureMap.field_110575_b);
-      if (this.field_188301_f) {
-         GlStateManager.func_179142_g();
-         GlStateManager.func_187431_e(this.func_188298_c(p_76986_1_));
-      }
+    /**
+     * Renders the desired {@code T} type Entity.
+     */
+    public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks)
+    {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate((float)x, (float)y, (float)z);
+        GlStateManager.enableRescaleNormal();
+        GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate((float)(this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-      this.field_177083_e.func_181564_a(this.func_177082_d(p_76986_1_), ItemCameraTransforms.TransformType.GROUND);
-      if (this.field_188301_f) {
-         GlStateManager.func_187417_n();
-         GlStateManager.func_179119_h();
-      }
+        if (this.renderOutlines)
+        {
+            GlStateManager.enableColorMaterial();
+            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
+        }
 
-      GlStateManager.func_179101_C();
-      GlStateManager.func_179121_F();
-      super.func_76986_a(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
-   }
+        this.itemRenderer.renderItem(this.getStackToRender(entity), ItemCameraTransforms.TransformType.GROUND);
 
-   public ItemStack func_177082_d(T p_177082_1_) {
-      return new ItemStack(this.field_177084_a);
-   }
+        if (this.renderOutlines)
+        {
+            GlStateManager.disableOutlineMode();
+            GlStateManager.disableColorMaterial();
+        }
 
-   protected ResourceLocation func_110775_a(Entity p_110775_1_) {
-      return TextureMap.field_110575_b;
-   }
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.popMatrix();
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
+    }
+
+    public ItemStack getStackToRender(T entityIn)
+    {
+        return new ItemStack(this.item);
+    }
+
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(Entity entity)
+    {
+        return TextureMap.LOCATION_BLOCKS_TEXTURE;
+    }
 }

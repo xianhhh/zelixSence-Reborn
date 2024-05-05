@@ -7,55 +7,76 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public class CPacketPlayerDigging implements Packet<INetHandlerPlayServer> {
-   private BlockPos field_179717_a;
-   private EnumFacing field_179716_b;
-   private CPacketPlayerDigging.Action field_149508_e;
+public class CPacketPlayerDigging implements Packet<INetHandlerPlayServer>
+{
+    private BlockPos position;
+    private EnumFacing facing;
 
-   public CPacketPlayerDigging() {
-   }
+    /** Status of the digging (started, ongoing, broken). */
+    private CPacketPlayerDigging.Action action;
 
-   public CPacketPlayerDigging(CPacketPlayerDigging.Action p_i46871_1_, BlockPos p_i46871_2_, EnumFacing p_i46871_3_) {
-      this.field_149508_e = p_i46871_1_;
-      this.field_179717_a = p_i46871_2_;
-      this.field_179716_b = p_i46871_3_;
-   }
+    public CPacketPlayerDigging()
+    {
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149508_e = (CPacketPlayerDigging.Action)p_148837_1_.func_179257_a(CPacketPlayerDigging.Action.class);
-      this.field_179717_a = p_148837_1_.func_179259_c();
-      this.field_179716_b = EnumFacing.func_82600_a(p_148837_1_.readUnsignedByte());
-   }
+    public CPacketPlayerDigging(CPacketPlayerDigging.Action actionIn, BlockPos posIn, EnumFacing facingIn)
+    {
+        this.action = actionIn;
+        this.position = posIn;
+        this.facing = facingIn;
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179249_a(this.field_149508_e);
-      p_148840_1_.func_179255_a(this.field_179717_a);
-      p_148840_1_.writeByte(this.field_179716_b.func_176745_a());
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.action = (CPacketPlayerDigging.Action)buf.readEnumValue(CPacketPlayerDigging.Action.class);
+        this.position = buf.readBlockPos();
+        this.facing = EnumFacing.getFront(buf.readUnsignedByte());
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147345_a(this);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeEnumValue(this.action);
+        buf.writeBlockPos(this.position);
+        buf.writeByte(this.facing.getIndex());
+    }
 
-   public BlockPos func_179715_a() {
-      return this.field_179717_a;
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processPlayerDigging(this);
+    }
 
-   public EnumFacing func_179714_b() {
-      return this.field_179716_b;
-   }
+    public BlockPos getPosition()
+    {
+        return this.position;
+    }
 
-   public CPacketPlayerDigging.Action func_180762_c() {
-      return this.field_149508_e;
-   }
+    public EnumFacing getFacing()
+    {
+        return this.facing;
+    }
 
-   public static enum Action {
-      START_DESTROY_BLOCK,
-      ABORT_DESTROY_BLOCK,
-      STOP_DESTROY_BLOCK,
-      DROP_ALL_ITEMS,
-      DROP_ITEM,
-      RELEASE_USE_ITEM,
-      SWAP_HELD_ITEMS;
-   }
+    public CPacketPlayerDigging.Action getAction()
+    {
+        return this.action;
+    }
+
+    public static enum Action
+    {
+        START_DESTROY_BLOCK,
+        ABORT_DESTROY_BLOCK,
+        STOP_DESTROY_BLOCK,
+        DROP_ALL_ITEMS,
+        DROP_ITEM,
+        RELEASE_USE_ITEM,
+        SWAP_HELD_ITEMS;
+    }
 }

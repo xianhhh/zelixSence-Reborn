@@ -7,19 +7,24 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 
-public interface IBlockAccess {
-   @Nullable
-   TileEntity func_175625_s(BlockPos var1);
+public interface IBlockAccess
+{
+    @Nullable
+    TileEntity getTileEntity(BlockPos pos);
 
-   int func_175626_b(BlockPos var1, int var2);
+    int getCombinedLight(BlockPos pos, int lightValue);
 
-   IBlockState func_180495_p(BlockPos var1);
+    IBlockState getBlockState(BlockPos pos);
 
-   boolean func_175623_d(BlockPos var1);
+    /**
+     * Checks to see if an air block exists at the provided location. Note that this only checks to see if the blocks
+     * material is set to air, meaning it is possible for non-vanilla blocks to still pass this check.
+     */
+    boolean isAirBlock(BlockPos pos);
 
-   Biome func_180494_b(BlockPos var1);
+    Biome getBiome(BlockPos pos);
 
-   int func_175627_a(BlockPos var1, EnumFacing var2);
+    int getStrongPower(BlockPos pos, EnumFacing direction);
 
-   WorldType func_175624_G();
+    WorldType getWorldType();
 }

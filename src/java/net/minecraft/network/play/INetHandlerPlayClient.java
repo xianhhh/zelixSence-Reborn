@@ -79,158 +79,317 @@ import net.minecraft.network.play.server.SPacketWindowItems;
 import net.minecraft.network.play.server.SPacketWindowProperty;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 
-public interface INetHandlerPlayClient extends INetHandler {
-   void func_147235_a(SPacketSpawnObject var1);
+public interface INetHandlerPlayClient extends INetHandler
+{
+    /**
+     * Spawns an instance of the objecttype indicated by the packet and sets its position and momentum
+     */
+    void handleSpawnObject(SPacketSpawnObject packetIn);
+
+    /**
+     * Spawns an experience orb and sets its value (amount of XP)
+     */
+    void handleSpawnExperienceOrb(SPacketSpawnExperienceOrb packetIn);
+
+    /**
+     * Handles globally visible entities. Used in vanilla for lightning bolts
+     */
+    void handleSpawnGlobalEntity(SPacketSpawnGlobalEntity packetIn);
+
+    /**
+     * Spawns the mob entity at the specified location, with the specified rotation, momentum and type. Updates the
+     * entities Datawatchers with the entity metadata specified in the packet
+     */
+    void handleSpawnMob(SPacketSpawnMob packetIn);
+
+    /**
+     * May create a scoreboard objective, remove an objective from the scoreboard or update an objectives' displayname
+     */
+    void handleScoreboardObjective(SPacketScoreboardObjective packetIn);
+
+    /**
+     * Handles the spawning of a painting object
+     */
+    void handleSpawnPainting(SPacketSpawnPainting packetIn);
+
+    /**
+     * Handles the creation of a nearby player entity, sets the position and held item
+     */
+    void handleSpawnPlayer(SPacketSpawnPlayer packetIn);
+
+    /**
+     * Renders a specified animation: Waking up a player, a living entity swinging its currently held item, being hurt
+     * or receiving a critical hit by normal or magical means
+     */
+    void handleAnimation(SPacketAnimation packetIn);
+
+    /**
+     * Updates the players statistics or achievements
+     */
+    void handleStatistics(SPacketStatistics packetIn);
+
+    void func_191980_a(SPacketRecipeBook p_191980_1_);
+
+    /**
+     * Updates all registered IWorldAccess instances with destroyBlockInWorldPartially
+     */
+    void handleBlockBreakAnim(SPacketBlockBreakAnim packetIn);
+
+    /**
+     * Creates a sign in the specified location if it didn't exist and opens the GUI to edit its text
+     */
+    void handleSignEditorOpen(SPacketSignEditorOpen packetIn);
+
+    /**
+     * Updates the NBTTagCompound metadata of instances of the following entitytypes: Mob spawners, command blocks,
+     * beacons, skulls, flowerpot
+     */
+    void handleUpdateTileEntity(SPacketUpdateTileEntity packetIn);
+
+    /**
+     * Triggers Block.onBlockEventReceived, which is implemented in BlockPistonBase for extension/retraction, BlockNote
+     * for setting the instrument (including audiovisual feedback) and in BlockContainer to set the number of players
+     * accessing a (Ender)Chest
+     */
+    void handleBlockAction(SPacketBlockAction packetIn);
+
+    /**
+     * Updates the block and metadata and generates a blockupdate (and notify the clients)
+     */
+    void handleBlockChange(SPacketBlockChange packetIn);
+
+    /**
+     * Prints a chatmessage in the chat GUI
+     */
+    void handleChat(SPacketChat packetIn);
+
+    /**
+     * Displays the available command-completion options the server knows of
+     */
+    void handleTabComplete(SPacketTabComplete packetIn);
+
+    /**
+     * Received from the servers PlayerManager if between 1 and 64 blocks in a chunk are changed. If only one block
+     * requires an update, the server sends S23PacketBlockChange and if 64 or more blocks are changed, the server sends
+     * S21PacketChunkData
+     */
+    void handleMultiBlockChange(SPacketMultiBlockChange packetIn);
+
+    /**
+     * Updates the worlds MapStorage with the specified MapData for the specified map-identifier and invokes a
+     * MapItemRenderer for it
+     */
+    void handleMaps(SPacketMaps packetIn);
+
+    /**
+     * Verifies that the server and client are synchronized with respect to the inventory/container opened by the player
+     * and confirms if it is the case.
+     */
+    void handleConfirmTransaction(SPacketConfirmTransaction packetIn);
+
+    /**
+     * Resets the ItemStack held in hand and closes the window that is opened
+     */
+    void handleCloseWindow(SPacketCloseWindow packetIn);
+
+    /**
+     * Handles the placement of a specified ItemStack in a specified container/inventory slot
+     */
+    void handleWindowItems(SPacketWindowItems packetIn);
+
+    /**
+     * Displays a GUI by ID. In order starting from id 0: Chest, Workbench, Furnace, Dispenser, Enchanting table,
+     * Brewing stand, Villager merchant, Beacon, Anvil, Hopper, Dropper, Horse
+     */
+    void handleOpenWindow(SPacketOpenWindow packetIn);
+
+    /**
+     * Sets the progressbar of the opened window to the specified value
+     */
+    void handleWindowProperty(SPacketWindowProperty packetIn);
+
+    /**
+     * Handles pickin up an ItemStack or dropping one in your inventory or an open (non-creative) container
+     */
+    void handleSetSlot(SPacketSetSlot packetIn);
+
+    /**
+     * Handles packets that have room for a channel specification. Vanilla implemented channels are "MC|TrList" to
+     * acquire a MerchantRecipeList trades for a villager merchant, "MC|Brand" which sets the server brand? on the
+     * player instance and finally "MC|RPack" which the server uses to communicate the identifier of the default server
+     * resourcepack for the client to load.
+     */
+    void handleCustomPayload(SPacketCustomPayload packetIn);
+
+    /**
+     * Closes the network channel
+     */
+    void handleDisconnect(SPacketDisconnect packetIn);
+
+    /**
+     * Retrieves the player identified by the packet, puts him to sleep if possible (and flags whether all players are
+     * asleep)
+     */
+    void handleUseBed(SPacketUseBed packetIn);
+
+    /**
+     * Invokes the entities' handleUpdateHealth method which is implemented in LivingBase (hurt/death),
+     * MinecartMobSpawner (spawn delay), FireworkRocket & MinecartTNT (explosion), IronGolem (throwing,...), Witch
+     * (spawn particles), Zombie (villager transformation), Animal (breeding mode particles), Horse (breeding/smoke
+     * particles), Sheep (...), Tameable (...), Villager (particles for breeding mode, angry and happy), Wolf (...)
+     */
+    void handleEntityStatus(SPacketEntityStatus packetIn);
+
+    void handleEntityAttach(SPacketEntityAttach packetIn);
+
+    void handleSetPassengers(SPacketSetPassengers packetIn);
+
+    /**
+     * Initiates a new explosion (sound, particles, drop spawn) for the affected blocks indicated by the packet.
+     */
+    void handleExplosion(SPacketExplosion packetIn);
+
+    void handleChangeGameState(SPacketChangeGameState packetIn);
+
+    void handleKeepAlive(SPacketKeepAlive packetIn);
+
+    /**
+     * Updates the specified chunk with the supplied data, marks it for re-rendering and lighting recalculation
+     */
+    void handleChunkData(SPacketChunkData packetIn);
+
+    void processChunkUnload(SPacketUnloadChunk packetIn);
+
+    void handleEffect(SPacketEffect packetIn);
+
+    /**
+     * Registers some server properties (gametype,hardcore-mode,terraintype,difficulty,player limit), creates a new
+     * WorldClient and sets the player initial dimension
+     */
+    void handleJoinGame(SPacketJoinGame packetIn);
+
+    /**
+     * Updates the specified entity's position by the specified relative moment and absolute rotation. Note that
+     * subclassing of the packet allows for the specification of a subset of this data (e.g. only rel. position, abs.
+     * rotation or both).
+     */
+    void handleEntityMovement(SPacketEntity packetIn);
 
-   void func_147286_a(SPacketSpawnExperienceOrb var1);
+    void handlePlayerPosLook(SPacketPlayerPosLook packetIn);
 
-   void func_147292_a(SPacketSpawnGlobalEntity var1);
+    /**
+     * Spawns a specified number of particles at the specified location with a randomized displacement according to
+     * specified bounds
+     */
+    void handleParticles(SPacketParticles packetIn);
 
-   void func_147281_a(SPacketSpawnMob var1);
+    void handlePlayerAbilities(SPacketPlayerAbilities packetIn);
 
-   void func_147291_a(SPacketScoreboardObjective var1);
+    void handlePlayerListItem(SPacketPlayerListItem packetIn);
 
-   void func_147288_a(SPacketSpawnPainting var1);
+    /**
+     * Locally eliminates the entities. Invoked by the server when the items are in fact destroyed, or the player is no
+     * longer registered as required to monitor them. The latter  happens when distance between the player and item
+     * increases beyond a certain treshold (typically the viewing distance)
+     */
+    void handleDestroyEntities(SPacketDestroyEntities packetIn);
 
-   void func_147237_a(SPacketSpawnPlayer var1);
+    void handleRemoveEntityEffect(SPacketRemoveEntityEffect packetIn);
 
-   void func_147279_a(SPacketAnimation var1);
+    void handleRespawn(SPacketRespawn packetIn);
 
-   void func_147293_a(SPacketStatistics var1);
+    /**
+     * Updates the direction in which the specified entity is looking, normally this head rotation is independent of the
+     * rotation of the entity itself
+     */
+    void handleEntityHeadLook(SPacketEntityHeadLook packetIn);
 
-   void func_191980_a(SPacketRecipeBook var1);
+    /**
+     * Updates which hotbar slot of the player is currently selected
+     */
+    void handleHeldItemChange(SPacketHeldItemChange packetIn);
 
-   void func_147294_a(SPacketBlockBreakAnim var1);
+    /**
+     * Removes or sets the ScoreObjective to be displayed at a particular scoreboard position (list, sidebar, below
+     * name)
+     */
+    void handleDisplayObjective(SPacketDisplayObjective packetIn);
 
-   void func_147268_a(SPacketSignEditorOpen var1);
+    /**
+     * Invoked when the server registers new proximate objects in your watchlist or when objects in your watchlist have
+     * changed -> Registers any changes locally
+     */
+    void handleEntityMetadata(SPacketEntityMetadata packetIn);
 
-   void func_147273_a(SPacketUpdateTileEntity var1);
+    /**
+     * Sets the velocity of the specified entity to the specified value
+     */
+    void handleEntityVelocity(SPacketEntityVelocity packetIn);
 
-   void func_147261_a(SPacketBlockAction var1);
+    void handleEntityEquipment(SPacketEntityEquipment packetIn);
 
-   void func_147234_a(SPacketBlockChange var1);
+    void handleSetExperience(SPacketSetExperience packetIn);
 
-   void func_147251_a(SPacketChat var1);
+    void handleUpdateHealth(SPacketUpdateHealth packetIn);
 
-   void func_147274_a(SPacketTabComplete var1);
+    /**
+     * Updates a team managed by the scoreboard: Create/Remove the team registration, Register/Remove the player-team-
+     * memberships, Set team displayname/prefix/suffix and/or whether friendly fire is enabled
+     */
+    void handleTeams(SPacketTeams packetIn);
 
-   void func_147287_a(SPacketMultiBlockChange var1);
+    /**
+     * Either updates the score with a specified value or removes the score for an objective
+     */
+    void handleUpdateScore(SPacketUpdateScore packetIn);
 
-   void func_147264_a(SPacketMaps var1);
+    void handleSpawnPosition(SPacketSpawnPosition packetIn);
 
-   void func_147239_a(SPacketConfirmTransaction var1);
+    void handleTimeUpdate(SPacketTimeUpdate packetIn);
 
-   void func_147276_a(SPacketCloseWindow var1);
+    void handleSoundEffect(SPacketSoundEffect packetIn);
 
-   void func_147241_a(SPacketWindowItems var1);
+    void handleCustomSound(SPacketCustomSound packetIn);
 
-   void func_147265_a(SPacketOpenWindow var1);
+    void handleCollectItem(SPacketCollectItem packetIn);
 
-   void func_147245_a(SPacketWindowProperty var1);
+    /**
+     * Updates an entity's position and rotation as specified by the packet
+     */
+    void handleEntityTeleport(SPacketEntityTeleport packetIn);
 
-   void func_147266_a(SPacketSetSlot var1);
+    /**
+     * Updates en entity's attributes and their respective modifiers, which are used for speed bonusses (player
+     * sprinting, animals fleeing, baby speed), weapon/tool attackDamage, hostiles followRange randomization, zombie
+     * maxHealth and knockback resistance as well as reinforcement spawning chance.
+     */
+    void handleEntityProperties(SPacketEntityProperties packetIn);
 
-   void func_147240_a(SPacketCustomPayload var1);
+    void handleEntityEffect(SPacketEntityEffect packetIn);
 
-   void func_147253_a(SPacketDisconnect var1);
+    void handleCombatEvent(SPacketCombatEvent packetIn);
 
-   void func_147278_a(SPacketUseBed var1);
+    void handleServerDifficulty(SPacketServerDifficulty packetIn);
 
-   void func_147236_a(SPacketEntityStatus var1);
+    void handleCamera(SPacketCamera packetIn);
 
-   void func_147243_a(SPacketEntityAttach var1);
+    void handleWorldBorder(SPacketWorldBorder packetIn);
 
-   void func_184328_a(SPacketSetPassengers var1);
+    void handleTitle(SPacketTitle packetIn);
 
-   void func_147283_a(SPacketExplosion var1);
+    void handlePlayerListHeaderFooter(SPacketPlayerListHeaderFooter packetIn);
 
-   void func_147252_a(SPacketChangeGameState var1);
+    void handleResourcePack(SPacketResourcePackSend packetIn);
 
-   void func_147272_a(SPacketKeepAlive var1);
+    void handleUpdateEntityNBT(SPacketUpdateBossInfo packetIn);
 
-   void func_147263_a(SPacketChunkData var1);
+    void handleCooldown(SPacketCooldown packetIn);
 
-   void func_184326_a(SPacketUnloadChunk var1);
+    void handleMoveVehicle(SPacketMoveVehicle packetIn);
 
-   void func_147277_a(SPacketEffect var1);
+    void func_191981_a(SPacketAdvancementInfo p_191981_1_);
 
-   void func_147282_a(SPacketJoinGame var1);
+    void func_194022_a(SPacketSelectAdvancementsTab p_194022_1_);
 
-   void func_147259_a(SPacketEntity var1);
-
-   void func_184330_a(SPacketPlayerPosLook var1);
-
-   void func_147289_a(SPacketParticles var1);
-
-   void func_147270_a(SPacketPlayerAbilities var1);
-
-   void func_147256_a(SPacketPlayerListItem var1);
-
-   void func_147238_a(SPacketDestroyEntities var1);
-
-   void func_147262_a(SPacketRemoveEntityEffect var1);
-
-   void func_147280_a(SPacketRespawn var1);
-
-   void func_147267_a(SPacketEntityHeadLook var1);
-
-   void func_147257_a(SPacketHeldItemChange var1);
-
-   void func_147254_a(SPacketDisplayObjective var1);
-
-   void func_147284_a(SPacketEntityMetadata var1);
-
-   void func_147244_a(SPacketEntityVelocity var1);
-
-   void func_147242_a(SPacketEntityEquipment var1);
-
-   void func_147295_a(SPacketSetExperience var1);
-
-   void func_147249_a(SPacketUpdateHealth var1);
-
-   void func_147247_a(SPacketTeams var1);
-
-   void func_147250_a(SPacketUpdateScore var1);
-
-   void func_147271_a(SPacketSpawnPosition var1);
-
-   void func_147285_a(SPacketTimeUpdate var1);
-
-   void func_184327_a(SPacketSoundEffect var1);
-
-   void func_184329_a(SPacketCustomSound var1);
-
-   void func_147246_a(SPacketCollectItem var1);
-
-   void func_147275_a(SPacketEntityTeleport var1);
-
-   void func_147290_a(SPacketEntityProperties var1);
-
-   void func_147260_a(SPacketEntityEffect var1);
-
-   void func_175098_a(SPacketCombatEvent var1);
-
-   void func_175101_a(SPacketServerDifficulty var1);
-
-   void func_175094_a(SPacketCamera var1);
-
-   void func_175093_a(SPacketWorldBorder var1);
-
-   void func_175099_a(SPacketTitle var1);
-
-   void func_175096_a(SPacketPlayerListHeaderFooter var1);
-
-   void func_175095_a(SPacketResourcePackSend var1);
-
-   void func_184325_a(SPacketUpdateBossInfo var1);
-
-   void func_184324_a(SPacketCooldown var1);
-
-   void func_184323_a(SPacketMoveVehicle var1);
-
-   void func_191981_a(SPacketAdvancementInfo var1);
-
-   void func_194022_a(SPacketSelectAdvancementsTab var1);
-
-   void func_194307_a(SPacketPlaceGhostRecipe var1);
+    void func_194307_a(SPacketPlaceGhostRecipe p_194307_1_);
 }

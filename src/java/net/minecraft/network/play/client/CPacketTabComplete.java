@@ -8,56 +8,76 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.StringUtils;
 
-public class CPacketTabComplete implements Packet<INetHandlerPlayServer> {
-   private String field_149420_a;
-   private boolean field_186990_b;
-   @Nullable
-   private BlockPos field_179710_b;
+public class CPacketTabComplete implements Packet<INetHandlerPlayServer>
+{
+    private String message;
+    private boolean hasTargetBlock;
+    @Nullable
+    private BlockPos targetBlock;
 
-   public CPacketTabComplete() {
-   }
+    public CPacketTabComplete()
+    {
+    }
 
-   public CPacketTabComplete(String p_i46888_1_, @Nullable BlockPos p_i46888_2_, boolean p_i46888_3_) {
-      this.field_149420_a = p_i46888_1_;
-      this.field_179710_b = p_i46888_2_;
-      this.field_186990_b = p_i46888_3_;
-   }
+    public CPacketTabComplete(String messageIn, @Nullable BlockPos targetBlockIn, boolean hasTargetBlockIn)
+    {
+        this.message = messageIn;
+        this.targetBlock = targetBlockIn;
+        this.hasTargetBlock = hasTargetBlockIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149420_a = p_148837_1_.func_150789_c(32767);
-      this.field_186990_b = p_148837_1_.readBoolean();
-      boolean flag = p_148837_1_.readBoolean();
-      if (flag) {
-         this.field_179710_b = p_148837_1_.func_179259_c();
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.message = buf.readStringFromBuffer(32767);
+        this.hasTargetBlock = buf.readBoolean();
+        boolean flag = buf.readBoolean();
 
-   }
+        if (flag)
+        {
+            this.targetBlock = buf.readBlockPos();
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_180714_a(StringUtils.substring(this.field_149420_a, 0, 32767));
-      p_148840_1_.writeBoolean(this.field_186990_b);
-      boolean flag = this.field_179710_b != null;
-      p_148840_1_.writeBoolean(flag);
-      if (flag) {
-         p_148840_1_.func_179255_a(this.field_179710_b);
-      }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeString(StringUtils.substring(this.message, 0, 32767));
+        buf.writeBoolean(this.hasTargetBlock);
+        boolean flag = this.targetBlock != null;
+        buf.writeBoolean(flag);
 
-   }
+        if (flag)
+        {
+            buf.writeBlockPos(this.targetBlock);
+        }
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147341_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processTabComplete(this);
+    }
 
-   public String func_149419_c() {
-      return this.field_149420_a;
-   }
+    public String getMessage()
+    {
+        return this.message;
+    }
 
-   @Nullable
-   public BlockPos func_179709_b() {
-      return this.field_179710_b;
-   }
+    @Nullable
+    public BlockPos getTargetBlock()
+    {
+        return this.targetBlock;
+    }
 
-   public boolean func_186989_c() {
-      return this.field_186990_b;
-   }
+    public boolean hasTargetBlock()
+    {
+        return this.hasTargetBlock;
+    }
 }

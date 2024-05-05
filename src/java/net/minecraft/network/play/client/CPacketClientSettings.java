@@ -7,65 +7,85 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHandSide;
 
-public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
-   private String field_149530_a;
-   private int field_149528_b;
-   private EntityPlayer.EnumChatVisibility field_149529_c;
-   private boolean field_149526_d;
-   private int field_179711_e;
-   private EnumHandSide field_186992_f;
+public class CPacketClientSettings implements Packet<INetHandlerPlayServer>
+{
+    private String lang;
+    private int view;
+    private EntityPlayer.EnumChatVisibility chatVisibility;
+    private boolean enableColors;
+    private int modelPartFlags;
+    private EnumHandSide mainHand;
 
-   public CPacketClientSettings() {
-   }
+    public CPacketClientSettings()
+    {
+    }
 
-   public CPacketClientSettings(String p_i46885_1_, int p_i46885_2_, EntityPlayer.EnumChatVisibility p_i46885_3_, boolean p_i46885_4_, int p_i46885_5_, EnumHandSide p_i46885_6_) {
-      this.field_149530_a = p_i46885_1_;
-      this.field_149528_b = p_i46885_2_;
-      this.field_149529_c = p_i46885_3_;
-      this.field_149526_d = p_i46885_4_;
-      this.field_179711_e = p_i46885_5_;
-      this.field_186992_f = p_i46885_6_;
-   }
+    public CPacketClientSettings(String langIn, int renderDistanceIn, EntityPlayer.EnumChatVisibility chatVisibilityIn, boolean chatColorsIn, int modelPartsIn, EnumHandSide mainHandIn)
+    {
+        this.lang = langIn;
+        this.view = renderDistanceIn;
+        this.chatVisibility = chatVisibilityIn;
+        this.enableColors = chatColorsIn;
+        this.modelPartFlags = modelPartsIn;
+        this.mainHand = mainHandIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149530_a = p_148837_1_.func_150789_c(16);
-      this.field_149528_b = p_148837_1_.readByte();
-      this.field_149529_c = (EntityPlayer.EnumChatVisibility)p_148837_1_.func_179257_a(EntityPlayer.EnumChatVisibility.class);
-      this.field_149526_d = p_148837_1_.readBoolean();
-      this.field_179711_e = p_148837_1_.readUnsignedByte();
-      this.field_186992_f = (EnumHandSide)p_148837_1_.func_179257_a(EnumHandSide.class);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.lang = buf.readStringFromBuffer(16);
+        this.view = buf.readByte();
+        this.chatVisibility = (EntityPlayer.EnumChatVisibility)buf.readEnumValue(EntityPlayer.EnumChatVisibility.class);
+        this.enableColors = buf.readBoolean();
+        this.modelPartFlags = buf.readUnsignedByte();
+        this.mainHand = (EnumHandSide)buf.readEnumValue(EnumHandSide.class);
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_180714_a(this.field_149530_a);
-      p_148840_1_.writeByte(this.field_149528_b);
-      p_148840_1_.func_179249_a(this.field_149529_c);
-      p_148840_1_.writeBoolean(this.field_149526_d);
-      p_148840_1_.writeByte(this.field_179711_e);
-      p_148840_1_.func_179249_a(this.field_186992_f);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeString(this.lang);
+        buf.writeByte(this.view);
+        buf.writeEnumValue(this.chatVisibility);
+        buf.writeBoolean(this.enableColors);
+        buf.writeByte(this.modelPartFlags);
+        buf.writeEnumValue(this.mainHand);
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147352_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processClientSettings(this);
+    }
 
-   public String func_149524_c() {
-      return this.field_149530_a;
-   }
+    public String getLang()
+    {
+        return this.lang;
+    }
 
-   public EntityPlayer.EnumChatVisibility func_149523_e() {
-      return this.field_149529_c;
-   }
+    public EntityPlayer.EnumChatVisibility getChatVisibility()
+    {
+        return this.chatVisibility;
+    }
 
-   public boolean func_149520_f() {
-      return this.field_149526_d;
-   }
+    public boolean isColorsEnabled()
+    {
+        return this.enableColors;
+    }
 
-   public int func_149521_d() {
-      return this.field_179711_e;
-   }
+    public int getModelPartFlags()
+    {
+        return this.modelPartFlags;
+    }
 
-   public EnumHandSide func_186991_f() {
-      return this.field_186992_f;
-   }
+    public EnumHandSide getMainHand()
+    {
+        return this.mainHand;
+    }
 }

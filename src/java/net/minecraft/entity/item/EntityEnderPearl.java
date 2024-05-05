@@ -17,105 +17,140 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class EntityEnderPearl extends EntityThrowable {
-   private EntityLivingBase field_181555_c;
+public class EntityEnderPearl extends EntityThrowable
+{
+    private EntityLivingBase thrower;
 
-   public EntityEnderPearl(World p_i46455_1_) {
-      super(p_i46455_1_);
-   }
+    public EntityEnderPearl(World worldIn)
+    {
+        super(worldIn);
+    }
 
-   public EntityEnderPearl(World p_i1783_1_, EntityLivingBase p_i1783_2_) {
-      super(p_i1783_1_, p_i1783_2_);
-      this.field_181555_c = p_i1783_2_;
-   }
+    public EntityEnderPearl(World worldIn, EntityLivingBase throwerIn)
+    {
+        super(worldIn, throwerIn);
+        this.thrower = throwerIn;
+    }
 
-   public EntityEnderPearl(World p_i1784_1_, double p_i1784_2_, double p_i1784_4_, double p_i1784_6_) {
-      super(p_i1784_1_, p_i1784_2_, p_i1784_4_, p_i1784_6_);
-   }
+    public EntityEnderPearl(World worldIn, double x, double y, double z)
+    {
+        super(worldIn, x, y, z);
+    }
 
-   public static void func_189663_a(DataFixer p_189663_0_) {
-      EntityThrowable.func_189661_a(p_189663_0_, "ThrownEnderpearl");
-   }
+    public static void registerFixesEnderPearl(DataFixer fixer)
+    {
+        EntityThrowable.registerFixesThrowable(fixer, "ThrownEnderpearl");
+    }
 
-   protected void func_70184_a(RayTraceResult p_70184_1_) {
-      EntityLivingBase entitylivingbase = this.func_85052_h();
-      if (p_70184_1_.field_72308_g != null) {
-         if (p_70184_1_.field_72308_g == this.field_181555_c) {
-            return;
-         }
+    /**
+     * Called when this EntityThrowable hits a block or entity.
+     */
+    protected void onImpact(RayTraceResult result)
+    {
+        EntityLivingBase entitylivingbase = this.getThrower();
 
-         p_70184_1_.field_72308_g.func_70097_a(DamageSource.func_76356_a(this, entitylivingbase), 0.0F);
-      }
-
-      if (p_70184_1_.field_72313_a == RayTraceResult.Type.BLOCK) {
-         BlockPos blockpos = p_70184_1_.func_178782_a();
-         TileEntity tileentity = this.field_70170_p.func_175625_s(blockpos);
-         if (tileentity instanceof TileEntityEndGateway) {
-            TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)tileentity;
-            if (entitylivingbase != null) {
-               if (entitylivingbase instanceof EntityPlayerMP) {
-                  CriteriaTriggers.field_192124_d.func_192193_a((EntityPlayerMP)entitylivingbase, this.field_70170_p.func_180495_p(blockpos));
-               }
-
-               tileentityendgateway.func_184306_a(entitylivingbase);
-               this.func_70106_y();
-               return;
+        if (result.entityHit != null)
+        {
+            if (result.entityHit == this.thrower)
+            {
+                return;
             }
 
-            tileentityendgateway.func_184306_a(this);
-            return;
-         }
-      }
+            result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, entitylivingbase), 0.0F);
+        }
 
-      for(int i = 0; i < 32; ++i) {
-         this.field_70170_p.func_175688_a(EnumParticleTypes.PORTAL, this.field_70165_t, this.field_70163_u + this.field_70146_Z.nextDouble() * 2.0D, this.field_70161_v, this.field_70146_Z.nextGaussian(), 0.0D, this.field_70146_Z.nextGaussian());
-      }
+        if (result.typeOfHit == RayTraceResult.Type.BLOCK)
+        {
+            BlockPos blockpos = result.getBlockPos();
+            TileEntity tileentity = this.world.getTileEntity(blockpos);
 
-      if (!this.field_70170_p.field_72995_K) {
-         if (entitylivingbase instanceof EntityPlayerMP) {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entitylivingbase;
-            if (entityplayermp.field_71135_a.func_147362_b().func_150724_d() && entityplayermp.field_70170_p == this.field_70170_p && !entityplayermp.func_70608_bn()) {
-               if (this.field_70146_Z.nextFloat() < 0.05F && this.field_70170_p.func_82736_K().func_82766_b("doMobSpawning")) {
-                  EntityEndermite entityendermite = new EntityEndermite(this.field_70170_p);
-                  entityendermite.func_175496_a(true);
-                  entityendermite.func_70012_b(entitylivingbase.field_70165_t, entitylivingbase.field_70163_u, entitylivingbase.field_70161_v, entitylivingbase.field_70177_z, entitylivingbase.field_70125_A);
-                  this.field_70170_p.func_72838_d(entityendermite);
-               }
+            if (tileentity instanceof TileEntityEndGateway)
+            {
+                TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)tileentity;
 
-               if (entitylivingbase.func_184218_aH()) {
-                  entitylivingbase.func_184210_p();
-               }
+                if (entitylivingbase != null)
+                {
+                    if (entitylivingbase instanceof EntityPlayerMP)
+                    {
+                        CriteriaTriggers.field_192124_d.func_192193_a((EntityPlayerMP)entitylivingbase, this.world.getBlockState(blockpos));
+                    }
 
-               entitylivingbase.func_70634_a(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-               entitylivingbase.field_70143_R = 0.0F;
-               entitylivingbase.func_70097_a(DamageSource.field_76379_h, 5.0F);
+                    tileentityendgateway.teleportEntity(entitylivingbase);
+                    this.setDead();
+                    return;
+                }
+
+                tileentityendgateway.teleportEntity(this);
+                return;
             }
-         } else if (entitylivingbase != null) {
-            entitylivingbase.func_70634_a(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-            entitylivingbase.field_70143_R = 0.0F;
-         }
+        }
 
-         this.func_70106_y();
-      }
+        for (int i = 0; i < 32; ++i)
+        {
+            this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX, this.posY + this.rand.nextDouble() * 2.0D, this.posZ, this.rand.nextGaussian(), 0.0D, this.rand.nextGaussian());
+        }
 
-   }
+        if (!this.world.isRemote)
+        {
+            if (entitylivingbase instanceof EntityPlayerMP)
+            {
+                EntityPlayerMP entityplayermp = (EntityPlayerMP)entitylivingbase;
 
-   public void func_70071_h_() {
-      EntityLivingBase entitylivingbase = this.func_85052_h();
-      if (entitylivingbase != null && entitylivingbase instanceof EntityPlayer && !entitylivingbase.func_70089_S()) {
-         this.func_70106_y();
-      } else {
-         super.func_70071_h_();
-      }
+                if (entityplayermp.connection.getNetworkManager().isChannelOpen() && entityplayermp.world == this.world && !entityplayermp.isPlayerSleeping())
+                {
+                    if (this.rand.nextFloat() < 0.05F && this.world.getGameRules().getBoolean("doMobSpawning"))
+                    {
+                        EntityEndermite entityendermite = new EntityEndermite(this.world);
+                        entityendermite.setSpawnedByPlayer(true);
+                        entityendermite.setLocationAndAngles(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ, entitylivingbase.rotationYaw, entitylivingbase.rotationPitch);
+                        this.world.spawnEntityInWorld(entityendermite);
+                    }
 
-   }
+                    if (entitylivingbase.isRiding())
+                    {
+                        entitylivingbase.dismountRidingEntity();
+                    }
 
-   @Nullable
-   public Entity func_184204_a(int p_184204_1_) {
-      if (this.field_70192_c.field_71093_bK != p_184204_1_) {
-         this.field_70192_c = null;
-      }
+                    entitylivingbase.setPositionAndUpdate(this.posX, this.posY, this.posZ);
+                    entitylivingbase.fallDistance = 0.0F;
+                    entitylivingbase.attackEntityFrom(DamageSource.fall, 5.0F);
+                }
+            }
+            else if (entitylivingbase != null)
+            {
+                entitylivingbase.setPositionAndUpdate(this.posX, this.posY, this.posZ);
+                entitylivingbase.fallDistance = 0.0F;
+            }
 
-      return super.func_184204_a(p_184204_1_);
-   }
+            this.setDead();
+        }
+    }
+
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        EntityLivingBase entitylivingbase = this.getThrower();
+
+        if (entitylivingbase != null && entitylivingbase instanceof EntityPlayer && !entitylivingbase.isEntityAlive())
+        {
+            this.setDead();
+        }
+        else
+        {
+            super.onUpdate();
+        }
+    }
+
+    @Nullable
+    public Entity changeDimension(int dimensionIn)
+    {
+        if (this.thrower.dimension != dimensionIn)
+        {
+            this.thrower = null;
+        }
+
+        return super.changeDimension(dimensionIn);
+    }
 }

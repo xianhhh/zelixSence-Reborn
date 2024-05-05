@@ -8,119 +8,149 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.realms.RealmsSimpleScrolledSelectionList;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiSimpleScrolledSelectionListProxy extends GuiSlot {
-   private final RealmsSimpleScrolledSelectionList field_178050_u;
+public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
+{
+    private final RealmsSimpleScrolledSelectionList realmsScrolledSelectionList;
 
-   public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList p_i45525_1_, int p_i45525_2_, int p_i45525_3_, int p_i45525_4_, int p_i45525_5_, int p_i45525_6_) {
-      super(Minecraft.func_71410_x(), p_i45525_2_, p_i45525_3_, p_i45525_4_, p_i45525_5_, p_i45525_6_);
-      this.field_178050_u = p_i45525_1_;
-   }
+    public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList p_i45525_1_, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
+    {
+        super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
+        this.realmsScrolledSelectionList = p_i45525_1_;
+    }
 
-   protected int func_148127_b() {
-      return this.field_178050_u.getItemCount();
-   }
+    protected int getSize()
+    {
+        return this.realmsScrolledSelectionList.getItemCount();
+    }
 
-   protected void func_148144_a(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_) {
-      this.field_178050_u.selectItem(p_148144_1_, p_148144_2_, p_148144_3_, p_148144_4_);
-   }
+    /**
+     * The element in the slot that was clicked, boolean for whether it was double clicked or not
+     */
+    protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
+    {
+        this.realmsScrolledSelectionList.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
+    }
 
-   protected boolean func_148131_a(int p_148131_1_) {
-      return this.field_178050_u.isSelectedItem(p_148131_1_);
-   }
+    /**
+     * Returns true if the element passed in is currently selected
+     */
+    protected boolean isSelected(int slotIndex)
+    {
+        return this.realmsScrolledSelectionList.isSelectedItem(slotIndex);
+    }
 
-   protected void func_148123_a() {
-      this.field_178050_u.renderBackground();
-   }
+    protected void drawBackground()
+    {
+        this.realmsScrolledSelectionList.renderBackground();
+    }
 
-   protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_) {
-      this.field_178050_u.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
-   }
+    protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
+    {
+        this.realmsScrolledSelectionList.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
+    }
 
-   public int func_178048_e() {
-      return this.field_148155_a;
-   }
+    public int getWidth()
+    {
+        return this.width;
+    }
 
-   public int func_178047_f() {
-      return this.field_148162_h;
-   }
+    public int getMouseY()
+    {
+        return this.mouseY;
+    }
 
-   public int func_178049_g() {
-      return this.field_148150_g;
-   }
+    public int getMouseX()
+    {
+        return this.mouseX;
+    }
 
-   protected int func_148138_e() {
-      return this.field_178050_u.getMaxPosition();
-   }
+    /**
+     * Return the height of the content being scrolled
+     */
+    protected int getContentHeight()
+    {
+        return this.realmsScrolledSelectionList.getMaxPosition();
+    }
 
-   protected int func_148137_d() {
-      return this.field_178050_u.getScrollbarPosition();
-   }
+    protected int getScrollBarX()
+    {
+        return this.realmsScrolledSelectionList.getScrollbarPosition();
+    }
 
-   public void func_178039_p() {
-      super.func_178039_p();
-   }
+    public void handleMouseInput()
+    {
+        super.handleMouseInput();
+    }
 
-   public void func_148128_a(int p_148128_1_, int p_148128_2_, float p_148128_3_) {
-      if (this.field_178041_q) {
-         this.field_148150_g = p_148128_1_;
-         this.field_148162_h = p_148128_2_;
-         this.func_148123_a();
-         int i = this.func_148137_d();
-         int j = i + 6;
-         this.func_148121_k();
-         GlStateManager.func_179140_f();
-         GlStateManager.func_179106_n();
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         int k = this.field_148152_e + this.field_148155_a / 2 - this.func_148139_c() / 2 + 2;
-         int l = this.field_148153_b + 4 - (int)this.field_148169_q;
-         if (this.field_148165_u) {
-            this.func_148129_a(k, l, tessellator);
-         }
+    public void drawScreen(int mouseXIn, int mouseYIn, float partialTicks)
+    {
+        if (this.visible)
+        {
+            this.mouseX = mouseXIn;
+            this.mouseY = mouseYIn;
+            this.drawBackground();
+            int i = this.getScrollBarX();
+            int j = i + 6;
+            this.bindAmountScrolled();
+            GlStateManager.disableLighting();
+            GlStateManager.disableFog();
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
+            int k = this.left + this.width / 2 - this.getListWidth() / 2 + 2;
+            int l = this.top + 4 - (int)this.amountScrolled;
 
-         this.func_192638_a(k, l, p_148128_1_, p_148128_2_, p_148128_3_);
-         GlStateManager.func_179097_i();
-         this.func_148136_c(0, this.field_148153_b, 255, 255);
-         this.func_148136_c(this.field_148154_c, this.field_148158_l, 255, 255);
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-         GlStateManager.func_179118_c();
-         GlStateManager.func_179103_j(7425);
-         GlStateManager.func_179090_x();
-         int i1 = this.func_148135_f();
-         if (i1 > 0) {
-            int j1 = (this.field_148154_c - this.field_148153_b) * (this.field_148154_c - this.field_148153_b) / this.func_148138_e();
-            j1 = MathHelper.func_76125_a(j1, 32, this.field_148154_c - this.field_148153_b - 8);
-            int k1 = (int)this.field_148169_q * (this.field_148154_c - this.field_148153_b - j1) / i1 + this.field_148153_b;
-            if (k1 < this.field_148153_b) {
-               k1 = this.field_148153_b;
+            if (this.hasListHeader)
+            {
+                this.drawListHeader(k, l, tessellator);
             }
 
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)this.field_148154_c, 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)this.field_148154_c, 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)this.field_148153_b, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)this.field_148153_b, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            tessellator.func_78381_a();
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)(k1 + j1), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)(k1 + j1), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)k1, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)k1, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            tessellator.func_78381_a();
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)(k1 + j1 - 1), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j - 1), (double)(k1 + j1 - 1), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j - 1), (double)k1, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)k1, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            tessellator.func_78381_a();
-         }
+            this.func_192638_a(k, l, mouseXIn, mouseYIn, partialTicks);
+            GlStateManager.disableDepth();
+            this.overlayBackground(0, this.top, 255, 255);
+            this.overlayBackground(this.bottom, this.height, 255, 255);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            GlStateManager.disableAlpha();
+            GlStateManager.shadeModel(7425);
+            GlStateManager.disableTexture2D();
+            int i1 = this.getMaxScroll();
 
-         this.func_148142_b(p_148128_1_, p_148128_2_);
-         GlStateManager.func_179098_w();
-         GlStateManager.func_179103_j(7424);
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179084_k();
-      }
-   }
+            if (i1 > 0)
+            {
+                int j1 = (this.bottom - this.top) * (this.bottom - this.top) / this.getContentHeight();
+                j1 = MathHelper.clamp(j1, 32, this.bottom - this.top - 8);
+                int k1 = (int)this.amountScrolled * (this.bottom - this.top - j1) / i1 + this.top;
+
+                if (k1 < this.top)
+                {
+                    k1 = this.top;
+                }
+
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)this.bottom, 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.bottom, 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.top, 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)this.top, 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                tessellator.draw();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(k1 + j1), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)(k1 + j1), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)k1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)k1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                tessellator.draw();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(k1 + j1 - 1), 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)(k1 + j1 - 1), 0.0D).tex(1.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)k1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)k1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                tessellator.draw();
+            }
+
+            this.renderDecorations(mouseXIn, mouseYIn);
+            GlStateManager.enableTexture2D();
+            GlStateManager.shadeModel(7424);
+            GlStateManager.enableAlpha();
+            GlStateManager.disableBlend();
+        }
+    }
 }

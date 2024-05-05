@@ -32,181 +32,286 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryDefaulted;
 import net.minecraft.world.World;
 
-public class BlockDispenser extends BlockContainer {
-   public static final PropertyDirection field_176441_a = BlockDirectional.field_176387_N;
-   public static final PropertyBool field_176440_b = PropertyBool.func_177716_a("triggered");
-   public static final RegistryDefaulted<Item, IBehaviorDispenseItem> field_149943_a = new RegistryDefaulted<Item, IBehaviorDispenseItem>(new BehaviorDefaultDispenseItem());
-   protected Random field_149942_b = new Random();
+public class BlockDispenser extends BlockContainer
+{
+    public static final PropertyDirection FACING = BlockDirectional.FACING;
+    public static final PropertyBool TRIGGERED = PropertyBool.create("triggered");
+    public static final RegistryDefaulted<Item, IBehaviorDispenseItem> DISPENSE_BEHAVIOR_REGISTRY = new RegistryDefaulted<Item, IBehaviorDispenseItem>(new BehaviorDefaultDispenseItem());
+    protected Random rand = new Random();
 
-   protected BlockDispenser() {
-      super(Material.field_151576_e);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176441_a, EnumFacing.NORTH).func_177226_a(field_176440_b, Boolean.valueOf(false)));
-      this.func_149647_a(CreativeTabs.field_78028_d);
-   }
+    protected BlockDispenser()
+    {
+        super(Material.ROCK);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRIGGERED, Boolean.valueOf(false)));
+        this.setCreativeTab(CreativeTabs.REDSTONE);
+    }
 
-   public int func_149738_a(World p_149738_1_) {
-      return 4;
-   }
+    /**
+     * How many world ticks before ticking
+     */
+    public int tickRate(World worldIn)
+    {
+        return 4;
+    }
 
-   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
-      super.func_176213_c(p_176213_1_, p_176213_2_, p_176213_3_);
-      this.func_176438_e(p_176213_1_, p_176213_2_, p_176213_3_);
-   }
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.onBlockAdded(worldIn, pos, state);
+        this.setDefaultDirection(worldIn, pos, state);
+    }
 
-   private void func_176438_e(World p_176438_1_, BlockPos p_176438_2_, IBlockState p_176438_3_) {
-      if (!p_176438_1_.field_72995_K) {
-         EnumFacing enumfacing = (EnumFacing)p_176438_3_.func_177229_b(field_176441_a);
-         boolean flag = p_176438_1_.func_180495_p(p_176438_2_.func_177978_c()).func_185913_b();
-         boolean flag1 = p_176438_1_.func_180495_p(p_176438_2_.func_177968_d()).func_185913_b();
-         if (enumfacing == EnumFacing.NORTH && flag && !flag1) {
-            enumfacing = EnumFacing.SOUTH;
-         } else if (enumfacing == EnumFacing.SOUTH && flag1 && !flag) {
-            enumfacing = EnumFacing.NORTH;
-         } else {
-            boolean flag2 = p_176438_1_.func_180495_p(p_176438_2_.func_177976_e()).func_185913_b();
-            boolean flag3 = p_176438_1_.func_180495_p(p_176438_2_.func_177974_f()).func_185913_b();
-            if (enumfacing == EnumFacing.WEST && flag2 && !flag3) {
-               enumfacing = EnumFacing.EAST;
-            } else if (enumfacing == EnumFacing.EAST && flag3 && !flag2) {
-               enumfacing = EnumFacing.WEST;
+    private void setDefaultDirection(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
+            boolean flag = worldIn.getBlockState(pos.north()).isFullBlock();
+            boolean flag1 = worldIn.getBlockState(pos.south()).isFullBlock();
+
+            if (enumfacing == EnumFacing.NORTH && flag && !flag1)
+            {
+                enumfacing = EnumFacing.SOUTH;
             }
-         }
-
-         p_176438_1_.func_180501_a(p_176438_2_, p_176438_3_.func_177226_a(field_176441_a, enumfacing).func_177226_a(field_176440_b, Boolean.valueOf(false)), 2);
-      }
-   }
-
-   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
-      if (p_180639_1_.field_72995_K) {
-         return true;
-      } else {
-         TileEntity tileentity = p_180639_1_.func_175625_s(p_180639_2_);
-         if (tileentity instanceof TileEntityDispenser) {
-            p_180639_4_.func_71007_a((TileEntityDispenser)tileentity);
-            if (tileentity instanceof TileEntityDropper) {
-               p_180639_4_.func_71029_a(StatList.field_188083_Q);
-            } else {
-               p_180639_4_.func_71029_a(StatList.field_188085_S);
+            else if (enumfacing == EnumFacing.SOUTH && flag1 && !flag)
+            {
+                enumfacing = EnumFacing.NORTH;
             }
-         }
+            else
+            {
+                boolean flag2 = worldIn.getBlockState(pos.west()).isFullBlock();
+                boolean flag3 = worldIn.getBlockState(pos.east()).isFullBlock();
 
-         return true;
-      }
-   }
-
-   protected void func_176439_d(World p_176439_1_, BlockPos p_176439_2_) {
-      BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_176439_1_, p_176439_2_);
-      TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();
-      if (tileentitydispenser != null) {
-         int i = tileentitydispenser.func_146017_i();
-         if (i < 0) {
-            p_176439_1_.func_175718_b(1001, p_176439_2_, 0);
-         } else {
-            ItemStack itemstack = tileentitydispenser.func_70301_a(i);
-            IBehaviorDispenseItem ibehaviordispenseitem = this.func_149940_a(itemstack);
-            if (ibehaviordispenseitem != IBehaviorDispenseItem.field_82483_a) {
-               tileentitydispenser.func_70299_a(i, ibehaviordispenseitem.func_82482_a(blocksourceimpl, itemstack));
+                if (enumfacing == EnumFacing.WEST && flag2 && !flag3)
+                {
+                    enumfacing = EnumFacing.EAST;
+                }
+                else if (enumfacing == EnumFacing.EAST && flag3 && !flag2)
+                {
+                    enumfacing = EnumFacing.WEST;
+                }
             }
 
-         }
-      }
-   }
+            worldIn.setBlockState(pos, state.withProperty(FACING, enumfacing).withProperty(TRIGGERED, Boolean.valueOf(false)), 2);
+        }
+    }
 
-   protected IBehaviorDispenseItem func_149940_a(ItemStack p_149940_1_) {
-      return field_149943_a.func_82594_a(p_149940_1_.func_77973_b());
-   }
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
+    {
+        if (worldIn.isRemote)
+        {
+            return true;
+        }
+        else
+        {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      boolean flag = p_189540_2_.func_175640_z(p_189540_3_) || p_189540_2_.func_175640_z(p_189540_3_.func_177984_a());
-      boolean flag1 = ((Boolean)p_189540_1_.func_177229_b(field_176440_b)).booleanValue();
-      if (flag && !flag1) {
-         p_189540_2_.func_175684_a(p_189540_3_, this, this.func_149738_a(p_189540_2_));
-         p_189540_2_.func_180501_a(p_189540_3_, p_189540_1_.func_177226_a(field_176440_b, Boolean.valueOf(true)), 4);
-      } else if (!flag && flag1) {
-         p_189540_2_.func_180501_a(p_189540_3_, p_189540_1_.func_177226_a(field_176440_b, Boolean.valueOf(false)), 4);
-      }
+            if (tileentity instanceof TileEntityDispenser)
+            {
+                playerIn.displayGUIChest((TileEntityDispenser)tileentity);
 
-   }
+                if (tileentity instanceof TileEntityDropper)
+                {
+                    playerIn.addStat(StatList.DROPPER_INSPECTED);
+                }
+                else
+                {
+                    playerIn.addStat(StatList.DISPENSER_INSPECTED);
+                }
+            }
 
-   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
-      if (!p_180650_1_.field_72995_K) {
-         this.func_176439_d(p_180650_1_, p_180650_2_);
-      }
+            return true;
+        }
+    }
 
-   }
+    protected void dispense(World worldIn, BlockPos pos)
+    {
+        BlockSourceImpl blocksourceimpl = new BlockSourceImpl(worldIn, pos);
+        TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();
 
-   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
-      return new TileEntityDispenser();
-   }
+        if (tileentitydispenser != null)
+        {
+            int i = tileentitydispenser.getDispenseSlot();
 
-   public IBlockState func_180642_a(World p_180642_1_, BlockPos p_180642_2_, EnumFacing p_180642_3_, float p_180642_4_, float p_180642_5_, float p_180642_6_, int p_180642_7_, EntityLivingBase p_180642_8_) {
-      return this.func_176223_P().func_177226_a(field_176441_a, EnumFacing.func_190914_a(p_180642_2_, p_180642_8_)).func_177226_a(field_176440_b, Boolean.valueOf(false));
-   }
+            if (i < 0)
+            {
+                worldIn.playEvent(1001, pos, 0);
+            }
+            else
+            {
+                ItemStack itemstack = tileentitydispenser.getStackInSlot(i);
+                IBehaviorDispenseItem ibehaviordispenseitem = this.getBehavior(itemstack);
 
-   public void func_180633_a(World p_180633_1_, BlockPos p_180633_2_, IBlockState p_180633_3_, EntityLivingBase p_180633_4_, ItemStack p_180633_5_) {
-      p_180633_1_.func_180501_a(p_180633_2_, p_180633_3_.func_177226_a(field_176441_a, EnumFacing.func_190914_a(p_180633_2_, p_180633_4_)), 2);
-      if (p_180633_5_.func_82837_s()) {
-         TileEntity tileentity = p_180633_1_.func_175625_s(p_180633_2_);
-         if (tileentity instanceof TileEntityDispenser) {
-            ((TileEntityDispenser)tileentity).func_190575_a(p_180633_5_.func_82833_r());
-         }
-      }
+                if (ibehaviordispenseitem != IBehaviorDispenseItem.DEFAULT_BEHAVIOR)
+                {
+                    tileentitydispenser.setInventorySlotContents(i, ibehaviordispenseitem.dispense(blocksourceimpl, itemstack));
+                }
+            }
+        }
+    }
 
-   }
+    protected IBehaviorDispenseItem getBehavior(ItemStack stack)
+    {
+        return DISPENSE_BEHAVIOR_REGISTRY.getObject(stack.getItem());
+    }
 
-   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
-      TileEntity tileentity = p_180663_1_.func_175625_s(p_180663_2_);
-      if (tileentity instanceof TileEntityDispenser) {
-         InventoryHelper.func_180175_a(p_180663_1_, p_180663_2_, (TileEntityDispenser)tileentity);
-         p_180663_1_.func_175666_e(p_180663_2_, this);
-      }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        boolean flag = worldIn.isBlockPowered(pos) || worldIn.isBlockPowered(pos.up());
+        boolean flag1 = ((Boolean)state.getValue(TRIGGERED)).booleanValue();
 
-      super.func_180663_b(p_180663_1_, p_180663_2_, p_180663_3_);
-   }
+        if (flag && !flag1)
+        {
+            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            worldIn.setBlockState(pos, state.withProperty(TRIGGERED, Boolean.valueOf(true)), 4);
+        }
+        else if (!flag && flag1)
+        {
+            worldIn.setBlockState(pos, state.withProperty(TRIGGERED, Boolean.valueOf(false)), 4);
+        }
+    }
 
-   public static IPosition func_149939_a(IBlockSource p_149939_0_) {
-      EnumFacing enumfacing = (EnumFacing)p_149939_0_.func_189992_e().func_177229_b(field_176441_a);
-      double d0 = p_149939_0_.func_82615_a() + 0.7D * (double)enumfacing.func_82601_c();
-      double d1 = p_149939_0_.func_82617_b() + 0.7D * (double)enumfacing.func_96559_d();
-      double d2 = p_149939_0_.func_82616_c() + 0.7D * (double)enumfacing.func_82599_e();
-      return new PositionImpl(d0, d1, d2);
-   }
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        if (!worldIn.isRemote)
+        {
+            this.dispense(worldIn, pos);
+        }
+    }
 
-   public boolean func_149740_M(IBlockState p_149740_1_) {
-      return true;
-   }
+    /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     */
+    public TileEntity createNewTileEntity(World worldIn, int meta)
+    {
+        return new TileEntityDispenser();
+    }
 
-   public int func_180641_l(IBlockState p_180641_1_, World p_180641_2_, BlockPos p_180641_3_) {
-      return Container.func_178144_a(p_180641_2_.func_175625_s(p_180641_3_));
-   }
+    /**
+     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
+     * IBlockstate
+     */
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        return this.getDefaultState().withProperty(FACING, EnumFacing.func_190914_a(pos, placer)).withProperty(TRIGGERED, Boolean.valueOf(false));
+    }
 
-   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
-      return EnumBlockRenderType.MODEL;
-   }
+    /**
+     * Called by ItemBlocks after a block is set in the world, to allow post-place logic
+     */
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        worldIn.setBlockState(pos, state.withProperty(FACING, EnumFacing.func_190914_a(pos, placer)), 2);
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_176441_a, EnumFacing.func_82600_a(p_176203_1_ & 7)).func_177226_a(field_176440_b, Boolean.valueOf((p_176203_1_ & 8) > 0));
-   }
+        if (stack.hasDisplayName())
+        {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      int i = 0;
-      i = i | ((EnumFacing)p_176201_1_.func_177229_b(field_176441_a)).func_176745_a();
-      if (((Boolean)p_176201_1_.func_177229_b(field_176440_b)).booleanValue()) {
-         i |= 8;
-      }
+            if (tileentity instanceof TileEntityDispenser)
+            {
+                ((TileEntityDispenser)tileentity).func_190575_a(stack.getDisplayName());
+            }
+        }
+    }
 
-      return i;
-   }
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        TileEntity tileentity = worldIn.getTileEntity(pos);
 
-   public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-      return p_185499_1_.func_177226_a(field_176441_a, p_185499_2_.func_185831_a((EnumFacing)p_185499_1_.func_177229_b(field_176441_a)));
-   }
+        if (tileentity instanceof TileEntityDispenser)
+        {
+            InventoryHelper.dropInventoryItems(worldIn, pos, (TileEntityDispenser)tileentity);
+            worldIn.updateComparatorOutputLevel(pos, this);
+        }
 
-   public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-      return p_185471_1_.func_185907_a(p_185471_2_.func_185800_a((EnumFacing)p_185471_1_.func_177229_b(field_176441_a)));
-   }
+        super.breakBlock(worldIn, pos, state);
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176441_a, field_176440_b});
-   }
+    /**
+     * Get the position where the dispenser at the given Coordinates should dispense to.
+     */
+    public static IPosition getDispensePosition(IBlockSource coords)
+    {
+        EnumFacing enumfacing = (EnumFacing)coords.getBlockState().getValue(FACING);
+        double d0 = coords.getX() + 0.7D * (double)enumfacing.getFrontOffsetX();
+        double d1 = coords.getY() + 0.7D * (double)enumfacing.getFrontOffsetY();
+        double d2 = coords.getZ() + 0.7D * (double)enumfacing.getFrontOffsetZ();
+        return new PositionImpl(d0, d1, d2);
+    }
+
+    public boolean hasComparatorInputOverride(IBlockState state)
+    {
+        return true;
+    }
+
+    public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos)
+    {
+        return Container.calcRedstone(worldIn.getTileEntity(pos));
+    }
+
+    /**
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
+     */
+    public EnumBlockRenderType getRenderType(IBlockState state)
+    {
+        return EnumBlockRenderType.MODEL;
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(meta & 7)).withProperty(TRIGGERED, Boolean.valueOf((meta & 8) > 0));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        int i = 0;
+        i = i | ((EnumFacing)state.getValue(FACING)).getIndex();
+
+        if (((Boolean)state.getValue(TRIGGERED)).booleanValue())
+        {
+            i |= 8;
+        }
+
+        return i;
+    }
+
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING, TRIGGERED});
+    }
 }

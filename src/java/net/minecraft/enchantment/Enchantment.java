@@ -14,167 +14,264 @@ import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 
-public abstract class Enchantment {
-   public static final RegistryNamespaced<ResourceLocation, Enchantment> field_185264_b = new RegistryNamespaced<ResourceLocation, Enchantment>();
-   private final EntityEquipmentSlot[] field_185263_a;
-   private final Enchantment.Rarity field_77333_a;
-   @Nullable
-   public EnumEnchantmentType field_77351_y;
-   protected String field_77350_z;
+public abstract class Enchantment
+{
+    public static final RegistryNamespaced<ResourceLocation, Enchantment> REGISTRY = new RegistryNamespaced<ResourceLocation, Enchantment>();
 
-   @Nullable
-   public static Enchantment func_185262_c(int p_185262_0_) {
-      return field_185264_b.func_148754_a(p_185262_0_);
-   }
+    /** Where this enchantment has an effect, e.g. offhand, pants */
+    private final EntityEquipmentSlot[] applicableEquipmentTypes;
+    private final Enchantment.Rarity rarity;
+    @Nullable
 
-   public static int func_185258_b(Enchantment p_185258_0_) {
-      return field_185264_b.func_148757_b(p_185258_0_);
-   }
+    /** The EnumEnchantmentType given to this Enchantment. */
+    public EnumEnchantmentType type;
 
-   @Nullable
-   public static Enchantment func_180305_b(String p_180305_0_) {
-      return field_185264_b.func_82594_a(new ResourceLocation(p_180305_0_));
-   }
+    /** Used in localisation and stats. */
+    protected String name;
 
-   protected Enchantment(Enchantment.Rarity p_i46731_1_, EnumEnchantmentType p_i46731_2_, EntityEquipmentSlot[] p_i46731_3_) {
-      this.field_77333_a = p_i46731_1_;
-      this.field_77351_y = p_i46731_2_;
-      this.field_185263_a = p_i46731_3_;
-   }
+    @Nullable
 
-   public List<ItemStack> func_185260_a(EntityLivingBase p_185260_1_) {
-      List<ItemStack> list = Lists.<ItemStack>newArrayList();
+    /**
+     * Gets an Enchantment from the registry, based on a numeric ID.
+     */
+    public static Enchantment getEnchantmentByID(int id)
+    {
+        return REGISTRY.getObjectById(id);
+    }
 
-      for(EntityEquipmentSlot entityequipmentslot : this.field_185263_a) {
-         ItemStack itemstack = p_185260_1_.func_184582_a(entityequipmentslot);
-         if (!itemstack.func_190926_b()) {
-            list.add(itemstack);
-         }
-      }
+    /**
+     * Gets the numeric ID for the passed enchantment.
+     */
+    public static int getEnchantmentID(Enchantment enchantmentIn)
+    {
+        return REGISTRY.getIDForObject(enchantmentIn);
+    }
 
-      return list;
-   }
+    @Nullable
 
-   public Enchantment.Rarity func_77324_c() {
-      return this.field_77333_a;
-   }
+    /**
+     * Retrieves an enchantment by using its location name.
+     */
+    public static Enchantment getEnchantmentByLocation(String location)
+    {
+        return REGISTRY.getObject(new ResourceLocation(location));
+    }
 
-   public int func_77319_d() {
-      return 1;
-   }
+    protected Enchantment(Enchantment.Rarity rarityIn, EnumEnchantmentType typeIn, EntityEquipmentSlot[] slots)
+    {
+        this.rarity = rarityIn;
+        this.type = typeIn;
+        this.applicableEquipmentTypes = slots;
+    }
 
-   public int func_77325_b() {
-      return 1;
-   }
+    public List<ItemStack> getEntityEquipment(EntityLivingBase entityIn)
+    {
+        List<ItemStack> list = Lists.<ItemStack>newArrayList();
 
-   public int func_77321_a(int p_77321_1_) {
-      return 1 + p_77321_1_ * 10;
-   }
+        for (EntityEquipmentSlot entityequipmentslot : this.applicableEquipmentTypes)
+        {
+            ItemStack itemstack = entityIn.getItemStackFromSlot(entityequipmentslot);
 
-   public int func_77317_b(int p_77317_1_) {
-      return this.func_77321_a(p_77317_1_) + 5;
-   }
+            if (!itemstack.func_190926_b())
+            {
+                list.add(itemstack);
+            }
+        }
 
-   public int func_77318_a(int p_77318_1_, DamageSource p_77318_2_) {
-      return 0;
-   }
+        return list;
+    }
 
-   public float func_152376_a(int p_152376_1_, EnumCreatureAttribute p_152376_2_) {
-      return 0.0F;
-   }
+    /**
+     * Retrieves the weight value of an Enchantment. This weight value is used within vanilla to determine how rare an
+     * enchantment is.
+     */
+    public Enchantment.Rarity getRarity()
+    {
+        return this.rarity;
+    }
 
-   public final boolean func_191560_c(Enchantment p_191560_1_) {
-      return this.func_77326_a(p_191560_1_) && p_191560_1_.func_77326_a(this);
-   }
+    /**
+     * Returns the minimum level that the enchantment can have.
+     */
+    public int getMinLevel()
+    {
+        return 1;
+    }
 
-   protected boolean func_77326_a(Enchantment p_77326_1_) {
-      return this != p_77326_1_;
-   }
+    /**
+     * Returns the maximum level that the enchantment can have.
+     */
+    public int getMaxLevel()
+    {
+        return 1;
+    }
 
-   public Enchantment func_77322_b(String p_77322_1_) {
-      this.field_77350_z = p_77322_1_;
-      return this;
-   }
+    /**
+     * Returns the minimal value of enchantability needed on the enchantment level passed.
+     */
+    public int getMinEnchantability(int enchantmentLevel)
+    {
+        return 1 + enchantmentLevel * 10;
+    }
 
-   public String func_77320_a() {
-      return "enchantment." + this.field_77350_z;
-   }
+    /**
+     * Returns the maximum value of enchantability nedded on the enchantment level passed.
+     */
+    public int getMaxEnchantability(int enchantmentLevel)
+    {
+        return this.getMinEnchantability(enchantmentLevel) + 5;
+    }
 
-   public String func_77316_c(int p_77316_1_) {
-      String s = I18n.func_74838_a(this.func_77320_a());
-      if (this.func_190936_d()) {
-         s = TextFormatting.RED + s;
-      }
+    /**
+     * Calculates the damage protection of the enchantment based on level and damage source passed.
+     */
+    public int calcModifierDamage(int level, DamageSource source)
+    {
+        return 0;
+    }
 
-      return p_77316_1_ == 1 && this.func_77325_b() == 1 ? s : s + " " + I18n.func_74838_a("enchantment.level." + p_77316_1_);
-   }
+    /**
+     * Calculates the additional damage that will be dealt by an item with this enchantment. This alternative to
+     * calcModifierDamage is sensitive to the targets EnumCreatureAttribute.
+     */
+    public float calcDamageByCreature(int level, EnumCreatureAttribute creatureType)
+    {
+        return 0.0F;
+    }
 
-   public boolean func_92089_a(ItemStack p_92089_1_) {
-      return this.field_77351_y.func_77557_a(p_92089_1_.func_77973_b());
-   }
+    public final boolean func_191560_c(Enchantment p_191560_1_)
+    {
+        return this.canApplyTogether(p_191560_1_) && p_191560_1_.canApplyTogether(this);
+    }
 
-   public void func_151368_a(EntityLivingBase p_151368_1_, Entity p_151368_2_, int p_151368_3_) {
-   }
+    /**
+     * Determines if the enchantment passed can be applyied together with this enchantment.
+     */
+    protected boolean canApplyTogether(Enchantment ench)
+    {
+        return this != ench;
+    }
 
-   public void func_151367_b(EntityLivingBase p_151367_1_, Entity p_151367_2_, int p_151367_3_) {
-   }
+    /**
+     * Sets the enchantment name
+     */
+    public Enchantment setName(String enchName)
+    {
+        this.name = enchName;
+        return this;
+    }
 
-   public boolean func_185261_e() {
-      return false;
-   }
+    /**
+     * Return the name of key in translation table of this enchantment.
+     */
+    public String getName()
+    {
+        return "enchantment." + this.name;
+    }
 
-   public boolean func_190936_d() {
-      return false;
-   }
+    /**
+     * Returns the correct traslated name of the enchantment and the level in roman numbers.
+     */
+    public String getTranslatedName(int level)
+    {
+        String s = I18n.translateToLocal(this.getName());
 
-   public static void func_185257_f() {
-      EntityEquipmentSlot[] aentityequipmentslot = new EntityEquipmentSlot[]{EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
-      field_185264_b.func_177775_a(0, new ResourceLocation("protection"), new EnchantmentProtection(Enchantment.Rarity.COMMON, EnchantmentProtection.Type.ALL, aentityequipmentslot));
-      field_185264_b.func_177775_a(1, new ResourceLocation("fire_protection"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.FIRE, aentityequipmentslot));
-      field_185264_b.func_177775_a(2, new ResourceLocation("feather_falling"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.FALL, aentityequipmentslot));
-      field_185264_b.func_177775_a(3, new ResourceLocation("blast_protection"), new EnchantmentProtection(Enchantment.Rarity.RARE, EnchantmentProtection.Type.EXPLOSION, aentityequipmentslot));
-      field_185264_b.func_177775_a(4, new ResourceLocation("projectile_protection"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.PROJECTILE, aentityequipmentslot));
-      field_185264_b.func_177775_a(5, new ResourceLocation("respiration"), new EnchantmentOxygen(Enchantment.Rarity.RARE, aentityequipmentslot));
-      field_185264_b.func_177775_a(6, new ResourceLocation("aqua_affinity"), new EnchantmentWaterWorker(Enchantment.Rarity.RARE, aentityequipmentslot));
-      field_185264_b.func_177775_a(7, new ResourceLocation("thorns"), new EnchantmentThorns(Enchantment.Rarity.VERY_RARE, aentityequipmentslot));
-      field_185264_b.func_177775_a(8, new ResourceLocation("depth_strider"), new EnchantmentWaterWalker(Enchantment.Rarity.RARE, aentityequipmentslot));
-      field_185264_b.func_177775_a(9, new ResourceLocation("frost_walker"), new EnchantmentFrostWalker(Enchantment.Rarity.RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.FEET}));
-      field_185264_b.func_177775_a(10, new ResourceLocation("binding_curse"), new EnchantmentBindingCurse(Enchantment.Rarity.VERY_RARE, aentityequipmentslot));
-      field_185264_b.func_177775_a(16, new ResourceLocation("sharpness"), new EnchantmentDamage(Enchantment.Rarity.COMMON, 0, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(17, new ResourceLocation("smite"), new EnchantmentDamage(Enchantment.Rarity.UNCOMMON, 1, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(18, new ResourceLocation("bane_of_arthropods"), new EnchantmentDamage(Enchantment.Rarity.UNCOMMON, 2, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(19, new ResourceLocation("knockback"), new EnchantmentKnockback(Enchantment.Rarity.UNCOMMON, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(20, new ResourceLocation("fire_aspect"), new EnchantmentFireAspect(Enchantment.Rarity.RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(21, new ResourceLocation("looting"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.WEAPON, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(22, new ResourceLocation("sweeping"), new EnchantmentSweepingEdge(Enchantment.Rarity.RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(32, new ResourceLocation("efficiency"), new EnchantmentDigging(Enchantment.Rarity.COMMON, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(33, new ResourceLocation("silk_touch"), new EnchantmentUntouching(Enchantment.Rarity.VERY_RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(34, new ResourceLocation("unbreaking"), new EnchantmentDurability(Enchantment.Rarity.UNCOMMON, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(35, new ResourceLocation("fortune"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.DIGGER, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(48, new ResourceLocation("power"), new EnchantmentArrowDamage(Enchantment.Rarity.COMMON, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(49, new ResourceLocation("punch"), new EnchantmentArrowKnockback(Enchantment.Rarity.RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(50, new ResourceLocation("flame"), new EnchantmentArrowFire(Enchantment.Rarity.RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(51, new ResourceLocation("infinity"), new EnchantmentArrowInfinite(Enchantment.Rarity.VERY_RARE, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(61, new ResourceLocation("luck_of_the_sea"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(62, new ResourceLocation("lure"), new EnchantmentFishingSpeed(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
-      field_185264_b.func_177775_a(70, new ResourceLocation("mending"), new EnchantmentMending(Enchantment.Rarity.RARE, EntityEquipmentSlot.values()));
-      field_185264_b.func_177775_a(71, new ResourceLocation("vanishing_curse"), new EnchantmentVanishingCurse(Enchantment.Rarity.VERY_RARE, EntityEquipmentSlot.values()));
-   }
+        if (this.func_190936_d())
+        {
+            s = TextFormatting.RED + s;
+        }
 
-   public static enum Rarity {
-      COMMON(10),
-      UNCOMMON(5),
-      RARE(2),
-      VERY_RARE(1);
+        return level == 1 && this.getMaxLevel() == 1 ? s : s + " " + I18n.translateToLocal("enchantment.level." + level);
+    }
 
-      private final int field_185275_e;
+    /**
+     * Determines if this enchantment can be applied to a specific ItemStack.
+     */
+    public boolean canApply(ItemStack stack)
+    {
+        return this.type.canEnchantItem(stack.getItem());
+    }
 
-      private Rarity(int p_i47026_3_) {
-         this.field_185275_e = p_i47026_3_;
-      }
+    /**
+     * Called whenever a mob is damaged with an item that has this enchantment on it.
+     */
+    public void onEntityDamaged(EntityLivingBase user, Entity target, int level)
+    {
+    }
 
-      public int func_185270_a() {
-         return this.field_185275_e;
-      }
-   }
+    /**
+     * Whenever an entity that has this enchantment on one of its associated items is damaged this method will be
+     * called.
+     */
+    public void onUserHurt(EntityLivingBase user, Entity attacker, int level)
+    {
+    }
+
+    public boolean isTreasureEnchantment()
+    {
+        return false;
+    }
+
+    public boolean func_190936_d()
+    {
+        return false;
+    }
+
+    /**
+     * Registers all of the vanilla enchantments.
+     */
+    public static void registerEnchantments()
+    {
+        EntityEquipmentSlot[] aentityequipmentslot = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
+        REGISTRY.register(0, new ResourceLocation("protection"), new EnchantmentProtection(Enchantment.Rarity.COMMON, EnchantmentProtection.Type.ALL, aentityequipmentslot));
+        REGISTRY.register(1, new ResourceLocation("fire_protection"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.FIRE, aentityequipmentslot));
+        REGISTRY.register(2, new ResourceLocation("feather_falling"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.FALL, aentityequipmentslot));
+        REGISTRY.register(3, new ResourceLocation("blast_protection"), new EnchantmentProtection(Enchantment.Rarity.RARE, EnchantmentProtection.Type.EXPLOSION, aentityequipmentslot));
+        REGISTRY.register(4, new ResourceLocation("projectile_protection"), new EnchantmentProtection(Enchantment.Rarity.UNCOMMON, EnchantmentProtection.Type.PROJECTILE, aentityequipmentslot));
+        REGISTRY.register(5, new ResourceLocation("respiration"), new EnchantmentOxygen(Enchantment.Rarity.RARE, aentityequipmentslot));
+        REGISTRY.register(6, new ResourceLocation("aqua_affinity"), new EnchantmentWaterWorker(Enchantment.Rarity.RARE, aentityequipmentslot));
+        REGISTRY.register(7, new ResourceLocation("thorns"), new EnchantmentThorns(Enchantment.Rarity.VERY_RARE, aentityequipmentslot));
+        REGISTRY.register(8, new ResourceLocation("depth_strider"), new EnchantmentWaterWalker(Enchantment.Rarity.RARE, aentityequipmentslot));
+        REGISTRY.register(9, new ResourceLocation("frost_walker"), new EnchantmentFrostWalker(Enchantment.Rarity.RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.FEET}));
+        REGISTRY.register(10, new ResourceLocation("binding_curse"), new EnchantmentBindingCurse(Enchantment.Rarity.VERY_RARE, aentityequipmentslot));
+        REGISTRY.register(16, new ResourceLocation("sharpness"), new EnchantmentDamage(Enchantment.Rarity.COMMON, 0, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(17, new ResourceLocation("smite"), new EnchantmentDamage(Enchantment.Rarity.UNCOMMON, 1, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(18, new ResourceLocation("bane_of_arthropods"), new EnchantmentDamage(Enchantment.Rarity.UNCOMMON, 2, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(19, new ResourceLocation("knockback"), new EnchantmentKnockback(Enchantment.Rarity.UNCOMMON, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(20, new ResourceLocation("fire_aspect"), new EnchantmentFireAspect(Enchantment.Rarity.RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(21, new ResourceLocation("looting"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.WEAPON, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(22, new ResourceLocation("sweeping"), new EnchantmentSweepingEdge(Enchantment.Rarity.RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(32, new ResourceLocation("efficiency"), new EnchantmentDigging(Enchantment.Rarity.COMMON, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(33, new ResourceLocation("silk_touch"), new EnchantmentUntouching(Enchantment.Rarity.VERY_RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(34, new ResourceLocation("unbreaking"), new EnchantmentDurability(Enchantment.Rarity.UNCOMMON, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(35, new ResourceLocation("fortune"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.DIGGER, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(48, new ResourceLocation("power"), new EnchantmentArrowDamage(Enchantment.Rarity.COMMON, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(49, new ResourceLocation("punch"), new EnchantmentArrowKnockback(Enchantment.Rarity.RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(50, new ResourceLocation("flame"), new EnchantmentArrowFire(Enchantment.Rarity.RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(51, new ResourceLocation("infinity"), new EnchantmentArrowInfinite(Enchantment.Rarity.VERY_RARE, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(61, new ResourceLocation("luck_of_the_sea"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(62, new ResourceLocation("lure"), new EnchantmentFishingSpeed(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[] {EntityEquipmentSlot.MAINHAND}));
+        REGISTRY.register(70, new ResourceLocation("mending"), new EnchantmentMending(Enchantment.Rarity.RARE, EntityEquipmentSlot.values()));
+        REGISTRY.register(71, new ResourceLocation("vanishing_curse"), new EnchantmentVanishingCurse(Enchantment.Rarity.VERY_RARE, EntityEquipmentSlot.values()));
+    }
+
+    public static enum Rarity
+    {
+        COMMON(10),
+        UNCOMMON(5),
+        RARE(2),
+        VERY_RARE(1);
+
+        private final int weight;
+
+        private Rarity(int rarityWeight)
+        {
+            this.weight = rarityWeight;
+        }
+
+        public int getWeight()
+        {
+            return this.weight;
+        }
+    }
 }

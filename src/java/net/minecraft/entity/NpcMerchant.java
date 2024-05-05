@@ -11,51 +11,74 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 
-public class NpcMerchant implements IMerchant {
-   private final InventoryMerchant field_70937_a;
-   private final EntityPlayer field_70935_b;
-   private MerchantRecipeList field_70936_c;
-   private final ITextComponent field_175548_d;
+public class NpcMerchant implements IMerchant
+{
+    /** Instance of Merchants Inventory. */
+    private final InventoryMerchant theMerchantInventory;
 
-   public NpcMerchant(EntityPlayer p_i45817_1_, ITextComponent p_i45817_2_) {
-      this.field_70935_b = p_i45817_1_;
-      this.field_175548_d = p_i45817_2_;
-      this.field_70937_a = new InventoryMerchant(p_i45817_1_, this);
-   }
+    /** This merchant's current player customer. */
+    private final EntityPlayer customer;
 
-   @Nullable
-   public EntityPlayer func_70931_l_() {
-      return this.field_70935_b;
-   }
+    /** The MerchantRecipeList instance. */
+    private MerchantRecipeList recipeList;
+    private final ITextComponent name;
 
-   public void func_70932_a_(@Nullable EntityPlayer p_70932_1_) {
-   }
+    public NpcMerchant(EntityPlayer customerIn, ITextComponent nameIn)
+    {
+        this.customer = customerIn;
+        this.name = nameIn;
+        this.theMerchantInventory = new InventoryMerchant(customerIn, this);
+    }
 
-   @Nullable
-   public MerchantRecipeList func_70934_b(EntityPlayer p_70934_1_) {
-      return this.field_70936_c;
-   }
+    @Nullable
+    public EntityPlayer getCustomer()
+    {
+        return this.customer;
+    }
 
-   public void func_70930_a(@Nullable MerchantRecipeList p_70930_1_) {
-      this.field_70936_c = p_70930_1_;
-   }
+    public void setCustomer(@Nullable EntityPlayer player)
+    {
+    }
 
-   public void func_70933_a(MerchantRecipe p_70933_1_) {
-      p_70933_1_.func_77399_f();
-   }
+    @Nullable
+    public MerchantRecipeList getRecipes(EntityPlayer player)
+    {
+        return this.recipeList;
+    }
 
-   public void func_110297_a_(ItemStack p_110297_1_) {
-   }
+    public void setRecipes(@Nullable MerchantRecipeList recipeList)
+    {
+        this.recipeList = recipeList;
+    }
 
-   public ITextComponent func_145748_c_() {
-      return (ITextComponent)(this.field_175548_d != null ? this.field_175548_d : new TextComponentTranslation("entity.Villager.name", new Object[0]));
-   }
+    public void useRecipe(MerchantRecipe recipe)
+    {
+        recipe.incrementToolUses();
+    }
 
-   public World func_190670_t_() {
-      return this.field_70935_b.field_70170_p;
-   }
+    /**
+     * Notifies the merchant of a possible merchantrecipe being fulfilled or not. Usually, this is just a sound byte
+     * being played depending if the suggested itemstack is not null.
+     */
+    public void verifySellingItem(ItemStack stack)
+    {
+    }
 
-   public BlockPos func_190671_u_() {
-      return new BlockPos(this.field_70935_b);
-   }
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    public ITextComponent getDisplayName()
+    {
+        return (ITextComponent)(this.name != null ? this.name : new TextComponentTranslation("entity.Villager.name", new Object[0]));
+    }
+
+    public World func_190670_t_()
+    {
+        return this.customer.world;
+    }
+
+    public BlockPos func_190671_u_()
+    {
+        return new BlockPos(this.customer);
+    }
 }

@@ -2,15 +2,16 @@ package net.minecraft.entity.ai.attributes;
 
 import javax.annotation.Nullable;
 
-public interface IAttribute {
-   String func_111108_a();
+public interface IAttribute
+{
+    String getAttributeUnlocalizedName();
 
-   double func_111109_a(double var1);
+    double clampValue(double value);
 
-   double func_111110_b();
+    double getDefaultValue();
 
-   boolean func_111111_c();
+    boolean getShouldWatch();
 
-   @Nullable
-   IAttribute func_180372_d();
+    @Nullable
+    IAttribute getParent();
 }

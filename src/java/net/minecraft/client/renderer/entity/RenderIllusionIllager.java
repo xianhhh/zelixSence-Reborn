@@ -11,54 +11,75 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class RenderIllusionIllager extends RenderLiving<EntityMob> {
-   private static final ResourceLocation field_193121_a = new ResourceLocation("textures/entity/illager/illusionist.png");
+public class RenderIllusionIllager extends RenderLiving<EntityMob>
+{
+    private static final ResourceLocation field_193121_a = new ResourceLocation("textures/entity/illager/illusionist.png");
 
-   public RenderIllusionIllager(RenderManager p_i47477_1_) {
-      super(p_i47477_1_, new ModelIllager(0.0F, 0.0F, 64, 64), 0.5F);
-      this.func_177094_a(new LayerHeldItem(this) {
-         public void func_177141_a(EntityLivingBase p_177141_1_, float p_177141_2_, float p_177141_3_, float p_177141_4_, float p_177141_5_, float p_177141_6_, float p_177141_7_, float p_177141_8_) {
-            if (((EntityIllusionIllager)p_177141_1_).func_193082_dl() || ((EntityIllusionIllager)p_177141_1_).func_193096_dj()) {
-               super.func_177141_a(p_177141_1_, p_177141_2_, p_177141_3_, p_177141_4_, p_177141_5_, p_177141_6_, p_177141_7_, p_177141_8_);
+    public RenderIllusionIllager(RenderManager p_i47477_1_)
+    {
+        super(p_i47477_1_, new ModelIllager(0.0F, 0.0F, 64, 64), 0.5F);
+        this.addLayer(new LayerHeldItem(this)
+        {
+            public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
+            {
+                if (((EntityIllusionIllager)entitylivingbaseIn).func_193082_dl() || ((EntityIllusionIllager)entitylivingbaseIn).func_193096_dj())
+                {
+                    super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
+                }
             }
+            protected void func_191361_a(EnumHandSide p_191361_1_)
+            {
+                ((ModelIllager)this.livingEntityRenderer.getMainModel()).func_191216_a(p_191361_1_).postRender(0.0625F);
+            }
+        });
+        ((ModelIllager)this.getMainModel()).field_193775_b.showModel = true;
+    }
 
-         }
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(EntityMob entity)
+    {
+        return field_193121_a;
+    }
 
-         protected void func_191361_a(EnumHandSide p_191361_1_) {
-            ((ModelIllager)this.field_177206_a.func_177087_b()).func_191216_a(p_191361_1_).func_78794_c(0.0625F);
-         }
-      });
-      ((ModelIllager)this.func_177087_b()).field_193775_b.field_78806_j = true;
-   }
+    /**
+     * Allows the render to do state modifications necessary before the model is rendered.
+     */
+    protected void preRenderCallback(EntityMob entitylivingbaseIn, float partialTickTime)
+    {
+        float f = 0.9375F;
+        GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
+    }
 
-   protected ResourceLocation func_110775_a(EntityMob p_110775_1_) {
-      return field_193121_a;
-   }
+    /**
+     * Renders the desired {@code T} type Entity.
+     */
+    public void doRender(EntityMob entity, double x, double y, double z, float entityYaw, float partialTicks)
+    {
+        if (entity.isInvisible())
+        {
+            Vec3d[] avec3d = ((EntityIllusionIllager)entity).func_193098_a(partialTicks);
+            float f = this.handleRotationFloat(entity, partialTicks);
 
-   protected void func_77041_b(EntityMob p_77041_1_, float p_77041_2_) {
-      float f = 0.9375F;
-      GlStateManager.func_179152_a(0.9375F, 0.9375F, 0.9375F);
-   }
+            for (int i = 0; i < avec3d.length; ++i)
+            {
+                super.doRender(entity, x + avec3d[i].xCoord + (double)MathHelper.cos((float)i + f * 0.5F) * 0.025D, y + avec3d[i].yCoord + (double)MathHelper.cos((float)i + f * 0.75F) * 0.0125D, z + avec3d[i].zCoord + (double)MathHelper.cos((float)i + f * 0.7F) * 0.025D, entityYaw, partialTicks);
+            }
+        }
+        else
+        {
+            super.doRender(entity, x, y, z, entityYaw, partialTicks);
+        }
+    }
 
-   public void func_76986_a(EntityMob p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {
-      if (p_76986_1_.func_82150_aj()) {
-         Vec3d[] avec3d = ((EntityIllusionIllager)p_76986_1_).func_193098_a(p_76986_9_);
-         float f = this.func_77044_a(p_76986_1_, p_76986_9_);
+    public void renderName(EntityMob entity, double x, double y, double z)
+    {
+        super.renderName(entity, x, y, z);
+    }
 
-         for(int i = 0; i < avec3d.length; ++i) {
-            super.func_76986_a(p_76986_1_, p_76986_2_ + avec3d[i].field_72450_a + (double)MathHelper.func_76134_b((float)i + f * 0.5F) * 0.025D, p_76986_4_ + avec3d[i].field_72448_b + (double)MathHelper.func_76134_b((float)i + f * 0.75F) * 0.0125D, p_76986_6_ + avec3d[i].field_72449_c + (double)MathHelper.func_76134_b((float)i + f * 0.7F) * 0.025D, p_76986_8_, p_76986_9_);
-         }
-      } else {
-         super.func_76986_a(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
-      }
-
-   }
-
-   public void func_177067_a(EntityMob p_177067_1_, double p_177067_2_, double p_177067_4_, double p_177067_6_) {
-      super.func_177067_a(p_177067_1_, p_177067_2_, p_177067_4_, p_177067_6_);
-   }
-
-   protected boolean func_193115_c(EntityMob p_193115_1_) {
-      return true;
-   }
+    protected boolean func_193115_c(EntityMob p_193115_1_)
+    {
+        return true;
+    }
 }

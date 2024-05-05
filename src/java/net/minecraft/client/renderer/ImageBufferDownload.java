@@ -7,79 +7,110 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.ImageObserver;
 import javax.annotation.Nullable;
 
-public class ImageBufferDownload implements IImageBuffer {
-   private int[] field_78438_a;
-   private int field_78436_b;
-   private int field_78437_c;
+public class ImageBufferDownload implements IImageBuffer
+{
+    private int[] imageData;
+    private int imageWidth;
+    private int imageHeight;
 
-   @Nullable
-   public BufferedImage func_78432_a(BufferedImage p_78432_1_) {
-      if (p_78432_1_ == null) {
-         return null;
-      } else {
-         this.field_78436_b = 64;
-         this.field_78437_c = 64;
-         BufferedImage bufferedimage = new BufferedImage(this.field_78436_b, this.field_78437_c, 2);
-         Graphics graphics = bufferedimage.getGraphics();
-         graphics.drawImage(p_78432_1_, 0, 0, (ImageObserver)null);
-         boolean flag = p_78432_1_.getHeight() == 32;
-         if (flag) {
-            graphics.setColor(new Color(0, 0, 0, 0));
-            graphics.fillRect(0, 32, 64, 32);
-            graphics.drawImage(bufferedimage, 24, 48, 20, 52, 4, 16, 8, 20, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 28, 48, 24, 52, 8, 16, 12, 20, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 20, 52, 16, 64, 8, 20, 12, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 24, 52, 20, 64, 4, 20, 8, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 28, 52, 24, 64, 0, 20, 4, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 32, 52, 28, 64, 12, 20, 16, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 40, 48, 36, 52, 44, 16, 48, 20, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 44, 48, 40, 52, 48, 16, 52, 20, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 36, 52, 32, 64, 48, 20, 52, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 40, 52, 36, 64, 44, 20, 48, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 44, 52, 40, 64, 40, 20, 44, 32, (ImageObserver)null);
-            graphics.drawImage(bufferedimage, 48, 52, 44, 64, 52, 20, 56, 32, (ImageObserver)null);
-         }
+    @Nullable
+    public BufferedImage parseUserSkin(BufferedImage image)
+    {
+        if (image == null)
+        {
+            return null;
+        }
+        else
+        {
+            this.imageWidth = 64;
+            this.imageHeight = 64;
+            int i = image.getWidth();
+            int j = image.getHeight();
+            int k;
 
-         graphics.dispose();
-         this.field_78438_a = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
-         this.func_78433_b(0, 0, 32, 16);
-         if (flag) {
-            this.func_189559_a(32, 0, 64, 32);
-         }
-
-         this.func_78433_b(0, 16, 64, 32);
-         this.func_78433_b(16, 48, 48, 64);
-         return bufferedimage;
-      }
-   }
-
-   public void func_152634_a() {
-   }
-
-   private void func_189559_a(int p_189559_1_, int p_189559_2_, int p_189559_3_, int p_189559_4_) {
-      for(int i = p_189559_1_; i < p_189559_3_; ++i) {
-         for(int j = p_189559_2_; j < p_189559_4_; ++j) {
-            int k = this.field_78438_a[i + j * this.field_78436_b];
-            if ((k >> 24 & 255) < 128) {
-               return;
+            for (k = 1; this.imageWidth < i || this.imageHeight < j; k *= 2)
+            {
+                this.imageWidth *= 2;
+                this.imageHeight *= 2;
             }
-         }
-      }
 
-      for(int l = p_189559_1_; l < p_189559_3_; ++l) {
-         for(int i1 = p_189559_2_; i1 < p_189559_4_; ++i1) {
-            this.field_78438_a[l + i1 * this.field_78436_b] &= 16777215;
-         }
-      }
+            BufferedImage bufferedimage = new BufferedImage(this.imageWidth, this.imageHeight, 2);
+            Graphics graphics = bufferedimage.getGraphics();
+            graphics.drawImage(image, 0, 0, (ImageObserver)null);
+            boolean flag = image.getHeight() == 32 * k;
 
-   }
+            if (flag)
+            {
+                graphics.setColor(new Color(0, 0, 0, 0));
+                graphics.fillRect(0 * k, 32 * k, 64 * k, 32 * k);
+                graphics.drawImage(bufferedimage, 24 * k, 48 * k, 20 * k, 52 * k, 4 * k, 16 * k, 8 * k, 20 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 28 * k, 48 * k, 24 * k, 52 * k, 8 * k, 16 * k, 12 * k, 20 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 20 * k, 52 * k, 16 * k, 64 * k, 8 * k, 20 * k, 12 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 24 * k, 52 * k, 20 * k, 64 * k, 4 * k, 20 * k, 8 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 28 * k, 52 * k, 24 * k, 64 * k, 0 * k, 20 * k, 4 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 32 * k, 52 * k, 28 * k, 64 * k, 12 * k, 20 * k, 16 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 40 * k, 48 * k, 36 * k, 52 * k, 44 * k, 16 * k, 48 * k, 20 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 44 * k, 48 * k, 40 * k, 52 * k, 48 * k, 16 * k, 52 * k, 20 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 36 * k, 52 * k, 32 * k, 64 * k, 48 * k, 20 * k, 52 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 40 * k, 52 * k, 36 * k, 64 * k, 44 * k, 20 * k, 48 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 44 * k, 52 * k, 40 * k, 64 * k, 40 * k, 20 * k, 44 * k, 32 * k, (ImageObserver)null);
+                graphics.drawImage(bufferedimage, 48 * k, 52 * k, 44 * k, 64 * k, 52 * k, 20 * k, 56 * k, 32 * k, (ImageObserver)null);
+            }
 
-   private void func_78433_b(int p_78433_1_, int p_78433_2_, int p_78433_3_, int p_78433_4_) {
-      for(int i = p_78433_1_; i < p_78433_3_; ++i) {
-         for(int j = p_78433_2_; j < p_78433_4_; ++j) {
-            this.field_78438_a[i + j * this.field_78436_b] |= -16777216;
-         }
-      }
+            graphics.dispose();
+            this.imageData = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
+            this.setAreaOpaque(0 * k, 0 * k, 32 * k, 16 * k);
 
-   }
+            if (flag)
+            {
+                this.doTransparencyHack(32 * k, 0 * k, 64 * k, 32 * k);
+            }
+
+            this.setAreaOpaque(0 * k, 16 * k, 64 * k, 32 * k);
+            this.setAreaOpaque(16 * k, 48 * k, 48 * k, 64 * k);
+            return bufferedimage;
+        }
+    }
+
+    public void skinAvailable()
+    {
+    }
+
+    private void doTransparencyHack(int p_189559_1_, int p_189559_2_, int p_189559_3_, int p_189559_4_)
+    {
+        for (int i = p_189559_1_; i < p_189559_3_; ++i)
+        {
+            for (int j = p_189559_2_; j < p_189559_4_; ++j)
+            {
+                int k = this.imageData[i + j * this.imageWidth];
+
+                if ((k >> 24 & 255) < 128)
+                {
+                    return;
+                }
+            }
+        }
+
+        for (int l = p_189559_1_; l < p_189559_3_; ++l)
+        {
+            for (int i1 = p_189559_2_; i1 < p_189559_4_; ++i1)
+            {
+                this.imageData[l + i1 * this.imageWidth] &= 16777215;
+            }
+        }
+    }
+
+    /**
+     * Makes the given area of the image opaque
+     */
+    private void setAreaOpaque(int x, int y, int width, int height)
+    {
+        for (int i = x; i < width; ++i)
+        {
+            for (int j = y; j < height; ++j)
+            {
+                this.imageData[i + j * this.imageWidth] |= -16777216;
+            }
+        }
+    }
 }

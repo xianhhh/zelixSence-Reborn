@@ -5,37 +5,54 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketUnloadChunk implements Packet<INetHandlerPlayClient> {
-   private int field_186942_a;
-   private int field_186943_b;
+public class SPacketUnloadChunk implements Packet<INetHandlerPlayClient>
+{
+    private int x;
+    private int z;
 
-   public SPacketUnloadChunk() {
-   }
+    public SPacketUnloadChunk()
+    {
+    }
 
-   public SPacketUnloadChunk(int p_i46944_1_, int p_i46944_2_) {
-      this.field_186942_a = p_i46944_1_;
-      this.field_186943_b = p_i46944_2_;
-   }
+    public SPacketUnloadChunk(int xIn, int zIn)
+    {
+        this.x = xIn;
+        this.z = zIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_186942_a = p_148837_1_.readInt();
-      this.field_186943_b = p_148837_1_.readInt();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.x = buf.readInt();
+        this.z = buf.readInt();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeInt(this.field_186942_a);
-      p_148840_1_.writeInt(this.field_186943_b);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeInt(this.x);
+        buf.writeInt(this.z);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_184326_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.processChunkUnload(this);
+    }
 
-   public int func_186940_a() {
-      return this.field_186942_a;
-   }
+    public int getX()
+    {
+        return this.x;
+    }
 
-   public int func_186941_b() {
-      return this.field_186943_b;
-   }
+    public int getZ()
+    {
+        return this.z;
+    }
 }

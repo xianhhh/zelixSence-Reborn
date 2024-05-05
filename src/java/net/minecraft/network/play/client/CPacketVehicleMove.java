@@ -6,61 +6,81 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketVehicleMove implements Packet<INetHandlerPlayServer> {
-   private double field_187007_a;
-   private double field_187008_b;
-   private double field_187009_c;
-   private float field_187010_d;
-   private float field_187011_e;
+public class CPacketVehicleMove implements Packet<INetHandlerPlayServer>
+{
+    private double x;
+    private double y;
+    private double z;
+    private float yaw;
+    private float pitch;
 
-   public CPacketVehicleMove() {
-   }
+    public CPacketVehicleMove()
+    {
+    }
 
-   public CPacketVehicleMove(Entity p_i46874_1_) {
-      this.field_187007_a = p_i46874_1_.field_70165_t;
-      this.field_187008_b = p_i46874_1_.field_70163_u;
-      this.field_187009_c = p_i46874_1_.field_70161_v;
-      this.field_187010_d = p_i46874_1_.field_70177_z;
-      this.field_187011_e = p_i46874_1_.field_70125_A;
-   }
+    public CPacketVehicleMove(Entity entityIn)
+    {
+        this.x = entityIn.posX;
+        this.y = entityIn.posY;
+        this.z = entityIn.posZ;
+        this.yaw = entityIn.rotationYaw;
+        this.pitch = entityIn.rotationPitch;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_187007_a = p_148837_1_.readDouble();
-      this.field_187008_b = p_148837_1_.readDouble();
-      this.field_187009_c = p_148837_1_.readDouble();
-      this.field_187010_d = p_148837_1_.readFloat();
-      this.field_187011_e = p_148837_1_.readFloat();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.x = buf.readDouble();
+        this.y = buf.readDouble();
+        this.z = buf.readDouble();
+        this.yaw = buf.readFloat();
+        this.pitch = buf.readFloat();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeDouble(this.field_187007_a);
-      p_148840_1_.writeDouble(this.field_187008_b);
-      p_148840_1_.writeDouble(this.field_187009_c);
-      p_148840_1_.writeFloat(this.field_187010_d);
-      p_148840_1_.writeFloat(this.field_187011_e);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeDouble(this.x);
+        buf.writeDouble(this.y);
+        buf.writeDouble(this.z);
+        buf.writeFloat(this.yaw);
+        buf.writeFloat(this.pitch);
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_184338_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processVehicleMove(this);
+    }
 
-   public double func_187004_a() {
-      return this.field_187007_a;
-   }
+    public double getX()
+    {
+        return this.x;
+    }
 
-   public double func_187002_b() {
-      return this.field_187008_b;
-   }
+    public double getY()
+    {
+        return this.y;
+    }
 
-   public double func_187003_c() {
-      return this.field_187009_c;
-   }
+    public double getZ()
+    {
+        return this.z;
+    }
 
-   public float func_187006_d() {
-      return this.field_187010_d;
-   }
+    public float getYaw()
+    {
+        return this.yaw;
+    }
 
-   public float func_187005_e() {
-      return this.field_187011_e;
-   }
+    public float getPitch()
+    {
+        return this.pitch;
+    }
 }

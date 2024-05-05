@@ -4,28 +4,41 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.PathNavigateFlying;
 import net.minecraft.pathfinding.PathNavigateGround;
 
-public class EntityAISwimming extends EntityAIBase {
-   private final EntityLiving field_75373_a;
+public class EntityAISwimming extends EntityAIBase
+{
+    private final EntityLiving theEntity;
 
-   public EntityAISwimming(EntityLiving p_i1624_1_) {
-      this.field_75373_a = p_i1624_1_;
-      this.func_75248_a(4);
-      if (p_i1624_1_.func_70661_as() instanceof PathNavigateGround) {
-         ((PathNavigateGround)p_i1624_1_.func_70661_as()).func_179693_d(true);
-      } else if (p_i1624_1_.func_70661_as() instanceof PathNavigateFlying) {
-         ((PathNavigateFlying)p_i1624_1_.func_70661_as()).func_192877_c(true);
-      }
+    public EntityAISwimming(EntityLiving entitylivingIn)
+    {
+        this.theEntity = entitylivingIn;
+        this.setMutexBits(4);
 
-   }
+        if (entitylivingIn.getNavigator() instanceof PathNavigateGround)
+        {
+            ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+        }
+        else if (entitylivingIn.getNavigator() instanceof PathNavigateFlying)
+        {
+            ((PathNavigateFlying)entitylivingIn.getNavigator()).func_192877_c(true);
+        }
+    }
 
-   public boolean func_75250_a() {
-      return this.field_75373_a.func_70090_H() || this.field_75373_a.func_180799_ab();
-   }
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        return this.theEntity.isInWater() || this.theEntity.isInLava();
+    }
 
-   public void func_75246_d() {
-      if (this.field_75373_a.func_70681_au().nextFloat() < 0.8F) {
-         this.field_75373_a.func_70683_ar().func_75660_a();
-      }
-
-   }
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        if (this.theEntity.getRNG().nextFloat() < 0.8F)
+        {
+            this.theEntity.getJumpHelper().setJumping();
+        }
+    }
 }

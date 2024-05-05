@@ -7,92 +7,130 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 
-public class CommandTime extends CommandBase {
-   public String func_71517_b() {
-      return "time";
-   }
+public class CommandTime extends CommandBase
+{
+    /**
+     * Gets the name of the command
+     */
+    public String getCommandName()
+    {
+        return "time";
+    }
 
-   public int func_82362_a() {
-      return 2;
-   }
+    /**
+     * Return the required permission level for this command.
+     */
+    public int getRequiredPermissionLevel()
+    {
+        return 2;
+    }
 
-   public String func_71518_a(ICommandSender p_71518_1_) {
-      return "commands.time.usage";
-   }
+    /**
+     * Gets the usage string for the command.
+     */
+    public String getCommandUsage(ICommandSender sender)
+    {
+        return "commands.time.usage";
+    }
 
-   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
-      if (p_184881_3_.length > 1) {
-         if ("set".equals(p_184881_3_[0])) {
-            int i1;
-            if ("day".equals(p_184881_3_[1])) {
-               i1 = 1000;
-            } else if ("night".equals(p_184881_3_[1])) {
-               i1 = 13000;
-            } else {
-               i1 = func_180528_a(p_184881_3_[1], 0);
+    /**
+     * Callback for when the command is executed
+     */
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length > 1)
+        {
+            if ("set".equals(args[0]))
+            {
+                int i1;
+
+                if ("day".equals(args[1]))
+                {
+                    i1 = 1000;
+                }
+                else if ("night".equals(args[1]))
+                {
+                    i1 = 13000;
+                }
+                else
+                {
+                    i1 = parseInt(args[1], 0);
+                }
+
+                this.setAllWorldTimes(server, i1);
+                notifyCommandListener(sender, this, "commands.time.set", new Object[] {i1});
+                return;
             }
 
-            this.func_184929_a(p_184881_1_, i1);
-            func_152373_a(p_184881_2_, this, "commands.time.set", new Object[]{i1});
-            return;
-         }
-
-         if ("add".equals(p_184881_3_[0])) {
-            int l = func_180528_a(p_184881_3_[1], 0);
-            this.func_184928_b(p_184881_1_, l);
-            func_152373_a(p_184881_2_, this, "commands.time.added", new Object[]{l});
-            return;
-         }
-
-         if ("query".equals(p_184881_3_[0])) {
-            if ("daytime".equals(p_184881_3_[1])) {
-               int k = (int)(p_184881_2_.func_130014_f_().func_72820_D() % 24000L);
-               p_184881_2_.func_174794_a(CommandResultStats.Type.QUERY_RESULT, k);
-               func_152373_a(p_184881_2_, this, "commands.time.query", new Object[]{k});
-               return;
+            if ("add".equals(args[0]))
+            {
+                int l = parseInt(args[1], 0);
+                this.incrementAllWorldTimes(server, l);
+                notifyCommandListener(sender, this, "commands.time.added", new Object[] {l});
+                return;
             }
 
-            if ("day".equals(p_184881_3_[1])) {
-               int j = (int)(p_184881_2_.func_130014_f_().func_72820_D() / 24000L % 2147483647L);
-               p_184881_2_.func_174794_a(CommandResultStats.Type.QUERY_RESULT, j);
-               func_152373_a(p_184881_2_, this, "commands.time.query", new Object[]{j});
-               return;
+            if ("query".equals(args[0]))
+            {
+                if ("daytime".equals(args[1]))
+                {
+                    int k = (int)(sender.getEntityWorld().getWorldTime() % 24000L);
+                    sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, k);
+                    notifyCommandListener(sender, this, "commands.time.query", new Object[] {k});
+                    return;
+                }
+
+                if ("day".equals(args[1]))
+                {
+                    int j = (int)(sender.getEntityWorld().getWorldTime() / 24000L % 2147483647L);
+                    sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, j);
+                    notifyCommandListener(sender, this, "commands.time.query", new Object[] {j});
+                    return;
+                }
+
+                if ("gametime".equals(args[1]))
+                {
+                    int i = (int)(sender.getEntityWorld().getTotalWorldTime() % 2147483647L);
+                    sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, i);
+                    notifyCommandListener(sender, this, "commands.time.query", new Object[] {i});
+                    return;
+                }
             }
+        }
 
-            if ("gametime".equals(p_184881_3_[1])) {
-               int i = (int)(p_184881_2_.func_130014_f_().func_82737_E() % 2147483647L);
-               p_184881_2_.func_174794_a(CommandResultStats.Type.QUERY_RESULT, i);
-               func_152373_a(p_184881_2_, this, "commands.time.query", new Object[]{i});
-               return;
-            }
-         }
-      }
+        throw new WrongUsageException("commands.time.usage", new Object[0]);
+    }
 
-      throw new WrongUsageException("commands.time.usage", new Object[0]);
-   }
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, new String[] {"set", "add", "query"});
+        }
+        else if (args.length == 2 && "set".equals(args[0]))
+        {
+            return getListOfStringsMatchingLastWord(args, new String[] {"day", "night"});
+        }
+        else
+        {
+            return args.length == 2 && "query".equals(args[0]) ? getListOfStringsMatchingLastWord(args, new String[] {"daytime", "gametime", "day"}) : Collections.emptyList();
+        }
+    }
 
-   public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_) {
-      if (p_184883_3_.length == 1) {
-         return func_71530_a(p_184883_3_, new String[]{"set", "add", "query"});
-      } else if (p_184883_3_.length == 2 && "set".equals(p_184883_3_[0])) {
-         return func_71530_a(p_184883_3_, new String[]{"day", "night"});
-      } else {
-         return p_184883_3_.length == 2 && "query".equals(p_184883_3_[0]) ? func_71530_a(p_184883_3_, new String[]{"daytime", "gametime", "day"}) : Collections.emptyList();
-      }
-   }
+    protected void setAllWorldTimes(MinecraftServer server, int time)
+    {
+        for (int i = 0; i < server.worldServers.length; ++i)
+        {
+            server.worldServers[i].setWorldTime((long)time);
+        }
+    }
 
-   protected void func_184929_a(MinecraftServer p_184929_1_, int p_184929_2_) {
-      for(int i = 0; i < p_184929_1_.field_71305_c.length; ++i) {
-         p_184929_1_.field_71305_c[i].func_72877_b((long)p_184929_2_);
-      }
-
-   }
-
-   protected void func_184928_b(MinecraftServer p_184928_1_, int p_184928_2_) {
-      for(int i = 0; i < p_184928_1_.field_71305_c.length; ++i) {
-         WorldServer worldserver = p_184928_1_.field_71305_c[i];
-         worldserver.func_72877_b(worldserver.func_72820_D() + (long)p_184928_2_);
-      }
-
-   }
+    protected void incrementAllWorldTimes(MinecraftServer server, int amount)
+    {
+        for (int i = 0; i < server.worldServers.length; ++i)
+        {
+            WorldServer worldserver = server.worldServers[i];
+            worldserver.setWorldTime(worldserver.getWorldTime() + (long)amount);
+        }
+    }
 }

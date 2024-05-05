@@ -20,192 +20,271 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable {
-   protected static final DataParameter<Byte> field_184755_bv = EntityDataManager.<Byte>func_187226_a(EntityTameable.class, DataSerializers.field_187191_a);
-   protected static final DataParameter<Optional<UUID>> field_184756_bw = EntityDataManager.<Optional<UUID>>func_187226_a(EntityTameable.class, DataSerializers.field_187203_m);
-   protected EntityAISit field_70911_d;
+public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable
+{
+    protected static final DataParameter<Byte> TAMED = EntityDataManager.<Byte>createKey(EntityTameable.class, DataSerializers.BYTE);
+    protected static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.<Optional<UUID>>createKey(EntityTameable.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+    protected EntityAISit aiSit;
 
-   public EntityTameable(World p_i1604_1_) {
-      super(p_i1604_1_);
-      this.func_175544_ck();
-   }
+    public EntityTameable(World worldIn)
+    {
+        super(worldIn);
+        this.setupTamedAI();
+    }
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-      this.field_70180_af.func_187214_a(field_184755_bv, Byte.valueOf((byte)0));
-      this.field_70180_af.func_187214_a(field_184756_bw, Optional.absent());
-   }
+    protected void entityInit()
+    {
+        super.entityInit();
+        this.dataManager.register(TAMED, Byte.valueOf((byte)0));
+        this.dataManager.register(OWNER_UNIQUE_ID, Optional.absent());
+    }
 
-   public void func_70014_b(NBTTagCompound p_70014_1_) {
-      super.func_70014_b(p_70014_1_);
-      if (this.func_184753_b() == null) {
-         p_70014_1_.func_74778_a("OwnerUUID", "");
-      } else {
-         p_70014_1_.func_74778_a("OwnerUUID", this.func_184753_b().toString());
-      }
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    public void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
 
-      p_70014_1_.func_74757_a("Sitting", this.func_70906_o());
-   }
+        if (this.getOwnerId() == null)
+        {
+            compound.setString("OwnerUUID", "");
+        }
+        else
+        {
+            compound.setString("OwnerUUID", this.getOwnerId().toString());
+        }
 
-   public void func_70037_a(NBTTagCompound p_70037_1_) {
-      super.func_70037_a(p_70037_1_);
-      String s;
-      if (p_70037_1_.func_150297_b("OwnerUUID", 8)) {
-         s = p_70037_1_.func_74779_i("OwnerUUID");
-      } else {
-         String s1 = p_70037_1_.func_74779_i("Owner");
-         s = PreYggdrasilConverter.func_187473_a(this.func_184102_h(), s1);
-      }
+        compound.setBoolean("Sitting", this.isSitting());
+    }
 
-      if (!s.isEmpty()) {
-         try {
-            this.func_184754_b(UUID.fromString(s));
-            this.func_70903_f(true);
-         } catch (Throwable var4) {
-            this.func_70903_f(false);
-         }
-      }
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
+        String s;
 
-      if (this.field_70911_d != null) {
-         this.field_70911_d.func_75270_a(p_70037_1_.func_74767_n("Sitting"));
-      }
+        if (compound.hasKey("OwnerUUID", 8))
+        {
+            s = compound.getString("OwnerUUID");
+        }
+        else
+        {
+            String s1 = compound.getString("Owner");
+            s = PreYggdrasilConverter.convertMobOwnerIfNeeded(this.getServer(), s1);
+        }
 
-      this.func_70904_g(p_70037_1_.func_74767_n("Sitting"));
-   }
+        if (!s.isEmpty())
+        {
+            try
+            {
+                this.setOwnerId(UUID.fromString(s));
+                this.setTamed(true);
+            }
+            catch (Throwable var4)
+            {
+                this.setTamed(false);
+            }
+        }
 
-   public boolean func_184652_a(EntityPlayer p_184652_1_) {
-      return !this.func_110167_bD();
-   }
+        if (this.aiSit != null)
+        {
+            this.aiSit.setSitting(compound.getBoolean("Sitting"));
+        }
 
-   protected void func_70908_e(boolean p_70908_1_) {
-      EnumParticleTypes enumparticletypes = EnumParticleTypes.HEART;
-      if (!p_70908_1_) {
-         enumparticletypes = EnumParticleTypes.SMOKE_NORMAL;
-      }
+        this.setSitting(compound.getBoolean("Sitting"));
+    }
 
-      for(int i = 0; i < 7; ++i) {
-         double d0 = this.field_70146_Z.nextGaussian() * 0.02D;
-         double d1 = this.field_70146_Z.nextGaussian() * 0.02D;
-         double d2 = this.field_70146_Z.nextGaussian() * 0.02D;
-         this.field_70170_p.func_175688_a(enumparticletypes, this.field_70165_t + (double)(this.field_70146_Z.nextFloat() * this.field_70130_N * 2.0F) - (double)this.field_70130_N, this.field_70163_u + 0.5D + (double)(this.field_70146_Z.nextFloat() * this.field_70131_O), this.field_70161_v + (double)(this.field_70146_Z.nextFloat() * this.field_70130_N * 2.0F) - (double)this.field_70130_N, d0, d1, d2);
-      }
+    public boolean canBeLeashedTo(EntityPlayer player)
+    {
+        return !this.getLeashed();
+    }
 
-   }
+    /**
+     * Play the taming effect, will either be hearts or smoke depending on status
+     */
+    protected void playTameEffect(boolean play)
+    {
+        EnumParticleTypes enumparticletypes = EnumParticleTypes.HEART;
 
-   public void func_70103_a(byte p_70103_1_) {
-      if (p_70103_1_ == 7) {
-         this.func_70908_e(true);
-      } else if (p_70103_1_ == 6) {
-         this.func_70908_e(false);
-      } else {
-         super.func_70103_a(p_70103_1_);
-      }
+        if (!play)
+        {
+            enumparticletypes = EnumParticleTypes.SMOKE_NORMAL;
+        }
 
-   }
+        for (int i = 0; i < 7; ++i)
+        {
+            double d0 = this.rand.nextGaussian() * 0.02D;
+            double d1 = this.rand.nextGaussian() * 0.02D;
+            double d2 = this.rand.nextGaussian() * 0.02D;
+            this.world.spawnParticle(enumparticletypes, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
+        }
+    }
 
-   public boolean func_70909_n() {
-      return (((Byte)this.field_70180_af.func_187225_a(field_184755_bv)).byteValue() & 4) != 0;
-   }
+    public void handleStatusUpdate(byte id)
+    {
+        if (id == 7)
+        {
+            this.playTameEffect(true);
+        }
+        else if (id == 6)
+        {
+            this.playTameEffect(false);
+        }
+        else
+        {
+            super.handleStatusUpdate(id);
+        }
+    }
 
-   public void func_70903_f(boolean p_70903_1_) {
-      byte b0 = ((Byte)this.field_70180_af.func_187225_a(field_184755_bv)).byteValue();
-      if (p_70903_1_) {
-         this.field_70180_af.func_187227_b(field_184755_bv, Byte.valueOf((byte)(b0 | 4)));
-      } else {
-         this.field_70180_af.func_187227_b(field_184755_bv, Byte.valueOf((byte)(b0 & -5)));
-      }
+    public boolean isTamed()
+    {
+        return (((Byte)this.dataManager.get(TAMED)).byteValue() & 4) != 0;
+    }
 
-      this.func_175544_ck();
-   }
+    public void setTamed(boolean tamed)
+    {
+        byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
 
-   protected void func_175544_ck() {
-   }
+        if (tamed)
+        {
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 4)));
+        }
+        else
+        {
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -5)));
+        }
 
-   public boolean func_70906_o() {
-      return (((Byte)this.field_70180_af.func_187225_a(field_184755_bv)).byteValue() & 1) != 0;
-   }
+        this.setupTamedAI();
+    }
 
-   public void func_70904_g(boolean p_70904_1_) {
-      byte b0 = ((Byte)this.field_70180_af.func_187225_a(field_184755_bv)).byteValue();
-      if (p_70904_1_) {
-         this.field_70180_af.func_187227_b(field_184755_bv, Byte.valueOf((byte)(b0 | 1)));
-      } else {
-         this.field_70180_af.func_187227_b(field_184755_bv, Byte.valueOf((byte)(b0 & -2)));
-      }
+    protected void setupTamedAI()
+    {
+    }
 
-   }
+    public boolean isSitting()
+    {
+        return (((Byte)this.dataManager.get(TAMED)).byteValue() & 1) != 0;
+    }
 
-   @Nullable
-   public UUID func_184753_b() {
-      return (UUID)((Optional)this.field_70180_af.func_187225_a(field_184756_bw)).orNull();
-   }
+    public void setSitting(boolean sitting)
+    {
+        byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
 
-   public void func_184754_b(@Nullable UUID p_184754_1_) {
-      this.field_70180_af.func_187227_b(field_184756_bw, Optional.fromNullable(p_184754_1_));
-   }
+        if (sitting)
+        {
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 1)));
+        }
+        else
+        {
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -2)));
+        }
+    }
 
-   public void func_193101_c(EntityPlayer p_193101_1_) {
-      this.func_70903_f(true);
-      this.func_184754_b(p_193101_1_.func_110124_au());
-      if (p_193101_1_ instanceof EntityPlayerMP) {
-         CriteriaTriggers.field_193136_w.func_193178_a((EntityPlayerMP)p_193101_1_, this);
-      }
+    @Nullable
+    public UUID getOwnerId()
+    {
+        return (UUID)((Optional)this.dataManager.get(OWNER_UNIQUE_ID)).orNull();
+    }
 
-   }
+    public void setOwnerId(@Nullable UUID p_184754_1_)
+    {
+        this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(p_184754_1_));
+    }
 
-   @Nullable
-   public EntityLivingBase func_70902_q() {
-      try {
-         UUID uuid = this.func_184753_b();
-         return uuid == null ? null : this.field_70170_p.func_152378_a(uuid);
-      } catch (IllegalArgumentException var2) {
-         return null;
-      }
-   }
+    public void func_193101_c(EntityPlayer p_193101_1_)
+    {
+        this.setTamed(true);
+        this.setOwnerId(p_193101_1_.getUniqueID());
 
-   public boolean func_152114_e(EntityLivingBase p_152114_1_) {
-      return p_152114_1_ == this.func_70902_q();
-   }
+        if (p_193101_1_ instanceof EntityPlayerMP)
+        {
+            CriteriaTriggers.field_193136_w.func_193178_a((EntityPlayerMP)p_193101_1_, this);
+        }
+    }
 
-   public EntityAISit func_70907_r() {
-      return this.field_70911_d;
-   }
+    @Nullable
+    public EntityLivingBase getOwner()
+    {
+        try
+        {
+            UUID uuid = this.getOwnerId();
+            return uuid == null ? null : this.world.getPlayerEntityByUUID(uuid);
+        }
+        catch (IllegalArgumentException var2)
+        {
+            return null;
+        }
+    }
 
-   public boolean func_142018_a(EntityLivingBase p_142018_1_, EntityLivingBase p_142018_2_) {
-      return true;
-   }
+    public boolean isOwner(EntityLivingBase entityIn)
+    {
+        return entityIn == this.getOwner();
+    }
 
-   public Team func_96124_cp() {
-      if (this.func_70909_n()) {
-         EntityLivingBase entitylivingbase = this.func_70902_q();
-         if (entitylivingbase != null) {
-            return entitylivingbase.func_96124_cp();
-         }
-      }
+    /**
+     * Returns the AITask responsible of the sit logic
+     */
+    public EntityAISit getAISit()
+    {
+        return this.aiSit;
+    }
 
-      return super.func_96124_cp();
-   }
+    public boolean shouldAttackEntity(EntityLivingBase p_142018_1_, EntityLivingBase p_142018_2_)
+    {
+        return true;
+    }
 
-   public boolean func_184191_r(Entity p_184191_1_) {
-      if (this.func_70909_n()) {
-         EntityLivingBase entitylivingbase = this.func_70902_q();
-         if (p_184191_1_ == entitylivingbase) {
-            return true;
-         }
+    public Team getTeam()
+    {
+        if (this.isTamed())
+        {
+            EntityLivingBase entitylivingbase = this.getOwner();
 
-         if (entitylivingbase != null) {
-            return entitylivingbase.func_184191_r(p_184191_1_);
-         }
-      }
+            if (entitylivingbase != null)
+            {
+                return entitylivingbase.getTeam();
+            }
+        }
 
-      return super.func_184191_r(p_184191_1_);
-   }
+        return super.getTeam();
+    }
 
-   public void func_70645_a(DamageSource p_70645_1_) {
-      if (!this.field_70170_p.field_72995_K && this.field_70170_p.func_82736_K().func_82766_b("showDeathMessages") && this.func_70902_q() instanceof EntityPlayerMP) {
-         this.func_70902_q().func_145747_a(this.func_110142_aN().func_151521_b());
-      }
+    /**
+     * Returns whether this Entity is on the same team as the given Entity.
+     */
+    public boolean isOnSameTeam(Entity entityIn)
+    {
+        if (this.isTamed())
+        {
+            EntityLivingBase entitylivingbase = this.getOwner();
 
-      super.func_70645_a(p_70645_1_);
-   }
+            if (entityIn == entitylivingbase)
+            {
+                return true;
+            }
+
+            if (entitylivingbase != null)
+            {
+                return entitylivingbase.isOnSameTeam(entityIn);
+            }
+        }
+
+        return super.isOnSameTeam(entityIn);
+    }
+
+    /**
+     * Called when the mob's health reaches 0.
+     */
+    public void onDeath(DamageSource cause)
+    {
+        if (!this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP)
+        {
+            this.getOwner().addChatMessage(this.getCombatTracker().getDeathMessage());
+        }
+
+        super.onDeath(cause);
+    }
 }

@@ -15,74 +15,102 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityZombieHorse extends AbstractHorse {
-   public EntityZombieHorse(World p_i47293_1_) {
-      super(p_i47293_1_);
-   }
+public class EntityZombieHorse extends AbstractHorse
+{
+    public EntityZombieHorse(World p_i47293_1_)
+    {
+        super(p_i47293_1_);
+    }
 
-   public static void func_190693_b(DataFixer p_190693_0_) {
-      AbstractHorse.func_190683_c(p_190693_0_, EntityZombieHorse.class);
-   }
+    public static void func_190693_b(DataFixer p_190693_0_)
+    {
+        AbstractHorse.func_190683_c(p_190693_0_, EntityZombieHorse.class);
+    }
 
-   protected void func_110147_ax() {
-      super.func_110147_ax();
-      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(15.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.20000000298023224D);
-      this.func_110148_a(field_110271_bv).func_111128_a(this.func_110245_cM());
-   }
+    protected void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(15.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
+        this.getEntityAttribute(JUMP_STRENGTH).setBaseValue(this.getModifiedJumpStrength());
+    }
 
-   public EnumCreatureAttribute func_70668_bt() {
-      return EnumCreatureAttribute.UNDEAD;
-   }
+    /**
+     * Get this Entity's EnumCreatureAttribute
+     */
+    public EnumCreatureAttribute getCreatureAttribute()
+    {
+        return EnumCreatureAttribute.UNDEAD;
+    }
 
-   protected SoundEvent func_184639_G() {
-      super.func_184639_G();
-      return SoundEvents.field_187931_he;
-   }
+    protected SoundEvent getAmbientSound()
+    {
+        super.getAmbientSound();
+        return SoundEvents.ENTITY_ZOMBIE_HORSE_AMBIENT;
+    }
 
-   protected SoundEvent func_184615_bR() {
-      super.func_184615_bR();
-      return SoundEvents.field_187932_hf;
-   }
+    protected SoundEvent getDeathSound()
+    {
+        super.getDeathSound();
+        return SoundEvents.ENTITY_ZOMBIE_HORSE_DEATH;
+    }
 
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      super.func_184601_bQ(p_184601_1_);
-      return SoundEvents.field_187933_hg;
-   }
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        super.getHurtSound(p_184601_1_);
+        return SoundEvents.ENTITY_ZOMBIE_HORSE_HURT;
+    }
 
-   @Nullable
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_186397_E;
-   }
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_ZOMBIE_HORSE;
+    }
 
-   public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_) {
-      ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-      boolean flag = !itemstack.func_190926_b();
-      if (flag && itemstack.func_77973_b() == Items.field_151063_bx) {
-         return super.func_184645_a(p_184645_1_, p_184645_2_);
-      } else if (!this.func_110248_bS()) {
-         return false;
-      } else if (this.func_70631_g_()) {
-         return super.func_184645_a(p_184645_1_, p_184645_2_);
-      } else if (p_184645_1_.func_70093_af()) {
-         this.func_110199_f(p_184645_1_);
-         return true;
-      } else if (this.func_184207_aI()) {
-         return super.func_184645_a(p_184645_1_, p_184645_2_);
-      } else {
-         if (flag) {
-            if (!this.func_110257_ck() && itemstack.func_77973_b() == Items.field_151141_av) {
-               this.func_110199_f(p_184645_1_);
-               return true;
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    {
+        ItemStack itemstack = player.getHeldItem(hand);
+        boolean flag = !itemstack.func_190926_b();
+
+        if (flag && itemstack.getItem() == Items.SPAWN_EGG)
+        {
+            return super.processInteract(player, hand);
+        }
+        else if (!this.isTame())
+        {
+            return false;
+        }
+        else if (this.isChild())
+        {
+            return super.processInteract(player, hand);
+        }
+        else if (player.isSneaking())
+        {
+            this.openGUI(player);
+            return true;
+        }
+        else if (this.isBeingRidden())
+        {
+            return super.processInteract(player, hand);
+        }
+        else
+        {
+            if (flag)
+            {
+                if (!this.isHorseSaddled() && itemstack.getItem() == Items.SADDLE)
+                {
+                    this.openGUI(player);
+                    return true;
+                }
+
+                if (itemstack.interactWithEntity(player, this, hand))
+                {
+                    return true;
+                }
             }
 
-            if (itemstack.func_111282_a(p_184645_1_, this, p_184645_2_)) {
-               return true;
-            }
-         }
-
-         this.func_110237_h(p_184645_1_);
-         return true;
-      }
-   }
+            this.mountTo(player);
+            return true;
+        }
+    }
 }

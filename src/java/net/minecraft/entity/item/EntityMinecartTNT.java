@@ -17,151 +17,225 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
-public class EntityMinecartTNT extends EntityMinecart {
-   private int field_94106_a = -1;
+public class EntityMinecartTNT extends EntityMinecart
+{
+    private int minecartTNTFuse = -1;
 
-   public EntityMinecartTNT(World p_i1727_1_) {
-      super(p_i1727_1_);
-   }
+    public EntityMinecartTNT(World worldIn)
+    {
+        super(worldIn);
+    }
 
-   public EntityMinecartTNT(World p_i1728_1_, double p_i1728_2_, double p_i1728_4_, double p_i1728_6_) {
-      super(p_i1728_1_, p_i1728_2_, p_i1728_4_, p_i1728_6_);
-   }
+    public EntityMinecartTNT(World worldIn, double x, double y, double z)
+    {
+        super(worldIn, x, y, z);
+    }
 
-   public static void func_189674_a(DataFixer p_189674_0_) {
-      EntityMinecart.func_189669_a(p_189674_0_, EntityMinecartTNT.class);
-   }
+    public static void registerFixesMinecartTNT(DataFixer fixer)
+    {
+        EntityMinecart.registerFixesMinecart(fixer, EntityMinecartTNT.class);
+    }
 
-   public EntityMinecart.Type func_184264_v() {
-      return EntityMinecart.Type.TNT;
-   }
+    public EntityMinecart.Type getType()
+    {
+        return EntityMinecart.Type.TNT;
+    }
 
-   public IBlockState func_180457_u() {
-      return Blocks.field_150335_W.func_176223_P();
-   }
+    public IBlockState getDefaultDisplayTile()
+    {
+        return Blocks.TNT.getDefaultState();
+    }
 
-   public void func_70071_h_() {
-      super.func_70071_h_();
-      if (this.field_94106_a > 0) {
-         --this.field_94106_a;
-         this.field_70170_p.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, this.field_70165_t, this.field_70163_u + 0.5D, this.field_70161_v, 0.0D, 0.0D, 0.0D);
-      } else if (this.field_94106_a == 0) {
-         this.func_94103_c(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-      }
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        super.onUpdate();
 
-      if (this.field_70123_F) {
-         double d0 = this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y;
-         if (d0 >= 0.009999999776482582D) {
-            this.func_94103_c(d0);
-         }
-      }
+        if (this.minecartTNTFuse > 0)
+        {
+            --this.minecartTNTFuse;
+            this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
+        }
+        else if (this.minecartTNTFuse == 0)
+        {
+            this.explodeCart(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        }
 
-   }
+        if (this.isCollidedHorizontally)
+        {
+            double d0 = this.motionX * this.motionX + this.motionZ * this.motionZ;
 
-   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
-      Entity entity = p_70097_1_.func_76364_f();
-      if (entity instanceof EntityArrow) {
-         EntityArrow entityarrow = (EntityArrow)entity;
-         if (entityarrow.func_70027_ad()) {
-            this.func_94103_c(entityarrow.field_70159_w * entityarrow.field_70159_w + entityarrow.field_70181_x * entityarrow.field_70181_x + entityarrow.field_70179_y * entityarrow.field_70179_y);
-         }
-      }
+            if (d0 >= 0.009999999776482582D)
+            {
+                this.explodeCart(d0);
+            }
+        }
+    }
 
-      return super.func_70097_a(p_70097_1_, p_70097_2_);
-   }
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        Entity entity = source.getSourceOfDamage();
 
-   public void func_94095_a(DamageSource p_94095_1_) {
-      double d0 = this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y;
-      if (!p_94095_1_.func_76347_k() && !p_94095_1_.func_94541_c() && d0 < 0.009999999776482582D) {
-         super.func_94095_a(p_94095_1_);
-         if (!p_94095_1_.func_94541_c() && this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops")) {
-            this.func_70099_a(new ItemStack(Blocks.field_150335_W, 1), 0.0F);
-         }
+        if (entity instanceof EntityArrow)
+        {
+            EntityArrow entityarrow = (EntityArrow)entity;
 
-      } else {
-         if (this.field_94106_a < 0) {
-            this.func_94105_c();
-            this.field_94106_a = this.field_70146_Z.nextInt(20) + this.field_70146_Z.nextInt(20);
-         }
+            if (entityarrow.isBurning())
+            {
+                this.explodeCart(entityarrow.motionX * entityarrow.motionX + entityarrow.motionY * entityarrow.motionY + entityarrow.motionZ * entityarrow.motionZ);
+            }
+        }
 
-      }
-   }
+        return super.attackEntityFrom(source, amount);
+    }
 
-   protected void func_94103_c(double p_94103_1_) {
-      if (!this.field_70170_p.field_72995_K) {
-         double d0 = Math.sqrt(p_94103_1_);
-         if (d0 > 5.0D) {
-            d0 = 5.0D;
-         }
+    public void killMinecart(DamageSource source)
+    {
+        double d0 = this.motionX * this.motionX + this.motionZ * this.motionZ;
 
-         this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, (float)(4.0D + this.field_70146_Z.nextDouble() * 1.5D * d0), true);
-         this.func_70106_y();
-      }
+        if (!source.isFireDamage() && !source.isExplosion() && d0 < 0.009999999776482582D)
+        {
+            super.killMinecart(source);
 
-   }
+            if (!source.isExplosion() && this.world.getGameRules().getBoolean("doEntityDrops"))
+            {
+                this.entityDropItem(new ItemStack(Blocks.TNT, 1), 0.0F);
+            }
+        }
+        else
+        {
+            if (this.minecartTNTFuse < 0)
+            {
+                this.ignite();
+                this.minecartTNTFuse = this.rand.nextInt(20) + this.rand.nextInt(20);
+            }
+        }
+    }
 
-   public void func_180430_e(float p_180430_1_, float p_180430_2_) {
-      if (p_180430_1_ >= 3.0F) {
-         float f = p_180430_1_ / 10.0F;
-         this.func_94103_c((double)(f * f));
-      }
+    /**
+     * Makes the minecart explode.
+     */
+    protected void explodeCart(double p_94103_1_)
+    {
+        if (!this.world.isRemote)
+        {
+            double d0 = Math.sqrt(p_94103_1_);
 
-      super.func_180430_e(p_180430_1_, p_180430_2_);
-   }
+            if (d0 > 5.0D)
+            {
+                d0 = 5.0D;
+            }
 
-   public void func_96095_a(int p_96095_1_, int p_96095_2_, int p_96095_3_, boolean p_96095_4_) {
-      if (p_96095_4_ && this.field_94106_a < 0) {
-         this.func_94105_c();
-      }
+            this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)(4.0D + this.rand.nextDouble() * 1.5D * d0), true);
+            this.setDead();
+        }
+    }
 
-   }
+    public void fall(float distance, float damageMultiplier)
+    {
+        if (distance >= 3.0F)
+        {
+            float f = distance / 10.0F;
+            this.explodeCart((double)(f * f));
+        }
 
-   public void func_70103_a(byte p_70103_1_) {
-      if (p_70103_1_ == 10) {
-         this.func_94105_c();
-      } else {
-         super.func_70103_a(p_70103_1_);
-      }
+        super.fall(distance, damageMultiplier);
+    }
 
-   }
+    /**
+     * Called every tick the minecart is on an activator rail.
+     */
+    public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
+    {
+        if (receivingPower && this.minecartTNTFuse < 0)
+        {
+            this.ignite();
+        }
+    }
 
-   public void func_94105_c() {
-      this.field_94106_a = 80;
-      if (!this.field_70170_p.field_72995_K) {
-         this.field_70170_p.func_72960_a(this, (byte)10);
-         if (!this.func_174814_R()) {
-            this.field_70170_p.func_184148_a((EntityPlayer)null, this.field_70165_t, this.field_70163_u, this.field_70161_v, SoundEvents.field_187904_gd, SoundCategory.BLOCKS, 1.0F, 1.0F);
-         }
-      }
+    public void handleStatusUpdate(byte id)
+    {
+        if (id == 10)
+        {
+            this.ignite();
+        }
+        else
+        {
+            super.handleStatusUpdate(id);
+        }
+    }
 
-   }
+    /**
+     * Ignites this TNT cart.
+     */
+    public void ignite()
+    {
+        this.minecartTNTFuse = 80;
 
-   public int func_94104_d() {
-      return this.field_94106_a;
-   }
+        if (!this.world.isRemote)
+        {
+            this.world.setEntityState(this, (byte)10);
 
-   public boolean func_96096_ay() {
-      return this.field_94106_a > -1;
-   }
+            if (!this.isSilent())
+            {
+                this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            }
+        }
+    }
 
-   public float func_180428_a(Explosion p_180428_1_, World p_180428_2_, BlockPos p_180428_3_, IBlockState p_180428_4_) {
-      return !this.func_96096_ay() || !BlockRailBase.func_176563_d(p_180428_4_) && !BlockRailBase.func_176562_d(p_180428_2_, p_180428_3_.func_177984_a()) ? super.func_180428_a(p_180428_1_, p_180428_2_, p_180428_3_, p_180428_4_) : 0.0F;
-   }
+    /**
+     * Gets the remaining fuse time in ticks.
+     */
+    public int getFuseTicks()
+    {
+        return this.minecartTNTFuse;
+    }
 
-   public boolean func_174816_a(Explosion p_174816_1_, World p_174816_2_, BlockPos p_174816_3_, IBlockState p_174816_4_, float p_174816_5_) {
-      return !this.func_96096_ay() || !BlockRailBase.func_176563_d(p_174816_4_) && !BlockRailBase.func_176562_d(p_174816_2_, p_174816_3_.func_177984_a()) ? super.func_174816_a(p_174816_1_, p_174816_2_, p_174816_3_, p_174816_4_, p_174816_5_) : false;
-   }
+    /**
+     * Returns true if the TNT minecart is ignited.
+     */
+    public boolean isIgnited()
+    {
+        return this.minecartTNTFuse > -1;
+    }
 
-   protected void func_70037_a(NBTTagCompound p_70037_1_) {
-      super.func_70037_a(p_70037_1_);
-      if (p_70037_1_.func_150297_b("TNTFuse", 99)) {
-         this.field_94106_a = p_70037_1_.func_74762_e("TNTFuse");
-      }
+    /**
+     * Explosion resistance of a block relative to this entity
+     */
+    public float getExplosionResistance(Explosion explosionIn, World worldIn, BlockPos pos, IBlockState blockStateIn)
+    {
+        return !this.isIgnited() || !BlockRailBase.isRailBlock(blockStateIn) && !BlockRailBase.isRailBlock(worldIn, pos.up()) ? super.getExplosionResistance(explosionIn, worldIn, pos, blockStateIn) : 0.0F;
+    }
 
-   }
+    public boolean verifyExplosion(Explosion explosionIn, World worldIn, BlockPos pos, IBlockState blockStateIn, float p_174816_5_)
+    {
+        return !this.isIgnited() || !BlockRailBase.isRailBlock(blockStateIn) && !BlockRailBase.isRailBlock(worldIn, pos.up()) ? super.verifyExplosion(explosionIn, worldIn, pos, blockStateIn, p_174816_5_) : false;
+    }
 
-   protected void func_70014_b(NBTTagCompound p_70014_1_) {
-      super.func_70014_b(p_70014_1_);
-      p_70014_1_.func_74768_a("TNTFuse", this.field_94106_a);
-   }
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    protected void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
+
+        if (compound.hasKey("TNTFuse", 99))
+        {
+            this.minecartTNTFuse = compound.getInteger("TNTFuse");
+        }
+    }
+
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    protected void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("TNTFuse", this.minecartTNTFuse);
+    }
 }

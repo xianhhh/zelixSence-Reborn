@@ -7,15 +7,21 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import net.minecraft.util.JsonUtils;
 
-public class TextureMetadataSectionSerializer extends BaseMetadataSectionSerializer<TextureMetadataSection> {
-   public TextureMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-      JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-      boolean flag = JsonUtils.func_151209_a(jsonobject, "blur", false);
-      boolean flag1 = JsonUtils.func_151209_a(jsonobject, "clamp", false);
-      return new TextureMetadataSection(flag, flag1);
-   }
+public class TextureMetadataSectionSerializer extends BaseMetadataSectionSerializer<TextureMetadataSection>
+{
+    public TextureMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
+    {
+        JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
+        boolean flag = JsonUtils.getBoolean(jsonobject, "blur", false);
+        boolean flag1 = JsonUtils.getBoolean(jsonobject, "clamp", false);
+        return new TextureMetadataSection(flag, flag1);
+    }
 
-   public String func_110483_a() {
-      return "texture";
-   }
+    /**
+     * The name of this section type as it appears in JSON.
+     */
+    public String getSectionName()
+    {
+        return "texture";
+    }
 }

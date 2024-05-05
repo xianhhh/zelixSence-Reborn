@@ -2,15 +2,21 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,6 +32,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
@@ -67,6 +74,7 @@ import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemRecord;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
@@ -80,2068 +88,3505 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
+import optifine.ChunkUtils;
+import optifine.CloudRenderer;
+import optifine.Config;
+import optifine.CustomColors;
+import optifine.CustomSky;
+import optifine.DynamicLights;
+import optifine.Lagometer;
+import optifine.RandomMobs;
+import optifine.Reflector;
+import optifine.RenderEnv;
+import optifine.RenderInfoLazy;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import shadersmod.client.Shaders;
+import shadersmod.client.ShadersRender;
+import shadersmod.client.ShadowUtils;
 
-public class RenderGlobal implements IWorldEventListener, IResourceManagerReloadListener {
-   private static final Logger field_147599_m = LogManager.getLogger();
-   private static final ResourceLocation field_110927_h = new ResourceLocation("textures/environment/moon_phases.png");
-   private static final ResourceLocation field_110928_i = new ResourceLocation("textures/environment/sun.png");
-   private static final ResourceLocation field_110925_j = new ResourceLocation("textures/environment/clouds.png");
-   private static final ResourceLocation field_110926_k = new ResourceLocation("textures/environment/end_sky.png");
-   private static final ResourceLocation field_175006_g = new ResourceLocation("textures/misc/forcefield.png");
-   private final Minecraft field_72777_q;
-   private final TextureManager field_72770_i;
-   private final RenderManager field_175010_j;
-   private WorldClient field_72769_h;
-   private Set<RenderChunk> field_175009_l = Sets.<RenderChunk>newLinkedHashSet();
-   private List<RenderGlobal.ContainerLocalRenderInformation> field_72755_R = Lists.<RenderGlobal.ContainerLocalRenderInformation>newArrayListWithCapacity(69696);
-   private final Set<TileEntity> field_181024_n = Sets.<TileEntity>newHashSet();
-   private ViewFrustum field_175008_n;
-   private int field_72772_v = -1;
-   private int field_72771_w = -1;
-   private int field_72781_x = -1;
-   private final VertexFormat field_175014_r;
-   private VertexBuffer field_175013_s;
-   private VertexBuffer field_175012_t;
-   private VertexBuffer field_175011_u;
-   private int field_72773_u;
-   private final Map<Integer, DestroyBlockProgress> field_72738_E = Maps.<Integer, DestroyBlockProgress>newHashMap();
-   private final Map<BlockPos, ISound> field_147593_P = Maps.<BlockPos, ISound>newHashMap();
-   private final TextureAtlasSprite[] field_94141_F = new TextureAtlasSprite[10];
-   private Framebuffer field_175015_z;
-   private ShaderGroup field_174991_A;
-   private double field_174992_B = Double.MIN_VALUE;
-   private double field_174993_C = Double.MIN_VALUE;
-   private double field_174987_D = Double.MIN_VALUE;
-   private int field_174988_E = Integer.MIN_VALUE;
-   private int field_174989_F = Integer.MIN_VALUE;
-   private int field_174990_G = Integer.MIN_VALUE;
-   private double field_174997_H = Double.MIN_VALUE;
-   private double field_174998_I = Double.MIN_VALUE;
-   private double field_174999_J = Double.MIN_VALUE;
-   private double field_175000_K = Double.MIN_VALUE;
-   private double field_174994_L = Double.MIN_VALUE;
-   private ChunkRenderDispatcher field_174995_M;
-   private ChunkRenderContainer field_174996_N;
-   private int field_72739_F = -1;
-   private int field_72740_G = 2;
-   private int field_72748_H;
-   private int field_72749_I;
-   private int field_72750_J;
-   private boolean field_175002_T;
-   private ClippingHelper field_175001_U;
-   private final Vector4f[] field_175004_V = new Vector4f[8];
-   private final Vector3d field_175003_W = new Vector3d();
-   private boolean field_175005_X;
-   IRenderChunkFactory field_175007_a;
-   private double field_147596_f;
-   private double field_147597_g;
-   private double field_147602_h;
-   private boolean field_147595_R = true;
-   private boolean field_184386_ad;
-   private final Set<BlockPos> field_184387_ae = Sets.<BlockPos>newHashSet();
+public class RenderGlobal implements IWorldEventListener, IResourceManagerReloadListener
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final ResourceLocation MOON_PHASES_TEXTURES = new ResourceLocation("textures/environment/moon_phases.png");
+    private static final ResourceLocation SUN_TEXTURES = new ResourceLocation("textures/environment/sun.png");
+    private static final ResourceLocation CLOUDS_TEXTURES = new ResourceLocation("textures/environment/clouds.png");
+    private static final ResourceLocation END_SKY_TEXTURES = new ResourceLocation("textures/environment/end_sky.png");
+    private static final ResourceLocation FORCEFIELD_TEXTURES = new ResourceLocation("textures/misc/forcefield.png");
 
-   public RenderGlobal(Minecraft p_i1249_1_) {
-      this.field_72777_q = p_i1249_1_;
-      this.field_175010_j = p_i1249_1_.func_175598_ae();
-      this.field_72770_i = p_i1249_1_.func_110434_K();
-      this.field_72770_i.func_110577_a(field_175006_g);
-      GlStateManager.func_187421_b(3553, 10242, 10497);
-      GlStateManager.func_187421_b(3553, 10243, 10497);
-      GlStateManager.func_179144_i(0);
-      this.func_174971_n();
-      this.field_175005_X = OpenGlHelper.func_176075_f();
-      if (this.field_175005_X) {
-         this.field_174996_N = new VboRenderList();
-         this.field_175007_a = new VboChunkFactory();
-      } else {
-         this.field_174996_N = new RenderList();
-         this.field_175007_a = new ListChunkFactory();
-      }
+    /** A reference to the Minecraft object. */
+    public final Minecraft mc;
 
-      this.field_175014_r = new VertexFormat();
-      this.field_175014_r.func_181721_a(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
-      this.func_174963_q();
-      this.func_174980_p();
-      this.func_174964_o();
-   }
+    /** The RenderEngine instance used by RenderGlobal */
+    private final TextureManager renderEngine;
+    private final RenderManager renderManager;
+    private WorldClient theWorld;
+    private Set<RenderChunk> chunksToUpdate = Sets.<RenderChunk>newLinkedHashSet();
+    private List<RenderGlobal.ContainerLocalRenderInformation> renderInfos = Lists.<RenderGlobal.ContainerLocalRenderInformation>newArrayListWithCapacity(69696);
+    private final Set<TileEntity> setTileEntities = Sets.<TileEntity>newHashSet();
+    private ViewFrustum viewFrustum;
 
-   public void func_110549_a(IResourceManager p_110549_1_) {
-      this.func_174971_n();
-   }
+    /** The star GL Call list */
+    private int starGLCallList = -1;
 
-   private void func_174971_n() {
-      TextureMap texturemap = this.field_72777_q.func_147117_R();
+    /** OpenGL sky list */
+    private int glSkyList = -1;
 
-      for(int i = 0; i < this.field_94141_F.length; ++i) {
-         this.field_94141_F[i] = texturemap.func_110572_b("minecraft:blocks/destroy_stage_" + i);
-      }
+    /** OpenGL sky list 2 */
+    private int glSkyList2 = -1;
+    private final VertexFormat vertexBufferFormat;
+    private VertexBuffer starVBO;
+    private VertexBuffer skyVBO;
+    private VertexBuffer sky2VBO;
 
-   }
+    /**
+     * counts the cloud render updates. Used with mod to stagger some updates
+     */
+    private int cloudTickCounter;
+    public final Map<Integer, DestroyBlockProgress> damagedBlocks = Maps.<Integer, DestroyBlockProgress>newHashMap();
+    private final Map<BlockPos, ISound> mapSoundPositions = Maps.<BlockPos, ISound>newHashMap();
+    private final TextureAtlasSprite[] destroyBlockIcons = new TextureAtlasSprite[10];
+    private Framebuffer entityOutlineFramebuffer;
 
-   public void func_174966_b() {
-      if (OpenGlHelper.field_148824_g) {
-         if (ShaderLinkHelper.func_148074_b() == null) {
-            ShaderLinkHelper.func_148076_a();
-         }
+    /** Stores the shader group for the entity_outline shader */
+    private ShaderGroup entityOutlineShader;
+    private double frustumUpdatePosX = Double.MIN_VALUE;
+    private double frustumUpdatePosY = Double.MIN_VALUE;
+    private double frustumUpdatePosZ = Double.MIN_VALUE;
+    private int frustumUpdatePosChunkX = Integer.MIN_VALUE;
+    private int frustumUpdatePosChunkY = Integer.MIN_VALUE;
+    private int frustumUpdatePosChunkZ = Integer.MIN_VALUE;
+    private double lastViewEntityX = Double.MIN_VALUE;
+    private double lastViewEntityY = Double.MIN_VALUE;
+    private double lastViewEntityZ = Double.MIN_VALUE;
+    private double lastViewEntityPitch = Double.MIN_VALUE;
+    private double lastViewEntityYaw = Double.MIN_VALUE;
+    private ChunkRenderDispatcher renderDispatcher;
+    private ChunkRenderContainer renderContainer;
+    private int renderDistanceChunks = -1;
 
-         ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
+    /** Render entities startup counter (init value=2) */
+    private int renderEntitiesStartupCounter = 2;
 
-         try {
-            this.field_174991_A = new ShaderGroup(this.field_72777_q.func_110434_K(), this.field_72777_q.func_110442_L(), this.field_72777_q.func_147110_a(), resourcelocation);
-            this.field_174991_A.func_148026_a(this.field_72777_q.field_71443_c, this.field_72777_q.field_71440_d);
-            this.field_175015_z = this.field_174991_A.func_177066_a("final");
-         } catch (IOException ioexception) {
-            field_147599_m.warn("Failed to load shader: {}", resourcelocation, ioexception);
-            this.field_174991_A = null;
-            this.field_175015_z = null;
-         } catch (JsonSyntaxException jsonsyntaxexception) {
-            field_147599_m.warn("Failed to load shader: {}", resourcelocation, jsonsyntaxexception);
-            this.field_174991_A = null;
-            this.field_175015_z = null;
-         }
-      } else {
-         this.field_174991_A = null;
-         this.field_175015_z = null;
-      }
+    /** Count entities total */
+    private int countEntitiesTotal;
 
-   }
+    /** Count entities rendered */
+    private int countEntitiesRendered;
 
-   public void func_174975_c() {
-      if (this.func_174985_d()) {
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-         this.field_175015_z.func_178038_a(this.field_72777_q.field_71443_c, this.field_72777_q.field_71440_d, false);
-         GlStateManager.func_179084_k();
-      }
+    /** Count entities hidden */
+    private int countEntitiesHidden;
+    private boolean debugFixTerrainFrustum;
+    private ClippingHelper debugFixedClippingHelper;
+    private final Vector4f[] debugTerrainMatrix = new Vector4f[8];
+    private final Vector3d debugTerrainFrustumPosition = new Vector3d();
+    private boolean vboEnabled;
+    IRenderChunkFactory renderChunkFactory;
+    private double prevRenderSortX;
+    private double prevRenderSortY;
+    private double prevRenderSortZ;
+    public boolean displayListEntitiesDirty = true;
+    private boolean entityOutlinesRendered;
+    private final Set<BlockPos> setLightUpdates = Sets.<BlockPos>newHashSet();
+    private CloudRenderer cloudRenderer;
+    public Entity renderedEntity;
+    public Set chunksToResortTransparency = new LinkedHashSet();
+    public Set chunksToUpdateForced = new LinkedHashSet();
+    private Deque visibilityDeque = new ArrayDeque();
+    private List renderInfosEntities = new ArrayList(1024);
+    private List renderInfosTileEntities = new ArrayList(1024);
+    private List renderInfosNormal = new ArrayList(1024);
+    private List renderInfosEntitiesNormal = new ArrayList(1024);
+    private List renderInfosTileEntitiesNormal = new ArrayList(1024);
+    private List renderInfosShadow = new ArrayList(1024);
+    private List renderInfosEntitiesShadow = new ArrayList(1024);
+    private List renderInfosTileEntitiesShadow = new ArrayList(1024);
+    private int renderDistance = 0;
+    private int renderDistanceSq = 0;
+    private static final Set SET_ALL_FACINGS = Collections.unmodifiableSet(new HashSet(Arrays.asList(EnumFacing.VALUES)));
+    private int countTileEntitiesRendered;
+    private IChunkProvider worldChunkProvider = null;
+    private Long2ObjectMap<Chunk> worldChunkProviderMap = null;
+    private int countLoadedChunksPrev = 0;
+    private RenderEnv renderEnv;
+    public boolean renderOverlayDamaged;
+    public boolean renderOverlayEyes;
+    static Deque<RenderGlobal.ContainerLocalRenderInformation> renderInfoCache = new ArrayDeque<RenderGlobal.ContainerLocalRenderInformation>();
 
-   }
+    public RenderGlobal(Minecraft mcIn)
+    {
+        this.renderEnv = new RenderEnv(this.theWorld, Blocks.AIR.getDefaultState(), new BlockPos(0, 0, 0));
+        this.renderOverlayDamaged = false;
+        this.renderOverlayEyes = false;
+        this.cloudRenderer = new CloudRenderer(mcIn);
+        this.mc = mcIn;
+        this.renderManager = mcIn.getRenderManager();
+        this.renderEngine = mcIn.getTextureManager();
+        this.renderEngine.bindTexture(FORCEFIELD_TEXTURES);
+        GlStateManager.glTexParameteri(3553, 10242, 10497);
+        GlStateManager.glTexParameteri(3553, 10243, 10497);
+        GlStateManager.bindTexture(0);
+        this.updateDestroyBlockIcons();
+        this.vboEnabled = OpenGlHelper.useVbo();
 
-   protected boolean func_174985_d() {
-      return this.field_175015_z != null && this.field_174991_A != null && this.field_72777_q.field_71439_g != null;
-   }
+        if (this.vboEnabled)
+        {
+            this.renderContainer = new VboRenderList();
+            this.renderChunkFactory = new VboChunkFactory();
+        }
+        else
+        {
+            this.renderContainer = new RenderList();
+            this.renderChunkFactory = new ListChunkFactory();
+        }
 
-   private void func_174964_o() {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      if (this.field_175011_u != null) {
-         this.field_175011_u.func_177362_c();
-      }
+        this.vertexBufferFormat = new VertexFormat();
+        this.vertexBufferFormat.addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+        this.generateStars();
+        this.generateSky();
+        this.generateSky2();
+    }
 
-      if (this.field_72781_x >= 0) {
-         GLAllocation.func_74523_b(this.field_72781_x);
-         this.field_72781_x = -1;
-      }
+    public void onResourceManagerReload(IResourceManager resourceManager)
+    {
+        this.updateDestroyBlockIcons();
+    }
 
-      if (this.field_175005_X) {
-         this.field_175011_u = new VertexBuffer(this.field_175014_r);
-         this.func_174968_a(bufferbuilder, -16.0F, true);
-         bufferbuilder.func_178977_d();
-         bufferbuilder.func_178965_a();
-         this.field_175011_u.func_181722_a(bufferbuilder.func_178966_f());
-      } else {
-         this.field_72781_x = GLAllocation.func_74526_a(1);
-         GlStateManager.func_187423_f(this.field_72781_x, 4864);
-         this.func_174968_a(bufferbuilder, -16.0F, true);
-         tessellator.func_78381_a();
-         GlStateManager.func_187415_K();
-      }
+    private void updateDestroyBlockIcons()
+    {
+        TextureMap texturemap = this.mc.getTextureMapBlocks();
 
-   }
+        for (int i = 0; i < this.destroyBlockIcons.length; ++i)
+        {
+            this.destroyBlockIcons[i] = texturemap.getAtlasSprite("minecraft:blocks/destroy_stage_" + i);
+        }
+    }
 
-   private void func_174980_p() {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      if (this.field_175012_t != null) {
-         this.field_175012_t.func_177362_c();
-      }
-
-      if (this.field_72771_w >= 0) {
-         GLAllocation.func_74523_b(this.field_72771_w);
-         this.field_72771_w = -1;
-      }
-
-      if (this.field_175005_X) {
-         this.field_175012_t = new VertexBuffer(this.field_175014_r);
-         this.func_174968_a(bufferbuilder, 16.0F, false);
-         bufferbuilder.func_178977_d();
-         bufferbuilder.func_178965_a();
-         this.field_175012_t.func_181722_a(bufferbuilder.func_178966_f());
-      } else {
-         this.field_72771_w = GLAllocation.func_74526_a(1);
-         GlStateManager.func_187423_f(this.field_72771_w, 4864);
-         this.func_174968_a(bufferbuilder, 16.0F, false);
-         tessellator.func_78381_a();
-         GlStateManager.func_187415_K();
-      }
-
-   }
-
-   private void func_174968_a(BufferBuilder p_174968_1_, float p_174968_2_, boolean p_174968_3_) {
-      int i = 64;
-      int j = 6;
-      p_174968_1_.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-
-      for(int k = -384; k <= 384; k += 64) {
-         for(int l = -384; l <= 384; l += 64) {
-            float f = (float)k;
-            float f1 = (float)(k + 64);
-            if (p_174968_3_) {
-               f1 = (float)k;
-               f = (float)(k + 64);
+    /**
+     * Creates the entity outline shader to be stored in RenderGlobal.entityOutlineShader
+     */
+    public void makeEntityOutlineShader()
+    {
+        if (OpenGlHelper.shadersSupported)
+        {
+            if (ShaderLinkHelper.getStaticShaderLinkHelper() == null)
+            {
+                ShaderLinkHelper.setNewStaticShaderLinkHelper();
             }
 
-            p_174968_1_.func_181662_b((double)f, (double)p_174968_2_, (double)l).func_181675_d();
-            p_174968_1_.func_181662_b((double)f1, (double)p_174968_2_, (double)l).func_181675_d();
-            p_174968_1_.func_181662_b((double)f1, (double)p_174968_2_, (double)(l + 64)).func_181675_d();
-            p_174968_1_.func_181662_b((double)f, (double)p_174968_2_, (double)(l + 64)).func_181675_d();
-         }
-      }
+            ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
 
-   }
-
-   private void func_174963_q() {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      if (this.field_175013_s != null) {
-         this.field_175013_s.func_177362_c();
-      }
-
-      if (this.field_72772_v >= 0) {
-         GLAllocation.func_74523_b(this.field_72772_v);
-         this.field_72772_v = -1;
-      }
-
-      if (this.field_175005_X) {
-         this.field_175013_s = new VertexBuffer(this.field_175014_r);
-         this.func_180444_a(bufferbuilder);
-         bufferbuilder.func_178977_d();
-         bufferbuilder.func_178965_a();
-         this.field_175013_s.func_181722_a(bufferbuilder.func_178966_f());
-      } else {
-         this.field_72772_v = GLAllocation.func_74526_a(1);
-         GlStateManager.func_179094_E();
-         GlStateManager.func_187423_f(this.field_72772_v, 4864);
-         this.func_180444_a(bufferbuilder);
-         tessellator.func_78381_a();
-         GlStateManager.func_187415_K();
-         GlStateManager.func_179121_F();
-      }
-
-   }
-
-   private void func_180444_a(BufferBuilder p_180444_1_) {
-      Random random = new Random(10842L);
-      p_180444_1_.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-
-      for(int i = 0; i < 1500; ++i) {
-         double d0 = (double)(random.nextFloat() * 2.0F - 1.0F);
-         double d1 = (double)(random.nextFloat() * 2.0F - 1.0F);
-         double d2 = (double)(random.nextFloat() * 2.0F - 1.0F);
-         double d3 = (double)(0.15F + random.nextFloat() * 0.1F);
-         double d4 = d0 * d0 + d1 * d1 + d2 * d2;
-         if (d4 < 1.0D && d4 > 0.01D) {
-            d4 = 1.0D / Math.sqrt(d4);
-            d0 = d0 * d4;
-            d1 = d1 * d4;
-            d2 = d2 * d4;
-            double d5 = d0 * 100.0D;
-            double d6 = d1 * 100.0D;
-            double d7 = d2 * 100.0D;
-            double d8 = Math.atan2(d0, d2);
-            double d9 = Math.sin(d8);
-            double d10 = Math.cos(d8);
-            double d11 = Math.atan2(Math.sqrt(d0 * d0 + d2 * d2), d1);
-            double d12 = Math.sin(d11);
-            double d13 = Math.cos(d11);
-            double d14 = random.nextDouble() * 3.141592653589793D * 2.0D;
-            double d15 = Math.sin(d14);
-            double d16 = Math.cos(d14);
-
-            for(int j = 0; j < 4; ++j) {
-               double d17 = 0.0D;
-               double d18 = (double)((j & 2) - 1) * d3;
-               double d19 = (double)((j + 1 & 2) - 1) * d3;
-               double d20 = 0.0D;
-               double d21 = d18 * d16 - d19 * d15;
-               double d22 = d19 * d16 + d18 * d15;
-               double d23 = d21 * d12 + 0.0D * d13;
-               double d24 = 0.0D * d12 - d21 * d13;
-               double d25 = d24 * d9 - d22 * d10;
-               double d26 = d22 * d9 + d24 * d10;
-               p_180444_1_.func_181662_b(d5 + d25, d6 + d23, d7 + d26).func_181675_d();
+            try
+            {
+                this.entityOutlineShader = new ShaderGroup(this.mc.getTextureManager(), this.mc.getResourceManager(), this.mc.getFramebuffer(), resourcelocation);
+                this.entityOutlineShader.createBindFramebuffers(this.mc.displayWidth, this.mc.displayHeight);
+                this.entityOutlineFramebuffer = this.entityOutlineShader.getFramebufferRaw("final");
             }
-         }
-      }
-
-   }
-
-   public void func_72732_a(@Nullable WorldClient p_72732_1_) {
-      if (this.field_72769_h != null) {
-         this.field_72769_h.func_72848_b(this);
-      }
-
-      this.field_174992_B = Double.MIN_VALUE;
-      this.field_174993_C = Double.MIN_VALUE;
-      this.field_174987_D = Double.MIN_VALUE;
-      this.field_174988_E = Integer.MIN_VALUE;
-      this.field_174989_F = Integer.MIN_VALUE;
-      this.field_174990_G = Integer.MIN_VALUE;
-      this.field_175010_j.func_78717_a(p_72732_1_);
-      this.field_72769_h = p_72732_1_;
-      if (p_72732_1_ != null) {
-         p_72732_1_.func_72954_a(this);
-         this.func_72712_a();
-      } else {
-         this.field_175009_l.clear();
-         this.field_72755_R.clear();
-         if (this.field_175008_n != null) {
-            this.field_175008_n.func_178160_a();
-            this.field_175008_n = null;
-         }
-
-         if (this.field_174995_M != null) {
-            this.field_174995_M.func_188244_g();
-         }
-
-         this.field_174995_M = null;
-      }
-
-   }
-
-   public void func_72712_a() {
-      if (this.field_72769_h != null) {
-         if (this.field_174995_M == null) {
-            this.field_174995_M = new ChunkRenderDispatcher();
-         }
-
-         this.field_147595_R = true;
-         Blocks.field_150362_t.func_150122_b(this.field_72777_q.field_71474_y.field_74347_j);
-         Blocks.field_150361_u.func_150122_b(this.field_72777_q.field_71474_y.field_74347_j);
-         this.field_72739_F = this.field_72777_q.field_71474_y.field_151451_c;
-         boolean flag = this.field_175005_X;
-         this.field_175005_X = OpenGlHelper.func_176075_f();
-         if (flag && !this.field_175005_X) {
-            this.field_174996_N = new RenderList();
-            this.field_175007_a = new ListChunkFactory();
-         } else if (!flag && this.field_175005_X) {
-            this.field_174996_N = new VboRenderList();
-            this.field_175007_a = new VboChunkFactory();
-         }
-
-         if (flag != this.field_175005_X) {
-            this.func_174963_q();
-            this.func_174980_p();
-            this.func_174964_o();
-         }
-
-         if (this.field_175008_n != null) {
-            this.field_175008_n.func_178160_a();
-         }
-
-         this.func_174986_e();
-         synchronized(this.field_181024_n) {
-            this.field_181024_n.clear();
-         }
-
-         this.field_175008_n = new ViewFrustum(this.field_72769_h, this.field_72777_q.field_71474_y.field_151451_c, this, this.field_175007_a);
-         if (this.field_72769_h != null) {
-            Entity entity = this.field_72777_q.func_175606_aa();
-            if (entity != null) {
-               this.field_175008_n.func_178163_a(entity.field_70165_t, entity.field_70161_v);
+            catch (IOException ioexception)
+            {
+                LOGGER.warn("Failed to load shader: {}", resourcelocation, ioexception);
+                this.entityOutlineShader = null;
+                this.entityOutlineFramebuffer = null;
             }
-         }
-
-         this.field_72740_G = 2;
-      }
-   }
-
-   protected void func_174986_e() {
-      this.field_175009_l.clear();
-      this.field_174995_M.func_178514_b();
-   }
-
-   public void func_72720_a(int p_72720_1_, int p_72720_2_) {
-      if (OpenGlHelper.field_148824_g) {
-         if (this.field_174991_A != null) {
-            this.field_174991_A.func_148026_a(p_72720_1_, p_72720_2_);
-         }
-
-      }
-   }
-
-   public void func_180446_a(Entity p_180446_1_, ICamera p_180446_2_, float p_180446_3_) {
-      if (this.field_72740_G > 0) {
-         --this.field_72740_G;
-      } else {
-         double d0 = p_180446_1_.field_70169_q + (p_180446_1_.field_70165_t - p_180446_1_.field_70169_q) * (double)p_180446_3_;
-         double d1 = p_180446_1_.field_70167_r + (p_180446_1_.field_70163_u - p_180446_1_.field_70167_r) * (double)p_180446_3_;
-         double d2 = p_180446_1_.field_70166_s + (p_180446_1_.field_70161_v - p_180446_1_.field_70166_s) * (double)p_180446_3_;
-         this.field_72769_h.field_72984_F.func_76320_a("prepare");
-         TileEntityRendererDispatcher.field_147556_a.func_190056_a(this.field_72769_h, this.field_72777_q.func_110434_K(), this.field_72777_q.field_71466_p, this.field_72777_q.func_175606_aa(), this.field_72777_q.field_71476_x, p_180446_3_);
-         this.field_175010_j.func_180597_a(this.field_72769_h, this.field_72777_q.field_71466_p, this.field_72777_q.func_175606_aa(), this.field_72777_q.field_147125_j, this.field_72777_q.field_71474_y, p_180446_3_);
-         this.field_72748_H = 0;
-         this.field_72749_I = 0;
-         this.field_72750_J = 0;
-         Entity entity = this.field_72777_q.func_175606_aa();
-         double d3 = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)p_180446_3_;
-         double d4 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)p_180446_3_;
-         double d5 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)p_180446_3_;
-         TileEntityRendererDispatcher.field_147554_b = d3;
-         TileEntityRendererDispatcher.field_147555_c = d4;
-         TileEntityRendererDispatcher.field_147552_d = d5;
-         this.field_175010_j.func_178628_a(d3, d4, d5);
-         this.field_72777_q.field_71460_t.func_180436_i();
-         this.field_72769_h.field_72984_F.func_76318_c("global");
-         List<Entity> list = this.field_72769_h.func_72910_y();
-         this.field_72748_H = list.size();
-
-         for(int i = 0; i < this.field_72769_h.field_73007_j.size(); ++i) {
-            Entity entity1 = this.field_72769_h.field_73007_j.get(i);
-            ++this.field_72749_I;
-            if (entity1.func_145770_h(d0, d1, d2)) {
-               this.field_175010_j.func_188388_a(entity1, p_180446_3_, false);
+            catch (JsonSyntaxException jsonsyntaxexception)
+            {
+                LOGGER.warn("Failed to load shader: {}", resourcelocation, jsonsyntaxexception);
+                this.entityOutlineShader = null;
+                this.entityOutlineFramebuffer = null;
             }
-         }
+        }
+        else
+        {
+            this.entityOutlineShader = null;
+            this.entityOutlineFramebuffer = null;
+        }
+    }
 
-         this.field_72769_h.field_72984_F.func_76318_c("entities");
-         List<Entity> list1 = Lists.<Entity>newArrayList();
-         List<Entity> list2 = Lists.<Entity>newArrayList();
-         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.func_185346_s();
+    public void renderEntityOutlineFramebuffer()
+    {
+        if (this.isRenderEntityOutlines())
+        {
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            this.entityOutlineFramebuffer.framebufferRenderExt(this.mc.displayWidth, this.mc.displayHeight, false);
+            GlStateManager.disableBlend();
+        }
+    }
 
-         for(RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.field_72755_R) {
-            Chunk chunk = this.field_72769_h.func_175726_f(renderglobal$containerlocalrenderinformation.field_178036_a.func_178568_j());
-            ClassInheritanceMultiMap<Entity> classinheritancemultimap = chunk.func_177429_s()[renderglobal$containerlocalrenderinformation.field_178036_a.func_178568_j().func_177956_o() / 16];
-            if (!classinheritancemultimap.isEmpty()) {
-               for(Entity entity2 : classinheritancemultimap) {
-                  boolean flag = this.field_175010_j.func_178635_a(entity2, p_180446_2_, d0, d1, d2) || entity2.func_184215_y(this.field_72777_q.field_71439_g);
-                  if (flag) {
-                     boolean flag1 = this.field_72777_q.func_175606_aa() instanceof EntityLivingBase ? ((EntityLivingBase)this.field_72777_q.func_175606_aa()).func_70608_bn() : false;
-                     if ((entity2 != this.field_72777_q.func_175606_aa() || this.field_72777_q.field_71474_y.field_74320_O != 0 || flag1) && (entity2.field_70163_u < 0.0D || entity2.field_70163_u >= 256.0D || this.field_72769_h.func_175667_e(blockpos$pooledmutableblockpos.func_189535_a(entity2)))) {
-                        ++this.field_72749_I;
-                        this.field_175010_j.func_188388_a(entity2, p_180446_3_, false);
-                        if (this.func_184383_a(entity2, entity, p_180446_2_)) {
-                           list1.add(entity2);
+    protected boolean isRenderEntityOutlines()
+    {
+        if (!Config.isFastRender() && !Config.isShaders() && !Config.isAntialiasing())
+        {
+            return this.entityOutlineFramebuffer != null && this.entityOutlineShader != null && this.mc.player != null;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void generateSky2()
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        if (this.sky2VBO != null)
+        {
+            this.sky2VBO.deleteGlBuffers();
+        }
+
+        if (this.glSkyList2 >= 0)
+        {
+            GLAllocation.deleteDisplayLists(this.glSkyList2);
+            this.glSkyList2 = -1;
+        }
+
+        if (this.vboEnabled)
+        {
+            this.sky2VBO = new VertexBuffer(this.vertexBufferFormat);
+            this.renderSky(bufferbuilder, -16.0F, true);
+            bufferbuilder.finishDrawing();
+            bufferbuilder.reset();
+            this.sky2VBO.bufferData(bufferbuilder.getByteBuffer());
+        }
+        else
+        {
+            this.glSkyList2 = GLAllocation.generateDisplayLists(1);
+            GlStateManager.glNewList(this.glSkyList2, 4864);
+            this.renderSky(bufferbuilder, -16.0F, true);
+            tessellator.draw();
+            GlStateManager.glEndList();
+        }
+    }
+
+    private void generateSky()
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        if (this.skyVBO != null)
+        {
+            this.skyVBO.deleteGlBuffers();
+        }
+
+        if (this.glSkyList >= 0)
+        {
+            GLAllocation.deleteDisplayLists(this.glSkyList);
+            this.glSkyList = -1;
+        }
+
+        if (this.vboEnabled)
+        {
+            this.skyVBO = new VertexBuffer(this.vertexBufferFormat);
+            this.renderSky(bufferbuilder, 16.0F, false);
+            bufferbuilder.finishDrawing();
+            bufferbuilder.reset();
+            this.skyVBO.bufferData(bufferbuilder.getByteBuffer());
+        }
+        else
+        {
+            this.glSkyList = GLAllocation.generateDisplayLists(1);
+            GlStateManager.glNewList(this.glSkyList, 4864);
+            this.renderSky(bufferbuilder, 16.0F, false);
+            tessellator.draw();
+            GlStateManager.glEndList();
+        }
+    }
+
+    private void renderSky(BufferBuilder worldRendererIn, float posY, boolean reverseX)
+    {
+        int i = 64;
+        int j = 6;
+        worldRendererIn.begin(7, DefaultVertexFormats.POSITION);
+
+        for (int k = -384; k <= 384; k += 64)
+        {
+            for (int l = -384; l <= 384; l += 64)
+            {
+                float f = (float)k;
+                float f1 = (float)(k + 64);
+
+                if (reverseX)
+                {
+                    f1 = (float)k;
+                    f = (float)(k + 64);
+                }
+
+                worldRendererIn.pos((double)f, (double)posY, (double)l).endVertex();
+                worldRendererIn.pos((double)f1, (double)posY, (double)l).endVertex();
+                worldRendererIn.pos((double)f1, (double)posY, (double)(l + 64)).endVertex();
+                worldRendererIn.pos((double)f, (double)posY, (double)(l + 64)).endVertex();
+            }
+        }
+    }
+
+    private void generateStars()
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        if (this.starVBO != null)
+        {
+            this.starVBO.deleteGlBuffers();
+        }
+
+        if (this.starGLCallList >= 0)
+        {
+            GLAllocation.deleteDisplayLists(this.starGLCallList);
+            this.starGLCallList = -1;
+        }
+
+        if (this.vboEnabled)
+        {
+            this.starVBO = new VertexBuffer(this.vertexBufferFormat);
+            this.renderStars(bufferbuilder);
+            bufferbuilder.finishDrawing();
+            bufferbuilder.reset();
+            this.starVBO.bufferData(bufferbuilder.getByteBuffer());
+        }
+        else
+        {
+            this.starGLCallList = GLAllocation.generateDisplayLists(1);
+            GlStateManager.pushMatrix();
+            GlStateManager.glNewList(this.starGLCallList, 4864);
+            this.renderStars(bufferbuilder);
+            tessellator.draw();
+            GlStateManager.glEndList();
+            GlStateManager.popMatrix();
+        }
+    }
+
+    private void renderStars(BufferBuilder worldRendererIn)
+    {
+        Random random = new Random(10842L);
+        worldRendererIn.begin(7, DefaultVertexFormats.POSITION);
+
+        for (int i = 0; i < 1500; ++i)
+        {
+            double d0 = (double)(random.nextFloat() * 2.0F - 1.0F);
+            double d1 = (double)(random.nextFloat() * 2.0F - 1.0F);
+            double d2 = (double)(random.nextFloat() * 2.0F - 1.0F);
+            double d3 = (double)(0.15F + random.nextFloat() * 0.1F);
+            double d4 = d0 * d0 + d1 * d1 + d2 * d2;
+
+            if (d4 < 1.0D && d4 > 0.01D)
+            {
+                d4 = 1.0D / Math.sqrt(d4);
+                d0 = d0 * d4;
+                d1 = d1 * d4;
+                d2 = d2 * d4;
+                double d5 = d0 * 100.0D;
+                double d6 = d1 * 100.0D;
+                double d7 = d2 * 100.0D;
+                double d8 = Math.atan2(d0, d2);
+                double d9 = Math.sin(d8);
+                double d10 = Math.cos(d8);
+                double d11 = Math.atan2(Math.sqrt(d0 * d0 + d2 * d2), d1);
+                double d12 = Math.sin(d11);
+                double d13 = Math.cos(d11);
+                double d14 = random.nextDouble() * Math.PI * 2.0D;
+                double d15 = Math.sin(d14);
+                double d16 = Math.cos(d14);
+
+                for (int j = 0; j < 4; ++j)
+                {
+                    double d17 = 0.0D;
+                    double d18 = (double)((j & 2) - 1) * d3;
+                    double d19 = (double)((j + 1 & 2) - 1) * d3;
+                    double d20 = 0.0D;
+                    double d21 = d18 * d16 - d19 * d15;
+                    double d22 = d19 * d16 + d18 * d15;
+                    double d23 = d21 * d12 + 0.0D * d13;
+                    double d24 = 0.0D * d12 - d21 * d13;
+                    double d25 = d24 * d9 - d22 * d10;
+                    double d26 = d22 * d9 + d24 * d10;
+                    worldRendererIn.pos(d5 + d25, d6 + d23, d7 + d26).endVertex();
+                }
+            }
+        }
+    }
+
+    /**
+     * set null to clear
+     */
+    public void setWorldAndLoadRenderers(@Nullable WorldClient worldClientIn)
+    {
+        if (this.theWorld != null)
+        {
+            this.theWorld.removeEventListener(this);
+        }
+
+        this.frustumUpdatePosX = Double.MIN_VALUE;
+        this.frustumUpdatePosY = Double.MIN_VALUE;
+        this.frustumUpdatePosZ = Double.MIN_VALUE;
+        this.frustumUpdatePosChunkX = Integer.MIN_VALUE;
+        this.frustumUpdatePosChunkY = Integer.MIN_VALUE;
+        this.frustumUpdatePosChunkZ = Integer.MIN_VALUE;
+        this.renderManager.set(worldClientIn);
+        this.theWorld = worldClientIn;
+
+        if (Config.isDynamicLights())
+        {
+            DynamicLights.clear();
+        }
+
+        if (worldClientIn != null)
+        {
+            worldClientIn.addEventListener(this);
+            this.loadRenderers();
+        }
+        else
+        {
+            this.chunksToUpdate.clear();
+            this.renderInfos.clear();
+
+            if (this.viewFrustum != null)
+            {
+                this.viewFrustum.deleteGlResources();
+                this.viewFrustum = null;
+            }
+
+            if (this.renderDispatcher != null)
+            {
+                this.renderDispatcher.stopWorkerThreads();
+            }
+
+            this.renderDispatcher = null;
+        }
+    }
+
+    /**
+     * Loads all the renderers and sets up the basic settings usage
+     */
+    public void loadRenderers()
+    {
+        if (this.theWorld != null)
+        {
+            if (this.renderDispatcher == null)
+            {
+                this.renderDispatcher = new ChunkRenderDispatcher();
+            }
+
+            this.displayListEntitiesDirty = true;
+            Blocks.LEAVES.setGraphicsLevel(Config.isTreesFancy());
+            Blocks.LEAVES2.setGraphicsLevel(Config.isTreesFancy());
+            BlockModelRenderer.updateAoLightValue();
+            renderInfoCache.clear();
+
+            if (Config.isDynamicLights())
+            {
+                DynamicLights.clear();
+            }
+
+            this.renderDistanceChunks = this.mc.gameSettings.renderDistanceChunks;
+            this.renderDistance = this.renderDistanceChunks * 16;
+            this.renderDistanceSq = this.renderDistance * this.renderDistance;
+            boolean flag = this.vboEnabled;
+            this.vboEnabled = OpenGlHelper.useVbo();
+
+            if (flag && !this.vboEnabled)
+            {
+                this.renderContainer = new RenderList();
+                this.renderChunkFactory = new ListChunkFactory();
+            }
+            else if (!flag && this.vboEnabled)
+            {
+                this.renderContainer = new VboRenderList();
+                this.renderChunkFactory = new VboChunkFactory();
+            }
+
+            if (flag != this.vboEnabled)
+            {
+                this.generateStars();
+                this.generateSky();
+                this.generateSky2();
+            }
+
+            if (this.viewFrustum != null)
+            {
+                this.viewFrustum.deleteGlResources();
+            }
+
+            this.stopChunkUpdates();
+
+            synchronized (this.setTileEntities)
+            {
+                this.setTileEntities.clear();
+            }
+
+            this.viewFrustum = new ViewFrustum(this.theWorld, this.mc.gameSettings.renderDistanceChunks, this, this.renderChunkFactory);
+
+            if (this.theWorld != null)
+            {
+                Entity entity = this.mc.getRenderViewEntity();
+
+                if (entity != null)
+                {
+                    this.viewFrustum.updateChunkPositions(entity.posX, entity.posZ);
+                }
+            }
+
+            this.renderEntitiesStartupCounter = 2;
+        }
+    }
+
+    protected void stopChunkUpdates()
+    {
+        this.chunksToUpdate.clear();
+        this.renderDispatcher.stopChunkUpdates();
+    }
+
+    public void createBindEntityOutlineFbs(int width, int height)
+    {
+        if (OpenGlHelper.shadersSupported && this.entityOutlineShader != null)
+        {
+            this.entityOutlineShader.createBindFramebuffers(width, height);
+        }
+    }
+
+    public void renderEntities(Entity renderViewEntity, ICamera camera, float partialTicks)
+    {
+        int i = 0;
+
+        if (Reflector.MinecraftForgeClient_getRenderPass.exists())
+        {
+            i = Reflector.callInt(Reflector.MinecraftForgeClient_getRenderPass);
+        }
+
+        if (this.renderEntitiesStartupCounter > 0)
+        {
+            if (i > 0)
+            {
+                return;
+            }
+
+            --this.renderEntitiesStartupCounter;
+        }
+        else
+        {
+            double d0 = renderViewEntity.prevPosX + (renderViewEntity.posX - renderViewEntity.prevPosX) * (double)partialTicks;
+            double d1 = renderViewEntity.prevPosY + (renderViewEntity.posY - renderViewEntity.prevPosY) * (double)partialTicks;
+            double d2 = renderViewEntity.prevPosZ + (renderViewEntity.posZ - renderViewEntity.prevPosZ) * (double)partialTicks;
+            this.theWorld.theProfiler.startSection("prepare");
+            TileEntityRendererDispatcher.instance.prepare(this.theWorld, this.mc.getTextureManager(), this.mc.fontRendererObj, this.mc.getRenderViewEntity(), this.mc.objectMouseOver, partialTicks);
+            this.renderManager.cacheActiveRenderInfo(this.theWorld, this.mc.fontRendererObj, this.mc.getRenderViewEntity(), this.mc.pointedEntity, this.mc.gameSettings, partialTicks);
+
+            if (i == 0)
+            {
+                this.countEntitiesTotal = 0;
+                this.countEntitiesRendered = 0;
+                this.countEntitiesHidden = 0;
+                this.countTileEntitiesRendered = 0;
+            }
+
+            Entity entity = this.mc.getRenderViewEntity();
+            double d3 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)partialTicks;
+            double d4 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks;
+            double d5 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)partialTicks;
+            TileEntityRendererDispatcher.staticPlayerX = d3;
+            TileEntityRendererDispatcher.staticPlayerY = d4;
+            TileEntityRendererDispatcher.staticPlayerZ = d5;
+            this.renderManager.setRenderPosition(d3, d4, d5);
+            this.mc.entityRenderer.enableLightmap();
+            this.theWorld.theProfiler.endStartSection("global");
+            List<Entity> list = this.theWorld.getLoadedEntityList();
+
+            if (i == 0)
+            {
+                this.countEntitiesTotal = list.size();
+            }
+
+            if (Config.isFogOff() && this.mc.entityRenderer.fogStandard)
+            {
+                GlStateManager.disableFog();
+            }
+
+            boolean flag = Reflector.ForgeEntity_shouldRenderInPass.exists();
+            boolean flag1 = Reflector.ForgeTileEntity_shouldRenderInPass.exists();
+
+            for (int j = 0; j < this.theWorld.weatherEffects.size(); ++j)
+            {
+                Entity entity1 = this.theWorld.weatherEffects.get(j);
+
+                if (!flag || Reflector.callBoolean(entity1, Reflector.ForgeEntity_shouldRenderInPass, i))
+                {
+                    ++this.countEntitiesRendered;
+
+                    if (entity1.isInRangeToRender3d(d0, d1, d2))
+                    {
+                        this.renderManager.renderEntityStatic(entity1, partialTicks, false);
+                    }
+                }
+            }
+
+            this.theWorld.theProfiler.endStartSection("entities");
+            boolean flag4 = Config.isShaders();
+
+            if (flag4)
+            {
+                Shaders.beginEntities();
+            }
+
+            boolean flag5 = this.mc.gameSettings.fancyGraphics;
+            this.mc.gameSettings.fancyGraphics = Config.isDroppedItemsFancy();
+            List<Entity> list1 = Lists.<Entity>newArrayList();
+            List<Entity> list2 = Lists.<Entity>newArrayList();
+            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+            for (Object renderglobal$containerlocalrenderinformation0 : this.renderInfosEntities)
+            {
+            	RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = (RenderGlobal.ContainerLocalRenderInformation) renderglobal$containerlocalrenderinformation0;
+                Chunk chunk = renderglobal$containerlocalrenderinformation.renderChunk.getChunk(this.theWorld);
+                ClassInheritanceMultiMap<Entity> classinheritancemultimap = chunk.getEntityLists()[renderglobal$containerlocalrenderinformation.renderChunk.getPosition().getY() / 16];
+
+                if (!classinheritancemultimap.isEmpty())
+                {
+                    for (Entity entity2 : classinheritancemultimap)
+                    {
+                        if (!flag || Reflector.callBoolean(entity2, Reflector.ForgeEntity_shouldRenderInPass, i))
+                        {
+                            boolean flag2 = this.renderManager.shouldRender(entity2, camera, d0, d1, d2) || entity2.isRidingOrBeingRiddenBy(this.mc.player);
+
+                            if (flag2)
+                            {
+                                boolean flag3 = this.mc.getRenderViewEntity() instanceof EntityLivingBase ? ((EntityLivingBase)this.mc.getRenderViewEntity()).isPlayerSleeping() : false;
+
+                                if ((entity2 != this.mc.getRenderViewEntity() || this.mc.gameSettings.thirdPersonView != 0 || flag3) && (entity2.posY < 0.0D || entity2.posY >= 256.0D || this.theWorld.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(entity2))))
+                                {
+                                    ++this.countEntitiesRendered;
+                                    this.renderedEntity = entity2;
+
+                                    if (flag4)
+                                    {
+                                        Shaders.nextEntity(entity2);
+                                    }
+
+                                    this.renderManager.renderEntityStatic(entity2, partialTicks, false);
+                                    this.renderedEntity = null;
+
+                                    if (this.isOutlineActive(entity2, entity, camera))
+                                    {
+                                        list1.add(entity2);
+                                    }
+
+                                    if (this.renderManager.isRenderMultipass(entity2))
+                                    {
+                                        list2.add(entity2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            blockpos$pooledmutableblockpos.release();
+
+            if (!list2.isEmpty())
+            {
+                for (Entity entity3 : list2)
+                {
+                    if (!flag || Reflector.callBoolean(entity3, Reflector.ForgeEntity_shouldRenderInPass, i))
+                    {
+                        if (flag4)
+                        {
+                            Shaders.nextEntity(entity3);
                         }
 
-                        if (this.field_175010_j.func_188390_b(entity2)) {
-                           list2.add(entity2);
+                        this.renderManager.renderMultipass(entity3, partialTicks);
+                    }
+                }
+            }
+
+            if (i == 0 && this.isRenderEntityOutlines() && (!list1.isEmpty() || this.entityOutlinesRendered))
+            {
+                this.theWorld.theProfiler.endStartSection("entityOutlines");
+                this.entityOutlineFramebuffer.framebufferClear();
+                this.entityOutlinesRendered = !list1.isEmpty();
+
+                if (!list1.isEmpty())
+                {
+                    GlStateManager.depthFunc(519);
+                    GlStateManager.disableFog();
+                    this.entityOutlineFramebuffer.bindFramebuffer(false);
+                    RenderHelper.disableStandardItemLighting();
+                    this.renderManager.setRenderOutlines(true);
+
+                    for (int k = 0; k < list1.size(); ++k)
+                    {
+                        Entity entity4 = list1.get(k);
+
+                        if (!flag || Reflector.callBoolean(entity4, Reflector.ForgeEntity_shouldRenderInPass, i))
+                        {
+                            if (flag4)
+                            {
+                                Shaders.nextEntity(entity4);
+                            }
+
+                            this.renderManager.renderEntityStatic(entity4, partialTicks, false);
                         }
-                     }
-                  }
-               }
-            }
-         }
+                    }
 
-         blockpos$pooledmutableblockpos.func_185344_t();
-         if (!list2.isEmpty()) {
-            for(Entity entity3 : list2) {
-               this.field_175010_j.func_188389_a(entity3, p_180446_3_);
-            }
-         }
+                    this.renderManager.setRenderOutlines(false);
+                    RenderHelper.enableStandardItemLighting();
+                    GlStateManager.depthMask(false);
+                    this.entityOutlineShader.loadShaderGroup(partialTicks);
+                    GlStateManager.enableLighting();
+                    GlStateManager.depthMask(true);
+                    GlStateManager.enableFog();
+                    GlStateManager.enableBlend();
+                    GlStateManager.enableColorMaterial();
+                    GlStateManager.depthFunc(515);
+                    GlStateManager.enableDepth();
+                    GlStateManager.enableAlpha();
+                }
 
-         if (this.func_174985_d() && (!list1.isEmpty() || this.field_184386_ad)) {
-            this.field_72769_h.field_72984_F.func_76318_c("entityOutlines");
-            this.field_175015_z.func_147614_f();
-            this.field_184386_ad = !list1.isEmpty();
-            if (!list1.isEmpty()) {
-               GlStateManager.func_179143_c(519);
-               GlStateManager.func_179106_n();
-               this.field_175015_z.func_147610_a(false);
-               RenderHelper.func_74518_a();
-               this.field_175010_j.func_178632_c(true);
-
-               for(int j = 0; j < list1.size(); ++j) {
-                  this.field_175010_j.func_188388_a(list1.get(j), p_180446_3_, false);
-               }
-
-               this.field_175010_j.func_178632_c(false);
-               RenderHelper.func_74519_b();
-               GlStateManager.func_179132_a(false);
-               this.field_174991_A.func_148018_a(p_180446_3_);
-               GlStateManager.func_179145_e();
-               GlStateManager.func_179132_a(true);
-               GlStateManager.func_179127_m();
-               GlStateManager.func_179147_l();
-               GlStateManager.func_179142_g();
-               GlStateManager.func_179143_c(515);
-               GlStateManager.func_179126_j();
-               GlStateManager.func_179141_d();
+                this.mc.getFramebuffer().bindFramebuffer(false);
             }
 
-            this.field_72777_q.func_147110_a().func_147610_a(false);
-         }
+            if (!this.isRenderEntityOutlines() && (!list1.isEmpty() || this.entityOutlinesRendered))
+            {
+                this.theWorld.theProfiler.endStartSection("entityOutlines");
+                this.entityOutlinesRendered = !list1.isEmpty();
 
-         this.field_72769_h.field_72984_F.func_76318_c("blockentities");
-         RenderHelper.func_74519_b();
+                if (!list1.isEmpty())
+                {
+                    GlStateManager.disableFog();
+                    GlStateManager.disableDepth();
+                    this.mc.entityRenderer.disableLightmap();
+                    RenderHelper.disableStandardItemLighting();
+                    this.renderManager.setRenderOutlines(true);
 
-         for(RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 : this.field_72755_R) {
-            List<TileEntity> list3 = renderglobal$containerlocalrenderinformation1.field_178036_a.func_178571_g().func_178485_b();
-            if (!list3.isEmpty()) {
-               for(TileEntity tileentity2 : list3) {
-                  TileEntityRendererDispatcher.field_147556_a.func_180546_a(tileentity2, p_180446_3_, -1);
-               }
-            }
-         }
+                    for (int l = 0; l < list1.size(); ++l)
+                    {
+                        Entity entity5 = list1.get(l);
 
-         synchronized(this.field_181024_n) {
-            for(TileEntity tileentity : this.field_181024_n) {
-               TileEntityRendererDispatcher.field_147556_a.func_180546_a(tileentity, p_180446_3_, -1);
-            }
-         }
+                        if (!flag || Reflector.callBoolean(entity5, Reflector.ForgeEntity_shouldRenderInPass, i))
+                        {
+                            if (flag4)
+                            {
+                                Shaders.nextEntity(entity5);
+                            }
 
-         this.func_180443_s();
+                            this.renderManager.renderEntityStatic(entity5, partialTicks, false);
+                        }
+                    }
 
-         for(DestroyBlockProgress destroyblockprogress : this.field_72738_E.values()) {
-            BlockPos blockpos = destroyblockprogress.func_180246_b();
-            if (this.field_72769_h.func_180495_p(blockpos).func_177230_c().func_149716_u()) {
-               TileEntity tileentity1 = this.field_72769_h.func_175625_s(blockpos);
-               if (tileentity1 instanceof TileEntityChest) {
-                  TileEntityChest tileentitychest = (TileEntityChest)tileentity1;
-                  if (tileentitychest.field_145991_k != null) {
-                     blockpos = blockpos.func_177972_a(EnumFacing.WEST);
-                     tileentity1 = this.field_72769_h.func_175625_s(blockpos);
-                  } else if (tileentitychest.field_145992_i != null) {
-                     blockpos = blockpos.func_177972_a(EnumFacing.NORTH);
-                     tileentity1 = this.field_72769_h.func_175625_s(blockpos);
-                  }
-               }
-
-               IBlockState iblockstate = this.field_72769_h.func_180495_p(blockpos);
-               if (tileentity1 != null && iblockstate.func_191057_i()) {
-                  TileEntityRendererDispatcher.field_147556_a.func_180546_a(tileentity1, p_180446_3_, destroyblockprogress.func_73106_e());
-               }
-            }
-         }
-
-         this.func_174969_t();
-         this.field_72777_q.field_71460_t.func_175072_h();
-         this.field_72777_q.field_71424_I.func_76319_b();
-      }
-   }
-
-   private boolean func_184383_a(Entity p_184383_1_, Entity p_184383_2_, ICamera p_184383_3_) {
-      boolean flag = p_184383_2_ instanceof EntityLivingBase && ((EntityLivingBase)p_184383_2_).func_70608_bn();
-      if (p_184383_1_ == p_184383_2_ && this.field_72777_q.field_71474_y.field_74320_O == 0 && !flag) {
-         return false;
-      } else if (p_184383_1_.func_184202_aL()) {
-         return true;
-      } else if (this.field_72777_q.field_71439_g.func_175149_v() && this.field_72777_q.field_71474_y.field_178883_an.func_151470_d() && p_184383_1_ instanceof EntityPlayer) {
-         return p_184383_1_.field_70158_ak || p_184383_3_.func_78546_a(p_184383_1_.func_174813_aQ()) || p_184383_1_.func_184215_y(this.field_72777_q.field_71439_g);
-      } else {
-         return false;
-      }
-   }
-
-   public String func_72735_c() {
-      int i = this.field_175008_n.field_178164_f.length;
-      int j = this.func_184382_g();
-      return String.format("C: %d/%d %sD: %d, L: %d, %s", j, i, this.field_72777_q.field_175612_E ? "(s) " : "", this.field_72739_F, this.field_184387_ae.size(), this.field_174995_M == null ? "null" : this.field_174995_M.func_178504_a());
-   }
-
-   protected int func_184382_g() {
-      int i = 0;
-
-      for(RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.field_72755_R) {
-         CompiledChunk compiledchunk = renderglobal$containerlocalrenderinformation.field_178036_a.field_178590_b;
-         if (compiledchunk != CompiledChunk.field_178502_a && !compiledchunk.func_178489_a()) {
-            ++i;
-         }
-      }
-
-      return i;
-   }
-
-   public String func_72723_d() {
-      return "E: " + this.field_72749_I + "/" + this.field_72748_H + ", B: " + this.field_72750_J;
-   }
-
-   public void func_174970_a(Entity p_174970_1_, double p_174970_2_, ICamera p_174970_4_, int p_174970_5_, boolean p_174970_6_) {
-      if (this.field_72777_q.field_71474_y.field_151451_c != this.field_72739_F) {
-         this.func_72712_a();
-      }
-
-      this.field_72769_h.field_72984_F.func_76320_a("camera");
-      double d0 = p_174970_1_.field_70165_t - this.field_174992_B;
-      double d1 = p_174970_1_.field_70163_u - this.field_174993_C;
-      double d2 = p_174970_1_.field_70161_v - this.field_174987_D;
-      if (this.field_174988_E != p_174970_1_.field_70176_ah || this.field_174989_F != p_174970_1_.field_70162_ai || this.field_174990_G != p_174970_1_.field_70164_aj || d0 * d0 + d1 * d1 + d2 * d2 > 16.0D) {
-         this.field_174992_B = p_174970_1_.field_70165_t;
-         this.field_174993_C = p_174970_1_.field_70163_u;
-         this.field_174987_D = p_174970_1_.field_70161_v;
-         this.field_174988_E = p_174970_1_.field_70176_ah;
-         this.field_174989_F = p_174970_1_.field_70162_ai;
-         this.field_174990_G = p_174970_1_.field_70164_aj;
-         this.field_175008_n.func_178163_a(p_174970_1_.field_70165_t, p_174970_1_.field_70161_v);
-      }
-
-      this.field_72769_h.field_72984_F.func_76318_c("renderlistcamera");
-      double d3 = p_174970_1_.field_70142_S + (p_174970_1_.field_70165_t - p_174970_1_.field_70142_S) * p_174970_2_;
-      double d4 = p_174970_1_.field_70137_T + (p_174970_1_.field_70163_u - p_174970_1_.field_70137_T) * p_174970_2_;
-      double d5 = p_174970_1_.field_70136_U + (p_174970_1_.field_70161_v - p_174970_1_.field_70136_U) * p_174970_2_;
-      this.field_174996_N.func_178004_a(d3, d4, d5);
-      this.field_72769_h.field_72984_F.func_76318_c("cull");
-      if (this.field_175001_U != null) {
-         Frustum frustum = new Frustum(this.field_175001_U);
-         frustum.func_78547_a(this.field_175003_W.field_181059_a, this.field_175003_W.field_181060_b, this.field_175003_W.field_181061_c);
-         p_174970_4_ = frustum;
-      }
-
-      this.field_72777_q.field_71424_I.func_76318_c("culling");
-      BlockPos blockpos1 = new BlockPos(d3, d4 + (double)p_174970_1_.func_70047_e(), d5);
-      RenderChunk renderchunk = this.field_175008_n.func_178161_a(blockpos1);
-      BlockPos blockpos = new BlockPos(MathHelper.func_76128_c(d3 / 16.0D) * 16, MathHelper.func_76128_c(d4 / 16.0D) * 16, MathHelper.func_76128_c(d5 / 16.0D) * 16);
-      this.field_147595_R = this.field_147595_R || !this.field_175009_l.isEmpty() || p_174970_1_.field_70165_t != this.field_174997_H || p_174970_1_.field_70163_u != this.field_174998_I || p_174970_1_.field_70161_v != this.field_174999_J || (double)p_174970_1_.field_70125_A != this.field_175000_K || (double)p_174970_1_.field_70177_z != this.field_174994_L;
-      this.field_174997_H = p_174970_1_.field_70165_t;
-      this.field_174998_I = p_174970_1_.field_70163_u;
-      this.field_174999_J = p_174970_1_.field_70161_v;
-      this.field_175000_K = (double)p_174970_1_.field_70125_A;
-      this.field_174994_L = (double)p_174970_1_.field_70177_z;
-      boolean flag = this.field_175001_U != null;
-      this.field_72777_q.field_71424_I.func_76318_c("update");
-      if (!flag && this.field_147595_R) {
-         this.field_147595_R = false;
-         this.field_72755_R = Lists.<RenderGlobal.ContainerLocalRenderInformation>newArrayList();
-         Queue<RenderGlobal.ContainerLocalRenderInformation> queue = Queues.<RenderGlobal.ContainerLocalRenderInformation>newArrayDeque();
-         Entity.func_184227_b(MathHelper.func_151237_a((double)this.field_72777_q.field_71474_y.field_151451_c / 8.0D, 1.0D, 2.5D));
-         boolean flag1 = this.field_72777_q.field_175612_E;
-         if (renderchunk != null) {
-            boolean flag2 = false;
-            RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation3 = new RenderGlobal.ContainerLocalRenderInformation(renderchunk, (EnumFacing)null, 0);
-            Set<EnumFacing> set1 = this.func_174978_c(blockpos1);
-            if (set1.size() == 1) {
-               Vector3f vector3f = this.func_174962_a(p_174970_1_, p_174970_2_);
-               EnumFacing enumfacing = EnumFacing.func_176737_a(vector3f.x, vector3f.y, vector3f.z).func_176734_d();
-               set1.remove(enumfacing);
+                    this.renderManager.setRenderOutlines(false);
+                    RenderHelper.enableStandardItemLighting();
+                    this.mc.entityRenderer.enableLightmap();
+                    GlStateManager.enableDepth();
+                    GlStateManager.enableFog();
+                }
             }
 
-            if (set1.isEmpty()) {
-               flag2 = true;
+            this.mc.gameSettings.fancyGraphics = flag5;
+            FontRenderer fontrenderer = TileEntityRendererDispatcher.instance.getFontRenderer();
+
+            if (flag4)
+            {
+                Shaders.endEntities();
+                Shaders.beginBlockEntities();
             }
 
-            if (flag2 && !p_174970_6_) {
-               this.field_72755_R.add(renderglobal$containerlocalrenderinformation3);
-            } else {
-               if (p_174970_6_ && this.field_72769_h.func_180495_p(blockpos1).func_185914_p()) {
-                  flag1 = false;
-               }
+            this.theWorld.theProfiler.endStartSection("blockentities");
+            RenderHelper.enableStandardItemLighting();
 
-               renderchunk.func_178577_a(p_174970_5_);
-               queue.add(renderglobal$containerlocalrenderinformation3);
-            }
-         } else {
-            int i = blockpos1.func_177956_o() > 0 ? 248 : 8;
-
-            for(int j = -this.field_72739_F; j <= this.field_72739_F; ++j) {
-               for(int k = -this.field_72739_F; k <= this.field_72739_F; ++k) {
-                  RenderChunk renderchunk1 = this.field_175008_n.func_178161_a(new BlockPos((j << 4) + 8, i, (k << 4) + 8));
-                  if (renderchunk1 != null && p_174970_4_.func_78546_a(renderchunk1.field_178591_c)) {
-                     renderchunk1.func_178577_a(p_174970_5_);
-                     queue.add(new RenderGlobal.ContainerLocalRenderInformation(renderchunk1, (EnumFacing)null, 0));
-                  }
-               }
-            }
-         }
-
-         this.field_72777_q.field_71424_I.func_76320_a("iteration");
-
-         while(!queue.isEmpty()) {
-            RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 = queue.poll();
-            RenderChunk renderchunk3 = renderglobal$containerlocalrenderinformation1.field_178036_a;
-            EnumFacing enumfacing2 = renderglobal$containerlocalrenderinformation1.field_178034_b;
-            this.field_72755_R.add(renderglobal$containerlocalrenderinformation1);
-
-            for(EnumFacing enumfacing1 : EnumFacing.values()) {
-               RenderChunk renderchunk2 = this.func_181562_a(blockpos, renderchunk3, enumfacing1);
-               if ((!flag1 || !renderglobal$containerlocalrenderinformation1.func_189560_a(enumfacing1.func_176734_d())) && (!flag1 || enumfacing2 == null || renderchunk3.func_178571_g().func_178495_a(enumfacing2.func_176734_d(), enumfacing1)) && renderchunk2 != null && renderchunk2.func_178577_a(p_174970_5_) && p_174970_4_.func_78546_a(renderchunk2.field_178591_c)) {
-                  RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = new RenderGlobal.ContainerLocalRenderInformation(renderchunk2, enumfacing1, renderglobal$containerlocalrenderinformation1.field_178032_d + 1);
-                  renderglobal$containerlocalrenderinformation.func_189561_a(renderglobal$containerlocalrenderinformation1.field_178035_c, enumfacing1);
-                  queue.add(renderglobal$containerlocalrenderinformation);
-               }
-            }
-         }
-
-         this.field_72777_q.field_71424_I.func_76319_b();
-      }
-
-      this.field_72777_q.field_71424_I.func_76318_c("captureFrustum");
-      if (this.field_175002_T) {
-         this.func_174984_a(d3, d4, d5);
-         this.field_175002_T = false;
-      }
-
-      this.field_72777_q.field_71424_I.func_76318_c("rebuildNear");
-      Set<RenderChunk> set = this.field_175009_l;
-      this.field_175009_l = Sets.<RenderChunk>newLinkedHashSet();
-
-      for(RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation2 : this.field_72755_R) {
-         RenderChunk renderchunk4 = renderglobal$containerlocalrenderinformation2.field_178036_a;
-         if (renderchunk4.func_178569_m() || set.contains(renderchunk4)) {
-            this.field_147595_R = true;
-            BlockPos blockpos2 = renderchunk4.func_178568_j().func_177982_a(8, 8, 8);
-            boolean flag3 = blockpos2.func_177951_i(blockpos1) < 768.0D;
-            if (!renderchunk4.func_188281_o() && !flag3) {
-               this.field_175009_l.add(renderchunk4);
-            } else {
-               this.field_72777_q.field_71424_I.func_76320_a("build near");
-               this.field_174995_M.func_178505_b(renderchunk4);
-               renderchunk4.func_188282_m();
-               this.field_72777_q.field_71424_I.func_76319_b();
-            }
-         }
-      }
-
-      this.field_175009_l.addAll(set);
-      this.field_72777_q.field_71424_I.func_76319_b();
-   }
-
-   private Set<EnumFacing> func_174978_c(BlockPos p_174978_1_) {
-      VisGraph visgraph = new VisGraph();
-      BlockPos blockpos = new BlockPos(p_174978_1_.func_177958_n() >> 4 << 4, p_174978_1_.func_177956_o() >> 4 << 4, p_174978_1_.func_177952_p() >> 4 << 4);
-      Chunk chunk = this.field_72769_h.func_175726_f(blockpos);
-
-      for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.func_177975_b(blockpos, blockpos.func_177982_a(15, 15, 15))) {
-         if (chunk.func_177435_g(blockpos$mutableblockpos).func_185914_p()) {
-            visgraph.func_178606_a(blockpos$mutableblockpos);
-         }
-      }
-
-      return visgraph.func_178609_b(p_174978_1_);
-   }
-
-   @Nullable
-   private RenderChunk func_181562_a(BlockPos p_181562_1_, RenderChunk p_181562_2_, EnumFacing p_181562_3_) {
-      BlockPos blockpos = p_181562_2_.func_181701_a(p_181562_3_);
-      if (MathHelper.func_76130_a(p_181562_1_.func_177958_n() - blockpos.func_177958_n()) > this.field_72739_F * 16) {
-         return null;
-      } else if (blockpos.func_177956_o() >= 0 && blockpos.func_177956_o() < 256) {
-         return MathHelper.func_76130_a(p_181562_1_.func_177952_p() - blockpos.func_177952_p()) > this.field_72739_F * 16 ? null : this.field_175008_n.func_178161_a(blockpos);
-      } else {
-         return null;
-      }
-   }
-
-   private void func_174984_a(double p_174984_1_, double p_174984_3_, double p_174984_5_) {
-      this.field_175001_U = new ClippingHelperImpl();
-      ((ClippingHelperImpl)this.field_175001_U).func_78560_b();
-      Matrix4f matrix4f = new Matrix4f(this.field_175001_U.field_178626_c);
-      matrix4f.transpose();
-      Matrix4f matrix4f1 = new Matrix4f(this.field_175001_U.field_178625_b);
-      matrix4f1.transpose();
-      Matrix4f matrix4f2 = new Matrix4f();
-      Matrix4f.mul(matrix4f1, matrix4f, matrix4f2);
-      matrix4f2.invert();
-      this.field_175003_W.field_181059_a = p_174984_1_;
-      this.field_175003_W.field_181060_b = p_174984_3_;
-      this.field_175003_W.field_181061_c = p_174984_5_;
-      this.field_175004_V[0] = new Vector4f(-1.0F, -1.0F, -1.0F, 1.0F);
-      this.field_175004_V[1] = new Vector4f(1.0F, -1.0F, -1.0F, 1.0F);
-      this.field_175004_V[2] = new Vector4f(1.0F, 1.0F, -1.0F, 1.0F);
-      this.field_175004_V[3] = new Vector4f(-1.0F, 1.0F, -1.0F, 1.0F);
-      this.field_175004_V[4] = new Vector4f(-1.0F, -1.0F, 1.0F, 1.0F);
-      this.field_175004_V[5] = new Vector4f(1.0F, -1.0F, 1.0F, 1.0F);
-      this.field_175004_V[6] = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
-      this.field_175004_V[7] = new Vector4f(-1.0F, 1.0F, 1.0F, 1.0F);
-
-      for(int i = 0; i < 8; ++i) {
-         Matrix4f.transform(matrix4f2, this.field_175004_V[i], this.field_175004_V[i]);
-         this.field_175004_V[i].x /= this.field_175004_V[i].w;
-         this.field_175004_V[i].y /= this.field_175004_V[i].w;
-         this.field_175004_V[i].z /= this.field_175004_V[i].w;
-         this.field_175004_V[i].w = 1.0F;
-      }
-
-   }
-
-   protected Vector3f func_174962_a(Entity p_174962_1_, double p_174962_2_) {
-      float f = (float)((double)p_174962_1_.field_70127_C + (double)(p_174962_1_.field_70125_A - p_174962_1_.field_70127_C) * p_174962_2_);
-      float f1 = (float)((double)p_174962_1_.field_70126_B + (double)(p_174962_1_.field_70177_z - p_174962_1_.field_70126_B) * p_174962_2_);
-      if (Minecraft.func_71410_x().field_71474_y.field_74320_O == 2) {
-         f += 180.0F;
-      }
-
-      float f2 = MathHelper.func_76134_b(-f1 * 0.017453292F - 3.1415927F);
-      float f3 = MathHelper.func_76126_a(-f1 * 0.017453292F - 3.1415927F);
-      float f4 = -MathHelper.func_76134_b(-f * 0.017453292F);
-      float f5 = MathHelper.func_76126_a(-f * 0.017453292F);
-      return new Vector3f(f3 * f4, f5, f2 * f4);
-   }
-
-   public int func_174977_a(BlockRenderLayer p_174977_1_, double p_174977_2_, int p_174977_4_, Entity p_174977_5_) {
-      RenderHelper.func_74518_a();
-      if (p_174977_1_ == BlockRenderLayer.TRANSLUCENT) {
-         this.field_72777_q.field_71424_I.func_76320_a("translucent_sort");
-         double d0 = p_174977_5_.field_70165_t - this.field_147596_f;
-         double d1 = p_174977_5_.field_70163_u - this.field_147597_g;
-         double d2 = p_174977_5_.field_70161_v - this.field_147602_h;
-         if (d0 * d0 + d1 * d1 + d2 * d2 > 1.0D) {
-            this.field_147596_f = p_174977_5_.field_70165_t;
-            this.field_147597_g = p_174977_5_.field_70163_u;
-            this.field_147602_h = p_174977_5_.field_70161_v;
-            int k = 0;
-
-            for(RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.field_72755_R) {
-               if (renderglobal$containerlocalrenderinformation.field_178036_a.field_178590_b.func_178492_d(p_174977_1_) && k++ < 15) {
-                  this.field_174995_M.func_178509_c(renderglobal$containerlocalrenderinformation.field_178036_a);
-               }
-            }
-         }
-
-         this.field_72777_q.field_71424_I.func_76319_b();
-      }
-
-      this.field_72777_q.field_71424_I.func_76320_a("filterempty");
-      int l = 0;
-      boolean flag = p_174977_1_ == BlockRenderLayer.TRANSLUCENT;
-      int i1 = flag ? this.field_72755_R.size() - 1 : 0;
-      int i = flag ? -1 : this.field_72755_R.size();
-      int j1 = flag ? -1 : 1;
-
-      for(int j = i1; j != i; j += j1) {
-         RenderChunk renderchunk = (this.field_72755_R.get(j)).field_178036_a;
-         if (!renderchunk.func_178571_g().func_178491_b(p_174977_1_)) {
-            ++l;
-            this.field_174996_N.func_178002_a(renderchunk, p_174977_1_);
-         }
-      }
-
-      this.field_72777_q.field_71424_I.func_194339_b(() -> {
-         return "render_" + p_194306_0_;
-      });
-      this.func_174982_a(p_174977_1_);
-      this.field_72777_q.field_71424_I.func_76319_b();
-      return l;
-   }
-
-   private void func_174982_a(BlockRenderLayer p_174982_1_) {
-      this.field_72777_q.field_71460_t.func_180436_i();
-      if (OpenGlHelper.func_176075_f()) {
-         GlStateManager.func_187410_q(32884);
-         OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a);
-         GlStateManager.func_187410_q(32888);
-         OpenGlHelper.func_77472_b(OpenGlHelper.field_77476_b);
-         GlStateManager.func_187410_q(32888);
-         OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a);
-         GlStateManager.func_187410_q(32886);
-      }
-
-      this.field_174996_N.func_178001_a(p_174982_1_);
-      if (OpenGlHelper.func_176075_f()) {
-         for(VertexFormatElement vertexformatelement : DefaultVertexFormats.field_176600_a.func_177343_g()) {
-            VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.func_177375_c();
-            int k1 = vertexformatelement.func_177369_e();
-            switch(vertexformatelement$enumusage) {
-            case POSITION:
-               GlStateManager.func_187429_p(32884);
-               break;
-            case UV:
-               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a + k1);
-               GlStateManager.func_187429_p(32888);
-               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a);
-               break;
-            case COLOR:
-               GlStateManager.func_187429_p(32886);
-               GlStateManager.func_179117_G();
-            }
-         }
-      }
-
-      this.field_72777_q.field_71460_t.func_175072_h();
-   }
-
-   private void func_174965_a(Iterator<DestroyBlockProgress> p_174965_1_) {
-      while(p_174965_1_.hasNext()) {
-         DestroyBlockProgress destroyblockprogress = p_174965_1_.next();
-         int k1 = destroyblockprogress.func_82743_f();
-         if (this.field_72773_u - k1 > 400) {
-            p_174965_1_.remove();
-         }
-      }
-
-   }
-
-   public void func_72734_e() {
-      ++this.field_72773_u;
-      if (this.field_72773_u % 20 == 0) {
-         this.func_174965_a(this.field_72738_E.values().iterator());
-      }
-
-      if (!this.field_184387_ae.isEmpty() && !this.field_174995_M.func_188248_h() && this.field_175009_l.isEmpty()) {
-         Iterator<BlockPos> iterator = this.field_184387_ae.iterator();
-
-         while(iterator.hasNext()) {
-            BlockPos blockpos = iterator.next();
-            iterator.remove();
-            int k1 = blockpos.func_177958_n();
-            int l1 = blockpos.func_177956_o();
-            int i2 = blockpos.func_177952_p();
-            this.func_184385_a(k1 - 1, l1 - 1, i2 - 1, k1 + 1, l1 + 1, i2 + 1, false);
-         }
-      }
-
-   }
-
-   private void func_180448_r() {
-      GlStateManager.func_179106_n();
-      GlStateManager.func_179118_c();
-      GlStateManager.func_179147_l();
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      RenderHelper.func_74518_a();
-      GlStateManager.func_179132_a(false);
-      this.field_72770_i.func_110577_a(field_110926_k);
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-
-      for(int k1 = 0; k1 < 6; ++k1) {
-         GlStateManager.func_179094_E();
-         if (k1 == 1) {
-            GlStateManager.func_179114_b(90.0F, 1.0F, 0.0F, 0.0F);
-         }
-
-         if (k1 == 2) {
-            GlStateManager.func_179114_b(-90.0F, 1.0F, 0.0F, 0.0F);
-         }
-
-         if (k1 == 3) {
-            GlStateManager.func_179114_b(180.0F, 1.0F, 0.0F, 0.0F);
-         }
-
-         if (k1 == 4) {
-            GlStateManager.func_179114_b(90.0F, 0.0F, 0.0F, 1.0F);
-         }
-
-         if (k1 == 5) {
-            GlStateManager.func_179114_b(-90.0F, 0.0F, 0.0F, 1.0F);
-         }
-
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-         bufferbuilder.func_181662_b(-100.0D, -100.0D, -100.0D).func_187315_a(0.0D, 0.0D).func_181669_b(40, 40, 40, 255).func_181675_d();
-         bufferbuilder.func_181662_b(-100.0D, -100.0D, 100.0D).func_187315_a(0.0D, 16.0D).func_181669_b(40, 40, 40, 255).func_181675_d();
-         bufferbuilder.func_181662_b(100.0D, -100.0D, 100.0D).func_187315_a(16.0D, 16.0D).func_181669_b(40, 40, 40, 255).func_181675_d();
-         bufferbuilder.func_181662_b(100.0D, -100.0D, -100.0D).func_187315_a(16.0D, 0.0D).func_181669_b(40, 40, 40, 255).func_181675_d();
-         tessellator.func_78381_a();
-         GlStateManager.func_179121_F();
-      }
-
-      GlStateManager.func_179132_a(true);
-      GlStateManager.func_179098_w();
-      GlStateManager.func_179141_d();
-   }
-
-   public void func_174976_a(float p_174976_1_, int p_174976_2_) {
-      if (this.field_72777_q.field_71441_e.field_73011_w.func_186058_p().func_186068_a() == 1) {
-         this.func_180448_r();
-      } else if (this.field_72777_q.field_71441_e.field_73011_w.func_76569_d()) {
-         GlStateManager.func_179090_x();
-         Vec3d vec3d = this.field_72769_h.func_72833_a(this.field_72777_q.func_175606_aa(), p_174976_1_);
-         float f = (float)vec3d.field_72450_a;
-         float f1 = (float)vec3d.field_72448_b;
-         float f2 = (float)vec3d.field_72449_c;
-         if (p_174976_2_ != 2) {
-            float f3 = (f * 30.0F + f1 * 59.0F + f2 * 11.0F) / 100.0F;
-            float f4 = (f * 30.0F + f1 * 70.0F) / 100.0F;
-            float f5 = (f * 30.0F + f2 * 70.0F) / 100.0F;
-            f = f3;
-            f1 = f4;
-            f2 = f5;
-         }
-
-         GlStateManager.func_179124_c(f, f1, f2);
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         GlStateManager.func_179132_a(false);
-         GlStateManager.func_179127_m();
-         GlStateManager.func_179124_c(f, f1, f2);
-         if (this.field_175005_X) {
-            this.field_175012_t.func_177359_a();
-            GlStateManager.func_187410_q(32884);
-            GlStateManager.func_187420_d(3, 5126, 12, 0);
-            this.field_175012_t.func_177358_a(7);
-            this.field_175012_t.func_177361_b();
-            GlStateManager.func_187429_p(32884);
-         } else {
-            GlStateManager.func_179148_o(this.field_72771_w);
-         }
-
-         GlStateManager.func_179106_n();
-         GlStateManager.func_179118_c();
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-         RenderHelper.func_74518_a();
-         float[] afloat = this.field_72769_h.field_73011_w.func_76560_a(this.field_72769_h.func_72826_c(p_174976_1_), p_174976_1_);
-         if (afloat != null) {
-            GlStateManager.func_179090_x();
-            GlStateManager.func_179103_j(7425);
-            GlStateManager.func_179094_E();
-            GlStateManager.func_179114_b(90.0F, 1.0F, 0.0F, 0.0F);
-            GlStateManager.func_179114_b(MathHelper.func_76126_a(this.field_72769_h.func_72929_e(p_174976_1_)) < 0.0F ? 180.0F : 0.0F, 0.0F, 0.0F, 1.0F);
-            GlStateManager.func_179114_b(90.0F, 0.0F, 0.0F, 1.0F);
-            float f6 = afloat[0];
-            float f7 = afloat[1];
-            float f8 = afloat[2];
-            if (p_174976_2_ != 2) {
-               float f9 = (f6 * 30.0F + f7 * 59.0F + f8 * 11.0F) / 100.0F;
-               float f10 = (f6 * 30.0F + f7 * 70.0F) / 100.0F;
-               float f11 = (f6 * 30.0F + f8 * 70.0F) / 100.0F;
-               f6 = f9;
-               f7 = f10;
-               f8 = f11;
+            if (Reflector.ForgeTileEntity_hasFastRenderer.exists())
+            {
+                TileEntityRendererDispatcher.instance.preDrawBatch();
             }
 
-            bufferbuilder.func_181668_a(6, DefaultVertexFormats.field_181706_f);
-            bufferbuilder.func_181662_b(0.0D, 100.0D, 0.0D).func_181666_a(f6, f7, f8, afloat[3]).func_181675_d();
-            int l1 = 16;
+            label251:
 
-            for(int j2 = 0; j2 <= 16; ++j2) {
-               float f21 = (float)j2 * 6.2831855F / 16.0F;
-               float f12 = MathHelper.func_76126_a(f21);
-               float f13 = MathHelper.func_76134_b(f21);
-               bufferbuilder.func_181662_b((double)(f12 * 120.0F), (double)(f13 * 120.0F), (double)(-f13 * 40.0F * afloat[3])).func_181666_a(afloat[0], afloat[1], afloat[2], 0.0F).func_181675_d();
+            for (Object renderglobal$containerlocalrenderinformation10 : this.renderInfosTileEntities)
+            {
+            	RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 = (RenderGlobal.ContainerLocalRenderInformation) renderglobal$containerlocalrenderinformation10;
+                List<TileEntity> list3 = renderglobal$containerlocalrenderinformation1.renderChunk.getCompiledChunk().getTileEntities();
+
+                if (!list3.isEmpty())
+                {
+                    Iterator iterator = list3.iterator();
+
+                    while (true)
+                    {
+                        TileEntity tileentity1;
+
+                        while (true)
+                        {
+                            if (!iterator.hasNext())
+                            {
+                                continue label251;
+                            }
+
+                            tileentity1 = (TileEntity)iterator.next();
+
+                            if (!flag1)
+                            {
+                                break;
+                            }
+
+                            if (Reflector.callBoolean(tileentity1, Reflector.ForgeTileEntity_shouldRenderInPass, i))
+                            {
+                                AxisAlignedBB axisalignedbb = (AxisAlignedBB)Reflector.call(tileentity1, Reflector.ForgeTileEntity_getRenderBoundingBox);
+
+                                if (axisalignedbb == null || camera.isBoundingBoxInFrustum(axisalignedbb))
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        Class oclass = tileentity1.getClass();
+
+                        if (oclass == TileEntitySign.class && !Config.zoomMode)
+                        {
+                            EntityPlayer entityplayer = this.mc.player;
+                            double d6 = tileentity1.getDistanceSq(entityplayer.posX, entityplayer.posY, entityplayer.posZ);
+
+                            if (d6 > 256.0D)
+                            {
+                                fontrenderer.enabled = false;
+                            }
+                        }
+
+                        if (flag4)
+                        {
+                            Shaders.nextBlockEntity(tileentity1);
+                        }
+
+                        TileEntityRendererDispatcher.instance.renderTileEntity(tileentity1, partialTicks, -1);
+                        ++this.countTileEntitiesRendered;
+                        fontrenderer.enabled = true;
+                    }
+                }
             }
 
-            tessellator.func_78381_a();
-            GlStateManager.func_179121_F();
-            GlStateManager.func_179103_j(7424);
-         }
+            synchronized (this.setTileEntities)
+            {
+                for (TileEntity tileentity : this.setTileEntities)
+                {
+                    if (!flag1 || Reflector.callBoolean(tileentity, Reflector.ForgeTileEntity_shouldRenderInPass, i))
+                    {
+                        if (flag4)
+                        {
+                            Shaders.nextBlockEntity(tileentity);
+                        }
 
-         GlStateManager.func_179098_w();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-         GlStateManager.func_179094_E();
-         float f16 = 1.0F - this.field_72769_h.func_72867_j(p_174976_1_);
-         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, f16);
-         GlStateManager.func_179114_b(-90.0F, 0.0F, 1.0F, 0.0F);
-         GlStateManager.func_179114_b(this.field_72769_h.func_72826_c(p_174976_1_) * 360.0F, 1.0F, 0.0F, 0.0F);
-         float f17 = 30.0F;
-         this.field_72770_i.func_110577_a(field_110928_i);
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
-         bufferbuilder.func_181662_b((double)(-f17), 100.0D, (double)(-f17)).func_187315_a(0.0D, 0.0D).func_181675_d();
-         bufferbuilder.func_181662_b((double)f17, 100.0D, (double)(-f17)).func_187315_a(1.0D, 0.0D).func_181675_d();
-         bufferbuilder.func_181662_b((double)f17, 100.0D, (double)f17).func_187315_a(1.0D, 1.0D).func_181675_d();
-         bufferbuilder.func_181662_b((double)(-f17), 100.0D, (double)f17).func_187315_a(0.0D, 1.0D).func_181675_d();
-         tessellator.func_78381_a();
-         f17 = 20.0F;
-         this.field_72770_i.func_110577_a(field_110927_h);
-         int k1 = this.field_72769_h.func_72853_d();
-         int i2 = k1 % 4;
-         int k2 = k1 / 4 % 2;
-         float f22 = (float)(i2 + 0) / 4.0F;
-         float f23 = (float)(k2 + 0) / 2.0F;
-         float f24 = (float)(i2 + 1) / 4.0F;
-         float f14 = (float)(k2 + 1) / 2.0F;
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
-         bufferbuilder.func_181662_b((double)(-f17), -100.0D, (double)f17).func_187315_a((double)f24, (double)f14).func_181675_d();
-         bufferbuilder.func_181662_b((double)f17, -100.0D, (double)f17).func_187315_a((double)f22, (double)f14).func_181675_d();
-         bufferbuilder.func_181662_b((double)f17, -100.0D, (double)(-f17)).func_187315_a((double)f22, (double)f23).func_181675_d();
-         bufferbuilder.func_181662_b((double)(-f17), -100.0D, (double)(-f17)).func_187315_a((double)f24, (double)f23).func_181675_d();
-         tessellator.func_78381_a();
-         GlStateManager.func_179090_x();
-         float f15 = this.field_72769_h.func_72880_h(p_174976_1_) * f16;
-         if (f15 > 0.0F) {
-            GlStateManager.func_179131_c(f15, f15, f15, f15);
-            if (this.field_175005_X) {
-               this.field_175013_s.func_177359_a();
-               GlStateManager.func_187410_q(32884);
-               GlStateManager.func_187420_d(3, 5126, 12, 0);
-               this.field_175013_s.func_177358_a(7);
-               this.field_175013_s.func_177361_b();
-               GlStateManager.func_187429_p(32884);
-            } else {
-               GlStateManager.func_179148_o(this.field_72772_v);
-            }
-         }
-
-         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-         GlStateManager.func_179084_k();
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179127_m();
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179090_x();
-         GlStateManager.func_179124_c(0.0F, 0.0F, 0.0F);
-         double d3 = this.field_72777_q.field_71439_g.func_174824_e(p_174976_1_).field_72448_b - this.field_72769_h.func_72919_O();
-         if (d3 < 0.0D) {
-            GlStateManager.func_179094_E();
-            GlStateManager.func_179109_b(0.0F, 12.0F, 0.0F);
-            if (this.field_175005_X) {
-               this.field_175011_u.func_177359_a();
-               GlStateManager.func_187410_q(32884);
-               GlStateManager.func_187420_d(3, 5126, 12, 0);
-               this.field_175011_u.func_177358_a(7);
-               this.field_175011_u.func_177361_b();
-               GlStateManager.func_187429_p(32884);
-            } else {
-               GlStateManager.func_179148_o(this.field_72781_x);
+                        TileEntityRendererDispatcher.instance.renderTileEntity(tileentity, partialTicks, -1);
+                    }
+                }
             }
 
-            GlStateManager.func_179121_F();
-            float f18 = 1.0F;
-            float f19 = -((float)(d3 + 65.0D));
-            float f20 = -1.0F;
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-            bufferbuilder.func_181662_b(-1.0D, (double)f19, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, (double)f19, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, (double)f19, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, (double)f19, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, (double)f19, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, (double)f19, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, (double)f19, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, (double)f19, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, -1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            tessellator.func_78381_a();
-         }
-
-         if (this.field_72769_h.field_73011_w.func_76561_g()) {
-            GlStateManager.func_179124_c(f * 0.2F + 0.04F, f1 * 0.2F + 0.04F, f2 * 0.6F + 0.1F);
-         } else {
-            GlStateManager.func_179124_c(f, f1, f2);
-         }
-
-         GlStateManager.func_179094_E();
-         GlStateManager.func_179109_b(0.0F, -((float)(d3 - 16.0D)), 0.0F);
-         GlStateManager.func_179148_o(this.field_72781_x);
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179098_w();
-         GlStateManager.func_179132_a(true);
-      }
-   }
-
-   public void func_180447_b(float p_180447_1_, int p_180447_2_, double p_180447_3_, double p_180447_5_, double p_180447_7_) {
-      if (this.field_72777_q.field_71441_e.field_73011_w.func_76569_d()) {
-         if (this.field_72777_q.field_71474_y.func_181147_e() == 2) {
-            this.func_180445_c(p_180447_1_, p_180447_2_, p_180447_3_, p_180447_5_, p_180447_7_);
-         } else {
-            GlStateManager.func_179129_p();
-            int k1 = 32;
-            int l1 = 8;
-            Tessellator tessellator = Tessellator.func_178181_a();
-            BufferBuilder bufferbuilder = tessellator.func_178180_c();
-            this.field_72770_i.func_110577_a(field_110925_j);
-            GlStateManager.func_179147_l();
-            GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            Vec3d vec3d = this.field_72769_h.func_72824_f(p_180447_1_);
-            float f = (float)vec3d.field_72450_a;
-            float f1 = (float)vec3d.field_72448_b;
-            float f2 = (float)vec3d.field_72449_c;
-            if (p_180447_2_ != 2) {
-               float f3 = (f * 30.0F + f1 * 59.0F + f2 * 11.0F) / 100.0F;
-               float f4 = (f * 30.0F + f1 * 70.0F) / 100.0F;
-               float f5 = (f * 30.0F + f2 * 70.0F) / 100.0F;
-               f = f3;
-               f1 = f4;
-               f2 = f5;
+            if (Reflector.ForgeTileEntity_hasFastRenderer.exists())
+            {
+                TileEntityRendererDispatcher.instance.drawBatch(i);
             }
 
-            float f9 = 4.8828125E-4F;
-            double d5 = (double)((float)this.field_72773_u + p_180447_1_);
-            double d3 = p_180447_3_ + d5 * 0.029999999329447746D;
-            int i2 = MathHelper.func_76128_c(d3 / 2048.0D);
-            int j2 = MathHelper.func_76128_c(p_180447_7_ / 2048.0D);
-            d3 = d3 - (double)(i2 * 2048);
-            double lvt_22_1_ = p_180447_7_ - (double)(j2 * 2048);
-            float f6 = this.field_72769_h.field_73011_w.func_76571_f() - (float)p_180447_5_ + 0.33F;
-            float f7 = (float)(d3 * 4.8828125E-4D);
-            float f8 = (float)(lvt_22_1_ * 4.8828125E-4D);
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
+            this.renderOverlayDamaged = true;
+            this.preRenderDamagedBlocks();
 
-            for(int k2 = -256; k2 < 256; k2 += 32) {
-               for(int l2 = -256; l2 < 256; l2 += 32) {
-                  bufferbuilder.func_181662_b((double)(k2 + 0), (double)f6, (double)(l2 + 32)).func_187315_a((double)((float)(k2 + 0) * 4.8828125E-4F + f7), (double)((float)(l2 + 32) * 4.8828125E-4F + f8)).func_181666_a(f, f1, f2, 0.8F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(k2 + 32), (double)f6, (double)(l2 + 32)).func_187315_a((double)((float)(k2 + 32) * 4.8828125E-4F + f7), (double)((float)(l2 + 32) * 4.8828125E-4F + f8)).func_181666_a(f, f1, f2, 0.8F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(k2 + 32), (double)f6, (double)(l2 + 0)).func_187315_a((double)((float)(k2 + 32) * 4.8828125E-4F + f7), (double)((float)(l2 + 0) * 4.8828125E-4F + f8)).func_181666_a(f, f1, f2, 0.8F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(k2 + 0), (double)f6, (double)(l2 + 0)).func_187315_a((double)((float)(k2 + 0) * 4.8828125E-4F + f7), (double)((float)(l2 + 0) * 4.8828125E-4F + f8)).func_181666_a(f, f1, f2, 0.8F).func_181675_d();
-               }
+            for (DestroyBlockProgress destroyblockprogress : this.damagedBlocks.values())
+            {
+                BlockPos blockpos = destroyblockprogress.getPosition();
+
+                if (this.theWorld.getBlockState(blockpos).getBlock().hasTileEntity())
+                {
+                    TileEntity tileentity2 = this.theWorld.getTileEntity(blockpos);
+
+                    if (tileentity2 instanceof TileEntityChest)
+                    {
+                        TileEntityChest tileentitychest = (TileEntityChest)tileentity2;
+
+                        if (tileentitychest.adjacentChestXNeg != null)
+                        {
+                            blockpos = blockpos.offset(EnumFacing.WEST);
+                            tileentity2 = this.theWorld.getTileEntity(blockpos);
+                        }
+                        else if (tileentitychest.adjacentChestZNeg != null)
+                        {
+                            blockpos = blockpos.offset(EnumFacing.NORTH);
+                            tileentity2 = this.theWorld.getTileEntity(blockpos);
+                        }
+                    }
+
+                    IBlockState iblockstate = this.theWorld.getBlockState(blockpos);
+
+                    if (tileentity2 != null && iblockstate.func_191057_i())
+                    {
+                        if (flag4)
+                        {
+                            Shaders.nextBlockEntity(tileentity2);
+                        }
+
+                        TileEntityRendererDispatcher.instance.renderTileEntity(tileentity2, partialTicks, destroyblockprogress.getPartialBlockDamage());
+                    }
+                }
             }
 
-            tessellator.func_78381_a();
-            GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.func_179084_k();
-            GlStateManager.func_179089_o();
-         }
-      }
-   }
+            this.postRenderDamagedBlocks();
+            this.renderOverlayDamaged = false;
+            this.mc.entityRenderer.disableLightmap();
+            this.mc.mcProfiler.endSection();
+        }
+    }
 
-   public boolean func_72721_a(double p_72721_1_, double p_72721_3_, double p_72721_5_, float p_72721_7_) {
-      return false;
-   }
+    private boolean isOutlineActive(Entity p_184383_1_, Entity p_184383_2_, ICamera p_184383_3_)
+    {
+        boolean flag = p_184383_2_ instanceof EntityLivingBase && ((EntityLivingBase)p_184383_2_).isPlayerSleeping();
 
-   private void func_180445_c(float p_180445_1_, int p_180445_2_, double p_180445_3_, double p_180445_5_, double p_180445_7_) {
-      GlStateManager.func_179129_p();
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      float f = 12.0F;
-      float f1 = 4.0F;
-      double d3 = (double)((float)this.field_72773_u + p_180445_1_);
-      double d4 = (p_180445_3_ + d3 * 0.029999999329447746D) / 12.0D;
-      double d5 = p_180445_7_ / 12.0D + 0.33000001311302185D;
-      float f2 = this.field_72769_h.field_73011_w.func_76571_f() - (float)p_180445_5_ + 0.33F;
-      int k1 = MathHelper.func_76128_c(d4 / 2048.0D);
-      int l1 = MathHelper.func_76128_c(d5 / 2048.0D);
-      d4 = d4 - (double)(k1 * 2048);
-      d5 = d5 - (double)(l1 * 2048);
-      this.field_72770_i.func_110577_a(field_110925_j);
-      GlStateManager.func_179147_l();
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      Vec3d vec3d = this.field_72769_h.func_72824_f(p_180445_1_);
-      float f3 = (float)vec3d.field_72450_a;
-      float f4 = (float)vec3d.field_72448_b;
-      float f5 = (float)vec3d.field_72449_c;
-      if (p_180445_2_ != 2) {
-         float f6 = (f3 * 30.0F + f4 * 59.0F + f5 * 11.0F) / 100.0F;
-         float f7 = (f3 * 30.0F + f4 * 70.0F) / 100.0F;
-         float f8 = (f3 * 30.0F + f5 * 70.0F) / 100.0F;
-         f3 = f6;
-         f4 = f7;
-         f5 = f8;
-      }
+        if (p_184383_1_ == p_184383_2_ && this.mc.gameSettings.thirdPersonView == 0 && !flag)
+        {
+            return false;
+        }
+        else if (p_184383_1_.isGlowing())
+        {
+            return true;
+        }
+        else if (this.mc.player.isSpectator() && this.mc.gameSettings.keyBindSpectatorOutlines.isKeyDown() && p_184383_1_ instanceof EntityPlayer)
+        {
+            return p_184383_1_.ignoreFrustumCheck || p_184383_3_.isBoundingBoxInFrustum(p_184383_1_.getEntityBoundingBox()) || p_184383_1_.isRidingOrBeingRiddenBy(this.mc.player);
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-      float f25 = f3 * 0.9F;
-      float f26 = f4 * 0.9F;
-      float f27 = f5 * 0.9F;
-      float f9 = f3 * 0.7F;
-      float f10 = f4 * 0.7F;
-      float f11 = f5 * 0.7F;
-      float f12 = f3 * 0.8F;
-      float f13 = f4 * 0.8F;
-      float f14 = f5 * 0.8F;
-      float f15 = 0.00390625F;
-      float f16 = (float)MathHelper.func_76128_c(d4) * 0.00390625F;
-      float f17 = (float)MathHelper.func_76128_c(d5) * 0.00390625F;
-      float f18 = (float)(d4 - (double)MathHelper.func_76128_c(d4));
-      float f19 = (float)(d5 - (double)MathHelper.func_76128_c(d5));
-      int i2 = 8;
-      int j2 = 4;
-      float f20 = 9.765625E-4F;
-      GlStateManager.func_179152_a(12.0F, 1.0F, 12.0F);
+    /**
+     * Gets the render info for use on the Debug screen
+     */
+    public String getDebugInfoRenders()
+    {
+        int i = this.viewFrustum.renderChunks.length;
+        int j = this.getRenderedChunks();
+        return String.format("C: %d/%d %sD: %d, L: %d, %s", j, i, this.mc.renderChunksMany ? "(s) " : "", this.renderDistanceChunks, this.setLightUpdates.size(), this.renderDispatcher == null ? "null" : this.renderDispatcher.getDebugInfo());
+    }
 
-      for(int k2 = 0; k2 < 2; ++k2) {
-         if (k2 == 0) {
-            GlStateManager.func_179135_a(false, false, false, false);
-         } else {
-            switch(p_180445_2_) {
-            case 0:
-               GlStateManager.func_179135_a(false, true, true, true);
-               break;
-            case 1:
-               GlStateManager.func_179135_a(true, false, false, true);
-               break;
-            case 2:
-               GlStateManager.func_179135_a(true, true, true, true);
+    protected int getRenderedChunks()
+    {
+        int i = 0;
+
+        for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos)
+        {
+            CompiledChunk compiledchunk = renderglobal$containerlocalrenderinformation.renderChunk.compiledChunk;
+
+            if (compiledchunk != CompiledChunk.DUMMY && !compiledchunk.isEmpty())
+            {
+                ++i;
             }
-         }
+        }
 
-         for(int l2 = -3; l2 <= 4; ++l2) {
-            for(int i3 = -3; i3 <= 4; ++i3) {
-               bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181712_l);
-               float f21 = (float)(l2 * 8);
-               float f22 = (float)(i3 * 8);
-               float f23 = f21 - f18;
-               float f24 = f22 - f19;
-               if (f2 > -5.0F) {
-                  bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f9, f10, f11, 0.8F).func_181663_c(0.0F, -1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f9, f10, f11, 0.8F).func_181663_c(0.0F, -1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f9, f10, f11, 0.8F).func_181663_c(0.0F, -1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f9, f10, f11, 0.8F).func_181663_c(0.0F, -1.0F, 0.0F).func_181675_d();
-               }
+        return i;
+    }
 
-               if (f2 <= 5.0F) {
-                  bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f3, f4, f5, 0.8F).func_181663_c(0.0F, 1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f3, f4, f5, 0.8F).func_181663_c(0.0F, 1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f3, f4, f5, 0.8F).func_181663_c(0.0F, 1.0F, 0.0F).func_181675_d();
-                  bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f3, f4, f5, 0.8F).func_181663_c(0.0F, 1.0F, 0.0F).func_181675_d();
-               }
+    /**
+     * Gets the entities info for use on the Debug screen
+     */
+    public String getDebugInfoEntities()
+    {
+        return "E: " + this.countEntitiesRendered + "/" + this.countEntitiesTotal + ", B: " + this.countEntitiesHidden + ", " + Config.getVersionDebug();
+    }
 
-               if (l2 > -1) {
-                  for(int j3 = 0; j3 < 8; ++j3) {
-                     bufferbuilder.func_181662_b((double)(f23 + (float)j3 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + (float)j3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(-1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)j3 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + (float)j3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(-1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)j3 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + (float)j3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(-1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)j3 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + (float)j3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(-1.0F, 0.0F, 0.0F).func_181675_d();
-                  }
-               }
+    public void setupTerrain(Entity viewEntity, double partialTicks, ICamera camera, int frameCount, boolean playerSpectator)
+    {
+        if (this.mc.gameSettings.renderDistanceChunks != this.renderDistanceChunks)
+        {
+            this.loadRenderers();
+        }
 
-               if (l2 <= 1) {
-                  for(int k3 = 0; k3 < 8; ++k3) {
-                     bufferbuilder.func_181662_b((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 4.0F), (double)(f24 + 8.0F)).func_187315_a((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 4.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(1.0F, 0.0F, 0.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).func_187315_a((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).func_181666_a(f25, f26, f27, 0.8F).func_181663_c(1.0F, 0.0F, 0.0F).func_181675_d();
-                  }
-               }
+        this.theWorld.theProfiler.startSection("camera");
+        double d0 = viewEntity.posX - this.frustumUpdatePosX;
+        double d1 = viewEntity.posY - this.frustumUpdatePosY;
+        double d2 = viewEntity.posZ - this.frustumUpdatePosZ;
 
-               if (i3 > -1) {
-                  for(int l3 = 0; l3 < 8; ++l3) {
-                     bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + (float)l3 + 0.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, -1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 4.0F), (double)(f24 + (float)l3 + 0.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, -1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + (float)l3 + 0.0F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, -1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + (float)l3 + 0.0F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, -1.0F).func_181675_d();
-                  }
-               }
+        if (this.frustumUpdatePosChunkX != viewEntity.chunkCoordX || this.frustumUpdatePosChunkY != viewEntity.chunkCoordY || this.frustumUpdatePosChunkZ != viewEntity.chunkCoordZ || d0 * d0 + d1 * d1 + d2 * d2 > 16.0D)
+        {
+            this.frustumUpdatePosX = viewEntity.posX;
+            this.frustumUpdatePosY = viewEntity.posY;
+            this.frustumUpdatePosZ = viewEntity.posZ;
+            this.frustumUpdatePosChunkX = viewEntity.chunkCoordX;
+            this.frustumUpdatePosChunkY = viewEntity.chunkCoordY;
+            this.frustumUpdatePosChunkZ = viewEntity.chunkCoordZ;
+            this.viewFrustum.updateChunkPositions(viewEntity.posX, viewEntity.posZ);
+        }
 
-               if (i3 <= 1) {
-                  for(int i4 = 0; i4 < 8; ++i4) {
-                     bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, 1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 4.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, 1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).func_187315_a((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, 1.0F).func_181675_d();
-                     bufferbuilder.func_181662_b((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).func_187315_a((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).func_181666_a(f12, f13, f14, 0.8F).func_181663_c(0.0F, 0.0F, 1.0F).func_181675_d();
-                  }
-               }
+        if (Config.isDynamicLights())
+        {
+            DynamicLights.update(this);
+        }
 
-               tessellator.func_78381_a();
+        this.theWorld.theProfiler.endStartSection("renderlistcamera");
+        double d3 = viewEntity.lastTickPosX + (viewEntity.posX - viewEntity.lastTickPosX) * partialTicks;
+        double d4 = viewEntity.lastTickPosY + (viewEntity.posY - viewEntity.lastTickPosY) * partialTicks;
+        double d5 = viewEntity.lastTickPosZ + (viewEntity.posZ - viewEntity.lastTickPosZ) * partialTicks;
+        this.renderContainer.initialize(d3, d4, d5);
+        this.theWorld.theProfiler.endStartSection("cull");
+
+        if (this.debugFixedClippingHelper != null)
+        {
+            Frustum frustum = new Frustum(this.debugFixedClippingHelper);
+            frustum.setPosition(this.debugTerrainFrustumPosition.x, this.debugTerrainFrustumPosition.y, this.debugTerrainFrustumPosition.z);
+            camera = frustum;
+        }
+
+        this.mc.mcProfiler.endStartSection("culling");
+        BlockPos blockpos1 = new BlockPos(d3, d4 + (double)viewEntity.getEyeHeight(), d5);
+        RenderChunk renderchunk = this.viewFrustum.getRenderChunk(blockpos1);
+        new BlockPos(MathHelper.floor(d3 / 16.0D) * 16, MathHelper.floor(d4 / 16.0D) * 16, MathHelper.floor(d5 / 16.0D) * 16);
+        this.displayListEntitiesDirty = this.displayListEntitiesDirty || !this.chunksToUpdate.isEmpty() || viewEntity.posX != this.lastViewEntityX || viewEntity.posY != this.lastViewEntityY || viewEntity.posZ != this.lastViewEntityZ || (double)viewEntity.rotationPitch != this.lastViewEntityPitch || (double)viewEntity.rotationYaw != this.lastViewEntityYaw;
+        this.lastViewEntityX = viewEntity.posX;
+        this.lastViewEntityY = viewEntity.posY;
+        this.lastViewEntityZ = viewEntity.posZ;
+        this.lastViewEntityPitch = (double)viewEntity.rotationPitch;
+        this.lastViewEntityYaw = (double)viewEntity.rotationYaw;
+        boolean flag = this.debugFixedClippingHelper != null;
+        this.mc.mcProfiler.endStartSection("update");
+        Lagometer.timerVisibility.start();
+        int i = this.getCountLoadedChunks();
+
+        if (i != this.countLoadedChunksPrev)
+        {
+            this.countLoadedChunksPrev = i;
+            this.displayListEntitiesDirty = true;
+        }
+
+        if (Shaders.isShadowPass)
+        {
+            this.renderInfos = this.renderInfosShadow;
+            this.renderInfosEntities = this.renderInfosEntitiesShadow;
+            this.renderInfosTileEntities = this.renderInfosTileEntitiesShadow;
+
+            if (!flag && this.displayListEntitiesDirty)
+            {
+                this.renderInfos.clear();
+                this.renderInfosEntities.clear();
+                this.renderInfosTileEntities.clear();
+                RenderInfoLazy renderinfolazy = new RenderInfoLazy();
+                Iterator<RenderChunk> iterator = ShadowUtils.makeShadowChunkIterator(this.theWorld, partialTicks, viewEntity, this.renderDistanceChunks, this.viewFrustum);
+
+                while (iterator.hasNext())
+                {
+                    RenderChunk renderchunk1 = iterator.next();
+
+                    if (renderchunk1 != null)
+                    {
+                        renderinfolazy.setRenderChunk(renderchunk1);
+
+                        if (!renderchunk1.compiledChunk.isEmpty() || renderchunk1.isNeedsUpdate())
+                        {
+                            this.renderInfos.add(renderinfolazy.getRenderInfo());
+                        }
+
+                        BlockPos blockpos = renderchunk1.getPosition();
+
+                        if (ChunkUtils.hasEntities(this.theWorld.getChunkFromBlockCoords(blockpos)))
+                        {
+                            this.renderInfosEntities.add(renderinfolazy.getRenderInfo());
+                        }
+
+                        if (renderchunk1.getCompiledChunk().getTileEntities().size() > 0)
+                        {
+                            this.renderInfosTileEntities.add(renderinfolazy.getRenderInfo());
+                        }
+                    }
+                }
             }
-         }
-      }
+        }
+        else
+        {
+            this.renderInfos = this.renderInfosNormal;
+            this.renderInfosEntities = this.renderInfosEntitiesNormal;
+            this.renderInfosTileEntities = this.renderInfosTileEntitiesNormal;
+        }
 
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      GlStateManager.func_179084_k();
-      GlStateManager.func_179089_o();
-   }
+        if (!flag && this.displayListEntitiesDirty && !Shaders.isShadowPass)
+        {
+            this.displayListEntitiesDirty = false;
 
-   public void func_174967_a(long p_174967_1_) {
-      this.field_147595_R |= this.field_174995_M.func_178516_a(p_174967_1_);
-      if (!this.field_175009_l.isEmpty()) {
-         Iterator<RenderChunk> iterator = this.field_175009_l.iterator();
-
-         while(iterator.hasNext()) {
-            RenderChunk renderchunk1 = iterator.next();
-            boolean flag1;
-            if (renderchunk1.func_188281_o()) {
-               flag1 = this.field_174995_M.func_178505_b(renderchunk1);
-            } else {
-               flag1 = this.field_174995_M.func_178507_a(renderchunk1);
+            for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 : this.renderInfos)
+            {
+                this.freeRenderInformation(renderglobal$containerlocalrenderinformation1);
             }
 
-            if (!flag1) {
-               break;
+            this.renderInfos.clear();
+            this.renderInfosEntities.clear();
+            this.renderInfosTileEntities.clear();
+            this.visibilityDeque.clear();
+            Deque deque = this.visibilityDeque;
+            Entity.setRenderDistanceWeight(MathHelper.clamp((double)this.mc.gameSettings.renderDistanceChunks / 8.0D, 1.0D, 2.5D));
+            boolean flag2 = this.mc.renderChunksMany;
+
+            if (renderchunk != null)
+            {
+                boolean flag3 = false;
+                RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation3 = new RenderGlobal.ContainerLocalRenderInformation(renderchunk, (EnumFacing)null, 0);
+                Set set1 = SET_ALL_FACINGS;
+
+                if (set1.size() == 1)
+                {
+                    Vector3f vector3f = this.getViewVector(viewEntity, partialTicks);
+                    EnumFacing enumfacing = EnumFacing.getFacingFromVector(vector3f.x, vector3f.y, vector3f.z).getOpposite();
+                    set1.remove(enumfacing);
+                }
+
+                if (set1.isEmpty())
+                {
+                    flag3 = true;
+                }
+
+                if (flag3 && !playerSpectator)
+                {
+                    this.renderInfos.add(renderglobal$containerlocalrenderinformation3);
+                }
+                else
+                {
+                    if (playerSpectator && this.theWorld.getBlockState(blockpos1).isOpaqueCube())
+                    {
+                        flag2 = false;
+                    }
+
+                    renderchunk.setFrameIndex(frameCount);
+                    deque.add(renderglobal$containerlocalrenderinformation3);
+                }
+            }
+            else
+            {
+                int i1 = blockpos1.getY() > 0 ? 248 : 8;
+
+                for (int j1 = -this.renderDistanceChunks; j1 <= this.renderDistanceChunks; ++j1)
+                {
+                    for (int j = -this.renderDistanceChunks; j <= this.renderDistanceChunks; ++j)
+                    {
+                        RenderChunk renderchunk2 = this.viewFrustum.getRenderChunk(new BlockPos((j1 << 4) + 8, i1, (j << 4) + 8));
+
+                        if (renderchunk2 != null && camera.isBoundingBoxInFrustum(renderchunk2.boundingBox))
+                        {
+                            renderchunk2.setFrameIndex(frameCount);
+                            deque.add(new RenderGlobal.ContainerLocalRenderInformation(renderchunk2, (EnumFacing)null, 0));
+                        }
+                    }
+                }
             }
 
-            renderchunk1.func_188282_m();
-            iterator.remove();
-            long k1 = p_174967_1_ - System.nanoTime();
-            if (k1 < 0L) {
-               break;
+            this.mc.mcProfiler.startSection("iteration");
+            EnumFacing[] aenumfacing = EnumFacing.VALUES;
+            int k1 = aenumfacing.length;
+
+            while (!deque.isEmpty())
+            {
+                RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation4 = (RenderGlobal.ContainerLocalRenderInformation)deque.poll();
+                RenderChunk renderchunk5 = renderglobal$containerlocalrenderinformation4.renderChunk;
+                EnumFacing enumfacing2 = renderglobal$containerlocalrenderinformation4.facing;
+                boolean flag1 = false;
+                CompiledChunk compiledchunk = renderchunk5.compiledChunk;
+
+                if (!compiledchunk.isEmpty() || renderchunk5.isNeedsUpdate())
+                {
+                    this.renderInfos.add(renderglobal$containerlocalrenderinformation4);
+                    flag1 = true;
+                }
+
+                if (ChunkUtils.hasEntities(renderchunk5.getChunk(this.theWorld)))
+                {
+                    this.renderInfosEntities.add(renderglobal$containerlocalrenderinformation4);
+                    flag1 = true;
+                }
+
+                if (compiledchunk.getTileEntities().size() > 0)
+                {
+                    this.renderInfosTileEntities.add(renderglobal$containerlocalrenderinformation4);
+                    flag1 = true;
+                }
+
+                for (int k = 0; k < k1; ++k)
+                {
+                    EnumFacing enumfacing1 = aenumfacing[k];
+
+                    if ((!flag2 || !renderglobal$containerlocalrenderinformation4.hasDirection(enumfacing1.getOpposite())) && (!flag2 || enumfacing2 == null || compiledchunk.isVisible(enumfacing2.getOpposite(), enumfacing1)))
+                    {
+                        RenderChunk renderchunk3 = this.getRenderChunkOffset(blockpos1, renderchunk5, enumfacing1);
+
+                        if (renderchunk3 != null && renderchunk3.setFrameIndex(frameCount) && camera.isBoundingBoxInFrustum(renderchunk3.boundingBox))
+                        {
+                            int l = renderglobal$containerlocalrenderinformation4.setFacing | 1 << enumfacing1.ordinal();
+                            RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = this.allocateRenderInformation(renderchunk3, enumfacing1, l);
+                            deque.add(renderglobal$containerlocalrenderinformation);
+                        }
+                    }
+                }
+
+                if (!flag1)
+                {
+                    this.freeRenderInformation(renderglobal$containerlocalrenderinformation4);
+                }
             }
-         }
-      }
 
-   }
+            this.mc.mcProfiler.endSection();
+        }
 
-   public void func_180449_a(Entity p_180449_1_, float p_180449_2_) {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      WorldBorder worldborder = this.field_72769_h.func_175723_af();
-      double d3 = (double)(this.field_72777_q.field_71474_y.field_151451_c * 16);
-      if (p_180449_1_.field_70165_t >= worldborder.func_177728_d() - d3 || p_180449_1_.field_70165_t <= worldborder.func_177726_b() + d3 || p_180449_1_.field_70161_v >= worldborder.func_177733_e() - d3 || p_180449_1_.field_70161_v <= worldborder.func_177736_c() + d3) {
-         double d4 = 1.0D - worldborder.func_177745_a(p_180449_1_) / d3;
-         d4 = Math.pow(d4, 4.0D);
-         double d5 = p_180449_1_.field_70142_S + (p_180449_1_.field_70165_t - p_180449_1_.field_70142_S) * (double)p_180449_2_;
-         double d6 = p_180449_1_.field_70137_T + (p_180449_1_.field_70163_u - p_180449_1_.field_70137_T) * (double)p_180449_2_;
-         double d7 = p_180449_1_.field_70136_U + (p_180449_1_.field_70161_v - p_180449_1_.field_70136_U) * (double)p_180449_2_;
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-         this.field_72770_i.func_110577_a(field_175006_g);
-         GlStateManager.func_179132_a(false);
-         GlStateManager.func_179094_E();
-         int k1 = worldborder.func_177734_a().func_177766_a();
-         float f = (float)(k1 >> 16 & 255) / 255.0F;
-         float f1 = (float)(k1 >> 8 & 255) / 255.0F;
-         float f2 = (float)(k1 & 255) / 255.0F;
-         GlStateManager.func_179131_c(f, f1, f2, (float)d4);
-         GlStateManager.func_179136_a(-3.0F, -3.0F);
-         GlStateManager.func_179088_q();
-         GlStateManager.func_179092_a(516, 0.1F);
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179129_p();
-         float f3 = (float)(Minecraft.func_71386_F() % 3000L) / 3000.0F;
-         float f4 = 0.0F;
-         float f5 = 0.0F;
-         float f6 = 128.0F;
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
-         bufferbuilder.func_178969_c(-d5, -d6, -d7);
-         double d8 = Math.max((double)MathHelper.func_76128_c(d7 - d3), worldborder.func_177736_c());
-         double d9 = Math.min((double)MathHelper.func_76143_f(d7 + d3), worldborder.func_177733_e());
-         if (d5 > worldborder.func_177728_d() - d3) {
-            float f7 = 0.0F;
+        this.mc.mcProfiler.endStartSection("captureFrustum");
 
-            for(double d10 = d8; d10 < d9; f7 += 0.5F) {
-               double d11 = Math.min(1.0D, d9 - d10);
-               float f8 = (float)d11 * 0.5F;
-               bufferbuilder.func_181662_b(worldborder.func_177728_d(), 256.0D, d10).func_187315_a((double)(f3 + f7), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177728_d(), 256.0D, d10 + d11).func_187315_a((double)(f3 + f8 + f7), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177728_d(), 0.0D, d10 + d11).func_187315_a((double)(f3 + f8 + f7), (double)(f3 + 128.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177728_d(), 0.0D, d10).func_187315_a((double)(f3 + f7), (double)(f3 + 128.0F)).func_181675_d();
-               ++d10;
+        if (this.debugFixTerrainFrustum)
+        {
+            this.fixTerrainFrustum(d3, d4, d5);
+            this.debugFixTerrainFrustum = false;
+        }
+
+        Lagometer.timerVisibility.end();
+
+        if (Shaders.isShadowPass)
+        {
+            Shaders.mcProfilerEndSection();
+        }
+        else
+        {
+            this.mc.mcProfiler.endStartSection("rebuildNear");
+            Set<RenderChunk> set = this.chunksToUpdate;
+            this.chunksToUpdate = Sets.<RenderChunk>newLinkedHashSet();
+            Lagometer.timerChunkUpdate.start();
+
+            for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation2 : this.renderInfos)
+            {
+                RenderChunk renderchunk4 = renderglobal$containerlocalrenderinformation2.renderChunk;
+
+                if (renderchunk4.isNeedsUpdate() || set.contains(renderchunk4))
+                {
+                    this.displayListEntitiesDirty = true;
+                    BlockPos blockpos2 = renderchunk4.getPosition();
+                    boolean flag4 = blockpos1.distanceSq((double)(blockpos2.getX() + 8), (double)(blockpos2.getY() + 8), (double)(blockpos2.getZ() + 8)) < 768.0D;
+
+                    if (!flag4)
+                    {
+                        this.chunksToUpdate.add(renderchunk4);
+                    }
+                    else if (!renderchunk4.isPlayerUpdate())
+                    {
+                        this.chunksToUpdateForced.add(renderchunk4);
+                    }
+                    else
+                    {
+                        this.mc.mcProfiler.startSection("build near");
+                        this.renderDispatcher.updateChunkNow(renderchunk4);
+                        renderchunk4.clearNeedsUpdate();
+                        this.mc.mcProfiler.endSection();
+                    }
+                }
             }
-         }
 
-         if (d5 < worldborder.func_177726_b() + d3) {
-            float f9 = 0.0F;
+            Lagometer.timerChunkUpdate.end();
+            this.chunksToUpdate.addAll(set);
+            this.mc.mcProfiler.endSection();
+        }
+    }
 
-            for(double d12 = d8; d12 < d9; f9 += 0.5F) {
-               double d15 = Math.min(1.0D, d9 - d12);
-               float f12 = (float)d15 * 0.5F;
-               bufferbuilder.func_181662_b(worldborder.func_177726_b(), 256.0D, d12).func_187315_a((double)(f3 + f9), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177726_b(), 256.0D, d12 + d15).func_187315_a((double)(f3 + f12 + f9), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177726_b(), 0.0D, d12 + d15).func_187315_a((double)(f3 + f12 + f9), (double)(f3 + 128.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(worldborder.func_177726_b(), 0.0D, d12).func_187315_a((double)(f3 + f9), (double)(f3 + 128.0F)).func_181675_d();
-               ++d12;
+    private Set<EnumFacing> getVisibleFacings(BlockPos pos)
+    {
+        VisGraph visgraph = new VisGraph();
+        BlockPos blockpos = new BlockPos(pos.getX() >> 4 << 4, pos.getY() >> 4 << 4, pos.getZ() >> 4 << 4);
+        Chunk chunk = this.theWorld.getChunkFromBlockCoords(blockpos);
+
+        for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(blockpos, blockpos.add(15, 15, 15)))
+        {
+            if (chunk.getBlockState(blockpos$mutableblockpos).isOpaqueCube())
+            {
+                visgraph.setOpaqueCube(blockpos$mutableblockpos);
             }
-         }
+        }
+        return visgraph.getVisibleFacings(pos);
+    }
 
-         d8 = Math.max((double)MathHelper.func_76128_c(d5 - d3), worldborder.func_177726_b());
-         d9 = Math.min((double)MathHelper.func_76143_f(d5 + d3), worldborder.func_177728_d());
-         if (d7 > worldborder.func_177733_e() - d3) {
-            float f10 = 0.0F;
+    @Nullable
 
-            for(double d13 = d8; d13 < d9; f10 += 0.5F) {
-               double d16 = Math.min(1.0D, d9 - d13);
-               float f13 = (float)d16 * 0.5F;
-               bufferbuilder.func_181662_b(d13, 256.0D, worldborder.func_177733_e()).func_187315_a((double)(f3 + f10), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d13 + d16, 256.0D, worldborder.func_177733_e()).func_187315_a((double)(f3 + f13 + f10), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d13 + d16, 0.0D, worldborder.func_177733_e()).func_187315_a((double)(f3 + f13 + f10), (double)(f3 + 128.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d13, 0.0D, worldborder.func_177733_e()).func_187315_a((double)(f3 + f10), (double)(f3 + 128.0F)).func_181675_d();
-               ++d13;
+    /**
+     * Returns RenderChunk offset from given RenderChunk in given direction, or null if it can't be seen by player at
+     * given BlockPos.
+     */
+    private RenderChunk getRenderChunkOffset(BlockPos playerPos, RenderChunk renderChunkBase, EnumFacing facing)
+    {
+        BlockPos blockpos = renderChunkBase.getBlockPosOffset16(facing);
+
+        if (blockpos.getY() >= 0 && blockpos.getY() < 256)
+        {
+            int i = playerPos.getX() - blockpos.getX();
+            int j = playerPos.getZ() - blockpos.getZ();
+
+            if (Config.isFogOff())
+            {
+                if (Math.abs(i) > this.renderDistance || Math.abs(j) > this.renderDistance)
+                {
+                    return null;
+                }
             }
-         }
+            else
+            {
+                int k = i * i + j * j;
 
-         if (d7 < worldborder.func_177736_c() + d3) {
-            float f11 = 0.0F;
-
-            for(double d14 = d8; d14 < d9; f11 += 0.5F) {
-               double d17 = Math.min(1.0D, d9 - d14);
-               float f14 = (float)d17 * 0.5F;
-               bufferbuilder.func_181662_b(d14, 256.0D, worldborder.func_177736_c()).func_187315_a((double)(f3 + f11), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d14 + d17, 256.0D, worldborder.func_177736_c()).func_187315_a((double)(f3 + f14 + f11), (double)(f3 + 0.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d14 + d17, 0.0D, worldborder.func_177736_c()).func_187315_a((double)(f3 + f14 + f11), (double)(f3 + 128.0F)).func_181675_d();
-               bufferbuilder.func_181662_b(d14, 0.0D, worldborder.func_177736_c()).func_187315_a((double)(f3 + f11), (double)(f3 + 128.0F)).func_181675_d();
-               ++d14;
+                if (k > this.renderDistanceSq)
+                {
+                    return null;
+                }
             }
-         }
 
-         tessellator.func_78381_a();
-         bufferbuilder.func_178969_c(0.0D, 0.0D, 0.0D);
-         GlStateManager.func_179089_o();
-         GlStateManager.func_179118_c();
-         GlStateManager.func_179136_a(0.0F, 0.0F);
-         GlStateManager.func_179113_r();
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179084_k();
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179132_a(true);
-      }
-   }
-
-   private void func_180443_s() {
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      GlStateManager.func_179147_l();
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 0.5F);
-      GlStateManager.func_179136_a(-3.0F, -3.0F);
-      GlStateManager.func_179088_q();
-      GlStateManager.func_179092_a(516, 0.1F);
-      GlStateManager.func_179141_d();
-      GlStateManager.func_179094_E();
-   }
-
-   private void func_174969_t() {
-      GlStateManager.func_179118_c();
-      GlStateManager.func_179136_a(0.0F, 0.0F);
-      GlStateManager.func_179113_r();
-      GlStateManager.func_179141_d();
-      GlStateManager.func_179132_a(true);
-      GlStateManager.func_179121_F();
-   }
-
-   public void func_174981_a(Tessellator p_174981_1_, BufferBuilder p_174981_2_, Entity p_174981_3_, float p_174981_4_) {
-      double d3 = p_174981_3_.field_70142_S + (p_174981_3_.field_70165_t - p_174981_3_.field_70142_S) * (double)p_174981_4_;
-      double d4 = p_174981_3_.field_70137_T + (p_174981_3_.field_70163_u - p_174981_3_.field_70137_T) * (double)p_174981_4_;
-      double d5 = p_174981_3_.field_70136_U + (p_174981_3_.field_70161_v - p_174981_3_.field_70136_U) * (double)p_174981_4_;
-      if (!this.field_72738_E.isEmpty()) {
-         this.field_72770_i.func_110577_a(TextureMap.field_110575_b);
-         this.func_180443_s();
-         p_174981_2_.func_181668_a(7, DefaultVertexFormats.field_176600_a);
-         p_174981_2_.func_178969_c(-d3, -d4, -d5);
-         p_174981_2_.func_78914_f();
-         Iterator<DestroyBlockProgress> iterator = this.field_72738_E.values().iterator();
-
-         while(iterator.hasNext()) {
-            DestroyBlockProgress destroyblockprogress = iterator.next();
-            BlockPos blockpos = destroyblockprogress.func_180246_b();
-            double d6 = (double)blockpos.func_177958_n() - d3;
-            double d7 = (double)blockpos.func_177956_o() - d4;
-            double d8 = (double)blockpos.func_177952_p() - d5;
-            Block block = this.field_72769_h.func_180495_p(blockpos).func_177230_c();
-            if (!(block instanceof BlockChest) && !(block instanceof BlockEnderChest) && !(block instanceof BlockSign) && !(block instanceof BlockSkull)) {
-               if (d6 * d6 + d7 * d7 + d8 * d8 > 1024.0D) {
-                  iterator.remove();
-               } else {
-                  IBlockState iblockstate = this.field_72769_h.func_180495_p(blockpos);
-                  if (iblockstate.func_185904_a() != Material.field_151579_a) {
-                     int k1 = destroyblockprogress.func_73106_e();
-                     TextureAtlasSprite textureatlassprite = this.field_94141_F[k1];
-                     BlockRendererDispatcher blockrendererdispatcher = this.field_72777_q.func_175602_ab();
-                     blockrendererdispatcher.func_175020_a(iblockstate, blockpos, textureatlassprite, this.field_72769_h);
-                  }
-               }
-            }
-         }
-
-         p_174981_1_.func_78381_a();
-         p_174981_2_.func_178969_c(0.0D, 0.0D, 0.0D);
-         this.func_174969_t();
-      }
-
-   }
-
-   public void func_72731_b(EntityPlayer p_72731_1_, RayTraceResult p_72731_2_, int p_72731_3_, float p_72731_4_) {
-      if (p_72731_3_ == 0 && p_72731_2_.field_72313_a == RayTraceResult.Type.BLOCK) {
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-         GlStateManager.func_187441_d(2.0F);
-         GlStateManager.func_179090_x();
-         GlStateManager.func_179132_a(false);
-         BlockPos blockpos = p_72731_2_.func_178782_a();
-         IBlockState iblockstate = this.field_72769_h.func_180495_p(blockpos);
-         if (iblockstate.func_185904_a() != Material.field_151579_a && this.field_72769_h.func_175723_af().func_177746_a(blockpos)) {
-            double d3 = p_72731_1_.field_70142_S + (p_72731_1_.field_70165_t - p_72731_1_.field_70142_S) * (double)p_72731_4_;
-            double d4 = p_72731_1_.field_70137_T + (p_72731_1_.field_70163_u - p_72731_1_.field_70137_T) * (double)p_72731_4_;
-            double d5 = p_72731_1_.field_70136_U + (p_72731_1_.field_70161_v - p_72731_1_.field_70136_U) * (double)p_72731_4_;
-            func_189697_a(iblockstate.func_185918_c(this.field_72769_h, blockpos).func_186662_g(0.0020000000949949026D).func_72317_d(-d3, -d4, -d5), 0.0F, 0.0F, 0.0F, 0.4F);
-         }
-
-         GlStateManager.func_179132_a(true);
-         GlStateManager.func_179098_w();
-         GlStateManager.func_179084_k();
-      }
-
-   }
-
-   public static void func_189697_a(AxisAlignedBB p_189697_0_, float p_189697_1_, float p_189697_2_, float p_189697_3_, float p_189697_4_) {
-      func_189694_a(p_189697_0_.field_72340_a, p_189697_0_.field_72338_b, p_189697_0_.field_72339_c, p_189697_0_.field_72336_d, p_189697_0_.field_72337_e, p_189697_0_.field_72334_f, p_189697_1_, p_189697_2_, p_189697_3_, p_189697_4_);
-   }
-
-   public static void func_189694_a(double p_189694_0_, double p_189694_2_, double p_189694_4_, double p_189694_6_, double p_189694_8_, double p_189694_10_, float p_189694_12_, float p_189694_13_, float p_189694_14_, float p_189694_15_) {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      bufferbuilder.func_181668_a(3, DefaultVertexFormats.field_181706_f);
-      func_189698_a(bufferbuilder, p_189694_0_, p_189694_2_, p_189694_4_, p_189694_6_, p_189694_8_, p_189694_10_, p_189694_12_, p_189694_13_, p_189694_14_, p_189694_15_);
-      tessellator.func_78381_a();
-   }
-
-   public static void func_189698_a(BufferBuilder p_189698_0_, double p_189698_1_, double p_189698_3_, double p_189698_5_, double p_189698_7_, double p_189698_9_, double p_189698_11_, float p_189698_13_, float p_189698_14_, float p_189698_15_, float p_189698_16_) {
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, 0.0F).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_3_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_3_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_9_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_9_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_9_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_9_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_9_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_9_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, 0.0F).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_1_, p_189698_3_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_9_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, 0.0F).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_3_, p_189698_11_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_9_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, 0.0F).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, p_189698_16_).func_181675_d();
-      p_189698_0_.func_181662_b(p_189698_7_, p_189698_3_, p_189698_5_).func_181666_a(p_189698_13_, p_189698_14_, p_189698_15_, 0.0F).func_181675_d();
-   }
-
-   public static void func_189696_b(AxisAlignedBB p_189696_0_, float p_189696_1_, float p_189696_2_, float p_189696_3_, float p_189696_4_) {
-      func_189695_b(p_189696_0_.field_72340_a, p_189696_0_.field_72338_b, p_189696_0_.field_72339_c, p_189696_0_.field_72336_d, p_189696_0_.field_72337_e, p_189696_0_.field_72334_f, p_189696_1_, p_189696_2_, p_189696_3_, p_189696_4_);
-   }
-
-   public static void func_189695_b(double p_189695_0_, double p_189695_2_, double p_189695_4_, double p_189695_6_, double p_189695_8_, double p_189695_10_, float p_189695_12_, float p_189695_13_, float p_189695_14_, float p_189695_15_) {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      bufferbuilder.func_181668_a(5, DefaultVertexFormats.field_181706_f);
-      func_189693_b(bufferbuilder, p_189695_0_, p_189695_2_, p_189695_4_, p_189695_6_, p_189695_8_, p_189695_10_, p_189695_12_, p_189695_13_, p_189695_14_, p_189695_15_);
-      tessellator.func_78381_a();
-   }
-
-   public static void func_189693_b(BufferBuilder p_189693_0_, double p_189693_1_, double p_189693_3_, double p_189693_5_, double p_189693_7_, double p_189693_9_, double p_189693_11_, float p_189693_13_, float p_189693_14_, float p_189693_15_, float p_189693_16_) {
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_3_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_1_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_5_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-      p_189693_0_.func_181662_b(p_189693_7_, p_189693_9_, p_189693_11_).func_181666_a(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).func_181675_d();
-   }
-
-   private void func_184385_a(int p_184385_1_, int p_184385_2_, int p_184385_3_, int p_184385_4_, int p_184385_5_, int p_184385_6_, boolean p_184385_7_) {
-      this.field_175008_n.func_187474_a(p_184385_1_, p_184385_2_, p_184385_3_, p_184385_4_, p_184385_5_, p_184385_6_, p_184385_7_);
-   }
-
-   public void func_184376_a(World p_184376_1_, BlockPos p_184376_2_, IBlockState p_184376_3_, IBlockState p_184376_4_, int p_184376_5_) {
-      int k1 = p_184376_2_.func_177958_n();
-      int l1 = p_184376_2_.func_177956_o();
-      int i2 = p_184376_2_.func_177952_p();
-      this.func_184385_a(k1 - 1, l1 - 1, i2 - 1, k1 + 1, l1 + 1, i2 + 1, (p_184376_5_ & 8) != 0);
-   }
-
-   public void func_174959_b(BlockPos p_174959_1_) {
-      this.field_184387_ae.add(p_174959_1_.func_185334_h());
-   }
-
-   public void func_147585_a(int p_147585_1_, int p_147585_2_, int p_147585_3_, int p_147585_4_, int p_147585_5_, int p_147585_6_) {
-      this.func_184385_a(p_147585_1_ - 1, p_147585_2_ - 1, p_147585_3_ - 1, p_147585_4_ + 1, p_147585_5_ + 1, p_147585_6_ + 1, false);
-   }
-
-   public void func_184377_a(@Nullable SoundEvent p_184377_1_, BlockPos p_184377_2_) {
-      ISound isound = this.field_147593_P.get(p_184377_2_);
-      if (isound != null) {
-         this.field_72777_q.func_147118_V().func_147683_b(isound);
-         this.field_147593_P.remove(p_184377_2_);
-      }
-
-      if (p_184377_1_ != null) {
-         ItemRecord itemrecord = ItemRecord.func_185074_a(p_184377_1_);
-         if (itemrecord != null) {
-            this.field_72777_q.field_71456_v.func_73833_a(itemrecord.func_150927_i());
-         }
-
-         ISound positionedsoundrecord = PositionedSoundRecord.func_184372_a(p_184377_1_, (float)p_184377_2_.func_177958_n(), (float)p_184377_2_.func_177956_o(), (float)p_184377_2_.func_177952_p());
-         this.field_147593_P.put(p_184377_2_, positionedsoundrecord);
-         this.field_72777_q.func_147118_V().func_147682_a(positionedsoundrecord);
-      }
-
-      this.func_193054_a(this.field_72769_h, p_184377_2_, p_184377_1_ != null);
-   }
-
-   private void func_193054_a(World p_193054_1_, BlockPos p_193054_2_, boolean p_193054_3_) {
-      for(EntityLivingBase entitylivingbase : p_193054_1_.func_72872_a(EntityLivingBase.class, (new AxisAlignedBB(p_193054_2_)).func_186662_g(3.0D))) {
-         entitylivingbase.func_191987_a(p_193054_2_, p_193054_3_);
-      }
-
-   }
-
-   public void func_184375_a(@Nullable EntityPlayer p_184375_1_, SoundEvent p_184375_2_, SoundCategory p_184375_3_, double p_184375_4_, double p_184375_6_, double p_184375_8_, float p_184375_10_, float p_184375_11_) {
-   }
-
-   public void func_180442_a(int p_180442_1_, boolean p_180442_2_, double p_180442_3_, double p_180442_5_, double p_180442_7_, double p_180442_9_, double p_180442_11_, double p_180442_13_, int... p_180442_15_) {
-      this.func_190570_a(p_180442_1_, p_180442_2_, false, p_180442_3_, p_180442_5_, p_180442_7_, p_180442_9_, p_180442_11_, p_180442_13_, p_180442_15_);
-   }
-
-   public void func_190570_a(int p_190570_1_, boolean p_190570_2_, boolean p_190570_3_, final double p_190570_4_, final double p_190570_6_, final double p_190570_8_, double p_190570_10_, double p_190570_12_, double p_190570_14_, int... p_190570_16_) {
-      try {
-         this.func_190571_b(p_190570_1_, p_190570_2_, p_190570_3_, p_190570_4_, p_190570_6_, p_190570_8_, p_190570_10_, p_190570_12_, p_190570_14_, p_190570_16_);
-      } catch (Throwable throwable) {
-         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Exception while adding particle");
-         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Particle being added");
-         crashreportcategory.func_71507_a("ID", Integer.valueOf(p_190570_1_));
-         if (p_190570_16_ != null) {
-            crashreportcategory.func_71507_a("Parameters", p_190570_16_);
-         }
-
-         crashreportcategory.func_189529_a("Position", new ICrashReportDetail<String>() {
-            public String call() throws Exception {
-               return CrashReportCategory.func_85074_a(p_190570_4_, p_190570_6_, p_190570_8_);
-            }
-         });
-         throw new ReportedException(crashreport);
-      }
-   }
-
-   private void func_174972_a(EnumParticleTypes p_174972_1_, double p_174972_2_, double p_174972_4_, double p_174972_6_, double p_174972_8_, double p_174972_10_, double p_174972_12_, int... p_174972_14_) {
-      this.func_180442_a(p_174972_1_.func_179348_c(), p_174972_1_.func_179344_e(), p_174972_2_, p_174972_4_, p_174972_6_, p_174972_8_, p_174972_10_, p_174972_12_, p_174972_14_);
-   }
-
-   @Nullable
-   private Particle func_174974_b(int p_174974_1_, boolean p_174974_2_, double p_174974_3_, double p_174974_5_, double p_174974_7_, double p_174974_9_, double p_174974_11_, double p_174974_13_, int... p_174974_15_) {
-      return this.func_190571_b(p_174974_1_, p_174974_2_, false, p_174974_3_, p_174974_5_, p_174974_7_, p_174974_9_, p_174974_11_, p_174974_13_, p_174974_15_);
-   }
-
-   @Nullable
-   private Particle func_190571_b(int p_190571_1_, boolean p_190571_2_, boolean p_190571_3_, double p_190571_4_, double p_190571_6_, double p_190571_8_, double p_190571_10_, double p_190571_12_, double p_190571_14_, int... p_190571_16_) {
-      Entity entity = this.field_72777_q.func_175606_aa();
-      if (this.field_72777_q != null && entity != null && this.field_72777_q.field_71452_i != null) {
-         int k1 = this.func_190572_a(p_190571_3_);
-         double d3 = entity.field_70165_t - p_190571_4_;
-         double d4 = entity.field_70163_u - p_190571_6_;
-         double d5 = entity.field_70161_v - p_190571_8_;
-         if (p_190571_2_) {
-            return this.field_72777_q.field_71452_i.func_178927_a(p_190571_1_, p_190571_4_, p_190571_6_, p_190571_8_, p_190571_10_, p_190571_12_, p_190571_14_, p_190571_16_);
-         } else if (d3 * d3 + d4 * d4 + d5 * d5 > 1024.0D) {
+            return renderChunkBase.getRenderChunkOffset16(this.viewFrustum, facing);
+        }
+        else
+        {
             return null;
-         } else {
-            return k1 > 1 ? null : this.field_72777_q.field_71452_i.func_178927_a(p_190571_1_, p_190571_4_, p_190571_6_, p_190571_8_, p_190571_10_, p_190571_12_, p_190571_14_, p_190571_16_);
-         }
-      } else {
-         return null;
-      }
-   }
+        }
+    }
 
-   private int func_190572_a(boolean p_190572_1_) {
-      int k1 = this.field_72777_q.field_71474_y.field_74362_aa;
-      if (p_190572_1_ && k1 == 2 && this.field_72769_h.field_73012_v.nextInt(10) == 0) {
-         k1 = 1;
-      }
+    private void fixTerrainFrustum(double x, double y, double z)
+    {
+        this.debugFixedClippingHelper = new ClippingHelperImpl();
+        ((ClippingHelperImpl)this.debugFixedClippingHelper).init();
+        Matrix4f matrix4f = new Matrix4f(this.debugFixedClippingHelper.modelviewMatrix);
+        matrix4f.transpose();
+        Matrix4f matrix4f1 = new Matrix4f(this.debugFixedClippingHelper.projectionMatrix);
+        matrix4f1.transpose();
+        Matrix4f matrix4f2 = new Matrix4f();
+        Matrix4f.mul(matrix4f1, matrix4f, matrix4f2);
+        matrix4f2.invert();
+        this.debugTerrainFrustumPosition.x = x;
+        this.debugTerrainFrustumPosition.y = y;
+        this.debugTerrainFrustumPosition.z = z;
+        this.debugTerrainMatrix[0] = new Vector4f(-1.0F, -1.0F, -1.0F, 1.0F);
+        this.debugTerrainMatrix[1] = new Vector4f(1.0F, -1.0F, -1.0F, 1.0F);
+        this.debugTerrainMatrix[2] = new Vector4f(1.0F, 1.0F, -1.0F, 1.0F);
+        this.debugTerrainMatrix[3] = new Vector4f(-1.0F, 1.0F, -1.0F, 1.0F);
+        this.debugTerrainMatrix[4] = new Vector4f(-1.0F, -1.0F, 1.0F, 1.0F);
+        this.debugTerrainMatrix[5] = new Vector4f(1.0F, -1.0F, 1.0F, 1.0F);
+        this.debugTerrainMatrix[6] = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.debugTerrainMatrix[7] = new Vector4f(-1.0F, 1.0F, 1.0F, 1.0F);
 
-      if (k1 == 1 && this.field_72769_h.field_73012_v.nextInt(3) == 0) {
-         k1 = 2;
-      }
+        for (int i = 0; i < 8; ++i)
+        {
+            Matrix4f.transform(matrix4f2, this.debugTerrainMatrix[i], this.debugTerrainMatrix[i]);
+            this.debugTerrainMatrix[i].x /= this.debugTerrainMatrix[i].w;
+            this.debugTerrainMatrix[i].y /= this.debugTerrainMatrix[i].w;
+            this.debugTerrainMatrix[i].z /= this.debugTerrainMatrix[i].w;
+            this.debugTerrainMatrix[i].w = 1.0F;
+        }
+    }
 
-      return k1;
-   }
+    protected Vector3f getViewVector(Entity entityIn, double partialTicks)
+    {
+        float f = (float)((double)entityIn.prevRotationPitch + (double)(entityIn.rotationPitch - entityIn.prevRotationPitch) * partialTicks);
+        float f1 = (float)((double)entityIn.prevRotationYaw + (double)(entityIn.rotationYaw - entityIn.prevRotationYaw) * partialTicks);
 
-   public void func_72703_a(Entity p_72703_1_) {
-   }
+        if (Minecraft.getMinecraft().gameSettings.thirdPersonView == 2)
+        {
+            f += 180.0F;
+        }
 
-   public void func_72709_b(Entity p_72709_1_) {
-   }
+        float f2 = MathHelper.cos(-f1 * 0.017453292F - (float)Math.PI);
+        float f3 = MathHelper.sin(-f1 * 0.017453292F - (float)Math.PI);
+        float f4 = -MathHelper.cos(-f * 0.017453292F);
+        float f5 = MathHelper.sin(-f * 0.017453292F);
+        return new Vector3f(f3 * f4, f5, f2 * f4);
+    }
 
-   public void func_72728_f() {
-   }
+    public int renderBlockLayer(BlockRenderLayer blockLayerIn, double partialTicks, int pass, Entity entityIn)
+    {
+        RenderHelper.disableStandardItemLighting();
 
-   public void func_180440_a(int p_180440_1_, BlockPos p_180440_2_, int p_180440_3_) {
-      switch(p_180440_1_) {
-      case 1023:
-      case 1028:
-      case 1038:
-         Entity entity = this.field_72777_q.func_175606_aa();
-         if (entity != null) {
-            double d3 = (double)p_180440_2_.func_177958_n() - entity.field_70165_t;
-            double d4 = (double)p_180440_2_.func_177956_o() - entity.field_70163_u;
-            double d5 = (double)p_180440_2_.func_177952_p() - entity.field_70161_v;
-            double d6 = Math.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
-            double d7 = entity.field_70165_t;
-            double d8 = entity.field_70163_u;
-            double d9 = entity.field_70161_v;
-            if (d6 > 0.0D) {
-               d7 += d3 / d6 * 2.0D;
-               d8 += d4 / d6 * 2.0D;
-               d9 += d5 / d6 * 2.0D;
+        if (blockLayerIn == BlockRenderLayer.TRANSLUCENT)
+        {
+            this.mc.mcProfiler.startSection("translucent_sort");
+            double d0 = entityIn.posX - this.prevRenderSortX;
+            double d1 = entityIn.posY - this.prevRenderSortY;
+            double d2 = entityIn.posZ - this.prevRenderSortZ;
+
+            if (d0 * d0 + d1 * d1 + d2 * d2 > 1.0D)
+            {
+                this.prevRenderSortX = entityIn.posX;
+                this.prevRenderSortY = entityIn.posY;
+                this.prevRenderSortZ = entityIn.posZ;
+                int k = 0;
+                this.chunksToResortTransparency.clear();
+
+                for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos)
+                {
+                    if (renderglobal$containerlocalrenderinformation.renderChunk.compiledChunk.isLayerStarted(blockLayerIn) && k++ < 15)
+                    {
+                        this.chunksToResortTransparency.add(renderglobal$containerlocalrenderinformation.renderChunk);
+                    }
+                }
             }
 
-            if (p_180440_1_ == 1023) {
-               this.field_72769_h.func_184134_a(d7, d8, d9, SoundEvents.field_187855_gD, SoundCategory.HOSTILE, 1.0F, 1.0F, false);
-            } else if (p_180440_1_ == 1038) {
-               this.field_72769_h.func_184134_a(d7, d8, d9, SoundEvents.field_193782_bq, SoundCategory.HOSTILE, 1.0F, 1.0F, false);
-            } else {
-               this.field_72769_h.func_184134_a(d7, d8, d9, SoundEvents.field_187522_aL, SoundCategory.HOSTILE, 5.0F, 1.0F, false);
+            this.mc.mcProfiler.endSection();
+        }
+
+        this.mc.mcProfiler.startSection("filterempty");
+        int l = 0;
+        boolean flag = blockLayerIn == BlockRenderLayer.TRANSLUCENT;
+        int i1 = flag ? this.renderInfos.size() - 1 : 0;
+        int i = flag ? -1 : this.renderInfos.size();
+        int j1 = flag ? -1 : 1;
+
+        for (int j = i1; j != i; j += j1)
+        {
+            RenderChunk renderchunk = (this.renderInfos.get(j)).renderChunk;
+
+            if (!renderchunk.getCompiledChunk().isLayerEmpty(blockLayerIn))
+            {
+                ++l;
+                this.renderContainer.addRenderChunk(renderchunk, blockLayerIn);
             }
-         }
-      default:
-      }
-   }
+        }
 
-   public void func_180439_a(EntityPlayer p_180439_1_, int p_180439_2_, BlockPos p_180439_3_, int p_180439_4_) {
-      Random random = this.field_72769_h.field_73012_v;
-      switch(p_180439_2_) {
-      case 1000:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187574_as, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-         break;
-      case 1001:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187576_at, SoundCategory.BLOCKS, 1.0F, 1.2F, false);
-         break;
-      case 1002:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187578_au, SoundCategory.BLOCKS, 1.0F, 1.2F, false);
-         break;
-      case 1003:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187528_aR, SoundCategory.NEUTRAL, 1.0F, 1.2F, false);
-         break;
-      case 1004:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187634_bp, SoundCategory.NEUTRAL, 1.0F, 1.2F, false);
-         break;
-      case 1005:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187611_cI, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1006:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187875_gN, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1007:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187879_gP, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1008:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187613_bi, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1009:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
-         break;
-      case 1010:
-         if (Item.func_150899_d(p_180439_4_) instanceof ItemRecord) {
-            this.field_72769_h.func_184149_a(p_180439_3_, ((ItemRecord)Item.func_150899_d(p_180439_4_)).func_185075_h());
-         } else {
-            this.field_72769_h.func_184149_a(p_180439_3_, (SoundEvent)null);
-         }
-         break;
-      case 1011:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187608_cH, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1012:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187873_gM, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1013:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187877_gO, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1014:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187610_bh, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1015:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187559_bL, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1016:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187557_bK, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1017:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187527_aQ, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1018:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187606_E, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1019:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187927_ha, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1020:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187928_hb, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1021:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187929_hc, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1022:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187926_gz, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1024:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187853_gC, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1025:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187744_z, SoundCategory.NEUTRAL, 0.05F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1026:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187945_hs, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1027:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187941_ho, SoundCategory.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
-         break;
-      case 1029:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187680_c, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1030:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187698_i, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1031:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187689_f, SoundCategory.BLOCKS, 0.3F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1032:
-         this.field_72777_q.func_147118_V().func_147682_a(PositionedSoundRecord.func_184371_a(SoundEvents.field_187812_eh, random.nextFloat() * 0.4F + 0.8F));
-         break;
-      case 1033:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187542_ac, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-         break;
-      case 1034:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187540_ab, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-         break;
-      case 1035:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187621_J, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-         break;
-      case 1036:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187614_cJ, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 1037:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187617_cK, SoundCategory.BLOCKS, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 2000:
-         int j2 = p_180439_4_ % 3 - 1;
-         int k1 = p_180439_4_ / 3 % 3 - 1;
-         double d11 = (double)p_180439_3_.func_177958_n() + (double)j2 * 0.6D + 0.5D;
-         double d13 = (double)p_180439_3_.func_177956_o() + 0.5D;
-         double d15 = (double)p_180439_3_.func_177952_p() + (double)k1 * 0.6D + 0.5D;
-
-         for(int l2 = 0; l2 < 10; ++l2) {
-            double d16 = random.nextDouble() * 0.2D + 0.01D;
-            double d19 = d11 + (double)j2 * 0.01D + (random.nextDouble() - 0.5D) * (double)k1 * 0.5D;
-            double d22 = d13 + (random.nextDouble() - 0.5D) * 0.5D;
-            double d25 = d15 + (double)k1 * 0.01D + (random.nextDouble() - 0.5D) * (double)j2 * 0.5D;
-            double d27 = (double)j2 * d16 + random.nextGaussian() * 0.01D;
-            double d29 = -0.03D + random.nextGaussian() * 0.01D;
-            double d30 = (double)k1 * d16 + random.nextGaussian() * 0.01D;
-            this.func_174972_a(EnumParticleTypes.SMOKE_NORMAL, d19, d22, d25, d27, d29, d30);
-         }
-
-         return;
-      case 2001:
-         Block block = Block.func_149729_e(p_180439_4_ & 4095);
-         if (block.func_176223_P().func_185904_a() != Material.field_151579_a) {
-            SoundType soundtype = block.func_185467_w();
-            this.field_72769_h.func_184156_a(p_180439_3_, soundtype.func_185845_c(), SoundCategory.BLOCKS, (soundtype.func_185843_a() + 1.0F) / 2.0F, soundtype.func_185847_b() * 0.8F, false);
-         }
-
-         this.field_72777_q.field_71452_i.func_180533_a(p_180439_3_, block.func_176203_a(p_180439_4_ >> 12 & 255));
-         break;
-      case 2002:
-      case 2007:
-         double d9 = (double)p_180439_3_.func_177958_n();
-         double d10 = (double)p_180439_3_.func_177956_o();
-         double d12 = (double)p_180439_3_.func_177952_p();
-
-         for(int k2 = 0; k2 < 8; ++k2) {
-            this.func_174972_a(EnumParticleTypes.ITEM_CRACK, d9, d10, d12, random.nextGaussian() * 0.15D, random.nextDouble() * 0.2D, random.nextGaussian() * 0.15D, Item.func_150891_b(Items.field_185155_bH));
-         }
-
-         float f5 = (float)(p_180439_4_ >> 16 & 255) / 255.0F;
-         float f = (float)(p_180439_4_ >> 8 & 255) / 255.0F;
-         float f1 = (float)(p_180439_4_ >> 0 & 255) / 255.0F;
-         EnumParticleTypes enumparticletypes = p_180439_2_ == 2007 ? EnumParticleTypes.SPELL_INSTANT : EnumParticleTypes.SPELL;
-
-         for(int j3 = 0; j3 < 100; ++j3) {
-            double d18 = random.nextDouble() * 4.0D;
-            double d21 = random.nextDouble() * 3.141592653589793D * 2.0D;
-            double d24 = Math.cos(d21) * d18;
-            double d26 = 0.01D + random.nextDouble() * 0.5D;
-            double d28 = Math.sin(d21) * d18;
-            Particle particle1 = this.func_174974_b(enumparticletypes.func_179348_c(), enumparticletypes.func_179344_e(), d9 + d24 * 0.1D, d10 + 0.3D, d12 + d28 * 0.1D, d24, d26, d28);
-            if (particle1 != null) {
-               float f4 = 0.75F + random.nextFloat() * 0.25F;
-               particle1.func_70538_b(f5 * f4, f * f4, f1 * f4);
-               particle1.func_70543_e((float)d18);
+        if (l == 0)
+        {
+            this.mc.mcProfiler.endSection();
+            return l;
+        }
+        else
+        {
+            if (Config.isFogOff() && this.mc.entityRenderer.fogStandard)
+            {
+                GlStateManager.disableFog();
             }
-         }
 
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187825_fO, SoundCategory.NEUTRAL, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 2003:
-         double d3 = (double)p_180439_3_.func_177958_n() + 0.5D;
-         double d4 = (double)p_180439_3_.func_177956_o();
-         double d5 = (double)p_180439_3_.func_177952_p() + 0.5D;
+            this.mc.mcProfiler.endStartSection("render_" + blockLayerIn);
+            this.renderBlockLayer(blockLayerIn);
+            this.mc.mcProfiler.endSection();
+            return l;
+        }
+    }
 
-         for(int l1 = 0; l1 < 8; ++l1) {
-            this.func_174972_a(EnumParticleTypes.ITEM_CRACK, d3, d4, d5, random.nextGaussian() * 0.15D, random.nextDouble() * 0.2D, random.nextGaussian() * 0.15D, Item.func_150891_b(Items.field_151061_bv));
-         }
+    private void renderBlockLayer(BlockRenderLayer blockLayerIn)
+    {
+        this.mc.entityRenderer.enableLightmap();
 
-         for(double d14 = 0.0D; d14 < 6.283185307179586D; d14 += 0.15707963267948966D) {
-            this.func_174972_a(EnumParticleTypes.PORTAL, d3 + Math.cos(d14) * 5.0D, d4 - 0.4D, d5 + Math.sin(d14) * 5.0D, Math.cos(d14) * -5.0D, 0.0D, Math.sin(d14) * -5.0D);
-            this.func_174972_a(EnumParticleTypes.PORTAL, d3 + Math.cos(d14) * 5.0D, d4 - 0.4D, d5 + Math.sin(d14) * 5.0D, Math.cos(d14) * -7.0D, 0.0D, Math.sin(d14) * -7.0D);
-         }
+        if (OpenGlHelper.useVbo())
+        {
+            GlStateManager.glEnableClientState(32884);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.glEnableClientState(32888);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.lightmapTexUnit);
+            GlStateManager.glEnableClientState(32888);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.glEnableClientState(32886);
+        }
 
-         return;
-      case 2004:
-         for(int i3 = 0; i3 < 20; ++i3) {
-            double d17 = (double)p_180439_3_.func_177958_n() + 0.5D + ((double)this.field_72769_h.field_73012_v.nextFloat() - 0.5D) * 2.0D;
-            double d20 = (double)p_180439_3_.func_177956_o() + 0.5D + ((double)this.field_72769_h.field_73012_v.nextFloat() - 0.5D) * 2.0D;
-            double d23 = (double)p_180439_3_.func_177952_p() + 0.5D + ((double)this.field_72769_h.field_73012_v.nextFloat() - 0.5D) * 2.0D;
-            this.field_72769_h.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, d17, d20, d23, 0.0D, 0.0D, 0.0D, new int[0]);
-            this.field_72769_h.func_175688_a(EnumParticleTypes.FLAME, d17, d20, d23, 0.0D, 0.0D, 0.0D, new int[0]);
-         }
+        if (Config.isShaders())
+        {
+            ShadersRender.preRenderChunkLayer(blockLayerIn);
+        }
 
-         return;
-      case 2005:
-         ItemDye.func_180617_a(this.field_72769_h, p_180439_3_, p_180439_4_);
-         break;
-      case 2006:
-         for(int i2 = 0; i2 < 200; ++i2) {
-            float f2 = random.nextFloat() * 4.0F;
-            float f3 = random.nextFloat() * 6.2831855F;
-            double d6 = (double)(MathHelper.func_76134_b(f3) * f2);
-            double d7 = 0.01D + random.nextDouble() * 0.5D;
-            double d8 = (double)(MathHelper.func_76126_a(f3) * f2);
-            Particle particle = this.func_174974_b(EnumParticleTypes.DRAGON_BREATH.func_179348_c(), false, (double)p_180439_3_.func_177958_n() + d6 * 0.1D, (double)p_180439_3_.func_177956_o() + 0.3D, (double)p_180439_3_.func_177952_p() + d8 * 0.1D, d6, d7, d8);
-            if (particle != null) {
-               particle.func_70543_e(f2);
+        this.renderContainer.renderChunkLayer(blockLayerIn);
+
+        if (Config.isShaders())
+        {
+            ShadersRender.postRenderChunkLayer(blockLayerIn);
+        }
+
+        if (OpenGlHelper.useVbo())
+        {
+            for (VertexFormatElement vertexformatelement : DefaultVertexFormats.BLOCK.getElements())
+            {
+                VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.getUsage();
+                int k1 = vertexformatelement.getIndex();
+
+                switch (vertexformatelement$enumusage)
+                {
+                    case POSITION:
+                        GlStateManager.glDisableClientState(32884);
+                        break;
+
+                    case UV:
+                        OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit + k1);
+                        GlStateManager.glDisableClientState(32888);
+                        OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+                        break;
+
+                    case COLOR:
+                        GlStateManager.glDisableClientState(32886);
+                        GlStateManager.resetColor();
+                }
             }
-         }
+        }
 
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187523_aM, SoundCategory.HOSTILE, 1.0F, this.field_72769_h.field_73012_v.nextFloat() * 0.1F + 0.9F, false);
-         break;
-      case 3000:
-         this.field_72769_h.func_175682_a(EnumParticleTypes.EXPLOSION_HUGE, true, (double)p_180439_3_.func_177958_n() + 0.5D, (double)p_180439_3_.func_177956_o() + 0.5D, (double)p_180439_3_.func_177952_p() + 0.5D, 0.0D, 0.0D, 0.0D, new int[0]);
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187598_bd, SoundCategory.BLOCKS, 10.0F, (1.0F + (this.field_72769_h.field_73012_v.nextFloat() - this.field_72769_h.field_73012_v.nextFloat()) * 0.2F) * 0.7F, false);
-         break;
-      case 3001:
-         this.field_72769_h.func_184156_a(p_180439_3_, SoundEvents.field_187525_aO, SoundCategory.HOSTILE, 64.0F, 0.8F + this.field_72769_h.field_73012_v.nextFloat() * 0.3F, false);
-      }
+        this.mc.entityRenderer.disableLightmap();
+    }
 
-   }
+    private void cleanupDamagedBlocks(Iterator<DestroyBlockProgress> iteratorIn)
+    {
+        while (iteratorIn.hasNext())
+        {
+            DestroyBlockProgress destroyblockprogress = iteratorIn.next();
+            int k1 = destroyblockprogress.getCreationCloudUpdateTick();
 
-   public void func_180441_b(int p_180441_1_, BlockPos p_180441_2_, int p_180441_3_) {
-      if (p_180441_3_ >= 0 && p_180441_3_ < 10) {
-         DestroyBlockProgress destroyblockprogress = this.field_72738_E.get(Integer.valueOf(p_180441_1_));
-         if (destroyblockprogress == null || destroyblockprogress.func_180246_b().func_177958_n() != p_180441_2_.func_177958_n() || destroyblockprogress.func_180246_b().func_177956_o() != p_180441_2_.func_177956_o() || destroyblockprogress.func_180246_b().func_177952_p() != p_180441_2_.func_177952_p()) {
-            destroyblockprogress = new DestroyBlockProgress(p_180441_1_, p_180441_2_);
-            this.field_72738_E.put(Integer.valueOf(p_180441_1_), destroyblockprogress);
-         }
+            if (this.cloudTickCounter - k1 > 400)
+            {
+                iteratorIn.remove();
+            }
+        }
+    }
 
-         destroyblockprogress.func_73107_a(p_180441_3_);
-         destroyblockprogress.func_82744_b(this.field_72773_u);
-      } else {
-         this.field_72738_E.remove(Integer.valueOf(p_180441_1_));
-      }
+    public void updateClouds()
+    {
+        if (Config.isShaders() && Keyboard.isKeyDown(61) && Keyboard.isKeyDown(19))
+        {
+            Shaders.uninit();
+            Shaders.loadShaderPack();
+            Reflector.Minecraft_actionKeyF3.setValue(this.mc, Boolean.TRUE);
+        }
 
-   }
+        ++this.cloudTickCounter;
 
-   public boolean func_184384_n() {
-      return this.field_175009_l.isEmpty() && this.field_174995_M.func_188247_f();
-   }
+        if (this.cloudTickCounter % 20 == 0)
+        {
+            this.cleanupDamagedBlocks(this.damagedBlocks.values().iterator());
+        }
 
-   public void func_174979_m() {
-      this.field_147595_R = true;
-   }
+        if (!this.setLightUpdates.isEmpty() && !this.renderDispatcher.hasNoFreeRenderBuilders() && this.chunksToUpdate.isEmpty())
+        {
+            Iterator<BlockPos> iterator = this.setLightUpdates.iterator();
 
-   public void func_181023_a(Collection<TileEntity> p_181023_1_, Collection<TileEntity> p_181023_2_) {
-      synchronized(this.field_181024_n) {
-         this.field_181024_n.removeAll(p_181023_1_);
-         this.field_181024_n.addAll(p_181023_2_);
-      }
-   }
+            while (iterator.hasNext())
+            {
+                BlockPos blockpos = iterator.next();
+                iterator.remove();
+                int k1 = blockpos.getX();
+                int l1 = blockpos.getY();
+                int i2 = blockpos.getZ();
+                this.markBlocksForUpdate(k1 - 1, l1 - 1, i2 - 1, k1 + 1, l1 + 1, i2 + 1, false);
+            }
+        }
+    }
 
-   class ContainerLocalRenderInformation {
-      final RenderChunk field_178036_a;
-      final EnumFacing field_178034_b;
-      byte field_178035_c;
-      final int field_178032_d;
+    private void renderSkyEnd()
+    {
+        if (Config.isSkyEnabled())
+        {
+            GlStateManager.disableFog();
+            GlStateManager.disableAlpha();
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderHelper.disableStandardItemLighting();
+            GlStateManager.depthMask(false);
+            this.renderEngine.bindTexture(END_SKY_TEXTURES);
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
 
-      private ContainerLocalRenderInformation(RenderChunk p_i46248_2_, EnumFacing p_i46248_3_, @Nullable int p_i46248_4_) {
-         this.field_178036_a = p_i46248_2_;
-         this.field_178034_b = p_i46248_3_;
-         this.field_178032_d = p_i46248_4_;
-      }
+            for (int k1 = 0; k1 < 6; ++k1)
+            {
+                GlStateManager.pushMatrix();
 
-      public void func_189561_a(byte p_189561_1_, EnumFacing p_189561_2_) {
-         this.field_178035_c = (byte)(this.field_178035_c | p_189561_1_ | 1 << p_189561_2_.ordinal());
-      }
+                if (k1 == 1)
+                {
+                    GlStateManager.rotate(90.0F, 1.0F, 0.0F, 0.0F);
+                }
 
-      public boolean func_189560_a(EnumFacing p_189560_1_) {
-         return (this.field_178035_c & 1 << p_189560_1_.ordinal()) > 0;
-      }
-   }
+                if (k1 == 2)
+                {
+                    GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
+                }
+
+                if (k1 == 3)
+                {
+                    GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
+                }
+
+                if (k1 == 4)
+                {
+                    GlStateManager.rotate(90.0F, 0.0F, 0.0F, 1.0F);
+                }
+
+                if (k1 == 5)
+                {
+                    GlStateManager.rotate(-90.0F, 0.0F, 0.0F, 1.0F);
+                }
+
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                int l1 = 40;
+                int i2 = 40;
+                int j2 = 40;
+
+                if (Config.isCustomColors())
+                {
+                    Vec3d vec3d = new Vec3d((double)l1 / 255.0D, (double)i2 / 255.0D, (double)j2 / 255.0D);
+                    vec3d = CustomColors.getWorldSkyColor(vec3d, this.theWorld, this.mc.getRenderViewEntity(), 0.0F);
+                    l1 = (int)(vec3d.xCoord * 255.0D);
+                    i2 = (int)(vec3d.yCoord * 255.0D);
+                    j2 = (int)(vec3d.zCoord * 255.0D);
+                }
+
+                bufferbuilder.pos(-100.0D, -100.0D, -100.0D).tex(0.0D, 0.0D).color(l1, i2, j2, 255).endVertex();
+                bufferbuilder.pos(-100.0D, -100.0D, 100.0D).tex(0.0D, 16.0D).color(l1, i2, j2, 255).endVertex();
+                bufferbuilder.pos(100.0D, -100.0D, 100.0D).tex(16.0D, 16.0D).color(l1, i2, j2, 255).endVertex();
+                bufferbuilder.pos(100.0D, -100.0D, -100.0D).tex(16.0D, 0.0D).color(l1, i2, j2, 255).endVertex();
+                tessellator.draw();
+                GlStateManager.popMatrix();
+            }
+
+            GlStateManager.depthMask(true);
+            GlStateManager.enableTexture2D();
+            GlStateManager.enableAlpha();
+            GlStateManager.disableBlend();
+        }
+    }
+
+    public void renderSky(float partialTicks, int pass)
+    {
+        if (Reflector.ForgeWorldProvider_getSkyRenderer.exists())
+        {
+            WorldProvider worldprovider = this.mc.world.provider;
+            Object object = Reflector.call(worldprovider, Reflector.ForgeWorldProvider_getSkyRenderer);
+
+            if (object != null)
+            {
+                Reflector.callVoid(object, Reflector.IRenderHandler_render, partialTicks, this.theWorld, this.mc);
+                return;
+            }
+        }
+
+        if (this.mc.world.provider.getDimensionType() == DimensionType.THE_END)
+        {
+            this.renderSkyEnd();
+        }
+        else if (this.mc.world.provider.isSurfaceWorld())
+        {
+            GlStateManager.disableTexture2D();
+            boolean flag1 = Config.isShaders();
+
+            if (flag1)
+            {
+                Shaders.disableTexture2D();
+            }
+
+            Vec3d vec3d = this.theWorld.getSkyColor(this.mc.getRenderViewEntity(), partialTicks);
+            vec3d = CustomColors.getSkyColor(vec3d, this.mc.world, this.mc.getRenderViewEntity().posX, this.mc.getRenderViewEntity().posY + 1.0D, this.mc.getRenderViewEntity().posZ);
+
+            if (flag1)
+            {
+                Shaders.setSkyColor(vec3d);
+            }
+
+            float f = (float)vec3d.xCoord;
+            float f1 = (float)vec3d.yCoord;
+            float f2 = (float)vec3d.zCoord;
+
+            if (pass != 2)
+            {
+                float f3 = (f * 30.0F + f1 * 59.0F + f2 * 11.0F) / 100.0F;
+                float f4 = (f * 30.0F + f1 * 70.0F) / 100.0F;
+                float f5 = (f * 30.0F + f2 * 70.0F) / 100.0F;
+                f = f3;
+                f1 = f4;
+                f2 = f5;
+            }
+
+            GlStateManager.color(f, f1, f2);
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
+            GlStateManager.depthMask(false);
+            GlStateManager.enableFog();
+
+            if (flag1)
+            {
+                Shaders.enableFog();
+            }
+
+            GlStateManager.color(f, f1, f2);
+
+            if (flag1)
+            {
+                Shaders.preSkyList();
+            }
+
+            if (Config.isSkyEnabled())
+            {
+                if (this.vboEnabled)
+                {
+                    this.skyVBO.bindBuffer();
+                    GlStateManager.glEnableClientState(32884);
+                    GlStateManager.glVertexPointer(3, 5126, 12, 0);
+                    this.skyVBO.drawArrays(7);
+                    this.skyVBO.unbindBuffer();
+                    GlStateManager.glDisableClientState(32884);
+                }
+                else
+                {
+                    GlStateManager.callList(this.glSkyList);
+                }
+            }
+
+            GlStateManager.disableFog();
+
+            if (flag1)
+            {
+                Shaders.disableFog();
+            }
+
+            GlStateManager.disableAlpha();
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderHelper.disableStandardItemLighting();
+            float[] afloat = this.theWorld.provider.calcSunriseSunsetColors(this.theWorld.getCelestialAngle(partialTicks), partialTicks);
+
+            if (afloat != null && Config.isSunMoonEnabled())
+            {
+                GlStateManager.disableTexture2D();
+
+                if (flag1)
+                {
+                    Shaders.disableTexture2D();
+                }
+
+                GlStateManager.shadeModel(7425);
+                GlStateManager.pushMatrix();
+                GlStateManager.rotate(90.0F, 1.0F, 0.0F, 0.0F);
+                GlStateManager.rotate(MathHelper.sin(this.theWorld.getCelestialAngleRadians(partialTicks)) < 0.0F ? 180.0F : 0.0F, 0.0F, 0.0F, 1.0F);
+                GlStateManager.rotate(90.0F, 0.0F, 0.0F, 1.0F);
+                float f6 = afloat[0];
+                float f7 = afloat[1];
+                float f8 = afloat[2];
+
+                if (pass != 2)
+                {
+                    float f9 = (f6 * 30.0F + f7 * 59.0F + f8 * 11.0F) / 100.0F;
+                    float f10 = (f6 * 30.0F + f7 * 70.0F) / 100.0F;
+                    float f11 = (f6 * 30.0F + f8 * 70.0F) / 100.0F;
+                    f6 = f9;
+                    f7 = f10;
+                    f8 = f11;
+                }
+
+                bufferbuilder.begin(6, DefaultVertexFormats.POSITION_COLOR);
+                bufferbuilder.pos(0.0D, 100.0D, 0.0D).color(f6, f7, f8, afloat[3]).endVertex();
+                int l1 = 16;
+
+                for (int j2 = 0; j2 <= 16; ++j2)
+                {
+                    float f18 = (float)j2 * ((float)Math.PI * 2F) / 16.0F;
+                    float f12 = MathHelper.sin(f18);
+                    float f13 = MathHelper.cos(f18);
+                    bufferbuilder.pos((double)(f12 * 120.0F), (double)(f13 * 120.0F), (double)(-f13 * 40.0F * afloat[3])).color(afloat[0], afloat[1], afloat[2], 0.0F).endVertex();
+                }
+
+                tessellator.draw();
+                GlStateManager.popMatrix();
+                GlStateManager.shadeModel(7424);
+            }
+
+            GlStateManager.enableTexture2D();
+
+            if (flag1)
+            {
+                Shaders.enableTexture2D();
+            }
+
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.pushMatrix();
+            float f15 = 1.0F - this.theWorld.getRainStrength(partialTicks);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, f15);
+            GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
+            CustomSky.renderSky(this.theWorld, this.renderEngine, partialTicks);
+
+            if (flag1)
+            {
+                Shaders.preCelestialRotate();
+            }
+
+            GlStateManager.rotate(this.theWorld.getCelestialAngle(partialTicks) * 360.0F, 1.0F, 0.0F, 0.0F);
+
+            if (flag1)
+            {
+                Shaders.postCelestialRotate();
+            }
+
+            float f16 = 30.0F;
+
+            if (Config.isSunTexture())
+            {
+                this.renderEngine.bindTexture(SUN_TEXTURES);
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                bufferbuilder.pos((double)(-f16), 100.0D, (double)(-f16)).tex(0.0D, 0.0D).endVertex();
+                bufferbuilder.pos((double)f16, 100.0D, (double)(-f16)).tex(1.0D, 0.0D).endVertex();
+                bufferbuilder.pos((double)f16, 100.0D, (double)f16).tex(1.0D, 1.0D).endVertex();
+                bufferbuilder.pos((double)(-f16), 100.0D, (double)f16).tex(0.0D, 1.0D).endVertex();
+                tessellator.draw();
+            }
+
+            f16 = 20.0F;
+
+            if (Config.isMoonTexture())
+            {
+                this.renderEngine.bindTexture(MOON_PHASES_TEXTURES);
+                int k1 = this.theWorld.getMoonPhase();
+                int i2 = k1 % 4;
+                int k2 = k1 / 4 % 2;
+                float f19 = (float)(i2 + 0) / 4.0F;
+                float f21 = (float)(k2 + 0) / 2.0F;
+                float f23 = (float)(i2 + 1) / 4.0F;
+                float f14 = (float)(k2 + 1) / 2.0F;
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                bufferbuilder.pos((double)(-f16), -100.0D, (double)f16).tex((double)f23, (double)f14).endVertex();
+                bufferbuilder.pos((double)f16, -100.0D, (double)f16).tex((double)f19, (double)f14).endVertex();
+                bufferbuilder.pos((double)f16, -100.0D, (double)(-f16)).tex((double)f19, (double)f21).endVertex();
+                bufferbuilder.pos((double)(-f16), -100.0D, (double)(-f16)).tex((double)f23, (double)f21).endVertex();
+                tessellator.draw();
+            }
+
+            GlStateManager.disableTexture2D();
+
+            if (flag1)
+            {
+                Shaders.disableTexture2D();
+            }
+
+            float f17 = this.theWorld.getStarBrightness(partialTicks) * f15;
+
+            if (f17 > 0.0F && Config.isStarsEnabled() && !CustomSky.hasSkyLayers(this.theWorld))
+            {
+                GlStateManager.color(f17, f17, f17, f17);
+
+                if (this.vboEnabled)
+                {
+                    this.starVBO.bindBuffer();
+                    GlStateManager.glEnableClientState(32884);
+                    GlStateManager.glVertexPointer(3, 5126, 12, 0);
+                    this.starVBO.drawArrays(7);
+                    this.starVBO.unbindBuffer();
+                    GlStateManager.glDisableClientState(32884);
+                }
+                else
+                {
+                    GlStateManager.callList(this.starGLCallList);
+                }
+            }
+
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.disableBlend();
+            GlStateManager.enableAlpha();
+            GlStateManager.enableFog();
+
+            if (flag1)
+            {
+                Shaders.enableFog();
+            }
+
+            GlStateManager.popMatrix();
+            GlStateManager.disableTexture2D();
+
+            if (flag1)
+            {
+                Shaders.disableTexture2D();
+            }
+
+            GlStateManager.color(0.0F, 0.0F, 0.0F);
+            double d3 = this.mc.player.getPositionEyes(partialTicks).yCoord - this.theWorld.getHorizon();
+
+            if (d3 < 0.0D)
+            {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0.0F, 12.0F, 0.0F);
+
+                if (this.vboEnabled)
+                {
+                    this.sky2VBO.bindBuffer();
+                    GlStateManager.glEnableClientState(32884);
+                    GlStateManager.glVertexPointer(3, 5126, 12, 0);
+                    this.sky2VBO.drawArrays(7);
+                    this.sky2VBO.unbindBuffer();
+                    GlStateManager.glDisableClientState(32884);
+                }
+                else
+                {
+                    GlStateManager.callList(this.glSkyList2);
+                }
+
+                GlStateManager.popMatrix();
+                float f20 = 1.0F;
+                float f22 = -((float)(d3 + 65.0D));
+                float f24 = -1.0F;
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+                bufferbuilder.pos(-1.0D, (double)f22, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, (double)f22, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, (double)f22, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, (double)f22, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, (double)f22, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, (double)f22, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, (double)f22, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, (double)f22, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+                tessellator.draw();
+            }
+
+            if (this.theWorld.provider.isSkyColored())
+            {
+                GlStateManager.color(f * 0.2F + 0.04F, f1 * 0.2F + 0.04F, f2 * 0.6F + 0.1F);
+            }
+            else
+            {
+                GlStateManager.color(f, f1, f2);
+            }
+
+            if (this.mc.gameSettings.renderDistanceChunks <= 4)
+            {
+                GlStateManager.color(this.mc.entityRenderer.fogColorRed, this.mc.entityRenderer.fogColorGreen, this.mc.entityRenderer.fogColorBlue);
+            }
+
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, -((float)(d3 - 16.0D)), 0.0F);
+
+            if (Config.isSkyEnabled())
+            {
+                GlStateManager.callList(this.glSkyList2);
+            }
+
+            GlStateManager.popMatrix();
+            GlStateManager.enableTexture2D();
+
+            if (flag1)
+            {
+                Shaders.enableTexture2D();
+            }
+
+            GlStateManager.depthMask(true);
+        }
+    }
+
+    public void renderClouds(float partialTicks, int pass, double p_180447_3_, double p_180447_5_, double p_180447_7_)
+    {
+        if (!Config.isCloudsOff())
+        {
+            if (Reflector.ForgeWorldProvider_getCloudRenderer.exists())
+            {
+                WorldProvider worldprovider = this.mc.world.provider;
+                Object object = Reflector.call(worldprovider, Reflector.ForgeWorldProvider_getCloudRenderer);
+
+                if (object != null)
+                {
+                    Reflector.callVoid(object, Reflector.IRenderHandler_render, partialTicks, this.theWorld, this.mc);
+                    return;
+                }
+            }
+
+            if (this.mc.world.provider.isSurfaceWorld())
+            {
+                if (Config.isShaders())
+                {
+                    Shaders.beginClouds();
+                }
+
+                if (Config.isCloudsFancy())
+                {
+                    this.renderCloudsFancy(partialTicks, pass, p_180447_3_, p_180447_5_, p_180447_7_);
+                }
+                else
+                {
+                    float f9 = partialTicks;
+                    partialTicks = 0.0F;
+                    GlStateManager.disableCull();
+                    int l2 = 32;
+                    int k1 = 8;
+                    Tessellator tessellator = Tessellator.getInstance();
+                    BufferBuilder bufferbuilder = tessellator.getBuffer();
+                    this.renderEngine.bindTexture(CLOUDS_TEXTURES);
+                    GlStateManager.enableBlend();
+                    GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                    Vec3d vec3d = this.theWorld.getCloudColour(partialTicks);
+                    float f = (float)vec3d.xCoord;
+                    float f1 = (float)vec3d.yCoord;
+                    float f2 = (float)vec3d.zCoord;
+                    this.cloudRenderer.prepareToRender(false, this.cloudTickCounter, f9, vec3d);
+
+                    if (this.cloudRenderer.shouldUpdateGlList())
+                    {
+                        this.cloudRenderer.startUpdateGlList();
+
+                        if (pass != 2)
+                        {
+                            float f3 = (f * 30.0F + f1 * 59.0F + f2 * 11.0F) / 100.0F;
+                            float f4 = (f * 30.0F + f1 * 70.0F) / 100.0F;
+                            float f5 = (f * 30.0F + f2 * 70.0F) / 100.0F;
+                            f = f3;
+                            f1 = f4;
+                            f2 = f5;
+                        }
+
+                        float f10 = 4.8828125E-4F;
+                        double d5 = (double)((float)this.cloudTickCounter + partialTicks);
+                        double d3 = p_180447_3_ + d5 * 0.029999999329447746D;
+                        int l1 = MathHelper.floor(d3 / 2048.0D);
+                        int i2 = MathHelper.floor(p_180447_7_ / 2048.0D);
+                        d3 = d3 - (double)(l1 * 2048);
+                        double d4 = p_180447_7_ - (double)(i2 * 2048);
+                        float f6 = this.theWorld.provider.getCloudHeight() - (float)p_180447_5_ + 0.33F;
+                        f6 = f6 + this.mc.gameSettings.ofCloudsHeight * 128.0F;
+                        float f7 = (float)(d3 * 4.8828125E-4D);
+                        float f8 = (float)(d4 * 4.8828125E-4D);
+                        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+
+                        for (int j2 = -256; j2 < 256; j2 += 32)
+                        {
+                            for (int k2 = -256; k2 < 256; k2 += 32)
+                            {
+                                bufferbuilder.pos((double)(j2 + 0), (double)f6, (double)(k2 + 32)).tex((double)((float)(j2 + 0) * 4.8828125E-4F + f7), (double)((float)(k2 + 32) * 4.8828125E-4F + f8)).color(f, f1, f2, 0.8F).endVertex();
+                                bufferbuilder.pos((double)(j2 + 32), (double)f6, (double)(k2 + 32)).tex((double)((float)(j2 + 32) * 4.8828125E-4F + f7), (double)((float)(k2 + 32) * 4.8828125E-4F + f8)).color(f, f1, f2, 0.8F).endVertex();
+                                bufferbuilder.pos((double)(j2 + 32), (double)f6, (double)(k2 + 0)).tex((double)((float)(j2 + 32) * 4.8828125E-4F + f7), (double)((float)(k2 + 0) * 4.8828125E-4F + f8)).color(f, f1, f2, 0.8F).endVertex();
+                                bufferbuilder.pos((double)(j2 + 0), (double)f6, (double)(k2 + 0)).tex((double)((float)(j2 + 0) * 4.8828125E-4F + f7), (double)((float)(k2 + 0) * 4.8828125E-4F + f8)).color(f, f1, f2, 0.8F).endVertex();
+                            }
+                        }
+
+                        tessellator.draw();
+                        this.cloudRenderer.endUpdateGlList();
+                    }
+
+                    this.cloudRenderer.renderGlList();
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    GlStateManager.disableBlend();
+                    GlStateManager.enableCull();
+                }
+
+                if (Config.isShaders())
+                {
+                    Shaders.endClouds();
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the given position is to be rendered with cloud fog
+     */
+    public boolean hasCloudFog(double x, double y, double z, float partialTicks)
+    {
+        return false;
+    }
+
+    private void renderCloudsFancy(float partialTicks, int pass, double p_180445_3_, double p_180445_5_, double p_180445_7_)
+    {
+        float f251 = 0.0F;
+        GlStateManager.disableCull();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        float f = 12.0F;
+        float f1 = 4.0F;
+        double d3 = (double)((float)this.cloudTickCounter + f251);
+        double d4 = (p_180445_3_ + d3 * 0.029999999329447746D) / 12.0D;
+        double d5 = p_180445_7_ / 12.0D + 0.33000001311302185D;
+        float f2 = this.theWorld.provider.getCloudHeight() - (float)p_180445_5_ + 0.33F;
+        f2 = f2 + this.mc.gameSettings.ofCloudsHeight * 128.0F;
+        int k1 = MathHelper.floor(d4 / 2048.0D);
+        int l1 = MathHelper.floor(d5 / 2048.0D);
+        d4 = d4 - (double)(k1 * 2048);
+        d5 = d5 - (double)(l1 * 2048);
+        this.renderEngine.bindTexture(CLOUDS_TEXTURES);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        Vec3d vec3d = this.theWorld.getCloudColour(f251);
+        float f3 = (float)vec3d.xCoord;
+        float f4 = (float)vec3d.yCoord;
+        float f5 = (float)vec3d.zCoord;
+        this.cloudRenderer.prepareToRender(true, this.cloudTickCounter, partialTicks, vec3d);
+
+        if (pass != 2)
+        {
+            float f6 = (f3 * 30.0F + f4 * 59.0F + f5 * 11.0F) / 100.0F;
+            float f7 = (f3 * 30.0F + f4 * 70.0F) / 100.0F;
+            float f8 = (f3 * 30.0F + f5 * 70.0F) / 100.0F;
+            f3 = f6;
+            f4 = f7;
+            f5 = f8;
+        }
+
+        float f26 = f3 * 0.9F;
+        float f27 = f4 * 0.9F;
+        float f28 = f5 * 0.9F;
+        float f9 = f3 * 0.7F;
+        float f10 = f4 * 0.7F;
+        float f11 = f5 * 0.7F;
+        float f12 = f3 * 0.8F;
+        float f13 = f4 * 0.8F;
+        float f14 = f5 * 0.8F;
+        float f15 = 0.00390625F;
+        float f16 = (float)MathHelper.floor(d4) * 0.00390625F;
+        float f17 = (float)MathHelper.floor(d5) * 0.00390625F;
+        float f18 = (float)(d4 - (double)MathHelper.floor(d4));
+        float f19 = (float)(d5 - (double)MathHelper.floor(d5));
+        int i2 = 8;
+        int j2 = 4;
+        float f20 = 9.765625E-4F;
+        GlStateManager.scale(12.0F, 1.0F, 12.0F);
+
+        for (int k2 = 0; k2 < 2; ++k2)
+        {
+            if (k2 == 0)
+            {
+                GlStateManager.colorMask(false, false, false, false);
+            }
+            else
+            {
+                switch (pass)
+                {
+                    case 0:
+                        GlStateManager.colorMask(false, true, true, true);
+                        break;
+
+                    case 1:
+                        GlStateManager.colorMask(true, false, false, true);
+                        break;
+
+                    case 2:
+                        GlStateManager.colorMask(true, true, true, true);
+                }
+            }
+
+            this.cloudRenderer.renderGlList();
+        }
+
+        if (this.cloudRenderer.shouldUpdateGlList())
+        {
+            this.cloudRenderer.startUpdateGlList();
+
+            for (int j3 = -3; j3 <= 4; ++j3)
+            {
+                for (int l2 = -3; l2 <= 4; ++l2)
+                {
+                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
+                    float f21 = (float)(j3 * 8);
+                    float f22 = (float)(l2 * 8);
+                    float f23 = f21 - f18;
+                    float f24 = f22 - f19;
+
+                    if (f2 > -5.0F)
+                    {
+                        bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f9, f10, f11, 0.8F).normal(0.0F, -1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f9, f10, f11, 0.8F).normal(0.0F, -1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f9, f10, f11, 0.8F).normal(0.0F, -1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f9, f10, f11, 0.8F).normal(0.0F, -1.0F, 0.0F).endVertex();
+                    }
+
+                    if (f2 <= 5.0F)
+                    {
+                        bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 8.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f3, f4, f5, 0.8F).normal(0.0F, 1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 8.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f3, f4, f5, 0.8F).normal(0.0F, 1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 0.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f3, f4, f5, 0.8F).normal(0.0F, 1.0F, 0.0F).endVertex();
+                        bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 4.0F - 9.765625E-4F), (double)(f24 + 0.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f3, f4, f5, 0.8F).normal(0.0F, 1.0F, 0.0F).endVertex();
+                    }
+
+                    if (j3 > -1)
+                    {
+                        for (int i3 = 0; i3 < 8; ++i3)
+                        {
+                            bufferbuilder.pos((double)(f23 + (float)i3 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).tex((double)((f21 + (float)i3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)i3 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + 8.0F)).tex((double)((f21 + (float)i3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)i3 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + 0.0F)).tex((double)((f21 + (float)i3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)i3 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).tex((double)((f21 + (float)i3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+                        }
+                    }
+
+                    if (j3 <= 1)
+                    {
+                        for (int k3 = 0; k3 < 8; ++k3)
+                        {
+                            bufferbuilder.pos((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 0.0F), (double)(f24 + 8.0F)).tex((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 4.0F), (double)(f24 + 8.0F)).tex((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 8.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 4.0F), (double)(f24 + 0.0F)).tex((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(1.0F, 0.0F, 0.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + (float)k3 + 1.0F - 9.765625E-4F), (double)(f2 + 0.0F), (double)(f24 + 0.0F)).tex((double)((f21 + (float)k3 + 0.5F) * 0.00390625F + f16), (double)((f22 + 0.0F) * 0.00390625F + f17)).color(f26, f27, f28, 0.8F).normal(1.0F, 0.0F, 0.0F).endVertex();
+                        }
+                    }
+
+                    if (l2 > -1)
+                    {
+                        for (int l3 = 0; l3 < 8; ++l3)
+                        {
+                            bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + (float)l3 + 0.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, -1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 4.0F), (double)(f24 + (float)l3 + 0.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, -1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + (float)l3 + 0.0F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, -1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + (float)l3 + 0.0F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)l3 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, -1.0F).endVertex();
+                        }
+                    }
+
+                    if (l2 <= 1)
+                    {
+                        for (int i4 = 0; i4 < 8; ++i4)
+                        {
+                            bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 4.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, 1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 4.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, 1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 8.0F), (double)(f2 + 0.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).tex((double)((f21 + 8.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, 1.0F).endVertex();
+                            bufferbuilder.pos((double)(f23 + 0.0F), (double)(f2 + 0.0F), (double)(f24 + (float)i4 + 1.0F - 9.765625E-4F)).tex((double)((f21 + 0.0F) * 0.00390625F + f16), (double)((f22 + (float)i4 + 0.5F) * 0.00390625F + f17)).color(f12, f13, f14, 0.8F).normal(0.0F, 0.0F, 1.0F).endVertex();
+                        }
+                    }
+
+                    tessellator.draw();
+                }
+            }
+
+            this.cloudRenderer.endUpdateGlList();
+        }
+
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableBlend();
+        GlStateManager.enableCull();
+    }
+
+    public void updateChunks(long finishTimeNano)
+    {
+        finishTimeNano = (long)((double)finishTimeNano + 1.0E8D);
+        this.displayListEntitiesDirty |= this.renderDispatcher.runChunkUploads(finishTimeNano);
+
+        if (this.chunksToUpdateForced.size() > 0)
+        {
+            Iterator iterator = this.chunksToUpdateForced.iterator();
+
+            while (iterator.hasNext())
+            {
+                RenderChunk renderchunk1 = (RenderChunk)iterator.next();
+
+                if (!this.renderDispatcher.updateChunkLater(renderchunk1))
+                {
+                    break;
+                }
+
+                renderchunk1.clearNeedsUpdate();
+                iterator.remove();
+                this.chunksToUpdate.remove(renderchunk1);
+                this.chunksToResortTransparency.remove(renderchunk1);
+            }
+        }
+
+        if (this.chunksToResortTransparency.size() > 0)
+        {
+            Iterator iterator2 = this.chunksToResortTransparency.iterator();
+
+            if (iterator2.hasNext())
+            {
+                RenderChunk renderchunk3 = (RenderChunk)iterator2.next();
+
+                if (this.renderDispatcher.updateTransparencyLater(renderchunk3))
+                {
+                    iterator2.remove();
+                }
+            }
+        }
+
+        int l1 = 0;
+        int i2 = Config.getUpdatesPerFrame();
+        int k1 = i2 * 2;
+
+        if (!this.chunksToUpdate.isEmpty())
+        {
+            Iterator<RenderChunk> iterator1 = this.chunksToUpdate.iterator();
+
+            while (iterator1.hasNext())
+            {
+                RenderChunk renderchunk2 = iterator1.next();
+                boolean flag1;
+
+                if (renderchunk2.isNeedsUpdateCustom())
+                {
+                    flag1 = this.renderDispatcher.updateChunkNow(renderchunk2);
+                }
+                else
+                {
+                    flag1 = this.renderDispatcher.updateChunkLater(renderchunk2);
+                }
+
+                if (!flag1)
+                {
+                    break;
+                }
+
+                renderchunk2.clearNeedsUpdate();
+                iterator1.remove();
+
+                if (renderchunk2.getCompiledChunk().isEmpty() && i2 < k1)
+                {
+                    ++i2;
+                }
+
+                ++l1;
+
+                if (l1 >= i2)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void renderWorldBorder(Entity entityIn, float partialTicks)
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        WorldBorder worldborder = this.theWorld.getWorldBorder();
+        double d3 = (double)(this.mc.gameSettings.renderDistanceChunks * 16);
+
+        if (entityIn.posX >= worldborder.maxX() - d3 || entityIn.posX <= worldborder.minX() + d3 || entityIn.posZ >= worldborder.maxZ() - d3 || entityIn.posZ <= worldborder.minZ() + d3)
+        {
+            double d4 = 1.0D - worldborder.getClosestDistance(entityIn) / d3;
+            d4 = Math.pow(d4, 4.0D);
+            double d5 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
+            double d6 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
+            double d7 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            this.renderEngine.bindTexture(FORCEFIELD_TEXTURES);
+            GlStateManager.depthMask(false);
+            GlStateManager.pushMatrix();
+            int k1 = worldborder.getStatus().getID();
+            float f = (float)(k1 >> 16 & 255) / 255.0F;
+            float f1 = (float)(k1 >> 8 & 255) / 255.0F;
+            float f2 = (float)(k1 & 255) / 255.0F;
+            GlStateManager.color(f, f1, f2, (float)d4);
+            GlStateManager.doPolygonOffset(-3.0F, -3.0F);
+            GlStateManager.enablePolygonOffset();
+            GlStateManager.alphaFunc(516, 0.1F);
+            GlStateManager.enableAlpha();
+            GlStateManager.disableCull();
+            float f3 = (float)(Minecraft.getSystemTime() % 3000L) / 3000.0F;
+            float f4 = 0.0F;
+            float f5 = 0.0F;
+            float f6 = 128.0F;
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+            bufferbuilder.setTranslation(-d5, -d6, -d7);
+            double d8 = Math.max((double)MathHelper.floor(d7 - d3), worldborder.minZ());
+            double d9 = Math.min((double)MathHelper.ceil(d7 + d3), worldborder.maxZ());
+
+            if (d5 > worldborder.maxX() - d3)
+            {
+                float f7 = 0.0F;
+
+                for (double d10 = d8; d10 < d9; f7 += 0.5F)
+                {
+                    double d11 = Math.min(1.0D, d9 - d10);
+                    float f8 = (float)d11 * 0.5F;
+                    bufferbuilder.pos(worldborder.maxX(), 256.0D, d10).tex((double)(f3 + f7), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.maxX(), 256.0D, d10 + d11).tex((double)(f3 + f8 + f7), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.maxX(), 0.0D, d10 + d11).tex((double)(f3 + f8 + f7), (double)(f3 + 128.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.maxX(), 0.0D, d10).tex((double)(f3 + f7), (double)(f3 + 128.0F)).endVertex();
+                    ++d10;
+                }
+            }
+
+            if (d5 < worldborder.minX() + d3)
+            {
+                float f9 = 0.0F;
+
+                for (double d12 = d8; d12 < d9; f9 += 0.5F)
+                {
+                    double d15 = Math.min(1.0D, d9 - d12);
+                    float f12 = (float)d15 * 0.5F;
+                    bufferbuilder.pos(worldborder.minX(), 256.0D, d12).tex((double)(f3 + f9), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.minX(), 256.0D, d12 + d15).tex((double)(f3 + f12 + f9), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.minX(), 0.0D, d12 + d15).tex((double)(f3 + f12 + f9), (double)(f3 + 128.0F)).endVertex();
+                    bufferbuilder.pos(worldborder.minX(), 0.0D, d12).tex((double)(f3 + f9), (double)(f3 + 128.0F)).endVertex();
+                    ++d12;
+                }
+            }
+
+            d8 = Math.max((double)MathHelper.floor(d5 - d3), worldborder.minX());
+            d9 = Math.min((double)MathHelper.ceil(d5 + d3), worldborder.maxX());
+
+            if (d7 > worldborder.maxZ() - d3)
+            {
+                float f10 = 0.0F;
+
+                for (double d13 = d8; d13 < d9; f10 += 0.5F)
+                {
+                    double d16 = Math.min(1.0D, d9 - d13);
+                    float f13 = (float)d16 * 0.5F;
+                    bufferbuilder.pos(d13, 256.0D, worldborder.maxZ()).tex((double)(f3 + f10), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(d13 + d16, 256.0D, worldborder.maxZ()).tex((double)(f3 + f13 + f10), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(d13 + d16, 0.0D, worldborder.maxZ()).tex((double)(f3 + f13 + f10), (double)(f3 + 128.0F)).endVertex();
+                    bufferbuilder.pos(d13, 0.0D, worldborder.maxZ()).tex((double)(f3 + f10), (double)(f3 + 128.0F)).endVertex();
+                    ++d13;
+                }
+            }
+
+            if (d7 < worldborder.minZ() + d3)
+            {
+                float f11 = 0.0F;
+
+                for (double d14 = d8; d14 < d9; f11 += 0.5F)
+                {
+                    double d17 = Math.min(1.0D, d9 - d14);
+                    float f14 = (float)d17 * 0.5F;
+                    bufferbuilder.pos(d14, 256.0D, worldborder.minZ()).tex((double)(f3 + f11), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(d14 + d17, 256.0D, worldborder.minZ()).tex((double)(f3 + f14 + f11), (double)(f3 + 0.0F)).endVertex();
+                    bufferbuilder.pos(d14 + d17, 0.0D, worldborder.minZ()).tex((double)(f3 + f14 + f11), (double)(f3 + 128.0F)).endVertex();
+                    bufferbuilder.pos(d14, 0.0D, worldborder.minZ()).tex((double)(f3 + f11), (double)(f3 + 128.0F)).endVertex();
+                    ++d14;
+                }
+            }
+
+            tessellator.draw();
+            bufferbuilder.setTranslation(0.0D, 0.0D, 0.0D);
+            GlStateManager.enableCull();
+            GlStateManager.disableAlpha();
+            GlStateManager.doPolygonOffset(0.0F, 0.0F);
+            GlStateManager.disablePolygonOffset();
+            GlStateManager.enableAlpha();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+            GlStateManager.depthMask(true);
+        }
+    }
+
+    private void preRenderDamagedBlocks()
+    {
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 0.5F);
+        GlStateManager.doPolygonOffset(-3.0F, -3.0F);
+        GlStateManager.enablePolygonOffset();
+        GlStateManager.alphaFunc(516, 0.1F);
+        GlStateManager.enableAlpha();
+        GlStateManager.pushMatrix();
+
+        if (Config.isShaders())
+        {
+            ShadersRender.beginBlockDamage();
+        }
+    }
+
+    private void postRenderDamagedBlocks()
+    {
+        GlStateManager.disableAlpha();
+        GlStateManager.doPolygonOffset(0.0F, 0.0F);
+        GlStateManager.disablePolygonOffset();
+        GlStateManager.enableAlpha();
+        GlStateManager.depthMask(true);
+        GlStateManager.popMatrix();
+
+        if (Config.isShaders())
+        {
+            ShadersRender.endBlockDamage();
+        }
+    }
+
+    public void drawBlockDamageTexture(Tessellator tessellatorIn, BufferBuilder worldRendererIn, Entity entityIn, float partialTicks)
+    {
+        double d3 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
+        double d4 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
+        double d5 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+
+        if (!this.damagedBlocks.isEmpty())
+        {
+            this.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+            this.preRenderDamagedBlocks();
+            worldRendererIn.begin(7, DefaultVertexFormats.BLOCK);
+            worldRendererIn.setTranslation(-d3, -d4, -d5);
+            worldRendererIn.noColor();
+            Iterator<DestroyBlockProgress> iterator = this.damagedBlocks.values().iterator();
+
+            while (iterator.hasNext())
+            {
+                DestroyBlockProgress destroyblockprogress = iterator.next();
+                BlockPos blockpos = destroyblockprogress.getPosition();
+                double d6 = (double)blockpos.getX() - d3;
+                double d7 = (double)blockpos.getY() - d4;
+                double d8 = (double)blockpos.getZ() - d5;
+                Block block = this.theWorld.getBlockState(blockpos).getBlock();
+                boolean flag1;
+
+                if (Reflector.ForgeTileEntity_canRenderBreaking.exists())
+                {
+                    boolean flag2 = block instanceof BlockChest || block instanceof BlockEnderChest || block instanceof BlockSign || block instanceof BlockSkull;
+
+                    if (!flag2)
+                    {
+                        TileEntity tileentity = this.theWorld.getTileEntity(blockpos);
+
+                        if (tileentity != null)
+                        {
+                            flag2 = Reflector.callBoolean(tileentity, Reflector.ForgeTileEntity_canRenderBreaking);
+                        }
+                    }
+
+                    flag1 = !flag2;
+                }
+                else
+                {
+                    flag1 = !(block instanceof BlockChest) && !(block instanceof BlockEnderChest) && !(block instanceof BlockSign) && !(block instanceof BlockSkull);
+                }
+
+                if (flag1)
+                {
+                    if (d6 * d6 + d7 * d7 + d8 * d8 > 1024.0D)
+                    {
+                        iterator.remove();
+                    }
+                    else
+                    {
+                        IBlockState iblockstate = this.theWorld.getBlockState(blockpos);
+
+                        if (iblockstate.getMaterial() != Material.AIR)
+                        {
+                            int k1 = destroyblockprogress.getPartialBlockDamage();
+                            TextureAtlasSprite textureatlassprite = this.destroyBlockIcons[k1];
+                            BlockRendererDispatcher blockrendererdispatcher = this.mc.getBlockRendererDispatcher();
+                            blockrendererdispatcher.renderBlockDamage(iblockstate, blockpos, textureatlassprite, this.theWorld);
+                        }
+                    }
+                }
+            }
+
+            tessellatorIn.draw();
+            worldRendererIn.setTranslation(0.0D, 0.0D, 0.0D);
+            this.postRenderDamagedBlocks();
+        }
+    }
+
+    /**
+     * Draws the selection box for the player.
+     */
+    public void drawSelectionBox(EntityPlayer player, RayTraceResult movingObjectPositionIn, int execute, float partialTicks)
+    {
+        if (execute == 0 && movingObjectPositionIn.typeOfHit == RayTraceResult.Type.BLOCK)
+        {
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.glLineWidth(2.0F);
+            GlStateManager.disableTexture2D();
+
+            if (Config.isShaders())
+            {
+                Shaders.disableTexture2D();
+            }
+
+            GlStateManager.depthMask(false);
+            BlockPos blockpos = movingObjectPositionIn.getBlockPos();
+            IBlockState iblockstate = this.theWorld.getBlockState(blockpos);
+
+            if (iblockstate.getMaterial() != Material.AIR && this.theWorld.getWorldBorder().contains(blockpos))
+            {
+                double d3 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)partialTicks;
+                double d4 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
+                double d5 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)partialTicks;
+                drawSelectionBoundingBox(iblockstate.getSelectedBoundingBox(this.theWorld, blockpos).expandXyz(0.0020000000949949026D).offset(-d3, -d4, -d5), 0.0F, 0.0F, 0.0F, 0.4F);
+            }
+
+            GlStateManager.depthMask(true);
+            GlStateManager.enableTexture2D();
+
+            if (Config.isShaders())
+            {
+                Shaders.enableTexture2D();
+            }
+
+            GlStateManager.disableBlend();
+        }
+    }
+
+    public static void drawSelectionBoundingBox(AxisAlignedBB box, float red, float green, float blue, float alpha)
+    {
+        drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, red, green, blue, alpha);
+    }
+
+    public static void drawBoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha)
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        drawBoundingBox(bufferbuilder, minX, minY, minZ, maxX, maxY, maxZ, red, green, blue, alpha);
+        tessellator.draw();
+    }
+
+    public static void drawBoundingBox(BufferBuilder buffer, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha)
+    {
+        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, maxY, minZ).color(red, green, blue, 0.0F).endVertex();
+        buffer.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, minY, maxZ).color(red, green, blue, 0.0F).endVertex();
+        buffer.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        buffer.pos(maxX, maxY, minZ).color(red, green, blue, 0.0F).endVertex();
+        buffer.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+    }
+
+    public static void renderFilledBox(AxisAlignedBB p_189696_0_, float p_189696_1_, float p_189696_2_, float p_189696_3_, float p_189696_4_)
+    {
+        renderFilledBox(p_189696_0_.minX, p_189696_0_.minY, p_189696_0_.minZ, p_189696_0_.maxX, p_189696_0_.maxY, p_189696_0_.maxZ, p_189696_1_, p_189696_2_, p_189696_3_, p_189696_4_);
+    }
+
+    public static void renderFilledBox(double p_189695_0_, double p_189695_2_, double p_189695_4_, double p_189695_6_, double p_189695_8_, double p_189695_10_, float p_189695_12_, float p_189695_13_, float p_189695_14_, float p_189695_15_)
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
+        addChainedFilledBoxVertices(bufferbuilder, p_189695_0_, p_189695_2_, p_189695_4_, p_189695_6_, p_189695_8_, p_189695_10_, p_189695_12_, p_189695_13_, p_189695_14_, p_189695_15_);
+        tessellator.draw();
+    }
+
+    public static void addChainedFilledBoxVertices(BufferBuilder p_189693_0_, double p_189693_1_, double p_189693_3_, double p_189693_5_, double p_189693_7_, double p_189693_9_, double p_189693_11_, float p_189693_13_, float p_189693_14_, float p_189693_15_, float p_189693_16_)
+    {
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_3_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_1_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_5_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+        p_189693_0_.pos(p_189693_7_, p_189693_9_, p_189693_11_).color(p_189693_13_, p_189693_14_, p_189693_15_, p_189693_16_).endVertex();
+    }
+
+    private void markBlocksForUpdate(int p_184385_1_, int p_184385_2_, int p_184385_3_, int p_184385_4_, int p_184385_5_, int p_184385_6_, boolean p_184385_7_)
+    {
+        this.viewFrustum.markBlocksForUpdate(p_184385_1_, p_184385_2_, p_184385_3_, p_184385_4_, p_184385_5_, p_184385_6_, p_184385_7_);
+    }
+
+    public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags)
+    {
+        int k1 = pos.getX();
+        int l1 = pos.getY();
+        int i2 = pos.getZ();
+        this.markBlocksForUpdate(k1 - 1, l1 - 1, i2 - 1, k1 + 1, l1 + 1, i2 + 1, (flags & 8) != 0);
+    }
+
+    public void notifyLightSet(BlockPos pos)
+    {
+        this.setLightUpdates.add(pos.toImmutable());
+    }
+
+    /**
+     * On the client, re-renders all blocks in this range, inclusive. On the server, does nothing.
+     */
+    public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2)
+    {
+        this.markBlocksForUpdate(x1 - 1, y1 - 1, z1 - 1, x2 + 1, y2 + 1, z2 + 1, false);
+    }
+
+    public void playRecord(@Nullable SoundEvent soundIn, BlockPos pos)
+    {
+        ISound isound = this.mapSoundPositions.get(pos);
+
+        if (isound != null)
+        {
+            this.mc.getSoundHandler().stopSound(isound);
+            this.mapSoundPositions.remove(pos);
+        }
+
+        if (soundIn != null)
+        {
+            ItemRecord itemrecord = ItemRecord.getBySound(soundIn);
+
+            if (itemrecord != null)
+            {
+                this.mc.ingameGUI.setRecordPlayingMessage(itemrecord.getRecordNameLocal());
+            }
+
+            ISound isound1 = PositionedSoundRecord.getRecordSoundRecord(soundIn, (float)pos.getX(), (float)pos.getY(), (float)pos.getZ());
+            this.mapSoundPositions.put(pos, isound1);
+            this.mc.getSoundHandler().playSound(isound1);
+        }
+
+        this.func_193054_a(this.theWorld, pos, soundIn != null);
+    }
+
+    private void func_193054_a(World p_193054_1_, BlockPos p_193054_2_, boolean p_193054_3_)
+    {
+        for (EntityLivingBase entitylivingbase : p_193054_1_.getEntitiesWithinAABB(EntityLivingBase.class, (new AxisAlignedBB(p_193054_2_)).expandXyz(3.0D)))
+        {
+            entitylivingbase.func_191987_a(p_193054_2_, p_193054_3_);
+        }
+    }
+
+    public void playSoundToAllNearExcept(@Nullable EntityPlayer player, SoundEvent soundIn, SoundCategory category, double x, double y, double z, float volume, float pitch)
+    {
+    }
+
+    public void spawnParticle(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters)
+    {
+        this.func_190570_a(particleID, ignoreRange, false, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+    }
+
+    public void func_190570_a(int p_190570_1_, boolean p_190570_2_, boolean p_190570_3_, final double p_190570_4_, final double p_190570_6_, final double p_190570_8_, double p_190570_10_, double p_190570_12_, double p_190570_14_, int... p_190570_16_)
+    {
+        try
+        {
+            this.func_190571_b(p_190570_1_, p_190570_2_, p_190570_3_, p_190570_4_, p_190570_6_, p_190570_8_, p_190570_10_, p_190570_12_, p_190570_14_, p_190570_16_);
+        }
+        catch (Throwable throwable)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while adding particle");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being added");
+            crashreportcategory.addCrashSection("ID", Integer.valueOf(p_190570_1_));
+
+            if (p_190570_16_ != null)
+            {
+                crashreportcategory.addCrashSection("Parameters", p_190570_16_);
+            }
+
+            crashreportcategory.setDetail("Position", new ICrashReportDetail<String>()
+            {
+                public String call() throws Exception
+                {
+                    return CrashReportCategory.getCoordinateInfo(p_190570_4_, p_190570_6_, p_190570_8_);
+                }
+            });
+            throw new ReportedException(crashreport);
+        }
+    }
+
+    private void spawnParticle(EnumParticleTypes particleIn, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters)
+    {
+        this.spawnParticle(particleIn.getParticleID(), particleIn.getShouldIgnoreRange(), xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+    }
+
+    @Nullable
+    private Particle spawnEntityFX(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters)
+    {
+        return this.func_190571_b(particleID, ignoreRange, false, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+    }
+
+    @Nullable
+    private Particle func_190571_b(int p_190571_1_, boolean p_190571_2_, boolean p_190571_3_, double p_190571_4_, double p_190571_6_, double p_190571_8_, double p_190571_10_, double p_190571_12_, double p_190571_14_, int... p_190571_16_)
+    {
+        Entity entity = this.mc.getRenderViewEntity();
+
+        if (this.mc != null && entity != null && this.mc.effectRenderer != null)
+        {
+            int k1 = this.func_190572_a(p_190571_3_);
+            double d3 = entity.posX - p_190571_4_;
+            double d4 = entity.posY - p_190571_6_;
+            double d5 = entity.posZ - p_190571_8_;
+
+            if (p_190571_1_ == EnumParticleTypes.EXPLOSION_HUGE.getParticleID() && !Config.isAnimatedExplosion())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.EXPLOSION_LARGE.getParticleID() && !Config.isAnimatedExplosion())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.EXPLOSION_NORMAL.getParticleID() && !Config.isAnimatedExplosion())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SUSPENDED.getParticleID() && !Config.isWaterParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SUSPENDED_DEPTH.getParticleID() && !Config.isVoidParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SMOKE_NORMAL.getParticleID() && !Config.isAnimatedSmoke())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SMOKE_LARGE.getParticleID() && !Config.isAnimatedSmoke())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SPELL_MOB.getParticleID() && !Config.isPotionParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SPELL_MOB_AMBIENT.getParticleID() && !Config.isPotionParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SPELL.getParticleID() && !Config.isPotionParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SPELL_INSTANT.getParticleID() && !Config.isPotionParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.SPELL_WITCH.getParticleID() && !Config.isPotionParticles())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.PORTAL.getParticleID() && !Config.isAnimatedPortal())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.FLAME.getParticleID() && !Config.isAnimatedFlame())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.REDSTONE.getParticleID() && !Config.isAnimatedRedstone())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.DRIP_WATER.getParticleID() && !Config.isDrippingWaterLava())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.DRIP_LAVA.getParticleID() && !Config.isDrippingWaterLava())
+            {
+                return null;
+            }
+            else if (p_190571_1_ == EnumParticleTypes.FIREWORKS_SPARK.getParticleID() && !Config.isFireworkParticles())
+            {
+                return null;
+            }
+            else
+            {
+                if (!p_190571_2_)
+                {
+                    double d6 = 1024.0D;
+
+                    if (p_190571_1_ == EnumParticleTypes.CRIT.getParticleID())
+                    {
+                        d6 = 38416.0D;
+                    }
+
+                    if (d3 * d3 + d4 * d4 + d5 * d5 > d6)
+                    {
+                        return null;
+                    }
+
+                    if (k1 > 1)
+                    {
+                        return null;
+                    }
+                }
+
+                Particle particle = this.mc.effectRenderer.spawnEffectParticle(p_190571_1_, p_190571_4_, p_190571_6_, p_190571_8_, p_190571_10_, p_190571_12_, p_190571_14_, p_190571_16_);
+
+                if (p_190571_1_ == EnumParticleTypes.WATER_BUBBLE.getParticleID())
+                {
+                    CustomColors.updateWaterFX(particle, this.theWorld, p_190571_4_, p_190571_6_, p_190571_8_, this.renderEnv);
+                }
+
+                if (p_190571_1_ == EnumParticleTypes.WATER_SPLASH.getParticleID())
+                {
+                    CustomColors.updateWaterFX(particle, this.theWorld, p_190571_4_, p_190571_6_, p_190571_8_, this.renderEnv);
+                }
+
+                if (p_190571_1_ == EnumParticleTypes.WATER_DROP.getParticleID())
+                {
+                    CustomColors.updateWaterFX(particle, this.theWorld, p_190571_4_, p_190571_6_, p_190571_8_, this.renderEnv);
+                }
+
+                if (p_190571_1_ == EnumParticleTypes.TOWN_AURA.getParticleID())
+                {
+                    CustomColors.updateMyceliumFX(particle);
+                }
+
+                if (p_190571_1_ == EnumParticleTypes.PORTAL.getParticleID())
+                {
+                    CustomColors.updatePortalFX(particle);
+                }
+
+                if (p_190571_1_ == EnumParticleTypes.REDSTONE.getParticleID())
+                {
+                    CustomColors.updateReddustFX(particle, this.theWorld, p_190571_4_, p_190571_6_, p_190571_8_);
+                }
+
+                return particle;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private int func_190572_a(boolean p_190572_1_)
+    {
+        int k1 = this.mc.gameSettings.particleSetting;
+
+        if (p_190572_1_ && k1 == 2 && this.theWorld.rand.nextInt(10) == 0)
+        {
+            k1 = 1;
+        }
+
+        if (k1 == 1 && this.theWorld.rand.nextInt(3) == 0)
+        {
+            k1 = 2;
+        }
+
+        return k1;
+    }
+
+    /**
+     * Called on all IWorldAccesses when an entity is created or loaded. On client worlds, starts downloading any
+     * necessary textures. On server worlds, adds the entity to the entity tracker.
+     */
+    public void onEntityAdded(Entity entityIn)
+    {
+        RandomMobs.entityLoaded(entityIn, this.theWorld);
+
+        if (Config.isDynamicLights())
+        {
+            DynamicLights.entityAdded(entityIn, this);
+        }
+    }
+
+    /**
+     * Called on all IWorldAccesses when an entity is unloaded or destroyed. On client worlds, releases any downloaded
+     * textures. On server worlds, removes the entity from the entity tracker.
+     */
+    public void onEntityRemoved(Entity entityIn)
+    {
+        if (Config.isDynamicLights())
+        {
+            DynamicLights.entityRemoved(entityIn, this);
+        }
+    }
+
+    /**
+     * Deletes all display lists
+     */
+    public void deleteAllDisplayLists()
+    {
+    }
+
+    public void broadcastSound(int soundID, BlockPos pos, int data)
+    {
+        switch (soundID)
+        {
+            case 1023:
+            case 1028:
+            case 1038:
+                Entity entity = this.mc.getRenderViewEntity();
+
+                if (entity != null)
+                {
+                    double d3 = (double)pos.getX() - entity.posX;
+                    double d4 = (double)pos.getY() - entity.posY;
+                    double d5 = (double)pos.getZ() - entity.posZ;
+                    double d6 = Math.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+                    double d7 = entity.posX;
+                    double d8 = entity.posY;
+                    double d9 = entity.posZ;
+
+                    if (d6 > 0.0D)
+                    {
+                        d7 += d3 / d6 * 2.0D;
+                        d8 += d4 / d6 * 2.0D;
+                        d9 += d5 / d6 * 2.0D;
+                    }
+
+                    if (soundID == 1023)
+                    {
+                        this.theWorld.playSound(d7, d8, d9, SoundEvents.ENTITY_WITHER_SPAWN, SoundCategory.HOSTILE, 1.0F, 1.0F, false);
+                    }
+                    else if (soundID == 1038)
+                    {
+                        this.theWorld.playSound(d7, d8, d9, SoundEvents.field_193782_bq, SoundCategory.HOSTILE, 1.0F, 1.0F, false);
+                    }
+                    else
+                    {
+                        this.theWorld.playSound(d7, d8, d9, SoundEvents.ENTITY_ENDERDRAGON_DEATH, SoundCategory.HOSTILE, 5.0F, 1.0F, false);
+                    }
+                }
+
+            default:
+        }
+    }
+
+    public void playEvent(EntityPlayer player, int type, BlockPos blockPosIn, int data)
+    {
+        Random random = this.theWorld.rand;
+
+        switch (type)
+        {
+            case 1000:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_DISPENSER_DISPENSE, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                break;
+
+            case 1001:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_DISPENSER_FAIL, SoundCategory.BLOCKS, 1.0F, 1.2F, false);
+                break;
+
+            case 1002:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_DISPENSER_LAUNCH, SoundCategory.BLOCKS, 1.0F, 1.2F, false);
+                break;
+
+            case 1003:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ENDEREYE_LAUNCH, SoundCategory.NEUTRAL, 1.0F, 1.2F, false);
+                break;
+
+            case 1004:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_FIREWORK_SHOOT, SoundCategory.NEUTRAL, 1.0F, 1.2F, false);
+                break;
+
+            case 1005:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_IRON_DOOR_OPEN, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1006:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_WOODEN_DOOR_OPEN, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1007:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_WOODEN_TRAPDOOR_OPEN, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1008:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_FENCE_GATE_OPEN, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1009:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
+                break;
+
+            case 1010:
+                if (Item.getItemById(data) instanceof ItemRecord)
+                {
+                    this.theWorld.playRecord(blockPosIn, ((ItemRecord)Item.getItemById(data)).getSound());
+                }
+                else
+                {
+                    this.theWorld.playRecord(blockPosIn, (SoundEvent)null);
+                }
+
+                break;
+
+            case 1011:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_IRON_DOOR_CLOSE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1012:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_WOODEN_DOOR_CLOSE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1013:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_WOODEN_TRAPDOOR_CLOSE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1014:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_FENCE_GATE_CLOSE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1015:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_GHAST_WARN, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1016:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_GHAST_SHOOT, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1017:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ENDERDRAGON_SHOOT, SoundCategory.HOSTILE, 10.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1018:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1019:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1020:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1021:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1022:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_WITHER_BREAK_BLOCK, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1024:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_WITHER_SHOOT, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1025:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.NEUTRAL, 0.05F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1026:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ZOMBIE_INFECT, SoundCategory.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1027:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, SoundCategory.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                break;
+
+            case 1029:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_ANVIL_DESTROY, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1030:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1031:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 0.3F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1032:
+                this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_PORTAL_TRAVEL, random.nextFloat() * 0.4F + 0.8F));
+                break;
+
+            case 1033:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_CHORUS_FLOWER_GROW, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                break;
+
+            case 1034:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_CHORUS_FLOWER_DEATH, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                break;
+
+            case 1035:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_BREWING_STAND_BREW, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                break;
+
+            case 1036:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 1037:
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_IRON_TRAPDOOR_OPEN, SoundCategory.BLOCKS, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 2000:
+                int k1 = data % 3 - 1;
+                int l1 = data / 3 % 3 - 1;
+                double d3 = (double)blockPosIn.getX() + (double)k1 * 0.6D + 0.5D;
+                double d4 = (double)blockPosIn.getY() + 0.5D;
+                double d5 = (double)blockPosIn.getZ() + (double)l1 * 0.6D + 0.5D;
+
+                for (int k2 = 0; k2 < 10; ++k2)
+                {
+                    double d18 = random.nextDouble() * 0.2D + 0.01D;
+                    double d19 = d3 + (double)k1 * 0.01D + (random.nextDouble() - 0.5D) * (double)l1 * 0.5D;
+                    double d20 = d4 + (random.nextDouble() - 0.5D) * 0.5D;
+                    double d21 = d5 + (double)l1 * 0.01D + (random.nextDouble() - 0.5D) * (double)k1 * 0.5D;
+                    double d22 = (double)k1 * d18 + random.nextGaussian() * 0.01D;
+                    double d23 = -0.03D + random.nextGaussian() * 0.01D;
+                    double d24 = (double)l1 * d18 + random.nextGaussian() * 0.01D;
+                    this.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d19, d20, d21, d22, d23, d24);
+                }
+
+                return;
+
+            case 2001:
+                Block block = Block.getBlockById(data & 4095);
+
+                if (block.getDefaultState().getMaterial() != Material.AIR)
+                {
+                    SoundType soundtype = block.getSoundType();
+
+                    if (Reflector.ForgeBlock_getSoundType.exists())
+                    {
+                        soundtype = (SoundType)Reflector.call(block, Reflector.ForgeBlock_getSoundType, Block.getStateById(data), this.theWorld, blockPosIn, null);
+                    }
+
+                    this.theWorld.playSound(blockPosIn, soundtype.getBreakSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F, false);
+                }
+
+                this.mc.effectRenderer.addBlockDestroyEffects(blockPosIn, block.getStateFromMeta(data >> 12 & 255));
+                break;
+
+            case 2002:
+            case 2007:
+                double d6 = (double)blockPosIn.getX();
+                double d7 = (double)blockPosIn.getY();
+                double d8 = (double)blockPosIn.getZ();
+
+                for (int i2 = 0; i2 < 8; ++i2)
+                {
+                    this.spawnParticle(EnumParticleTypes.ITEM_CRACK, d6, d7, d8, random.nextGaussian() * 0.15D, random.nextDouble() * 0.2D, random.nextGaussian() * 0.15D, Item.getIdFromItem(Items.SPLASH_POTION));
+                }
+
+                float f5 = (float)(data >> 16 & 255) / 255.0F;
+                float f = (float)(data >> 8 & 255) / 255.0F;
+                float f1 = (float)(data >> 0 & 255) / 255.0F;
+                EnumParticleTypes enumparticletypes = type == 2007 ? EnumParticleTypes.SPELL_INSTANT : EnumParticleTypes.SPELL;
+
+                for (int l2 = 0; l2 < 100; ++l2)
+                {
+                    double d10 = random.nextDouble() * 4.0D;
+                    double d12 = random.nextDouble() * Math.PI * 2.0D;
+                    double d14 = Math.cos(d12) * d10;
+                    double d27 = 0.01D + random.nextDouble() * 0.5D;
+                    double d29 = Math.sin(d12) * d10;
+                    Particle particle1 = this.spawnEntityFX(enumparticletypes.getParticleID(), enumparticletypes.getShouldIgnoreRange(), d6 + d14 * 0.1D, d7 + 0.3D, d8 + d29 * 0.1D, d14, d27, d29);
+
+                    if (particle1 != null)
+                    {
+                        float f4 = 0.75F + random.nextFloat() * 0.25F;
+                        particle1.setRBGColorF(f5 * f4, f * f4, f1 * f4);
+                        particle1.multiplyVelocity((float)d10);
+                    }
+                }
+
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_SPLASH_POTION_BREAK, SoundCategory.NEUTRAL, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 2003:
+                double d9 = (double)blockPosIn.getX() + 0.5D;
+                double d11 = (double)blockPosIn.getY();
+                double d13 = (double)blockPosIn.getZ() + 0.5D;
+
+                for (int j3 = 0; j3 < 8; ++j3)
+                {
+                    this.spawnParticle(EnumParticleTypes.ITEM_CRACK, d9, d11, d13, random.nextGaussian() * 0.15D, random.nextDouble() * 0.2D, random.nextGaussian() * 0.15D, Item.getIdFromItem(Items.ENDER_EYE));
+                }
+
+                for (double d25 = 0.0D; d25 < (Math.PI * 2D); d25 += 0.15707963267948966D)
+                {
+                    this.spawnParticle(EnumParticleTypes.PORTAL, d9 + Math.cos(d25) * 5.0D, d11 - 0.4D, d13 + Math.sin(d25) * 5.0D, Math.cos(d25) * -5.0D, 0.0D, Math.sin(d25) * -5.0D);
+                    this.spawnParticle(EnumParticleTypes.PORTAL, d9 + Math.cos(d25) * 5.0D, d11 - 0.4D, d13 + Math.sin(d25) * 5.0D, Math.cos(d25) * -7.0D, 0.0D, Math.sin(d25) * -7.0D);
+                }
+
+                return;
+
+            case 2004:
+                for (int i3 = 0; i3 < 20; ++i3)
+                {
+                    double d26 = (double)blockPosIn.getX() + 0.5D + ((double)this.theWorld.rand.nextFloat() - 0.5D) * 2.0D;
+                    double d28 = (double)blockPosIn.getY() + 0.5D + ((double)this.theWorld.rand.nextFloat() - 0.5D) * 2.0D;
+                    double d30 = (double)blockPosIn.getZ() + 0.5D + ((double)this.theWorld.rand.nextFloat() - 0.5D) * 2.0D;
+                    this.theWorld.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d26, d28, d30, 0.0D, 0.0D, 0.0D, new int[0]);
+                    this.theWorld.spawnParticle(EnumParticleTypes.FLAME, d26, d28, d30, 0.0D, 0.0D, 0.0D, new int[0]);
+                }
+
+                return;
+
+            case 2005:
+                ItemDye.spawnBonemealParticles(this.theWorld, blockPosIn, data);
+                break;
+
+            case 2006:
+                for (int j2 = 0; j2 < 200; ++j2)
+                {
+                    float f2 = random.nextFloat() * 4.0F;
+                    float f3 = random.nextFloat() * ((float)Math.PI * 2F);
+                    double d15 = (double)(MathHelper.cos(f3) * f2);
+                    double d16 = 0.01D + random.nextDouble() * 0.5D;
+                    double d17 = (double)(MathHelper.sin(f3) * f2);
+                    Particle particle = this.spawnEntityFX(EnumParticleTypes.DRAGON_BREATH.getParticleID(), false, (double)blockPosIn.getX() + d15 * 0.1D, (double)blockPosIn.getY() + 0.3D, (double)blockPosIn.getZ() + d17 * 0.1D, d15, d16, d17);
+
+                    if (particle != null)
+                    {
+                        particle.multiplyVelocity(f2);
+                    }
+                }
+
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ENDERDRAGON_FIREBALL_EPLD, SoundCategory.HOSTILE, 1.0F, this.theWorld.rand.nextFloat() * 0.1F + 0.9F, false);
+                break;
+
+            case 3000:
+                this.theWorld.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, true, (double)blockPosIn.getX() + 0.5D, (double)blockPosIn.getY() + 0.5D, (double)blockPosIn.getZ() + 0.5D, 0.0D, 0.0D, 0.0D, new int[0]);
+                this.theWorld.playSound(blockPosIn, SoundEvents.BLOCK_END_GATEWAY_SPAWN, SoundCategory.BLOCKS, 10.0F, (1.0F + (this.theWorld.rand.nextFloat() - this.theWorld.rand.nextFloat()) * 0.2F) * 0.7F, false);
+                break;
+
+            case 3001:
+                this.theWorld.playSound(blockPosIn, SoundEvents.ENTITY_ENDERDRAGON_GROWL, SoundCategory.HOSTILE, 64.0F, 0.8F + this.theWorld.rand.nextFloat() * 0.3F, false);
+        }
+    }
+
+    public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress)
+    {
+        if (progress >= 0 && progress < 10)
+        {
+            DestroyBlockProgress destroyblockprogress = this.damagedBlocks.get(Integer.valueOf(breakerId));
+
+            if (destroyblockprogress == null || destroyblockprogress.getPosition().getX() != pos.getX() || destroyblockprogress.getPosition().getY() != pos.getY() || destroyblockprogress.getPosition().getZ() != pos.getZ())
+            {
+                destroyblockprogress = new DestroyBlockProgress(breakerId, pos);
+                this.damagedBlocks.put(Integer.valueOf(breakerId), destroyblockprogress);
+            }
+
+            destroyblockprogress.setPartialBlockDamage(progress);
+            destroyblockprogress.setCloudUpdateTick(this.cloudTickCounter);
+        }
+        else
+        {
+            this.damagedBlocks.remove(Integer.valueOf(breakerId));
+        }
+    }
+
+    public boolean hasNoChunkUpdates()
+    {
+        return this.chunksToUpdate.isEmpty() && this.renderDispatcher.hasChunkUpdates();
+    }
+
+    public void setDisplayListEntitiesDirty()
+    {
+        this.displayListEntitiesDirty = true;
+    }
+
+    public void resetClouds()
+    {
+        this.cloudRenderer.reset();
+    }
+
+    public int getCountRenderers()
+    {
+        return this.viewFrustum.renderChunks.length;
+    }
+
+    public int getCountActiveRenderers()
+    {
+        return this.renderInfos.size();
+    }
+
+    public int getCountEntitiesRendered()
+    {
+        return this.countEntitiesRendered;
+    }
+
+    public int getCountTileEntitiesRendered()
+    {
+        return this.countTileEntitiesRendered;
+    }
+
+    public int getCountLoadedChunks()
+    {
+        if (this.theWorld == null)
+        {
+            return 0;
+        }
+        else
+        {
+            IChunkProvider ichunkprovider = this.theWorld.getChunkProvider();
+
+            if (ichunkprovider == null)
+            {
+                return 0;
+            }
+            else
+            {
+                if (ichunkprovider != this.worldChunkProvider)
+                {
+                    this.worldChunkProvider = ichunkprovider;
+                    this.worldChunkProviderMap = (Long2ObjectMap)Reflector.getFieldValue(ichunkprovider, Reflector.ChunkProviderClient_chunkMapping);
+                }
+
+                return this.worldChunkProviderMap == null ? 0 : this.worldChunkProviderMap.size();
+            }
+        }
+    }
+
+    public int getCountChunksToUpdate()
+    {
+        return this.chunksToUpdate.size();
+    }
+
+    public RenderChunk getRenderChunk(BlockPos p_getRenderChunk_1_)
+    {
+        return this.viewFrustum.getRenderChunk(p_getRenderChunk_1_);
+    }
+
+    public WorldClient getWorld()
+    {
+        return this.theWorld;
+    }
+
+    public void updateTileEntities(Collection<TileEntity> tileEntitiesToRemove, Collection<TileEntity> tileEntitiesToAdd)
+    {
+        synchronized (this.setTileEntities)
+        {
+            this.setTileEntities.removeAll(tileEntitiesToRemove);
+            this.setTileEntities.addAll(tileEntitiesToAdd);
+        }
+    }
+
+    private RenderGlobal.ContainerLocalRenderInformation allocateRenderInformation(RenderChunk p_allocateRenderInformation_1_, EnumFacing p_allocateRenderInformation_2_, int p_allocateRenderInformation_3_)
+    {
+        RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1;
+
+        if (renderInfoCache.isEmpty())
+        {
+            renderglobal$containerlocalrenderinformation1 = new RenderGlobal.ContainerLocalRenderInformation(p_allocateRenderInformation_1_, p_allocateRenderInformation_2_, p_allocateRenderInformation_3_);
+        }
+        else
+        {
+            renderglobal$containerlocalrenderinformation1 = renderInfoCache.pollLast();
+            renderglobal$containerlocalrenderinformation1.initialize(p_allocateRenderInformation_1_, p_allocateRenderInformation_2_, p_allocateRenderInformation_3_);
+        }
+
+        renderglobal$containerlocalrenderinformation1.cacheable = true;
+        return renderglobal$containerlocalrenderinformation1;
+    }
+
+    private void freeRenderInformation(RenderGlobal.ContainerLocalRenderInformation p_freeRenderInformation_1_)
+    {
+        if (p_freeRenderInformation_1_.cacheable)
+        {
+            renderInfoCache.add(p_freeRenderInformation_1_);
+        }
+    }
+
+    public static class ContainerLocalRenderInformation
+    {
+        RenderChunk renderChunk;
+        EnumFacing facing;
+        int setFacing;
+        boolean cacheable = false;
+
+        public ContainerLocalRenderInformation(RenderChunk p_i1_1_, EnumFacing p_i1_2_, int p_i1_3_)
+        {
+            this.renderChunk = p_i1_1_;
+            this.facing = p_i1_2_;
+            this.setFacing = p_i1_3_;
+        }
+
+        public void setDirection(byte p_189561_1_, EnumFacing p_189561_2_)
+        {
+            this.setFacing = this.setFacing | p_189561_1_ | 1 << p_189561_2_.ordinal();
+        }
+
+        public boolean hasDirection(EnumFacing p_189560_1_)
+        {
+            return (this.setFacing & 1 << p_189560_1_.ordinal()) > 0;
+        }
+
+        private void initialize(RenderChunk p_initialize_1_, EnumFacing p_initialize_2_, int p_initialize_3_)
+        {
+            this.renderChunk = p_initialize_1_;
+            this.facing = p_initialize_2_;
+            this.setFacing = p_initialize_3_;
+        }
+    }
 }

@@ -6,83 +6,115 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 
-public class TileEntityEnderChest extends TileEntity implements ITickable {
-   public float field_145972_a;
-   public float field_145975_i;
-   public int field_145973_j;
-   private int field_145974_k;
+public class TileEntityEnderChest extends TileEntity implements ITickable
+{
+    public float lidAngle;
 
-   public void func_73660_a() {
-      if (++this.field_145974_k % 20 * 4 == 0) {
-         this.field_145850_b.func_175641_c(this.field_174879_c, Blocks.field_150477_bB, 1, this.field_145973_j);
-      }
+    /** The angle of the ender chest lid last tick */
+    public float prevLidAngle;
+    public int numPlayersUsing;
+    private int ticksSinceSync;
 
-      this.field_145975_i = this.field_145972_a;
-      int i = this.field_174879_c.func_177958_n();
-      int j = this.field_174879_c.func_177956_o();
-      int k = this.field_174879_c.func_177952_p();
-      float f = 0.1F;
-      if (this.field_145973_j > 0 && this.field_145972_a == 0.0F) {
-         double d0 = (double)i + 0.5D;
-         double d1 = (double)k + 0.5D;
-         this.field_145850_b.func_184148_a((EntityPlayer)null, d0, (double)j + 0.5D, d1, SoundEvents.field_187520_aJ, SoundCategory.BLOCKS, 0.5F, this.field_145850_b.field_73012_v.nextFloat() * 0.1F + 0.9F);
-      }
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
+    public void update()
+    {
+        if (++this.ticksSinceSync % 20 * 4 == 0)
+        {
+            this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
+        }
 
-      if (this.field_145973_j == 0 && this.field_145972_a > 0.0F || this.field_145973_j > 0 && this.field_145972_a < 1.0F) {
-         float f2 = this.field_145972_a;
-         if (this.field_145973_j > 0) {
-            this.field_145972_a += 0.1F;
-         } else {
-            this.field_145972_a -= 0.1F;
-         }
+        this.prevLidAngle = this.lidAngle;
+        int i = this.pos.getX();
+        int j = this.pos.getY();
+        int k = this.pos.getZ();
+        float f = 0.1F;
 
-         if (this.field_145972_a > 1.0F) {
-            this.field_145972_a = 1.0F;
-         }
+        if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F)
+        {
+            double d0 = (double)i + 0.5D;
+            double d1 = (double)k + 0.5D;
+            this.world.playSound((EntityPlayer)null, d0, (double)j + 0.5D, d1, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+        }
 
-         float f1 = 0.5F;
-         if (this.field_145972_a < 0.5F && f2 >= 0.5F) {
-            double d3 = (double)i + 0.5D;
-            double d2 = (double)k + 0.5D;
-            this.field_145850_b.func_184148_a((EntityPlayer)null, d3, (double)j + 0.5D, d2, SoundEvents.field_187519_aI, SoundCategory.BLOCKS, 0.5F, this.field_145850_b.field_73012_v.nextFloat() * 0.1F + 0.9F);
-         }
+        if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F)
+        {
+            float f2 = this.lidAngle;
 
-         if (this.field_145972_a < 0.0F) {
-            this.field_145972_a = 0.0F;
-         }
-      }
+            if (this.numPlayersUsing > 0)
+            {
+                this.lidAngle += 0.1F;
+            }
+            else
+            {
+                this.lidAngle -= 0.1F;
+            }
 
-   }
+            if (this.lidAngle > 1.0F)
+            {
+                this.lidAngle = 1.0F;
+            }
 
-   public boolean func_145842_c(int p_145842_1_, int p_145842_2_) {
-      if (p_145842_1_ == 1) {
-         this.field_145973_j = p_145842_2_;
-         return true;
-      } else {
-         return super.func_145842_c(p_145842_1_, p_145842_2_);
-      }
-   }
+            float f1 = 0.5F;
 
-   public void func_145843_s() {
-      this.func_145836_u();
-      super.func_145843_s();
-   }
+            if (this.lidAngle < 0.5F && f2 >= 0.5F)
+            {
+                double d3 = (double)i + 0.5D;
+                double d2 = (double)k + 0.5D;
+                this.world.playSound((EntityPlayer)null, d3, (double)j + 0.5D, d2, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            }
 
-   public void func_145969_a() {
-      ++this.field_145973_j;
-      this.field_145850_b.func_175641_c(this.field_174879_c, Blocks.field_150477_bB, 1, this.field_145973_j);
-   }
+            if (this.lidAngle < 0.0F)
+            {
+                this.lidAngle = 0.0F;
+            }
+        }
+    }
 
-   public void func_145970_b() {
-      --this.field_145973_j;
-      this.field_145850_b.func_175641_c(this.field_174879_c, Blocks.field_150477_bB, 1, this.field_145973_j);
-   }
+    public boolean receiveClientEvent(int id, int type)
+    {
+        if (id == 1)
+        {
+            this.numPlayersUsing = type;
+            return true;
+        }
+        else
+        {
+            return super.receiveClientEvent(id, type);
+        }
+    }
 
-   public boolean func_145971_a(EntityPlayer p_145971_1_) {
-      if (this.field_145850_b.func_175625_s(this.field_174879_c) != this) {
-         return false;
-      } else {
-         return p_145971_1_.func_70092_e((double)this.field_174879_c.func_177958_n() + 0.5D, (double)this.field_174879_c.func_177956_o() + 0.5D, (double)this.field_174879_c.func_177952_p() + 0.5D) <= 64.0D;
-      }
-   }
+    /**
+     * invalidates a tile entity
+     */
+    public void invalidate()
+    {
+        this.updateContainingBlockInfo();
+        super.invalidate();
+    }
+
+    public void openChest()
+    {
+        ++this.numPlayersUsing;
+        this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
+    }
+
+    public void closeChest()
+    {
+        --this.numPlayersUsing;
+        this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
+    }
+
+    public boolean canBeUsed(EntityPlayer player)
+    {
+        if (this.world.getTileEntity(this.pos) != this)
+        {
+            return false;
+        }
+        else
+        {
+            return player.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+        }
+    }
 }

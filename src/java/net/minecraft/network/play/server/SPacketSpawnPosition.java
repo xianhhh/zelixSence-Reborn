@@ -6,29 +6,45 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 
-public class SPacketSpawnPosition implements Packet<INetHandlerPlayClient> {
-   private BlockPos field_179801_a;
+public class SPacketSpawnPosition implements Packet<INetHandlerPlayClient>
+{
+    private BlockPos spawnBlockPos;
 
-   public SPacketSpawnPosition() {
-   }
+    public SPacketSpawnPosition()
+    {
+    }
 
-   public SPacketSpawnPosition(BlockPos p_i46903_1_) {
-      this.field_179801_a = p_i46903_1_;
-   }
+    public SPacketSpawnPosition(BlockPos posIn)
+    {
+        this.spawnBlockPos = posIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179801_a = p_148837_1_.func_179259_c();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.spawnBlockPos = buf.readBlockPos();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179255_a(this.field_179801_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeBlockPos(this.spawnBlockPos);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147271_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleSpawnPosition(this);
+    }
 
-   public BlockPos func_179800_a() {
-      return this.field_179801_a;
-   }
+    public BlockPos getSpawnPos()
+    {
+        return this.spawnBlockPos;
+    }
 }

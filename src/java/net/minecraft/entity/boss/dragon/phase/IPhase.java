@@ -8,27 +8,50 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public interface IPhase {
-   boolean func_188654_a();
+public interface IPhase
+{
+    boolean getIsStationary();
 
-   void func_188657_b();
+    /**
+     * Generates particle effects appropriate to the phase (or sometimes sounds).
+     * Called by dragon's onLivingUpdate. Only used when worldObj.isRemote.
+     */
+    void doClientRenderEffects();
 
-   void func_188659_c();
+    /**
+     * Gives the phase a chance to update its status.
+     * Called by dragon's onLivingUpdate. Only used when !worldObj.isRemote.
+     */
+    void doLocalUpdate();
 
-   void func_188655_a(EntityEnderCrystal var1, BlockPos var2, DamageSource var3, @Nullable EntityPlayer var4);
+    void onCrystalDestroyed(EntityEnderCrystal crystal, BlockPos pos, DamageSource dmgSrc, EntityPlayer plyr);
 
-   void func_188660_d();
+    /**
+     * Called when this phase is set to active
+     */
+    void initPhase();
 
-   void func_188658_e();
+    void removeAreaEffect();
 
-   float func_188651_f();
+    /**
+     * Returns the maximum amount dragon may rise or fall during this phase
+     */
+    float getMaxRiseOrFall();
 
-   float func_188653_h();
+    float getYawFactor();
 
-   PhaseList<? extends IPhase> func_188652_i();
+    PhaseList <? extends IPhase > getPhaseList();
 
-   @Nullable
-   Vec3d func_188650_g();
+    @Nullable
 
-   float func_188656_a(MultiPartEntityPart var1, DamageSource var2, float var3);
+    /**
+     * Returns the location the dragon is flying toward
+     */
+    Vec3d getTargetLocation();
+
+    /**
+     * Normally, just returns damage. If dragon is sitting and src is an arrow, arrow is enflamed and zero damage
+     * returned.
+     */
+    float getAdjustedDamage(MultiPartEntityPart pt, DamageSource src, float damage);
 }

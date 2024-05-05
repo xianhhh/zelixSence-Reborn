@@ -5,34 +5,51 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketClientStatus implements Packet<INetHandlerPlayServer> {
-   private CPacketClientStatus.State field_149437_a;
+public class CPacketClientStatus implements Packet<INetHandlerPlayServer>
+{
+    private CPacketClientStatus.State status;
 
-   public CPacketClientStatus() {
-   }
+    public CPacketClientStatus()
+    {
+    }
 
-   public CPacketClientStatus(CPacketClientStatus.State p_i46886_1_) {
-      this.field_149437_a = p_i46886_1_;
-   }
+    public CPacketClientStatus(CPacketClientStatus.State p_i46886_1_)
+    {
+        this.status = p_i46886_1_;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149437_a = (CPacketClientStatus.State)p_148837_1_.func_179257_a(CPacketClientStatus.State.class);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.status = (CPacketClientStatus.State)buf.readEnumValue(CPacketClientStatus.State.class);
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179249_a(this.field_149437_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeEnumValue(this.status);
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147342_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processClientStatus(this);
+    }
 
-   public CPacketClientStatus.State func_149435_c() {
-      return this.field_149437_a;
-   }
+    public CPacketClientStatus.State getStatus()
+    {
+        return this.status;
+    }
 
-   public static enum State {
-      PERFORM_RESPAWN,
-      REQUEST_STATS;
-   }
+    public static enum State
+    {
+        PERFORM_RESPAWN,
+        REQUEST_STATS;
+    }
 }

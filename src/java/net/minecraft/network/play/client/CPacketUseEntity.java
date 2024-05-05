@@ -10,85 +10,111 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class CPacketUseEntity implements Packet<INetHandlerPlayServer> {
-   private int field_149567_a;
-   private CPacketUseEntity.Action field_149566_b;
-   private Vec3d field_179713_c;
-   private EnumHand field_186995_d;
+public class CPacketUseEntity implements Packet<INetHandlerPlayServer>
+{
+    private int entityId;
+    private CPacketUseEntity.Action action;
+    private Vec3d hitVec;
+    private EnumHand hand;
 
-   public CPacketUseEntity() {
-   }
+    public CPacketUseEntity()
+    {
+    }
 
-   public CPacketUseEntity(Entity p_i46877_1_) {
-      this.field_149567_a = p_i46877_1_.func_145782_y();
-      this.field_149566_b = CPacketUseEntity.Action.ATTACK;
-   }
+    public CPacketUseEntity(Entity entityIn)
+    {
+        this.entityId = entityIn.getEntityId();
+        this.action = CPacketUseEntity.Action.ATTACK;
+    }
 
-   public CPacketUseEntity(Entity p_i46878_1_, EnumHand p_i46878_2_) {
-      this.field_149567_a = p_i46878_1_.func_145782_y();
-      this.field_149566_b = CPacketUseEntity.Action.INTERACT;
-      this.field_186995_d = p_i46878_2_;
-   }
+    public CPacketUseEntity(Entity entityIn, EnumHand handIn)
+    {
+        this.entityId = entityIn.getEntityId();
+        this.action = CPacketUseEntity.Action.INTERACT;
+        this.hand = handIn;
+    }
 
-   public CPacketUseEntity(Entity p_i47098_1_, EnumHand p_i47098_2_, Vec3d p_i47098_3_) {
-      this.field_149567_a = p_i47098_1_.func_145782_y();
-      this.field_149566_b = CPacketUseEntity.Action.INTERACT_AT;
-      this.field_186995_d = p_i47098_2_;
-      this.field_179713_c = p_i47098_3_;
-   }
+    public CPacketUseEntity(Entity entityIn, EnumHand handIn, Vec3d hitVecIn)
+    {
+        this.entityId = entityIn.getEntityId();
+        this.action = CPacketUseEntity.Action.INTERACT_AT;
+        this.hand = handIn;
+        this.hitVec = hitVecIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149567_a = p_148837_1_.func_150792_a();
-      this.field_149566_b = (CPacketUseEntity.Action)p_148837_1_.func_179257_a(CPacketUseEntity.Action.class);
-      if (this.field_149566_b == CPacketUseEntity.Action.INTERACT_AT) {
-         this.field_179713_c = new Vec3d((double)p_148837_1_.readFloat(), (double)p_148837_1_.readFloat(), (double)p_148837_1_.readFloat());
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityId = buf.readVarIntFromBuffer();
+        this.action = (CPacketUseEntity.Action)buf.readEnumValue(CPacketUseEntity.Action.class);
 
-      if (this.field_149566_b == CPacketUseEntity.Action.INTERACT || this.field_149566_b == CPacketUseEntity.Action.INTERACT_AT) {
-         this.field_186995_d = (EnumHand)p_148837_1_.func_179257_a(EnumHand.class);
-      }
+        if (this.action == CPacketUseEntity.Action.INTERACT_AT)
+        {
+            this.hitVec = new Vec3d((double)buf.readFloat(), (double)buf.readFloat(), (double)buf.readFloat());
+        }
 
-   }
+        if (this.action == CPacketUseEntity.Action.INTERACT || this.action == CPacketUseEntity.Action.INTERACT_AT)
+        {
+            this.hand = (EnumHand)buf.readEnumValue(EnumHand.class);
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_149567_a);
-      p_148840_1_.func_179249_a(this.field_149566_b);
-      if (this.field_149566_b == CPacketUseEntity.Action.INTERACT_AT) {
-         p_148840_1_.writeFloat((float)this.field_179713_c.field_72450_a);
-         p_148840_1_.writeFloat((float)this.field_179713_c.field_72448_b);
-         p_148840_1_.writeFloat((float)this.field_179713_c.field_72449_c);
-      }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeEnumValue(this.action);
 
-      if (this.field_149566_b == CPacketUseEntity.Action.INTERACT || this.field_149566_b == CPacketUseEntity.Action.INTERACT_AT) {
-         p_148840_1_.func_179249_a(this.field_186995_d);
-      }
+        if (this.action == CPacketUseEntity.Action.INTERACT_AT)
+        {
+            buf.writeFloat((float)this.hitVec.xCoord);
+            buf.writeFloat((float)this.hitVec.yCoord);
+            buf.writeFloat((float)this.hitVec.zCoord);
+        }
 
-   }
+        if (this.action == CPacketUseEntity.Action.INTERACT || this.action == CPacketUseEntity.Action.INTERACT_AT)
+        {
+            buf.writeEnumValue(this.hand);
+        }
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147340_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processUseEntity(this);
+    }
 
-   @Nullable
-   public Entity func_149564_a(World p_149564_1_) {
-      return p_149564_1_.func_73045_a(this.field_149567_a);
-   }
+    @Nullable
+    public Entity getEntityFromWorld(World worldIn)
+    {
+        return worldIn.getEntityByID(this.entityId);
+    }
 
-   public CPacketUseEntity.Action func_149565_c() {
-      return this.field_149566_b;
-   }
+    public CPacketUseEntity.Action getAction()
+    {
+        return this.action;
+    }
 
-   public EnumHand func_186994_b() {
-      return this.field_186995_d;
-   }
+    public EnumHand getHand()
+    {
+        return this.hand;
+    }
 
-   public Vec3d func_179712_b() {
-      return this.field_179713_c;
-   }
+    public Vec3d getHitVec()
+    {
+        return this.hitVec;
+    }
 
-   public static enum Action {
-      INTERACT,
-      ATTACK,
-      INTERACT_AT;
-   }
+    public static enum Action
+    {
+        INTERACT,
+        ATTACK,
+        INTERACT_AT;
+    }
 }

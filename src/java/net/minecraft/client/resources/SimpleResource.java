@@ -16,104 +16,138 @@ import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
-public class SimpleResource implements IResource {
-   private final Map<String, IMetadataSection> field_110535_a = Maps.<String, IMetadataSection>newHashMap();
-   private final String field_177242_b;
-   private final ResourceLocation field_110533_b;
-   private final InputStream field_110534_c;
-   private final InputStream field_110531_d;
-   private final MetadataSerializer field_110532_e;
-   private boolean field_110529_f;
-   private JsonObject field_110530_g;
+public class SimpleResource implements IResource
+{
+    private final Map<String, IMetadataSection> mapMetadataSections = Maps.<String, IMetadataSection>newHashMap();
+    private final String resourcePackName;
+    private final ResourceLocation srResourceLocation;
+    private final InputStream resourceInputStream;
+    private final InputStream mcmetaInputStream;
+    private final MetadataSerializer srMetadataSerializer;
+    private boolean mcmetaJsonChecked;
+    private JsonObject mcmetaJson;
 
-   public SimpleResource(String p_i46090_1_, ResourceLocation p_i46090_2_, InputStream p_i46090_3_, InputStream p_i46090_4_, MetadataSerializer p_i46090_5_) {
-      this.field_177242_b = p_i46090_1_;
-      this.field_110533_b = p_i46090_2_;
-      this.field_110534_c = p_i46090_3_;
-      this.field_110531_d = p_i46090_4_;
-      this.field_110532_e = p_i46090_5_;
-   }
+    public SimpleResource(String resourcePackNameIn, ResourceLocation srResourceLocationIn, InputStream resourceInputStreamIn, InputStream mcmetaInputStreamIn, MetadataSerializer srMetadataSerializerIn)
+    {
+        this.resourcePackName = resourcePackNameIn;
+        this.srResourceLocation = srResourceLocationIn;
+        this.resourceInputStream = resourceInputStreamIn;
+        this.mcmetaInputStream = mcmetaInputStreamIn;
+        this.srMetadataSerializer = srMetadataSerializerIn;
+    }
 
-   public ResourceLocation func_177241_a() {
-      return this.field_110533_b;
-   }
+    public ResourceLocation getResourceLocation()
+    {
+        return this.srResourceLocation;
+    }
 
-   public InputStream func_110527_b() {
-      return this.field_110534_c;
-   }
+    public InputStream getInputStream()
+    {
+        return this.resourceInputStream;
+    }
 
-   public boolean func_110528_c() {
-      return this.field_110531_d != null;
-   }
+    public boolean hasMetadata()
+    {
+        return this.mcmetaInputStream != null;
+    }
 
-   @Nullable
-   public <T extends IMetadataSection> T func_110526_a(String p_110526_1_) {
-      if (!this.func_110528_c()) {
-         return (T)null;
-      } else {
-         if (this.field_110530_g == null && !this.field_110529_f) {
-            this.field_110529_f = true;
-            BufferedReader bufferedreader = null;
+    @Nullable
+    public <T extends IMetadataSection> T getMetadata(String sectionName)
+    {
+        if (!this.hasMetadata())
+        {
+            return (T)null;
+        }
+        else
+        {
+            if (this.mcmetaJson == null && !this.mcmetaJsonChecked)
+            {
+                this.mcmetaJsonChecked = true;
+                BufferedReader bufferedreader = null;
 
-            try {
-               bufferedreader = new BufferedReader(new InputStreamReader(this.field_110531_d, StandardCharsets.UTF_8));
-               this.field_110530_g = (new JsonParser()).parse(bufferedreader).getAsJsonObject();
-            } finally {
-               IOUtils.closeQuietly((Reader)bufferedreader);
+                try
+                {
+                    bufferedreader = new BufferedReader(new InputStreamReader(this.mcmetaInputStream, StandardCharsets.UTF_8));
+                    this.mcmetaJson = (new JsonParser()).parse(bufferedreader).getAsJsonObject();
+                }
+                finally
+                {
+                    IOUtils.closeQuietly((Reader)bufferedreader);
+                }
             }
-         }
 
-         T t = this.field_110535_a.get(p_110526_1_);
-         if (t == null) {
-            t = this.field_110532_e.func_110503_a(p_110526_1_, this.field_110530_g);
-         }
+            T t = (T)this.mapMetadataSections.get(sectionName);
 
-         return t;
-      }
-   }
-
-   public String func_177240_d() {
-      return this.field_177242_b;
-   }
-
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
-         return true;
-      } else if (!(p_equals_1_ instanceof SimpleResource)) {
-         return false;
-      } else {
-         SimpleResource simpleresource = (SimpleResource)p_equals_1_;
-         if (this.field_110533_b != null) {
-            if (!this.field_110533_b.equals(simpleresource.field_110533_b)) {
-               return false;
+            if (t == null)
+            {
+                t = this.srMetadataSerializer.parseMetadataSection(sectionName, this.mcmetaJson);
             }
-         } else if (simpleresource.field_110533_b != null) {
+
+            return t;
+        }
+    }
+
+    public String getResourcePackName()
+    {
+        return this.resourcePackName;
+    }
+
+    public boolean equals(Object p_equals_1_)
+    {
+        if (this == p_equals_1_)
+        {
+            return true;
+        }
+        else if (!(p_equals_1_ instanceof SimpleResource))
+        {
             return false;
-         }
+        }
+        else
+        {
+            SimpleResource simpleresource = (SimpleResource)p_equals_1_;
 
-         if (this.field_177242_b != null) {
-            if (!this.field_177242_b.equals(simpleresource.field_177242_b)) {
-               return false;
+            if (this.srResourceLocation != null)
+            {
+                if (!this.srResourceLocation.equals(simpleresource.srResourceLocation))
+                {
+                    return false;
+                }
             }
-         } else if (simpleresource.field_177242_b != null) {
-            return false;
-         }
+            else if (simpleresource.srResourceLocation != null)
+            {
+                return false;
+            }
 
-         return true;
-      }
-   }
+            if (this.resourcePackName != null)
+            {
+                if (!this.resourcePackName.equals(simpleresource.resourcePackName))
+                {
+                    return false;
+                }
+            }
+            else if (simpleresource.resourcePackName != null)
+            {
+                return false;
+            }
 
-   public int hashCode() {
-      int i = this.field_177242_b != null ? this.field_177242_b.hashCode() : 0;
-      i = 31 * i + (this.field_110533_b != null ? this.field_110533_b.hashCode() : 0);
-      return i;
-   }
+            return true;
+        }
+    }
 
-   public void close() throws IOException {
-      this.field_110534_c.close();
-      if (this.field_110531_d != null) {
-         this.field_110531_d.close();
-      }
+    public int hashCode()
+    {
+        int i = this.resourcePackName != null ? this.resourcePackName.hashCode() : 0;
+        i = 31 * i + (this.srResourceLocation != null ? this.srResourceLocation.hashCode() : 0);
+        return i;
+    }
 
-   }
+    public void close() throws IOException
+    {
+        this.resourceInputStream.close();
+
+        if (this.mcmetaInputStream != null)
+        {
+            this.mcmetaInputStream.close();
+        }
+    }
 }

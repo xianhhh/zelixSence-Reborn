@@ -7,40 +7,55 @@ import net.minecraft.util.datafix.IDataWalker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntityTag implements IDataWalker {
-   private static final Logger field_188270_a = LogManager.getLogger();
+public class EntityTag implements IDataWalker
+{
+    private static final Logger LOGGER = LogManager.getLogger();
 
-   public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_) {
-      NBTTagCompound nbttagcompound = p_188266_2_.func_74775_l("tag");
-      if (nbttagcompound.func_150297_b("EntityTag", 10)) {
-         NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("EntityTag");
-         String s = p_188266_2_.func_74779_i("id");
-         String s1;
-         if ("minecraft:armor_stand".equals(s)) {
-            s1 = p_188266_3_ < 515 ? "ArmorStand" : "minecraft:armor_stand";
-         } else {
-            if (!"minecraft:spawn_egg".equals(s)) {
-               return p_188266_2_;
+    public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn)
+    {
+        NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
+
+        if (nbttagcompound.hasKey("EntityTag", 10))
+        {
+            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("EntityTag");
+            String s = compound.getString("id");
+            String s1;
+
+            if ("minecraft:armor_stand".equals(s))
+            {
+                s1 = versionIn < 515 ? "ArmorStand" : "minecraft:armor_stand";
+            }
+            else
+            {
+                if (!"minecraft:spawn_egg".equals(s))
+                {
+                    return compound;
+                }
+
+                s1 = nbttagcompound1.getString("id");
             }
 
-            s1 = nbttagcompound1.func_74779_i("id");
-         }
+            boolean flag;
 
-         boolean flag;
-         if (s1 == null) {
-            field_188270_a.warn("Unable to resolve Entity for ItemInstance: {}", (Object)s);
-            flag = false;
-         } else {
-            flag = !nbttagcompound1.func_150297_b("id", 8);
-            nbttagcompound1.func_74778_a("id", s1);
-         }
+            if (s1 == null)
+            {
+                LOGGER.warn("Unable to resolve Entity for ItemInstance: {}", (Object)s);
+                flag = false;
+            }
+            else
+            {
+                flag = !nbttagcompound1.hasKey("id", 8);
+                nbttagcompound1.setString("id", s1);
+            }
 
-         p_188266_1_.func_188251_a(FixTypes.ENTITY, nbttagcompound1, p_188266_3_);
-         if (flag) {
-            nbttagcompound1.func_82580_o("id");
-         }
-      }
+            fixer.process(FixTypes.ENTITY, nbttagcompound1, versionIn);
 
-      return p_188266_2_;
-   }
+            if (flag)
+            {
+                nbttagcompound1.removeTag("id");
+            }
+        }
+
+        return compound;
+    }
 }

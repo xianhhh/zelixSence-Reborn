@@ -6,53 +6,76 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 
-public class SPacketEffect implements Packet<INetHandlerPlayClient> {
-   private int field_149251_a;
-   private BlockPos field_179747_b;
-   private int field_149249_b;
-   private boolean field_149246_f;
+public class SPacketEffect implements Packet<INetHandlerPlayClient>
+{
+    private int soundType;
+    private BlockPos soundPos;
 
-   public SPacketEffect() {
-   }
+    /** can be a block/item id or other depending on the soundtype */
+    private int soundData;
 
-   public SPacketEffect(int p_i46940_1_, BlockPos p_i46940_2_, int p_i46940_3_, boolean p_i46940_4_) {
-      this.field_149251_a = p_i46940_1_;
-      this.field_179747_b = p_i46940_2_;
-      this.field_149249_b = p_i46940_3_;
-      this.field_149246_f = p_i46940_4_;
-   }
+    /** If true the sound is played across the server */
+    private boolean serverWide;
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149251_a = p_148837_1_.readInt();
-      this.field_179747_b = p_148837_1_.func_179259_c();
-      this.field_149249_b = p_148837_1_.readInt();
-      this.field_149246_f = p_148837_1_.readBoolean();
-   }
+    public SPacketEffect()
+    {
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeInt(this.field_149251_a);
-      p_148840_1_.func_179255_a(this.field_179747_b);
-      p_148840_1_.writeInt(this.field_149249_b);
-      p_148840_1_.writeBoolean(this.field_149246_f);
-   }
+    public SPacketEffect(int soundTypeIn, BlockPos soundPosIn, int soundDataIn, boolean serverWideIn)
+    {
+        this.soundType = soundTypeIn;
+        this.soundPos = soundPosIn;
+        this.soundData = soundDataIn;
+        this.serverWide = serverWideIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147277_a(this);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.soundType = buf.readInt();
+        this.soundPos = buf.readBlockPos();
+        this.soundData = buf.readInt();
+        this.serverWide = buf.readBoolean();
+    }
 
-   public boolean func_149244_c() {
-      return this.field_149246_f;
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeInt(this.soundType);
+        buf.writeBlockPos(this.soundPos);
+        buf.writeInt(this.soundData);
+        buf.writeBoolean(this.serverWide);
+    }
 
-   public int func_149242_d() {
-      return this.field_149251_a;
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleEffect(this);
+    }
 
-   public int func_149241_e() {
-      return this.field_149249_b;
-   }
+    public boolean isSoundServerwide()
+    {
+        return this.serverWide;
+    }
 
-   public BlockPos func_179746_d() {
-      return this.field_179747_b;
-   }
+    public int getSoundType()
+    {
+        return this.soundType;
+    }
+
+    public int getSoundData()
+    {
+        return this.soundData;
+    }
+
+    public BlockPos getSoundPos()
+    {
+        return this.soundPos;
+    }
 }

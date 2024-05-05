@@ -5,35 +5,63 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
-public class RConConsoleSource implements ICommandSender {
-   private final StringBuffer field_70009_b = new StringBuffer();
-   private final MinecraftServer field_184171_b;
+public class RConConsoleSource implements ICommandSender
+{
+    /** RCon string buffer for log. */
+    private final StringBuffer buffer = new StringBuffer();
+    private final MinecraftServer server;
 
-   public RConConsoleSource(MinecraftServer p_i46835_1_) {
-      this.field_184171_b = p_i46835_1_;
-   }
+    public RConConsoleSource(MinecraftServer serverIn)
+    {
+        this.server = serverIn;
+    }
 
-   public String func_70005_c_() {
-      return "Rcon";
-   }
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        return "Rcon";
+    }
 
-   public void func_145747_a(ITextComponent p_145747_1_) {
-      this.field_70009_b.append(p_145747_1_.func_150260_c());
-   }
+    /**
+     * Send a chat message to the CommandSender
+     */
+    public void addChatMessage(ITextComponent component)
+    {
+        this.buffer.append(component.getUnformattedText());
+    }
 
-   public boolean func_70003_b(int p_70003_1_, String p_70003_2_) {
-      return true;
-   }
+    /**
+     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
+     */
+    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    {
+        return true;
+    }
 
-   public World func_130014_f_() {
-      return this.field_184171_b.func_130014_f_();
-   }
+    /**
+     * Get the world, if available. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
+     * the overworld
+     */
+    public World getEntityWorld()
+    {
+        return this.server.getEntityWorld();
+    }
 
-   public boolean func_174792_t_() {
-      return true;
-   }
+    /**
+     * Returns true if the command sender should be sent feedback about executed commands
+     */
+    public boolean sendCommandFeedback()
+    {
+        return true;
+    }
 
-   public MinecraftServer func_184102_h() {
-      return this.field_184171_b;
-   }
+    /**
+     * Get the Minecraft server instance
+     */
+    public MinecraftServer getServer()
+    {
+        return this.server;
+    }
 }

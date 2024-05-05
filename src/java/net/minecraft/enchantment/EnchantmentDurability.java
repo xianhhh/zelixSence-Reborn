@@ -5,33 +5,60 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
-public class EnchantmentDurability extends Enchantment {
-   protected EnchantmentDurability(Enchantment.Rarity p_i46733_1_, EntityEquipmentSlot... p_i46733_2_) {
-      super(p_i46733_1_, EnumEnchantmentType.BREAKABLE, p_i46733_2_);
-      this.func_77322_b("durability");
-   }
+public class EnchantmentDurability extends Enchantment
+{
+    protected EnchantmentDurability(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
+    {
+        super(rarityIn, EnumEnchantmentType.BREAKABLE, slots);
+        this.setName("durability");
+    }
 
-   public int func_77321_a(int p_77321_1_) {
-      return 5 + (p_77321_1_ - 1) * 8;
-   }
+    /**
+     * Returns the minimal value of enchantability needed on the enchantment level passed.
+     */
+    public int getMinEnchantability(int enchantmentLevel)
+    {
+        return 5 + (enchantmentLevel - 1) * 8;
+    }
 
-   public int func_77317_b(int p_77317_1_) {
-      return super.func_77321_a(p_77317_1_) + 50;
-   }
+    /**
+     * Returns the maximum value of enchantability nedded on the enchantment level passed.
+     */
+    public int getMaxEnchantability(int enchantmentLevel)
+    {
+        return super.getMinEnchantability(enchantmentLevel) + 50;
+    }
 
-   public int func_77325_b() {
-      return 3;
-   }
+    /**
+     * Returns the maximum level that the enchantment can have.
+     */
+    public int getMaxLevel()
+    {
+        return 3;
+    }
 
-   public boolean func_92089_a(ItemStack p_92089_1_) {
-      return p_92089_1_.func_77984_f() ? true : super.func_92089_a(p_92089_1_);
-   }
+    /**
+     * Determines if this enchantment can be applied to a specific ItemStack.
+     */
+    public boolean canApply(ItemStack stack)
+    {
+        return stack.isItemStackDamageable() ? true : super.canApply(stack);
+    }
 
-   public static boolean func_92097_a(ItemStack p_92097_0_, int p_92097_1_, Random p_92097_2_) {
-      if (p_92097_0_.func_77973_b() instanceof ItemArmor && p_92097_2_.nextFloat() < 0.6F) {
-         return false;
-      } else {
-         return p_92097_2_.nextInt(p_92097_1_ + 1) > 0;
-      }
-   }
+    /**
+     * Used by ItemStack.attemptDamageItem. Randomly determines if a point of damage should be negated using the
+     * enchantment level (par1). If the ItemStack is Armor then there is a flat 60% chance for damage to be negated no
+     * matter the enchantment level, otherwise there is a 1-(par/1) chance for damage to be negated.
+     */
+    public static boolean negateDamage(ItemStack p_92097_0_, int p_92097_1_, Random p_92097_2_)
+    {
+        if (p_92097_0_.getItem() instanceof ItemArmor && p_92097_2_.nextFloat() < 0.6F)
+        {
+            return false;
+        }
+        else
+        {
+            return p_92097_2_.nextInt(p_92097_1_ + 1) > 0;
+        }
+    }
 }

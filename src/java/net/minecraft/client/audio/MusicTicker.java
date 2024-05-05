@@ -7,72 +7,92 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 
-public class MusicTicker implements ITickable {
-   private final Random field_147679_a = new Random();
-   private final Minecraft field_147677_b;
-   private ISound field_147678_c;
-   private int field_147676_d = 100;
+public class MusicTicker implements ITickable
+{
+    private final Random rand = new Random();
+    private final Minecraft mc;
+    private ISound currentMusic;
+    private int timeUntilNextMusic = 100;
 
-   public MusicTicker(Minecraft p_i45112_1_) {
-      this.field_147677_b = p_i45112_1_;
-   }
+    public MusicTicker(Minecraft mcIn)
+    {
+        this.mc = mcIn;
+    }
 
-   public void func_73660_a() {
-      MusicTicker.MusicType musicticker$musictype = this.field_147677_b.func_147109_W();
-      if (this.field_147678_c != null) {
-         if (!musicticker$musictype.func_188768_a().func_187503_a().equals(this.field_147678_c.func_147650_b())) {
-            this.field_147677_b.func_147118_V().func_147683_b(this.field_147678_c);
-            this.field_147676_d = MathHelper.func_76136_a(this.field_147679_a, 0, musicticker$musictype.func_148634_b() / 2);
-         }
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
+    public void update()
+    {
+        MusicTicker.MusicType musicticker$musictype = this.mc.getAmbientMusicType();
 
-         if (!this.field_147677_b.func_147118_V().func_147692_c(this.field_147678_c)) {
-            this.field_147678_c = null;
-            this.field_147676_d = Math.min(MathHelper.func_76136_a(this.field_147679_a, musicticker$musictype.func_148634_b(), musicticker$musictype.func_148633_c()), this.field_147676_d);
-         }
-      }
+        if (this.currentMusic != null)
+        {
+            if (!musicticker$musictype.getMusicLocation().getSoundName().equals(this.currentMusic.getSoundLocation()))
+            {
+                this.mc.getSoundHandler().stopSound(this.currentMusic);
+                this.timeUntilNextMusic = MathHelper.getInt(this.rand, 0, musicticker$musictype.getMinDelay() / 2);
+            }
 
-      this.field_147676_d = Math.min(this.field_147676_d, musicticker$musictype.func_148633_c());
-      if (this.field_147678_c == null && this.field_147676_d-- <= 0) {
-         this.func_181558_a(musicticker$musictype);
-      }
+            if (!this.mc.getSoundHandler().isSoundPlaying(this.currentMusic))
+            {
+                this.currentMusic = null;
+                this.timeUntilNextMusic = Math.min(MathHelper.getInt(this.rand, musicticker$musictype.getMinDelay(), musicticker$musictype.getMaxDelay()), this.timeUntilNextMusic);
+            }
+        }
 
-   }
+        this.timeUntilNextMusic = Math.min(this.timeUntilNextMusic, musicticker$musictype.getMaxDelay());
 
-   public void func_181558_a(MusicTicker.MusicType p_181558_1_) {
-      this.field_147678_c = PositionedSoundRecord.func_184370_a(p_181558_1_.func_188768_a());
-      this.field_147677_b.func_147118_V().func_147682_a(this.field_147678_c);
-      this.field_147676_d = Integer.MAX_VALUE;
-   }
+        if (this.currentMusic == null && this.timeUntilNextMusic-- <= 0)
+        {
+            this.playMusic(musicticker$musictype);
+        }
+    }
 
-   public static enum MusicType {
-      MENU(SoundEvents.field_187671_dC, 20, 600),
-      GAME(SoundEvents.field_187669_dB, 12000, 24000),
-      CREATIVE(SoundEvents.field_187792_dx, 1200, 3600),
-      CREDITS(SoundEvents.field_187794_dy, 0, 0),
-      NETHER(SoundEvents.field_187673_dD, 1200, 3600),
-      END_BOSS(SoundEvents.field_187796_dz, 0, 0),
-      END(SoundEvents.field_187667_dA, 6000, 24000);
+    /**
+     * Plays a music track for the maximum allowable period of time
+     */
+    public void playMusic(MusicTicker.MusicType requestedMusicType)
+    {
+        this.currentMusic = PositionedSoundRecord.getMusicRecord(requestedMusicType.getMusicLocation());
+        this.mc.getSoundHandler().playSound(this.currentMusic);
+        this.timeUntilNextMusic = Integer.MAX_VALUE;
+    }
 
-      private final SoundEvent field_148645_h;
-      private final int field_148646_i;
-      private final int field_148643_j;
+    public static enum MusicType
+    {
+        MENU(SoundEvents.MUSIC_MENU, 20, 600),
+        GAME(SoundEvents.MUSIC_GAME, 12000, 24000),
+        CREATIVE(SoundEvents.MUSIC_CREATIVE, 1200, 3600),
+        CREDITS(SoundEvents.MUSIC_CREDITS, 0, 0),
+        NETHER(SoundEvents.MUSIC_NETHER, 1200, 3600),
+        END_BOSS(SoundEvents.MUSIC_DRAGON, 0, 0),
+        END(SoundEvents.MUSIC_END, 6000, 24000);
 
-      private MusicType(SoundEvent p_i47050_3_, int p_i47050_4_, int p_i47050_5_) {
-         this.field_148645_h = p_i47050_3_;
-         this.field_148646_i = p_i47050_4_;
-         this.field_148643_j = p_i47050_5_;
-      }
+        private final SoundEvent musicLocation;
+        private final int minDelay;
+        private final int maxDelay;
 
-      public SoundEvent func_188768_a() {
-         return this.field_148645_h;
-      }
+        private MusicType(SoundEvent musicLocationIn, int minDelayIn, int maxDelayIn)
+        {
+            this.musicLocation = musicLocationIn;
+            this.minDelay = minDelayIn;
+            this.maxDelay = maxDelayIn;
+        }
 
-      public int func_148634_b() {
-         return this.field_148646_i;
-      }
+        public SoundEvent getMusicLocation()
+        {
+            return this.musicLocation;
+        }
 
-      public int func_148633_c() {
-         return this.field_148643_j;
-      }
-   }
+        public int getMinDelay()
+        {
+            return this.minDelay;
+        }
+
+        public int getMaxDelay()
+        {
+            return this.maxDelay;
+        }
+    }
 }

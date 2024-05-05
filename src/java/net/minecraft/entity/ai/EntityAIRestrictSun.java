@@ -4,22 +4,36 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.pathfinding.PathNavigateGround;
 
-public class EntityAIRestrictSun extends EntityAIBase {
-   private final EntityCreature field_75273_a;
+public class EntityAIRestrictSun extends EntityAIBase
+{
+    private final EntityCreature theEntity;
 
-   public EntityAIRestrictSun(EntityCreature p_i1652_1_) {
-      this.field_75273_a = p_i1652_1_;
-   }
+    public EntityAIRestrictSun(EntityCreature creature)
+    {
+        this.theEntity = creature;
+    }
 
-   public boolean func_75250_a() {
-      return this.field_75273_a.field_70170_p.func_72935_r() && this.field_75273_a.func_184582_a(EntityEquipmentSlot.HEAD).func_190926_b();
-   }
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        return this.theEntity.world.isDaytime() && this.theEntity.getItemStackFromSlot(EntityEquipmentSlot.HEAD).func_190926_b();
+    }
 
-   public void func_75249_e() {
-      ((PathNavigateGround)this.field_75273_a.func_70661_as()).func_179685_e(true);
-   }
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
+    public void startExecuting()
+    {
+        ((PathNavigateGround)this.theEntity.getNavigator()).setAvoidSun(true);
+    }
 
-   public void func_75251_c() {
-      ((PathNavigateGround)this.field_75273_a.func_70661_as()).func_179685_e(false);
-   }
+    /**
+     * Resets the task
+     */
+    public void resetTask()
+    {
+        ((PathNavigateGround)this.theEntity.getNavigator()).setAvoidSun(false);
+    }
 }

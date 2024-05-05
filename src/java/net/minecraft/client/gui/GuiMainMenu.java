@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Runnables;
 import java.io.BufferedReader;
@@ -30,6 +31,10 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServerDemo;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldInfo;
+import optifine.CustomPanorama;
+import optifine.CustomPanoramaProperties;
+import optifine.Reflector;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,450 +42,727 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.Project;
 
-public class GuiMainMenu extends GuiScreen {
-   private static final Logger field_146974_g = LogManager.getLogger();
-   private static final Random field_175374_h = new Random();
-   private final float field_73974_b;
-   private String field_73975_c;
-   private GuiButton field_73973_d;
-   private float field_73979_m;
-   private DynamicTexture field_73977_n;
-   private final Object field_104025_t = new Object();
-   public static final String field_96138_a = "Please click " + TextFormatting.UNDERLINE + "here" + TextFormatting.RESET + " for more information.";
-   private int field_92024_r;
-   private int field_92023_s;
-   private int field_92022_t;
-   private int field_92021_u;
-   private int field_92020_v;
-   private int field_92019_w;
-   private String field_92025_p;
-   private String field_146972_A;
-   private String field_104024_v;
-   private static final ResourceLocation field_110353_x = new ResourceLocation("texts/splashes.txt");
-   private static final ResourceLocation field_110352_y = new ResourceLocation("textures/gui/title/minecraft.png");
-   private static final ResourceLocation field_194400_H = new ResourceLocation("textures/gui/title/edition.png");
-   private static final ResourceLocation[] field_73978_o = new ResourceLocation[]{new ResourceLocation("textures/gui/title/background/panorama_0.png"), new ResourceLocation("textures/gui/title/background/panorama_1.png"), new ResourceLocation("textures/gui/title/background/panorama_2.png"), new ResourceLocation("textures/gui/title/background/panorama_3.png"), new ResourceLocation("textures/gui/title/background/panorama_4.png"), new ResourceLocation("textures/gui/title/background/panorama_5.png")};
-   private ResourceLocation field_110351_G;
-   private GuiButton field_175372_K;
-   private boolean field_183502_L;
-   private GuiScreen field_183503_M;
-   private int field_193978_M;
-   private int field_193979_N;
+public class GuiMainMenu extends GuiScreen
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Random RANDOM = new Random();
 
-   public GuiMainMenu() {
-      this.field_146972_A = field_96138_a;
-      this.field_73975_c = "missingno";
-      IResource iresource = null;
+    /** Counts the number of screen updates. */
+    private final float updateCounter;
 
-      try {
-         List<String> list = Lists.<String>newArrayList();
-         iresource = Minecraft.func_71410_x().func_110442_L().func_110536_a(field_110353_x);
-         BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(iresource.func_110527_b(), StandardCharsets.UTF_8));
+    /** The splash message. */
+    private String splashText;
+    private GuiButton buttonResetDemo;
 
-         String s;
-         while((s = bufferedreader.readLine()) != null) {
-            s = s.trim();
-            if (!s.isEmpty()) {
-               list.add(s);
-            }
-         }
+    /** Timer used to rotate the panorama, increases every tick. */
+    private float panoramaTimer;
 
-         if (!list.isEmpty()) {
-            while(true) {
-               this.field_73975_c = list.get(field_175374_h.nextInt(list.size()));
-               if (this.field_73975_c.hashCode() != 125780783) {
-                  break;
-               }
-            }
-         }
-      } catch (IOException var8) {
-         ;
-      } finally {
-         IOUtils.closeQuietly((Closeable)iresource);
-      }
+    /**
+     * Texture allocated for the current viewport of the main menu's panorama background.
+     */
+    private DynamicTexture viewportTexture;
 
-      this.field_73974_b = field_175374_h.nextFloat();
-      this.field_92025_p = "";
-      if (!GLContext.getCapabilities().OpenGL20 && !OpenGlHelper.func_153193_b()) {
-         this.field_92025_p = I18n.func_135052_a("title.oldgl1");
-         this.field_146972_A = I18n.func_135052_a("title.oldgl2");
-         this.field_104024_v = "https://help.mojang.com/customer/portal/articles/325948?ref=game";
-      }
+    /**
+     * The Object object utilized as a thread lock when performing non thread-safe operations
+     */
+    private final Object threadLock = new Object();
+    public static final String MORE_INFO_TEXT = "Please click " + TextFormatting.UNDERLINE + "here" + TextFormatting.RESET + " for more information.";
 
-   }
+    /** Width of openGLWarning2 */
+    private int openGLWarning2Width;
 
-   private boolean func_183501_a() {
-      return Minecraft.func_71410_x().field_71474_y.func_74308_b(GameSettings.Options.REALMS_NOTIFICATIONS) && this.field_183503_M != null;
-   }
+    /** Width of openGLWarning1 */
+    private int openGLWarning1Width;
 
-   public void func_73876_c() {
-      if (this.func_183501_a()) {
-         this.field_183503_M.func_73876_c();
-      }
+    /** Left x coordinate of the OpenGL warning */
+    private int openGLWarningX1;
 
-   }
+    /** Top y coordinate of the OpenGL warning */
+    private int openGLWarningY1;
 
-   public boolean func_73868_f() {
-      return false;
-   }
+    /** Right x coordinate of the OpenGL warning */
+    private int openGLWarningX2;
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-   }
+    /** Bottom y coordinate of the OpenGL warning */
+    private int openGLWarningY2;
 
-   public void func_73866_w_() {
-      this.field_73977_n = new DynamicTexture(256, 256);
-      this.field_110351_G = this.field_146297_k.func_110434_K().func_110578_a("background", this.field_73977_n);
-      this.field_193978_M = this.field_146289_q.func_78256_a("Copyright Mojang AB. Do not distribute!");
-      this.field_193979_N = this.field_146294_l - this.field_193978_M - 2;
-      Calendar calendar = Calendar.getInstance();
-      calendar.setTime(new Date());
-      if (calendar.get(2) + 1 == 12 && calendar.get(5) == 24) {
-         this.field_73975_c = "Merry X-mas!";
-      } else if (calendar.get(2) + 1 == 1 && calendar.get(5) == 1) {
-         this.field_73975_c = "Happy new year!";
-      } else if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31) {
-         this.field_73975_c = "OOoooOOOoooo! Spooky!";
-      }
+    /** OpenGL graphics card warning. */
+    private String openGLWarning1;
 
-      int i = 24;
-      int j = this.field_146295_m / 4 + 48;
-      if (this.field_146297_k.func_71355_q()) {
-         this.func_73972_b(j, 24);
-      } else {
-         this.func_73969_a(j, 24);
-      }
+    /** OpenGL graphics card warning. */
+    private String openGLWarning2;
 
-      this.field_146292_n.add(new GuiButton(0, this.field_146294_l / 2 - 100, j + 72 + 12, 98, 20, I18n.func_135052_a("menu.options")));
-      this.field_146292_n.add(new GuiButton(4, this.field_146294_l / 2 + 2, j + 72 + 12, 98, 20, I18n.func_135052_a("menu.quit")));
-      this.field_146292_n.add(new GuiButtonLanguage(5, this.field_146294_l / 2 - 124, j + 72 + 12));
-      synchronized(this.field_104025_t) {
-         this.field_92023_s = this.field_146289_q.func_78256_a(this.field_92025_p);
-         this.field_92024_r = this.field_146289_q.func_78256_a(this.field_146972_A);
-         int k = Math.max(this.field_92023_s, this.field_92024_r);
-         this.field_92022_t = (this.field_146294_l - k) / 2;
-         this.field_92021_u = (this.field_146292_n.get(0)).field_146129_i - 24;
-         this.field_92020_v = this.field_92022_t + k;
-         this.field_92019_w = this.field_92021_u + 24;
-      }
+    /** Link to the Mojang Support about minimum requirements */
+    private String openGLWarningLink;
+    private static final ResourceLocation SPLASH_TEXTS = new ResourceLocation("texts/splashes.txt");
+    private static final ResourceLocation MINECRAFT_TITLE_TEXTURES = new ResourceLocation("textures/gui/title/minecraft.png");
+    private static final ResourceLocation field_194400_H = new ResourceLocation("textures/gui/title/edition.png");
 
-      this.field_146297_k.func_181537_a(false);
-      if (Minecraft.func_71410_x().field_71474_y.func_74308_b(GameSettings.Options.REALMS_NOTIFICATIONS) && !this.field_183502_L) {
-         RealmsBridge realmsbridge = new RealmsBridge();
-         this.field_183503_M = realmsbridge.getNotificationScreen(this);
-         this.field_183502_L = true;
-      }
+    /** An array of all the paths to the panorama pictures. */
+    private static final ResourceLocation[] TITLE_PANORAMA_PATHS = new ResourceLocation[] {new ResourceLocation("textures/gui/title/background/panorama_0.png"), new ResourceLocation("textures/gui/title/background/panorama_1.png"), new ResourceLocation("textures/gui/title/background/panorama_2.png"), new ResourceLocation("textures/gui/title/background/panorama_3.png"), new ResourceLocation("textures/gui/title/background/panorama_4.png"), new ResourceLocation("textures/gui/title/background/panorama_5.png")};
+    private ResourceLocation backgroundTexture;
 
-      if (this.func_183501_a()) {
-         this.field_183503_M.func_183500_a(this.field_146294_l, this.field_146295_m);
-         this.field_183503_M.func_73866_w_();
-      }
+    /** Minecraft Realms button. */
+    private GuiButton realmsButton;
 
-   }
+    /** Has the check for a realms notification screen been performed? */
+    private boolean hasCheckedForRealmsNotification;
 
-   private void func_73969_a(int p_73969_1_, int p_73969_2_) {
-      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 - 100, p_73969_1_, I18n.func_135052_a("menu.singleplayer")));
-      this.field_146292_n.add(new GuiButton(2, this.field_146294_l / 2 - 100, p_73969_1_ + p_73969_2_ * 1, I18n.func_135052_a("menu.multiplayer")));
-      this.field_175372_K = this.func_189646_b(new GuiButton(14, this.field_146294_l / 2 - 100, p_73969_1_ + p_73969_2_ * 2, I18n.func_135052_a("menu.online")));
-   }
+    /**
+     * A screen generated by realms for notifications; drawn in adition to the main menu (buttons and such from both are
+     * drawn at the same time). May be null.
+     */
+    private GuiScreen realmsNotification;
+    private int field_193978_M;
+    private int field_193979_N;
+    private GuiButton modButton;
+    private GuiScreen modUpdateNotification;
 
-   private void func_73972_b(int p_73972_1_, int p_73972_2_) {
-      this.field_146292_n.add(new GuiButton(11, this.field_146294_l / 2 - 100, p_73972_1_, I18n.func_135052_a("menu.playdemo")));
-      this.field_73973_d = this.func_189646_b(new GuiButton(12, this.field_146294_l / 2 - 100, p_73972_1_ + p_73972_2_ * 1, I18n.func_135052_a("menu.resetdemo")));
-      ISaveFormat isaveformat = this.field_146297_k.func_71359_d();
-      WorldInfo worldinfo = isaveformat.func_75803_c("Demo_World");
-      if (worldinfo == null) {
-         this.field_73973_d.field_146124_l = false;
-      }
+    public GuiMainMenu()
+    {
+        this.openGLWarning2 = MORE_INFO_TEXT;
+        this.splashText = "missingno";
+        IResource iresource = null;
 
-   }
+        try
+        {
+            List<String> list = Lists.<String>newArrayList();
+            iresource = Minecraft.getMinecraft().getResourceManager().getResource(SPLASH_TEXTS);
+            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8));
+            String s;
 
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-      if (p_146284_1_.field_146127_k == 0) {
-         this.field_146297_k.func_147108_a(new GuiOptions(this, this.field_146297_k.field_71474_y));
-      }
+            while ((s = bufferedreader.readLine()) != null)
+            {
+                s = s.trim();
 
-      if (p_146284_1_.field_146127_k == 5) {
-         this.field_146297_k.func_147108_a(new GuiLanguage(this, this.field_146297_k.field_71474_y, this.field_146297_k.func_135016_M()));
-      }
-
-      if (p_146284_1_.field_146127_k == 1) {
-         this.field_146297_k.func_147108_a(new GuiWorldSelection(this));
-      }
-
-      if (p_146284_1_.field_146127_k == 2) {
-         this.field_146297_k.func_147108_a(new GuiMultiplayer(this));
-      }
-
-      if (p_146284_1_.field_146127_k == 14 && this.field_175372_K.field_146125_m) {
-         this.func_140005_i();
-      }
-
-      if (p_146284_1_.field_146127_k == 4) {
-         this.field_146297_k.func_71400_g();
-      }
-
-      if (p_146284_1_.field_146127_k == 11) {
-         this.field_146297_k.func_71371_a("Demo_World", "Demo_World", WorldServerDemo.field_73071_a);
-      }
-
-      if (p_146284_1_.field_146127_k == 12) {
-         ISaveFormat isaveformat = this.field_146297_k.func_71359_d();
-         WorldInfo worldinfo = isaveformat.func_75803_c("Demo_World");
-         if (worldinfo != null) {
-            this.field_146297_k.func_147108_a(new GuiYesNo(this, I18n.func_135052_a("selectWorld.deleteQuestion"), "'" + worldinfo.func_76065_j() + "' " + I18n.func_135052_a("selectWorld.deleteWarning"), I18n.func_135052_a("selectWorld.deleteButton"), I18n.func_135052_a("gui.cancel"), 12));
-         }
-      }
-
-   }
-
-   private void func_140005_i() {
-      RealmsBridge realmsbridge = new RealmsBridge();
-      realmsbridge.switchToRealms(this);
-   }
-
-   public void func_73878_a(boolean p_73878_1_, int p_73878_2_) {
-      if (p_73878_1_ && p_73878_2_ == 12) {
-         ISaveFormat isaveformat = this.field_146297_k.func_71359_d();
-         isaveformat.func_75800_d();
-         isaveformat.func_75802_e("Demo_World");
-         this.field_146297_k.func_147108_a(this);
-      } else if (p_73878_2_ == 12) {
-         this.field_146297_k.func_147108_a(this);
-      } else if (p_73878_2_ == 13) {
-         if (p_73878_1_) {
-            try {
-               Class<?> oclass = Class.forName("java.awt.Desktop");
-               Object object = oclass.getMethod("getDesktop").invoke((Object)null);
-               oclass.getMethod("browse", URI.class).invoke(object, new URI(this.field_104024_v));
-            } catch (Throwable throwable) {
-               field_146974_g.error("Couldn't open link", throwable);
-            }
-         }
-
-         this.field_146297_k.func_147108_a(this);
-      }
-
-   }
-
-   private void func_73970_b(int p_73970_1_, int p_73970_2_, float p_73970_3_) {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      GlStateManager.func_179128_n(5889);
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179096_D();
-      Project.gluPerspective(120.0F, 1.0F, 0.05F, 10.0F);
-      GlStateManager.func_179128_n(5888);
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179096_D();
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      GlStateManager.func_179114_b(180.0F, 1.0F, 0.0F, 0.0F);
-      GlStateManager.func_179114_b(90.0F, 0.0F, 0.0F, 1.0F);
-      GlStateManager.func_179147_l();
-      GlStateManager.func_179118_c();
-      GlStateManager.func_179129_p();
-      GlStateManager.func_179132_a(false);
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      int i = 8;
-
-      for(int j = 0; j < 64; ++j) {
-         GlStateManager.func_179094_E();
-         float f = ((float)(j % 8) / 8.0F - 0.5F) / 64.0F;
-         float f1 = ((float)(j / 8) / 8.0F - 0.5F) / 64.0F;
-         float f2 = 0.0F;
-         GlStateManager.func_179109_b(f, f1, 0.0F);
-         GlStateManager.func_179114_b(MathHelper.func_76126_a(this.field_73979_m / 400.0F) * 25.0F + 20.0F, 1.0F, 0.0F, 0.0F);
-         GlStateManager.func_179114_b(-this.field_73979_m * 0.1F, 0.0F, 1.0F, 0.0F);
-
-         for(int k = 0; k < 6; ++k) {
-            GlStateManager.func_179094_E();
-            if (k == 1) {
-               GlStateManager.func_179114_b(90.0F, 0.0F, 1.0F, 0.0F);
+                if (!s.isEmpty())
+                {
+                    list.add(s);
+                }
             }
 
-            if (k == 2) {
-               GlStateManager.func_179114_b(180.0F, 0.0F, 1.0F, 0.0F);
+            if (!list.isEmpty())
+            {
+                while (true)
+                {
+                    this.splashText = list.get(RANDOM.nextInt(list.size()));
+
+                    if (this.splashText.hashCode() != 125780783)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        catch (IOException var8)
+        {
+            ;
+        }
+        finally
+        {
+            IOUtils.closeQuietly((Closeable)iresource);
+        }
+
+        this.updateCounter = RANDOM.nextFloat();
+        this.openGLWarning1 = "";
+
+        if (!GLContext.getCapabilities().OpenGL20 && !OpenGlHelper.areShadersSupported())
+        {
+            this.openGLWarning1 = I18n.format("title.oldgl1");
+            this.openGLWarning2 = I18n.format("title.oldgl2");
+            this.openGLWarningLink = "https://help.mojang.com/customer/portal/articles/325948?ref=game";
+        }
+    }
+
+    /**
+     * Is there currently a realms notification screen, and are realms notifications enabled?
+     */
+    private boolean areRealmsNotificationsEnabled()
+    {
+        return Minecraft.getMinecraft().gameSettings.getOptionOrdinalValue(GameSettings.Options.REALMS_NOTIFICATIONS) && this.realmsNotification != null;
+    }
+
+    /**
+     * Called from the main game loop to update the screen.
+     */
+    public void updateScreen()
+    {
+        if (this.areRealmsNotificationsEnabled())
+        {
+            this.realmsNotification.updateScreen();
+        }
+    }
+
+    /**
+     * Returns true if this GUI should pause the game when it is displayed in single-player
+     */
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
+
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+    }
+
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        this.viewportTexture = new DynamicTexture(256, 256);
+        this.backgroundTexture = this.mc.getTextureManager().getDynamicTextureLocation("background", this.viewportTexture);
+        this.field_193978_M = this.fontRendererObj.getStringWidth("Copyright Mojang AB. Do not distribute!");
+        this.field_193979_N = this.width - this.field_193978_M - 2;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        if (calendar.get(2) + 1 == 12 && calendar.get(5) == 24)
+        {
+            this.splashText = "Merry X-mas!";
+        }
+        else if (calendar.get(2) + 1 == 1 && calendar.get(5) == 1)
+        {
+            this.splashText = "Happy new year!";
+        }
+        else if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31)
+        {
+            this.splashText = "OOoooOOOoooo! Spooky!";
+        }
+
+        int i = 24;
+        int j = this.height / 4 + 48;
+
+        if (this.mc.isDemo())
+        {
+            this.addDemoButtons(j, 24);
+        }
+        else
+        {
+            this.addSingleplayerMultiplayerButtons(j, 24);
+        }
+
+        this.buttonList.add(new GuiButton(0, this.width / 2 - 100, j + 72 + 12, 98, 20, I18n.format("menu.options")));
+        this.buttonList.add(new GuiButton(4, this.width / 2 + 2, j + 72 + 12, 98, 20, I18n.format("menu.quit")));
+        this.buttonList.add(new GuiButtonLanguage(5, this.width / 2 - 124, j + 72 + 12));
+
+        synchronized (this.threadLock)
+        {
+            this.openGLWarning1Width = this.fontRendererObj.getStringWidth(this.openGLWarning1);
+            this.openGLWarning2Width = this.fontRendererObj.getStringWidth(this.openGLWarning2);
+            int k = Math.max(this.openGLWarning1Width, this.openGLWarning2Width);
+            this.openGLWarningX1 = (this.width - k) / 2;
+            this.openGLWarningY1 = (this.buttonList.get(0)).yPosition - 24;
+            this.openGLWarningX2 = this.openGLWarningX1 + k;
+            this.openGLWarningY2 = this.openGLWarningY1 + 24;
+        }
+
+        this.mc.setConnectedToRealms(false);
+
+        if (Minecraft.getMinecraft().gameSettings.getOptionOrdinalValue(GameSettings.Options.REALMS_NOTIFICATIONS) && !this.hasCheckedForRealmsNotification)
+        {
+            RealmsBridge realmsbridge = new RealmsBridge();
+            this.realmsNotification = realmsbridge.getNotificationScreen(this);
+            this.hasCheckedForRealmsNotification = true;
+        }
+
+        if (this.areRealmsNotificationsEnabled())
+        {
+            this.realmsNotification.setGuiSize(this.width, this.height);
+            this.realmsNotification.initGui();
+        }
+
+        if (Reflector.NotificationModUpdateScreen_init.exists())
+        {
+            this.modUpdateNotification = (GuiScreen)Reflector.call(Reflector.NotificationModUpdateScreen_init, this, this.modButton);
+        }
+    }
+
+    /**
+     * Adds Singleplayer and Multiplayer buttons on Main Menu for players who have bought the game.
+     */
+    private void addSingleplayerMultiplayerButtons(int p_73969_1_, int p_73969_2_)
+    {
+        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, p_73969_1_, I18n.format("menu.singleplayer")));
+        this.buttonList.add(new GuiButton(2, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 1, I18n.format("menu.multiplayer")));
+
+        if (Reflector.GuiModList_Constructor.exists())
+        {
+            this.realmsButton = this.addButton(new GuiButton(14, this.width / 2 + 2, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("menu.online").replace("Minecraft", "").trim()));
+            this.buttonList.add(this.modButton = new GuiButton(6, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("fml.menu.mods")));
+        }
+        else
+        {
+            this.realmsButton = this.addButton(new GuiButton(14, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, I18n.format("menu.online")));
+        }
+    }
+
+    /**
+     * Adds Demo buttons on Main Menu for players who are playing Demo.
+     */
+    private void addDemoButtons(int p_73972_1_, int p_73972_2_)
+    {
+        this.buttonList.add(new GuiButton(11, this.width / 2 - 100, p_73972_1_, I18n.format("menu.playdemo")));
+        this.buttonResetDemo = this.addButton(new GuiButton(12, this.width / 2 - 100, p_73972_1_ + p_73972_2_ * 1, I18n.format("menu.resetdemo")));
+        ISaveFormat isaveformat = this.mc.getSaveLoader();
+        WorldInfo worldinfo = isaveformat.getWorldInfo("Demo_World");
+
+        if (worldinfo == null)
+        {
+            this.buttonResetDemo.enabled = false;
+        }
+    }
+
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.id == 0)
+        {
+            this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
+        }
+
+        if (button.id == 5)
+        {
+            this.mc.displayGuiScreen(new GuiLanguage(this, this.mc.gameSettings, this.mc.getLanguageManager()));
+        }
+
+        if (button.id == 1)
+        {
+            this.mc.displayGuiScreen(new GuiWorldSelection(this));
+        }
+
+        if (button.id == 2)
+        {
+            this.mc.displayGuiScreen(new GuiMultiplayer(this));
+        }
+
+        if (button.id == 14 && this.realmsButton.visible)
+        {
+            this.switchToRealms();
+        }
+
+        if (button.id == 4)
+        {
+            this.mc.shutdown();
+        }
+
+        if (button.id == 6 && Reflector.GuiModList_Constructor.exists())
+        {
+            this.mc.displayGuiScreen((GuiScreen)Reflector.newInstance(Reflector.GuiModList_Constructor, this));
+        }
+
+        if (button.id == 11)
+        {
+            this.mc.launchIntegratedServer("Demo_World", "Demo_World", WorldServerDemo.DEMO_WORLD_SETTINGS);
+        }
+
+        if (button.id == 12)
+        {
+            ISaveFormat isaveformat = this.mc.getSaveLoader();
+            WorldInfo worldinfo = isaveformat.getWorldInfo("Demo_World");
+
+            if (worldinfo != null)
+            {
+                this.mc.displayGuiScreen(new GuiYesNo(this, I18n.format("selectWorld.deleteQuestion"), "'" + worldinfo.getWorldName() + "' " + I18n.format("selectWorld.deleteWarning"), I18n.format("selectWorld.deleteButton"), I18n.format("gui.cancel"), 12));
+            }
+        }
+    }
+
+    private void switchToRealms()
+    {
+        RealmsBridge realmsbridge = new RealmsBridge();
+        realmsbridge.switchToRealms(this);
+    }
+
+    public void confirmClicked(boolean result, int id)
+    {
+        if (result && id == 12)
+        {
+            ISaveFormat isaveformat = this.mc.getSaveLoader();
+            isaveformat.flushCache();
+            isaveformat.deleteWorldDirectory("Demo_World");
+            this.mc.displayGuiScreen(this);
+        }
+        else if (id == 12)
+        {
+            this.mc.displayGuiScreen(this);
+        }
+        else if (id == 13)
+        {
+            if (result)
+            {
+                try
+                {
+                    Class<?> oclass = Class.forName("java.awt.Desktop");
+                    Object object = oclass.getMethod("getDesktop").invoke((Object)null);
+                    oclass.getMethod("browse", URI.class).invoke(object, new URI(this.openGLWarningLink));
+                }
+                catch (Throwable throwable1)
+                {
+                    LOGGER.error("Couldn't open link", throwable1);
+                }
             }
 
-            if (k == 3) {
-               GlStateManager.func_179114_b(-90.0F, 0.0F, 1.0F, 0.0F);
+            this.mc.displayGuiScreen(this);
+        }
+    }
+
+    /**
+     * Draws the main menu panorama
+     */
+    private void drawPanorama(int mouseX, int mouseY, float partialTicks)
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.matrixMode(5889);
+        GlStateManager.pushMatrix();
+        GlStateManager.loadIdentity();
+        Project.gluPerspective(120.0F, 1.0F, 0.05F, 10.0F);
+        GlStateManager.matrixMode(5888);
+        GlStateManager.pushMatrix();
+        GlStateManager.loadIdentity();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotate(90.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.disableCull();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        int i = 8;
+        int j = 64;
+        CustomPanoramaProperties custompanoramaproperties = CustomPanorama.getCustomPanoramaProperties();
+
+        if (custompanoramaproperties != null)
+        {
+            j = custompanoramaproperties.getBlur1();
+        }
+
+        for (int k = 0; k < j; ++k)
+        {
+            GlStateManager.pushMatrix();
+            float f = ((float)(k % 8) / 8.0F - 0.5F) / 64.0F;
+            float f1 = ((float)(k / 8) / 8.0F - 0.5F) / 64.0F;
+            float f2 = 0.0F;
+            GlStateManager.translate(f, f1, 0.0F);
+            GlStateManager.rotate(MathHelper.sin(this.panoramaTimer / 400.0F) * 25.0F + 20.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-this.panoramaTimer * 0.1F, 0.0F, 1.0F, 0.0F);
+
+            for (int l = 0; l < 6; ++l)
+            {
+                GlStateManager.pushMatrix();
+
+                if (l == 1)
+                {
+                    GlStateManager.rotate(90.0F, 0.0F, 1.0F, 0.0F);
+                }
+
+                if (l == 2)
+                {
+                    GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+                }
+
+                if (l == 3)
+                {
+                    GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
+                }
+
+                if (l == 4)
+                {
+                    GlStateManager.rotate(90.0F, 1.0F, 0.0F, 0.0F);
+                }
+
+                if (l == 5)
+                {
+                    GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
+                }
+
+                ResourceLocation[] aresourcelocation = TITLE_PANORAMA_PATHS;
+
+                if (custompanoramaproperties != null)
+                {
+                    aresourcelocation = custompanoramaproperties.getPanoramaLocations();
+                }
+
+                this.mc.getTextureManager().bindTexture(aresourcelocation[l]);
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                int i1 = 255 / (k + 1);
+                float f3 = 0.0F;
+                bufferbuilder.pos(-1.0D, -1.0D, 1.0D).tex(0.0D, 0.0D).color(255, 255, 255, i1).endVertex();
+                bufferbuilder.pos(1.0D, -1.0D, 1.0D).tex(1.0D, 0.0D).color(255, 255, 255, i1).endVertex();
+                bufferbuilder.pos(1.0D, 1.0D, 1.0D).tex(1.0D, 1.0D).color(255, 255, 255, i1).endVertex();
+                bufferbuilder.pos(-1.0D, 1.0D, 1.0D).tex(0.0D, 1.0D).color(255, 255, 255, i1).endVertex();
+                tessellator.draw();
+                GlStateManager.popMatrix();
             }
 
-            if (k == 4) {
-               GlStateManager.func_179114_b(90.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.popMatrix();
+            GlStateManager.colorMask(true, true, true, false);
+        }
+
+        bufferbuilder.setTranslation(0.0D, 0.0D, 0.0D);
+        GlStateManager.colorMask(true, true, true, true);
+        GlStateManager.matrixMode(5889);
+        GlStateManager.popMatrix();
+        GlStateManager.matrixMode(5888);
+        GlStateManager.popMatrix();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableCull();
+        GlStateManager.enableDepth();
+    }
+
+    /**
+     * Rotate and blurs the skybox view in the main menu
+     */
+    private void rotateAndBlurSkybox()
+    {
+        this.mc.getTextureManager().bindTexture(this.backgroundTexture);
+        GlStateManager.glTexParameteri(3553, 10241, 9729);
+        GlStateManager.glTexParameteri(3553, 10240, 9729);
+        GlStateManager.glCopyTexSubImage2D(3553, 0, 0, 0, 0, 0, 256, 256);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.colorMask(true, true, true, false);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        GlStateManager.disableAlpha();
+        int i = 3;
+        int j = 3;
+        CustomPanoramaProperties custompanoramaproperties = CustomPanorama.getCustomPanoramaProperties();
+
+        if (custompanoramaproperties != null)
+        {
+            j = custompanoramaproperties.getBlur2();
+        }
+
+        for (int k = 0; k < j; ++k)
+        {
+            float f = 1.0F / (float)(k + 1);
+            int l = this.width;
+            int i1 = this.height;
+            float f1 = (float)(k - 1) / 256.0F;
+            bufferbuilder.pos((double)l, (double)i1, (double)this.zLevel).tex((double)(0.0F + f1), 1.0D).color(1.0F, 1.0F, 1.0F, f).endVertex();
+            bufferbuilder.pos((double)l, 0.0D, (double)this.zLevel).tex((double)(1.0F + f1), 1.0D).color(1.0F, 1.0F, 1.0F, f).endVertex();
+            bufferbuilder.pos(0.0D, 0.0D, (double)this.zLevel).tex((double)(1.0F + f1), 0.0D).color(1.0F, 1.0F, 1.0F, f).endVertex();
+            bufferbuilder.pos(0.0D, (double)i1, (double)this.zLevel).tex((double)(0.0F + f1), 0.0D).color(1.0F, 1.0F, 1.0F, f).endVertex();
+        }
+
+        tessellator.draw();
+        GlStateManager.enableAlpha();
+        GlStateManager.colorMask(true, true, true, true);
+    }
+
+    /**
+     * Renders the skybox in the main menu
+     */
+    private void renderSkybox(int mouseX, int mouseY, float partialTicks)
+    {
+        this.mc.getFramebuffer().unbindFramebuffer();
+        GlStateManager.viewport(0, 0, 256, 256);
+        this.drawPanorama(mouseX, mouseY, partialTicks);
+        this.rotateAndBlurSkybox();
+        int i = 3;
+        CustomPanoramaProperties custompanoramaproperties = CustomPanorama.getCustomPanoramaProperties();
+
+        if (custompanoramaproperties != null)
+        {
+            i = custompanoramaproperties.getBlur3();
+        }
+
+        for (int j = 0; j < i; ++j)
+        {
+            this.rotateAndBlurSkybox();
+            this.rotateAndBlurSkybox();
+        }
+
+        this.mc.getFramebuffer().bindFramebuffer(true);
+        GlStateManager.viewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
+        float f2 = 120.0F / (float)(this.width > this.height ? this.width : this.height);
+        float f = (float)this.height * f2 / 256.0F;
+        float f1 = (float)this.width * f2 / 256.0F;
+        int k = this.width;
+        int l = this.height;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos(0.0D, (double)l, (double)this.zLevel).tex((double)(0.5F - f), (double)(0.5F + f1)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+        bufferbuilder.pos((double)k, (double)l, (double)this.zLevel).tex((double)(0.5F - f), (double)(0.5F - f1)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+        bufferbuilder.pos((double)k, 0.0D, (double)this.zLevel).tex((double)(0.5F + f), (double)(0.5F - f1)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+        bufferbuilder.pos(0.0D, 0.0D, (double)this.zLevel).tex((double)(0.5F + f), (double)(0.5F + f1)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+        tessellator.draw();
+    }
+
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.panoramaTimer += partialTicks;
+        GlStateManager.disableAlpha();
+        this.renderSkybox(mouseX, mouseY, partialTicks);
+        GlStateManager.enableAlpha();
+        int i = 274;
+        int j = this.width / 2 - 137;
+        int k = 30;
+        int l = -2130706433;
+        int i1 = 16777215;
+        int j1 = 0;
+        int k1 = Integer.MIN_VALUE;
+        CustomPanoramaProperties custompanoramaproperties = CustomPanorama.getCustomPanoramaProperties();
+
+        if (custompanoramaproperties != null)
+        {
+            l = custompanoramaproperties.getOverlay1Top();
+            i1 = custompanoramaproperties.getOverlay1Bottom();
+            j1 = custompanoramaproperties.getOverlay2Top();
+            k1 = custompanoramaproperties.getOverlay2Bottom();
+        }
+
+        if (l != 0 || i1 != 0)
+        {
+            this.drawGradientRect(0, 0, this.width, this.height, l, i1);
+        }
+
+        if (j1 != 0 || k1 != 0)
+        {
+            this.drawGradientRect(0, 0, this.width, this.height, j1, k1);
+        }
+
+        this.mc.getTextureManager().bindTexture(MINECRAFT_TITLE_TEXTURES);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        if ((double)this.updateCounter < 1.0E-4D)
+        {
+            this.drawTexturedModalRect(j + 0, 30, 0, 0, 99, 44);
+            this.drawTexturedModalRect(j + 99, 30, 129, 0, 27, 44);
+            this.drawTexturedModalRect(j + 99 + 26, 30, 126, 0, 3, 44);
+            this.drawTexturedModalRect(j + 99 + 26 + 3, 30, 99, 0, 26, 44);
+            this.drawTexturedModalRect(j + 155, 30, 0, 45, 155, 44);
+        }
+        else
+        {
+            this.drawTexturedModalRect(j + 0, 30, 0, 0, 155, 44);
+            this.drawTexturedModalRect(j + 155, 30, 0, 45, 155, 44);
+        }
+
+        this.mc.getTextureManager().bindTexture(field_194400_H);
+        drawModalRectWithCustomSizedTexture(j + 88, 67, 0.0F, 0.0F, 98, 14, 128.0F, 16.0F);
+
+        if (Reflector.ForgeHooksClient_renderMainMenu.exists())
+        {
+            this.splashText = Reflector.callString(Reflector.ForgeHooksClient_renderMainMenu, this, this.fontRendererObj, this.width, this.height, this.splashText);
+        }
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate((float)(this.width / 2 + 90), 70.0F, 0.0F);
+        GlStateManager.rotate(-20.0F, 0.0F, 0.0F, 1.0F);
+        float f = 1.8F - MathHelper.abs(MathHelper.sin((float)(Minecraft.getSystemTime() % 1000L) / 1000.0F * ((float)Math.PI * 2F)) * 0.1F);
+        f = f * 100.0F / (float)(this.fontRendererObj.getStringWidth(this.splashText) + 32);
+        GlStateManager.scale(f, f, f);
+        this.drawCenteredString(this.fontRendererObj, this.splashText, 0, -8, -256);
+        GlStateManager.popMatrix();
+        String s = "Minecraft 1.12.2";
+
+        if (this.mc.isDemo())
+        {
+            s = s + " Demo";
+        }
+        else
+        {
+            s = s + ("release".equalsIgnoreCase(this.mc.getVersionType()) ? "" : "/" + this.mc.getVersionType());
+        }
+
+        if (Reflector.FMLCommonHandler_getBrandings.exists())
+        {
+            Object object = Reflector.call(Reflector.FMLCommonHandler_instance);
+            List<String> list = Lists.<String>reverse((List)Reflector.call(object, Reflector.FMLCommonHandler_getBrandings, true));
+
+            for (int l1 = 0; l1 < list.size(); ++l1)
+            {
+                String s1 = list.get(l1);
+
+                if (!Strings.isNullOrEmpty(s1))
+                {
+                    this.drawString(this.fontRendererObj, s1, 2, this.height - (10 + l1 * (this.fontRendererObj.FONT_HEIGHT + 1)), 16777215);
+                }
             }
+        }
+        else
+        {
+            this.drawString(this.fontRendererObj, s, 2, this.height - 10, -1);
+        }
 
-            if (k == 5) {
-               GlStateManager.func_179114_b(-90.0F, 1.0F, 0.0F, 0.0F);
+        this.drawString(this.fontRendererObj, "Copyright Mojang AB. Do not distribute!", this.field_193979_N, this.height - 10, -1);
+
+        if (mouseX > this.field_193979_N && mouseX < this.field_193979_N + this.field_193978_M && mouseY > this.height - 10 && mouseY < this.height && Mouse.isInsideWindow())
+        {
+            drawRect(this.field_193979_N, this.height - 1, this.field_193979_N + this.field_193978_M, this.height, -1);
+        }
+
+        if (this.openGLWarning1 != null && !this.openGLWarning1.isEmpty())
+        {
+            drawRect(this.openGLWarningX1 - 2, this.openGLWarningY1 - 2, this.openGLWarningX2 + 2, this.openGLWarningY2 - 1, 1428160512);
+            this.drawString(this.fontRendererObj, this.openGLWarning1, this.openGLWarningX1, this.openGLWarningY1, -1);
+            this.drawString(this.fontRendererObj, this.openGLWarning2, (this.width - this.openGLWarning2Width) / 2, (this.buttonList.get(0)).yPosition - 12, -1);
+        }
+
+        super.drawScreen(mouseX, mouseY, partialTicks);
+
+        if (this.areRealmsNotificationsEnabled())
+        {
+            this.realmsNotification.drawScreen(mouseX, mouseY, partialTicks);
+        }
+
+        if (this.modUpdateNotification != null)
+        {
+            this.modUpdateNotification.drawScreen(mouseX, mouseY, partialTicks);
+        }
+    }
+
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+
+        synchronized (this.threadLock)
+        {
+            if (!this.openGLWarning1.isEmpty() && !StringUtils.isNullOrEmpty(this.openGLWarningLink) && mouseX >= this.openGLWarningX1 && mouseX <= this.openGLWarningX2 && mouseY >= this.openGLWarningY1 && mouseY <= this.openGLWarningY2)
+            {
+                GuiConfirmOpenLink guiconfirmopenlink = new GuiConfirmOpenLink(this, this.openGLWarningLink, 13, true);
+                guiconfirmopenlink.disableSecurityWarning();
+                this.mc.displayGuiScreen(guiconfirmopenlink);
             }
+        }
 
-            this.field_146297_k.func_110434_K().func_110577_a(field_73978_o[k]);
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            int l = 255 / (j + 1);
-            float f3 = 0.0F;
-            bufferbuilder.func_181662_b(-1.0D, -1.0D, 1.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, l).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, -1.0D, 1.0D).func_187315_a(1.0D, 0.0D).func_181669_b(255, 255, 255, l).func_181675_d();
-            bufferbuilder.func_181662_b(1.0D, 1.0D, 1.0D).func_187315_a(1.0D, 1.0D).func_181669_b(255, 255, 255, l).func_181675_d();
-            bufferbuilder.func_181662_b(-1.0D, 1.0D, 1.0D).func_187315_a(0.0D, 1.0D).func_181669_b(255, 255, 255, l).func_181675_d();
-            tessellator.func_78381_a();
-            GlStateManager.func_179121_F();
-         }
+        if (this.areRealmsNotificationsEnabled())
+        {
+            this.realmsNotification.mouseClicked(mouseX, mouseY, mouseButton);
+        }
 
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179135_a(true, true, true, false);
-      }
+        if (mouseX > this.field_193979_N && mouseX < this.field_193979_N + this.field_193978_M && mouseY > this.height - 10 && mouseY < this.height)
+        {
+            this.mc.displayGuiScreen(new GuiWinGame(false, Runnables.doNothing()));
+        }
+    }
 
-      bufferbuilder.func_178969_c(0.0D, 0.0D, 0.0D);
-      GlStateManager.func_179135_a(true, true, true, true);
-      GlStateManager.func_179128_n(5889);
-      GlStateManager.func_179121_F();
-      GlStateManager.func_179128_n(5888);
-      GlStateManager.func_179121_F();
-      GlStateManager.func_179132_a(true);
-      GlStateManager.func_179089_o();
-      GlStateManager.func_179126_j();
-   }
-
-   private void func_73968_a() {
-      this.field_146297_k.func_110434_K().func_110577_a(this.field_110351_G);
-      GlStateManager.func_187421_b(3553, 10241, 9729);
-      GlStateManager.func_187421_b(3553, 10240, 9729);
-      GlStateManager.func_187443_a(3553, 0, 0, 0, 0, 0, 256, 256);
-      GlStateManager.func_179147_l();
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      GlStateManager.func_179135_a(true, true, true, false);
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      GlStateManager.func_179118_c();
-      int i = 3;
-
-      for(int j = 0; j < 3; ++j) {
-         float f = 1.0F / (float)(j + 1);
-         int k = this.field_146294_l;
-         int l = this.field_146295_m;
-         float f1 = (float)(j - 1) / 256.0F;
-         bufferbuilder.func_181662_b((double)k, (double)l, (double)this.field_73735_i).func_187315_a((double)(0.0F + f1), 1.0D).func_181666_a(1.0F, 1.0F, 1.0F, f).func_181675_d();
-         bufferbuilder.func_181662_b((double)k, 0.0D, (double)this.field_73735_i).func_187315_a((double)(1.0F + f1), 1.0D).func_181666_a(1.0F, 1.0F, 1.0F, f).func_181675_d();
-         bufferbuilder.func_181662_b(0.0D, 0.0D, (double)this.field_73735_i).func_187315_a((double)(1.0F + f1), 0.0D).func_181666_a(1.0F, 1.0F, 1.0F, f).func_181675_d();
-         bufferbuilder.func_181662_b(0.0D, (double)l, (double)this.field_73735_i).func_187315_a((double)(0.0F + f1), 0.0D).func_181666_a(1.0F, 1.0F, 1.0F, f).func_181675_d();
-      }
-
-      tessellator.func_78381_a();
-      GlStateManager.func_179141_d();
-      GlStateManager.func_179135_a(true, true, true, true);
-   }
-
-   private void func_73971_c(int p_73971_1_, int p_73971_2_, float p_73971_3_) {
-      this.field_146297_k.func_147110_a().func_147609_e();
-      GlStateManager.func_179083_b(0, 0, 256, 256);
-      this.func_73970_b(p_73971_1_, p_73971_2_, p_73971_3_);
-      this.func_73968_a();
-      this.func_73968_a();
-      this.func_73968_a();
-      this.func_73968_a();
-      this.func_73968_a();
-      this.func_73968_a();
-      this.func_73968_a();
-      this.field_146297_k.func_147110_a().func_147610_a(true);
-      GlStateManager.func_179083_b(0, 0, this.field_146297_k.field_71443_c, this.field_146297_k.field_71440_d);
-      float f = 120.0F / (float)(this.field_146294_l > this.field_146295_m ? this.field_146294_l : this.field_146295_m);
-      float f1 = (float)this.field_146295_m * f / 256.0F;
-      float f2 = (float)this.field_146294_l * f / 256.0F;
-      int i = this.field_146294_l;
-      int j = this.field_146295_m;
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      bufferbuilder.func_181662_b(0.0D, (double)j, (double)this.field_73735_i).func_187315_a((double)(0.5F - f1), (double)(0.5F + f2)).func_181666_a(1.0F, 1.0F, 1.0F, 1.0F).func_181675_d();
-      bufferbuilder.func_181662_b((double)i, (double)j, (double)this.field_73735_i).func_187315_a((double)(0.5F - f1), (double)(0.5F - f2)).func_181666_a(1.0F, 1.0F, 1.0F, 1.0F).func_181675_d();
-      bufferbuilder.func_181662_b((double)i, 0.0D, (double)this.field_73735_i).func_187315_a((double)(0.5F + f1), (double)(0.5F - f2)).func_181666_a(1.0F, 1.0F, 1.0F, 1.0F).func_181675_d();
-      bufferbuilder.func_181662_b(0.0D, 0.0D, (double)this.field_73735_i).func_187315_a((double)(0.5F + f1), (double)(0.5F + f2)).func_181666_a(1.0F, 1.0F, 1.0F, 1.0F).func_181675_d();
-      tessellator.func_78381_a();
-   }
-
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.field_73979_m += p_73863_3_;
-      GlStateManager.func_179118_c();
-      this.func_73971_c(p_73863_1_, p_73863_2_, p_73863_3_);
-      GlStateManager.func_179141_d();
-      int i = 274;
-      int j = this.field_146294_l / 2 - 137;
-      int k = 30;
-      this.func_73733_a(0, 0, this.field_146294_l, this.field_146295_m, -2130706433, 16777215);
-      this.func_73733_a(0, 0, this.field_146294_l, this.field_146295_m, 0, Integer.MIN_VALUE);
-      this.field_146297_k.func_110434_K().func_110577_a(field_110352_y);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      if ((double)this.field_73974_b < 1.0E-4D) {
-         this.func_73729_b(j + 0, 30, 0, 0, 99, 44);
-         this.func_73729_b(j + 99, 30, 129, 0, 27, 44);
-         this.func_73729_b(j + 99 + 26, 30, 126, 0, 3, 44);
-         this.func_73729_b(j + 99 + 26 + 3, 30, 99, 0, 26, 44);
-         this.func_73729_b(j + 155, 30, 0, 45, 155, 44);
-      } else {
-         this.func_73729_b(j + 0, 30, 0, 0, 155, 44);
-         this.func_73729_b(j + 155, 30, 0, 45, 155, 44);
-      }
-
-      this.field_146297_k.func_110434_K().func_110577_a(field_194400_H);
-      func_146110_a(j + 88, 67, 0.0F, 0.0F, 98, 14, 128.0F, 16.0F);
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179109_b((float)(this.field_146294_l / 2 + 90), 70.0F, 0.0F);
-      GlStateManager.func_179114_b(-20.0F, 0.0F, 0.0F, 1.0F);
-      float f = 1.8F - MathHelper.func_76135_e(MathHelper.func_76126_a((float)(Minecraft.func_71386_F() % 1000L) / 1000.0F * 6.2831855F) * 0.1F);
-      f = f * 100.0F / (float)(this.field_146289_q.func_78256_a(this.field_73975_c) + 32);
-      GlStateManager.func_179152_a(f, f, f);
-      this.func_73732_a(this.field_146289_q, this.field_73975_c, 0, -8, -256);
-      GlStateManager.func_179121_F();
-      String s = "Minecraft 1.12.2";
-      if (this.field_146297_k.func_71355_q()) {
-         s = s + " Demo";
-      } else {
-         s = s + ("release".equalsIgnoreCase(this.field_146297_k.func_184123_d()) ? "" : "/" + this.field_146297_k.func_184123_d());
-      }
-
-      this.func_73731_b(this.field_146289_q, s, 2, this.field_146295_m - 10, -1);
-      this.func_73731_b(this.field_146289_q, "Copyright Mojang AB. Do not distribute!", this.field_193979_N, this.field_146295_m - 10, -1);
-      if (p_73863_1_ > this.field_193979_N && p_73863_1_ < this.field_193979_N + this.field_193978_M && p_73863_2_ > this.field_146295_m - 10 && p_73863_2_ < this.field_146295_m && Mouse.isInsideWindow()) {
-         func_73734_a(this.field_193979_N, this.field_146295_m - 1, this.field_193979_N + this.field_193978_M, this.field_146295_m, -1);
-      }
-
-      if (this.field_92025_p != null && !this.field_92025_p.isEmpty()) {
-         func_73734_a(this.field_92022_t - 2, this.field_92021_u - 2, this.field_92020_v + 2, this.field_92019_w - 1, 1428160512);
-         this.func_73731_b(this.field_146289_q, this.field_92025_p, this.field_92022_t, this.field_92021_u, -1);
-         this.func_73731_b(this.field_146289_q, this.field_146972_A, (this.field_146294_l - this.field_92024_r) / 2, (this.field_146292_n.get(0)).field_146129_i - 12, -1);
-      }
-
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      if (this.func_183501_a()) {
-         this.field_183503_M.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      }
-
-   }
-
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      synchronized(this.field_104025_t) {
-         if (!this.field_92025_p.isEmpty() && !StringUtils.func_151246_b(this.field_104024_v) && p_73864_1_ >= this.field_92022_t && p_73864_1_ <= this.field_92020_v && p_73864_2_ >= this.field_92021_u && p_73864_2_ <= this.field_92019_w) {
-            GuiConfirmOpenLink guiconfirmopenlink = new GuiConfirmOpenLink(this, this.field_104024_v, 13, true);
-            guiconfirmopenlink.func_146358_g();
-            this.field_146297_k.func_147108_a(guiconfirmopenlink);
-         }
-      }
-
-      if (this.func_183501_a()) {
-         this.field_183503_M.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      }
-
-      if (p_73864_1_ > this.field_193979_N && p_73864_1_ < this.field_193979_N + this.field_193978_M && p_73864_2_ > this.field_146295_m - 10 && p_73864_2_ < this.field_146295_m) {
-         this.field_146297_k.func_147108_a(new GuiWinGame(false, Runnables.doNothing()));
-      }
-
-   }
-
-   public void func_146281_b() {
-      if (this.field_183503_M != null) {
-         this.field_183503_M.func_146281_b();
-      }
-
-   }
+    /**
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
+     */
+    public void onGuiClosed()
+    {
+        if (this.realmsNotification != null)
+        {
+            this.realmsNotification.onGuiClosed();
+        }
+    }
 }

@@ -40,168 +40,239 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityWitch extends EntityMob implements IRangedAttackMob {
-   private static final UUID field_110184_bp = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
-   private static final AttributeModifier field_110185_bq = (new AttributeModifier(field_110184_bp, "Drinking speed penalty", -0.25D, 0)).func_111168_a(false);
-   private static final DataParameter<Boolean> field_184731_c = EntityDataManager.<Boolean>func_187226_a(EntityWitch.class, DataSerializers.field_187198_h);
-   private int field_82200_e;
+public class EntityWitch extends EntityMob implements IRangedAttackMob
+{
+    private static final UUID MODIFIER_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
+    private static final AttributeModifier MODIFIER = (new AttributeModifier(MODIFIER_UUID, "Drinking speed penalty", -0.25D, 0)).setSaved(false);
+    private static final DataParameter<Boolean> IS_AGGRESSIVE = EntityDataManager.<Boolean>createKey(EntityWitch.class, DataSerializers.BOOLEAN);
 
-   public EntityWitch(World p_i1744_1_) {
-      super(p_i1744_1_);
-      this.func_70105_a(0.6F, 1.95F);
-   }
+    /**
+     * Timer used as interval for a witch's attack, decremented every tick if aggressive and when reaches zero the witch
+     * will throw a potion at the target entity.
+     */
+    private int witchAttackTimer;
 
-   public static void func_189776_b(DataFixer p_189776_0_) {
-      EntityLiving.func_189752_a(p_189776_0_, EntityWitch.class);
-   }
+    public EntityWitch(World worldIn)
+    {
+        super(worldIn);
+        this.setSize(0.6F, 1.95F);
+    }
 
-   protected void func_184651_r() {
-      this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
-      this.field_70714_bg.func_75776_a(2, new EntityAIAttackRanged(this, 1.0D, 60, 10.0F));
-      this.field_70714_bg.func_75776_a(2, new EntityAIWanderAvoidWater(this, 1.0D));
-      this.field_70714_bg.func_75776_a(3, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-      this.field_70714_bg.func_75776_a(3, new EntityAILookIdle(this));
-      this.field_70715_bh.func_75776_a(1, new EntityAIHurtByTarget(this, false, new Class[0]));
-      this.field_70715_bh.func_75776_a(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-   }
+    public static void registerFixesWitch(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityWitch.class);
+    }
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-      this.func_184212_Q().func_187214_a(field_184731_c, Boolean.valueOf(false));
-   }
+    protected void initEntityAI()
+    {
+        this.tasks.addTask(1, new EntityAISwimming(this));
+        this.tasks.addTask(2, new EntityAIAttackRanged(this, 1.0D, 60, 10.0F));
+        this.tasks.addTask(2, new EntityAIWanderAvoidWater(this, 1.0D));
+        this.tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        this.tasks.addTask(3, new EntityAILookIdle(this));
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+    }
 
-   protected SoundEvent func_184639_G() {
-      return SoundEvents.field_187920_gt;
-   }
+    protected void entityInit()
+    {
+        super.entityInit();
+        this.getDataManager().register(IS_AGGRESSIVE, Boolean.valueOf(false));
+    }
 
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      return SoundEvents.field_187923_gw;
-   }
+    protected SoundEvent getAmbientSound()
+    {
+        return SoundEvents.ENTITY_WITCH_AMBIENT;
+    }
 
-   protected SoundEvent func_184615_bR() {
-      return SoundEvents.field_187921_gu;
-   }
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        return SoundEvents.ENTITY_WITCH_HURT;
+    }
 
-   public void func_82197_f(boolean p_82197_1_) {
-      this.func_184212_Q().func_187227_b(field_184731_c, Boolean.valueOf(p_82197_1_));
-   }
+    protected SoundEvent getDeathSound()
+    {
+        return SoundEvents.ENTITY_WITCH_DEATH;
+    }
 
-   public boolean func_184730_o() {
-      return ((Boolean)this.func_184212_Q().func_187225_a(field_184731_c)).booleanValue();
-   }
+    /**
+     * Set whether this witch is aggressive at an entity.
+     */
+    public void setAggressive(boolean aggressive)
+    {
+        this.getDataManager().set(IS_AGGRESSIVE, Boolean.valueOf(aggressive));
+    }
 
-   protected void func_110147_ax() {
-      super.func_110147_ax();
-      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(26.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
-   }
+    public boolean isDrinkingPotion()
+    {
+        return ((Boolean)this.getDataManager().get(IS_AGGRESSIVE)).booleanValue();
+    }
 
-   public void func_70636_d() {
-      if (!this.field_70170_p.field_72995_K) {
-         if (this.func_184730_o()) {
-            if (this.field_82200_e-- <= 0) {
-               this.func_82197_f(false);
-               ItemStack itemstack = this.func_184614_ca();
-               this.func_184201_a(EntityEquipmentSlot.MAINHAND, ItemStack.field_190927_a);
-               if (itemstack.func_77973_b() == Items.field_151068_bn) {
-                  List<PotionEffect> list = PotionUtils.func_185189_a(itemstack);
-                  if (list != null) {
-                     for(PotionEffect potioneffect : list) {
-                        this.func_70690_d(new PotionEffect(potioneffect));
-                     }
-                  }
-               }
+    protected void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(26.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+    }
 
-               this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111124_b(field_110185_bq);
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
+    public void onLivingUpdate()
+    {
+        if (!this.world.isRemote)
+        {
+            if (this.isDrinkingPotion())
+            {
+                if (this.witchAttackTimer-- <= 0)
+                {
+                    this.setAggressive(false);
+                    ItemStack itemstack = this.getHeldItemMainhand();
+                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.field_190927_a);
+
+                    if (itemstack.getItem() == Items.POTIONITEM)
+                    {
+                        List<PotionEffect> list = PotionUtils.getEffectsFromStack(itemstack);
+
+                        if (list != null)
+                        {
+                            for (PotionEffect potioneffect : list)
+                            {
+                                this.addPotionEffect(new PotionEffect(potioneffect));
+                            }
+                        }
+                    }
+
+                    this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(MODIFIER);
+                }
             }
-         } else {
-            PotionType potiontype = null;
-            if (this.field_70146_Z.nextFloat() < 0.15F && this.func_70055_a(Material.field_151586_h) && !this.func_70644_a(MobEffects.field_76427_o)) {
-               potiontype = PotionTypes.field_185248_t;
-            } else if (this.field_70146_Z.nextFloat() < 0.15F && (this.func_70027_ad() || this.func_189748_bU() != null && this.func_189748_bU().func_76347_k()) && !this.func_70644_a(MobEffects.field_76426_n)) {
-               potiontype = PotionTypes.field_185241_m;
-            } else if (this.field_70146_Z.nextFloat() < 0.05F && this.func_110143_aJ() < this.func_110138_aP()) {
-               potiontype = PotionTypes.field_185250_v;
-            } else if (this.field_70146_Z.nextFloat() < 0.5F && this.func_70638_az() != null && !this.func_70644_a(MobEffects.field_76424_c) && this.func_70638_az().func_70068_e(this) > 121.0D) {
-               potiontype = PotionTypes.field_185243_o;
+            else
+            {
+                PotionType potiontype = null;
+
+                if (this.rand.nextFloat() < 0.15F && this.isInsideOfMaterial(Material.WATER) && !this.isPotionActive(MobEffects.WATER_BREATHING))
+                {
+                    potiontype = PotionTypes.WATER_BREATHING;
+                }
+                else if (this.rand.nextFloat() < 0.15F && (this.isBurning() || this.getLastDamageSource() != null && this.getLastDamageSource().isFireDamage()) && !this.isPotionActive(MobEffects.FIRE_RESISTANCE))
+                {
+                    potiontype = PotionTypes.FIRE_RESISTANCE;
+                }
+                else if (this.rand.nextFloat() < 0.05F && this.getHealth() < this.getMaxHealth())
+                {
+                    potiontype = PotionTypes.HEALING;
+                }
+                else if (this.rand.nextFloat() < 0.5F && this.getAttackTarget() != null && !this.isPotionActive(MobEffects.SPEED) && this.getAttackTarget().getDistanceSqToEntity(this) > 121.0D)
+                {
+                    potiontype = PotionTypes.SWIFTNESS;
+                }
+
+                if (potiontype != null)
+                {
+                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), potiontype));
+                    this.witchAttackTimer = this.getHeldItemMainhand().getMaxItemUseDuration();
+                    this.setAggressive(true);
+                    this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_WITCH_DRINK, this.getSoundCategory(), 1.0F, 0.8F + this.rand.nextFloat() * 0.4F);
+                    IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+                    iattributeinstance.removeModifier(MODIFIER);
+                    iattributeinstance.applyModifier(MODIFIER);
+                }
             }
 
-            if (potiontype != null) {
-               this.func_184201_a(EntityEquipmentSlot.MAINHAND, PotionUtils.func_185188_a(new ItemStack(Items.field_151068_bn), potiontype));
-               this.field_82200_e = this.func_184614_ca().func_77988_m();
-               this.func_82197_f(true);
-               this.field_70170_p.func_184148_a((EntityPlayer)null, this.field_70165_t, this.field_70163_u, this.field_70161_v, SoundEvents.field_187922_gv, this.func_184176_by(), 1.0F, 0.8F + this.field_70146_Z.nextFloat() * 0.4F);
-               IAttributeInstance iattributeinstance = this.func_110148_a(SharedMonsterAttributes.field_111263_d);
-               iattributeinstance.func_111124_b(field_110185_bq);
-               iattributeinstance.func_111121_a(field_110185_bq);
+            if (this.rand.nextFloat() < 7.5E-4F)
+            {
+                this.world.setEntityState(this, (byte)15);
             }
-         }
+        }
 
-         if (this.field_70146_Z.nextFloat() < 7.5E-4F) {
-            this.field_70170_p.func_72960_a(this, (byte)15);
-         }
-      }
+        super.onLivingUpdate();
+    }
 
-      super.func_70636_d();
-   }
+    public void handleStatusUpdate(byte id)
+    {
+        if (id == 15)
+        {
+            for (int i = 0; i < this.rand.nextInt(35) + 10; ++i)
+            {
+                this.world.spawnParticle(EnumParticleTypes.SPELL_WITCH, this.posX + this.rand.nextGaussian() * 0.12999999523162842D, this.getEntityBoundingBox().maxY + 0.5D + this.rand.nextGaussian() * 0.12999999523162842D, this.posZ + this.rand.nextGaussian() * 0.12999999523162842D, 0.0D, 0.0D, 0.0D);
+            }
+        }
+        else
+        {
+            super.handleStatusUpdate(id);
+        }
+    }
 
-   public void func_70103_a(byte p_70103_1_) {
-      if (p_70103_1_ == 15) {
-         for(int i = 0; i < this.field_70146_Z.nextInt(35) + 10; ++i) {
-            this.field_70170_p.func_175688_a(EnumParticleTypes.SPELL_WITCH, this.field_70165_t + this.field_70146_Z.nextGaussian() * 0.12999999523162842D, this.func_174813_aQ().field_72337_e + 0.5D + this.field_70146_Z.nextGaussian() * 0.12999999523162842D, this.field_70161_v + this.field_70146_Z.nextGaussian() * 0.12999999523162842D, 0.0D, 0.0D, 0.0D);
-         }
-      } else {
-         super.func_70103_a(p_70103_1_);
-      }
+    /**
+     * Reduces damage, depending on potions
+     */
+    protected float applyPotionDamageCalculations(DamageSource source, float damage)
+    {
+        damage = super.applyPotionDamageCalculations(source, damage);
 
-   }
+        if (source.getEntity() == this)
+        {
+            damage = 0.0F;
+        }
 
-   protected float func_70672_c(DamageSource p_70672_1_, float p_70672_2_) {
-      p_70672_2_ = super.func_70672_c(p_70672_1_, p_70672_2_);
-      if (p_70672_1_.func_76346_g() == this) {
-         p_70672_2_ = 0.0F;
-      }
+        if (source.isMagicDamage())
+        {
+            damage = (float)((double)damage * 0.15D);
+        }
 
-      if (p_70672_1_.func_82725_o()) {
-         p_70672_2_ = (float)((double)p_70672_2_ * 0.15D);
-      }
+        return damage;
+    }
 
-      return p_70672_2_;
-   }
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_WITCH;
+    }
 
-   @Nullable
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_186432_n;
-   }
+    /**
+     * Attack the specified entity using a ranged attack.
+     *  
+     * @param distanceFactor How far the target is, normalized and clamped between 0.1 and 1.0
+     */
+    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor)
+    {
+        if (!this.isDrinkingPotion())
+        {
+            double d0 = target.posY + (double)target.getEyeHeight() - 1.100000023841858D;
+            double d1 = target.posX + target.motionX - this.posX;
+            double d2 = d0 - this.posY;
+            double d3 = target.posZ + target.motionZ - this.posZ;
+            float f = MathHelper.sqrt(d1 * d1 + d3 * d3);
+            PotionType potiontype = PotionTypes.HARMING;
 
-   public void func_82196_d(EntityLivingBase p_82196_1_, float p_82196_2_) {
-      if (!this.func_184730_o()) {
-         double d0 = p_82196_1_.field_70163_u + (double)p_82196_1_.func_70047_e() - 1.100000023841858D;
-         double d1 = p_82196_1_.field_70165_t + p_82196_1_.field_70159_w - this.field_70165_t;
-         double d2 = d0 - this.field_70163_u;
-         double d3 = p_82196_1_.field_70161_v + p_82196_1_.field_70179_y - this.field_70161_v;
-         float f = MathHelper.func_76133_a(d1 * d1 + d3 * d3);
-         PotionType potiontype = PotionTypes.field_185252_x;
-         if (f >= 8.0F && !p_82196_1_.func_70644_a(MobEffects.field_76421_d)) {
-            potiontype = PotionTypes.field_185246_r;
-         } else if (p_82196_1_.func_110143_aJ() >= 8.0F && !p_82196_1_.func_70644_a(MobEffects.field_76436_u)) {
-            potiontype = PotionTypes.field_185254_z;
-         } else if (f <= 3.0F && !p_82196_1_.func_70644_a(MobEffects.field_76437_t) && this.field_70146_Z.nextFloat() < 0.25F) {
-            potiontype = PotionTypes.field_185226_I;
-         }
+            if (f >= 8.0F && !target.isPotionActive(MobEffects.SLOWNESS))
+            {
+                potiontype = PotionTypes.SLOWNESS;
+            }
+            else if (target.getHealth() >= 8.0F && !target.isPotionActive(MobEffects.POISON))
+            {
+                potiontype = PotionTypes.POISON;
+            }
+            else if (f <= 3.0F && !target.isPotionActive(MobEffects.WEAKNESS) && this.rand.nextFloat() < 0.25F)
+            {
+                potiontype = PotionTypes.WEAKNESS;
+            }
 
-         EntityPotion entitypotion = new EntityPotion(this.field_70170_p, this, PotionUtils.func_185188_a(new ItemStack(Items.field_185155_bH), potiontype));
-         entitypotion.field_70125_A -= -20.0F;
-         entitypotion.func_70186_c(d1, d2 + (double)(f * 0.2F), d3, 0.75F, 8.0F);
-         this.field_70170_p.func_184148_a((EntityPlayer)null, this.field_70165_t, this.field_70163_u, this.field_70161_v, SoundEvents.field_187924_gx, this.func_184176_by(), 1.0F, 0.8F + this.field_70146_Z.nextFloat() * 0.4F);
-         this.field_70170_p.func_72838_d(entitypotion);
-      }
-   }
+            EntityPotion entitypotion = new EntityPotion(this.world, this, PotionUtils.addPotionToItemStack(new ItemStack(Items.SPLASH_POTION), potiontype));
+            entitypotion.rotationPitch -= -20.0F;
+            entitypotion.setThrowableHeading(d1, d2 + (double)(f * 0.2F), d3, 0.75F, 8.0F);
+            this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.rand.nextFloat() * 0.4F);
+            this.world.spawnEntityInWorld(entitypotion);
+        }
+    }
 
-   public float func_70047_e() {
-      return 1.62F;
-   }
+    public float getEyeHeight()
+    {
+        return 1.62F;
+    }
 
-   public void func_184724_a(boolean p_184724_1_) {
-   }
+    public void setSwingingArms(boolean swingingArms)
+    {
+    }
 }

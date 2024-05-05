@@ -12,69 +12,94 @@ import net.minecraft.world.storage.WorldSummary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GuiListWorldSelection extends GuiListExtended {
-   private static final Logger field_186797_u = LogManager.getLogger();
-   private final GuiWorldSelection field_186798_v;
-   private final List<GuiListWorldSelectionEntry> field_186799_w = Lists.<GuiListWorldSelectionEntry>newArrayList();
-   private int field_186800_x = -1;
+public class GuiListWorldSelection extends GuiListExtended
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final GuiWorldSelection worldSelectionObj;
+    private final List<GuiListWorldSelectionEntry> entries = Lists.<GuiListWorldSelectionEntry>newArrayList();
 
-   public GuiListWorldSelection(GuiWorldSelection p_i46590_1_, Minecraft p_i46590_2_, int p_i46590_3_, int p_i46590_4_, int p_i46590_5_, int p_i46590_6_, int p_i46590_7_) {
-      super(p_i46590_2_, p_i46590_3_, p_i46590_4_, p_i46590_5_, p_i46590_6_, p_i46590_7_);
-      this.field_186798_v = p_i46590_1_;
-      this.func_186795_e();
-   }
+    /** Index to the currently selected world */
+    private int selectedIdx = -1;
 
-   public void func_186795_e() {
-      ISaveFormat isaveformat = this.field_148161_k.func_71359_d();
+    public GuiListWorldSelection(GuiWorldSelection p_i46590_1_, Minecraft clientIn, int p_i46590_3_, int p_i46590_4_, int p_i46590_5_, int p_i46590_6_, int p_i46590_7_)
+    {
+        super(clientIn, p_i46590_3_, p_i46590_4_, p_i46590_5_, p_i46590_6_, p_i46590_7_);
+        this.worldSelectionObj = p_i46590_1_;
+        this.refreshList();
+    }
 
-      List<WorldSummary> list;
-      try {
-         list = isaveformat.func_75799_b();
-      } catch (AnvilConverterException anvilconverterexception) {
-         field_186797_u.error("Couldn't load level list", (Throwable)anvilconverterexception);
-         this.field_148161_k.func_147108_a(new GuiErrorScreen(I18n.func_135052_a("selectWorld.unable_to_load"), anvilconverterexception.getMessage()));
-         return;
-      }
+    public void refreshList()
+    {
+        ISaveFormat isaveformat = this.mc.getSaveLoader();
+        List<WorldSummary> list;
 
-      Collections.sort(list);
+        try
+        {
+            list = isaveformat.getSaveList();
+        }
+        catch (AnvilConverterException anvilconverterexception)
+        {
+            LOGGER.error("Couldn't load level list", (Throwable)anvilconverterexception);
+            this.mc.displayGuiScreen(new GuiErrorScreen(I18n.format("selectWorld.unable_to_load"), anvilconverterexception.getMessage()));
+            return;
+        }
 
-      for(WorldSummary worldsummary : list) {
-         this.field_186799_w.add(new GuiListWorldSelectionEntry(this, worldsummary, this.field_148161_k.func_71359_d()));
-      }
+        Collections.sort(list);
 
-   }
+        for (WorldSummary worldsummary : list)
+        {
+            this.entries.add(new GuiListWorldSelectionEntry(this, worldsummary, this.mc.getSaveLoader()));
+        }
+    }
 
-   public GuiListWorldSelectionEntry func_148180_b(int p_148180_1_) {
-      return this.field_186799_w.get(p_148180_1_);
-   }
+    /**
+     * Gets the IGuiListEntry object for the given index
+     */
+    public GuiListWorldSelectionEntry getListEntry(int index)
+    {
+        return this.entries.get(index);
+    }
 
-   protected int func_148127_b() {
-      return this.field_186799_w.size();
-   }
+    protected int getSize()
+    {
+        return this.entries.size();
+    }
 
-   protected int func_148137_d() {
-      return super.func_148137_d() + 20;
-   }
+    protected int getScrollBarX()
+    {
+        return super.getScrollBarX() + 20;
+    }
 
-   public int func_148139_c() {
-      return super.func_148139_c() + 50;
-   }
+    /**
+     * Gets the width of the list
+     */
+    public int getListWidth()
+    {
+        return super.getListWidth() + 50;
+    }
 
-   public void func_186792_d(int p_186792_1_) {
-      this.field_186800_x = p_186792_1_;
-      this.field_186798_v.func_184863_a(this.func_186794_f());
-   }
+    public void selectWorld(int idx)
+    {
+        this.selectedIdx = idx;
+        this.worldSelectionObj.selectWorld(this.getSelectedWorld());
+    }
 
-   protected boolean func_148131_a(int p_148131_1_) {
-      return p_148131_1_ == this.field_186800_x;
-   }
+    /**
+     * Returns true if the element passed in is currently selected
+     */
+    protected boolean isSelected(int slotIndex)
+    {
+        return slotIndex == this.selectedIdx;
+    }
 
-   @Nullable
-   public GuiListWorldSelectionEntry func_186794_f() {
-      return this.field_186800_x >= 0 && this.field_186800_x < this.func_148127_b() ? this.func_148180_b(this.field_186800_x) : null;
-   }
+    @Nullable
+    public GuiListWorldSelectionEntry getSelectedWorld()
+    {
+        return this.selectedIdx >= 0 && this.selectedIdx < this.getSize() ? this.getListEntry(this.selectedIdx) : null;
+    }
 
-   public GuiWorldSelection func_186796_g() {
-      return this.field_186798_v;
-   }
+    public GuiWorldSelection getGuiWorldSelection()
+    {
+        return this.worldSelectionObj;
+    }
 }

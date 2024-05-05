@@ -5,45 +5,63 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketWindowProperty implements Packet<INetHandlerPlayClient> {
-   private int field_149186_a;
-   private int field_149184_b;
-   private int field_149185_c;
+public class SPacketWindowProperty implements Packet<INetHandlerPlayClient>
+{
+    private int windowId;
+    private int property;
+    private int value;
 
-   public SPacketWindowProperty() {
-   }
+    public SPacketWindowProperty()
+    {
+    }
 
-   public SPacketWindowProperty(int p_i46952_1_, int p_i46952_2_, int p_i46952_3_) {
-      this.field_149186_a = p_i46952_1_;
-      this.field_149184_b = p_i46952_2_;
-      this.field_149185_c = p_i46952_3_;
-   }
+    public SPacketWindowProperty(int windowIdIn, int propertyIn, int valueIn)
+    {
+        this.windowId = windowIdIn;
+        this.property = propertyIn;
+        this.value = valueIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147245_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleWindowProperty(this);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149186_a = p_148837_1_.readUnsignedByte();
-      this.field_149184_b = p_148837_1_.readShort();
-      this.field_149185_c = p_148837_1_.readShort();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.windowId = buf.readUnsignedByte();
+        this.property = buf.readShort();
+        this.value = buf.readShort();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeByte(this.field_149186_a);
-      p_148840_1_.writeShort(this.field_149184_b);
-      p_148840_1_.writeShort(this.field_149185_c);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeByte(this.windowId);
+        buf.writeShort(this.property);
+        buf.writeShort(this.value);
+    }
 
-   public int func_149182_c() {
-      return this.field_149186_a;
-   }
+    public int getWindowId()
+    {
+        return this.windowId;
+    }
 
-   public int func_149181_d() {
-      return this.field_149184_b;
-   }
+    public int getProperty()
+    {
+        return this.property;
+    }
 
-   public int func_149180_e() {
-      return this.field_149185_c;
-   }
+    public int getValue()
+    {
+        return this.value;
+    }
 }

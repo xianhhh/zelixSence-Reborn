@@ -16,95 +16,136 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemSlab extends ItemBlock {
-   private final BlockSlab field_150949_c;
-   private final BlockSlab field_179226_c;
+public class ItemSlab extends ItemBlock
+{
+    private final BlockSlab singleSlab;
+    private final BlockSlab doubleSlab;
 
-   public ItemSlab(Block p_i45782_1_, BlockSlab p_i45782_2_, BlockSlab p_i45782_3_) {
-      super(p_i45782_1_);
-      this.field_150949_c = p_i45782_2_;
-      this.field_179226_c = p_i45782_3_;
-      this.func_77656_e(0);
-      this.func_77627_a(true);
-   }
+    public ItemSlab(Block block, BlockSlab singleSlab, BlockSlab doubleSlab)
+    {
+        super(block);
+        this.singleSlab = singleSlab;
+        this.doubleSlab = doubleSlab;
+        this.setMaxDamage(0);
+        this.setHasSubtypes(true);
+    }
 
-   public int func_77647_b(int p_77647_1_) {
-      return p_77647_1_;
-   }
+    /**
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
+     */
+    public int getMetadata(int damage)
+    {
+        return damage;
+    }
 
-   public String func_77667_c(ItemStack p_77667_1_) {
-      return this.field_150949_c.func_150002_b(p_77667_1_.func_77960_j());
-   }
+    /**
+     * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
+     * different names based on their damage or NBT.
+     */
+    public String getUnlocalizedName(ItemStack stack)
+    {
+        return this.singleSlab.getUnlocalizedName(stack.getMetadata());
+    }
 
-   public EnumActionResult func_180614_a(EntityPlayer p_180614_1_, World p_180614_2_, BlockPos p_180614_3_, EnumHand p_180614_4_, EnumFacing p_180614_5_, float p_180614_6_, float p_180614_7_, float p_180614_8_) {
-      ItemStack itemstack = p_180614_1_.func_184586_b(p_180614_4_);
-      if (!itemstack.func_190926_b() && p_180614_1_.func_175151_a(p_180614_3_.func_177972_a(p_180614_5_), p_180614_5_, itemstack)) {
-         Comparable<?> comparable = this.field_150949_c.func_185674_a(itemstack);
-         IBlockState iblockstate = p_180614_2_.func_180495_p(p_180614_3_);
-         if (iblockstate.func_177230_c() == this.field_150949_c) {
-            IProperty<?> iproperty = this.field_150949_c.func_176551_l();
-            Comparable<?> comparable1 = iblockstate.func_177229_b(iproperty);
-            BlockSlab.EnumBlockHalf blockslab$enumblockhalf = (BlockSlab.EnumBlockHalf)iblockstate.func_177229_b(BlockSlab.field_176554_a);
-            if ((p_180614_5_ == EnumFacing.UP && blockslab$enumblockhalf == BlockSlab.EnumBlockHalf.BOTTOM || p_180614_5_ == EnumFacing.DOWN && blockslab$enumblockhalf == BlockSlab.EnumBlockHalf.TOP) && comparable1 == comparable) {
-               IBlockState iblockstate1 = this.func_185055_a(iproperty, comparable1);
-               AxisAlignedBB axisalignedbb = iblockstate1.func_185890_d(p_180614_2_, p_180614_3_);
-               if (axisalignedbb != Block.field_185506_k && p_180614_2_.func_72855_b(axisalignedbb.func_186670_a(p_180614_3_)) && p_180614_2_.func_180501_a(p_180614_3_, iblockstate1, 11)) {
-                  SoundType soundtype = this.field_179226_c.func_185467_w();
-                  p_180614_2_.func_184133_a(p_180614_1_, p_180614_3_, soundtype.func_185841_e(), SoundCategory.BLOCKS, (soundtype.func_185843_a() + 1.0F) / 2.0F, soundtype.func_185847_b() * 0.8F);
-                  itemstack.func_190918_g(1);
-                  if (p_180614_1_ instanceof EntityPlayerMP) {
-                     CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)p_180614_1_, p_180614_3_, itemstack);
-                  }
-               }
+    /**
+     * Called when a Block is right-clicked with this Item
+     */
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
+    {
+        ItemStack itemstack = stack.getHeldItem(pos);
 
-               return EnumActionResult.SUCCESS;
-            }
-         }
+        if (!itemstack.func_190926_b() && stack.canPlayerEdit(worldIn.offset(hand), hand, itemstack))
+        {
+            Comparable<?> comparable = this.singleSlab.getTypeForItem(itemstack);
+            IBlockState iblockstate = playerIn.getBlockState(worldIn);
 
-         return this.func_180615_a(p_180614_1_, itemstack, p_180614_2_, p_180614_3_.func_177972_a(p_180614_5_), comparable) ? EnumActionResult.SUCCESS : super.func_180614_a(p_180614_1_, p_180614_2_, p_180614_3_, p_180614_4_, p_180614_5_, p_180614_6_, p_180614_7_, p_180614_8_);
-      } else {
-         return EnumActionResult.FAIL;
-      }
-   }
+            if (iblockstate.getBlock() == this.singleSlab)
+            {
+                IProperty<?> iproperty = this.singleSlab.getVariantProperty();
+                Comparable<?> comparable1 = iblockstate.getValue(iproperty);
+                BlockSlab.EnumBlockHalf blockslab$enumblockhalf = (BlockSlab.EnumBlockHalf)iblockstate.getValue(BlockSlab.HALF);
 
-   public boolean func_179222_a(World p_179222_1_, BlockPos p_179222_2_, EnumFacing p_179222_3_, EntityPlayer p_179222_4_, ItemStack p_179222_5_) {
-      BlockPos blockpos = p_179222_2_;
-      IProperty<?> iproperty = this.field_150949_c.func_176551_l();
-      Comparable<?> comparable = this.field_150949_c.func_185674_a(p_179222_5_);
-      IBlockState iblockstate = p_179222_1_.func_180495_p(p_179222_2_);
-      if (iblockstate.func_177230_c() == this.field_150949_c) {
-         boolean flag = iblockstate.func_177229_b(BlockSlab.field_176554_a) == BlockSlab.EnumBlockHalf.TOP;
-         if ((p_179222_3_ == EnumFacing.UP && !flag || p_179222_3_ == EnumFacing.DOWN && flag) && comparable == iblockstate.func_177229_b(iproperty)) {
-            return true;
-         }
-      }
+                if ((hand == EnumFacing.UP && blockslab$enumblockhalf == BlockSlab.EnumBlockHalf.BOTTOM || hand == EnumFacing.DOWN && blockslab$enumblockhalf == BlockSlab.EnumBlockHalf.TOP) && comparable1 == comparable)
+                {
+                    IBlockState iblockstate1 = this.makeState(iproperty, comparable1);
+                    AxisAlignedBB axisalignedbb = iblockstate1.getCollisionBoundingBox(playerIn, worldIn);
 
-      p_179222_2_ = p_179222_2_.func_177972_a(p_179222_3_);
-      IBlockState iblockstate1 = p_179222_1_.func_180495_p(p_179222_2_);
-      return iblockstate1.func_177230_c() == this.field_150949_c && comparable == iblockstate1.func_177229_b(iproperty) ? true : super.func_179222_a(p_179222_1_, blockpos, p_179222_3_, p_179222_4_, p_179222_5_);
-   }
+                    if (axisalignedbb != Block.NULL_AABB && playerIn.checkNoEntityCollision(axisalignedbb.offset(worldIn)) && playerIn.setBlockState(worldIn, iblockstate1, 11))
+                    {
+                        SoundType soundtype = this.doubleSlab.getSoundType();
+                        playerIn.playSound(stack, worldIn, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                        itemstack.func_190918_g(1);
 
-   private boolean func_180615_a(EntityPlayer p_180615_1_, ItemStack p_180615_2_, World p_180615_3_, BlockPos p_180615_4_, Object p_180615_5_) {
-      IBlockState iblockstate = p_180615_3_.func_180495_p(p_180615_4_);
-      if (iblockstate.func_177230_c() == this.field_150949_c) {
-         Comparable<?> comparable = iblockstate.func_177229_b(this.field_150949_c.func_176551_l());
-         if (comparable == p_180615_5_) {
-            IBlockState iblockstate1 = this.func_185055_a(this.field_150949_c.func_176551_l(), comparable);
-            AxisAlignedBB axisalignedbb = iblockstate1.func_185890_d(p_180615_3_, p_180615_4_);
-            if (axisalignedbb != Block.field_185506_k && p_180615_3_.func_72855_b(axisalignedbb.func_186670_a(p_180615_4_)) && p_180615_3_.func_180501_a(p_180615_4_, iblockstate1, 11)) {
-               SoundType soundtype = this.field_179226_c.func_185467_w();
-               p_180615_3_.func_184133_a(p_180615_1_, p_180615_4_, soundtype.func_185841_e(), SoundCategory.BLOCKS, (soundtype.func_185843_a() + 1.0F) / 2.0F, soundtype.func_185847_b() * 0.8F);
-               p_180615_2_.func_190918_g(1);
+                        if (stack instanceof EntityPlayerMP)
+                        {
+                            CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                        }
+                    }
+
+                    return EnumActionResult.SUCCESS;
+                }
             }
 
-            return true;
-         }
-      }
+            return this.tryPlace(stack, itemstack, playerIn, worldIn.offset(hand), comparable) ? EnumActionResult.SUCCESS : super.onItemUse(stack, playerIn, worldIn, pos, hand, facing, hitX, hitY);
+        }
+        else
+        {
+            return EnumActionResult.FAIL;
+        }
+    }
 
-      return false;
-   }
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, EntityPlayer player, ItemStack stack)
+    {
+        BlockPos blockpos = pos;
+        IProperty<?> iproperty = this.singleSlab.getVariantProperty();
+        Comparable<?> comparable = this.singleSlab.getTypeForItem(stack);
+        IBlockState iblockstate = worldIn.getBlockState(pos);
 
-   protected <T extends Comparable<T>> IBlockState func_185055_a(IProperty<T> p_185055_1_, Comparable<?> p_185055_2_) {
-      return this.field_179226_c.func_176223_P().func_177226_a(p_185055_1_, p_185055_2_);
-   }
+        if (iblockstate.getBlock() == this.singleSlab)
+        {
+            boolean flag = iblockstate.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP;
+
+            if ((side == EnumFacing.UP && !flag || side == EnumFacing.DOWN && flag) && comparable == iblockstate.getValue(iproperty))
+            {
+                return true;
+            }
+        }
+
+        pos = pos.offset(side);
+        IBlockState iblockstate1 = worldIn.getBlockState(pos);
+        return iblockstate1.getBlock() == this.singleSlab && comparable == iblockstate1.getValue(iproperty) ? true : super.canPlaceBlockOnSide(worldIn, blockpos, side, player, stack);
+    }
+
+    private boolean tryPlace(EntityPlayer player, ItemStack stack, World worldIn, BlockPos pos, Object itemSlabType)
+    {
+        IBlockState iblockstate = worldIn.getBlockState(pos);
+
+        if (iblockstate.getBlock() == this.singleSlab)
+        {
+            Comparable<?> comparable = iblockstate.getValue(this.singleSlab.getVariantProperty());
+
+            if (comparable == itemSlabType)
+            {
+                IBlockState iblockstate1 = this.makeState(this.singleSlab.getVariantProperty(), comparable);
+                AxisAlignedBB axisalignedbb = iblockstate1.getCollisionBoundingBox(worldIn, pos);
+
+                if (axisalignedbb != Block.NULL_AABB && worldIn.checkNoEntityCollision(axisalignedbb.offset(pos)) && worldIn.setBlockState(pos, iblockstate1, 11))
+                {
+                    SoundType soundtype = this.doubleSlab.getSoundType();
+                    worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                    stack.func_190918_g(1);
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected <T extends Comparable<T>> IBlockState makeState(IProperty<T> p_185055_1_, Comparable<?> p_185055_2_)
+    {
+        return this.doubleSlab.getDefaultState().withProperty(p_185055_1_, (T)p_185055_2_);
+    }
 }

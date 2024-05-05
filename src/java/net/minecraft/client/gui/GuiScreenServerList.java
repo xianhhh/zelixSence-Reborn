@@ -5,69 +5,106 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
-public class GuiScreenServerList extends GuiScreen {
-   private final GuiScreen field_146303_a;
-   private final ServerData field_146301_f;
-   private GuiTextField field_146302_g;
+public class GuiScreenServerList extends GuiScreen
+{
+    private final GuiScreen lastScreen;
+    private final ServerData serverData;
+    private GuiTextField ipEdit;
 
-   public GuiScreenServerList(GuiScreen p_i1031_1_, ServerData p_i1031_2_) {
-      this.field_146303_a = p_i1031_1_;
-      this.field_146301_f = p_i1031_2_;
-   }
+    public GuiScreenServerList(GuiScreen p_i1031_1_, ServerData p_i1031_2_)
+    {
+        this.lastScreen = p_i1031_1_;
+        this.serverData = p_i1031_2_;
+    }
 
-   public void func_73876_c() {
-      this.field_146302_g.func_146178_a();
-   }
+    /**
+     * Called from the main game loop to update the screen.
+     */
+    public void updateScreen()
+    {
+        this.ipEdit.updateCursorCounter();
+    }
 
-   public void func_73866_w_() {
-      Keyboard.enableRepeatEvents(true);
-      this.field_146292_n.clear();
-      this.field_146292_n.add(new GuiButton(0, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 96 + 12, I18n.func_135052_a("selectServer.select")));
-      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 120 + 12, I18n.func_135052_a("gui.cancel")));
-      this.field_146302_g = new GuiTextField(2, this.field_146289_q, this.field_146294_l / 2 - 100, 116, 200, 20);
-      this.field_146302_g.func_146203_f(128);
-      this.field_146302_g.func_146195_b(true);
-      this.field_146302_g.func_146180_a(this.field_146297_k.field_71474_y.field_74332_R);
-      (this.field_146292_n.get(0)).field_146124_l = !this.field_146302_g.func_146179_b().isEmpty() && this.field_146302_g.func_146179_b().split(":").length > 0;
-   }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        Keyboard.enableRepeatEvents(true);
+        this.buttonList.clear();
+        this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 96 + 12, I18n.format("selectServer.select")));
+        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 120 + 12, I18n.format("gui.cancel")));
+        this.ipEdit = new GuiTextField(2, this.fontRendererObj, this.width / 2 - 100, 116, 200, 20);
+        this.ipEdit.setMaxStringLength(128);
+        this.ipEdit.setFocused(true);
+        this.ipEdit.setText(this.mc.gameSettings.lastServer);
+        (this.buttonList.get(0)).enabled = !this.ipEdit.getText().isEmpty() && this.ipEdit.getText().split(":").length > 0;
+    }
 
-   public void func_146281_b() {
-      Keyboard.enableRepeatEvents(false);
-      this.field_146297_k.field_71474_y.field_74332_R = this.field_146302_g.func_146179_b();
-      this.field_146297_k.field_71474_y.func_74303_b();
-   }
+    /**
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
+     */
+    public void onGuiClosed()
+    {
+        Keyboard.enableRepeatEvents(false);
+        this.mc.gameSettings.lastServer = this.ipEdit.getText();
+        this.mc.gameSettings.saveOptions();
+    }
 
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-      if (p_146284_1_.field_146124_l) {
-         if (p_146284_1_.field_146127_k == 1) {
-            this.field_146303_a.func_73878_a(false, 0);
-         } else if (p_146284_1_.field_146127_k == 0) {
-            this.field_146301_f.field_78845_b = this.field_146302_g.func_146179_b();
-            this.field_146303_a.func_73878_a(true, 0);
-         }
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.enabled)
+        {
+            if (button.id == 1)
+            {
+                this.lastScreen.confirmClicked(false, 0);
+            }
+            else if (button.id == 0)
+            {
+                this.serverData.serverIP = this.ipEdit.getText();
+                this.lastScreen.confirmClicked(true, 0);
+            }
+        }
+    }
 
-      }
-   }
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        if (this.ipEdit.textboxKeyTyped(typedChar, keyCode))
+        {
+            (this.buttonList.get(0)).enabled = !this.ipEdit.getText().isEmpty() && this.ipEdit.getText().split(":").length > 0;
+        }
+        else if (keyCode == 28 || keyCode == 156)
+        {
+            this.actionPerformed(this.buttonList.get(0));
+        }
+    }
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-      if (this.field_146302_g.func_146201_a(p_73869_1_, p_73869_2_)) {
-         (this.field_146292_n.get(0)).field_146124_l = !this.field_146302_g.func_146179_b().isEmpty() && this.field_146302_g.func_146179_b().split(":").length > 0;
-      } else if (p_73869_2_ == 28 || p_73869_2_ == 156) {
-         this.func_146284_a(this.field_146292_n.get(0));
-      }
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.ipEdit.mouseClicked(mouseX, mouseY, mouseButton);
+    }
 
-   }
-
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      this.field_146302_g.func_146192_a(p_73864_1_, p_73864_2_, p_73864_3_);
-   }
-
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.func_146276_q_();
-      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("selectServer.direct"), this.field_146294_l / 2, 20, 16777215);
-      this.func_73731_b(this.field_146289_q, I18n.func_135052_a("addServer.enterIp"), this.field_146294_l / 2 - 100, 100, 10526880);
-      this.field_146302_g.func_146194_f();
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawDefaultBackground();
+        this.drawCenteredString(this.fontRendererObj, I18n.format("selectServer.direct"), this.width / 2, 20, 16777215);
+        this.drawString(this.fontRendererObj, I18n.format("addServer.enterIp"), this.width / 2 - 100, 100, 10526880);
+        this.ipEdit.drawTextBox();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
 }

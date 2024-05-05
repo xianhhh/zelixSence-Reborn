@@ -9,38 +9,45 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 
-public abstract class LootFunction {
-   private final LootCondition[] field_186555_a;
+public abstract class LootFunction
+{
+    private final LootCondition[] conditions;
 
-   protected LootFunction(LootCondition[] p_i46626_1_) {
-      this.field_186555_a = p_i46626_1_;
-   }
+    protected LootFunction(LootCondition[] conditionsIn)
+    {
+        this.conditions = conditionsIn;
+    }
 
-   public abstract ItemStack func_186553_a(ItemStack var1, Random var2, LootContext var3);
+    public abstract ItemStack apply(ItemStack stack, Random rand, LootContext context);
 
-   public LootCondition[] func_186554_a() {
-      return this.field_186555_a;
-   }
+    public LootCondition[] getConditions()
+    {
+        return this.conditions;
+    }
 
-   public abstract static class Serializer<T extends LootFunction> {
-      private final ResourceLocation field_186533_a;
-      private final Class<T> field_186534_b;
+    public abstract static class Serializer<T extends LootFunction>
+    {
+        private final ResourceLocation lootTableLocation;
+        private final Class<T> functionClass;
 
-      protected Serializer(ResourceLocation p_i47002_1_, Class<T> p_i47002_2_) {
-         this.field_186533_a = p_i47002_1_;
-         this.field_186534_b = p_i47002_2_;
-      }
+        protected Serializer(ResourceLocation location, Class<T> clazz)
+        {
+            this.lootTableLocation = location;
+            this.functionClass = clazz;
+        }
 
-      public ResourceLocation func_186529_a() {
-         return this.field_186533_a;
-      }
+        public ResourceLocation getFunctionName()
+        {
+            return this.lootTableLocation;
+        }
 
-      public Class<T> func_186531_b() {
-         return this.field_186534_b;
-      }
+        public Class<T> getFunctionClass()
+        {
+            return this.functionClass;
+        }
 
-      public abstract void func_186532_a(JsonObject var1, T var2, JsonSerializationContext var3);
+        public abstract void serialize(JsonObject object, T functionClazz, JsonSerializationContext serializationContext);
 
-      public abstract T func_186530_b(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3);
-   }
+        public abstract T deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootCondition[] conditionsIn);
+    }
 }

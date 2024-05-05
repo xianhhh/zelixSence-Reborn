@@ -15,26 +15,35 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-public class ItemLingeringPotion extends ItemPotion {
-   public String func_77653_i(ItemStack p_77653_1_) {
-      return I18n.func_74838_a(PotionUtils.func_185191_c(p_77653_1_).func_185174_b("lingering_potion.effect."));
-   }
+public class ItemLingeringPotion extends ItemPotion
+{
+    public String getItemStackDisplayName(ItemStack stack)
+    {
+        return I18n.translateToLocal(PotionUtils.getPotionFromItem(stack).getNamePrefixed("lingering_potion.effect."));
+    }
 
-   public void func_77624_a(ItemStack p_77624_1_, @Nullable World p_77624_2_, List<String> p_77624_3_, ITooltipFlag p_77624_4_) {
-      PotionUtils.func_185182_a(p_77624_1_, p_77624_3_, 0.25F);
-   }
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    {
+        PotionUtils.addPotionTooltip(stack, tooltip, 0.25F);
+    }
 
-   public ActionResult<ItemStack> func_77659_a(World p_77659_1_, EntityPlayer p_77659_2_, EnumHand p_77659_3_) {
-      ItemStack itemstack = p_77659_2_.func_184586_b(p_77659_3_);
-      ItemStack itemstack1 = p_77659_2_.field_71075_bZ.field_75098_d ? itemstack.func_77946_l() : itemstack.func_77979_a(1);
-      p_77659_1_.func_184148_a((EntityPlayer)null, p_77659_2_.field_70165_t, p_77659_2_.field_70163_u, p_77659_2_.field_70161_v, SoundEvents.field_187756_df, SoundCategory.NEUTRAL, 0.5F, 0.4F / (field_77697_d.nextFloat() * 0.4F + 0.8F));
-      if (!p_77659_1_.field_72995_K) {
-         EntityPotion entitypotion = new EntityPotion(p_77659_1_, p_77659_2_, itemstack1);
-         entitypotion.func_184538_a(p_77659_2_, p_77659_2_.field_70125_A, p_77659_2_.field_70177_z, -20.0F, 0.5F, 1.0F);
-         p_77659_1_.func_72838_d(entitypotion);
-      }
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    {
+        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        ItemStack itemstack1 = worldIn.capabilities.isCreativeMode ? itemstack.copy() : itemstack.splitStack(1);
+        itemStackIn.playSound((EntityPlayer)null, worldIn.posX, worldIn.posY, worldIn.posZ, SoundEvents.ENTITY_LINGERINGPOTION_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
 
-      p_77659_2_.func_71029_a(StatList.func_188057_b(this));
-      return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
-   }
+        if (!itemStackIn.isRemote)
+        {
+            EntityPotion entitypotion = new EntityPotion(itemStackIn, worldIn, itemstack1);
+            entitypotion.setHeadingFromThrower(worldIn, worldIn.rotationPitch, worldIn.rotationYaw, -20.0F, 0.5F, 1.0F);
+            itemStackIn.spawnEntityInWorld(entitypotion);
+        }
+
+        worldIn.addStat(StatList.getObjectUseStats(this));
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+    }
 }

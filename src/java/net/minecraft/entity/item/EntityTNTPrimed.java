@@ -11,116 +11,166 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public class EntityTNTPrimed extends Entity {
-   private static final DataParameter<Integer> field_184537_a = EntityDataManager.<Integer>func_187226_a(EntityTNTPrimed.class, DataSerializers.field_187192_b);
-   @Nullable
-   private EntityLivingBase field_94084_b;
-   private int field_70516_a;
+public class EntityTNTPrimed extends Entity
+{
+    private static final DataParameter<Integer> FUSE = EntityDataManager.<Integer>createKey(EntityTNTPrimed.class, DataSerializers.VARINT);
+    @Nullable
+    private EntityLivingBase tntPlacedBy;
 
-   public EntityTNTPrimed(World p_i1729_1_) {
-      super(p_i1729_1_);
-      this.field_70516_a = 80;
-      this.field_70156_m = true;
-      this.field_70178_ae = true;
-      this.func_70105_a(0.98F, 0.98F);
-   }
+    /** How long the fuse is */
+    private int fuse;
 
-   public EntityTNTPrimed(World p_i1730_1_, double p_i1730_2_, double p_i1730_4_, double p_i1730_6_, EntityLivingBase p_i1730_8_) {
-      this(p_i1730_1_);
-      this.func_70107_b(p_i1730_2_, p_i1730_4_, p_i1730_6_);
-      float f = (float)(Math.random() * 6.2831854820251465D);
-      this.field_70159_w = (double)(-((float)Math.sin((double)f)) * 0.02F);
-      this.field_70181_x = 0.20000000298023224D;
-      this.field_70179_y = (double)(-((float)Math.cos((double)f)) * 0.02F);
-      this.func_184534_a(80);
-      this.field_70169_q = p_i1730_2_;
-      this.field_70167_r = p_i1730_4_;
-      this.field_70166_s = p_i1730_6_;
-      this.field_94084_b = p_i1730_8_;
-   }
+    public EntityTNTPrimed(World worldIn)
+    {
+        super(worldIn);
+        this.fuse = 80;
+        this.preventEntitySpawning = true;
+        this.isImmuneToFire = true;
+        this.setSize(0.98F, 0.98F);
+    }
 
-   protected void func_70088_a() {
-      this.field_70180_af.func_187214_a(field_184537_a, Integer.valueOf(80));
-   }
+    public EntityTNTPrimed(World worldIn, double x, double y, double z, EntityLivingBase igniter)
+    {
+        this(worldIn);
+        this.setPosition(x, y, z);
+        float f = (float)(Math.random() * (Math.PI * 2D));
+        this.motionX = (double)(-((float)Math.sin((double)f)) * 0.02F);
+        this.motionY = 0.20000000298023224D;
+        this.motionZ = (double)(-((float)Math.cos((double)f)) * 0.02F);
+        this.setFuse(80);
+        this.prevPosX = x;
+        this.prevPosY = y;
+        this.prevPosZ = z;
+        this.tntPlacedBy = igniter;
+    }
 
-   protected boolean func_70041_e_() {
-      return false;
-   }
+    protected void entityInit()
+    {
+        this.dataManager.register(FUSE, Integer.valueOf(80));
+    }
 
-   public boolean func_70067_L() {
-      return !this.field_70128_L;
-   }
+    /**
+     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
+     * prevent them from trampling crops
+     */
+    protected boolean canTriggerWalking()
+    {
+        return false;
+    }
 
-   public void func_70071_h_() {
-      this.field_70169_q = this.field_70165_t;
-      this.field_70167_r = this.field_70163_u;
-      this.field_70166_s = this.field_70161_v;
-      if (!this.func_189652_ae()) {
-         this.field_70181_x -= 0.03999999910593033D;
-      }
+    /**
+     * Returns true if other Entities should be prevented from moving through this Entity.
+     */
+    public boolean canBeCollidedWith()
+    {
+        return !this.isDead;
+    }
 
-      this.func_70091_d(MoverType.SELF, this.field_70159_w, this.field_70181_x, this.field_70179_y);
-      this.field_70159_w *= 0.9800000190734863D;
-      this.field_70181_x *= 0.9800000190734863D;
-      this.field_70179_y *= 0.9800000190734863D;
-      if (this.field_70122_E) {
-         this.field_70159_w *= 0.699999988079071D;
-         this.field_70179_y *= 0.699999988079071D;
-         this.field_70181_x *= -0.5D;
-      }
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        this.prevPosX = this.posX;
+        this.prevPosY = this.posY;
+        this.prevPosZ = this.posZ;
 
-      --this.field_70516_a;
-      if (this.field_70516_a <= 0) {
-         this.func_70106_y();
-         if (!this.field_70170_p.field_72995_K) {
-            this.func_70515_d();
-         }
-      } else {
-         this.func_70072_I();
-         this.field_70170_p.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, this.field_70165_t, this.field_70163_u + 0.5D, this.field_70161_v, 0.0D, 0.0D, 0.0D);
-      }
+        if (!this.hasNoGravity())
+        {
+            this.motionY -= 0.03999999910593033D;
+        }
 
-   }
+        this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+        this.motionX *= 0.9800000190734863D;
+        this.motionY *= 0.9800000190734863D;
+        this.motionZ *= 0.9800000190734863D;
 
-   private void func_70515_d() {
-      float f = 4.0F;
-      this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u + (double)(this.field_70131_O / 16.0F), this.field_70161_v, 4.0F, true);
-   }
+        if (this.onGround)
+        {
+            this.motionX *= 0.699999988079071D;
+            this.motionZ *= 0.699999988079071D;
+            this.motionY *= -0.5D;
+        }
 
-   protected void func_70014_b(NBTTagCompound p_70014_1_) {
-      p_70014_1_.func_74777_a("Fuse", (short)this.func_184536_l());
-   }
+        --this.fuse;
 
-   protected void func_70037_a(NBTTagCompound p_70037_1_) {
-      this.func_184534_a(p_70037_1_.func_74765_d("Fuse"));
-   }
+        if (this.fuse <= 0)
+        {
+            this.setDead();
 
-   @Nullable
-   public EntityLivingBase func_94083_c() {
-      return this.field_94084_b;
-   }
+            if (!this.world.isRemote)
+            {
+                this.explode();
+            }
+        }
+        else
+        {
+            this.handleWaterMovement();
+            this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
+        }
+    }
 
-   public float func_70047_e() {
-      return 0.0F;
-   }
+    private void explode()
+    {
+        float f = 4.0F;
+        this.world.createExplosion(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, 4.0F, true);
+    }
 
-   public void func_184534_a(int p_184534_1_) {
-      this.field_70180_af.func_187227_b(field_184537_a, Integer.valueOf(p_184534_1_));
-      this.field_70516_a = p_184534_1_;
-   }
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    protected void writeEntityToNBT(NBTTagCompound compound)
+    {
+        compound.setShort("Fuse", (short)this.getFuse());
+    }
 
-   public void func_184206_a(DataParameter<?> p_184206_1_) {
-      if (field_184537_a.equals(p_184206_1_)) {
-         this.field_70516_a = this.func_184535_k();
-      }
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    protected void readEntityFromNBT(NBTTagCompound compound)
+    {
+        this.setFuse(compound.getShort("Fuse"));
+    }
 
-   }
+    @Nullable
 
-   public int func_184535_k() {
-      return ((Integer)this.field_70180_af.func_187225_a(field_184537_a)).intValue();
-   }
+    /**
+     * returns null or the entityliving it was placed or ignited by
+     */
+    public EntityLivingBase getTntPlacedBy()
+    {
+        return this.tntPlacedBy;
+    }
 
-   public int func_184536_l() {
-      return this.field_70516_a;
-   }
+    public float getEyeHeight()
+    {
+        return 0.0F;
+    }
+
+    public void setFuse(int fuseIn)
+    {
+        this.dataManager.set(FUSE, Integer.valueOf(fuseIn));
+        this.fuse = fuseIn;
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (FUSE.equals(key))
+        {
+            this.fuse = this.getFuseDataManager();
+        }
+    }
+
+    /**
+     * Gets the fuse from the data manager
+     */
+    public int getFuseDataManager()
+    {
+        return ((Integer)this.dataManager.get(FUSE)).intValue();
+    }
+
+    public int getFuse()
+    {
+        return this.fuse;
+    }
 }

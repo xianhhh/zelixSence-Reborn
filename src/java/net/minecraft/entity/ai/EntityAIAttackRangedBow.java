@@ -7,118 +7,168 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemBow;
 import net.minecraft.util.EnumHand;
 
-public class EntityAIAttackRangedBow<T extends EntityMob & IRangedAttackMob> extends EntityAIBase {
-   private final T field_188499_a;
-   private final double field_188500_b;
-   private int field_188501_c;
-   private final float field_188502_d;
-   private int field_188503_e = -1;
-   private int field_188504_f;
-   private boolean field_188505_g;
-   private boolean field_188506_h;
-   private int field_188507_i = -1;
+public class EntityAIAttackRangedBow<T extends EntityMob & IRangedAttackMob> extends EntityAIBase
+{
+    private final T entity;
+    private final double moveSpeedAmp;
+    private int attackCooldown;
+    private final float maxAttackDistance;
+    private int attackTime = -1;
+    private int seeTime;
+    private boolean strafingClockwise;
+    private boolean strafingBackwards;
+    private int strafingTime = -1;
 
-   public EntityAIAttackRangedBow(T p_i47515_1_, double p_i47515_2_, int p_i47515_4_, float p_i47515_5_) {
-      this.field_188499_a = p_i47515_1_;
-      this.field_188500_b = p_i47515_2_;
-      this.field_188501_c = p_i47515_4_;
-      this.field_188502_d = p_i47515_5_ * p_i47515_5_;
-      this.func_75248_a(3);
-   }
+    public EntityAIAttackRangedBow(T p_i47515_1_, double p_i47515_2_, int p_i47515_4_, float p_i47515_5_)
+    {
+        this.entity = p_i47515_1_;
+        this.moveSpeedAmp = p_i47515_2_;
+        this.attackCooldown = p_i47515_4_;
+        this.maxAttackDistance = p_i47515_5_ * p_i47515_5_;
+        this.setMutexBits(3);
+    }
 
-   public void func_189428_b(int p_189428_1_) {
-      this.field_188501_c = p_189428_1_;
-   }
+    public void setAttackCooldown(int p_189428_1_)
+    {
+        this.attackCooldown = p_189428_1_;
+    }
 
-   public boolean func_75250_a() {
-      return this.field_188499_a.func_70638_az() == null ? false : this.func_188498_f();
-   }
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        return this.entity.getAttackTarget() == null ? false : this.isBowInMainhand();
+    }
 
-   protected boolean func_188498_f() {
-      return !this.field_188499_a.func_184614_ca().func_190926_b() && this.field_188499_a.func_184614_ca().func_77973_b() == Items.field_151031_f;
-   }
+    protected boolean isBowInMainhand()
+    {
+        return !this.entity.getHeldItemMainhand().func_190926_b() && this.entity.getHeldItemMainhand().getItem() == Items.BOW;
+    }
 
-   public boolean func_75253_b() {
-      return (this.func_75250_a() || !this.field_188499_a.func_70661_as().func_75500_f()) && this.func_188498_f();
-   }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        return (this.shouldExecute() || !this.entity.getNavigator().noPath()) && this.isBowInMainhand();
+    }
 
-   public void func_75249_e() {
-      super.func_75249_e();
-      ((IRangedAttackMob)this.field_188499_a).func_184724_a(true);
-   }
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
+    public void startExecuting()
+    {
+        super.startExecuting();
+        ((IRangedAttackMob)this.entity).setSwingingArms(true);
+    }
 
-   public void func_75251_c() {
-      super.func_75251_c();
-      ((IRangedAttackMob)this.field_188499_a).func_184724_a(false);
-      this.field_188504_f = 0;
-      this.field_188503_e = -1;
-      this.field_188499_a.func_184602_cy();
-   }
+    /**
+     * Resets the task
+     */
+    public void resetTask()
+    {
+        super.resetTask();
+        ((IRangedAttackMob)this.entity).setSwingingArms(false);
+        this.seeTime = 0;
+        this.attackTime = -1;
+        this.entity.resetActiveHand();
+    }
 
-   public void func_75246_d() {
-      EntityLivingBase entitylivingbase = this.field_188499_a.func_70638_az();
-      if (entitylivingbase != null) {
-         double d0 = this.field_188499_a.func_70092_e(entitylivingbase.field_70165_t, entitylivingbase.func_174813_aQ().field_72338_b, entitylivingbase.field_70161_v);
-         boolean flag = this.field_188499_a.func_70635_at().func_75522_a(entitylivingbase);
-         boolean flag1 = this.field_188504_f > 0;
-         if (flag != flag1) {
-            this.field_188504_f = 0;
-         }
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        EntityLivingBase entitylivingbase = this.entity.getAttackTarget();
 
-         if (flag) {
-            ++this.field_188504_f;
-         } else {
-            --this.field_188504_f;
-         }
+        if (entitylivingbase != null)
+        {
+            double d0 = this.entity.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+            boolean flag = this.entity.getEntitySenses().canSee(entitylivingbase);
+            boolean flag1 = this.seeTime > 0;
 
-         if (d0 <= (double)this.field_188502_d && this.field_188504_f >= 20) {
-            this.field_188499_a.func_70661_as().func_75499_g();
-            ++this.field_188507_i;
-         } else {
-            this.field_188499_a.func_70661_as().func_75497_a(entitylivingbase, this.field_188500_b);
-            this.field_188507_i = -1;
-         }
-
-         if (this.field_188507_i >= 20) {
-            if ((double)this.field_188499_a.func_70681_au().nextFloat() < 0.3D) {
-               this.field_188505_g = !this.field_188505_g;
+            if (flag != flag1)
+            {
+                this.seeTime = 0;
             }
 
-            if ((double)this.field_188499_a.func_70681_au().nextFloat() < 0.3D) {
-               this.field_188506_h = !this.field_188506_h;
+            if (flag)
+            {
+                ++this.seeTime;
+            }
+            else
+            {
+                --this.seeTime;
             }
 
-            this.field_188507_i = 0;
-         }
-
-         if (this.field_188507_i > -1) {
-            if (d0 > (double)(this.field_188502_d * 0.75F)) {
-               this.field_188506_h = false;
-            } else if (d0 < (double)(this.field_188502_d * 0.25F)) {
-               this.field_188506_h = true;
+            if (d0 <= (double)this.maxAttackDistance && this.seeTime >= 20)
+            {
+                this.entity.getNavigator().clearPathEntity();
+                ++this.strafingTime;
+            }
+            else
+            {
+                this.entity.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.moveSpeedAmp);
+                this.strafingTime = -1;
             }
 
-            this.field_188499_a.func_70605_aq().func_188488_a(this.field_188506_h ? -0.5F : 0.5F, this.field_188505_g ? 0.5F : -0.5F);
-            this.field_188499_a.func_70625_a(entitylivingbase, 30.0F, 30.0F);
-         } else {
-            this.field_188499_a.func_70671_ap().func_75651_a(entitylivingbase, 30.0F, 30.0F);
-         }
+            if (this.strafingTime >= 20)
+            {
+                if ((double)this.entity.getRNG().nextFloat() < 0.3D)
+                {
+                    this.strafingClockwise = !this.strafingClockwise;
+                }
 
-         if (this.field_188499_a.func_184587_cr()) {
-            if (!flag && this.field_188504_f < -60) {
-               this.field_188499_a.func_184602_cy();
-            } else if (flag) {
-               int i = this.field_188499_a.func_184612_cw();
-               if (i >= 20) {
-                  this.field_188499_a.func_184602_cy();
-                  ((IRangedAttackMob)this.field_188499_a).func_82196_d(entitylivingbase, ItemBow.func_185059_b(i));
-                  this.field_188503_e = this.field_188501_c;
-               }
+                if ((double)this.entity.getRNG().nextFloat() < 0.3D)
+                {
+                    this.strafingBackwards = !this.strafingBackwards;
+                }
+
+                this.strafingTime = 0;
             }
-         } else if (--this.field_188503_e <= 0 && this.field_188504_f >= -60) {
-            this.field_188499_a.func_184598_c(EnumHand.MAIN_HAND);
-         }
 
-      }
-   }
+            if (this.strafingTime > -1)
+            {
+                if (d0 > (double)(this.maxAttackDistance * 0.75F))
+                {
+                    this.strafingBackwards = false;
+                }
+                else if (d0 < (double)(this.maxAttackDistance * 0.25F))
+                {
+                    this.strafingBackwards = true;
+                }
+
+                this.entity.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
+                this.entity.faceEntity(entitylivingbase, 30.0F, 30.0F);
+            }
+            else
+            {
+                this.entity.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
+            }
+
+            if (this.entity.isHandActive())
+            {
+                if (!flag && this.seeTime < -60)
+                {
+                    this.entity.resetActiveHand();
+                }
+                else if (flag)
+                {
+                    int i = this.entity.getItemInUseMaxCount();
+
+                    if (i >= 20)
+                    {
+                        this.entity.resetActiveHand();
+                        ((IRangedAttackMob)this.entity).attackEntityWithRangedAttack(entitylivingbase, ItemBow.getArrowVelocity(i));
+                        this.attackTime = this.attackCooldown;
+                    }
+                }
+            }
+            else if (--this.attackTime <= 0 && this.seeTime >= -60)
+            {
+                this.entity.setActiveHand(EnumHand.MAIN_HAND);
+            }
+        }
+    }
 }

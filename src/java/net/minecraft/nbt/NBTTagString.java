@@ -5,73 +5,105 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
-public class NBTTagString extends NBTBase {
-   private String field_74751_a;
+public class NBTTagString extends NBTBase
+{
+    /** The string value for the tag (cannot be empty). */
+    private String data;
 
-   public NBTTagString() {
-      this("");
-   }
+    public NBTTagString()
+    {
+        this("");
+    }
 
-   public NBTTagString(String p_i1389_1_) {
-      Objects.requireNonNull(p_i1389_1_, "Null string not allowed");
-      this.field_74751_a = p_i1389_1_;
-   }
+    public NBTTagString(String data)
+    {
+        Objects.requireNonNull(data, "Null string not allowed");
+        this.data = data;
+    }
 
-   void func_74734_a(DataOutput p_74734_1_) throws IOException {
-      p_74734_1_.writeUTF(this.field_74751_a);
-   }
+    /**
+     * Write the actual data contents of the tag, implemented in NBT extension classes
+     */
+    void write(DataOutput output) throws IOException
+    {
+        output.writeUTF(this.data);
+    }
 
-   void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException {
-      p_152446_3_.func_152450_a(288L);
-      this.field_74751_a = p_152446_1_.readUTF();
-      p_152446_3_.func_152450_a((long)(16 * this.field_74751_a.length()));
-   }
+    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
+    {
+        sizeTracker.read(288L);
+        this.data = input.readUTF();
+        sizeTracker.read((long)(16 * this.data.length()));
+    }
 
-   public byte func_74732_a() {
-      return 8;
-   }
+    /**
+     * Gets the type byte for the tag.
+     */
+    public byte getId()
+    {
+        return 8;
+    }
 
-   public String toString() {
-      return func_193588_a(this.field_74751_a);
-   }
+    public String toString()
+    {
+        return func_193588_a(this.data);
+    }
 
-   public NBTTagString func_74737_b() {
-      return new NBTTagString(this.field_74751_a);
-   }
+    /**
+     * Creates a clone of the tag.
+     */
+    public NBTTagString copy()
+    {
+        return new NBTTagString(this.data);
+    }
 
-   public boolean func_82582_d() {
-      return this.field_74751_a.isEmpty();
-   }
+    /**
+     * Return whether this compound has no tags.
+     */
+    public boolean hasNoTags()
+    {
+        return this.data.isEmpty();
+    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (!super.equals(p_equals_1_)) {
-         return false;
-      } else {
-         NBTTagString nbttagstring = (NBTTagString)p_equals_1_;
-         return this.field_74751_a == null && nbttagstring.field_74751_a == null || Objects.equals(this.field_74751_a, nbttagstring.field_74751_a);
-      }
-   }
+    public boolean equals(Object p_equals_1_)
+    {
+        if (!super.equals(p_equals_1_))
+        {
+            return false;
+        }
+        else
+        {
+            NBTTagString nbttagstring = (NBTTagString)p_equals_1_;
+            return this.data == null && nbttagstring.data == null || Objects.equals(this.data, nbttagstring.data);
+        }
+    }
 
-   public int hashCode() {
-      return super.hashCode() ^ this.field_74751_a.hashCode();
-   }
+    public int hashCode()
+    {
+        return super.hashCode() ^ this.data.hashCode();
+    }
 
-   public String func_150285_a_() {
-      return this.field_74751_a;
-   }
+    public String getString()
+    {
+        return this.data;
+    }
 
-   public static String func_193588_a(String p_193588_0_) {
-      StringBuilder stringbuilder = new StringBuilder("\"");
+    public static String func_193588_a(String p_193588_0_)
+    {
+        StringBuilder stringbuilder = new StringBuilder("\"");
 
-      for(int i = 0; i < p_193588_0_.length(); ++i) {
-         char c0 = p_193588_0_.charAt(i);
-         if (c0 == '\\' || c0 == '"') {
-            stringbuilder.append('\\');
-         }
+        for (int i = 0; i < p_193588_0_.length(); ++i)
+        {
+            char c0 = p_193588_0_.charAt(i);
 
-         stringbuilder.append(c0);
-      }
+            if (c0 == '\\' || c0 == '"')
+            {
+                stringbuilder.append('\\');
+            }
 
-      return stringbuilder.append('"').toString();
-   }
+            stringbuilder.append(c0);
+        }
+
+        return stringbuilder.append('"').toString();
+    }
 }

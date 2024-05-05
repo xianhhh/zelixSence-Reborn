@@ -4,8 +4,9 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.login.client.CPacketEncryptionResponse;
 import net.minecraft.network.login.client.CPacketLoginStart;
 
-public interface INetHandlerLoginServer extends INetHandler {
-   void func_147316_a(CPacketLoginStart var1);
+public interface INetHandlerLoginServer extends INetHandler
+{
+    void processLoginStart(CPacketLoginStart packetIn);
 
-   void func_147315_a(CPacketEncryptionResponse var1);
+    void processEncryptionResponse(CPacketEncryptionResponse packetIn);
 }

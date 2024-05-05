@@ -10,526 +10,829 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiTextField extends Gui {
-   private final int field_175208_g;
-   private final FontRenderer field_146211_a;
-   public int field_146209_f;
-   public int field_146210_g;
-   private final int field_146218_h;
-   private final int field_146219_i;
-   private String field_146216_j = "";
-   private int field_146217_k = 32;
-   private int field_146214_l;
-   private boolean field_146215_m = true;
-   private boolean field_146212_n = true;
-   private boolean field_146213_o;
-   private boolean field_146226_p = true;
-   private int field_146225_q;
-   private int field_146224_r;
-   private int field_146223_s;
-   private int field_146222_t = 14737632;
-   private int field_146221_u = 7368816;
-   private boolean field_146220_v = true;
-   private GuiPageButtonList.GuiResponder field_175210_x;
-   private Predicate<String> field_175209_y = Predicates.<String>alwaysTrue();
+public class GuiTextField extends Gui
+{
+    private final int id;
+    private final FontRenderer fontRendererInstance;
+    public int xPosition;
+    public int yPosition;
 
-   public GuiTextField(int p_i45542_1_, FontRenderer p_i45542_2_, int p_i45542_3_, int p_i45542_4_, int p_i45542_5_, int p_i45542_6_) {
-      this.field_175208_g = p_i45542_1_;
-      this.field_146211_a = p_i45542_2_;
-      this.field_146209_f = p_i45542_3_;
-      this.field_146210_g = p_i45542_4_;
-      this.field_146218_h = p_i45542_5_;
-      this.field_146219_i = p_i45542_6_;
-   }
+    /** The width of this text field. */
+    private final int width;
+    private final int height;
 
-   public void func_175207_a(GuiPageButtonList.GuiResponder p_175207_1_) {
-      this.field_175210_x = p_175207_1_;
-   }
+    /** Has the current text being edited on the textbox. */
+    private String text = "";
+    private int maxStringLength = 32;
+    private int cursorCounter;
+    private boolean enableBackgroundDrawing = true;
 
-   public void func_146178_a() {
-      ++this.field_146214_l;
-   }
+    /**
+     * if true the textbox can lose focus by clicking elsewhere on the screen
+     */
+    private boolean canLoseFocus = true;
 
-   public void func_146180_a(String p_146180_1_) {
-      if (this.field_175209_y.apply(p_146180_1_)) {
-         if (p_146180_1_.length() > this.field_146217_k) {
-            this.field_146216_j = p_146180_1_.substring(0, this.field_146217_k);
-         } else {
-            this.field_146216_j = p_146180_1_;
-         }
+    /**
+     * If this value is true along with isEnabled, keyTyped will process the keys.
+     */
+    private boolean isFocused;
 
-         this.func_146202_e();
-      }
-   }
+    /**
+     * If this value is true along with isFocused, keyTyped will process the keys.
+     */
+    private boolean isEnabled = true;
 
-   public String func_146179_b() {
-      return this.field_146216_j;
-   }
+    /**
+     * The current character index that should be used as start of the rendered text.
+     */
+    private int lineScrollOffset;
+    private int cursorPosition;
 
-   public String func_146207_c() {
-      int i = this.field_146224_r < this.field_146223_s ? this.field_146224_r : this.field_146223_s;
-      int j = this.field_146224_r < this.field_146223_s ? this.field_146223_s : this.field_146224_r;
-      return this.field_146216_j.substring(i, j);
-   }
+    /** other selection position, maybe the same as the cursor */
+    private int selectionEnd;
+    private int enabledColor = 14737632;
+    private int disabledColor = 7368816;
 
-   public void func_175205_a(Predicate<String> p_175205_1_) {
-      this.field_175209_y = p_175205_1_;
-   }
+    /** True if this textbox is visible */
+    private boolean visible = true;
+    private GuiPageButtonList.GuiResponder guiResponder;
+    private Predicate<String> validator = Predicates.<String>alwaysTrue();
 
-   public void func_146191_b(String p_146191_1_) {
-      String s = "";
-      String s1 = ChatAllowedCharacters.func_71565_a(p_146191_1_);
-      int i = this.field_146224_r < this.field_146223_s ? this.field_146224_r : this.field_146223_s;
-      int j = this.field_146224_r < this.field_146223_s ? this.field_146223_s : this.field_146224_r;
-      int k = this.field_146217_k - this.field_146216_j.length() - (i - j);
-      if (!this.field_146216_j.isEmpty()) {
-         s = s + this.field_146216_j.substring(0, i);
-      }
+    public GuiTextField(int componentId, FontRenderer fontrendererObj, int x, int y, int par5Width, int par6Height)
+    {
+        this.id = componentId;
+        this.fontRendererInstance = fontrendererObj;
+        this.xPosition = x;
+        this.yPosition = y;
+        this.width = par5Width;
+        this.height = par6Height;
+    }
 
-      int l;
-      if (k < s1.length()) {
-         s = s + s1.substring(0, k);
-         l = k;
-      } else {
-         s = s + s1;
-         l = s1.length();
-      }
+    /**
+     * Sets the GuiResponder associated with this text box.
+     */
+    public void setGuiResponder(GuiPageButtonList.GuiResponder guiResponderIn)
+    {
+        this.guiResponder = guiResponderIn;
+    }
 
-      if (!this.field_146216_j.isEmpty() && j < this.field_146216_j.length()) {
-         s = s + this.field_146216_j.substring(j);
-      }
+    /**
+     * Increments the cursor counter
+     */
+    public void updateCursorCounter()
+    {
+        ++this.cursorCounter;
+    }
 
-      if (this.field_175209_y.apply(s)) {
-         this.field_146216_j = s;
-         this.func_146182_d(i - this.field_146223_s + l);
-         this.func_190516_a(this.field_175208_g, this.field_146216_j);
-      }
-   }
-
-   public void func_190516_a(int p_190516_1_, String p_190516_2_) {
-      if (this.field_175210_x != null) {
-         this.field_175210_x.func_175319_a(p_190516_1_, p_190516_2_);
-      }
-
-   }
-
-   public void func_146177_a(int p_146177_1_) {
-      if (!this.field_146216_j.isEmpty()) {
-         if (this.field_146223_s != this.field_146224_r) {
-            this.func_146191_b("");
-         } else {
-            this.func_146175_b(this.func_146187_c(p_146177_1_) - this.field_146224_r);
-         }
-      }
-   }
-
-   public void func_146175_b(int p_146175_1_) {
-      if (!this.field_146216_j.isEmpty()) {
-         if (this.field_146223_s != this.field_146224_r) {
-            this.func_146191_b("");
-         } else {
-            boolean flag = p_146175_1_ < 0;
-            int i = flag ? this.field_146224_r + p_146175_1_ : this.field_146224_r;
-            int j = flag ? this.field_146224_r : this.field_146224_r + p_146175_1_;
-            String s = "";
-            if (i >= 0) {
-               s = this.field_146216_j.substring(0, i);
+    /**
+     * Sets the text of the textbox, and moves the cursor to the end.
+     */
+    public void setText(String textIn)
+    {
+        if (this.validator.apply(textIn))
+        {
+            if (textIn.length() > this.maxStringLength)
+            {
+                this.text = textIn.substring(0, this.maxStringLength);
+            }
+            else
+            {
+                this.text = textIn;
             }
 
-            if (j < this.field_146216_j.length()) {
-               s = s + this.field_146216_j.substring(j);
+            this.setCursorPositionEnd();
+        }
+    }
+
+    /**
+     * Returns the contents of the textbox
+     */
+    public String getText()
+    {
+        return this.text;
+    }
+
+    /**
+     * returns the text between the cursor and selectionEnd
+     */
+    public String getSelectedText()
+    {
+        int i = this.cursorPosition < this.selectionEnd ? this.cursorPosition : this.selectionEnd;
+        int j = this.cursorPosition < this.selectionEnd ? this.selectionEnd : this.cursorPosition;
+        return this.text.substring(i, j);
+    }
+
+    public void setValidator(Predicate<String> theValidator)
+    {
+        this.validator = theValidator;
+    }
+
+    /**
+     * Adds the given text after the cursor, or replaces the currently selected text if there is a selection.
+     */
+    public void writeText(String textToWrite)
+    {
+        String s = "";
+        String s1 = ChatAllowedCharacters.filterAllowedCharacters(textToWrite);
+        int i = this.cursorPosition < this.selectionEnd ? this.cursorPosition : this.selectionEnd;
+        int j = this.cursorPosition < this.selectionEnd ? this.selectionEnd : this.cursorPosition;
+        int k = this.maxStringLength - this.text.length() - (i - j);
+
+        if (!this.text.isEmpty())
+        {
+            s = s + this.text.substring(0, i);
+        }
+
+        int l;
+
+        if (k < s1.length())
+        {
+            s = s + s1.substring(0, k);
+            l = k;
+        }
+        else
+        {
+            s = s + s1;
+            l = s1.length();
+        }
+
+        if (!this.text.isEmpty() && j < this.text.length())
+        {
+            s = s + this.text.substring(j);
+        }
+
+        if (this.validator.apply(s))
+        {
+            this.text = s;
+            this.moveCursorBy(i - this.selectionEnd + l);
+            this.func_190516_a(this.id, this.text);
+        }
+    }
+
+    public void func_190516_a(int p_190516_1_, String p_190516_2_)
+    {
+        if (this.guiResponder != null)
+        {
+            this.guiResponder.setEntryValue(p_190516_1_, p_190516_2_);
+        }
+    }
+
+    /**
+     * Deletes the given number of words from the current cursor's position, unless there is currently a selection, in
+     * which case the selection is deleted instead.
+     */
+    public void deleteWords(int num)
+    {
+        if (!this.text.isEmpty())
+        {
+            if (this.selectionEnd != this.cursorPosition)
+            {
+                this.writeText("");
             }
-
-            if (this.field_175209_y.apply(s)) {
-               this.field_146216_j = s;
-               if (flag) {
-                  this.func_146182_d(p_146175_1_);
-               }
-
-               this.func_190516_a(this.field_175208_g, this.field_146216_j);
+            else
+            {
+                this.deleteFromCursor(this.getNthWordFromCursor(num) - this.cursorPosition);
             }
-         }
-      }
-   }
+        }
+    }
 
-   public int func_175206_d() {
-      return this.field_175208_g;
-   }
-
-   public int func_146187_c(int p_146187_1_) {
-      return this.func_146183_a(p_146187_1_, this.func_146198_h());
-   }
-
-   public int func_146183_a(int p_146183_1_, int p_146183_2_) {
-      return this.func_146197_a(p_146183_1_, p_146183_2_, true);
-   }
-
-   public int func_146197_a(int p_146197_1_, int p_146197_2_, boolean p_146197_3_) {
-      int i = p_146197_2_;
-      boolean flag = p_146197_1_ < 0;
-      int j = Math.abs(p_146197_1_);
-
-      for(int k = 0; k < j; ++k) {
-         if (!flag) {
-            int l = this.field_146216_j.length();
-            i = this.field_146216_j.indexOf(32, i);
-            if (i == -1) {
-               i = l;
-            } else {
-               while(p_146197_3_ && i < l && this.field_146216_j.charAt(i) == ' ') {
-                  ++i;
-               }
+    /**
+     * Deletes the given number of characters from the current cursor's position, unless there is currently a selection,
+     * in which case the selection is deleted instead.
+     */
+    public void deleteFromCursor(int num)
+    {
+        if (!this.text.isEmpty())
+        {
+            if (this.selectionEnd != this.cursorPosition)
+            {
+                this.writeText("");
             }
-         } else {
-            while(p_146197_3_ && i > 0 && this.field_146216_j.charAt(i - 1) == ' ') {
-               --i;
+            else
+            {
+                boolean flag = num < 0;
+                int i = flag ? this.cursorPosition + num : this.cursorPosition;
+                int j = flag ? this.cursorPosition : this.cursorPosition + num;
+                String s = "";
+
+                if (i >= 0)
+                {
+                    s = this.text.substring(0, i);
+                }
+
+                if (j < this.text.length())
+                {
+                    s = s + this.text.substring(j);
+                }
+
+                if (this.validator.apply(s))
+                {
+                    this.text = s;
+
+                    if (flag)
+                    {
+                        this.moveCursorBy(num);
+                    }
+
+                    this.func_190516_a(this.id, this.text);
+                }
             }
+        }
+    }
 
-            while(i > 0 && this.field_146216_j.charAt(i - 1) != ' ') {
-               --i;
+    public int getId()
+    {
+        return this.id;
+    }
+
+    /**
+     * Gets the starting index of the word at the specified number of words away from the cursor position.
+     */
+    public int getNthWordFromCursor(int numWords)
+    {
+        return this.getNthWordFromPos(numWords, this.getCursorPosition());
+    }
+
+    /**
+     * Gets the starting index of the word at a distance of the specified number of words away from the given position.
+     */
+    public int getNthWordFromPos(int n, int pos)
+    {
+        return this.getNthWordFromPosWS(n, pos, true);
+    }
+
+    /**
+     * Like getNthWordFromPos (which wraps this), but adds option for skipping consecutive spaces
+     */
+    public int getNthWordFromPosWS(int n, int pos, boolean skipWs)
+    {
+        int i = pos;
+        boolean flag = n < 0;
+        int j = Math.abs(n);
+
+        for (int k = 0; k < j; ++k)
+        {
+            if (!flag)
+            {
+                int l = this.text.length();
+                i = this.text.indexOf(32, i);
+
+                if (i == -1)
+                {
+                    i = l;
+                }
+                else
+                {
+                    while (skipWs && i < l && this.text.charAt(i) == ' ')
+                    {
+                        ++i;
+                    }
+                }
             }
-         }
-      }
+            else
+            {
+                while (skipWs && i > 0 && this.text.charAt(i - 1) == ' ')
+                {
+                    --i;
+                }
 
-      return i;
-   }
+                while (i > 0 && this.text.charAt(i - 1) != ' ')
+                {
+                    --i;
+                }
+            }
+        }
 
-   public void func_146182_d(int p_146182_1_) {
-      this.func_146190_e(this.field_146223_s + p_146182_1_);
-   }
+        return i;
+    }
 
-   public void func_146190_e(int p_146190_1_) {
-      this.field_146224_r = p_146190_1_;
-      int i = this.field_146216_j.length();
-      this.field_146224_r = MathHelper.func_76125_a(this.field_146224_r, 0, i);
-      this.func_146199_i(this.field_146224_r);
-   }
+    /**
+     * Moves the text cursor by a specified number of characters and clears the selection
+     */
+    public void moveCursorBy(int num)
+    {
+        this.setCursorPosition(this.selectionEnd + num);
+    }
 
-   public void func_146196_d() {
-      this.func_146190_e(0);
-   }
+    /**
+     * Sets the current position of the cursor.
+     */
+    public void setCursorPosition(int pos)
+    {
+        this.cursorPosition = pos;
+        int i = this.text.length();
+        this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, i);
+        this.setSelectionPos(this.cursorPosition);
+    }
 
-   public void func_146202_e() {
-      this.func_146190_e(this.field_146216_j.length());
-   }
+    /**
+     * Moves the cursor to the very start of this text box.
+     */
+    public void setCursorPositionZero()
+    {
+        this.setCursorPosition(0);
+    }
 
-   public boolean func_146201_a(char p_146201_1_, int p_146201_2_) {
-      if (!this.field_146213_o) {
-         return false;
-      } else if (GuiScreen.func_175278_g(p_146201_2_)) {
-         this.func_146202_e();
-         this.func_146199_i(0);
-         return true;
-      } else if (GuiScreen.func_175280_f(p_146201_2_)) {
-         GuiScreen.func_146275_d(this.func_146207_c());
-         return true;
-      } else if (GuiScreen.func_175279_e(p_146201_2_)) {
-         if (this.field_146226_p) {
-            this.func_146191_b(GuiScreen.func_146277_j());
-         }
+    /**
+     * Moves the cursor to the very end of this text box.
+     */
+    public void setCursorPositionEnd()
+    {
+        this.setCursorPosition(this.text.length());
+    }
 
-         return true;
-      } else if (GuiScreen.func_175277_d(p_146201_2_)) {
-         GuiScreen.func_146275_d(this.func_146207_c());
-         if (this.field_146226_p) {
-            this.func_146191_b("");
-         }
-
-         return true;
-      } else {
-         switch(p_146201_2_) {
-         case 14:
-            if (GuiScreen.func_146271_m()) {
-               if (this.field_146226_p) {
-                  this.func_146177_a(-1);
-               }
-            } else if (this.field_146226_p) {
-               this.func_146175_b(-1);
+    /**
+     * Call this method from your GuiScreen to process the keys into the textbox
+     */
+    public boolean textboxKeyTyped(char typedChar, int keyCode)
+    {
+        if (!this.isFocused)
+        {
+            return false;
+        }
+        else if (GuiScreen.isKeyComboCtrlA(keyCode))
+        {
+            this.setCursorPositionEnd();
+            this.setSelectionPos(0);
+            return true;
+        }
+        else if (GuiScreen.isKeyComboCtrlC(keyCode))
+        {
+            GuiScreen.setClipboardString(this.getSelectedText());
+            return true;
+        }
+        else if (GuiScreen.isKeyComboCtrlV(keyCode))
+        {
+            if (this.isEnabled)
+            {
+                this.writeText(GuiScreen.getClipboardString());
             }
 
             return true;
-         case 199:
-            if (GuiScreen.func_146272_n()) {
-               this.func_146199_i(0);
-            } else {
-               this.func_146196_d();
+        }
+        else if (GuiScreen.isKeyComboCtrlX(keyCode))
+        {
+            GuiScreen.setClipboardString(this.getSelectedText());
+
+            if (this.isEnabled)
+            {
+                this.writeText("");
             }
 
             return true;
-         case 203:
-            if (GuiScreen.func_146272_n()) {
-               if (GuiScreen.func_146271_m()) {
-                  this.func_146199_i(this.func_146183_a(-1, this.func_146186_n()));
-               } else {
-                  this.func_146199_i(this.func_146186_n() - 1);
-               }
-            } else if (GuiScreen.func_146271_m()) {
-               this.func_146190_e(this.func_146187_c(-1));
-            } else {
-               this.func_146182_d(-1);
+        }
+        else
+        {
+            switch (keyCode)
+            {
+                case 14:
+                    if (GuiScreen.isCtrlKeyDown())
+                    {
+                        if (this.isEnabled)
+                        {
+                            this.deleteWords(-1);
+                        }
+                    }
+                    else if (this.isEnabled)
+                    {
+                        this.deleteFromCursor(-1);
+                    }
+
+                    return true;
+
+                case 199:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        this.setSelectionPos(0);
+                    }
+                    else
+                    {
+                        this.setCursorPositionZero();
+                    }
+
+                    return true;
+
+                case 203:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        if (GuiScreen.isCtrlKeyDown())
+                        {
+                            this.setSelectionPos(this.getNthWordFromPos(-1, this.getSelectionEnd()));
+                        }
+                        else
+                        {
+                            this.setSelectionPos(this.getSelectionEnd() - 1);
+                        }
+                    }
+                    else if (GuiScreen.isCtrlKeyDown())
+                    {
+                        this.setCursorPosition(this.getNthWordFromCursor(-1));
+                    }
+                    else
+                    {
+                        this.moveCursorBy(-1);
+                    }
+
+                    return true;
+
+                case 205:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        if (GuiScreen.isCtrlKeyDown())
+                        {
+                            this.setSelectionPos(this.getNthWordFromPos(1, this.getSelectionEnd()));
+                        }
+                        else
+                        {
+                            this.setSelectionPos(this.getSelectionEnd() + 1);
+                        }
+                    }
+                    else if (GuiScreen.isCtrlKeyDown())
+                    {
+                        this.setCursorPosition(this.getNthWordFromCursor(1));
+                    }
+                    else
+                    {
+                        this.moveCursorBy(1);
+                    }
+
+                    return true;
+
+                case 207:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        this.setSelectionPos(this.text.length());
+                    }
+                    else
+                    {
+                        this.setCursorPositionEnd();
+                    }
+
+                    return true;
+
+                case 211:
+                    if (GuiScreen.isCtrlKeyDown())
+                    {
+                        if (this.isEnabled)
+                        {
+                            this.deleteWords(1);
+                        }
+                    }
+                    else if (this.isEnabled)
+                    {
+                        this.deleteFromCursor(1);
+                    }
+
+                    return true;
+
+                default:
+                    if (ChatAllowedCharacters.isAllowedCharacter(typedChar))
+                    {
+                        if (this.isEnabled)
+                        {
+                            this.writeText(Character.toString(typedChar));
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+            }
+        }
+    }
+
+    /**
+     * Called when mouse is clicked, regardless as to whether it is over this button or not.
+     */
+    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton)
+    {
+        boolean flag = mouseX >= this.xPosition && mouseX < this.xPosition + this.width && mouseY >= this.yPosition && mouseY < this.yPosition + this.height;
+
+        if (this.canLoseFocus)
+        {
+            this.setFocused(flag);
+        }
+
+        if (this.isFocused && flag && mouseButton == 0)
+        {
+            int i = mouseX - this.xPosition;
+
+            if (this.enableBackgroundDrawing)
+            {
+                i -= 4;
             }
 
+            String s = this.fontRendererInstance.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
+            this.setCursorPosition(this.fontRendererInstance.trimStringToWidth(s, i).length() + this.lineScrollOffset);
             return true;
-         case 205:
-            if (GuiScreen.func_146272_n()) {
-               if (GuiScreen.func_146271_m()) {
-                  this.func_146199_i(this.func_146183_a(1, this.func_146186_n()));
-               } else {
-                  this.func_146199_i(this.func_146186_n() + 1);
-               }
-            } else if (GuiScreen.func_146271_m()) {
-               this.func_146190_e(this.func_146187_c(1));
-            } else {
-               this.func_146182_d(1);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Draws the textbox
+     */
+    public void drawTextBox()
+    {
+        if (this.getVisible())
+        {
+            if (this.getEnableBackgroundDrawing())
+            {
+                drawRect(this.xPosition - 1, this.yPosition - 1, this.xPosition + this.width + 1, this.yPosition + this.height + 1, -6250336);
+                drawRect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height, -16777216);
             }
 
-            return true;
-         case 207:
-            if (GuiScreen.func_146272_n()) {
-               this.func_146199_i(this.field_146216_j.length());
-            } else {
-               this.func_146202_e();
+            int i = this.isEnabled ? this.enabledColor : this.disabledColor;
+            int j = this.cursorPosition - this.lineScrollOffset;
+            int k = this.selectionEnd - this.lineScrollOffset;
+            String s = this.fontRendererInstance.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
+            boolean flag = j >= 0 && j <= s.length();
+            boolean flag1 = this.isFocused && this.cursorCounter / 6 % 2 == 0 && flag;
+            int l = this.enableBackgroundDrawing ? this.xPosition + 4 : this.xPosition;
+            int i1 = this.enableBackgroundDrawing ? this.yPosition + (this.height - 8) / 2 : this.yPosition;
+            int j1 = l;
+
+            if (k > s.length())
+            {
+                k = s.length();
             }
 
-            return true;
-         case 211:
-            if (GuiScreen.func_146271_m()) {
-               if (this.field_146226_p) {
-                  this.func_146177_a(1);
-               }
-            } else if (this.field_146226_p) {
-               this.func_146175_b(1);
+            if (!s.isEmpty())
+            {
+                String s1 = flag ? s.substring(0, j) : s;
+                j1 = this.fontRendererInstance.drawStringWithShadow(s1, (float)l, (float)i1, i);
             }
 
-            return true;
-         default:
-            if (ChatAllowedCharacters.func_71566_a(p_146201_1_)) {
-               if (this.field_146226_p) {
-                  this.func_146191_b(Character.toString(p_146201_1_));
-               }
+            boolean flag2 = this.cursorPosition < this.text.length() || this.text.length() >= this.getMaxStringLength();
+            int k1 = j1;
 
-               return true;
-            } else {
-               return false;
+            if (!flag)
+            {
+                k1 = j > 0 ? l + this.width : l;
             }
-         }
-      }
-   }
-
-   public boolean func_146192_a(int p_146192_1_, int p_146192_2_, int p_146192_3_) {
-      boolean flag = p_146192_1_ >= this.field_146209_f && p_146192_1_ < this.field_146209_f + this.field_146218_h && p_146192_2_ >= this.field_146210_g && p_146192_2_ < this.field_146210_g + this.field_146219_i;
-      if (this.field_146212_n) {
-         this.func_146195_b(flag);
-      }
-
-      if (this.field_146213_o && flag && p_146192_3_ == 0) {
-         int i = p_146192_1_ - this.field_146209_f;
-         if (this.field_146215_m) {
-            i -= 4;
-         }
-
-         String s = this.field_146211_a.func_78269_a(this.field_146216_j.substring(this.field_146225_q), this.func_146200_o());
-         this.func_146190_e(this.field_146211_a.func_78269_a(s, i).length() + this.field_146225_q);
-         return true;
-      } else {
-         return false;
-      }
-   }
-
-   public void func_146194_f() {
-      if (this.func_146176_q()) {
-         if (this.func_146181_i()) {
-            func_73734_a(this.field_146209_f - 1, this.field_146210_g - 1, this.field_146209_f + this.field_146218_h + 1, this.field_146210_g + this.field_146219_i + 1, -6250336);
-            func_73734_a(this.field_146209_f, this.field_146210_g, this.field_146209_f + this.field_146218_h, this.field_146210_g + this.field_146219_i, -16777216);
-         }
-
-         int i = this.field_146226_p ? this.field_146222_t : this.field_146221_u;
-         int j = this.field_146224_r - this.field_146225_q;
-         int k = this.field_146223_s - this.field_146225_q;
-         String s = this.field_146211_a.func_78269_a(this.field_146216_j.substring(this.field_146225_q), this.func_146200_o());
-         boolean flag = j >= 0 && j <= s.length();
-         boolean flag1 = this.field_146213_o && this.field_146214_l / 6 % 2 == 0 && flag;
-         int l = this.field_146215_m ? this.field_146209_f + 4 : this.field_146209_f;
-         int i1 = this.field_146215_m ? this.field_146210_g + (this.field_146219_i - 8) / 2 : this.field_146210_g;
-         int j1 = l;
-         if (k > s.length()) {
-            k = s.length();
-         }
-
-         if (!s.isEmpty()) {
-            String s1 = flag ? s.substring(0, j) : s;
-            j1 = this.field_146211_a.func_175063_a(s1, (float)l, (float)i1, i);
-         }
-
-         boolean flag2 = this.field_146224_r < this.field_146216_j.length() || this.field_146216_j.length() >= this.func_146208_g();
-         int k1 = j1;
-         if (!flag) {
-            k1 = j > 0 ? l + this.field_146218_h : l;
-         } else if (flag2) {
-            k1 = j1 - 1;
-            --j1;
-         }
-
-         if (!s.isEmpty() && flag && j < s.length()) {
-            j1 = this.field_146211_a.func_175063_a(s.substring(j), (float)j1, (float)i1, i);
-         }
-
-         if (flag1) {
-            if (flag2) {
-               Gui.func_73734_a(k1, i1 - 1, k1 + 1, i1 + 1 + this.field_146211_a.field_78288_b, -3092272);
-            } else {
-               this.field_146211_a.func_175063_a("_", (float)k1, (float)i1, i);
+            else if (flag2)
+            {
+                k1 = j1 - 1;
+                --j1;
             }
-         }
 
-         if (k != j) {
-            int l1 = l + this.field_146211_a.func_78256_a(s.substring(0, k));
-            this.func_146188_c(k1, i1 - 1, l1 - 1, i1 + 1 + this.field_146211_a.field_78288_b);
-         }
+            if (!s.isEmpty() && flag && j < s.length())
+            {
+                j1 = this.fontRendererInstance.drawStringWithShadow(s.substring(j), (float)j1, (float)i1, i);
+            }
 
-      }
-   }
+            if (flag1)
+            {
+                if (flag2)
+                {
+                    Gui.drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + this.fontRendererInstance.FONT_HEIGHT, -3092272);
+                }
+                else
+                {
+                    this.fontRendererInstance.drawStringWithShadow("_", (float)k1, (float)i1, i);
+                }
+            }
 
-   private void func_146188_c(int p_146188_1_, int p_146188_2_, int p_146188_3_, int p_146188_4_) {
-      if (p_146188_1_ < p_146188_3_) {
-         int i = p_146188_1_;
-         p_146188_1_ = p_146188_3_;
-         p_146188_3_ = i;
-      }
+            if (k != j)
+            {
+                int l1 = l + this.fontRendererInstance.getStringWidth(s.substring(0, k));
+                this.drawCursorVertical(k1, i1 - 1, l1 - 1, i1 + 1 + this.fontRendererInstance.FONT_HEIGHT);
+            }
+        }
+    }
 
-      if (p_146188_2_ < p_146188_4_) {
-         int j = p_146188_2_;
-         p_146188_2_ = p_146188_4_;
-         p_146188_4_ = j;
-      }
+    /**
+     * Draws the current selection and a vertical line cursor in the text box.
+     */
+    private void drawCursorVertical(int startX, int startY, int endX, int endY)
+    {
+        if (startX < endX)
+        {
+            int i = startX;
+            startX = endX;
+            endX = i;
+        }
 
-      if (p_146188_3_ > this.field_146209_f + this.field_146218_h) {
-         p_146188_3_ = this.field_146209_f + this.field_146218_h;
-      }
+        if (startY < endY)
+        {
+            int j = startY;
+            startY = endY;
+            endY = j;
+        }
 
-      if (p_146188_1_ > this.field_146209_f + this.field_146218_h) {
-         p_146188_1_ = this.field_146209_f + this.field_146218_h;
-      }
+        if (endX > this.xPosition + this.width)
+        {
+            endX = this.xPosition + this.width;
+        }
 
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      GlStateManager.func_179131_c(0.0F, 0.0F, 255.0F, 255.0F);
-      GlStateManager.func_179090_x();
-      GlStateManager.func_179115_u();
-      GlStateManager.func_187422_a(GlStateManager.LogicOp.OR_REVERSE);
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-      bufferbuilder.func_181662_b((double)p_146188_1_, (double)p_146188_4_, 0.0D).func_181675_d();
-      bufferbuilder.func_181662_b((double)p_146188_3_, (double)p_146188_4_, 0.0D).func_181675_d();
-      bufferbuilder.func_181662_b((double)p_146188_3_, (double)p_146188_2_, 0.0D).func_181675_d();
-      bufferbuilder.func_181662_b((double)p_146188_1_, (double)p_146188_2_, 0.0D).func_181675_d();
-      tessellator.func_78381_a();
-      GlStateManager.func_179134_v();
-      GlStateManager.func_179098_w();
-   }
+        if (startX > this.xPosition + this.width)
+        {
+            startX = this.xPosition + this.width;
+        }
 
-   public void func_146203_f(int p_146203_1_) {
-      this.field_146217_k = p_146203_1_;
-      if (this.field_146216_j.length() > p_146203_1_) {
-         this.field_146216_j = this.field_146216_j.substring(0, p_146203_1_);
-      }
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.color(0.0F, 0.0F, 255.0F, 255.0F);
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableColorLogic();
+        GlStateManager.colorLogicOp(GlStateManager.LogicOp.OR_REVERSE);
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.pos((double)startX, (double)endY, 0.0D).endVertex();
+        bufferbuilder.pos((double)endX, (double)endY, 0.0D).endVertex();
+        bufferbuilder.pos((double)endX, (double)startY, 0.0D).endVertex();
+        bufferbuilder.pos((double)startX, (double)startY, 0.0D).endVertex();
+        tessellator.draw();
+        GlStateManager.disableColorLogic();
+        GlStateManager.enableTexture2D();
+    }
 
-   }
+    /**
+     * Sets the maximum length for the text in this text box. If the current text is longer than this length, the
+     * current text will be trimmed.
+     */
+    public void setMaxStringLength(int length)
+    {
+        this.maxStringLength = length;
 
-   public int func_146208_g() {
-      return this.field_146217_k;
-   }
+        if (this.text.length() > length)
+        {
+            this.text = this.text.substring(0, length);
+        }
+    }
 
-   public int func_146198_h() {
-      return this.field_146224_r;
-   }
+    /**
+     * returns the maximum number of character that can be contained in this textbox
+     */
+    public int getMaxStringLength()
+    {
+        return this.maxStringLength;
+    }
 
-   public boolean func_146181_i() {
-      return this.field_146215_m;
-   }
+    /**
+     * returns the current position of the cursor
+     */
+    public int getCursorPosition()
+    {
+        return this.cursorPosition;
+    }
 
-   public void func_146185_a(boolean p_146185_1_) {
-      this.field_146215_m = p_146185_1_;
-   }
+    /**
+     * Gets whether the background and outline of this text box should be drawn (true if so).
+     */
+    public boolean getEnableBackgroundDrawing()
+    {
+        return this.enableBackgroundDrawing;
+    }
 
-   public void func_146193_g(int p_146193_1_) {
-      this.field_146222_t = p_146193_1_;
-   }
+    /**
+     * Sets whether or not the background and outline of this text box should be drawn.
+     */
+    public void setEnableBackgroundDrawing(boolean enableBackgroundDrawingIn)
+    {
+        this.enableBackgroundDrawing = enableBackgroundDrawingIn;
+    }
 
-   public void func_146204_h(int p_146204_1_) {
-      this.field_146221_u = p_146204_1_;
-   }
+    /**
+     * Sets the color to use when drawing this text box's text. A different color is used if this text box is disabled.
+     */
+    public void setTextColor(int color)
+    {
+        this.enabledColor = color;
+    }
 
-   public void func_146195_b(boolean p_146195_1_) {
-      if (p_146195_1_ && !this.field_146213_o) {
-         this.field_146214_l = 0;
-      }
+    /**
+     * Sets the color to use for text in this text box when this text box is disabled.
+     */
+    public void setDisabledTextColour(int color)
+    {
+        this.disabledColor = color;
+    }
 
-      this.field_146213_o = p_146195_1_;
-      if (Minecraft.func_71410_x().field_71462_r != null) {
-         Minecraft.func_71410_x().field_71462_r.func_193975_a(p_146195_1_);
-      }
+    /**
+     * Sets focus to this gui element
+     */
+    public void setFocused(boolean isFocusedIn)
+    {
+        if (isFocusedIn && !this.isFocused)
+        {
+            this.cursorCounter = 0;
+        }
 
-   }
+        this.isFocused = isFocusedIn;
 
-   public boolean func_146206_l() {
-      return this.field_146213_o;
-   }
+        if (Minecraft.getMinecraft().currentScreen != null)
+        {
+            Minecraft.getMinecraft().currentScreen.func_193975_a(isFocusedIn);
+        }
+    }
 
-   public void func_146184_c(boolean p_146184_1_) {
-      this.field_146226_p = p_146184_1_;
-   }
+    /**
+     * Getter for the focused field
+     */
+    public boolean isFocused()
+    {
+        return this.isFocused;
+    }
 
-   public int func_146186_n() {
-      return this.field_146223_s;
-   }
+    /**
+     * Sets whether this text box is enabled. Disabled text boxes cannot be typed in.
+     */
+    public void setEnabled(boolean enabled)
+    {
+        this.isEnabled = enabled;
+    }
 
-   public int func_146200_o() {
-      return this.func_146181_i() ? this.field_146218_h - 8 : this.field_146218_h;
-   }
+    /**
+     * the side of the selection that is not the cursor, may be the same as the cursor
+     */
+    public int getSelectionEnd()
+    {
+        return this.selectionEnd;
+    }
 
-   public void func_146199_i(int p_146199_1_) {
-      int i = this.field_146216_j.length();
-      if (p_146199_1_ > i) {
-         p_146199_1_ = i;
-      }
+    /**
+     * returns the width of the textbox depending on if background drawing is enabled
+     */
+    public int getWidth()
+    {
+        return this.getEnableBackgroundDrawing() ? this.width - 8 : this.width;
+    }
 
-      if (p_146199_1_ < 0) {
-         p_146199_1_ = 0;
-      }
+    /**
+     * Sets the position of the selection anchor (the selection anchor and the cursor position mark the edges of the
+     * selection). If the anchor is set beyond the bounds of the current text, it will be put back inside.
+     */
+    public void setSelectionPos(int position)
+    {
+        int i = this.text.length();
 
-      this.field_146223_s = p_146199_1_;
-      if (this.field_146211_a != null) {
-         if (this.field_146225_q > i) {
-            this.field_146225_q = i;
-         }
+        if (position > i)
+        {
+            position = i;
+        }
 
-         int j = this.func_146200_o();
-         String s = this.field_146211_a.func_78269_a(this.field_146216_j.substring(this.field_146225_q), j);
-         int k = s.length() + this.field_146225_q;
-         if (p_146199_1_ == this.field_146225_q) {
-            this.field_146225_q -= this.field_146211_a.func_78262_a(this.field_146216_j, j, true).length();
-         }
+        if (position < 0)
+        {
+            position = 0;
+        }
 
-         if (p_146199_1_ > k) {
-            this.field_146225_q += p_146199_1_ - k;
-         } else if (p_146199_1_ <= this.field_146225_q) {
-            this.field_146225_q -= this.field_146225_q - p_146199_1_;
-         }
+        this.selectionEnd = position;
 
-         this.field_146225_q = MathHelper.func_76125_a(this.field_146225_q, 0, i);
-      }
+        if (this.fontRendererInstance != null)
+        {
+            if (this.lineScrollOffset > i)
+            {
+                this.lineScrollOffset = i;
+            }
 
-   }
+            int j = this.getWidth();
+            String s = this.fontRendererInstance.trimStringToWidth(this.text.substring(this.lineScrollOffset), j);
+            int k = s.length() + this.lineScrollOffset;
 
-   public void func_146205_d(boolean p_146205_1_) {
-      this.field_146212_n = p_146205_1_;
-   }
+            if (position == this.lineScrollOffset)
+            {
+                this.lineScrollOffset -= this.fontRendererInstance.trimStringToWidth(this.text, j, true).length();
+            }
 
-   public boolean func_146176_q() {
-      return this.field_146220_v;
-   }
+            if (position > k)
+            {
+                this.lineScrollOffset += position - k;
+            }
+            else if (position <= this.lineScrollOffset)
+            {
+                this.lineScrollOffset -= this.lineScrollOffset - position;
+            }
 
-   public void func_146189_e(boolean p_146189_1_) {
-      this.field_146220_v = p_146189_1_;
-   }
+            this.lineScrollOffset = MathHelper.clamp(this.lineScrollOffset, 0, i);
+        }
+    }
+
+    /**
+     * Sets whether this text box loses focus when something other than it is clicked.
+     */
+    public void setCanLoseFocus(boolean canLoseFocusIn)
+    {
+        this.canLoseFocus = canLoseFocusIn;
+    }
+
+    /**
+     * returns true if this textbox is visible
+     */
+    public boolean getVisible()
+    {
+        return this.visible;
+    }
+
+    /**
+     * Sets whether or not this textbox is visible
+     */
+    public void setVisible(boolean isVisible)
+    {
+        this.visible = isVisible;
+    }
 }

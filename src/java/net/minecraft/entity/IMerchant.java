@@ -9,24 +9,32 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 
-public interface IMerchant {
-   void func_70932_a_(@Nullable EntityPlayer var1);
+public interface IMerchant
+{
+    void setCustomer(EntityPlayer player);
 
-   @Nullable
-   EntityPlayer func_70931_l_();
+    @Nullable
+    EntityPlayer getCustomer();
 
-   @Nullable
-   MerchantRecipeList func_70934_b(EntityPlayer var1);
+    @Nullable
+    MerchantRecipeList getRecipes(EntityPlayer player);
 
-   void func_70930_a(@Nullable MerchantRecipeList var1);
+    void setRecipes(MerchantRecipeList recipeList);
 
-   void func_70933_a(MerchantRecipe var1);
+    void useRecipe(MerchantRecipe recipe);
 
-   void func_110297_a_(ItemStack var1);
+    /**
+     * Notifies the merchant of a possible merchantrecipe being fulfilled or not. Usually, this is just a sound byte
+     * being played depending if the suggested itemstack is not null.
+     */
+    void verifySellingItem(ItemStack stack);
 
-   ITextComponent func_145748_c_();
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    ITextComponent getDisplayName();
 
-   World func_190670_t_();
+    World func_190670_t_();
 
-   BlockPos func_190671_u_();
+    BlockPos func_190671_u_();
 }

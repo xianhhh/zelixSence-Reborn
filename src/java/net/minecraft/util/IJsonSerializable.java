@@ -2,8 +2,12 @@ package net.minecraft.util;
 
 import com.google.gson.JsonElement;
 
-public interface IJsonSerializable {
-   void func_152753_a(JsonElement var1);
+public interface IJsonSerializable
+{
+    void fromJson(JsonElement json);
 
-   JsonElement func_151003_a();
+    /**
+     * Gets the JsonElement that can be serialized.
+     */
+    JsonElement getSerializableElement();
 }

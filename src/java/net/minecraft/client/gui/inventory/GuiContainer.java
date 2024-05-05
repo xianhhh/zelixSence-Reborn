@@ -20,523 +20,762 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
-public abstract class GuiContainer extends GuiScreen {
-   public static final ResourceLocation field_147001_a = new ResourceLocation("textures/gui/container/inventory.png");
-   protected int field_146999_f = 176;
-   protected int field_147000_g = 166;
-   public Container field_147002_h;
-   protected int field_147003_i;
-   protected int field_147009_r;
-   private Slot field_147006_u;
-   private Slot field_147005_v;
-   private boolean field_147004_w;
-   private ItemStack field_147012_x = ItemStack.field_190927_a;
-   private int field_147011_y;
-   private int field_147010_z;
-   private Slot field_146989_A;
-   private long field_146990_B;
-   private ItemStack field_146991_C = ItemStack.field_190927_a;
-   private Slot field_146985_D;
-   private long field_146986_E;
-   protected final Set<Slot> field_147008_s = Sets.<Slot>newHashSet();
-   protected boolean field_147007_t;
-   private int field_146987_F;
-   private int field_146988_G;
-   private boolean field_146995_H;
-   private int field_146996_I;
-   private long field_146997_J;
-   private Slot field_146998_K;
-   private int field_146992_L;
-   private boolean field_146993_M;
-   private ItemStack field_146994_N = ItemStack.field_190927_a;
+public abstract class GuiContainer extends GuiScreen
+{
+    /** The location of the inventory background texture */
+    public static final ResourceLocation INVENTORY_BACKGROUND = new ResourceLocation("textures/gui/container/inventory.png");
 
-   public GuiContainer(Container p_i1072_1_) {
-      this.field_147002_h = p_i1072_1_;
-      this.field_146995_H = true;
-   }
+    /** The X size of the inventory window in pixels. */
+    protected int xSize = 176;
 
-   public void func_73866_w_() {
-      super.func_73866_w_();
-      this.field_146297_k.field_71439_g.field_71070_bA = this.field_147002_h;
-      this.field_147003_i = (this.field_146294_l - this.field_146999_f) / 2;
-      this.field_147009_r = (this.field_146295_m - this.field_147000_g) / 2;
-   }
+    /** The Y size of the inventory window in pixels. */
+    protected int ySize = 166;
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      int i = this.field_147003_i;
-      int j = this.field_147009_r;
-      this.func_146976_a(p_73863_3_, p_73863_1_, p_73863_2_);
-      GlStateManager.func_179101_C();
-      RenderHelper.func_74518_a();
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179097_i();
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      RenderHelper.func_74520_c();
-      GlStateManager.func_179094_E();
-      GlStateManager.func_179109_b((float)i, (float)j, 0.0F);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      GlStateManager.func_179091_B();
-      this.field_147006_u = null;
-      int k = 240;
-      int l = 240;
-      OpenGlHelper.func_77475_a(OpenGlHelper.field_77476_b, 240.0F, 240.0F);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
+    /** A list of the players inventory slots */
+    public Container inventorySlots;
 
-      for(int i1 = 0; i1 < this.field_147002_h.field_75151_b.size(); ++i1) {
-         Slot slot = this.field_147002_h.field_75151_b.get(i1);
-         if (slot.func_111238_b()) {
-            this.func_146977_a(slot);
-         }
+    /**
+     * Starting X position for the Gui. Inconsistent use for Gui backgrounds.
+     */
+    protected int guiLeft;
 
-         if (this.func_146981_a(slot, p_73863_1_, p_73863_2_) && slot.func_111238_b()) {
-            this.field_147006_u = slot;
-            GlStateManager.func_179140_f();
-            GlStateManager.func_179097_i();
-            int j1 = slot.field_75223_e;
-            int k1 = slot.field_75221_f;
-            GlStateManager.func_179135_a(true, true, true, false);
-            this.func_73733_a(j1, k1, j1 + 16, k1 + 16, -2130706433, -2130706433);
-            GlStateManager.func_179135_a(true, true, true, true);
-            GlStateManager.func_179145_e();
-            GlStateManager.func_179126_j();
-         }
-      }
+    /**
+     * Starting Y position for the Gui. Inconsistent use for Gui backgrounds.
+     */
+    protected int guiTop;
 
-      RenderHelper.func_74518_a();
-      this.func_146979_b(p_73863_1_, p_73863_2_);
-      RenderHelper.func_74520_c();
-      InventoryPlayer inventoryplayer = this.field_146297_k.field_71439_g.field_71071_by;
-      ItemStack itemstack = this.field_147012_x.func_190926_b() ? inventoryplayer.func_70445_o() : this.field_147012_x;
-      if (!itemstack.func_190926_b()) {
-         int j2 = 8;
-         int k2 = this.field_147012_x.func_190926_b() ? 8 : 16;
-         String s = null;
-         if (!this.field_147012_x.func_190926_b() && this.field_147004_w) {
-            itemstack = itemstack.func_77946_l();
-            itemstack.func_190920_e(MathHelper.func_76123_f((float)itemstack.func_190916_E() / 2.0F));
-         } else if (this.field_147007_t && this.field_147008_s.size() > 1) {
-            itemstack = itemstack.func_77946_l();
-            itemstack.func_190920_e(this.field_146996_I);
-            if (itemstack.func_190926_b()) {
-               s = "" + TextFormatting.YELLOW + "0";
-            }
-         }
+    /** holds the slot currently hovered */
+    private Slot theSlot;
 
-         this.func_146982_a(itemstack, p_73863_1_ - i - 8, p_73863_2_ - j - k2, s);
-      }
+    /** Used when touchscreen is enabled. */
+    private Slot clickedSlot;
 
-      if (!this.field_146991_C.func_190926_b()) {
-         float f = (float)(Minecraft.func_71386_F() - this.field_146990_B) / 100.0F;
-         if (f >= 1.0F) {
-            f = 1.0F;
-            this.field_146991_C = ItemStack.field_190927_a;
-         }
+    /** Used when touchscreen is enabled. */
+    private boolean isRightMouseClick;
 
-         int l2 = this.field_146989_A.field_75223_e - this.field_147011_y;
-         int i3 = this.field_146989_A.field_75221_f - this.field_147010_z;
-         int l1 = this.field_147011_y + (int)((float)l2 * f);
-         int i2 = this.field_147010_z + (int)((float)i3 * f);
-         this.func_146982_a(this.field_146991_C, l1, i2, (String)null);
-      }
+    /** Used when touchscreen is enabled */
+    private ItemStack draggedStack = ItemStack.field_190927_a;
+    private int touchUpX;
+    private int touchUpY;
+    private Slot returningStackDestSlot;
+    private long returningStackTime;
 
-      GlStateManager.func_179121_F();
-      GlStateManager.func_179145_e();
-      GlStateManager.func_179126_j();
-      RenderHelper.func_74519_b();
-   }
+    /** Used when touchscreen is enabled */
+    private ItemStack returningStack = ItemStack.field_190927_a;
+    private Slot currentDragTargetSlot;
+    private long dragItemDropDelay;
+    protected final Set<Slot> dragSplittingSlots = Sets.<Slot>newHashSet();
+    protected boolean dragSplitting;
+    private int dragSplittingLimit;
+    private int dragSplittingButton;
+    private boolean ignoreMouseUp;
+    private int dragSplittingRemnant;
+    private long lastClickTime;
+    private Slot lastClickSlot;
+    private int lastClickButton;
+    private boolean doubleClick;
+    private ItemStack shiftClickedSlot = ItemStack.field_190927_a;
 
-   protected void func_191948_b(int p_191948_1_, int p_191948_2_) {
-      if (this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b() && this.field_147006_u != null && this.field_147006_u.func_75216_d()) {
-         this.func_146285_a(this.field_147006_u.func_75211_c(), p_191948_1_, p_191948_2_);
-      }
+    public GuiContainer(Container inventorySlotsIn)
+    {
+        this.inventorySlots = inventorySlotsIn;
+        this.ignoreMouseUp = true;
+    }
 
-   }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        super.initGui();
+        this.mc.player.openContainer = this.inventorySlots;
+        this.guiLeft = (this.width - this.xSize) / 2;
+        this.guiTop = (this.height - this.ySize) / 2;
+    }
 
-   private void func_146982_a(ItemStack p_146982_1_, int p_146982_2_, int p_146982_3_, String p_146982_4_) {
-      GlStateManager.func_179109_b(0.0F, 0.0F, 32.0F);
-      this.field_73735_i = 200.0F;
-      this.field_146296_j.field_77023_b = 200.0F;
-      this.field_146296_j.func_180450_b(p_146982_1_, p_146982_2_, p_146982_3_);
-      this.field_146296_j.func_180453_a(this.field_146289_q, p_146982_1_, p_146982_2_, p_146982_3_ - (this.field_147012_x.func_190926_b() ? 0 : 8), p_146982_4_);
-      this.field_73735_i = 0.0F;
-      this.field_146296_j.field_77023_b = 0.0F;
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        int i = this.guiLeft;
+        int j = this.guiTop;
+        this.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+        GlStateManager.disableRescaleNormal();
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+        RenderHelper.enableGUIStandardItemLighting();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate((float)i, (float)j, 0.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.enableRescaleNormal();
+        this.theSlot = null;
+        int k = 240;
+        int l = 240;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-   protected void func_146979_b(int p_146979_1_, int p_146979_2_) {
-   }
+        for (int i1 = 0; i1 < this.inventorySlots.inventorySlots.size(); ++i1)
+        {
+            Slot slot = this.inventorySlots.inventorySlots.get(i1);
 
-   protected abstract void func_146976_a(float var1, int var2, int var3);
-
-   private void func_146977_a(Slot p_146977_1_) {
-      int i = p_146977_1_.field_75223_e;
-      int j = p_146977_1_.field_75221_f;
-      ItemStack itemstack = p_146977_1_.func_75211_c();
-      boolean flag = false;
-      boolean flag1 = p_146977_1_ == this.field_147005_v && !this.field_147012_x.func_190926_b() && !this.field_147004_w;
-      ItemStack itemstack1 = this.field_146297_k.field_71439_g.field_71071_by.func_70445_o();
-      String s = null;
-      if (p_146977_1_ == this.field_147005_v && !this.field_147012_x.func_190926_b() && this.field_147004_w && !itemstack.func_190926_b()) {
-         itemstack = itemstack.func_77946_l();
-         itemstack.func_190920_e(itemstack.func_190916_E() / 2);
-      } else if (this.field_147007_t && this.field_147008_s.contains(p_146977_1_) && !itemstack1.func_190926_b()) {
-         if (this.field_147008_s.size() == 1) {
-            return;
-         }
-
-         if (Container.func_94527_a(p_146977_1_, itemstack1, true) && this.field_147002_h.func_94531_b(p_146977_1_)) {
-            itemstack = itemstack1.func_77946_l();
-            flag = true;
-            Container.func_94525_a(this.field_147008_s, this.field_146987_F, itemstack, p_146977_1_.func_75211_c().func_190926_b() ? 0 : p_146977_1_.func_75211_c().func_190916_E());
-            int k = Math.min(itemstack.func_77976_d(), p_146977_1_.func_178170_b(itemstack));
-            if (itemstack.func_190916_E() > k) {
-               s = TextFormatting.YELLOW.toString() + k;
-               itemstack.func_190920_e(k);
-            }
-         } else {
-            this.field_147008_s.remove(p_146977_1_);
-            this.func_146980_g();
-         }
-      }
-
-      this.field_73735_i = 100.0F;
-      this.field_146296_j.field_77023_b = 100.0F;
-      if (itemstack.func_190926_b() && p_146977_1_.func_111238_b()) {
-         String s1 = p_146977_1_.func_178171_c();
-         if (s1 != null) {
-            TextureAtlasSprite textureatlassprite = this.field_146297_k.func_147117_R().func_110572_b(s1);
-            GlStateManager.func_179140_f();
-            this.field_146297_k.func_110434_K().func_110577_a(TextureMap.field_110575_b);
-            this.func_175175_a(i, j, textureatlassprite, 16, 16);
-            GlStateManager.func_179145_e();
-            flag1 = true;
-         }
-      }
-
-      if (!flag1) {
-         if (flag) {
-            func_73734_a(i, j, i + 16, j + 16, -2130706433);
-         }
-
-         GlStateManager.func_179126_j();
-         this.field_146296_j.func_184391_a(this.field_146297_k.field_71439_g, itemstack, i, j);
-         this.field_146296_j.func_180453_a(this.field_146289_q, itemstack, i, j, s);
-      }
-
-      this.field_146296_j.field_77023_b = 0.0F;
-      this.field_73735_i = 0.0F;
-   }
-
-   private void func_146980_g() {
-      ItemStack itemstack = this.field_146297_k.field_71439_g.field_71071_by.func_70445_o();
-      if (!itemstack.func_190926_b() && this.field_147007_t) {
-         if (this.field_146987_F == 2) {
-            this.field_146996_I = itemstack.func_77976_d();
-         } else {
-            this.field_146996_I = itemstack.func_190916_E();
-
-            for(Slot slot : this.field_147008_s) {
-               ItemStack itemstack1 = itemstack.func_77946_l();
-               ItemStack itemstack2 = slot.func_75211_c();
-               int i = itemstack2.func_190926_b() ? 0 : itemstack2.func_190916_E();
-               Container.func_94525_a(this.field_147008_s, this.field_146987_F, itemstack1, i);
-               int j = Math.min(itemstack1.func_77976_d(), slot.func_178170_b(itemstack1));
-               if (itemstack1.func_190916_E() > j) {
-                  itemstack1.func_190920_e(j);
-               }
-
-               this.field_146996_I -= itemstack1.func_190916_E() - i;
+            if (slot.canBeHovered())
+            {
+                this.drawSlot(slot);
             }
 
-         }
-      }
-   }
-
-   private Slot func_146975_c(int p_146975_1_, int p_146975_2_) {
-      for(int i = 0; i < this.field_147002_h.field_75151_b.size(); ++i) {
-         Slot slot = this.field_147002_h.field_75151_b.get(i);
-         if (this.func_146981_a(slot, p_146975_1_, p_146975_2_) && slot.func_111238_b()) {
-            return slot;
-         }
-      }
-
-      return null;
-   }
-
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      boolean flag = p_73864_3_ == this.field_146297_k.field_71474_y.field_74322_I.func_151463_i() + 100;
-      Slot slot = this.func_146975_c(p_73864_1_, p_73864_2_);
-      long i = Minecraft.func_71386_F();
-      this.field_146993_M = this.field_146998_K == slot && i - this.field_146997_J < 250L && this.field_146992_L == p_73864_3_;
-      this.field_146995_H = false;
-      if (p_73864_3_ == 0 || p_73864_3_ == 1 || flag) {
-         int j = this.field_147003_i;
-         int k = this.field_147009_r;
-         boolean flag1 = this.func_193983_c(p_73864_1_, p_73864_2_, j, k);
-         int l = -1;
-         if (slot != null) {
-            l = slot.field_75222_d;
-         }
-
-         if (flag1) {
-            l = -999;
-         }
-
-         if (this.field_146297_k.field_71474_y.field_85185_A && flag1 && this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b()) {
-            this.field_146297_k.func_147108_a((GuiScreen)null);
-            return;
-         }
-
-         if (l != -1) {
-            if (this.field_146297_k.field_71474_y.field_85185_A) {
-               if (slot != null && slot.func_75216_d()) {
-                  this.field_147005_v = slot;
-                  this.field_147012_x = ItemStack.field_190927_a;
-                  this.field_147004_w = p_73864_3_ == 1;
-               } else {
-                  this.field_147005_v = null;
-               }
-            } else if (!this.field_147007_t) {
-               if (this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b()) {
-                  if (p_73864_3_ == this.field_146297_k.field_71474_y.field_74322_I.func_151463_i() + 100) {
-                     this.func_184098_a(slot, l, p_73864_3_, ClickType.CLONE);
-                  } else {
-                     boolean flag2 = l != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
-                     ClickType clicktype = ClickType.PICKUP;
-                     if (flag2) {
-                        this.field_146994_N = slot != null && slot.func_75216_d() ? slot.func_75211_c().func_77946_l() : ItemStack.field_190927_a;
-                        clicktype = ClickType.QUICK_MOVE;
-                     } else if (l == -999) {
-                        clicktype = ClickType.THROW;
-                     }
-
-                     this.func_184098_a(slot, l, p_73864_3_, clicktype);
-                  }
-
-                  this.field_146995_H = true;
-               } else {
-                  this.field_147007_t = true;
-                  this.field_146988_G = p_73864_3_;
-                  this.field_147008_s.clear();
-                  if (p_73864_3_ == 0) {
-                     this.field_146987_F = 0;
-                  } else if (p_73864_3_ == 1) {
-                     this.field_146987_F = 1;
-                  } else if (p_73864_3_ == this.field_146297_k.field_71474_y.field_74322_I.func_151463_i() + 100) {
-                     this.field_146987_F = 2;
-                  }
-               }
+            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.canBeHovered())
+            {
+                this.theSlot = slot;
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                int j1 = slot.xDisplayPosition;
+                int k1 = slot.yDisplayPosition;
+                GlStateManager.colorMask(true, true, true, false);
+                this.drawGradientRect(j1, k1, j1 + 16, k1 + 16, -2130706433, -2130706433);
+                GlStateManager.colorMask(true, true, true, true);
+                GlStateManager.enableLighting();
+                GlStateManager.enableDepth();
             }
-         }
-      }
+        }
 
-      this.field_146998_K = slot;
-      this.field_146997_J = i;
-      this.field_146992_L = p_73864_3_;
-   }
+        RenderHelper.disableStandardItemLighting();
+        this.drawGuiContainerForegroundLayer(mouseX, mouseY);
+        RenderHelper.enableGUIStandardItemLighting();
+        InventoryPlayer inventoryplayer = this.mc.player.inventory;
+        ItemStack itemstack = this.draggedStack.func_190926_b() ? inventoryplayer.getItemStack() : this.draggedStack;
 
-   protected boolean func_193983_c(int p_193983_1_, int p_193983_2_, int p_193983_3_, int p_193983_4_) {
-      return p_193983_1_ < p_193983_3_ || p_193983_2_ < p_193983_4_ || p_193983_1_ >= p_193983_3_ + this.field_146999_f || p_193983_2_ >= p_193983_4_ + this.field_147000_g;
-   }
+        if (!itemstack.func_190926_b())
+        {
+            int j2 = 8;
+            int k2 = this.draggedStack.func_190926_b() ? 8 : 16;
+            String s = null;
 
-   protected void func_146273_a(int p_146273_1_, int p_146273_2_, int p_146273_3_, long p_146273_4_) {
-      Slot slot = this.func_146975_c(p_146273_1_, p_146273_2_);
-      ItemStack itemstack = this.field_146297_k.field_71439_g.field_71071_by.func_70445_o();
-      if (this.field_147005_v != null && this.field_146297_k.field_71474_y.field_85185_A) {
-         if (p_146273_3_ == 0 || p_146273_3_ == 1) {
-            if (this.field_147012_x.func_190926_b()) {
-               if (slot != this.field_147005_v && !this.field_147005_v.func_75211_c().func_190926_b()) {
-                  this.field_147012_x = this.field_147005_v.func_75211_c().func_77946_l();
-               }
-            } else if (this.field_147012_x.func_190916_E() > 1 && slot != null && Container.func_94527_a(slot, this.field_147012_x, false)) {
-               long i = Minecraft.func_71386_F();
-               if (this.field_146985_D == slot) {
-                  if (i - this.field_146986_E > 500L) {
-                     this.func_184098_a(this.field_147005_v, this.field_147005_v.field_75222_d, 0, ClickType.PICKUP);
-                     this.func_184098_a(slot, slot.field_75222_d, 1, ClickType.PICKUP);
-                     this.func_184098_a(this.field_147005_v, this.field_147005_v.field_75222_d, 0, ClickType.PICKUP);
-                     this.field_146986_E = i + 750L;
-                     this.field_147012_x.func_190918_g(1);
-                  }
-               } else {
-                  this.field_146985_D = slot;
-                  this.field_146986_E = i;
-               }
+            if (!this.draggedStack.func_190926_b() && this.isRightMouseClick)
+            {
+                itemstack = itemstack.copy();
+                itemstack.func_190920_e(MathHelper.ceil((float)itemstack.func_190916_E() / 2.0F));
             }
-         }
-      } else if (this.field_147007_t && slot != null && !itemstack.func_190926_b() && (itemstack.func_190916_E() > this.field_147008_s.size() || this.field_146987_F == 2) && Container.func_94527_a(slot, itemstack, true) && slot.func_75214_a(itemstack) && this.field_147002_h.func_94531_b(slot)) {
-         this.field_147008_s.add(slot);
-         this.func_146980_g();
-      }
+            else if (this.dragSplitting && this.dragSplittingSlots.size() > 1)
+            {
+                itemstack = itemstack.copy();
+                itemstack.func_190920_e(this.dragSplittingRemnant);
 
-   }
-
-   protected void func_146286_b(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
-      Slot slot = this.func_146975_c(p_146286_1_, p_146286_2_);
-      int i = this.field_147003_i;
-      int j = this.field_147009_r;
-      boolean flag = this.func_193983_c(p_146286_1_, p_146286_2_, i, j);
-      int k = -1;
-      if (slot != null) {
-         k = slot.field_75222_d;
-      }
-
-      if (flag) {
-         k = -999;
-      }
-
-      if (this.field_146993_M && slot != null && p_146286_3_ == 0 && this.field_147002_h.func_94530_a(ItemStack.field_190927_a, slot)) {
-         if (func_146272_n()) {
-            if (!this.field_146994_N.func_190926_b()) {
-               for(Slot slot2 : this.field_147002_h.field_75151_b) {
-                  if (slot2 != null && slot2.func_82869_a(this.field_146297_k.field_71439_g) && slot2.func_75216_d() && slot2.field_75224_c == slot.field_75224_c && Container.func_94527_a(slot2, this.field_146994_N, true)) {
-                     this.func_184098_a(slot2, slot2.field_75222_d, p_146286_3_, ClickType.QUICK_MOVE);
-                  }
-               }
-            }
-         } else {
-            this.func_184098_a(slot, k, p_146286_3_, ClickType.PICKUP_ALL);
-         }
-
-         this.field_146993_M = false;
-         this.field_146997_J = 0L;
-      } else {
-         if (this.field_147007_t && this.field_146988_G != p_146286_3_) {
-            this.field_147007_t = false;
-            this.field_147008_s.clear();
-            this.field_146995_H = true;
-            return;
-         }
-
-         if (this.field_146995_H) {
-            this.field_146995_H = false;
-            return;
-         }
-
-         if (this.field_147005_v != null && this.field_146297_k.field_71474_y.field_85185_A) {
-            if (p_146286_3_ == 0 || p_146286_3_ == 1) {
-               if (this.field_147012_x.func_190926_b() && slot != this.field_147005_v) {
-                  this.field_147012_x = this.field_147005_v.func_75211_c();
-               }
-
-               boolean flag2 = Container.func_94527_a(slot, this.field_147012_x, false);
-               if (k != -1 && !this.field_147012_x.func_190926_b() && flag2) {
-                  this.func_184098_a(this.field_147005_v, this.field_147005_v.field_75222_d, p_146286_3_, ClickType.PICKUP);
-                  this.func_184098_a(slot, k, 0, ClickType.PICKUP);
-                  if (this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b()) {
-                     this.field_146991_C = ItemStack.field_190927_a;
-                  } else {
-                     this.func_184098_a(this.field_147005_v, this.field_147005_v.field_75222_d, p_146286_3_, ClickType.PICKUP);
-                     this.field_147011_y = p_146286_1_ - i;
-                     this.field_147010_z = p_146286_2_ - j;
-                     this.field_146989_A = this.field_147005_v;
-                     this.field_146991_C = this.field_147012_x;
-                     this.field_146990_B = Minecraft.func_71386_F();
-                  }
-               } else if (!this.field_147012_x.func_190926_b()) {
-                  this.field_147011_y = p_146286_1_ - i;
-                  this.field_147010_z = p_146286_2_ - j;
-                  this.field_146989_A = this.field_147005_v;
-                  this.field_146991_C = this.field_147012_x;
-                  this.field_146990_B = Minecraft.func_71386_F();
-               }
-
-               this.field_147012_x = ItemStack.field_190927_a;
-               this.field_147005_v = null;
-            }
-         } else if (this.field_147007_t && !this.field_147008_s.isEmpty()) {
-            this.func_184098_a((Slot)null, -999, Container.func_94534_d(0, this.field_146987_F), ClickType.QUICK_CRAFT);
-
-            for(Slot slot1 : this.field_147008_s) {
-               this.func_184098_a(slot1, slot1.field_75222_d, Container.func_94534_d(1, this.field_146987_F), ClickType.QUICK_CRAFT);
+                if (itemstack.func_190926_b())
+                {
+                    s = "" + TextFormatting.YELLOW + "0";
+                }
             }
 
-            this.func_184098_a((Slot)null, -999, Container.func_94534_d(2, this.field_146987_F), ClickType.QUICK_CRAFT);
-         } else if (!this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b()) {
-            if (p_146286_3_ == this.field_146297_k.field_71474_y.field_74322_I.func_151463_i() + 100) {
-               this.func_184098_a(slot, k, p_146286_3_, ClickType.CLONE);
-            } else {
-               boolean flag1 = k != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
-               if (flag1) {
-                  this.field_146994_N = slot != null && slot.func_75216_d() ? slot.func_75211_c().func_77946_l() : ItemStack.field_190927_a;
-               }
+            this.drawItemStack(itemstack, mouseX - i - 8, mouseY - j - k2, s);
+        }
 
-               this.func_184098_a(slot, k, p_146286_3_, flag1 ? ClickType.QUICK_MOVE : ClickType.PICKUP);
+        if (!this.returningStack.func_190926_b())
+        {
+            float f = (float)(Minecraft.getSystemTime() - this.returningStackTime) / 100.0F;
+
+            if (f >= 1.0F)
+            {
+                f = 1.0F;
+                this.returningStack = ItemStack.field_190927_a;
             }
-         }
-      }
 
-      if (this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b()) {
-         this.field_146997_J = 0L;
-      }
+            int l2 = this.returningStackDestSlot.xDisplayPosition - this.touchUpX;
+            int i3 = this.returningStackDestSlot.yDisplayPosition - this.touchUpY;
+            int l1 = this.touchUpX + (int)((float)l2 * f);
+            int i2 = this.touchUpY + (int)((float)i3 * f);
+            this.drawItemStack(this.returningStack, l1, i2, (String)null);
+        }
 
-      this.field_147007_t = false;
-   }
+        GlStateManager.popMatrix();
+        GlStateManager.enableLighting();
+        GlStateManager.enableDepth();
+        RenderHelper.enableStandardItemLighting();
+    }
 
-   private boolean func_146981_a(Slot p_146981_1_, int p_146981_2_, int p_146981_3_) {
-      return this.func_146978_c(p_146981_1_.field_75223_e, p_146981_1_.field_75221_f, 16, 16, p_146981_2_, p_146981_3_);
-   }
+    protected void func_191948_b(int p_191948_1_, int p_191948_2_)
+    {
+        if (this.mc.player.inventory.getItemStack().func_190926_b() && this.theSlot != null && this.theSlot.getHasStack())
+        {
+            this.renderToolTip(this.theSlot.getStack(), p_191948_1_, p_191948_2_);
+        }
+    }
 
-   protected boolean func_146978_c(int p_146978_1_, int p_146978_2_, int p_146978_3_, int p_146978_4_, int p_146978_5_, int p_146978_6_) {
-      int i = this.field_147003_i;
-      int j = this.field_147009_r;
-      p_146978_5_ = p_146978_5_ - i;
-      p_146978_6_ = p_146978_6_ - j;
-      return p_146978_5_ >= p_146978_1_ - 1 && p_146978_5_ < p_146978_1_ + p_146978_3_ + 1 && p_146978_6_ >= p_146978_2_ - 1 && p_146978_6_ < p_146978_2_ + p_146978_4_ + 1;
-   }
+    /**
+     * Draws an ItemStack.
+     *  
+     * The z index is increased by 32 (and not decreased afterwards), and the item is then rendered at z=200.
+     */
+    private void drawItemStack(ItemStack stack, int x, int y, String altText)
+    {
+        GlStateManager.translate(0.0F, 0.0F, 32.0F);
+        this.zLevel = 200.0F;
+        this.itemRender.zLevel = 200.0F;
+        this.itemRender.renderItemAndEffectIntoGUI(stack, x, y);
+        this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, stack, x, y - (this.draggedStack.func_190926_b() ? 0 : 8), altText);
+        this.zLevel = 0.0F;
+        this.itemRender.zLevel = 0.0F;
+    }
 
-   protected void func_184098_a(Slot p_184098_1_, int p_184098_2_, int p_184098_3_, ClickType p_184098_4_) {
-      if (p_184098_1_ != null) {
-         p_184098_2_ = p_184098_1_.field_75222_d;
-      }
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
+     */
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+    {
+    }
 
-      this.field_146297_k.field_71442_b.func_187098_a(this.field_147002_h.field_75152_c, p_184098_2_, p_184098_3_, p_184098_4_, this.field_146297_k.field_71439_g);
-   }
+    /**
+     * Draws the background layer of this container (behind the items).
+     */
+    protected abstract void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY);
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-      if (p_73869_2_ == 1 || p_73869_2_ == this.field_146297_k.field_71474_y.field_151445_Q.func_151463_i()) {
-         this.field_146297_k.field_71439_g.func_71053_j();
-      }
+    /**
+     * Draws the given slot: any item in it, the slot's background, the hovered highlight, etc.
+     */
+    private void drawSlot(Slot slotIn)
+    {
+        int i = slotIn.xDisplayPosition;
+        int j = slotIn.yDisplayPosition;
+        ItemStack itemstack = slotIn.getStack();
+        boolean flag = false;
+        boolean flag1 = slotIn == this.clickedSlot && !this.draggedStack.func_190926_b() && !this.isRightMouseClick;
+        ItemStack itemstack1 = this.mc.player.inventory.getItemStack();
+        String s = null;
 
-      this.func_146983_a(p_73869_2_);
-      if (this.field_147006_u != null && this.field_147006_u.func_75216_d()) {
-         if (p_73869_2_ == this.field_146297_k.field_71474_y.field_74322_I.func_151463_i()) {
-            this.func_184098_a(this.field_147006_u, this.field_147006_u.field_75222_d, 0, ClickType.CLONE);
-         } else if (p_73869_2_ == this.field_146297_k.field_71474_y.field_74316_C.func_151463_i()) {
-            this.func_184098_a(this.field_147006_u, this.field_147006_u.field_75222_d, func_146271_m() ? 1 : 0, ClickType.THROW);
-         }
-      }
-
-   }
-
-   protected boolean func_146983_a(int p_146983_1_) {
-      if (this.field_146297_k.field_71439_g.field_71071_by.func_70445_o().func_190926_b() && this.field_147006_u != null) {
-         for(int i = 0; i < 9; ++i) {
-            if (p_146983_1_ == this.field_146297_k.field_71474_y.field_151456_ac[i].func_151463_i()) {
-               this.func_184098_a(this.field_147006_u, this.field_147006_u.field_75222_d, i, ClickType.SWAP);
-               return true;
+        if (slotIn == this.clickedSlot && !this.draggedStack.func_190926_b() && this.isRightMouseClick && !itemstack.func_190926_b())
+        {
+            itemstack = itemstack.copy();
+            itemstack.func_190920_e(itemstack.func_190916_E() / 2);
+        }
+        else if (this.dragSplitting && this.dragSplittingSlots.contains(slotIn) && !itemstack1.func_190926_b())
+        {
+            if (this.dragSplittingSlots.size() == 1)
+            {
+                return;
             }
-         }
-      }
 
-      return false;
-   }
+            if (Container.canAddItemToSlot(slotIn, itemstack1, true) && this.inventorySlots.canDragIntoSlot(slotIn))
+            {
+                itemstack = itemstack1.copy();
+                flag = true;
+                Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack, slotIn.getStack().func_190926_b() ? 0 : slotIn.getStack().func_190916_E());
+                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getItemStackLimit(itemstack));
 
-   public void func_146281_b() {
-      if (this.field_146297_k.field_71439_g != null) {
-         this.field_147002_h.func_75134_a(this.field_146297_k.field_71439_g);
-      }
-   }
+                if (itemstack.func_190916_E() > k)
+                {
+                    s = TextFormatting.YELLOW.toString() + k;
+                    itemstack.func_190920_e(k);
+                }
+            }
+            else
+            {
+                this.dragSplittingSlots.remove(slotIn);
+                this.updateDragSplitting();
+            }
+        }
 
-   public boolean func_73868_f() {
-      return false;
-   }
+        this.zLevel = 100.0F;
+        this.itemRender.zLevel = 100.0F;
 
-   public void func_73876_c() {
-      super.func_73876_c();
-      if (!this.field_146297_k.field_71439_g.func_70089_S() || this.field_146297_k.field_71439_g.field_70128_L) {
-         this.field_146297_k.field_71439_g.func_71053_j();
-      }
+        if (itemstack.func_190926_b() && slotIn.canBeHovered())
+        {
+            String s1 = slotIn.getSlotTexture();
 
-   }
+            if (s1 != null)
+            {
+                TextureAtlasSprite textureatlassprite = this.mc.getTextureMapBlocks().getAtlasSprite(s1);
+                GlStateManager.disableLighting();
+                this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+                this.drawTexturedModalRect(i, j, textureatlassprite, 16, 16);
+                GlStateManager.enableLighting();
+                flag1 = true;
+            }
+        }
+
+        if (!flag1)
+        {
+            if (flag)
+            {
+                drawRect(i, j, i + 16, j + 16, -2130706433);
+            }
+
+            GlStateManager.enableDepth();
+            this.itemRender.renderItemAndEffectIntoGUI(this.mc.player, itemstack, i, j);
+            this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, i, j, s);
+        }
+
+        this.itemRender.zLevel = 0.0F;
+        this.zLevel = 0.0F;
+    }
+
+    private void updateDragSplitting()
+    {
+        ItemStack itemstack = this.mc.player.inventory.getItemStack();
+
+        if (!itemstack.func_190926_b() && this.dragSplitting)
+        {
+            if (this.dragSplittingLimit == 2)
+            {
+                this.dragSplittingRemnant = itemstack.getMaxStackSize();
+            }
+            else
+            {
+                this.dragSplittingRemnant = itemstack.func_190916_E();
+
+                for (Slot slot : this.dragSplittingSlots)
+                {
+                    ItemStack itemstack1 = itemstack.copy();
+                    ItemStack itemstack2 = slot.getStack();
+                    int i = itemstack2.func_190926_b() ? 0 : itemstack2.func_190916_E();
+                    Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack1, i);
+                    int j = Math.min(itemstack1.getMaxStackSize(), slot.getItemStackLimit(itemstack1));
+
+                    if (itemstack1.func_190916_E() > j)
+                    {
+                        itemstack1.func_190920_e(j);
+                    }
+
+                    this.dragSplittingRemnant -= itemstack1.func_190916_E() - i;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the slot at the given coordinates or null if there is none.
+     */
+    private Slot getSlotAtPosition(int x, int y)
+    {
+        for (int i = 0; i < this.inventorySlots.inventorySlots.size(); ++i)
+        {
+            Slot slot = this.inventorySlots.inventorySlots.get(i);
+
+            if (this.isMouseOverSlot(slot, x, y) && slot.canBeHovered())
+            {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        boolean flag = mouseButton == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100;
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        long i = Minecraft.getSystemTime();
+        this.doubleClick = this.lastClickSlot == slot && i - this.lastClickTime < 250L && this.lastClickButton == mouseButton;
+        this.ignoreMouseUp = false;
+
+        if (mouseButton == 0 || mouseButton == 1 || flag)
+        {
+            int j = this.guiLeft;
+            int k = this.guiTop;
+            boolean flag1 = this.func_193983_c(mouseX, mouseY, j, k);
+            int l = -1;
+
+            if (slot != null)
+            {
+                l = slot.slotNumber;
+            }
+
+            if (flag1)
+            {
+                l = -999;
+            }
+
+            if (this.mc.gameSettings.touchscreen && flag1 && this.mc.player.inventory.getItemStack().func_190926_b())
+            {
+                this.mc.displayGuiScreen((GuiScreen)null);
+                return;
+            }
+
+            if (l != -1)
+            {
+                if (this.mc.gameSettings.touchscreen)
+                {
+                    if (slot != null && slot.getHasStack())
+                    {
+                        this.clickedSlot = slot;
+                        this.draggedStack = ItemStack.field_190927_a;
+                        this.isRightMouseClick = mouseButton == 1;
+                    }
+                    else
+                    {
+                        this.clickedSlot = null;
+                    }
+                }
+                else if (!this.dragSplitting)
+                {
+                    if (this.mc.player.inventory.getItemStack().func_190926_b())
+                    {
+                        if (mouseButton == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100)
+                        {
+                            this.handleMouseClick(slot, l, mouseButton, ClickType.CLONE);
+                        }
+                        else
+                        {
+                            boolean flag2 = l != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+                            ClickType clicktype = ClickType.PICKUP;
+
+                            if (flag2)
+                            {
+                                this.shiftClickedSlot = slot != null && slot.getHasStack() ? slot.getStack().copy() : ItemStack.field_190927_a;
+                                clicktype = ClickType.QUICK_MOVE;
+                            }
+                            else if (l == -999)
+                            {
+                                clicktype = ClickType.THROW;
+                            }
+
+                            this.handleMouseClick(slot, l, mouseButton, clicktype);
+                        }
+
+                        this.ignoreMouseUp = true;
+                    }
+                    else
+                    {
+                        this.dragSplitting = true;
+                        this.dragSplittingButton = mouseButton;
+                        this.dragSplittingSlots.clear();
+
+                        if (mouseButton == 0)
+                        {
+                            this.dragSplittingLimit = 0;
+                        }
+                        else if (mouseButton == 1)
+                        {
+                            this.dragSplittingLimit = 1;
+                        }
+                        else if (mouseButton == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100)
+                        {
+                            this.dragSplittingLimit = 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.lastClickSlot = slot;
+        this.lastClickTime = i;
+        this.lastClickButton = mouseButton;
+    }
+
+    protected boolean func_193983_c(int p_193983_1_, int p_193983_2_, int p_193983_3_, int p_193983_4_)
+    {
+        return p_193983_1_ < p_193983_3_ || p_193983_2_ < p_193983_4_ || p_193983_1_ >= p_193983_3_ + this.xSize || p_193983_2_ >= p_193983_4_ + this.ySize;
+    }
+
+    /**
+     * Called when a mouse button is pressed and the mouse is moved around. Parameters are : mouseX, mouseY,
+     * lastButtonClicked & timeSinceMouseClick.
+     */
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
+    {
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        ItemStack itemstack = this.mc.player.inventory.getItemStack();
+
+        if (this.clickedSlot != null && this.mc.gameSettings.touchscreen)
+        {
+            if (clickedMouseButton == 0 || clickedMouseButton == 1)
+            {
+                if (this.draggedStack.func_190926_b())
+                {
+                    if (slot != this.clickedSlot && !this.clickedSlot.getStack().func_190926_b())
+                    {
+                        this.draggedStack = this.clickedSlot.getStack().copy();
+                    }
+                }
+                else if (this.draggedStack.func_190916_E() > 1 && slot != null && Container.canAddItemToSlot(slot, this.draggedStack, false))
+                {
+                    long i = Minecraft.getSystemTime();
+
+                    if (this.currentDragTargetSlot == slot)
+                    {
+                        if (i - this.dragItemDropDelay > 500L)
+                        {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, ClickType.PICKUP);
+                            this.handleMouseClick(slot, slot.slotNumber, 1, ClickType.PICKUP);
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, ClickType.PICKUP);
+                            this.dragItemDropDelay = i + 750L;
+                            this.draggedStack.func_190918_g(1);
+                        }
+                    }
+                    else
+                    {
+                        this.currentDragTargetSlot = slot;
+                        this.dragItemDropDelay = i;
+                    }
+                }
+            }
+        }
+        else if (this.dragSplitting && slot != null && !itemstack.func_190926_b() && (itemstack.func_190916_E() > this.dragSplittingSlots.size() || this.dragSplittingLimit == 2) && Container.canAddItemToSlot(slot, itemstack, true) && slot.isItemValid(itemstack) && this.inventorySlots.canDragIntoSlot(slot))
+        {
+            this.dragSplittingSlots.add(slot);
+            this.updateDragSplitting();
+        }
+    }
+
+    /**
+     * Called when a mouse button is released.
+     */
+    protected void mouseReleased(int mouseX, int mouseY, int state)
+    {
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        int i = this.guiLeft;
+        int j = this.guiTop;
+        boolean flag = this.func_193983_c(mouseX, mouseY, i, j);
+        int k = -1;
+
+        if (slot != null)
+        {
+            k = slot.slotNumber;
+        }
+
+        if (flag)
+        {
+            k = -999;
+        }
+
+        if (this.doubleClick && slot != null && state == 0 && this.inventorySlots.canMergeSlot(ItemStack.field_190927_a, slot))
+        {
+            if (isShiftKeyDown())
+            {
+                if (!this.shiftClickedSlot.func_190926_b())
+                {
+                    for (Slot slot2 : this.inventorySlots.inventorySlots)
+                    {
+                        if (slot2 != null && slot2.canTakeStack(this.mc.player) && slot2.getHasStack() && slot2.inventory == slot.inventory && Container.canAddItemToSlot(slot2, this.shiftClickedSlot, true))
+                        {
+                            this.handleMouseClick(slot2, slot2.slotNumber, state, ClickType.QUICK_MOVE);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.handleMouseClick(slot, k, state, ClickType.PICKUP_ALL);
+            }
+
+            this.doubleClick = false;
+            this.lastClickTime = 0L;
+        }
+        else
+        {
+            if (this.dragSplitting && this.dragSplittingButton != state)
+            {
+                this.dragSplitting = false;
+                this.dragSplittingSlots.clear();
+                this.ignoreMouseUp = true;
+                return;
+            }
+
+            if (this.ignoreMouseUp)
+            {
+                this.ignoreMouseUp = false;
+                return;
+            }
+
+            if (this.clickedSlot != null && this.mc.gameSettings.touchscreen)
+            {
+                if (state == 0 || state == 1)
+                {
+                    if (this.draggedStack.func_190926_b() && slot != this.clickedSlot)
+                    {
+                        this.draggedStack = this.clickedSlot.getStack();
+                    }
+
+                    boolean flag2 = Container.canAddItemToSlot(slot, this.draggedStack, false);
+
+                    if (k != -1 && !this.draggedStack.func_190926_b() && flag2)
+                    {
+                        this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, state, ClickType.PICKUP);
+                        this.handleMouseClick(slot, k, 0, ClickType.PICKUP);
+
+                        if (this.mc.player.inventory.getItemStack().func_190926_b())
+                        {
+                            this.returningStack = ItemStack.field_190927_a;
+                        }
+                        else
+                        {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, state, ClickType.PICKUP);
+                            this.touchUpX = mouseX - i;
+                            this.touchUpY = mouseY - j;
+                            this.returningStackDestSlot = this.clickedSlot;
+                            this.returningStack = this.draggedStack;
+                            this.returningStackTime = Minecraft.getSystemTime();
+                        }
+                    }
+                    else if (!this.draggedStack.func_190926_b())
+                    {
+                        this.touchUpX = mouseX - i;
+                        this.touchUpY = mouseY - j;
+                        this.returningStackDestSlot = this.clickedSlot;
+                        this.returningStack = this.draggedStack;
+                        this.returningStackTime = Minecraft.getSystemTime();
+                    }
+
+                    this.draggedStack = ItemStack.field_190927_a;
+                    this.clickedSlot = null;
+                }
+            }
+            else if (this.dragSplitting && !this.dragSplittingSlots.isEmpty())
+            {
+                this.handleMouseClick((Slot)null, -999, Container.getQuickcraftMask(0, this.dragSplittingLimit), ClickType.QUICK_CRAFT);
+
+                for (Slot slot1 : this.dragSplittingSlots)
+                {
+                    this.handleMouseClick(slot1, slot1.slotNumber, Container.getQuickcraftMask(1, this.dragSplittingLimit), ClickType.QUICK_CRAFT);
+                }
+
+                this.handleMouseClick((Slot)null, -999, Container.getQuickcraftMask(2, this.dragSplittingLimit), ClickType.QUICK_CRAFT);
+            }
+            else if (!this.mc.player.inventory.getItemStack().func_190926_b())
+            {
+                if (state == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100)
+                {
+                    this.handleMouseClick(slot, k, state, ClickType.CLONE);
+                }
+                else
+                {
+                    boolean flag1 = k != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+
+                    if (flag1)
+                    {
+                        this.shiftClickedSlot = slot != null && slot.getHasStack() ? slot.getStack().copy() : ItemStack.field_190927_a;
+                    }
+
+                    this.handleMouseClick(slot, k, state, flag1 ? ClickType.QUICK_MOVE : ClickType.PICKUP);
+                }
+            }
+        }
+
+        if (this.mc.player.inventory.getItemStack().func_190926_b())
+        {
+            this.lastClickTime = 0L;
+        }
+
+        this.dragSplitting = false;
+    }
+
+    /**
+     * Returns whether the mouse is over the given slot.
+     */
+    private boolean isMouseOverSlot(Slot slotIn, int mouseX, int mouseY)
+    {
+        return this.isPointInRegion(slotIn.xDisplayPosition, slotIn.yDisplayPosition, 16, 16, mouseX, mouseY);
+    }
+
+    /**
+     * Test if the 2D point is in a rectangle (relative to the GUI). Args : rectX, rectY, rectWidth, rectHeight, pointX,
+     * pointY
+     */
+    protected boolean isPointInRegion(int rectX, int rectY, int rectWidth, int rectHeight, int pointX, int pointY)
+    {
+        int i = this.guiLeft;
+        int j = this.guiTop;
+        pointX = pointX - i;
+        pointY = pointY - j;
+        return pointX >= rectX - 1 && pointX < rectX + rectWidth + 1 && pointY >= rectY - 1 && pointY < rectY + rectHeight + 1;
+    }
+
+    /**
+     * Called when the mouse is clicked over a slot or outside the gui.
+     */
+    protected void handleMouseClick(Slot slotIn, int slotId, int mouseButton, ClickType type)
+    {
+        if (slotIn != null)
+        {
+            slotId = slotIn.slotNumber;
+        }
+
+        this.mc.playerController.windowClick(this.inventorySlots.windowId, slotId, mouseButton, type, this.mc.player);
+    }
+
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        if (keyCode == 1 || keyCode == this.mc.gameSettings.keyBindInventory.getKeyCode())
+        {
+            this.mc.player.closeScreen();
+        }
+
+        this.checkHotbarKeys(keyCode);
+
+        if (this.theSlot != null && this.theSlot.getHasStack())
+        {
+            if (keyCode == this.mc.gameSettings.keyBindPickBlock.getKeyCode())
+            {
+                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, 0, ClickType.CLONE);
+            }
+            else if (keyCode == this.mc.gameSettings.keyBindDrop.getKeyCode())
+            {
+                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, isCtrlKeyDown() ? 1 : 0, ClickType.THROW);
+            }
+        }
+    }
+
+    /**
+     * Checks whether a hotbar key (to swap the hovered item with an item in the hotbar) has been pressed. If so, it
+     * swaps the given items.
+     * Returns true if a hotbar key was pressed.
+     */
+    protected boolean checkHotbarKeys(int keyCode)
+    {
+        if (this.mc.player.inventory.getItemStack().func_190926_b() && this.theSlot != null)
+        {
+            for (int i = 0; i < 9; ++i)
+            {
+                if (keyCode == this.mc.gameSettings.keyBindsHotbar[i].getKeyCode())
+                {
+                    this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, i, ClickType.SWAP);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
+     */
+    public void onGuiClosed()
+    {
+        if (this.mc.player != null)
+        {
+            this.inventorySlots.onContainerClosed(this.mc.player);
+        }
+    }
+
+    /**
+     * Returns true if this GUI should pause the game when it is displayed in single-player
+     */
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
+
+    /**
+     * Called from the main game loop to update the screen.
+     */
+    public void updateScreen()
+    {
+        super.updateScreen();
+
+        if (!this.mc.player.isEntityAlive() || this.mc.player.isDead)
+        {
+            this.mc.player.closeScreen();
+        }
+    }
 }

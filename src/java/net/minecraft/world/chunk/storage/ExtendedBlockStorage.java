@@ -5,115 +5,207 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
+import optifine.Reflector;
 
-public class ExtendedBlockStorage {
-   private final int field_76684_a;
-   private int field_76682_b;
-   private int field_76683_c;
-   private final BlockStateContainer field_177488_d;
-   private NibbleArray field_76679_g;
-   private NibbleArray field_76685_h;
+public class ExtendedBlockStorage
+{
+    /**
+     * Contains the bottom-most Y block represented by this ExtendedBlockStorage. Typically a multiple of 16.
+     */
+    private final int yBase;
 
-   public ExtendedBlockStorage(int p_i1997_1_, boolean p_i1997_2_) {
-      this.field_76684_a = p_i1997_1_;
-      this.field_177488_d = new BlockStateContainer();
-      this.field_76679_g = new NibbleArray();
-      if (p_i1997_2_) {
-         this.field_76685_h = new NibbleArray();
-      }
+    /**
+     * A total count of the number of non-air blocks in this block storage's Chunk.
+     */
+    private int blockRefCount;
 
-   }
+    /**
+     * Contains the number of blocks in this block storage's parent chunk that require random ticking. Used to cull the
+     * Chunk from random tick updates for performance reasons.
+     */
+    private int tickRefCount;
+    private final BlockStateContainer data;
 
-   public IBlockState func_177485_a(int p_177485_1_, int p_177485_2_, int p_177485_3_) {
-      return this.field_177488_d.func_186016_a(p_177485_1_, p_177485_2_, p_177485_3_);
-   }
+    /** The NibbleArray containing a block of Block-light data. */
+    private NibbleArray blocklightArray;
 
-   public void func_177484_a(int p_177484_1_, int p_177484_2_, int p_177484_3_, IBlockState p_177484_4_) {
-      IBlockState iblockstate = this.func_177485_a(p_177484_1_, p_177484_2_, p_177484_3_);
-      Block block = iblockstate.func_177230_c();
-      Block block1 = p_177484_4_.func_177230_c();
-      if (block != Blocks.field_150350_a) {
-         --this.field_76682_b;
-         if (block.func_149653_t()) {
-            --this.field_76683_c;
-         }
-      }
+    /** The NibbleArray containing a block of Sky-light data. */
+    private NibbleArray skylightArray;
 
-      if (block1 != Blocks.field_150350_a) {
-         ++this.field_76682_b;
-         if (block1.func_149653_t()) {
-            ++this.field_76683_c;
-         }
-      }
+    public ExtendedBlockStorage(int y, boolean storeSkylight)
+    {
+        this.yBase = y;
+        this.data = new BlockStateContainer();
+        this.blocklightArray = new NibbleArray();
 
-      this.field_177488_d.func_186013_a(p_177484_1_, p_177484_2_, p_177484_3_, p_177484_4_);
-   }
+        if (storeSkylight)
+        {
+            this.skylightArray = new NibbleArray();
+        }
+    }
 
-   public boolean func_76663_a() {
-      return this.field_76682_b == 0;
-   }
+    public IBlockState get(int x, int y, int z)
+    {
+        return this.data.get(x, y, z);
+    }
 
-   public boolean func_76675_b() {
-      return this.field_76683_c > 0;
-   }
+    public void set(int x, int y, int z, IBlockState state)
+    {
+        if (Reflector.IExtendedBlockState.isInstance(state))
+        {
+            state = (IBlockState)Reflector.call(state, Reflector.IExtendedBlockState_getClean);
+        }
 
-   public int func_76662_d() {
-      return this.field_76684_a;
-   }
+        IBlockState iblockstate = this.get(x, y, z);
+        Block block = iblockstate.getBlock();
+        Block block1 = state.getBlock();
 
-   public void func_76657_c(int p_76657_1_, int p_76657_2_, int p_76657_3_, int p_76657_4_) {
-      this.field_76685_h.func_76581_a(p_76657_1_, p_76657_2_, p_76657_3_, p_76657_4_);
-   }
+        if (block != Blocks.AIR)
+        {
+            --this.blockRefCount;
 
-   public int func_76670_c(int p_76670_1_, int p_76670_2_, int p_76670_3_) {
-      return this.field_76685_h.func_76582_a(p_76670_1_, p_76670_2_, p_76670_3_);
-   }
-
-   public void func_76677_d(int p_76677_1_, int p_76677_2_, int p_76677_3_, int p_76677_4_) {
-      this.field_76679_g.func_76581_a(p_76677_1_, p_76677_2_, p_76677_3_, p_76677_4_);
-   }
-
-   public int func_76674_d(int p_76674_1_, int p_76674_2_, int p_76674_3_) {
-      return this.field_76679_g.func_76582_a(p_76674_1_, p_76674_2_, p_76674_3_);
-   }
-
-   public void func_76672_e() {
-      this.field_76682_b = 0;
-      this.field_76683_c = 0;
-
-      for(int i = 0; i < 16; ++i) {
-         for(int j = 0; j < 16; ++j) {
-            for(int k = 0; k < 16; ++k) {
-               Block block = this.func_177485_a(i, j, k).func_177230_c();
-               if (block != Blocks.field_150350_a) {
-                  ++this.field_76682_b;
-                  if (block.func_149653_t()) {
-                     ++this.field_76683_c;
-                  }
-               }
+            if (block.getTickRandomly())
+            {
+                --this.tickRefCount;
             }
-         }
-      }
+        }
 
-   }
+        if (block1 != Blocks.AIR)
+        {
+            ++this.blockRefCount;
 
-   public BlockStateContainer func_186049_g() {
-      return this.field_177488_d;
-   }
+            if (block1.getTickRandomly())
+            {
+                ++this.tickRefCount;
+            }
+        }
 
-   public NibbleArray func_76661_k() {
-      return this.field_76679_g;
-   }
+        this.data.set(x, y, z, state);
+    }
 
-   public NibbleArray func_76671_l() {
-      return this.field_76685_h;
-   }
+    /**
+     * Returns whether or not this block storage's Chunk is fully empty, based on its internal reference count.
+     */
+    public boolean isEmpty()
+    {
+        return this.blockRefCount == 0;
+    }
 
-   public void func_76659_c(NibbleArray p_76659_1_) {
-      this.field_76679_g = p_76659_1_;
-   }
+    /**
+     * Returns whether or not this block storage's Chunk will require random ticking, used to avoid looping through
+     * random block ticks when there are no blocks that would randomly tick.
+     */
+    public boolean getNeedsRandomTick()
+    {
+        return this.tickRefCount > 0;
+    }
 
-   public void func_76666_d(NibbleArray p_76666_1_) {
-      this.field_76685_h = p_76666_1_;
-   }
+    /**
+     * Returns the Y location of this ExtendedBlockStorage.
+     */
+    public int getYLocation()
+    {
+        return this.yBase;
+    }
+
+    /**
+     * Sets the saved Sky-light value in the extended block storage structure.
+     */
+    public void setExtSkylightValue(int x, int y, int z, int value)
+    {
+        this.skylightArray.set(x, y, z, value);
+    }
+
+    /**
+     * Gets the saved Sky-light value in the extended block storage structure.
+     */
+    public int getExtSkylightValue(int x, int y, int z)
+    {
+        return this.skylightArray.get(x, y, z);
+    }
+
+    /**
+     * Sets the saved Block-light value in the extended block storage structure.
+     */
+    public void setExtBlocklightValue(int x, int y, int z, int value)
+    {
+        this.blocklightArray.set(x, y, z, value);
+    }
+
+    /**
+     * Gets the saved Block-light value in the extended block storage structure.
+     */
+    public int getExtBlocklightValue(int x, int y, int z)
+    {
+        return this.blocklightArray.get(x, y, z);
+    }
+
+    public void removeInvalidBlocks()
+    {
+        IBlockState iblockstate = Blocks.AIR.getDefaultState();
+        int i = 0;
+        int j = 0;
+
+        for (int k = 0; k < 16; ++k)
+        {
+            for (int l = 0; l < 16; ++l)
+            {
+                for (int i1 = 0; i1 < 16; ++i1)
+                {
+                    IBlockState iblockstate1 = this.data.get(i1, k, l);
+
+                    if (iblockstate1 != iblockstate)
+                    {
+                        ++i;
+                        Block block = iblockstate1.getBlock();
+
+                        if (block.getTickRandomly())
+                        {
+                            ++j;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.blockRefCount = i;
+        this.tickRefCount = j;
+    }
+
+    public BlockStateContainer getData()
+    {
+        return this.data;
+    }
+
+    /**
+     * Returns the NibbleArray instance containing Block-light data.
+     */
+    public NibbleArray getBlocklightArray()
+    {
+        return this.blocklightArray;
+    }
+
+    /**
+     * Returns the NibbleArray instance containing Sky-light data.
+     */
+    public NibbleArray getSkylightArray()
+    {
+        return this.skylightArray;
+    }
+
+    /**
+     * Sets the NibbleArray instance used for Block-light values in this particular storage block.
+     */
+    public void setBlocklightArray(NibbleArray newBlocklightArray)
+    {
+        this.blocklightArray = newBlocklightArray;
+    }
+
+    /**
+     * Sets the NibbleArray instance used for Sky-light values in this particular storage block.
+     */
+    public void setSkylightArray(NibbleArray newSkylightArray)
+    {
+        this.skylightArray = newSkylightArray;
+    }
 }

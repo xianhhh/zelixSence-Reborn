@@ -6,37 +6,54 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketCooldown implements Packet<INetHandlerPlayClient> {
-   private Item field_186923_a;
-   private int field_186924_b;
+public class SPacketCooldown implements Packet<INetHandlerPlayClient>
+{
+    private Item item;
+    private int ticks;
 
-   public SPacketCooldown() {
-   }
+    public SPacketCooldown()
+    {
+    }
 
-   public SPacketCooldown(Item p_i46950_1_, int p_i46950_2_) {
-      this.field_186923_a = p_i46950_1_;
-      this.field_186924_b = p_i46950_2_;
-   }
+    public SPacketCooldown(Item itemIn, int ticksIn)
+    {
+        this.item = itemIn;
+        this.ticks = ticksIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_186923_a = Item.func_150899_d(p_148837_1_.func_150792_a());
-      this.field_186924_b = p_148837_1_.func_150792_a();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.item = Item.getItemById(buf.readVarIntFromBuffer());
+        this.ticks = buf.readVarIntFromBuffer();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(Item.func_150891_b(this.field_186923_a));
-      p_148840_1_.func_150787_b(this.field_186924_b);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(Item.getIdFromItem(this.item));
+        buf.writeVarIntToBuffer(this.ticks);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_184324_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleCooldown(this);
+    }
 
-   public Item func_186920_a() {
-      return this.field_186923_a;
-   }
+    public Item getItem()
+    {
+        return this.item;
+    }
 
-   public int func_186922_b() {
-      return this.field_186924_b;
-   }
+    public int getTicks()
+    {
+        return this.ticks;
+    }
 }

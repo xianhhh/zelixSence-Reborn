@@ -3,14 +3,18 @@ package net.minecraft.block.properties;
 import com.google.common.base.Optional;
 import java.util.Collection;
 
-public interface IProperty<T extends Comparable<T>> {
-   String func_177701_a();
+public interface IProperty<T extends Comparable<T>>
+{
+    String getName();
 
-   Collection<T> func_177700_c();
+    Collection<T> getAllowedValues();
 
-   Class<T> func_177699_b();
+    Class<T> getValueClass();
 
-   Optional<T> func_185929_b(String var1);
+    Optional<T> parseValue(String value);
 
-   String func_177702_a(T var1);
+    /**
+     * Get the name for the given value.
+     */
+    String getName(T value);
 }

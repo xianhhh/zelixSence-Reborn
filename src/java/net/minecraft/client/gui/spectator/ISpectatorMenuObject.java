@@ -2,12 +2,13 @@ package net.minecraft.client.gui.spectator;
 
 import net.minecraft.util.text.ITextComponent;
 
-public interface ISpectatorMenuObject {
-   void func_178661_a(SpectatorMenu var1);
+public interface ISpectatorMenuObject
+{
+    void selectItem(SpectatorMenu menu);
 
-   ITextComponent func_178664_z_();
+    ITextComponent getSpectatorName();
 
-   void func_178663_a(float var1, int var2);
+    void renderIcon(float p_178663_1_, int alpha);
 
-   boolean func_178662_A_();
+    boolean isEnabled();
 }

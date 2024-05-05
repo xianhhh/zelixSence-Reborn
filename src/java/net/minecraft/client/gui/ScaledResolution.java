@@ -3,54 +3,65 @@ package net.minecraft.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;
 
-public class ScaledResolution {
-   private final double field_78332_c;
-   private final double field_78329_d;
-   private int field_78333_a;
-   private int field_78331_b;
-   private int field_78330_e;
+public class ScaledResolution
+{
+    private final double scaledWidthD;
+    private final double scaledHeightD;
+    private int scaledWidth;
+    private int scaledHeight;
+    private int scaleFactor;
 
-   public ScaledResolution(Minecraft p_i46445_1_) {
-      this.field_78333_a = p_i46445_1_.field_71443_c;
-      this.field_78331_b = p_i46445_1_.field_71440_d;
-      this.field_78330_e = 1;
-      boolean flag = p_i46445_1_.func_152349_b();
-      int i = p_i46445_1_.field_71474_y.field_74335_Z;
-      if (i == 0) {
-         i = 1000;
-      }
+    public ScaledResolution(Minecraft minecraftClient)
+    {
+        this.scaledWidth = minecraftClient.displayWidth;
+        this.scaledHeight = minecraftClient.displayHeight;
+        this.scaleFactor = 1;
+        boolean flag = minecraftClient.isUnicode();
+        int i = minecraftClient.gameSettings.guiScale;
 
-      while(this.field_78330_e < i && this.field_78333_a / (this.field_78330_e + 1) >= 320 && this.field_78331_b / (this.field_78330_e + 1) >= 240) {
-         ++this.field_78330_e;
-      }
+        if (i == 0)
+        {
+            i = 1000;
+        }
 
-      if (flag && this.field_78330_e % 2 != 0 && this.field_78330_e != 1) {
-         --this.field_78330_e;
-      }
+        while (this.scaleFactor < i && this.scaledWidth / (this.scaleFactor + 1) >= 320 && this.scaledHeight / (this.scaleFactor + 1) >= 240)
+        {
+            ++this.scaleFactor;
+        }
 
-      this.field_78332_c = (double)this.field_78333_a / (double)this.field_78330_e;
-      this.field_78329_d = (double)this.field_78331_b / (double)this.field_78330_e;
-      this.field_78333_a = MathHelper.func_76143_f(this.field_78332_c);
-      this.field_78331_b = MathHelper.func_76143_f(this.field_78329_d);
-   }
+        if (flag && this.scaleFactor % 2 != 0 && this.scaleFactor != 1)
+        {
+            --this.scaleFactor;
+        }
 
-   public int func_78326_a() {
-      return this.field_78333_a;
-   }
+        this.scaledWidthD = (double)this.scaledWidth / (double)this.scaleFactor;
+        this.scaledHeightD = (double)this.scaledHeight / (double)this.scaleFactor;
+        this.scaledWidth = MathHelper.ceil(this.scaledWidthD);
+        this.scaledHeight = MathHelper.ceil(this.scaledHeightD);
+    }
 
-   public int func_78328_b() {
-      return this.field_78331_b;
-   }
+    public int getScaledWidth()
+    {
+        return this.scaledWidth;
+    }
 
-   public double func_78327_c() {
-      return this.field_78332_c;
-   }
+    public int getScaledHeight()
+    {
+        return this.scaledHeight;
+    }
 
-   public double func_78324_d() {
-      return this.field_78329_d;
-   }
+    public double getScaledWidth_double()
+    {
+        return this.scaledWidthD;
+    }
 
-   public int func_78325_e() {
-      return this.field_78330_e;
-   }
+    public double getScaledHeight_double()
+    {
+        return this.scaledHeightD;
+    }
+
+    public int getScaleFactor()
+    {
+        return this.scaleFactor;
+    }
 }

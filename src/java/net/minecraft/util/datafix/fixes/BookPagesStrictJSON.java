@@ -10,64 +10,92 @@ import net.minecraft.util.datafix.IFixableData;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 
-public class BookPagesStrictJSON implements IFixableData {
-   public int func_188216_a() {
-      return 165;
-   }
+public class BookPagesStrictJSON implements IFixableData
+{
+    public int getFixVersion()
+    {
+        return 165;
+    }
 
-   public NBTTagCompound func_188217_a(NBTTagCompound p_188217_1_) {
-      if ("minecraft:written_book".equals(p_188217_1_.func_74779_i("id"))) {
-         NBTTagCompound nbttagcompound = p_188217_1_.func_74775_l("tag");
-         if (nbttagcompound.func_150297_b("pages", 9)) {
-            NBTTagList nbttaglist = nbttagcompound.func_150295_c("pages", 8);
+    public NBTTagCompound fixTagCompound(NBTTagCompound compound)
+    {
+        if ("minecraft:written_book".equals(compound.getString("id")))
+        {
+            NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
 
-            for(int i = 0; i < nbttaglist.func_74745_c(); ++i) {
-               String s = nbttaglist.func_150307_f(i);
-               ITextComponent itextcomponent = null;
-               if (!"null".equals(s) && !StringUtils.func_151246_b(s)) {
-                  if (s.charAt(0) == '"' && s.charAt(s.length() - 1) == '"' || s.charAt(0) == '{' && s.charAt(s.length() - 1) == '}') {
-                     try {
-                        itextcomponent = (ITextComponent)JsonUtils.func_188176_a(SignStrictJSON.field_188225_a, s, ITextComponent.class, true);
-                        if (itextcomponent == null) {
-                           itextcomponent = new TextComponentString("");
+            if (nbttagcompound.hasKey("pages", 9))
+            {
+                NBTTagList nbttaglist = nbttagcompound.getTagList("pages", 8);
+
+                for (int i = 0; i < nbttaglist.tagCount(); ++i)
+                {
+                    String s = nbttaglist.getStringTagAt(i);
+                    ITextComponent itextcomponent = null;
+
+                    if (!"null".equals(s) && !StringUtils.isNullOrEmpty(s))
+                    {
+                        if (s.charAt(0) == '"' && s.charAt(s.length() - 1) == '"' || s.charAt(0) == '{' && s.charAt(s.length() - 1) == '}')
+                        {
+                            try
+                            {
+                                itextcomponent = (ITextComponent)JsonUtils.gsonDeserialize(SignStrictJSON.GSON_INSTANCE, s, ITextComponent.class, true);
+
+                                if (itextcomponent == null)
+                                {
+                                    itextcomponent = new TextComponentString("");
+                                }
+                            }
+                            catch (JsonParseException var10)
+                            {
+                                ;
+                            }
+
+                            if (itextcomponent == null)
+                            {
+                                try
+                                {
+                                    itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+                                }
+                                catch (JsonParseException var9)
+                                {
+                                    ;
+                                }
+                            }
+
+                            if (itextcomponent == null)
+                            {
+                                try
+                                {
+                                    itextcomponent = ITextComponent.Serializer.fromJsonLenient(s);
+                                }
+                                catch (JsonParseException var8)
+                                {
+                                    ;
+                                }
+                            }
+
+                            if (itextcomponent == null)
+                            {
+                                itextcomponent = new TextComponentString(s);
+                            }
                         }
-                     } catch (JsonParseException var10) {
-                        ;
-                     }
-
-                     if (itextcomponent == null) {
-                        try {
-                           itextcomponent = ITextComponent.Serializer.func_150699_a(s);
-                        } catch (JsonParseException var9) {
-                           ;
+                        else
+                        {
+                            itextcomponent = new TextComponentString(s);
                         }
-                     }
+                    }
+                    else
+                    {
+                        itextcomponent = new TextComponentString("");
+                    }
 
-                     if (itextcomponent == null) {
-                        try {
-                           itextcomponent = ITextComponent.Serializer.func_186877_b(s);
-                        } catch (JsonParseException var8) {
-                           ;
-                        }
-                     }
+                    nbttaglist.set(i, new NBTTagString(ITextComponent.Serializer.componentToJson(itextcomponent)));
+                }
 
-                     if (itextcomponent == null) {
-                        itextcomponent = new TextComponentString(s);
-                     }
-                  } else {
-                     itextcomponent = new TextComponentString(s);
-                  }
-               } else {
-                  itextcomponent = new TextComponentString("");
-               }
-
-               nbttaglist.func_150304_a(i, new NBTTagString(ITextComponent.Serializer.func_150696_a(itextcomponent)));
+                nbttagcompound.setTag("pages", nbttaglist);
             }
+        }
 
-            nbttagcompound.func_74782_a("pages", nbttaglist);
-         }
-      }
-
-      return p_188217_1_;
-   }
+        return compound;
+    }
 }

@@ -11,74 +11,117 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.Vec3d;
 
-public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
-   private final Predicate<Entity> field_179509_a;
-   protected EntityCreature field_75380_a;
-   private final double field_75378_b;
-   private final double field_75379_c;
-   protected T field_75376_d;
-   private final float field_179508_f;
-   private Path field_75374_f;
-   private final PathNavigate field_75375_g;
-   private final Class<T> field_181064_i;
-   private final Predicate<? super T> field_179510_i;
+public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase
+{
+    private final Predicate<Entity> canBeSeenSelector;
 
-   public EntityAIAvoidEntity(EntityCreature p_i46404_1_, Class<T> p_i46404_2_, float p_i46404_3_, double p_i46404_4_, double p_i46404_6_) {
-      this(p_i46404_1_, p_i46404_2_, Predicates.alwaysTrue(), p_i46404_3_, p_i46404_4_, p_i46404_6_);
-   }
+    /** The entity we are attached to */
+    protected EntityCreature theEntity;
+    private final double farSpeed;
+    private final double nearSpeed;
+    protected T closestLivingEntity;
+    private final float avoidDistance;
 
-   public EntityAIAvoidEntity(EntityCreature p_i46405_1_, Class<T> p_i46405_2_, Predicate<? super T> p_i46405_3_, float p_i46405_4_, double p_i46405_5_, double p_i46405_7_) {
-      this.field_179509_a = new Predicate<Entity>() {
-         public boolean apply(@Nullable Entity p_apply_1_) {
-            return p_apply_1_.func_70089_S() && EntityAIAvoidEntity.this.field_75380_a.func_70635_at().func_75522_a(p_apply_1_) && !EntityAIAvoidEntity.this.field_75380_a.func_184191_r(p_apply_1_);
-         }
-      };
-      this.field_75380_a = p_i46405_1_;
-      this.field_181064_i = p_i46405_2_;
-      this.field_179510_i = p_i46405_3_;
-      this.field_179508_f = p_i46405_4_;
-      this.field_75378_b = p_i46405_5_;
-      this.field_75379_c = p_i46405_7_;
-      this.field_75375_g = p_i46405_1_.func_70661_as();
-      this.func_75248_a(1);
-   }
+    /** The PathEntity of our entity */
+    private Path entityPathEntity;
 
-   public boolean func_75250_a() {
-      List<T> list = this.field_75380_a.field_70170_p.<T>func_175647_a(this.field_181064_i, this.field_75380_a.func_174813_aQ().func_72314_b((double)this.field_179508_f, 3.0D, (double)this.field_179508_f), Predicates.and(EntitySelectors.field_188444_d, this.field_179509_a, this.field_179510_i));
-      if (list.isEmpty()) {
-         return false;
-      } else {
-         this.field_75376_d = list.get(0);
-         Vec3d vec3d = RandomPositionGenerator.func_75461_b(this.field_75380_a, 16, 7, new Vec3d(this.field_75376_d.field_70165_t, this.field_75376_d.field_70163_u, this.field_75376_d.field_70161_v));
-         if (vec3d == null) {
+    /** The PathNavigate of our entity */
+    private final PathNavigate entityPathNavigate;
+    private final Class<T> classToAvoid;
+    private final Predicate <? super T > avoidTargetSelector;
+
+    public EntityAIAvoidEntity(EntityCreature theEntityIn, Class<T> classToAvoidIn, float avoidDistanceIn, double farSpeedIn, double nearSpeedIn)
+    {
+        this(theEntityIn, classToAvoidIn, Predicates.alwaysTrue(), avoidDistanceIn, farSpeedIn, nearSpeedIn);
+    }
+
+    public EntityAIAvoidEntity(EntityCreature theEntityIn, Class<T> classToAvoidIn, Predicate <? super T > avoidTargetSelectorIn, float avoidDistanceIn, double farSpeedIn, double nearSpeedIn)
+    {
+        this.canBeSeenSelector = new Predicate<Entity>()
+        {
+            public boolean apply(@Nullable Entity p_apply_1_)
+            {
+                return p_apply_1_.isEntityAlive() && EntityAIAvoidEntity.this.theEntity.getEntitySenses().canSee(p_apply_1_) && !EntityAIAvoidEntity.this.theEntity.isOnSameTeam(p_apply_1_);
+            }
+        };
+        this.theEntity = theEntityIn;
+        this.classToAvoid = classToAvoidIn;
+        this.avoidTargetSelector = avoidTargetSelectorIn;
+        this.avoidDistance = avoidDistanceIn;
+        this.farSpeed = farSpeedIn;
+        this.nearSpeed = nearSpeedIn;
+        this.entityPathNavigate = theEntityIn.getNavigator();
+        this.setMutexBits(1);
+    }
+
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        List<T> list = this.theEntity.world.<T>getEntitiesWithinAABB(this.classToAvoid, this.theEntity.getEntityBoundingBox().expand((double)this.avoidDistance, 3.0D, (double)this.avoidDistance), Predicates.and(EntitySelectors.CAN_AI_TARGET, this.canBeSeenSelector, this.avoidTargetSelector));
+
+        if (list.isEmpty())
+        {
             return false;
-         } else if (this.field_75376_d.func_70092_e(vec3d.field_72450_a, vec3d.field_72448_b, vec3d.field_72449_c) < this.field_75376_d.func_70068_e(this.field_75380_a)) {
-            return false;
-         } else {
-            this.field_75374_f = this.field_75375_g.func_75488_a(vec3d.field_72450_a, vec3d.field_72448_b, vec3d.field_72449_c);
-            return this.field_75374_f != null;
-         }
-      }
-   }
+        }
+        else
+        {
+            this.closestLivingEntity = list.get(0);
+            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.theEntity, 16, 7, new Vec3d(this.closestLivingEntity.posX, this.closestLivingEntity.posY, this.closestLivingEntity.posZ));
 
-   public boolean func_75253_b() {
-      return !this.field_75375_g.func_75500_f();
-   }
+            if (vec3d == null)
+            {
+                return false;
+            }
+            else if (this.closestLivingEntity.getDistanceSq(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord) < this.closestLivingEntity.getDistanceSqToEntity(this.theEntity))
+            {
+                return false;
+            }
+            else
+            {
+                this.entityPathEntity = this.entityPathNavigate.getPathToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
+                return this.entityPathEntity != null;
+            }
+        }
+    }
 
-   public void func_75249_e() {
-      this.field_75375_g.func_75484_a(this.field_75374_f, this.field_75378_b);
-   }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        return !this.entityPathNavigate.noPath();
+    }
 
-   public void func_75251_c() {
-      this.field_75376_d = null;
-   }
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
+    public void startExecuting()
+    {
+        this.entityPathNavigate.setPath(this.entityPathEntity, this.farSpeed);
+    }
 
-   public void func_75246_d() {
-      if (this.field_75380_a.func_70068_e(this.field_75376_d) < 49.0D) {
-         this.field_75380_a.func_70661_as().func_75489_a(this.field_75379_c);
-      } else {
-         this.field_75380_a.func_70661_as().func_75489_a(this.field_75378_b);
-      }
+    /**
+     * Resets the task
+     */
+    public void resetTask()
+    {
+        this.closestLivingEntity = null;
+    }
 
-   }
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        if (this.theEntity.getDistanceSqToEntity(this.closestLivingEntity) < 49.0D)
+        {
+            this.theEntity.getNavigator().setSpeed(this.nearSpeed);
+        }
+        else
+        {
+            this.theEntity.getNavigator().setSpeed(this.farSpeed);
+        }
+    }
 }

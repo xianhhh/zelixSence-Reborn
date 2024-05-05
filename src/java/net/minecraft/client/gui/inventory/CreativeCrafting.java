@@ -7,23 +7,41 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-public class CreativeCrafting implements IContainerListener {
-   private final Minecraft field_146109_a;
+public class CreativeCrafting implements IContainerListener
+{
+    private final Minecraft mc;
 
-   public CreativeCrafting(Minecraft p_i46314_1_) {
-      this.field_146109_a = p_i46314_1_;
-   }
+    public CreativeCrafting(Minecraft mc)
+    {
+        this.mc = mc;
+    }
 
-   public void func_71110_a(Container p_71110_1_, NonNullList<ItemStack> p_71110_2_) {
-   }
+    /**
+     * update the crafting window inventory with the items in the list
+     */
+    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
+    {
+    }
 
-   public void func_71111_a(Container p_71111_1_, int p_71111_2_, ItemStack p_71111_3_) {
-      this.field_146109_a.field_71442_b.func_78761_a(p_71111_3_, p_71111_2_);
-   }
+    /**
+     * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
+     * contents of that slot.
+     */
+    public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack)
+    {
+        this.mc.playerController.sendSlotPacket(stack, slotInd);
+    }
 
-   public void func_71112_a(Container p_71112_1_, int p_71112_2_, int p_71112_3_) {
-   }
+    /**
+     * Sends two ints to the client-side Container. Used for furnace burning time, smelting progress, brewing progress,
+     * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
+     * value. Both are truncated to shorts in non-local SMP.
+     */
+    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
+    {
+    }
 
-   public void func_175173_a(Container p_175173_1_, IInventory p_175173_2_) {
-   }
+    public void sendAllWindowProperties(Container containerIn, IInventory inventory)
+    {
+    }
 }

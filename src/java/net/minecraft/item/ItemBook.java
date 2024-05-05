@@ -1,11 +1,20 @@
 package net.minecraft.item;
 
-public class ItemBook extends Item {
-   public boolean func_77616_k(ItemStack p_77616_1_) {
-      return p_77616_1_.func_190916_E() == 1;
-   }
+public class ItemBook extends Item
+{
+    /**
+     * Checks isDamagable and if it cannot be stacked
+     */
+    public boolean isItemTool(ItemStack stack)
+    {
+        return stack.func_190916_E() == 1;
+    }
 
-   public int func_77619_b() {
-      return 1;
-   }
+    /**
+     * Return the enchantability factor of the item, most of the time is based on material.
+     */
+    public int getItemEnchantability()
+    {
+        return 1;
+    }
 }

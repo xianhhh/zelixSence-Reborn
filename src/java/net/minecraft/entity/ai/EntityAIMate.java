@@ -11,105 +11,151 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public class EntityAIMate extends EntityAIBase {
-   private final EntityAnimal field_75390_d;
-   private final Class<? extends EntityAnimal> field_190857_e;
-   World field_75394_a;
-   private EntityAnimal field_75391_e;
-   int field_75392_b;
-   double field_75393_c;
+public class EntityAIMate extends EntityAIBase
+{
+    private final EntityAnimal theAnimal;
+    private final Class <? extends EntityAnimal > field_190857_e;
+    World theWorld;
+    private EntityAnimal targetMate;
 
-   public EntityAIMate(EntityAnimal p_i1619_1_, double p_i1619_2_) {
-      this(p_i1619_1_, p_i1619_2_, p_i1619_1_.getClass());
-   }
+    /**
+     * Delay preventing a baby from spawning immediately when two mate-able animals find each other.
+     */
+    int spawnBabyDelay;
 
-   public EntityAIMate(EntityAnimal p_i47306_1_, double p_i47306_2_, Class<? extends EntityAnimal> p_i47306_4_) {
-      this.field_75390_d = p_i47306_1_;
-      this.field_75394_a = p_i47306_1_.field_70170_p;
-      this.field_190857_e = p_i47306_4_;
-      this.field_75393_c = p_i47306_2_;
-      this.func_75248_a(3);
-   }
+    /** The speed the creature moves at during mating behavior. */
+    double moveSpeed;
 
-   public boolean func_75250_a() {
-      if (!this.field_75390_d.func_70880_s()) {
-         return false;
-      } else {
-         this.field_75391_e = this.func_75389_f();
-         return this.field_75391_e != null;
-      }
-   }
+    public EntityAIMate(EntityAnimal animal, double speedIn)
+    {
+        this(animal, speedIn, animal.getClass());
+    }
 
-   public boolean func_75253_b() {
-      return this.field_75391_e.func_70089_S() && this.field_75391_e.func_70880_s() && this.field_75392_b < 60;
-   }
+    public EntityAIMate(EntityAnimal p_i47306_1_, double p_i47306_2_, Class <? extends EntityAnimal > p_i47306_4_)
+    {
+        this.theAnimal = p_i47306_1_;
+        this.theWorld = p_i47306_1_.world;
+        this.field_190857_e = p_i47306_4_;
+        this.moveSpeed = p_i47306_2_;
+        this.setMutexBits(3);
+    }
 
-   public void func_75251_c() {
-      this.field_75391_e = null;
-      this.field_75392_b = 0;
-   }
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        if (!this.theAnimal.isInLove())
+        {
+            return false;
+        }
+        else
+        {
+            this.targetMate = this.getNearbyMate();
+            return this.targetMate != null;
+        }
+    }
 
-   public void func_75246_d() {
-      this.field_75390_d.func_70671_ap().func_75651_a(this.field_75391_e, 10.0F, (float)this.field_75390_d.func_70646_bf());
-      this.field_75390_d.func_70661_as().func_75497_a(this.field_75391_e, this.field_75393_c);
-      ++this.field_75392_b;
-      if (this.field_75392_b >= 60 && this.field_75390_d.func_70068_e(this.field_75391_e) < 9.0D) {
-         this.func_75388_i();
-      }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        return this.targetMate.isEntityAlive() && this.targetMate.isInLove() && this.spawnBabyDelay < 60;
+    }
 
-   }
+    /**
+     * Resets the task
+     */
+    public void resetTask()
+    {
+        this.targetMate = null;
+        this.spawnBabyDelay = 0;
+    }
 
-   private EntityAnimal func_75389_f() {
-      List<EntityAnimal> list = this.field_75394_a.<EntityAnimal>func_72872_a(this.field_190857_e, this.field_75390_d.func_174813_aQ().func_186662_g(8.0D));
-      double d0 = Double.MAX_VALUE;
-      EntityAnimal entityanimal = null;
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        this.theAnimal.getLookHelper().setLookPositionWithEntity(this.targetMate, 10.0F, (float)this.theAnimal.getVerticalFaceSpeed());
+        this.theAnimal.getNavigator().tryMoveToEntityLiving(this.targetMate, this.moveSpeed);
+        ++this.spawnBabyDelay;
 
-      for(EntityAnimal entityanimal1 : list) {
-         if (this.field_75390_d.func_70878_b(entityanimal1) && this.field_75390_d.func_70068_e(entityanimal1) < d0) {
-            entityanimal = entityanimal1;
-            d0 = this.field_75390_d.func_70068_e(entityanimal1);
-         }
-      }
+        if (this.spawnBabyDelay >= 60 && this.theAnimal.getDistanceSqToEntity(this.targetMate) < 9.0D)
+        {
+            this.spawnBaby();
+        }
+    }
 
-      return entityanimal;
-   }
+    /**
+     * Loops through nearby animals and finds another animal of the same type that can be mated with. Returns the first
+     * valid mate found.
+     */
+    private EntityAnimal getNearbyMate()
+    {
+        List<EntityAnimal> list = this.theWorld.<EntityAnimal>getEntitiesWithinAABB(this.field_190857_e, this.theAnimal.getEntityBoundingBox().expandXyz(8.0D));
+        double d0 = Double.MAX_VALUE;
+        EntityAnimal entityanimal = null;
 
-   private void func_75388_i() {
-      EntityAgeable entityageable = this.field_75390_d.func_90011_a(this.field_75391_e);
-      if (entityageable != null) {
-         EntityPlayerMP entityplayermp = this.field_75390_d.func_191993_do();
-         if (entityplayermp == null && this.field_75391_e.func_191993_do() != null) {
-            entityplayermp = this.field_75391_e.func_191993_do();
-         }
+        for (EntityAnimal entityanimal1 : list)
+        {
+            if (this.theAnimal.canMateWith(entityanimal1) && this.theAnimal.getDistanceSqToEntity(entityanimal1) < d0)
+            {
+                entityanimal = entityanimal1;
+                d0 = this.theAnimal.getDistanceSqToEntity(entityanimal1);
+            }
+        }
 
-         if (entityplayermp != null) {
-            entityplayermp.func_71029_a(StatList.field_151186_x);
-            CriteriaTriggers.field_192134_n.func_192168_a(entityplayermp, this.field_75390_d, this.field_75391_e, entityageable);
-         }
+        return entityanimal;
+    }
 
-         this.field_75390_d.func_70873_a(6000);
-         this.field_75391_e.func_70873_a(6000);
-         this.field_75390_d.func_70875_t();
-         this.field_75391_e.func_70875_t();
-         entityageable.func_70873_a(-24000);
-         entityageable.func_70012_b(this.field_75390_d.field_70165_t, this.field_75390_d.field_70163_u, this.field_75390_d.field_70161_v, 0.0F, 0.0F);
-         this.field_75394_a.func_72838_d(entityageable);
-         Random random = this.field_75390_d.func_70681_au();
+    /**
+     * Spawns a baby animal of the same type.
+     */
+    private void spawnBaby()
+    {
+        EntityAgeable entityageable = this.theAnimal.createChild(this.targetMate);
 
-         for(int i = 0; i < 7; ++i) {
-            double d0 = random.nextGaussian() * 0.02D;
-            double d1 = random.nextGaussian() * 0.02D;
-            double d2 = random.nextGaussian() * 0.02D;
-            double d3 = random.nextDouble() * (double)this.field_75390_d.field_70130_N * 2.0D - (double)this.field_75390_d.field_70130_N;
-            double d4 = 0.5D + random.nextDouble() * (double)this.field_75390_d.field_70131_O;
-            double d5 = random.nextDouble() * (double)this.field_75390_d.field_70130_N * 2.0D - (double)this.field_75390_d.field_70130_N;
-            this.field_75394_a.func_175688_a(EnumParticleTypes.HEART, this.field_75390_d.field_70165_t + d3, this.field_75390_d.field_70163_u + d4, this.field_75390_d.field_70161_v + d5, d0, d1, d2);
-         }
+        if (entityageable != null)
+        {
+            EntityPlayerMP entityplayermp = this.theAnimal.func_191993_do();
 
-         if (this.field_75394_a.func_82736_K().func_82766_b("doMobLoot")) {
-            this.field_75394_a.func_72838_d(new EntityXPOrb(this.field_75394_a, this.field_75390_d.field_70165_t, this.field_75390_d.field_70163_u, this.field_75390_d.field_70161_v, random.nextInt(7) + 1));
-         }
+            if (entityplayermp == null && this.targetMate.func_191993_do() != null)
+            {
+                entityplayermp = this.targetMate.func_191993_do();
+            }
 
-      }
-   }
+            if (entityplayermp != null)
+            {
+                entityplayermp.addStat(StatList.ANIMALS_BRED);
+                CriteriaTriggers.field_192134_n.func_192168_a(entityplayermp, this.theAnimal, this.targetMate, entityageable);
+            }
+
+            this.theAnimal.setGrowingAge(6000);
+            this.targetMate.setGrowingAge(6000);
+            this.theAnimal.resetInLove();
+            this.targetMate.resetInLove();
+            entityageable.setGrowingAge(-24000);
+            entityageable.setLocationAndAngles(this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, 0.0F, 0.0F);
+            this.theWorld.spawnEntityInWorld(entityageable);
+            Random random = this.theAnimal.getRNG();
+
+            for (int i = 0; i < 7; ++i)
+            {
+                double d0 = random.nextGaussian() * 0.02D;
+                double d1 = random.nextGaussian() * 0.02D;
+                double d2 = random.nextGaussian() * 0.02D;
+                double d3 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+                double d4 = 0.5D + random.nextDouble() * (double)this.theAnimal.height;
+                double d5 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+                this.theWorld.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + d3, this.theAnimal.posY + d4, this.theAnimal.posZ + d5, d0, d1, d2);
+            }
+
+            if (this.theWorld.getGameRules().getBoolean("doMobLoot"))
+            {
+                this.theWorld.spawnEntityInWorld(new EntityXPOrb(this.theWorld, this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, random.nextInt(7) + 1));
+            }
+        }
+    }
 }
