@@ -6,85 +6,66 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityEnderChest;
 
-public class InventoryEnderChest extends InventoryBasic
-{
-    private TileEntityEnderChest associatedChest;
+public class InventoryEnderChest extends InventoryBasic {
+   private TileEntityEnderChest field_70488_a;
 
-    public InventoryEnderChest()
-    {
-        super("container.enderchest", false, 27);
-    }
+   public InventoryEnderChest() {
+      super("container.enderchest", false, 27);
+   }
 
-    public void setChestTileEntity(TileEntityEnderChest chestTileEntity)
-    {
-        this.associatedChest = chestTileEntity;
-    }
+   public void func_146031_a(TileEntityEnderChest p_146031_1_) {
+      this.field_70488_a = p_146031_1_;
+   }
 
-    public void loadInventoryFromNBT(NBTTagList p_70486_1_)
-    {
-        for (int i = 0; i < this.getSizeInventory(); ++i)
-        {
-            this.setInventorySlotContents(i, ItemStack.field_190927_a);
-        }
+   public void func_70486_a(NBTTagList p_70486_1_) {
+      for(int i = 0; i < this.func_70302_i_(); ++i) {
+         this.func_70299_a(i, ItemStack.field_190927_a);
+      }
 
-        for (int k = 0; k < p_70486_1_.tagCount(); ++k)
-        {
-            NBTTagCompound nbttagcompound = p_70486_1_.getCompoundTagAt(k);
-            int j = nbttagcompound.getByte("Slot") & 255;
+      for(int k = 0; k < p_70486_1_.func_74745_c(); ++k) {
+         NBTTagCompound nbttagcompound = p_70486_1_.func_150305_b(k);
+         int j = nbttagcompound.func_74771_c("Slot") & 255;
+         if (j >= 0 && j < this.func_70302_i_()) {
+            this.func_70299_a(j, new ItemStack(nbttagcompound));
+         }
+      }
 
-            if (j >= 0 && j < this.getSizeInventory())
-            {
-                this.setInventorySlotContents(j, new ItemStack(nbttagcompound));
-            }
-        }
-    }
+   }
 
-    public NBTTagList saveInventoryToNBT()
-    {
-        NBTTagList nbttaglist = new NBTTagList();
+   public NBTTagList func_70487_g() {
+      NBTTagList nbttaglist = new NBTTagList();
 
-        for (int i = 0; i < this.getSizeInventory(); ++i)
-        {
-            ItemStack itemstack = this.getStackInSlot(i);
+      for(int i = 0; i < this.func_70302_i_(); ++i) {
+         ItemStack itemstack = this.func_70301_a(i);
+         if (!itemstack.func_190926_b()) {
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.func_74774_a("Slot", (byte)i);
+            itemstack.func_77955_b(nbttagcompound);
+            nbttaglist.func_74742_a(nbttagcompound);
+         }
+      }
 
-            if (!itemstack.func_190926_b())
-            {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte)i);
-                itemstack.writeToNBT(nbttagcompound);
-                nbttaglist.appendTag(nbttagcompound);
-            }
-        }
+      return nbttaglist;
+   }
 
-        return nbttaglist;
-    }
+   public boolean func_70300_a(EntityPlayer p_70300_1_) {
+      return this.field_70488_a != null && !this.field_70488_a.func_145971_a(p_70300_1_) ? false : super.func_70300_a(p_70300_1_);
+   }
 
-    /**
-     * Don't rename this method to canInteractWith due to conflicts with Container
-     */
-    public boolean isUsableByPlayer(EntityPlayer player)
-    {
-        return this.associatedChest != null && !this.associatedChest.canBeUsed(player) ? false : super.isUsableByPlayer(player);
-    }
+   public void func_174889_b(EntityPlayer p_174889_1_) {
+      if (this.field_70488_a != null) {
+         this.field_70488_a.func_145969_a();
+      }
 
-    public void openInventory(EntityPlayer player)
-    {
-        if (this.associatedChest != null)
-        {
-            this.associatedChest.openChest();
-        }
+      super.func_174889_b(p_174889_1_);
+   }
 
-        super.openInventory(player);
-    }
+   public void func_174886_c(EntityPlayer p_174886_1_) {
+      if (this.field_70488_a != null) {
+         this.field_70488_a.func_145970_b();
+      }
 
-    public void closeInventory(EntityPlayer player)
-    {
-        if (this.associatedChest != null)
-        {
-            this.associatedChest.closeChest();
-        }
-
-        super.closeInventory(player);
-        this.associatedChest = null;
-    }
+      super.func_174886_c(p_174886_1_);
+      this.field_70488_a = null;
+   }
 }

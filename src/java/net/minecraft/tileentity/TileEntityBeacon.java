@@ -32,529 +32,379 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
-public class TileEntityBeacon extends TileEntityLockable implements ITickable, ISidedInventory
-{
-    /** List of effects that Beacon can apply */
-    public static final Potion[][] EFFECTS_LIST = new Potion[][] {{MobEffects.SPEED, MobEffects.HASTE}, {MobEffects.RESISTANCE, MobEffects.JUMP_BOOST}, {MobEffects.STRENGTH}, {MobEffects.REGENERATION}};
-    private static final Set<Potion> VALID_EFFECTS = Sets.<Potion>newHashSet();
-    private final List<TileEntityBeacon.BeamSegment> beamSegments = Lists.<TileEntityBeacon.BeamSegment>newArrayList();
-    private long beamRenderCounter;
-    private float beamRenderScale;
-    private boolean isComplete;
+public class TileEntityBeacon extends TileEntityLockable implements ITickable, ISidedInventory {
+   public static final Potion[][] field_146009_a = new Potion[][]{{MobEffects.field_76424_c, MobEffects.field_76422_e}, {MobEffects.field_76429_m, MobEffects.field_76430_j}, {MobEffects.field_76420_g}, {MobEffects.field_76428_l}};
+   private static final Set<Potion> field_184280_f = Sets.<Potion>newHashSet();
+   private final List<TileEntityBeacon.BeamSegment> field_174909_f = Lists.<TileEntityBeacon.BeamSegment>newArrayList();
+   private long field_146016_i;
+   private float field_146014_j;
+   private boolean field_146015_k;
+   private int field_146012_l = -1;
+   @Nullable
+   private Potion field_146013_m;
+   @Nullable
+   private Potion field_146010_n;
+   private ItemStack field_146011_o = ItemStack.field_190927_a;
+   private String field_146008_p;
 
-    /** Level of this beacon's pyramid. */
-    private int levels = -1;
-    @Nullable
+   public void func_73660_a() {
+      if (this.field_145850_b.func_82737_E() % 80L == 0L) {
+         this.func_174908_m();
+      }
 
-    /** Primary potion effect given by this beacon. */
-    private Potion primaryEffect;
-    @Nullable
+   }
 
-    /** Secondary potion effect given by this beacon. */
-    private Potion secondaryEffect;
+   public void func_174908_m() {
+      if (this.field_145850_b != null) {
+         this.func_146003_y();
+         this.func_146000_x();
+      }
 
-    /** Item given to this beacon as payment. */
-    private ItemStack payment = ItemStack.field_190927_a;
-    private String customName;
+   }
 
-    /**
-     * Like the old updateEntity(), except more generic.
-     */
-    public void update()
-    {
-        if (this.world.getTotalWorldTime() % 80L == 0L)
-        {
-            this.updateBeacon();
-        }
-    }
+   private void func_146000_x() {
+      if (this.field_146015_k && this.field_146012_l > 0 && !this.field_145850_b.field_72995_K && this.field_146013_m != null) {
+         double d0 = (double)(this.field_146012_l * 10 + 10);
+         int i = 0;
+         if (this.field_146012_l >= 4 && this.field_146013_m == this.field_146010_n) {
+            i = 1;
+         }
 
-    public void updateBeacon()
-    {
-        if (this.world != null)
-        {
-            this.updateSegmentColors();
-            this.addEffectsToPlayers();
-        }
-    }
+         int j = (9 + this.field_146012_l * 2) * 20;
+         int k = this.field_174879_c.func_177958_n();
+         int l = this.field_174879_c.func_177956_o();
+         int i1 = this.field_174879_c.func_177952_p();
+         AxisAlignedBB axisalignedbb = (new AxisAlignedBB((double)k, (double)l, (double)i1, (double)(k + 1), (double)(l + 1), (double)(i1 + 1))).func_186662_g(d0).func_72321_a(0.0D, (double)this.field_145850_b.func_72800_K(), 0.0D);
+         List<EntityPlayer> list = this.field_145850_b.<EntityPlayer>func_72872_a(EntityPlayer.class, axisalignedbb);
 
-    private void addEffectsToPlayers()
-    {
-        if (this.isComplete && this.levels > 0 && !this.world.isRemote && this.primaryEffect != null)
-        {
-            double d0 = (double)(this.levels * 10 + 10);
-            int i = 0;
+         for(EntityPlayer entityplayer : list) {
+            entityplayer.func_70690_d(new PotionEffect(this.field_146013_m, j, i, true, true));
+         }
 
-            if (this.levels >= 4 && this.primaryEffect == this.secondaryEffect)
-            {
-                i = 1;
+         if (this.field_146012_l >= 4 && this.field_146013_m != this.field_146010_n && this.field_146010_n != null) {
+            for(EntityPlayer entityplayer1 : list) {
+               entityplayer1.func_70690_d(new PotionEffect(this.field_146010_n, j, 0, true, true));
+            }
+         }
+      }
+
+   }
+
+   private void func_146003_y() {
+      int i = this.field_174879_c.func_177958_n();
+      int j = this.field_174879_c.func_177956_o();
+      int k = this.field_174879_c.func_177952_p();
+      int l = this.field_146012_l;
+      this.field_146012_l = 0;
+      this.field_174909_f.clear();
+      this.field_146015_k = true;
+      TileEntityBeacon.BeamSegment tileentitybeacon$beamsegment = new TileEntityBeacon.BeamSegment(EnumDyeColor.WHITE.func_193349_f());
+      this.field_174909_f.add(tileentitybeacon$beamsegment);
+      boolean flag = true;
+      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+      for(int i1 = j + 1; i1 < 256; ++i1) {
+         IBlockState iblockstate = this.field_145850_b.func_180495_p(blockpos$mutableblockpos.func_181079_c(i, i1, k));
+         float[] afloat;
+         if (iblockstate.func_177230_c() == Blocks.field_150399_cn) {
+            afloat = ((EnumDyeColor)iblockstate.func_177229_b(BlockStainedGlass.field_176547_a)).func_193349_f();
+         } else {
+            if (iblockstate.func_177230_c() != Blocks.field_150397_co) {
+               if (iblockstate.func_185891_c() >= 15 && iblockstate.func_177230_c() != Blocks.field_150357_h) {
+                  this.field_146015_k = false;
+                  this.field_174909_f.clear();
+                  break;
+               }
+
+               tileentitybeacon$beamsegment.func_177262_a();
+               continue;
             }
 
-            int j = (9 + this.levels * 2) * 20;
-            int k = this.pos.getX();
-            int l = this.pos.getY();
-            int i1 = this.pos.getZ();
-            AxisAlignedBB axisalignedbb = (new AxisAlignedBB((double)k, (double)l, (double)i1, (double)(k + 1), (double)(l + 1), (double)(i1 + 1))).expandXyz(d0).addCoord(0.0D, (double)this.world.getHeight(), 0.0D);
-            List<EntityPlayer> list = this.world.<EntityPlayer>getEntitiesWithinAABB(EntityPlayer.class, axisalignedbb);
+            afloat = ((EnumDyeColor)iblockstate.func_177229_b(BlockStainedGlassPane.field_176245_a)).func_193349_f();
+         }
 
-            for (EntityPlayer entityplayer : list)
-            {
-                entityplayer.addPotionEffect(new PotionEffect(this.primaryEffect, j, i, true, true));
+         if (!flag) {
+            afloat = new float[]{(tileentitybeacon$beamsegment.func_177263_b()[0] + afloat[0]) / 2.0F, (tileentitybeacon$beamsegment.func_177263_b()[1] + afloat[1]) / 2.0F, (tileentitybeacon$beamsegment.func_177263_b()[2] + afloat[2]) / 2.0F};
+         }
+
+         if (Arrays.equals(afloat, tileentitybeacon$beamsegment.func_177263_b())) {
+            tileentitybeacon$beamsegment.func_177262_a();
+         } else {
+            tileentitybeacon$beamsegment = new TileEntityBeacon.BeamSegment(afloat);
+            this.field_174909_f.add(tileentitybeacon$beamsegment);
+         }
+
+         flag = false;
+      }
+
+      if (this.field_146015_k) {
+         for(int l1 = 1; l1 <= 4; this.field_146012_l = l1++) {
+            int i2 = j - l1;
+            if (i2 < 0) {
+               break;
             }
 
-            if (this.levels >= 4 && this.primaryEffect != this.secondaryEffect && this.secondaryEffect != null)
-            {
-                for (EntityPlayer entityplayer1 : list)
-                {
-                    entityplayer1.addPotionEffect(new PotionEffect(this.secondaryEffect, j, 0, true, true));
-                }
-            }
-        }
-    }
+            boolean flag1 = true;
 
-    private void updateSegmentColors()
-    {
-        int i = this.pos.getX();
-        int j = this.pos.getY();
-        int k = this.pos.getZ();
-        int l = this.levels;
-        this.levels = 0;
-        this.beamSegments.clear();
-        this.isComplete = true;
-        TileEntityBeacon.BeamSegment tileentitybeacon$beamsegment = new TileEntityBeacon.BeamSegment(EnumDyeColor.WHITE.func_193349_f());
-        this.beamSegments.add(tileentitybeacon$beamsegment);
-        boolean flag = true;
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-
-        for (int i1 = j + 1; i1 < 256; ++i1)
-        {
-            IBlockState iblockstate = this.world.getBlockState(blockpos$mutableblockpos.setPos(i, i1, k));
-            float[] afloat;
-
-            if (iblockstate.getBlock() == Blocks.STAINED_GLASS)
-            {
-                afloat = ((EnumDyeColor)iblockstate.getValue(BlockStainedGlass.COLOR)).func_193349_f();
-            }
-            else
-            {
-                if (iblockstate.getBlock() != Blocks.STAINED_GLASS_PANE)
-                {
-                    if (iblockstate.getLightOpacity() >= 15 && iblockstate.getBlock() != Blocks.BEDROCK)
-                    {
-                        this.isComplete = false;
-                        this.beamSegments.clear();
-                        break;
-                    }
-
-                    tileentitybeacon$beamsegment.incrementHeight();
-                    continue;
-                }
-
-                afloat = ((EnumDyeColor)iblockstate.getValue(BlockStainedGlassPane.COLOR)).func_193349_f();
+            for(int j1 = i - l1; j1 <= i + l1 && flag1; ++j1) {
+               for(int k1 = k - l1; k1 <= k + l1; ++k1) {
+                  Block block = this.field_145850_b.func_180495_p(new BlockPos(j1, i2, k1)).func_177230_c();
+                  if (block != Blocks.field_150475_bE && block != Blocks.field_150340_R && block != Blocks.field_150484_ah && block != Blocks.field_150339_S) {
+                     flag1 = false;
+                     break;
+                  }
+               }
             }
 
-            if (!flag)
-            {
-                afloat = new float[] {(tileentitybeacon$beamsegment.getColors()[0] + afloat[0]) / 2.0F, (tileentitybeacon$beamsegment.getColors()[1] + afloat[1]) / 2.0F, (tileentitybeacon$beamsegment.getColors()[2] + afloat[2]) / 2.0F};
+            if (!flag1) {
+               break;
             }
+         }
 
-            if (Arrays.equals(afloat, tileentitybeacon$beamsegment.getColors()))
-            {
-                tileentitybeacon$beamsegment.incrementHeight();
+         if (this.field_146012_l == 0) {
+            this.field_146015_k = false;
+         }
+      }
+
+      if (!this.field_145850_b.field_72995_K && l < this.field_146012_l) {
+         for(EntityPlayerMP entityplayermp : this.field_145850_b.func_72872_a(EntityPlayerMP.class, (new AxisAlignedBB((double)i, (double)j, (double)k, (double)i, (double)(j - 4), (double)k)).func_72314_b(10.0D, 5.0D, 10.0D))) {
+            CriteriaTriggers.field_192131_k.func_192180_a(entityplayermp, this);
+         }
+      }
+
+   }
+
+   public List<TileEntityBeacon.BeamSegment> func_174907_n() {
+      return this.field_174909_f;
+   }
+
+   public float func_146002_i() {
+      if (!this.field_146015_k) {
+         return 0.0F;
+      } else {
+         int i = (int)(this.field_145850_b.func_82737_E() - this.field_146016_i);
+         this.field_146016_i = this.field_145850_b.func_82737_E();
+         if (i > 1) {
+            this.field_146014_j -= (float)i / 40.0F;
+            if (this.field_146014_j < 0.0F) {
+               this.field_146014_j = 0.0F;
             }
-            else
-            {
-                tileentitybeacon$beamsegment = new TileEntityBeacon.BeamSegment(afloat);
-                this.beamSegments.add(tileentitybeacon$beamsegment);
-            }
+         }
 
-            flag = false;
-        }
+         this.field_146014_j += 0.025F;
+         if (this.field_146014_j > 1.0F) {
+            this.field_146014_j = 1.0F;
+         }
 
-        if (this.isComplete)
-        {
-            for (int l1 = 1; l1 <= 4; this.levels = l1++)
-            {
-                int i2 = j - l1;
+         return this.field_146014_j;
+      }
+   }
 
-                if (i2 < 0)
-                {
-                    break;
-                }
+   public int func_191979_s() {
+      return this.field_146012_l;
+   }
 
-                boolean flag1 = true;
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      return new SPacketUpdateTileEntity(this.field_174879_c, 3, this.func_189517_E_());
+   }
 
-                for (int j1 = i - l1; j1 <= i + l1 && flag1; ++j1)
-                {
-                    for (int k1 = k - l1; k1 <= k + l1; ++k1)
-                    {
-                        Block block = this.world.getBlockState(new BlockPos(j1, i2, k1)).getBlock();
+   public NBTTagCompound func_189517_E_() {
+      return this.func_189515_b(new NBTTagCompound());
+   }
 
-                        if (block != Blocks.EMERALD_BLOCK && block != Blocks.GOLD_BLOCK && block != Blocks.DIAMOND_BLOCK && block != Blocks.IRON_BLOCK)
-                        {
-                            flag1 = false;
-                            break;
-                        }
-                    }
-                }
+   public double func_145833_n() {
+      return 65536.0D;
+   }
 
-                if (!flag1)
-                {
-                    break;
-                }
-            }
+   @Nullable
+   private static Potion func_184279_f(int p_184279_0_) {
+      Potion potion = Potion.func_188412_a(p_184279_0_);
+      return field_184280_f.contains(potion) ? potion : null;
+   }
 
-            if (this.levels == 0)
-            {
-                this.isComplete = false;
-            }
-        }
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      this.field_146013_m = func_184279_f(p_145839_1_.func_74762_e("Primary"));
+      this.field_146010_n = func_184279_f(p_145839_1_.func_74762_e("Secondary"));
+      this.field_146012_l = p_145839_1_.func_74762_e("Levels");
+   }
 
-        if (!this.world.isRemote && l < this.levels)
-        {
-            for (EntityPlayerMP entityplayermp : this.world.getEntitiesWithinAABB(EntityPlayerMP.class, (new AxisAlignedBB((double)i, (double)j, (double)k, (double)i, (double)(j - 4), (double)k)).expand(10.0D, 5.0D, 10.0D)))
-            {
-                CriteriaTriggers.field_192131_k.func_192180_a(entityplayermp, this);
-            }
-        }
-    }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      p_189515_1_.func_74768_a("Primary", Potion.func_188409_a(this.field_146013_m));
+      p_189515_1_.func_74768_a("Secondary", Potion.func_188409_a(this.field_146010_n));
+      p_189515_1_.func_74768_a("Levels", this.field_146012_l);
+      return p_189515_1_;
+   }
 
-    public List<TileEntityBeacon.BeamSegment> getBeamSegments()
-    {
-        return this.beamSegments;
-    }
+   public int func_70302_i_() {
+      return 1;
+   }
 
-    public float shouldBeamRender()
-    {
-        if (!this.isComplete)
-        {
-            return 0.0F;
-        }
-        else
-        {
-            int i = (int)(this.world.getTotalWorldTime() - this.beamRenderCounter);
-            this.beamRenderCounter = this.world.getTotalWorldTime();
+   public boolean func_191420_l() {
+      return this.field_146011_o.func_190926_b();
+   }
 
-            if (i > 1)
-            {
-                this.beamRenderScale -= (float)i / 40.0F;
+   public ItemStack func_70301_a(int p_70301_1_) {
+      return p_70301_1_ == 0 ? this.field_146011_o : ItemStack.field_190927_a;
+   }
 
-                if (this.beamRenderScale < 0.0F)
-                {
-                    this.beamRenderScale = 0.0F;
-                }
-            }
-
-            this.beamRenderScale += 0.025F;
-
-            if (this.beamRenderScale > 1.0F)
-            {
-                this.beamRenderScale = 1.0F;
-            }
-
-            return this.beamRenderScale;
-        }
-    }
-
-    public int func_191979_s()
-    {
-        return this.levels;
-    }
-
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        return new SPacketUpdateTileEntity(this.pos, 3, this.getUpdateTag());
-    }
-
-    public NBTTagCompound getUpdateTag()
-    {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    public double getMaxRenderDistanceSquared()
-    {
-        return 65536.0D;
-    }
-
-    @Nullable
-    private static Potion isBeaconEffect(int p_184279_0_)
-    {
-        Potion potion = Potion.getPotionById(p_184279_0_);
-        return VALID_EFFECTS.contains(potion) ? potion : null;
-    }
-
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        this.primaryEffect = isBeaconEffect(compound.getInteger("Primary"));
-        this.secondaryEffect = isBeaconEffect(compound.getInteger("Secondary"));
-        this.levels = compound.getInteger("Levels");
-    }
-
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        compound.setInteger("Primary", Potion.getIdFromPotion(this.primaryEffect));
-        compound.setInteger("Secondary", Potion.getIdFromPotion(this.secondaryEffect));
-        compound.setInteger("Levels", this.levels);
-        return compound;
-    }
-
-    /**
-     * Returns the number of slots in the inventory.
-     */
-    public int getSizeInventory()
-    {
-        return 1;
-    }
-
-    public boolean func_191420_l()
-    {
-        return this.payment.func_190926_b();
-    }
-
-    /**
-     * Returns the stack in the given slot.
-     */
-    public ItemStack getStackInSlot(int index)
-    {
-        return index == 0 ? this.payment : ItemStack.field_190927_a;
-    }
-
-    /**
-     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
-     */
-    public ItemStack decrStackSize(int index, int count)
-    {
-        if (index == 0 && !this.payment.func_190926_b())
-        {
-            if (count >= this.payment.func_190916_E())
-            {
-                ItemStack itemstack = this.payment;
-                this.payment = ItemStack.field_190927_a;
-                return itemstack;
-            }
-            else
-            {
-                return this.payment.splitStack(count);
-            }
-        }
-        else
-        {
-            return ItemStack.field_190927_a;
-        }
-    }
-
-    /**
-     * Removes a stack from the given slot and returns it.
-     */
-    public ItemStack removeStackFromSlot(int index)
-    {
-        if (index == 0)
-        {
-            ItemStack itemstack = this.payment;
-            this.payment = ItemStack.field_190927_a;
+   public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_) {
+      if (p_70298_1_ == 0 && !this.field_146011_o.func_190926_b()) {
+         if (p_70298_2_ >= this.field_146011_o.func_190916_E()) {
+            ItemStack itemstack = this.field_146011_o;
+            this.field_146011_o = ItemStack.field_190927_a;
             return itemstack;
-        }
-        else
-        {
-            return ItemStack.field_190927_a;
-        }
-    }
+         } else {
+            return this.field_146011_o.func_77979_a(p_70298_2_);
+         }
+      } else {
+         return ItemStack.field_190927_a;
+      }
+   }
 
-    /**
-     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
-     */
-    public void setInventorySlotContents(int index, ItemStack stack)
-    {
-        if (index == 0)
-        {
-            this.payment = stack;
-        }
-    }
+   public ItemStack func_70304_b(int p_70304_1_) {
+      if (p_70304_1_ == 0) {
+         ItemStack itemstack = this.field_146011_o;
+         this.field_146011_o = ItemStack.field_190927_a;
+         return itemstack;
+      } else {
+         return ItemStack.field_190927_a;
+      }
+   }
 
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.hasCustomName() ? this.customName : "container.beacon";
-    }
+   public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_) {
+      if (p_70299_1_ == 0) {
+         this.field_146011_o = p_70299_2_;
+      }
 
-    /**
-     * Returns true if this thing is named
-     */
-    public boolean hasCustomName()
-    {
-        return this.customName != null && !this.customName.isEmpty();
-    }
+   }
 
-    public void setName(String name)
-    {
-        this.customName = name;
-    }
+   public String func_70005_c_() {
+      return this.func_145818_k_() ? this.field_146008_p : "container.beacon";
+   }
 
-    /**
-     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
-     */
-    public int getInventoryStackLimit()
-    {
-        return 1;
-    }
+   public boolean func_145818_k_() {
+      return this.field_146008_p != null && !this.field_146008_p.isEmpty();
+   }
 
-    /**
-     * Don't rename this method to canInteractWith due to conflicts with Container
-     */
-    public boolean isUsableByPlayer(EntityPlayer player)
-    {
-        if (this.world.getTileEntity(this.pos) != this)
-        {
-            return false;
-        }
-        else
-        {
-            return player.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
-        }
-    }
+   public void func_145999_a(String p_145999_1_) {
+      this.field_146008_p = p_145999_1_;
+   }
 
-    public void openInventory(EntityPlayer player)
-    {
-    }
+   public int func_70297_j_() {
+      return 1;
+   }
 
-    public void closeInventory(EntityPlayer player)
-    {
-    }
+   public boolean func_70300_a(EntityPlayer p_70300_1_) {
+      if (this.field_145850_b.func_175625_s(this.field_174879_c) != this) {
+         return false;
+      } else {
+         return p_70300_1_.func_70092_e((double)this.field_174879_c.func_177958_n() + 0.5D, (double)this.field_174879_c.func_177956_o() + 0.5D, (double)this.field_174879_c.func_177952_p() + 0.5D) <= 64.0D;
+      }
+   }
 
-    /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
-     * guis use Slot.isItemValid
-     */
-    public boolean isItemValidForSlot(int index, ItemStack stack)
-    {
-        return stack.getItem() == Items.EMERALD || stack.getItem() == Items.DIAMOND || stack.getItem() == Items.GOLD_INGOT || stack.getItem() == Items.IRON_INGOT;
-    }
+   public void func_174889_b(EntityPlayer p_174889_1_) {
+   }
 
-    public String getGuiID()
-    {
-        return "minecraft:beacon";
-    }
+   public void func_174886_c(EntityPlayer p_174886_1_) {
+   }
 
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
-    {
-        return new ContainerBeacon(playerInventory, this);
-    }
+   public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_) {
+      return p_94041_2_.func_77973_b() == Items.field_151166_bC || p_94041_2_.func_77973_b() == Items.field_151045_i || p_94041_2_.func_77973_b() == Items.field_151043_k || p_94041_2_.func_77973_b() == Items.field_151042_j;
+   }
 
-    public int getField(int id)
-    {
-        switch (id)
-        {
-            case 0:
-                return this.levels;
+   public String func_174875_k() {
+      return "minecraft:beacon";
+   }
 
-            case 1:
-                return Potion.getIdFromPotion(this.primaryEffect);
+   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
+      return new ContainerBeacon(p_174876_1_, this);
+   }
 
-            case 2:
-                return Potion.getIdFromPotion(this.secondaryEffect);
+   public int func_174887_a_(int p_174887_1_) {
+      switch(p_174887_1_) {
+      case 0:
+         return this.field_146012_l;
+      case 1:
+         return Potion.func_188409_a(this.field_146013_m);
+      case 2:
+         return Potion.func_188409_a(this.field_146010_n);
+      default:
+         return 0;
+      }
+   }
 
-            default:
-                return 0;
-        }
-    }
+   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
+      switch(p_174885_1_) {
+      case 0:
+         this.field_146012_l = p_174885_2_;
+         break;
+      case 1:
+         this.field_146013_m = func_184279_f(p_174885_2_);
+         break;
+      case 2:
+         this.field_146010_n = func_184279_f(p_174885_2_);
+      }
 
-    public void setField(int id, int value)
-    {
-        switch (id)
-        {
-            case 0:
-                this.levels = value;
-                break;
+   }
 
-            case 1:
-                this.primaryEffect = isBeaconEffect(value);
-                break;
+   public int func_174890_g() {
+      return 3;
+   }
 
-            case 2:
-                this.secondaryEffect = isBeaconEffect(value);
-        }
-    }
+   public void func_174888_l() {
+      this.field_146011_o = ItemStack.field_190927_a;
+   }
 
-    public int getFieldCount()
-    {
-        return 3;
-    }
+   public boolean func_145842_c(int p_145842_1_, int p_145842_2_) {
+      if (p_145842_1_ == 1) {
+         this.func_174908_m();
+         return true;
+      } else {
+         return super.func_145842_c(p_145842_1_, p_145842_2_);
+      }
+   }
 
-    public void clear()
-    {
-        this.payment = ItemStack.field_190927_a;
-    }
+   public int[] func_180463_a(EnumFacing p_180463_1_) {
+      return new int[0];
+   }
 
-    public boolean receiveClientEvent(int id, int type)
-    {
-        if (id == 1)
-        {
-            this.updateBeacon();
-            return true;
-        }
-        else
-        {
-            return super.receiveClientEvent(id, type);
-        }
-    }
+   public boolean func_180462_a(int p_180462_1_, ItemStack p_180462_2_, EnumFacing p_180462_3_) {
+      return false;
+   }
 
-    public int[] getSlotsForFace(EnumFacing side)
-    {
-        return new int[0];
-    }
+   public boolean func_180461_b(int p_180461_1_, ItemStack p_180461_2_, EnumFacing p_180461_3_) {
+      return false;
+   }
 
-    /**
-     * Returns true if automation can insert the given item in the given slot from the given side.
-     */
-    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction)
-    {
-        return false;
-    }
+   static {
+      for(Potion[] apotion : field_146009_a) {
+         Collections.addAll(field_184280_f, apotion);
+      }
 
-    /**
-     * Returns true if automation can extract the given item in the given slot from the given side.
-     */
-    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction)
-    {
-        return false;
-    }
+   }
 
-    static
-    {
-        for (Potion[] apotion : EFFECTS_LIST)
-        {
-            Collections.addAll(VALID_EFFECTS, apotion);
-        }
-    }
+   public static class BeamSegment {
+      private final float[] field_177266_a;
+      private int field_177265_b;
 
-    public static class BeamSegment
-    {
-        private final float[] colors;
-        private int height;
+      public BeamSegment(float[] p_i45669_1_) {
+         this.field_177266_a = p_i45669_1_;
+         this.field_177265_b = 1;
+      }
 
-        public BeamSegment(float[] colorsIn)
-        {
-            this.colors = colorsIn;
-            this.height = 1;
-        }
+      protected void func_177262_a() {
+         ++this.field_177265_b;
+      }
 
-        protected void incrementHeight()
-        {
-            ++this.height;
-        }
+      public float[] func_177263_b() {
+         return this.field_177266_a;
+      }
 
-        public float[] getColors()
-        {
-            return this.colors;
-        }
-
-        public int getHeight()
-        {
-            return this.height;
-        }
-    }
+      public int func_177264_c() {
+         return this.field_177265_b;
+      }
+   }
 }

@@ -10,74 +10,53 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
-public class EntitySpectralArrow extends EntityArrow
-{
-    private int duration = 200;
+public class EntitySpectralArrow extends EntityArrow {
+   private int field_184562_f = 200;
 
-    public EntitySpectralArrow(World worldIn)
-    {
-        super(worldIn);
-    }
+   public EntitySpectralArrow(World p_i46767_1_) {
+      super(p_i46767_1_);
+   }
 
-    public EntitySpectralArrow(World worldIn, EntityLivingBase shooter)
-    {
-        super(worldIn, shooter);
-    }
+   public EntitySpectralArrow(World p_i46768_1_, EntityLivingBase p_i46768_2_) {
+      super(p_i46768_1_, p_i46768_2_);
+   }
 
-    public EntitySpectralArrow(World worldIn, double x, double y, double z)
-    {
-        super(worldIn, x, y, z);
-    }
+   public EntitySpectralArrow(World p_i46769_1_, double p_i46769_2_, double p_i46769_4_, double p_i46769_6_) {
+      super(p_i46769_1_, p_i46769_2_, p_i46769_4_, p_i46769_6_);
+   }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        super.onUpdate();
+   public void func_70071_h_() {
+      super.func_70071_h_();
+      if (this.field_70170_p.field_72995_K && !this.field_70254_i) {
+         this.field_70170_p.func_175688_a(EnumParticleTypes.SPELL_INSTANT, this.field_70165_t, this.field_70163_u, this.field_70161_v, 0.0D, 0.0D, 0.0D);
+      }
 
-        if (this.world.isRemote && !this.inGround)
-        {
-            this.world.spawnParticle(EnumParticleTypes.SPELL_INSTANT, this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
-        }
-    }
+   }
 
-    protected ItemStack getArrowStack()
-    {
-        return new ItemStack(Items.SPECTRAL_ARROW);
-    }
+   protected ItemStack func_184550_j() {
+      return new ItemStack(Items.field_185166_h);
+   }
 
-    protected void arrowHit(EntityLivingBase living)
-    {
-        super.arrowHit(living);
-        PotionEffect potioneffect = new PotionEffect(MobEffects.GLOWING, this.duration, 0);
-        living.addPotionEffect(potioneffect);
-    }
+   protected void func_184548_a(EntityLivingBase p_184548_1_) {
+      super.func_184548_a(p_184548_1_);
+      PotionEffect potioneffect = new PotionEffect(MobEffects.field_188423_x, this.field_184562_f, 0);
+      p_184548_1_.func_70690_d(potioneffect);
+   }
 
-    public static void registerFixesSpectralArrow(DataFixer fixer)
-    {
-        EntityArrow.registerFixesArrow(fixer, "SpectralArrow");
-    }
+   public static void func_189659_b(DataFixer p_189659_0_) {
+      EntityArrow.func_189657_a(p_189659_0_, "SpectralArrow");
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      if (p_70037_1_.func_74764_b("Duration")) {
+         this.field_184562_f = p_70037_1_.func_74762_e("Duration");
+      }
 
-        if (compound.hasKey("Duration"))
-        {
-            this.duration = compound.getInteger("Duration");
-        }
-    }
+   }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("Duration", this.duration);
-    }
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74768_a("Duration", this.field_184562_f);
+   }
 }

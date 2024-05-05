@@ -14,220 +14,154 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IWorldNameable;
 
-public class TileEntityBanner extends TileEntity implements IWorldNameable
-{
-    private String field_190617_a;
-    private EnumDyeColor baseColor = EnumDyeColor.BLACK;
+public class TileEntityBanner extends TileEntity implements IWorldNameable {
+   private String field_190617_a;
+   private EnumDyeColor field_175120_a = EnumDyeColor.BLACK;
+   private NBTTagList field_175118_f;
+   private boolean field_175119_g;
+   private List<BannerPattern> field_175122_h;
+   private List<EnumDyeColor> field_175123_i;
+   private String field_175121_j;
 
-    /** A list of all the banner patterns. */
-    private NBTTagList patterns;
-    private boolean patternDataSet;
-    private List<BannerPattern> patternList;
-    private List<EnumDyeColor> colorList;
+   public void func_175112_a(ItemStack p_175112_1_, boolean p_175112_2_) {
+      this.field_175118_f = null;
+      NBTTagCompound nbttagcompound = p_175112_1_.func_179543_a("BlockEntityTag");
+      if (nbttagcompound != null && nbttagcompound.func_150297_b("Patterns", 9)) {
+         this.field_175118_f = nbttagcompound.func_150295_c("Patterns", 10).func_74737_b();
+      }
 
-    /**
-     * This is a String representation of this banners pattern and color lists, used for texture caching.
-     */
-    private String patternResourceLocation;
+      this.field_175120_a = p_175112_2_ ? func_190616_d(p_175112_1_) : ItemBanner.func_179225_h(p_175112_1_);
+      this.field_175122_h = null;
+      this.field_175123_i = null;
+      this.field_175121_j = "";
+      this.field_175119_g = true;
+      this.field_190617_a = p_175112_1_.func_82837_s() ? p_175112_1_.func_82833_r() : null;
+   }
 
-    public void setItemValues(ItemStack stack, boolean p_175112_2_)
-    {
-        this.patterns = null;
-        NBTTagCompound nbttagcompound = stack.getSubCompound("BlockEntityTag");
+   public String func_70005_c_() {
+      return this.func_145818_k_() ? this.field_190617_a : "banner";
+   }
 
-        if (nbttagcompound != null && nbttagcompound.hasKey("Patterns", 9))
-        {
-            this.patterns = nbttagcompound.getTagList("Patterns", 10).copy();
-        }
+   public boolean func_145818_k_() {
+      return this.field_190617_a != null && !this.field_190617_a.isEmpty();
+   }
 
-        this.baseColor = p_175112_2_ ? func_190616_d(stack) : ItemBanner.getBaseColor(stack);
-        this.patternList = null;
-        this.colorList = null;
-        this.patternResourceLocation = "";
-        this.patternDataSet = true;
-        this.field_190617_a = stack.hasDisplayName() ? stack.getDisplayName() : null;
-    }
+   public ITextComponent func_145748_c_() {
+      return (ITextComponent)(this.func_145818_k_() ? new TextComponentString(this.func_70005_c_()) : new TextComponentTranslation(this.func_70005_c_(), new Object[0]));
+   }
 
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.hasCustomName() ? this.field_190617_a : "banner";
-    }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      p_189515_1_.func_74768_a("Base", this.field_175120_a.func_176767_b());
+      if (this.field_175118_f != null) {
+         p_189515_1_.func_74782_a("Patterns", this.field_175118_f);
+      }
 
-    /**
-     * Returns true if this thing is named
-     */
-    public boolean hasCustomName()
-    {
-        return this.field_190617_a != null && !this.field_190617_a.isEmpty();
-    }
+      if (this.func_145818_k_()) {
+         p_189515_1_.func_74778_a("CustomName", this.field_190617_a);
+      }
 
-    /**
-     * Get the formatted ChatComponent that will be used for the sender's username in chat
-     */
-    public ITextComponent getDisplayName()
-    {
-        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
-    }
+      return p_189515_1_;
+   }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        compound.setInteger("Base", this.baseColor.getDyeDamage());
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      if (p_145839_1_.func_150297_b("CustomName", 8)) {
+         this.field_190617_a = p_145839_1_.func_74779_i("CustomName");
+      }
 
-        if (this.patterns != null)
-        {
-            compound.setTag("Patterns", this.patterns);
-        }
+      this.field_175120_a = EnumDyeColor.func_176766_a(p_145839_1_.func_74762_e("Base"));
+      this.field_175118_f = p_145839_1_.func_150295_c("Patterns", 10);
+      this.field_175122_h = null;
+      this.field_175123_i = null;
+      this.field_175121_j = null;
+      this.field_175119_g = true;
+   }
 
-        if (this.hasCustomName())
-        {
-            compound.setString("CustomName", this.field_190617_a);
-        }
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      return new SPacketUpdateTileEntity(this.field_174879_c, 6, this.func_189517_E_());
+   }
 
-        return compound;
-    }
+   public NBTTagCompound func_189517_E_() {
+      return this.func_189515_b(new NBTTagCompound());
+   }
 
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
+   public static int func_175113_c(ItemStack p_175113_0_) {
+      NBTTagCompound nbttagcompound = p_175113_0_.func_179543_a("BlockEntityTag");
+      return nbttagcompound != null && nbttagcompound.func_74764_b("Patterns") ? nbttagcompound.func_150295_c("Patterns", 10).func_74745_c() : 0;
+   }
 
-        if (compound.hasKey("CustomName", 8))
-        {
-            this.field_190617_a = compound.getString("CustomName");
-        }
+   public List<BannerPattern> func_175114_c() {
+      this.func_175109_g();
+      return this.field_175122_h;
+   }
 
-        this.baseColor = EnumDyeColor.byDyeDamage(compound.getInteger("Base"));
-        this.patterns = compound.getTagList("Patterns", 10);
-        this.patternList = null;
-        this.colorList = null;
-        this.patternResourceLocation = null;
-        this.patternDataSet = true;
-    }
+   public List<EnumDyeColor> func_175110_d() {
+      this.func_175109_g();
+      return this.field_175123_i;
+   }
 
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        return new SPacketUpdateTileEntity(this.pos, 6, this.getUpdateTag());
-    }
+   public String func_175116_e() {
+      this.func_175109_g();
+      return this.field_175121_j;
+   }
 
-    public NBTTagCompound getUpdateTag()
-    {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    /**
-     * Retrieves the amount of patterns stored on an ItemStack. If the tag does not exist this value will be 0.
-     */
-    public static int getPatterns(ItemStack stack)
-    {
-        NBTTagCompound nbttagcompound = stack.getSubCompound("BlockEntityTag");
-        return nbttagcompound != null && nbttagcompound.hasKey("Patterns") ? nbttagcompound.getTagList("Patterns", 10).tagCount() : 0;
-    }
-
-    public List<BannerPattern> getPatternList()
-    {
-        this.initializeBannerData();
-        return this.patternList;
-    }
-
-    public List<EnumDyeColor> getColorList()
-    {
-        this.initializeBannerData();
-        return this.colorList;
-    }
-
-    public String getPatternResourceLocation()
-    {
-        this.initializeBannerData();
-        return this.patternResourceLocation;
-    }
-
-    /**
-     * Establishes all of the basic properties for the banner. This will also apply the data from the tile entities nbt
-     * tag compounds.
-     */
-    private void initializeBannerData()
-    {
-        if (this.patternList == null || this.colorList == null || this.patternResourceLocation == null)
-        {
-            if (!this.patternDataSet)
-            {
-                this.patternResourceLocation = "";
+   private void func_175109_g() {
+      if (this.field_175122_h == null || this.field_175123_i == null || this.field_175121_j == null) {
+         if (!this.field_175119_g) {
+            this.field_175121_j = "";
+         } else {
+            this.field_175122_h = Lists.<BannerPattern>newArrayList();
+            this.field_175123_i = Lists.<EnumDyeColor>newArrayList();
+            this.field_175122_h.add(BannerPattern.BASE);
+            this.field_175123_i.add(this.field_175120_a);
+            this.field_175121_j = "b" + this.field_175120_a.func_176767_b();
+            if (this.field_175118_f != null) {
+               for(int i = 0; i < this.field_175118_f.func_74745_c(); ++i) {
+                  NBTTagCompound nbttagcompound = this.field_175118_f.func_150305_b(i);
+                  BannerPattern bannerpattern = BannerPattern.func_190994_a(nbttagcompound.func_74779_i("Pattern"));
+                  if (bannerpattern != null) {
+                     this.field_175122_h.add(bannerpattern);
+                     int j = nbttagcompound.func_74762_e("Color");
+                     this.field_175123_i.add(EnumDyeColor.func_176766_a(j));
+                     this.field_175121_j = this.field_175121_j + bannerpattern.func_190993_b() + j;
+                  }
+               }
             }
-            else
-            {
-                this.patternList = Lists.<BannerPattern>newArrayList();
-                this.colorList = Lists.<EnumDyeColor>newArrayList();
-                this.patternList.add(BannerPattern.BASE);
-                this.colorList.add(this.baseColor);
-                this.patternResourceLocation = "b" + this.baseColor.getDyeDamage();
 
-                if (this.patterns != null)
-                {
-                    for (int i = 0; i < this.patterns.tagCount(); ++i)
-                    {
-                        NBTTagCompound nbttagcompound = this.patterns.getCompoundTagAt(i);
-                        BannerPattern bannerpattern = BannerPattern.func_190994_a(nbttagcompound.getString("Pattern"));
+         }
+      }
+   }
 
-                        if (bannerpattern != null)
-                        {
-                            this.patternList.add(bannerpattern);
-                            int j = nbttagcompound.getInteger("Color");
-                            this.colorList.add(EnumDyeColor.byDyeDamage(j));
-                            this.patternResourceLocation = this.patternResourceLocation + bannerpattern.func_190993_b() + j;
-                        }
-                    }
-                }
+   public static void func_175117_e(ItemStack p_175117_0_) {
+      NBTTagCompound nbttagcompound = p_175117_0_.func_179543_a("BlockEntityTag");
+      if (nbttagcompound != null && nbttagcompound.func_150297_b("Patterns", 9)) {
+         NBTTagList nbttaglist = nbttagcompound.func_150295_c("Patterns", 10);
+         if (!nbttaglist.func_82582_d()) {
+            nbttaglist.func_74744_a(nbttaglist.func_74745_c() - 1);
+            if (nbttaglist.func_82582_d()) {
+               p_175117_0_.func_77978_p().func_82580_o("BlockEntityTag");
+               if (p_175117_0_.func_77978_p().func_82582_d()) {
+                  p_175117_0_.func_77982_d((NBTTagCompound)null);
+               }
             }
-        }
-    }
 
-    /**
-     * Removes all the banner related data from a provided instance of ItemStack.
-     */
-    public static void removeBannerData(ItemStack stack)
-    {
-        NBTTagCompound nbttagcompound = stack.getSubCompound("BlockEntityTag");
+         }
+      }
+   }
 
-        if (nbttagcompound != null && nbttagcompound.hasKey("Patterns", 9))
-        {
-            NBTTagList nbttaglist = nbttagcompound.getTagList("Patterns", 10);
+   public ItemStack func_190615_l() {
+      ItemStack itemstack = ItemBanner.func_190910_a(this.field_175120_a, this.field_175118_f);
+      if (this.func_145818_k_()) {
+         itemstack.func_151001_c(this.func_70005_c_());
+      }
 
-            if (!nbttaglist.hasNoTags())
-            {
-                nbttaglist.removeTag(nbttaglist.tagCount() - 1);
+      return itemstack;
+   }
 
-                if (nbttaglist.hasNoTags())
-                {
-                    stack.getTagCompound().removeTag("BlockEntityTag");
-
-                    if (stack.getTagCompound().hasNoTags())
-                    {
-                        stack.setTagCompound((NBTTagCompound)null);
-                    }
-                }
-            }
-        }
-    }
-
-    public ItemStack func_190615_l()
-    {
-        ItemStack itemstack = ItemBanner.func_190910_a(this.baseColor, this.patterns);
-
-        if (this.hasCustomName())
-        {
-            itemstack.setStackDisplayName(this.getName());
-        }
-
-        return itemstack;
-    }
-
-    public static EnumDyeColor func_190616_d(ItemStack p_190616_0_)
-    {
-        NBTTagCompound nbttagcompound = p_190616_0_.getSubCompound("BlockEntityTag");
-        return nbttagcompound != null && nbttagcompound.hasKey("Base") ? EnumDyeColor.byDyeDamage(nbttagcompound.getInteger("Base")) : EnumDyeColor.BLACK;
-    }
+   public static EnumDyeColor func_190616_d(ItemStack p_190616_0_) {
+      NBTTagCompound nbttagcompound = p_190616_0_.func_179543_a("BlockEntityTag");
+      return nbttagcompound != null && nbttagcompound.func_74764_b("Base") ? EnumDyeColor.func_176766_a(nbttagcompound.func_74762_e("Base")) : EnumDyeColor.BLACK;
+   }
 }

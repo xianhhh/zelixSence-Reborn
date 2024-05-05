@@ -6,33 +6,22 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 
-public class ItemNameTag extends Item
-{
-    public ItemNameTag()
-    {
-        this.setCreativeTab(CreativeTabs.TOOLS);
-    }
+public class ItemNameTag extends Item {
+   public ItemNameTag() {
+      this.func_77637_a(CreativeTabs.field_78040_i);
+   }
 
-    /**
-     * Returns true if the item can be used on the given entity, e.g. shears on sheep.
-     */
-    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand)
-    {
-        if (stack.hasDisplayName() && !(target instanceof EntityPlayer))
-        {
-            target.setCustomNameTag(stack.getDisplayName());
+   public boolean func_111207_a(ItemStack p_111207_1_, EntityPlayer p_111207_2_, EntityLivingBase p_111207_3_, EnumHand p_111207_4_) {
+      if (p_111207_1_.func_82837_s() && !(p_111207_3_ instanceof EntityPlayer)) {
+         p_111207_3_.func_96094_a(p_111207_1_.func_82833_r());
+         if (p_111207_3_ instanceof EntityLiving) {
+            ((EntityLiving)p_111207_3_).func_110163_bv();
+         }
 
-            if (target instanceof EntityLiving)
-            {
-                ((EntityLiving)target).enablePersistence();
-            }
-
-            stack.func_190918_g(1);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+         p_111207_1_.func_190918_g(1);
+         return true;
+      } else {
+         return false;
+      }
+   }
 }

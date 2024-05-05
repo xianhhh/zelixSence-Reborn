@@ -2,35 +2,21 @@ package net.minecraft.enchantment;
 
 import net.minecraft.inventory.EntityEquipmentSlot;
 
-public class EnchantmentFireAspect extends Enchantment
-{
-    protected EnchantmentFireAspect(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
-    {
-        super(rarityIn, EnumEnchantmentType.WEAPON, slots);
-        this.setName("fire");
-    }
+public class EnchantmentFireAspect extends Enchantment {
+   protected EnchantmentFireAspect(Enchantment.Rarity p_i46730_1_, EntityEquipmentSlot... p_i46730_2_) {
+      super(p_i46730_1_, EnumEnchantmentType.WEAPON, p_i46730_2_);
+      this.func_77322_b("fire");
+   }
 
-    /**
-     * Returns the minimal value of enchantability needed on the enchantment level passed.
-     */
-    public int getMinEnchantability(int enchantmentLevel)
-    {
-        return 10 + 20 * (enchantmentLevel - 1);
-    }
+   public int func_77321_a(int p_77321_1_) {
+      return 10 + 20 * (p_77321_1_ - 1);
+   }
 
-    /**
-     * Returns the maximum value of enchantability nedded on the enchantment level passed.
-     */
-    public int getMaxEnchantability(int enchantmentLevel)
-    {
-        return super.getMinEnchantability(enchantmentLevel) + 50;
-    }
+   public int func_77317_b(int p_77317_1_) {
+      return super.func_77321_a(p_77317_1_) + 50;
+   }
 
-    /**
-     * Returns the maximum level that the enchantment can have.
-     */
-    public int getMaxLevel()
-    {
-        return 2;
-    }
+   public int func_77325_b() {
+      return 2;
+   }
 }

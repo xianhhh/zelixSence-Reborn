@@ -1,16 +1,11 @@
 package net.minecraft.client.model;
 
-public class TextureOffset
-{
-    /** The x coordinate offset of the texture */
-    public final int textureOffsetX;
+public class TextureOffset {
+   public final int field_78783_a;
+   public final int field_78782_b;
 
-    /** The y coordinate offset of the texture */
-    public final int textureOffsetY;
-
-    public TextureOffset(int textureOffsetXIn, int textureOffsetYIn)
-    {
-        this.textureOffsetX = textureOffsetXIn;
-        this.textureOffsetY = textureOffsetYIn;
-    }
+   public TextureOffset(int p_i1175_1_, int p_i1175_2_) {
+      this.field_78783_a = p_i1175_1_;
+      this.field_78782_b = p_i1175_2_;
+   }
 }

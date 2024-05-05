@@ -7,101 +7,69 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketClickWindow implements Packet<INetHandlerPlayServer>
-{
-    /** The id of the window which was clicked. 0 for player inventory. */
-    private int windowId;
+public class CPacketClickWindow implements Packet<INetHandlerPlayServer> {
+   private int field_149554_a;
+   private int field_149552_b;
+   private int field_149553_c;
+   private short field_149550_d;
+   private ItemStack field_149551_e = ItemStack.field_190927_a;
+   private ClickType field_149549_f;
 
-    /** Id of the clicked slot */
-    private int slotId;
+   public CPacketClickWindow() {
+   }
 
-    /** Button used */
-    private int usedButton;
+   public CPacketClickWindow(int p_i46882_1_, int p_i46882_2_, int p_i46882_3_, ClickType p_i46882_4_, ItemStack p_i46882_5_, short p_i46882_6_) {
+      this.field_149554_a = p_i46882_1_;
+      this.field_149552_b = p_i46882_2_;
+      this.field_149553_c = p_i46882_3_;
+      this.field_149551_e = p_i46882_5_.func_77946_l();
+      this.field_149550_d = p_i46882_6_;
+      this.field_149549_f = p_i46882_4_;
+   }
 
-    /** A unique number for the action, used for transaction handling */
-    private short actionNumber;
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_147351_a(this);
+   }
 
-    /** The item stack present in the slot */
-    private ItemStack clickedItem = ItemStack.field_190927_a;
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149554_a = p_148837_1_.readByte();
+      this.field_149552_b = p_148837_1_.readShort();
+      this.field_149553_c = p_148837_1_.readByte();
+      this.field_149550_d = p_148837_1_.readShort();
+      this.field_149549_f = (ClickType)p_148837_1_.func_179257_a(ClickType.class);
+      this.field_149551_e = p_148837_1_.func_150791_c();
+   }
 
-    /** Inventory operation mode */
-    private ClickType mode;
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeByte(this.field_149554_a);
+      p_148840_1_.writeShort(this.field_149552_b);
+      p_148840_1_.writeByte(this.field_149553_c);
+      p_148840_1_.writeShort(this.field_149550_d);
+      p_148840_1_.func_179249_a(this.field_149549_f);
+      p_148840_1_.func_150788_a(this.field_149551_e);
+   }
 
-    public CPacketClickWindow()
-    {
-    }
+   public int func_149548_c() {
+      return this.field_149554_a;
+   }
 
-    public CPacketClickWindow(int windowIdIn, int slotIdIn, int usedButtonIn, ClickType modeIn, ItemStack clickedItemIn, short actionNumberIn)
-    {
-        this.windowId = windowIdIn;
-        this.slotId = slotIdIn;
-        this.usedButton = usedButtonIn;
-        this.clickedItem = clickedItemIn.copy();
-        this.actionNumber = actionNumberIn;
-        this.mode = modeIn;
-    }
+   public int func_149544_d() {
+      return this.field_149552_b;
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.processClickWindow(this);
-    }
+   public int func_149543_e() {
+      return this.field_149553_c;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.windowId = buf.readByte();
-        this.slotId = buf.readShort();
-        this.usedButton = buf.readByte();
-        this.actionNumber = buf.readShort();
-        this.mode = (ClickType)buf.readEnumValue(ClickType.class);
-        this.clickedItem = buf.readItemStackFromBuffer();
-    }
+   public short func_149547_f() {
+      return this.field_149550_d;
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeByte(this.windowId);
-        buf.writeShort(this.slotId);
-        buf.writeByte(this.usedButton);
-        buf.writeShort(this.actionNumber);
-        buf.writeEnumValue(this.mode);
-        buf.writeItemStackToBuffer(this.clickedItem);
-    }
+   public ItemStack func_149546_g() {
+      return this.field_149551_e;
+   }
 
-    public int getWindowId()
-    {
-        return this.windowId;
-    }
-
-    public int getSlotId()
-    {
-        return this.slotId;
-    }
-
-    public int getUsedButton()
-    {
-        return this.usedButton;
-    }
-
-    public short getActionNumber()
-    {
-        return this.actionNumber;
-    }
-
-    public ItemStack getClickedItem()
-    {
-        return this.clickedItem;
-    }
-
-    public ClickType getClickType()
-    {
-        return this.mode;
-    }
+   public ClickType func_186993_f() {
+      return this.field_149549_f;
+   }
 }

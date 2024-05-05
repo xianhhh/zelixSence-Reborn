@@ -16,108 +16,69 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockStainedGlass extends BlockBreakable
-{
-    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+public class BlockStainedGlass extends BlockBreakable {
+   public static final PropertyEnum<EnumDyeColor> field_176547_a = PropertyEnum.<EnumDyeColor>func_177709_a("color", EnumDyeColor.class);
 
-    public BlockStainedGlass(Material materialIn)
-    {
-        super(materialIn, false);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+   public BlockStainedGlass(Material p_i45427_1_) {
+      super(p_i45427_1_, false);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176547_a, EnumDyeColor.WHITE));
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-    /**
-     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
-     * returns the metadata of the dropped item based on the old metadata of the block.
-     */
-    public int damageDropped(IBlockState state)
-    {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
-    }
+   public int func_180651_a(IBlockState p_180651_1_) {
+      return ((EnumDyeColor)p_180651_1_.func_177229_b(field_176547_a)).func_176765_a();
+   }
 
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
-        {
-            tab.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
-        }
-    }
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      for(EnumDyeColor enumdyecolor : EnumDyeColor.values()) {
+         p_149666_2_.add(new ItemStack(this, 1, enumdyecolor.func_176765_a()));
+      }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
-    }
+   }
 
-    public BlockRenderLayer getBlockLayer()
-    {
-        return BlockRenderLayer.TRANSLUCENT;
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return MapColor.func_193558_a((EnumDyeColor)p_180659_1_.func_177229_b(field_176547_a));
+   }
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    public int quantityDropped(Random random)
-    {
-        return 0;
-    }
+   public BlockRenderLayer func_180664_k() {
+      return BlockRenderLayer.TRANSLUCENT;
+   }
 
-    protected boolean canSilkHarvest()
-    {
-        return true;
-    }
+   public int func_149745_a(Random p_149745_1_) {
+      return 0;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   protected boolean func_149700_E() {
+      return true;
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
-    }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-    /**
-     * Called after the block is set in the Chunk data, but before the Tile Entity is set
-     */
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (!worldIn.isRemote)
-        {
-            BlockBeacon.updateColorAsync(worldIn, pos);
-        }
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176547_a, EnumDyeColor.func_176764_b(p_176203_1_));
+   }
 
-    /**
-     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
-     */
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (!worldIn.isRemote)
-        {
-            BlockBeacon.updateColorAsync(worldIn, pos);
-        }
-    }
+   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
+      if (!p_176213_1_.field_72995_K) {
+         BlockBeacon.func_176450_d(p_176213_1_, p_176213_2_);
+      }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
-    }
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {COLOR});
-    }
+   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
+      if (!p_180663_1_.field_72995_K) {
+         BlockBeacon.func_176450_d(p_180663_1_, p_180663_2_);
+      }
+
+   }
+
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((EnumDyeColor)p_176201_1_.func_177229_b(field_176547_a)).func_176765_a();
+   }
+
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176547_a});
+   }
 }

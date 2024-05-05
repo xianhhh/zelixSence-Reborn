@@ -67,645 +67,459 @@ import net.minecraft.world.storage.MapData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntityTrackerEntry
-{
-    private static final Logger LOGGER = LogManager.getLogger();
+public class EntityTrackerEntry {
+   private static final Logger field_151262_p = LogManager.getLogger();
+   private final Entity field_73132_a;
+   private final int field_73130_b;
+   private int field_187262_f;
+   private final int field_73131_c;
+   private long field_73128_d;
+   private long field_73129_e;
+   private long field_73126_f;
+   private int field_73127_g;
+   private int field_73139_h;
+   private int field_73140_i;
+   private double field_73137_j;
+   private double field_73138_k;
+   private double field_73135_l;
+   public int field_73136_m;
+   private double field_73147_p;
+   private double field_73146_q;
+   private double field_73145_r;
+   private boolean field_73144_s;
+   private final boolean field_73143_t;
+   private int field_73142_u;
+   private List<Entity> field_187263_w = Collections.<Entity>emptyList();
+   private boolean field_73141_v;
+   private boolean field_180234_y;
+   public boolean field_73133_n;
+   private final Set<EntityPlayerMP> field_73134_o = Sets.<EntityPlayerMP>newHashSet();
 
-    /** The entity that this EntityTrackerEntry tracks. */
-    private final Entity trackedEntity;
-    private final int range;
-    private int maxRange;
+   public EntityTrackerEntry(Entity p_i46837_1_, int p_i46837_2_, int p_i46837_3_, int p_i46837_4_, boolean p_i46837_5_) {
+      this.field_73132_a = p_i46837_1_;
+      this.field_73130_b = p_i46837_2_;
+      this.field_187262_f = p_i46837_3_;
+      this.field_73131_c = p_i46837_4_;
+      this.field_73143_t = p_i46837_5_;
+      this.field_73128_d = EntityTracker.func_187253_a(p_i46837_1_.field_70165_t);
+      this.field_73129_e = EntityTracker.func_187253_a(p_i46837_1_.field_70163_u);
+      this.field_73126_f = EntityTracker.func_187253_a(p_i46837_1_.field_70161_v);
+      this.field_73127_g = MathHelper.func_76141_d(p_i46837_1_.field_70177_z * 256.0F / 360.0F);
+      this.field_73139_h = MathHelper.func_76141_d(p_i46837_1_.field_70125_A * 256.0F / 360.0F);
+      this.field_73140_i = MathHelper.func_76141_d(p_i46837_1_.func_70079_am() * 256.0F / 360.0F);
+      this.field_180234_y = p_i46837_1_.field_70122_E;
+   }
 
-    /** check for sync when ticks % updateFrequency==0 */
-    private final int updateFrequency;
+   public boolean equals(Object p_equals_1_) {
+      if (p_equals_1_ instanceof EntityTrackerEntry) {
+         return ((EntityTrackerEntry)p_equals_1_).field_73132_a.func_145782_y() == this.field_73132_a.func_145782_y();
+      } else {
+         return false;
+      }
+   }
 
-    /** The encoded entity X position. */
-    private long encodedPosX;
+   public int hashCode() {
+      return this.field_73132_a.func_145782_y();
+   }
 
-    /** The encoded entity Y position. */
-    private long encodedPosY;
+   public void func_73122_a(List<EntityPlayer> p_73122_1_) {
+      this.field_73133_n = false;
+      if (!this.field_73144_s || this.field_73132_a.func_70092_e(this.field_73147_p, this.field_73146_q, this.field_73145_r) > 16.0D) {
+         this.field_73147_p = this.field_73132_a.field_70165_t;
+         this.field_73146_q = this.field_73132_a.field_70163_u;
+         this.field_73145_r = this.field_73132_a.field_70161_v;
+         this.field_73144_s = true;
+         this.field_73133_n = true;
+         this.func_73125_b(p_73122_1_);
+      }
 
-    /** The encoded entity Z position. */
-    private long encodedPosZ;
+      List<Entity> list = this.field_73132_a.func_184188_bt();
+      if (!list.equals(this.field_187263_w)) {
+         this.field_187263_w = list;
+         this.func_151259_a(new SPacketSetPassengers(this.field_73132_a));
+      }
 
-    /** The encoded entity yaw rotation. */
-    private int encodedRotationYaw;
+      if (this.field_73132_a instanceof EntityItemFrame && this.field_73136_m % 10 == 0) {
+         EntityItemFrame entityitemframe = (EntityItemFrame)this.field_73132_a;
+         ItemStack itemstack = entityitemframe.func_82335_i();
+         if (itemstack.func_77973_b() instanceof ItemMap) {
+            MapData mapdata = Items.field_151098_aY.func_77873_a(itemstack, this.field_73132_a.field_70170_p);
 
-    /** The encoded entity pitch rotation. */
-    private int encodedRotationPitch;
-    private int lastHeadMotion;
-    private double lastTrackedEntityMotionX;
-    private double lastTrackedEntityMotionY;
-    private double motionZ;
-    public int updateCounter;
-    private double lastTrackedEntityPosX;
-    private double lastTrackedEntityPosY;
-    private double lastTrackedEntityPosZ;
-    private boolean updatedPlayerVisibility;
-    private final boolean sendVelocityUpdates;
+            for(EntityPlayer entityplayer : p_73122_1_) {
+               EntityPlayerMP entityplayermp = (EntityPlayerMP)entityplayer;
+               mapdata.func_76191_a(entityplayermp, itemstack);
+               Packet<?> packet = Items.field_151098_aY.func_150911_c(itemstack, this.field_73132_a.field_70170_p, entityplayermp);
+               if (packet != null) {
+                  entityplayermp.field_71135_a.func_147359_a(packet);
+               }
+            }
+         }
 
-    /**
-     * every 400 ticks a  full teleport packet is sent, rather than just a "move me +x" command, so that position
-     * remains fully synced.
-     */
-    private int ticksSinceLastForcedTeleport;
-    private List<Entity> passengers = Collections.<Entity>emptyList();
-    private boolean ridingEntity;
-    private boolean onGround;
-    public boolean playerEntitiesUpdated;
-    private final Set<EntityPlayerMP> trackingPlayers = Sets.<EntityPlayerMP>newHashSet();
+         this.func_111190_b();
+      }
 
-    public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn)
-    {
-        this.trackedEntity = entityIn;
-        this.range = rangeIn;
-        this.maxRange = maxRangeIn;
-        this.updateFrequency = updateFrequencyIn;
-        this.sendVelocityUpdates = sendVelocityUpdatesIn;
-        this.encodedPosX = EntityTracker.getPositionLong(entityIn.posX);
-        this.encodedPosY = EntityTracker.getPositionLong(entityIn.posY);
-        this.encodedPosZ = EntityTracker.getPositionLong(entityIn.posZ);
-        this.encodedRotationYaw = MathHelper.floor(entityIn.rotationYaw * 256.0F / 360.0F);
-        this.encodedRotationPitch = MathHelper.floor(entityIn.rotationPitch * 256.0F / 360.0F);
-        this.lastHeadMotion = MathHelper.floor(entityIn.getRotationYawHead() * 256.0F / 360.0F);
-        this.onGround = entityIn.onGround;
-    }
-
-    public boolean equals(Object p_equals_1_)
-    {
-        if (p_equals_1_ instanceof EntityTrackerEntry)
-        {
-            return ((EntityTrackerEntry)p_equals_1_).trackedEntity.getEntityId() == this.trackedEntity.getEntityId();
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public int hashCode()
-    {
-        return this.trackedEntity.getEntityId();
-    }
-
-    public void updatePlayerList(List<EntityPlayer> players)
-    {
-        this.playerEntitiesUpdated = false;
-
-        if (!this.updatedPlayerVisibility || this.trackedEntity.getDistanceSq(this.lastTrackedEntityPosX, this.lastTrackedEntityPosY, this.lastTrackedEntityPosZ) > 16.0D)
-        {
-            this.lastTrackedEntityPosX = this.trackedEntity.posX;
-            this.lastTrackedEntityPosY = this.trackedEntity.posY;
-            this.lastTrackedEntityPosZ = this.trackedEntity.posZ;
-            this.updatedPlayerVisibility = true;
-            this.playerEntitiesUpdated = true;
-            this.updatePlayerEntities(players);
-        }
-
-        List<Entity> list = this.trackedEntity.getPassengers();
-
-        if (!list.equals(this.passengers))
-        {
-            this.passengers = list;
-            this.sendPacketToTrackedPlayers(new SPacketSetPassengers(this.trackedEntity));
-        }
-
-        if (this.trackedEntity instanceof EntityItemFrame && this.updateCounter % 10 == 0)
-        {
-            EntityItemFrame entityitemframe = (EntityItemFrame)this.trackedEntity;
-            ItemStack itemstack = entityitemframe.getDisplayedItem();
-
-            if (itemstack.getItem() instanceof ItemMap)
-            {
-                MapData mapdata = Items.FILLED_MAP.getMapData(itemstack, this.trackedEntity.world);
-
-                for (EntityPlayer entityplayer : players)
-                {
-                    EntityPlayerMP entityplayermp = (EntityPlayerMP)entityplayer;
-                    mapdata.updateVisiblePlayers(entityplayermp, itemstack);
-                    Packet<?> packet = Items.FILLED_MAP.createMapDataPacket(itemstack, this.trackedEntity.world, entityplayermp);
-
-                    if (packet != null)
-                    {
-                        entityplayermp.connection.sendPacket(packet);
-                    }
-                }
+      if (this.field_73136_m % this.field_73131_c == 0 || this.field_73132_a.field_70160_al || this.field_73132_a.func_184212_Q().func_187223_a()) {
+         if (this.field_73132_a.func_184218_aH()) {
+            int j1 = MathHelper.func_76141_d(this.field_73132_a.field_70177_z * 256.0F / 360.0F);
+            int l1 = MathHelper.func_76141_d(this.field_73132_a.field_70125_A * 256.0F / 360.0F);
+            boolean flag3 = Math.abs(j1 - this.field_73127_g) >= 1 || Math.abs(l1 - this.field_73139_h) >= 1;
+            if (flag3) {
+               this.func_151259_a(new SPacketEntity.S16PacketEntityLook(this.field_73132_a.func_145782_y(), (byte)j1, (byte)l1, this.field_73132_a.field_70122_E));
+               this.field_73127_g = j1;
+               this.field_73139_h = l1;
             }
 
-            this.sendMetadataToAllAssociatedPlayers();
-        }
-
-        if (this.updateCounter % this.updateFrequency == 0 || this.trackedEntity.isAirBorne || this.trackedEntity.getDataManager().isDirty())
-        {
-            if (this.trackedEntity.isRiding())
-            {
-                int j1 = MathHelper.floor(this.trackedEntity.rotationYaw * 256.0F / 360.0F);
-                int l1 = MathHelper.floor(this.trackedEntity.rotationPitch * 256.0F / 360.0F);
-                boolean flag3 = Math.abs(j1 - this.encodedRotationYaw) >= 1 || Math.abs(l1 - this.encodedRotationPitch) >= 1;
-
-                if (flag3)
-                {
-                    this.sendPacketToTrackedPlayers(new SPacketEntity.S16PacketEntityLook(this.trackedEntity.getEntityId(), (byte)j1, (byte)l1, this.trackedEntity.onGround));
-                    this.encodedRotationYaw = j1;
-                    this.encodedRotationPitch = l1;
-                }
-
-                this.encodedPosX = EntityTracker.getPositionLong(this.trackedEntity.posX);
-                this.encodedPosY = EntityTracker.getPositionLong(this.trackedEntity.posY);
-                this.encodedPosZ = EntityTracker.getPositionLong(this.trackedEntity.posZ);
-                this.sendMetadataToAllAssociatedPlayers();
-                this.ridingEntity = true;
-            }
-            else
-            {
-                ++this.ticksSinceLastForcedTeleport;
-                long i1 = EntityTracker.getPositionLong(this.trackedEntity.posX);
-                long i2 = EntityTracker.getPositionLong(this.trackedEntity.posY);
-                long j2 = EntityTracker.getPositionLong(this.trackedEntity.posZ);
-                int k2 = MathHelper.floor(this.trackedEntity.rotationYaw * 256.0F / 360.0F);
-                int i = MathHelper.floor(this.trackedEntity.rotationPitch * 256.0F / 360.0F);
-                long j = i1 - this.encodedPosX;
-                long k = i2 - this.encodedPosY;
-                long l = j2 - this.encodedPosZ;
-                Packet<?> packet1 = null;
-                boolean flag = j * j + k * k + l * l >= 128L || this.updateCounter % 60 == 0;
-                boolean flag1 = Math.abs(k2 - this.encodedRotationYaw) >= 1 || Math.abs(i - this.encodedRotationPitch) >= 1;
-
-                if (this.updateCounter > 0 || this.trackedEntity instanceof EntityArrow)
-                {
-                    if (j >= -32768L && j < 32768L && k >= -32768L && k < 32768L && l >= -32768L && l < 32768L && this.ticksSinceLastForcedTeleport <= 400 && !this.ridingEntity && this.onGround == this.trackedEntity.onGround)
-                    {
-                        if ((!flag || !flag1) && !(this.trackedEntity instanceof EntityArrow))
-                        {
-                            if (flag)
-                            {
-                                packet1 = new SPacketEntity.S15PacketEntityRelMove(this.trackedEntity.getEntityId(), j, k, l, this.trackedEntity.onGround);
-                            }
-                            else if (flag1)
-                            {
-                                packet1 = new SPacketEntity.S16PacketEntityLook(this.trackedEntity.getEntityId(), (byte)k2, (byte)i, this.trackedEntity.onGround);
-                            }
-                        }
-                        else
-                        {
-                            packet1 = new SPacketEntity.S17PacketEntityLookMove(this.trackedEntity.getEntityId(), j, k, l, (byte)k2, (byte)i, this.trackedEntity.onGround);
-                        }
-                    }
-                    else
-                    {
-                        this.onGround = this.trackedEntity.onGround;
-                        this.ticksSinceLastForcedTeleport = 0;
-                        this.resetPlayerVisibility();
-                        packet1 = new SPacketEntityTeleport(this.trackedEntity);
-                    }
-                }
-
-                boolean flag2 = this.sendVelocityUpdates;
-
-                if (this.trackedEntity instanceof EntityLivingBase && ((EntityLivingBase)this.trackedEntity).isElytraFlying())
-                {
-                    flag2 = true;
-                }
-
-                if (flag2 && this.updateCounter > 0)
-                {
-                    double d0 = this.trackedEntity.motionX - this.lastTrackedEntityMotionX;
-                    double d1 = this.trackedEntity.motionY - this.lastTrackedEntityMotionY;
-                    double d2 = this.trackedEntity.motionZ - this.motionZ;
-                    double d3 = 0.02D;
-                    double d4 = d0 * d0 + d1 * d1 + d2 * d2;
-
-                    if (d4 > 4.0E-4D || d4 > 0.0D && this.trackedEntity.motionX == 0.0D && this.trackedEntity.motionY == 0.0D && this.trackedEntity.motionZ == 0.0D)
-                    {
-                        this.lastTrackedEntityMotionX = this.trackedEntity.motionX;
-                        this.lastTrackedEntityMotionY = this.trackedEntity.motionY;
-                        this.motionZ = this.trackedEntity.motionZ;
-                        this.sendPacketToTrackedPlayers(new SPacketEntityVelocity(this.trackedEntity.getEntityId(), this.lastTrackedEntityMotionX, this.lastTrackedEntityMotionY, this.motionZ));
-                    }
-                }
-
-                if (packet1 != null)
-                {
-                    this.sendPacketToTrackedPlayers(packet1);
-                }
-
-                this.sendMetadataToAllAssociatedPlayers();
-
-                if (flag)
-                {
-                    this.encodedPosX = i1;
-                    this.encodedPosY = i2;
-                    this.encodedPosZ = j2;
-                }
-
-                if (flag1)
-                {
-                    this.encodedRotationYaw = k2;
-                    this.encodedRotationPitch = i;
-                }
-
-                this.ridingEntity = false;
+            this.field_73128_d = EntityTracker.func_187253_a(this.field_73132_a.field_70165_t);
+            this.field_73129_e = EntityTracker.func_187253_a(this.field_73132_a.field_70163_u);
+            this.field_73126_f = EntityTracker.func_187253_a(this.field_73132_a.field_70161_v);
+            this.func_111190_b();
+            this.field_73141_v = true;
+         } else {
+            ++this.field_73142_u;
+            long i1 = EntityTracker.func_187253_a(this.field_73132_a.field_70165_t);
+            long i2 = EntityTracker.func_187253_a(this.field_73132_a.field_70163_u);
+            long j2 = EntityTracker.func_187253_a(this.field_73132_a.field_70161_v);
+            int k2 = MathHelper.func_76141_d(this.field_73132_a.field_70177_z * 256.0F / 360.0F);
+            int i = MathHelper.func_76141_d(this.field_73132_a.field_70125_A * 256.0F / 360.0F);
+            long j = i1 - this.field_73128_d;
+            long k = i2 - this.field_73129_e;
+            long l = j2 - this.field_73126_f;
+            Packet<?> packet1 = null;
+            boolean flag = j * j + k * k + l * l >= 128L || this.field_73136_m % 60 == 0;
+            boolean flag1 = Math.abs(k2 - this.field_73127_g) >= 1 || Math.abs(i - this.field_73139_h) >= 1;
+            if (this.field_73136_m > 0 || this.field_73132_a instanceof EntityArrow) {
+               if (j >= -32768L && j < 32768L && k >= -32768L && k < 32768L && l >= -32768L && l < 32768L && this.field_73142_u <= 400 && !this.field_73141_v && this.field_180234_y == this.field_73132_a.field_70122_E) {
+                  if ((!flag || !flag1) && !(this.field_73132_a instanceof EntityArrow)) {
+                     if (flag) {
+                        packet1 = new SPacketEntity.S15PacketEntityRelMove(this.field_73132_a.func_145782_y(), j, k, l, this.field_73132_a.field_70122_E);
+                     } else if (flag1) {
+                        packet1 = new SPacketEntity.S16PacketEntityLook(this.field_73132_a.func_145782_y(), (byte)k2, (byte)i, this.field_73132_a.field_70122_E);
+                     }
+                  } else {
+                     packet1 = new SPacketEntity.S17PacketEntityLookMove(this.field_73132_a.func_145782_y(), j, k, l, (byte)k2, (byte)i, this.field_73132_a.field_70122_E);
+                  }
+               } else {
+                  this.field_180234_y = this.field_73132_a.field_70122_E;
+                  this.field_73142_u = 0;
+                  this.func_187261_c();
+                  packet1 = new SPacketEntityTeleport(this.field_73132_a);
+               }
             }
 
-            int k1 = MathHelper.floor(this.trackedEntity.getRotationYawHead() * 256.0F / 360.0F);
-
-            if (Math.abs(k1 - this.lastHeadMotion) >= 1)
-            {
-                this.sendPacketToTrackedPlayers(new SPacketEntityHeadLook(this.trackedEntity, (byte)k1));
-                this.lastHeadMotion = k1;
+            boolean flag2 = this.field_73143_t;
+            if (this.field_73132_a instanceof EntityLivingBase && ((EntityLivingBase)this.field_73132_a).func_184613_cA()) {
+               flag2 = true;
             }
 
-            this.trackedEntity.isAirBorne = false;
-        }
-
-        ++this.updateCounter;
-
-        if (this.trackedEntity.velocityChanged)
-        {
-            this.sendToTrackingAndSelf(new SPacketEntityVelocity(this.trackedEntity));
-            this.trackedEntity.velocityChanged = false;
-        }
-    }
-
-    /**
-     * Sends the entity metadata (DataWatcher) and attributes to all players tracking this entity, including the entity
-     * itself if a player.
-     */
-    private void sendMetadataToAllAssociatedPlayers()
-    {
-        EntityDataManager entitydatamanager = this.trackedEntity.getDataManager();
-
-        if (entitydatamanager.isDirty())
-        {
-            this.sendToTrackingAndSelf(new SPacketEntityMetadata(this.trackedEntity.getEntityId(), entitydatamanager, false));
-        }
-
-        if (this.trackedEntity instanceof EntityLivingBase)
-        {
-            AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMap();
-            Set<IAttributeInstance> set = attributemap.getAttributeInstanceSet();
-
-            if (!set.isEmpty())
-            {
-                this.sendToTrackingAndSelf(new SPacketEntityProperties(this.trackedEntity.getEntityId(), set));
+            if (flag2 && this.field_73136_m > 0) {
+               double d0 = this.field_73132_a.field_70159_w - this.field_73137_j;
+               double d1 = this.field_73132_a.field_70181_x - this.field_73138_k;
+               double d2 = this.field_73132_a.field_70179_y - this.field_73135_l;
+               double d3 = 0.02D;
+               double d4 = d0 * d0 + d1 * d1 + d2 * d2;
+               if (d4 > 4.0E-4D || d4 > 0.0D && this.field_73132_a.field_70159_w == 0.0D && this.field_73132_a.field_70181_x == 0.0D && this.field_73132_a.field_70179_y == 0.0D) {
+                  this.field_73137_j = this.field_73132_a.field_70159_w;
+                  this.field_73138_k = this.field_73132_a.field_70181_x;
+                  this.field_73135_l = this.field_73132_a.field_70179_y;
+                  this.func_151259_a(new SPacketEntityVelocity(this.field_73132_a.func_145782_y(), this.field_73137_j, this.field_73138_k, this.field_73135_l));
+               }
             }
 
-            set.clear();
-        }
-    }
-
-    /**
-     * Send the given packet to all players tracking this entity.
-     */
-    public void sendPacketToTrackedPlayers(Packet<?> packetIn)
-    {
-        for (EntityPlayerMP entityplayermp : this.trackingPlayers)
-        {
-            entityplayermp.connection.sendPacket(packetIn);
-        }
-    }
-
-    public void sendToTrackingAndSelf(Packet<?> packetIn)
-    {
-        this.sendPacketToTrackedPlayers(packetIn);
-
-        if (this.trackedEntity instanceof EntityPlayerMP)
-        {
-            ((EntityPlayerMP)this.trackedEntity).connection.sendPacket(packetIn);
-        }
-    }
-
-    public void sendDestroyEntityPacketToTrackedPlayers()
-    {
-        for (EntityPlayerMP entityplayermp : this.trackingPlayers)
-        {
-            this.trackedEntity.removeTrackingPlayer(entityplayermp);
-            entityplayermp.removeEntity(this.trackedEntity);
-        }
-    }
-
-    public void removeFromTrackedPlayers(EntityPlayerMP playerMP)
-    {
-        if (this.trackingPlayers.contains(playerMP))
-        {
-            this.trackedEntity.removeTrackingPlayer(playerMP);
-            playerMP.removeEntity(this.trackedEntity);
-            this.trackingPlayers.remove(playerMP);
-        }
-    }
-
-    public void updatePlayerEntity(EntityPlayerMP playerMP)
-    {
-        if (playerMP != this.trackedEntity)
-        {
-            if (this.isVisibleTo(playerMP))
-            {
-                if (!this.trackingPlayers.contains(playerMP) && (this.isPlayerWatchingThisChunk(playerMP) || this.trackedEntity.forceSpawn))
-                {
-                    this.trackingPlayers.add(playerMP);
-                    Packet<?> packet = this.createSpawnPacket();
-                    playerMP.connection.sendPacket(packet);
-
-                    if (!this.trackedEntity.getDataManager().isEmpty())
-                    {
-                        playerMP.connection.sendPacket(new SPacketEntityMetadata(this.trackedEntity.getEntityId(), this.trackedEntity.getDataManager(), true));
-                    }
-
-                    boolean flag = this.sendVelocityUpdates;
-
-                    if (this.trackedEntity instanceof EntityLivingBase)
-                    {
-                        AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMap();
-                        Collection<IAttributeInstance> collection = attributemap.getWatchedAttributes();
-
-                        if (!collection.isEmpty())
-                        {
-                            playerMP.connection.sendPacket(new SPacketEntityProperties(this.trackedEntity.getEntityId(), collection));
-                        }
-
-                        if (((EntityLivingBase)this.trackedEntity).isElytraFlying())
-                        {
-                            flag = true;
-                        }
-                    }
-
-                    this.lastTrackedEntityMotionX = this.trackedEntity.motionX;
-                    this.lastTrackedEntityMotionY = this.trackedEntity.motionY;
-                    this.motionZ = this.trackedEntity.motionZ;
-
-                    if (flag && !(packet instanceof SPacketSpawnMob))
-                    {
-                        playerMP.connection.sendPacket(new SPacketEntityVelocity(this.trackedEntity.getEntityId(), this.trackedEntity.motionX, this.trackedEntity.motionY, this.trackedEntity.motionZ));
-                    }
-
-                    if (this.trackedEntity instanceof EntityLivingBase)
-                    {
-                        for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values())
-                        {
-                            ItemStack itemstack = ((EntityLivingBase)this.trackedEntity).getItemStackFromSlot(entityequipmentslot);
-
-                            if (!itemstack.func_190926_b())
-                            {
-                                playerMP.connection.sendPacket(new SPacketEntityEquipment(this.trackedEntity.getEntityId(), entityequipmentslot, itemstack));
-                            }
-                        }
-                    }
-
-                    if (this.trackedEntity instanceof EntityPlayer)
-                    {
-                        EntityPlayer entityplayer = (EntityPlayer)this.trackedEntity;
-
-                        if (entityplayer.isPlayerSleeping())
-                        {
-                            playerMP.connection.sendPacket(new SPacketUseBed(entityplayer, new BlockPos(this.trackedEntity)));
-                        }
-                    }
-
-                    if (this.trackedEntity instanceof EntityLivingBase)
-                    {
-                        EntityLivingBase entitylivingbase = (EntityLivingBase)this.trackedEntity;
-
-                        for (PotionEffect potioneffect : entitylivingbase.getActivePotionEffects())
-                        {
-                            playerMP.connection.sendPacket(new SPacketEntityEffect(this.trackedEntity.getEntityId(), potioneffect));
-                        }
-                    }
-
-                    if (!this.trackedEntity.getPassengers().isEmpty())
-                    {
-                        playerMP.connection.sendPacket(new SPacketSetPassengers(this.trackedEntity));
-                    }
-
-                    if (this.trackedEntity.isRiding())
-                    {
-                        playerMP.connection.sendPacket(new SPacketSetPassengers(this.trackedEntity.getRidingEntity()));
-                    }
-
-                    this.trackedEntity.addTrackingPlayer(playerMP);
-                    playerMP.addEntity(this.trackedEntity);
-                }
-            }
-            else if (this.trackingPlayers.contains(playerMP))
-            {
-                this.trackingPlayers.remove(playerMP);
-                this.trackedEntity.removeTrackingPlayer(playerMP);
-                playerMP.removeEntity(this.trackedEntity);
-            }
-        }
-    }
-
-    public boolean isVisibleTo(EntityPlayerMP playerMP)
-    {
-        double d0 = playerMP.posX - (double)this.encodedPosX / 4096.0D;
-        double d1 = playerMP.posZ - (double)this.encodedPosZ / 4096.0D;
-        int i = Math.min(this.range, this.maxRange);
-        return d0 >= (double)(-i) && d0 <= (double)i && d1 >= (double)(-i) && d1 <= (double)i && this.trackedEntity.isSpectatedByPlayer(playerMP);
-    }
-
-    private boolean isPlayerWatchingThisChunk(EntityPlayerMP playerMP)
-    {
-        return playerMP.getServerWorld().getPlayerChunkMap().isPlayerWatchingChunk(playerMP, this.trackedEntity.chunkCoordX, this.trackedEntity.chunkCoordZ);
-    }
-
-    public void updatePlayerEntities(List<EntityPlayer> players)
-    {
-        for (int i = 0; i < players.size(); ++i)
-        {
-            this.updatePlayerEntity((EntityPlayerMP)players.get(i));
-        }
-    }
-
-    private Packet<?> createSpawnPacket()
-    {
-        if (this.trackedEntity.isDead)
-        {
-            LOGGER.warn("Fetching addPacket for removed entity");
-        }
-
-        if (this.trackedEntity instanceof EntityPlayerMP)
-        {
-            return new SPacketSpawnPlayer((EntityPlayer)this.trackedEntity);
-        }
-        else if (this.trackedEntity instanceof IAnimals)
-        {
-            this.lastHeadMotion = MathHelper.floor(this.trackedEntity.getRotationYawHead() * 256.0F / 360.0F);
-            return new SPacketSpawnMob((EntityLivingBase)this.trackedEntity);
-        }
-        else if (this.trackedEntity instanceof EntityPainting)
-        {
-            return new SPacketSpawnPainting((EntityPainting)this.trackedEntity);
-        }
-        else if (this.trackedEntity instanceof EntityItem)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 2, 1);
-        }
-        else if (this.trackedEntity instanceof EntityMinecart)
-        {
-            EntityMinecart entityminecart = (EntityMinecart)this.trackedEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 10, entityminecart.getType().getId());
-        }
-        else if (this.trackedEntity instanceof EntityBoat)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 1);
-        }
-        else if (this.trackedEntity instanceof EntityXPOrb)
-        {
-            return new SPacketSpawnExperienceOrb((EntityXPOrb)this.trackedEntity);
-        }
-        else if (this.trackedEntity instanceof EntityFishHook)
-        {
-            Entity entity2 = ((EntityFishHook)this.trackedEntity).func_190619_l();
-            return new SPacketSpawnObject(this.trackedEntity, 90, entity2 == null ? this.trackedEntity.getEntityId() : entity2.getEntityId());
-        }
-        else if (this.trackedEntity instanceof EntitySpectralArrow)
-        {
-            Entity entity1 = ((EntitySpectralArrow)this.trackedEntity).shootingEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 91, 1 + (entity1 == null ? this.trackedEntity.getEntityId() : entity1.getEntityId()));
-        }
-        else if (this.trackedEntity instanceof EntityTippedArrow)
-        {
-            Entity entity = ((EntityArrow)this.trackedEntity).shootingEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 60, 1 + (entity == null ? this.trackedEntity.getEntityId() : entity.getEntityId()));
-        }
-        else if (this.trackedEntity instanceof EntitySnowball)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 61);
-        }
-        else if (this.trackedEntity instanceof EntityLlamaSpit)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 68);
-        }
-        else if (this.trackedEntity instanceof EntityPotion)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 73);
-        }
-        else if (this.trackedEntity instanceof EntityExpBottle)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 75);
-        }
-        else if (this.trackedEntity instanceof EntityEnderPearl)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 65);
-        }
-        else if (this.trackedEntity instanceof EntityEnderEye)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 72);
-        }
-        else if (this.trackedEntity instanceof EntityFireworkRocket)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 76);
-        }
-        else if (this.trackedEntity instanceof EntityFireball)
-        {
-            EntityFireball entityfireball = (EntityFireball)this.trackedEntity;
-            SPacketSpawnObject spacketspawnobject = null;
-            int i = 63;
-
-            if (this.trackedEntity instanceof EntitySmallFireball)
-            {
-                i = 64;
-            }
-            else if (this.trackedEntity instanceof EntityDragonFireball)
-            {
-                i = 93;
-            }
-            else if (this.trackedEntity instanceof EntityWitherSkull)
-            {
-                i = 66;
+            if (packet1 != null) {
+               this.func_151259_a(packet1);
             }
 
-            if (entityfireball.shootingEntity != null)
-            {
-                spacketspawnobject = new SPacketSpawnObject(this.trackedEntity, i, ((EntityFireball)this.trackedEntity).shootingEntity.getEntityId());
-            }
-            else
-            {
-                spacketspawnobject = new SPacketSpawnObject(this.trackedEntity, i, 0);
+            this.func_111190_b();
+            if (flag) {
+               this.field_73128_d = i1;
+               this.field_73129_e = i2;
+               this.field_73126_f = j2;
             }
 
-            spacketspawnobject.setSpeedX((int)(entityfireball.accelerationX * 8000.0D));
-            spacketspawnobject.setSpeedY((int)(entityfireball.accelerationY * 8000.0D));
-            spacketspawnobject.setSpeedZ((int)(entityfireball.accelerationZ * 8000.0D));
-            return spacketspawnobject;
-        }
-        else if (this.trackedEntity instanceof EntityShulkerBullet)
-        {
-            SPacketSpawnObject spacketspawnobject1 = new SPacketSpawnObject(this.trackedEntity, 67, 0);
-            spacketspawnobject1.setSpeedX((int)(this.trackedEntity.motionX * 8000.0D));
-            spacketspawnobject1.setSpeedY((int)(this.trackedEntity.motionY * 8000.0D));
-            spacketspawnobject1.setSpeedZ((int)(this.trackedEntity.motionZ * 8000.0D));
-            return spacketspawnobject1;
-        }
-        else if (this.trackedEntity instanceof EntityEgg)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 62);
-        }
-        else if (this.trackedEntity instanceof EntityEvokerFangs)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 79);
-        }
-        else if (this.trackedEntity instanceof EntityTNTPrimed)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 50);
-        }
-        else if (this.trackedEntity instanceof EntityEnderCrystal)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 51);
-        }
-        else if (this.trackedEntity instanceof EntityFallingBlock)
-        {
-            EntityFallingBlock entityfallingblock = (EntityFallingBlock)this.trackedEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 70, Block.getStateId(entityfallingblock.getBlock()));
-        }
-        else if (this.trackedEntity instanceof EntityArmorStand)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 78);
-        }
-        else if (this.trackedEntity instanceof EntityItemFrame)
-        {
-            EntityItemFrame entityitemframe = (EntityItemFrame)this.trackedEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 71, entityitemframe.facingDirection.getHorizontalIndex(), entityitemframe.getHangingPosition());
-        }
-        else if (this.trackedEntity instanceof EntityLeashKnot)
-        {
-            EntityLeashKnot entityleashknot = (EntityLeashKnot)this.trackedEntity;
-            return new SPacketSpawnObject(this.trackedEntity, 77, 0, entityleashknot.getHangingPosition());
-        }
-        else if (this.trackedEntity instanceof EntityAreaEffectCloud)
-        {
-            return new SPacketSpawnObject(this.trackedEntity, 3);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Don't know how to add " + this.trackedEntity.getClass() + "!");
-        }
-    }
+            if (flag1) {
+               this.field_73127_g = k2;
+               this.field_73139_h = i;
+            }
 
-    /**
-     * Remove a tracked player from our list and tell the tracked player to destroy us from their world.
-     */
-    public void removeTrackedPlayerSymmetric(EntityPlayerMP playerMP)
-    {
-        if (this.trackingPlayers.contains(playerMP))
-        {
-            this.trackingPlayers.remove(playerMP);
-            this.trackedEntity.removeTrackingPlayer(playerMP);
-            playerMP.removeEntity(this.trackedEntity);
-        }
-    }
+            this.field_73141_v = false;
+         }
 
-    public Entity getTrackedEntity()
-    {
-        return this.trackedEntity;
-    }
+         int k1 = MathHelper.func_76141_d(this.field_73132_a.func_70079_am() * 256.0F / 360.0F);
+         if (Math.abs(k1 - this.field_73140_i) >= 1) {
+            this.func_151259_a(new SPacketEntityHeadLook(this.field_73132_a, (byte)k1));
+            this.field_73140_i = k1;
+         }
 
-    public void setMaxRange(int maxRangeIn)
-    {
-        this.maxRange = maxRangeIn;
-    }
+         this.field_73132_a.field_70160_al = false;
+      }
 
-    public void resetPlayerVisibility()
-    {
-        this.updatedPlayerVisibility = false;
-    }
+      ++this.field_73136_m;
+      if (this.field_73132_a.field_70133_I) {
+         this.func_151261_b(new SPacketEntityVelocity(this.field_73132_a));
+         this.field_73132_a.field_70133_I = false;
+      }
+
+   }
+
+   private void func_111190_b() {
+      EntityDataManager entitydatamanager = this.field_73132_a.func_184212_Q();
+      if (entitydatamanager.func_187223_a()) {
+         this.func_151261_b(new SPacketEntityMetadata(this.field_73132_a.func_145782_y(), entitydatamanager, false));
+      }
+
+      if (this.field_73132_a instanceof EntityLivingBase) {
+         AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.field_73132_a).func_110140_aT();
+         Set<IAttributeInstance> set = attributemap.func_111161_b();
+         if (!set.isEmpty()) {
+            this.func_151261_b(new SPacketEntityProperties(this.field_73132_a.func_145782_y(), set));
+         }
+
+         set.clear();
+      }
+
+   }
+
+   public void func_151259_a(Packet<?> p_151259_1_) {
+      for(EntityPlayerMP entityplayermp : this.field_73134_o) {
+         entityplayermp.field_71135_a.func_147359_a(p_151259_1_);
+      }
+
+   }
+
+   public void func_151261_b(Packet<?> p_151261_1_) {
+      this.func_151259_a(p_151261_1_);
+      if (this.field_73132_a instanceof EntityPlayerMP) {
+         ((EntityPlayerMP)this.field_73132_a).field_71135_a.func_147359_a(p_151261_1_);
+      }
+
+   }
+
+   public void func_73119_a() {
+      for(EntityPlayerMP entityplayermp : this.field_73134_o) {
+         this.field_73132_a.func_184203_c(entityplayermp);
+         entityplayermp.func_152339_d(this.field_73132_a);
+      }
+
+   }
+
+   public void func_73118_a(EntityPlayerMP p_73118_1_) {
+      if (this.field_73134_o.contains(p_73118_1_)) {
+         this.field_73132_a.func_184203_c(p_73118_1_);
+         p_73118_1_.func_152339_d(this.field_73132_a);
+         this.field_73134_o.remove(p_73118_1_);
+      }
+
+   }
+
+   public void func_73117_b(EntityPlayerMP p_73117_1_) {
+      if (p_73117_1_ != this.field_73132_a) {
+         if (this.func_180233_c(p_73117_1_)) {
+            if (!this.field_73134_o.contains(p_73117_1_) && (this.func_73121_d(p_73117_1_) || this.field_73132_a.field_98038_p)) {
+               this.field_73134_o.add(p_73117_1_);
+               Packet<?> packet = this.func_151260_c();
+               p_73117_1_.field_71135_a.func_147359_a(packet);
+               if (!this.field_73132_a.func_184212_Q().func_187228_d()) {
+                  p_73117_1_.field_71135_a.func_147359_a(new SPacketEntityMetadata(this.field_73132_a.func_145782_y(), this.field_73132_a.func_184212_Q(), true));
+               }
+
+               boolean flag = this.field_73143_t;
+               if (this.field_73132_a instanceof EntityLivingBase) {
+                  AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.field_73132_a).func_110140_aT();
+                  Collection<IAttributeInstance> collection = attributemap.func_111160_c();
+                  if (!collection.isEmpty()) {
+                     p_73117_1_.field_71135_a.func_147359_a(new SPacketEntityProperties(this.field_73132_a.func_145782_y(), collection));
+                  }
+
+                  if (((EntityLivingBase)this.field_73132_a).func_184613_cA()) {
+                     flag = true;
+                  }
+               }
+
+               this.field_73137_j = this.field_73132_a.field_70159_w;
+               this.field_73138_k = this.field_73132_a.field_70181_x;
+               this.field_73135_l = this.field_73132_a.field_70179_y;
+               if (flag && !(packet instanceof SPacketSpawnMob)) {
+                  p_73117_1_.field_71135_a.func_147359_a(new SPacketEntityVelocity(this.field_73132_a.func_145782_y(), this.field_73132_a.field_70159_w, this.field_73132_a.field_70181_x, this.field_73132_a.field_70179_y));
+               }
+
+               if (this.field_73132_a instanceof EntityLivingBase) {
+                  for(EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values()) {
+                     ItemStack itemstack = ((EntityLivingBase)this.field_73132_a).func_184582_a(entityequipmentslot);
+                     if (!itemstack.func_190926_b()) {
+                        p_73117_1_.field_71135_a.func_147359_a(new SPacketEntityEquipment(this.field_73132_a.func_145782_y(), entityequipmentslot, itemstack));
+                     }
+                  }
+               }
+
+               if (this.field_73132_a instanceof EntityPlayer) {
+                  EntityPlayer entityplayer = (EntityPlayer)this.field_73132_a;
+                  if (entityplayer.func_70608_bn()) {
+                     p_73117_1_.field_71135_a.func_147359_a(new SPacketUseBed(entityplayer, new BlockPos(this.field_73132_a)));
+                  }
+               }
+
+               if (this.field_73132_a instanceof EntityLivingBase) {
+                  EntityLivingBase entitylivingbase = (EntityLivingBase)this.field_73132_a;
+
+                  for(PotionEffect potioneffect : entitylivingbase.func_70651_bq()) {
+                     p_73117_1_.field_71135_a.func_147359_a(new SPacketEntityEffect(this.field_73132_a.func_145782_y(), potioneffect));
+                  }
+               }
+
+               if (!this.field_73132_a.func_184188_bt().isEmpty()) {
+                  p_73117_1_.field_71135_a.func_147359_a(new SPacketSetPassengers(this.field_73132_a));
+               }
+
+               if (this.field_73132_a.func_184218_aH()) {
+                  p_73117_1_.field_71135_a.func_147359_a(new SPacketSetPassengers(this.field_73132_a.func_184187_bx()));
+               }
+
+               this.field_73132_a.func_184178_b(p_73117_1_);
+               p_73117_1_.func_184848_d(this.field_73132_a);
+            }
+         } else if (this.field_73134_o.contains(p_73117_1_)) {
+            this.field_73134_o.remove(p_73117_1_);
+            this.field_73132_a.func_184203_c(p_73117_1_);
+            p_73117_1_.func_152339_d(this.field_73132_a);
+         }
+
+      }
+   }
+
+   public boolean func_180233_c(EntityPlayerMP p_180233_1_) {
+      double d0 = p_180233_1_.field_70165_t - (double)this.field_73128_d / 4096.0D;
+      double d1 = p_180233_1_.field_70161_v - (double)this.field_73126_f / 4096.0D;
+      int i = Math.min(this.field_73130_b, this.field_187262_f);
+      return d0 >= (double)(-i) && d0 <= (double)i && d1 >= (double)(-i) && d1 <= (double)i && this.field_73132_a.func_174827_a(p_180233_1_);
+   }
+
+   private boolean func_73121_d(EntityPlayerMP p_73121_1_) {
+      return p_73121_1_.func_71121_q().func_184164_w().func_72694_a(p_73121_1_, this.field_73132_a.field_70176_ah, this.field_73132_a.field_70164_aj);
+   }
+
+   public void func_73125_b(List<EntityPlayer> p_73125_1_) {
+      for(int i = 0; i < p_73125_1_.size(); ++i) {
+         this.func_73117_b((EntityPlayerMP)p_73125_1_.get(i));
+      }
+
+   }
+
+   private Packet<?> func_151260_c() {
+      if (this.field_73132_a.field_70128_L) {
+         field_151262_p.warn("Fetching addPacket for removed entity");
+      }
+
+      if (this.field_73132_a instanceof EntityPlayerMP) {
+         return new SPacketSpawnPlayer((EntityPlayer)this.field_73132_a);
+      } else if (this.field_73132_a instanceof IAnimals) {
+         this.field_73140_i = MathHelper.func_76141_d(this.field_73132_a.func_70079_am() * 256.0F / 360.0F);
+         return new SPacketSpawnMob((EntityLivingBase)this.field_73132_a);
+      } else if (this.field_73132_a instanceof EntityPainting) {
+         return new SPacketSpawnPainting((EntityPainting)this.field_73132_a);
+      } else if (this.field_73132_a instanceof EntityItem) {
+         return new SPacketSpawnObject(this.field_73132_a, 2, 1);
+      } else if (this.field_73132_a instanceof EntityMinecart) {
+         EntityMinecart entityminecart = (EntityMinecart)this.field_73132_a;
+         return new SPacketSpawnObject(this.field_73132_a, 10, entityminecart.func_184264_v().func_184956_a());
+      } else if (this.field_73132_a instanceof EntityBoat) {
+         return new SPacketSpawnObject(this.field_73132_a, 1);
+      } else if (this.field_73132_a instanceof EntityXPOrb) {
+         return new SPacketSpawnExperienceOrb((EntityXPOrb)this.field_73132_a);
+      } else if (this.field_73132_a instanceof EntityFishHook) {
+         Entity entity2 = ((EntityFishHook)this.field_73132_a).func_190619_l();
+         return new SPacketSpawnObject(this.field_73132_a, 90, entity2 == null ? this.field_73132_a.func_145782_y() : entity2.func_145782_y());
+      } else if (this.field_73132_a instanceof EntitySpectralArrow) {
+         Entity entity1 = ((EntitySpectralArrow)this.field_73132_a).field_70250_c;
+         return new SPacketSpawnObject(this.field_73132_a, 91, 1 + (entity1 == null ? this.field_73132_a.func_145782_y() : entity1.func_145782_y()));
+      } else if (this.field_73132_a instanceof EntityTippedArrow) {
+         Entity entity = ((EntityArrow)this.field_73132_a).field_70250_c;
+         return new SPacketSpawnObject(this.field_73132_a, 60, 1 + (entity == null ? this.field_73132_a.func_145782_y() : entity.func_145782_y()));
+      } else if (this.field_73132_a instanceof EntitySnowball) {
+         return new SPacketSpawnObject(this.field_73132_a, 61);
+      } else if (this.field_73132_a instanceof EntityLlamaSpit) {
+         return new SPacketSpawnObject(this.field_73132_a, 68);
+      } else if (this.field_73132_a instanceof EntityPotion) {
+         return new SPacketSpawnObject(this.field_73132_a, 73);
+      } else if (this.field_73132_a instanceof EntityExpBottle) {
+         return new SPacketSpawnObject(this.field_73132_a, 75);
+      } else if (this.field_73132_a instanceof EntityEnderPearl) {
+         return new SPacketSpawnObject(this.field_73132_a, 65);
+      } else if (this.field_73132_a instanceof EntityEnderEye) {
+         return new SPacketSpawnObject(this.field_73132_a, 72);
+      } else if (this.field_73132_a instanceof EntityFireworkRocket) {
+         return new SPacketSpawnObject(this.field_73132_a, 76);
+      } else if (this.field_73132_a instanceof EntityFireball) {
+         EntityFireball entityfireball = (EntityFireball)this.field_73132_a;
+         SPacketSpawnObject spacketspawnobject = null;
+         int i = 63;
+         if (this.field_73132_a instanceof EntitySmallFireball) {
+            i = 64;
+         } else if (this.field_73132_a instanceof EntityDragonFireball) {
+            i = 93;
+         } else if (this.field_73132_a instanceof EntityWitherSkull) {
+            i = 66;
+         }
+
+         if (entityfireball.field_70235_a != null) {
+            spacketspawnobject = new SPacketSpawnObject(this.field_73132_a, i, ((EntityFireball)this.field_73132_a).field_70235_a.func_145782_y());
+         } else {
+            spacketspawnobject = new SPacketSpawnObject(this.field_73132_a, i, 0);
+         }
+
+         spacketspawnobject.func_149003_d((int)(entityfireball.field_70232_b * 8000.0D));
+         spacketspawnobject.func_149000_e((int)(entityfireball.field_70233_c * 8000.0D));
+         spacketspawnobject.func_149007_f((int)(entityfireball.field_70230_d * 8000.0D));
+         return spacketspawnobject;
+      } else if (this.field_73132_a instanceof EntityShulkerBullet) {
+         SPacketSpawnObject spacketspawnobject1 = new SPacketSpawnObject(this.field_73132_a, 67, 0);
+         spacketspawnobject1.func_149003_d((int)(this.field_73132_a.field_70159_w * 8000.0D));
+         spacketspawnobject1.func_149000_e((int)(this.field_73132_a.field_70181_x * 8000.0D));
+         spacketspawnobject1.func_149007_f((int)(this.field_73132_a.field_70179_y * 8000.0D));
+         return spacketspawnobject1;
+      } else if (this.field_73132_a instanceof EntityEgg) {
+         return new SPacketSpawnObject(this.field_73132_a, 62);
+      } else if (this.field_73132_a instanceof EntityEvokerFangs) {
+         return new SPacketSpawnObject(this.field_73132_a, 79);
+      } else if (this.field_73132_a instanceof EntityTNTPrimed) {
+         return new SPacketSpawnObject(this.field_73132_a, 50);
+      } else if (this.field_73132_a instanceof EntityEnderCrystal) {
+         return new SPacketSpawnObject(this.field_73132_a, 51);
+      } else if (this.field_73132_a instanceof EntityFallingBlock) {
+         EntityFallingBlock entityfallingblock = (EntityFallingBlock)this.field_73132_a;
+         return new SPacketSpawnObject(this.field_73132_a, 70, Block.func_176210_f(entityfallingblock.func_175131_l()));
+      } else if (this.field_73132_a instanceof EntityArmorStand) {
+         return new SPacketSpawnObject(this.field_73132_a, 78);
+      } else if (this.field_73132_a instanceof EntityItemFrame) {
+         EntityItemFrame entityitemframe = (EntityItemFrame)this.field_73132_a;
+         return new SPacketSpawnObject(this.field_73132_a, 71, entityitemframe.field_174860_b.func_176736_b(), entityitemframe.func_174857_n());
+      } else if (this.field_73132_a instanceof EntityLeashKnot) {
+         EntityLeashKnot entityleashknot = (EntityLeashKnot)this.field_73132_a;
+         return new SPacketSpawnObject(this.field_73132_a, 77, 0, entityleashknot.func_174857_n());
+      } else if (this.field_73132_a instanceof EntityAreaEffectCloud) {
+         return new SPacketSpawnObject(this.field_73132_a, 3);
+      } else {
+         throw new IllegalArgumentException("Don't know how to add " + this.field_73132_a.getClass() + "!");
+      }
+   }
+
+   public void func_73123_c(EntityPlayerMP p_73123_1_) {
+      if (this.field_73134_o.contains(p_73123_1_)) {
+         this.field_73134_o.remove(p_73123_1_);
+         this.field_73132_a.func_184203_c(p_73123_1_);
+         p_73123_1_.func_152339_d(this.field_73132_a);
+      }
+
+   }
+
+   public Entity func_187260_b() {
+      return this.field_73132_a;
+   }
+
+   public void func_187259_a(int p_187259_1_) {
+      this.field_187262_f = p_187259_1_;
+   }
+
+   public void func_187261_c() {
+      this.field_73144_s = false;
+   }
 }

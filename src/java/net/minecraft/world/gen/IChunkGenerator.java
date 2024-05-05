@@ -8,20 +8,19 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
-public interface IChunkGenerator
-{
-    Chunk provideChunk(int x, int z);
+public interface IChunkGenerator {
+   Chunk func_185932_a(int var1, int var2);
 
-    void populate(int x, int z);
+   void func_185931_b(int var1, int var2);
 
-    boolean generateStructures(Chunk chunkIn, int x, int z);
+   boolean func_185933_a(Chunk var1, int var2, int var3);
 
-    List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos);
+   List<Biome.SpawnListEntry> func_177458_a(EnumCreatureType var1, BlockPos var2);
 
-    @Nullable
-    BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_);
+   @Nullable
+   BlockPos func_180513_a(World var1, String var2, BlockPos var3, boolean var4);
 
-    void recreateStructures(Chunk chunkIn, int x, int z);
+   void func_180514_a(Chunk var1, int var2, int var3);
 
-    boolean func_193414_a(World p_193414_1_, String p_193414_2_, BlockPos p_193414_3_);
+   boolean func_193414_a(World var1, String var2, BlockPos var3);
 }

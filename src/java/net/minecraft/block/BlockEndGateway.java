@@ -17,105 +17,75 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockEndGateway extends BlockContainer
-{
-    protected BlockEndGateway(Material p_i46687_1_)
-    {
-        super(p_i46687_1_);
-        this.setLightLevel(1.0F);
-    }
+public class BlockEndGateway extends BlockContainer {
+   protected BlockEndGateway(Material p_i46687_1_) {
+      super(p_i46687_1_);
+      this.func_149715_a(1.0F);
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityEndGateway();
-    }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityEndGateway();
+   }
 
-    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        IBlockState iblockstate = blockAccess.getBlockState(pos.offset(side));
-        Block block = iblockstate.getBlock();
-        return !iblockstate.isOpaqueCube() && block != Blocks.END_GATEWAY;
-    }
+   public boolean func_176225_a(IBlockState p_176225_1_, IBlockAccess p_176225_2_, BlockPos p_176225_3_, EnumFacing p_176225_4_) {
+      IBlockState iblockstate = p_176225_2_.func_180495_p(p_176225_3_.func_177972_a(p_176225_4_));
+      Block block = iblockstate.func_177230_c();
+      return !iblockstate.func_185914_p() && block != Blocks.field_185775_db;
+   }
 
-    @Nullable
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
-    {
-        return NULL_AABB;
-    }
+   @Nullable
+   public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_) {
+      return field_185506_k;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    public int quantityDropped(Random random)
-    {
-        return 0;
-    }
+   public int func_149745_a(Random p_149745_1_) {
+      return 0;
+   }
 
-    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
-    {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_) {
+      TileEntity tileentity = p_180655_2_.func_175625_s(p_180655_3_);
+      if (tileentity instanceof TileEntityEndGateway) {
+         int i = ((TileEntityEndGateway)tileentity).func_184304_i();
 
-        if (tileentity instanceof TileEntityEndGateway)
-        {
-            int i = ((TileEntityEndGateway)tileentity).getParticleAmount();
-
-            for (int j = 0; j < i; ++j)
-            {
-                double d0 = (double)((float)pos.getX() + rand.nextFloat());
-                double d1 = (double)((float)pos.getY() + rand.nextFloat());
-                double d2 = (double)((float)pos.getZ() + rand.nextFloat());
-                double d3 = ((double)rand.nextFloat() - 0.5D) * 0.5D;
-                double d4 = ((double)rand.nextFloat() - 0.5D) * 0.5D;
-                double d5 = ((double)rand.nextFloat() - 0.5D) * 0.5D;
-                int k = rand.nextInt(2) * 2 - 1;
-
-                if (rand.nextBoolean())
-                {
-                    d2 = (double)pos.getZ() + 0.5D + 0.25D * (double)k;
-                    d5 = (double)(rand.nextFloat() * 2.0F * (float)k);
-                }
-                else
-                {
-                    d0 = (double)pos.getX() + 0.5D + 0.25D * (double)k;
-                    d3 = (double)(rand.nextFloat() * 2.0F * (float)k);
-                }
-
-                worldIn.spawnParticle(EnumParticleTypes.PORTAL, d0, d1, d2, d3, d4, d5);
+         for(int j = 0; j < i; ++j) {
+            double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
+            double d1 = (double)((float)p_180655_3_.func_177956_o() + p_180655_4_.nextFloat());
+            double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
+            double d3 = ((double)p_180655_4_.nextFloat() - 0.5D) * 0.5D;
+            double d4 = ((double)p_180655_4_.nextFloat() - 0.5D) * 0.5D;
+            double d5 = ((double)p_180655_4_.nextFloat() - 0.5D) * 0.5D;
+            int k = p_180655_4_.nextInt(2) * 2 - 1;
+            if (p_180655_4_.nextBoolean()) {
+               d2 = (double)p_180655_3_.func_177952_p() + 0.5D + 0.25D * (double)k;
+               d5 = (double)(p_180655_4_.nextFloat() * 2.0F * (float)k);
+            } else {
+               d0 = (double)p_180655_3_.func_177958_n() + 0.5D + 0.25D * (double)k;
+               d3 = (double)(p_180655_4_.nextFloat() * 2.0F * (float)k);
             }
-        }
-    }
 
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return ItemStack.field_190927_a;
-    }
+            p_180655_2_.func_175688_a(EnumParticleTypes.PORTAL, d0, d1, d2, d3, d4, d5);
+         }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return MapColor.BLACK;
-    }
+      }
+   }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        return BlockFaceShape.UNDEFINED;
-    }
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      return ItemStack.field_190927_a;
+   }
+
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return MapColor.field_151646_E;
+   }
+
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      return BlockFaceShape.UNDEFINED;
+   }
 }

@@ -6,192 +6,145 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
 
-public class ScorePlayerTeam extends Team
-{
-    private final Scoreboard theScoreboard;
-    private final String registeredName;
-    private final Set<String> membershipSet = Sets.<String>newHashSet();
-    private String teamNameSPT;
-    private String namePrefixSPT = "";
-    private String colorSuffix = "";
-    private boolean allowFriendlyFire = true;
-    private boolean canSeeFriendlyInvisibles = true;
-    private Team.EnumVisible nameTagVisibility = Team.EnumVisible.ALWAYS;
-    private Team.EnumVisible deathMessageVisibility = Team.EnumVisible.ALWAYS;
-    private TextFormatting chatFormat = TextFormatting.RESET;
-    private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;
+public class ScorePlayerTeam extends Team {
+   private final Scoreboard field_96677_a;
+   private final String field_96675_b;
+   private final Set<String> field_96676_c = Sets.<String>newHashSet();
+   private String field_96673_d;
+   private String field_96674_e = "";
+   private String field_96671_f = "";
+   private boolean field_96672_g = true;
+   private boolean field_98301_h = true;
+   private Team.EnumVisible field_178778_i = Team.EnumVisible.ALWAYS;
+   private Team.EnumVisible field_178776_j = Team.EnumVisible.ALWAYS;
+   private TextFormatting field_178777_k = TextFormatting.RESET;
+   private Team.CollisionRule field_186683_l = Team.CollisionRule.ALWAYS;
 
-    public ScorePlayerTeam(Scoreboard theScoreboardIn, String name)
-    {
-        this.theScoreboard = theScoreboardIn;
-        this.registeredName = name;
-        this.teamNameSPT = name;
-    }
+   public ScorePlayerTeam(Scoreboard p_i2308_1_, String p_i2308_2_) {
+      this.field_96677_a = p_i2308_1_;
+      this.field_96675_b = p_i2308_2_;
+      this.field_96673_d = p_i2308_2_;
+   }
 
-    /**
-     * Retrieve the name by which this team is registered in the scoreboard
-     */
-    public String getRegisteredName()
-    {
-        return this.registeredName;
-    }
+   public String func_96661_b() {
+      return this.field_96675_b;
+   }
 
-    public String getTeamName()
-    {
-        return this.teamNameSPT;
-    }
+   public String func_96669_c() {
+      return this.field_96673_d;
+   }
 
-    public void setTeamName(String name)
-    {
-        if (name == null)
-        {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        else
-        {
-            this.teamNameSPT = name;
-            this.theScoreboard.broadcastTeamInfoUpdate(this);
-        }
-    }
+   public void func_96664_a(String p_96664_1_) {
+      if (p_96664_1_ == null) {
+         throw new IllegalArgumentException("Name cannot be null");
+      } else {
+         this.field_96673_d = p_96664_1_;
+         this.field_96677_a.func_96538_b(this);
+      }
+   }
 
-    public Collection<String> getMembershipCollection()
-    {
-        return this.membershipSet;
-    }
+   public Collection<String> func_96670_d() {
+      return this.field_96676_c;
+   }
 
-    /**
-     * Returns the color prefix for the player's team name
-     */
-    public String getColorPrefix()
-    {
-        return this.namePrefixSPT;
-    }
+   public String func_96668_e() {
+      return this.field_96674_e;
+   }
 
-    public void setNamePrefix(String prefix)
-    {
-        if (prefix == null)
-        {
-            throw new IllegalArgumentException("Prefix cannot be null");
-        }
-        else
-        {
-            this.namePrefixSPT = prefix;
-            this.theScoreboard.broadcastTeamInfoUpdate(this);
-        }
-    }
+   public void func_96666_b(String p_96666_1_) {
+      if (p_96666_1_ == null) {
+         throw new IllegalArgumentException("Prefix cannot be null");
+      } else {
+         this.field_96674_e = p_96666_1_;
+         this.field_96677_a.func_96538_b(this);
+      }
+   }
 
-    /**
-     * Returns the color suffix for the player's team name
-     */
-    public String getColorSuffix()
-    {
-        return this.colorSuffix;
-    }
+   public String func_96663_f() {
+      return this.field_96671_f;
+   }
 
-    public void setNameSuffix(String suffix)
-    {
-        this.colorSuffix = suffix;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_96662_c(String p_96662_1_) {
+      this.field_96671_f = p_96662_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public String formatString(String input)
-    {
-        return this.getColorPrefix() + input + this.getColorSuffix();
-    }
+   public String func_142053_d(String p_142053_1_) {
+      return this.func_96668_e() + p_142053_1_ + this.func_96663_f();
+   }
 
-    /**
-     * Returns the player name including the color prefixes and suffixes
-     */
-    public static String formatPlayerName(@Nullable Team teamIn, String string)
-    {
-        return teamIn == null ? string : teamIn.formatString(string);
-    }
+   public static String func_96667_a(@Nullable Team p_96667_0_, String p_96667_1_) {
+      return p_96667_0_ == null ? p_96667_1_ : p_96667_0_.func_142053_d(p_96667_1_);
+   }
 
-    public boolean getAllowFriendlyFire()
-    {
-        return this.allowFriendlyFire;
-    }
+   public boolean func_96665_g() {
+      return this.field_96672_g;
+   }
 
-    public void setAllowFriendlyFire(boolean friendlyFire)
-    {
-        this.allowFriendlyFire = friendlyFire;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_96660_a(boolean p_96660_1_) {
+      this.field_96672_g = p_96660_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public boolean getSeeFriendlyInvisiblesEnabled()
-    {
-        return this.canSeeFriendlyInvisibles;
-    }
+   public boolean func_98297_h() {
+      return this.field_98301_h;
+   }
 
-    public void setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles)
-    {
-        this.canSeeFriendlyInvisibles = friendlyInvisibles;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_98300_b(boolean p_98300_1_) {
+      this.field_98301_h = p_98300_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public Team.EnumVisible getNameTagVisibility()
-    {
-        return this.nameTagVisibility;
-    }
+   public Team.EnumVisible func_178770_i() {
+      return this.field_178778_i;
+   }
 
-    public Team.EnumVisible getDeathMessageVisibility()
-    {
-        return this.deathMessageVisibility;
-    }
+   public Team.EnumVisible func_178771_j() {
+      return this.field_178776_j;
+   }
 
-    public void setNameTagVisibility(Team.EnumVisible visibility)
-    {
-        this.nameTagVisibility = visibility;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_178772_a(Team.EnumVisible p_178772_1_) {
+      this.field_178778_i = p_178772_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public void setDeathMessageVisibility(Team.EnumVisible visibility)
-    {
-        this.deathMessageVisibility = visibility;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_178773_b(Team.EnumVisible p_178773_1_) {
+      this.field_178776_j = p_178773_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public Team.CollisionRule getCollisionRule()
-    {
-        return this.collisionRule;
-    }
+   public Team.CollisionRule func_186681_k() {
+      return this.field_186683_l;
+   }
 
-    public void setCollisionRule(Team.CollisionRule rule)
-    {
-        this.collisionRule = rule;
-        this.theScoreboard.broadcastTeamInfoUpdate(this);
-    }
+   public void func_186682_a(Team.CollisionRule p_186682_1_) {
+      this.field_186683_l = p_186682_1_;
+      this.field_96677_a.func_96538_b(this);
+   }
 
-    public int getFriendlyFlags()
-    {
-        int i = 0;
+   public int func_98299_i() {
+      int i = 0;
+      if (this.func_96665_g()) {
+         i |= 1;
+      }
 
-        if (this.getAllowFriendlyFire())
-        {
-            i |= 1;
-        }
+      if (this.func_98297_h()) {
+         i |= 2;
+      }
 
-        if (this.getSeeFriendlyInvisiblesEnabled())
-        {
-            i |= 2;
-        }
+      return i;
+   }
 
-        return i;
-    }
+   public void func_98298_a(int p_98298_1_) {
+      this.func_96660_a((p_98298_1_ & 1) > 0);
+      this.func_98300_b((p_98298_1_ & 2) > 0);
+   }
 
-    public void setFriendlyFlags(int flags)
-    {
-        this.setAllowFriendlyFire((flags & 1) > 0);
-        this.setSeeFriendlyInvisiblesEnabled((flags & 2) > 0);
-    }
+   public void func_178774_a(TextFormatting p_178774_1_) {
+      this.field_178777_k = p_178774_1_;
+   }
 
-    public void setChatFormat(TextFormatting format)
-    {
-        this.chatFormat = format;
-    }
-
-    public TextFormatting getChatFormat()
-    {
-        return this.chatFormat;
-    }
+   public TextFormatting func_178775_l() {
+      return this.field_178777_k;
+   }
 }

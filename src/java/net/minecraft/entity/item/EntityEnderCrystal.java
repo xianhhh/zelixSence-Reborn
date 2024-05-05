@@ -16,184 +16,124 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.end.DragonFightManager;
 
-public class EntityEnderCrystal extends Entity
-{
-    private static final DataParameter<Optional<BlockPos>> BEAM_TARGET = EntityDataManager.<Optional<BlockPos>>createKey(EntityEnderCrystal.class, DataSerializers.OPTIONAL_BLOCK_POS);
-    private static final DataParameter<Boolean> SHOW_BOTTOM = EntityDataManager.<Boolean>createKey(EntityEnderCrystal.class, DataSerializers.BOOLEAN);
+public class EntityEnderCrystal extends Entity {
+   private static final DataParameter<Optional<BlockPos>> field_184521_b = EntityDataManager.<Optional<BlockPos>>func_187226_a(EntityEnderCrystal.class, DataSerializers.field_187201_k);
+   private static final DataParameter<Boolean> field_184522_c = EntityDataManager.<Boolean>func_187226_a(EntityEnderCrystal.class, DataSerializers.field_187198_h);
+   public int field_70261_a;
 
-    /** Used to create the rotation animation when rendering the crystal. */
-    public int innerRotation;
+   public EntityEnderCrystal(World p_i1698_1_) {
+      super(p_i1698_1_);
+      this.field_70156_m = true;
+      this.func_70105_a(2.0F, 2.0F);
+      this.field_70261_a = this.field_70146_Z.nextInt(100000);
+   }
 
-    public EntityEnderCrystal(World worldIn)
-    {
-        super(worldIn);
-        this.preventEntitySpawning = true;
-        this.setSize(2.0F, 2.0F);
-        this.innerRotation = this.rand.nextInt(100000);
-    }
+   public EntityEnderCrystal(World p_i1699_1_, double p_i1699_2_, double p_i1699_4_, double p_i1699_6_) {
+      this(p_i1699_1_);
+      this.func_70107_b(p_i1699_2_, p_i1699_4_, p_i1699_6_);
+   }
 
-    public EntityEnderCrystal(World worldIn, double x, double y, double z)
-    {
-        this(worldIn);
-        this.setPosition(x, y, z);
-    }
+   protected boolean func_70041_e_() {
+      return false;
+   }
 
-    /**
-     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
-     * prevent them from trampling crops
-     */
-    protected boolean canTriggerWalking()
-    {
-        return false;
-    }
+   protected void func_70088_a() {
+      this.func_184212_Q().func_187214_a(field_184521_b, Optional.absent());
+      this.func_184212_Q().func_187214_a(field_184522_c, Boolean.valueOf(true));
+   }
 
-    protected void entityInit()
-    {
-        this.getDataManager().register(BEAM_TARGET, Optional.absent());
-        this.getDataManager().register(SHOW_BOTTOM, Boolean.valueOf(true));
-    }
+   public void func_70071_h_() {
+      this.field_70169_q = this.field_70165_t;
+      this.field_70167_r = this.field_70163_u;
+      this.field_70166_s = this.field_70161_v;
+      ++this.field_70261_a;
+      if (!this.field_70170_p.field_72995_K) {
+         BlockPos blockpos = new BlockPos(this);
+         if (this.field_70170_p.field_73011_w instanceof WorldProviderEnd && this.field_70170_p.func_180495_p(blockpos).func_177230_c() != Blocks.field_150480_ab) {
+            this.field_70170_p.func_175656_a(blockpos, Blocks.field_150480_ab.func_176223_P());
+         }
+      }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-        ++this.innerRotation;
+   }
 
-        if (!this.world.isRemote)
-        {
-            BlockPos blockpos = new BlockPos(this);
+   protected void func_70014_b(NBTTagCompound p_70014_1_) {
+      if (this.func_184518_j() != null) {
+         p_70014_1_.func_74782_a("BeamTarget", NBTUtil.func_186859_a(this.func_184518_j()));
+      }
 
-            if (this.world.provider instanceof WorldProviderEnd && this.world.getBlockState(blockpos).getBlock() != Blocks.FIRE)
-            {
-                this.world.setBlockState(blockpos, Blocks.FIRE.getDefaultState());
+      p_70014_1_.func_74757_a("ShowBottom", this.func_184520_k());
+   }
+
+   protected void func_70037_a(NBTTagCompound p_70037_1_) {
+      if (p_70037_1_.func_150297_b("BeamTarget", 10)) {
+         this.func_184516_a(NBTUtil.func_186861_c(p_70037_1_.func_74775_l("BeamTarget")));
+      }
+
+      if (p_70037_1_.func_150297_b("ShowBottom", 1)) {
+         this.func_184517_a(p_70037_1_.func_74767_n("ShowBottom"));
+      }
+
+   }
+
+   public boolean func_70067_L() {
+      return true;
+   }
+
+   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
+      if (this.func_180431_b(p_70097_1_)) {
+         return false;
+      } else if (p_70097_1_.func_76346_g() instanceof EntityDragon) {
+         return false;
+      } else {
+         if (!this.field_70128_L && !this.field_70170_p.field_72995_K) {
+            this.func_70106_y();
+            if (!this.field_70170_p.field_72995_K) {
+               if (!p_70097_1_.func_94541_c()) {
+                  this.field_70170_p.func_72876_a((Entity)null, this.field_70165_t, this.field_70163_u, this.field_70161_v, 6.0F, true);
+               }
+
+               this.func_184519_a(p_70097_1_);
             }
-        }
-    }
+         }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    protected void writeEntityToNBT(NBTTagCompound compound)
-    {
-        if (this.getBeamTarget() != null)
-        {
-            compound.setTag("BeamTarget", NBTUtil.createPosTag(this.getBeamTarget()));
-        }
+         return true;
+      }
+   }
 
-        compound.setBoolean("ShowBottom", this.shouldShowBottom());
-    }
+   public void func_174812_G() {
+      this.func_184519_a(DamageSource.field_76377_j);
+      super.func_174812_G();
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    protected void readEntityFromNBT(NBTTagCompound compound)
-    {
-        if (compound.hasKey("BeamTarget", 10))
-        {
-            this.setBeamTarget(NBTUtil.getPosFromTag(compound.getCompoundTag("BeamTarget")));
-        }
+   private void func_184519_a(DamageSource p_184519_1_) {
+      if (this.field_70170_p.field_73011_w instanceof WorldProviderEnd) {
+         WorldProviderEnd worldproviderend = (WorldProviderEnd)this.field_70170_p.field_73011_w;
+         DragonFightManager dragonfightmanager = worldproviderend.func_186063_s();
+         if (dragonfightmanager != null) {
+            dragonfightmanager.func_186090_a(this, p_184519_1_);
+         }
+      }
 
-        if (compound.hasKey("ShowBottom", 1))
-        {
-            this.setShowBottom(compound.getBoolean("ShowBottom"));
-        }
-    }
+   }
 
-    /**
-     * Returns true if other Entities should be prevented from moving through this Entity.
-     */
-    public boolean canBeCollidedWith()
-    {
-        return true;
-    }
+   public void func_184516_a(@Nullable BlockPos p_184516_1_) {
+      this.func_184212_Q().func_187227_b(field_184521_b, Optional.fromNullable(p_184516_1_));
+   }
 
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
-        if (this.isEntityInvulnerable(source))
-        {
-            return false;
-        }
-        else if (source.getEntity() instanceof EntityDragon)
-        {
-            return false;
-        }
-        else
-        {
-            if (!this.isDead && !this.world.isRemote)
-            {
-                this.setDead();
+   @Nullable
+   public BlockPos func_184518_j() {
+      return (BlockPos)((Optional)this.func_184212_Q().func_187225_a(field_184521_b)).orNull();
+   }
 
-                if (!this.world.isRemote)
-                {
-                    if (!source.isExplosion())
-                    {
-                        this.world.createExplosion((Entity)null, this.posX, this.posY, this.posZ, 6.0F, true);
-                    }
+   public void func_184517_a(boolean p_184517_1_) {
+      this.func_184212_Q().func_187227_b(field_184522_c, Boolean.valueOf(p_184517_1_));
+   }
 
-                    this.onCrystalDestroyed(source);
-                }
-            }
+   public boolean func_184520_k() {
+      return ((Boolean)this.func_184212_Q().func_187225_a(field_184522_c)).booleanValue();
+   }
 
-            return true;
-        }
-    }
-
-    /**
-     * Called by the /kill command.
-     */
-    public void onKillCommand()
-    {
-        this.onCrystalDestroyed(DamageSource.generic);
-        super.onKillCommand();
-    }
-
-    private void onCrystalDestroyed(DamageSource source)
-    {
-        if (this.world.provider instanceof WorldProviderEnd)
-        {
-            WorldProviderEnd worldproviderend = (WorldProviderEnd)this.world.provider;
-            DragonFightManager dragonfightmanager = worldproviderend.getDragonFightManager();
-
-            if (dragonfightmanager != null)
-            {
-                dragonfightmanager.onCrystalDestroyed(this, source);
-            }
-        }
-    }
-
-    public void setBeamTarget(@Nullable BlockPos beamTarget)
-    {
-        this.getDataManager().set(BEAM_TARGET, Optional.fromNullable(beamTarget));
-    }
-
-    @Nullable
-    public BlockPos getBeamTarget()
-    {
-        return (BlockPos)((Optional)this.getDataManager().get(BEAM_TARGET)).orNull();
-    }
-
-    public void setShowBottom(boolean showBottom)
-    {
-        this.getDataManager().set(SHOW_BOTTOM, Boolean.valueOf(showBottom));
-    }
-
-    public boolean shouldShowBottom()
-    {
-        return ((Boolean)this.getDataManager().get(SHOW_BOTTOM)).booleanValue();
-    }
-
-    /**
-     * Checks if the entity is in range to render.
-     */
-    public boolean isInRangeToRenderDist(double distance)
-    {
-        return super.isInRangeToRenderDist(distance) || this.getBeamTarget() != null;
-    }
+   public boolean func_70112_a(double p_70112_1_) {
+      return super.func_70112_a(p_70112_1_) || this.func_184518_j() != null;
+   }
 }

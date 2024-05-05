@@ -2,57 +2,34 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
 
-public class EntityAIOpenDoor extends EntityAIDoorInteract
-{
-    /** If the entity close the door */
-    boolean closeDoor;
+public class EntityAIOpenDoor extends EntityAIDoorInteract {
+   boolean field_75361_i;
+   int field_75360_j;
 
-    /**
-     * The temporisation before the entity close the door (in ticks, always 20 = 1 second)
-     */
-    int closeDoorTemporisation;
+   public EntityAIOpenDoor(EntityLiving p_i1644_1_, boolean p_i1644_2_) {
+      super(p_i1644_1_);
+      this.field_75356_a = p_i1644_1_;
+      this.field_75361_i = p_i1644_2_;
+   }
 
-    public EntityAIOpenDoor(EntityLiving entitylivingIn, boolean shouldClose)
-    {
-        super(entitylivingIn);
-        this.theEntity = entitylivingIn;
-        this.closeDoor = shouldClose;
-    }
+   public boolean func_75253_b() {
+      return this.field_75361_i && this.field_75360_j > 0 && super.func_75253_b();
+   }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        return this.closeDoor && this.closeDoorTemporisation > 0 && super.continueExecuting();
-    }
+   public void func_75249_e() {
+      this.field_75360_j = 20;
+      this.field_151504_e.func_176512_a(this.field_75356_a.field_70170_p, this.field_179507_b, true);
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        this.closeDoorTemporisation = 20;
-        this.doorBlock.toggleDoor(this.theEntity.world, this.doorPosition, true);
-    }
+   public void func_75251_c() {
+      if (this.field_75361_i) {
+         this.field_151504_e.func_176512_a(this.field_75356_a.field_70170_p, this.field_179507_b, false);
+      }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        if (this.closeDoor)
-        {
-            this.doorBlock.toggleDoor(this.theEntity.world, this.doorPosition, false);
-        }
-    }
+   }
 
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        --this.closeDoorTemporisation;
-        super.updateTask();
-    }
+   public void func_75246_d() {
+      --this.field_75360_j;
+      super.func_75246_d();
+   }
 }

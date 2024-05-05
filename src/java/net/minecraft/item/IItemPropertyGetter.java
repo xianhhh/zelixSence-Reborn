@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
 
-public interface IItemPropertyGetter
-{
-    float apply(ItemStack stack, World worldIn, EntityLivingBase entityIn);
+public interface IItemPropertyGetter {
+   float func_185085_a(ItemStack var1, @Nullable World var2, @Nullable EntityLivingBase var3);
 }

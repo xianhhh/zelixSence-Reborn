@@ -19,227 +19,146 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class EntityMinecartHopper extends EntityMinecartContainer implements IHopper
-{
-    /** Whether this hopper minecart is being blocked by an activator rail. */
-    private boolean isBlocked = true;
-    private int transferTicker = -1;
-    private final BlockPos lastPosition = BlockPos.ORIGIN;
+public class EntityMinecartHopper extends EntityMinecartContainer implements IHopper {
+   private boolean field_96113_a = true;
+   private int field_98044_b = -1;
+   private final BlockPos field_174900_c = BlockPos.field_177992_a;
 
-    public EntityMinecartHopper(World worldIn)
-    {
-        super(worldIn);
-    }
+   public EntityMinecartHopper(World p_i1720_1_) {
+      super(p_i1720_1_);
+   }
 
-    public EntityMinecartHopper(World worldIn, double x, double y, double z)
-    {
-        super(worldIn, x, y, z);
-    }
+   public EntityMinecartHopper(World p_i1721_1_, double p_i1721_2_, double p_i1721_4_, double p_i1721_6_) {
+      super(p_i1721_1_, p_i1721_2_, p_i1721_4_, p_i1721_6_);
+   }
 
-    public EntityMinecart.Type getType()
-    {
-        return EntityMinecart.Type.HOPPER;
-    }
+   public EntityMinecart.Type func_184264_v() {
+      return EntityMinecart.Type.HOPPER;
+   }
 
-    public IBlockState getDefaultDisplayTile()
-    {
-        return Blocks.HOPPER.getDefaultState();
-    }
+   public IBlockState func_180457_u() {
+      return Blocks.field_150438_bZ.func_176223_P();
+   }
 
-    public int getDefaultDisplayTileOffset()
-    {
-        return 1;
-    }
+   public int func_94085_r() {
+      return 1;
+   }
 
-    /**
-     * Returns the number of slots in the inventory.
-     */
-    public int getSizeInventory()
-    {
-        return 5;
-    }
+   public int func_70302_i_() {
+      return 5;
+   }
 
-    public boolean processInitialInteract(EntityPlayer player, EnumHand stack)
-    {
-        if (!this.world.isRemote)
-        {
-            player.displayGUIChest(this);
-        }
+   public boolean func_184230_a(EntityPlayer p_184230_1_, EnumHand p_184230_2_) {
+      if (!this.field_70170_p.field_72995_K) {
+         p_184230_1_.func_71007_a(this);
+      }
 
-        return true;
-    }
+      return true;
+   }
 
-    /**
-     * Called every tick the minecart is on an activator rail.
-     */
-    public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
-    {
-        boolean flag = !receivingPower;
+   public void func_96095_a(int p_96095_1_, int p_96095_2_, int p_96095_3_, boolean p_96095_4_) {
+      boolean flag = !p_96095_4_;
+      if (flag != this.func_96111_ay()) {
+         this.func_96110_f(flag);
+      }
 
-        if (flag != this.getBlocked())
-        {
-            this.setBlocked(flag);
-        }
-    }
+   }
 
-    /**
-     * Get whether this hopper minecart is being blocked by an activator rail.
-     */
-    public boolean getBlocked()
-    {
-        return this.isBlocked;
-    }
+   public boolean func_96111_ay() {
+      return this.field_96113_a;
+   }
 
-    /**
-     * Set whether this hopper minecart is being blocked by an activator rail.
-     */
-    public void setBlocked(boolean p_96110_1_)
-    {
-        this.isBlocked = p_96110_1_;
-    }
+   public void func_96110_f(boolean p_96110_1_) {
+      this.field_96113_a = p_96110_1_;
+   }
 
-    /**
-     * Returns the worldObj for this tileEntity.
-     */
-    public World getWorld()
-    {
-        return this.world;
-    }
+   public World func_145831_w() {
+      return this.field_70170_p;
+   }
 
-    /**
-     * Gets the world X position for this hopper entity.
-     */
-    public double getXPos()
-    {
-        return this.posX;
-    }
+   public double func_96107_aA() {
+      return this.field_70165_t;
+   }
 
-    /**
-     * Gets the world Y position for this hopper entity.
-     */
-    public double getYPos()
-    {
-        return this.posY + 0.5D;
-    }
+   public double func_96109_aB() {
+      return this.field_70163_u + 0.5D;
+   }
 
-    /**
-     * Gets the world Z position for this hopper entity.
-     */
-    public double getZPos()
-    {
-        return this.posZ;
-    }
+   public double func_96108_aC() {
+      return this.field_70161_v;
+   }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        super.onUpdate();
+   public void func_70071_h_() {
+      super.func_70071_h_();
+      if (!this.field_70170_p.field_72995_K && this.func_70089_S() && this.func_96111_ay()) {
+         BlockPos blockpos = new BlockPos(this);
+         if (blockpos.equals(this.field_174900_c)) {
+            --this.field_98044_b;
+         } else {
+            this.func_98042_n(0);
+         }
 
-        if (!this.world.isRemote && this.isEntityAlive() && this.getBlocked())
-        {
-            BlockPos blockpos = new BlockPos(this);
-
-            if (blockpos.equals(this.lastPosition))
-            {
-                --this.transferTicker;
+         if (!this.func_98043_aE()) {
+            this.func_98042_n(0);
+            if (this.func_96112_aD()) {
+               this.func_98042_n(4);
+               this.func_70296_d();
             }
-            else
-            {
-                this.setTransferTicker(0);
-            }
+         }
+      }
 
-            if (!this.canTransfer())
-            {
-                this.setTransferTicker(0);
+   }
 
-                if (this.captureDroppedItems())
-                {
-                    this.setTransferTicker(4);
-                    this.markDirty();
-                }
-            }
-        }
-    }
+   public boolean func_96112_aD() {
+      if (TileEntityHopper.func_145891_a(this)) {
+         return true;
+      } else {
+         List<EntityItem> list = this.field_70170_p.<EntityItem>func_175647_a(EntityItem.class, this.func_174813_aQ().func_72314_b(0.25D, 0.0D, 0.25D), EntitySelectors.field_94557_a);
+         if (!list.isEmpty()) {
+            TileEntityHopper.func_145898_a((IInventory)null, this, list.get(0));
+         }
 
-    public boolean captureDroppedItems()
-    {
-        if (TileEntityHopper.captureDroppedItems(this))
-        {
-            return true;
-        }
-        else
-        {
-            List<EntityItem> list = this.world.<EntityItem>getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().expand(0.25D, 0.0D, 0.25D), EntitySelectors.IS_ALIVE);
+         return false;
+      }
+   }
 
-            if (!list.isEmpty())
-            {
-                TileEntityHopper.putDropInInventoryAllSlots((IInventory)null, this, list.get(0));
-            }
+   public void func_94095_a(DamageSource p_94095_1_) {
+      super.func_94095_a(p_94095_1_);
+      if (this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops")) {
+         this.func_145778_a(Item.func_150898_a(Blocks.field_150438_bZ), 1, 0.0F);
+      }
 
-            return false;
-        }
-    }
+   }
 
-    public void killMinecart(DamageSource source)
-    {
-        super.killMinecart(source);
+   public static void func_189682_a(DataFixer p_189682_0_) {
+      EntityMinecartContainer.func_190574_b(p_189682_0_, EntityMinecartHopper.class);
+   }
 
-        if (this.world.getGameRules().getBoolean("doEntityDrops"))
-        {
-            this.dropItemWithOffset(Item.getItemFromBlock(Blocks.HOPPER), 1, 0.0F);
-        }
-    }
+   protected void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74768_a("TransferCooldown", this.field_98044_b);
+      p_70014_1_.func_74757_a("Enabled", this.field_96113_a);
+   }
 
-    public static void registerFixesMinecartHopper(DataFixer fixer)
-    {
-        EntityMinecartContainer.func_190574_b(fixer, EntityMinecartHopper.class);
-    }
+   protected void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.field_98044_b = p_70037_1_.func_74762_e("TransferCooldown");
+      this.field_96113_a = p_70037_1_.func_74764_b("Enabled") ? p_70037_1_.func_74767_n("Enabled") : true;
+   }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    protected void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("TransferCooldown", this.transferTicker);
-        compound.setBoolean("Enabled", this.isBlocked);
-    }
+   public void func_98042_n(int p_98042_1_) {
+      this.field_98044_b = p_98042_1_;
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    protected void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.transferTicker = compound.getInteger("TransferCooldown");
-        this.isBlocked = compound.hasKey("Enabled") ? compound.getBoolean("Enabled") : true;
-    }
+   public boolean func_98043_aE() {
+      return this.field_98044_b > 0;
+   }
 
-    /**
-     * Sets the transfer ticker, used to determine the delay between transfers.
-     */
-    public void setTransferTicker(int p_98042_1_)
-    {
-        this.transferTicker = p_98042_1_;
-    }
+   public String func_174875_k() {
+      return "minecraft:hopper";
+   }
 
-    /**
-     * Returns whether the hopper cart can currently transfer an item.
-     */
-    public boolean canTransfer()
-    {
-        return this.transferTicker > 0;
-    }
-
-    public String getGuiID()
-    {
-        return "minecraft:hopper";
-    }
-
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
-    {
-        return new ContainerHopper(playerInventory, this, playerIn);
-    }
+   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
+      return new ContainerHopper(p_174876_1_, this, p_174876_2_);
+   }
 }

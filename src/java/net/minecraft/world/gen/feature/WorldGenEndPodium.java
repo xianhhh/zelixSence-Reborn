@@ -7,67 +7,47 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class WorldGenEndPodium extends WorldGenerator
-{
-    public static final BlockPos END_PODIUM_LOCATION = BlockPos.ORIGIN;
-    public static final BlockPos END_PODIUM_CHUNK_POS = new BlockPos(END_PODIUM_LOCATION.getX() - 4 & -16, 0, END_PODIUM_LOCATION.getZ() - 4 & -16);
-    private final boolean activePortal;
+public class WorldGenEndPodium extends WorldGenerator {
+   public static final BlockPos field_186139_a = BlockPos.field_177992_a;
+   public static final BlockPos field_186140_b = new BlockPos(field_186139_a.func_177958_n() - 4 & -16, 0, field_186139_a.func_177952_p() - 4 & -16);
+   private final boolean field_186141_c;
 
-    public WorldGenEndPodium(boolean activePortalIn)
-    {
-        this.activePortal = activePortalIn;
-    }
+   public WorldGenEndPodium(boolean p_i46666_1_) {
+      this.field_186141_c = p_i46666_1_;
+   }
 
-    public boolean generate(World worldIn, Random rand, BlockPos position)
-    {
-        for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(new BlockPos(position.getX() - 4, position.getY() - 1, position.getZ() - 4), new BlockPos(position.getX() + 4, position.getY() + 32, position.getZ() + 4)))
-        {
-            double d0 = blockpos$mutableblockpos.getDistance(position.getX(), blockpos$mutableblockpos.getY(), position.getZ());
-
-            if (d0 <= 3.5D)
-            {
-                if (blockpos$mutableblockpos.getY() < position.getY())
-                {
-                    if (d0 <= 2.5D)
-                    {
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.BEDROCK.getDefaultState());
-                    }
-                    else if (blockpos$mutableblockpos.getY() < position.getY())
-                    {
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.END_STONE.getDefaultState());
-                    }
-                }
-                else if (blockpos$mutableblockpos.getY() > position.getY())
-                {
-                    this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.AIR.getDefaultState());
-                }
-                else if (d0 > 2.5D)
-                {
-                    this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.BEDROCK.getDefaultState());
-                }
-                else if (this.activePortal)
-                {
-                    this.setBlockAndNotifyAdequately(worldIn, new BlockPos(blockpos$mutableblockpos), Blocks.END_PORTAL.getDefaultState());
-                }
-                else
-                {
-                    this.setBlockAndNotifyAdequately(worldIn, new BlockPos(blockpos$mutableblockpos), Blocks.AIR.getDefaultState());
-                }
+   public boolean func_180709_b(World p_180709_1_, Random p_180709_2_, BlockPos p_180709_3_) {
+      for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.func_177975_b(new BlockPos(p_180709_3_.func_177958_n() - 4, p_180709_3_.func_177956_o() - 1, p_180709_3_.func_177952_p() - 4), new BlockPos(p_180709_3_.func_177958_n() + 4, p_180709_3_.func_177956_o() + 32, p_180709_3_.func_177952_p() + 4))) {
+         double d0 = blockpos$mutableblockpos.func_185332_f(p_180709_3_.func_177958_n(), blockpos$mutableblockpos.func_177956_o(), p_180709_3_.func_177952_p());
+         if (d0 <= 3.5D) {
+            if (blockpos$mutableblockpos.func_177956_o() < p_180709_3_.func_177956_o()) {
+               if (d0 <= 2.5D) {
+                  this.func_175903_a(p_180709_1_, blockpos$mutableblockpos, Blocks.field_150357_h.func_176223_P());
+               } else if (blockpos$mutableblockpos.func_177956_o() < p_180709_3_.func_177956_o()) {
+                  this.func_175903_a(p_180709_1_, blockpos$mutableblockpos, Blocks.field_150377_bs.func_176223_P());
+               }
+            } else if (blockpos$mutableblockpos.func_177956_o() > p_180709_3_.func_177956_o()) {
+               this.func_175903_a(p_180709_1_, blockpos$mutableblockpos, Blocks.field_150350_a.func_176223_P());
+            } else if (d0 > 2.5D) {
+               this.func_175903_a(p_180709_1_, blockpos$mutableblockpos, Blocks.field_150357_h.func_176223_P());
+            } else if (this.field_186141_c) {
+               this.func_175903_a(p_180709_1_, new BlockPos(blockpos$mutableblockpos), Blocks.field_150384_bq.func_176223_P());
+            } else {
+               this.func_175903_a(p_180709_1_, new BlockPos(blockpos$mutableblockpos), Blocks.field_150350_a.func_176223_P());
             }
-        }
+         }
+      }
 
-        for (int i = 0; i < 4; ++i)
-        {
-            this.setBlockAndNotifyAdequately(worldIn, position.up(i), Blocks.BEDROCK.getDefaultState());
-        }
+      for(int i = 0; i < 4; ++i) {
+         this.func_175903_a(p_180709_1_, p_180709_3_.func_177981_b(i), Blocks.field_150357_h.func_176223_P());
+      }
 
-        BlockPos blockpos = position.up(2);
+      BlockPos blockpos = p_180709_3_.func_177981_b(2);
 
-        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
-        {
-            this.setBlockAndNotifyAdequately(worldIn, blockpos.offset(enumfacing), Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, enumfacing));
-        }
+      for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+         this.func_175903_a(p_180709_1_, blockpos.func_177972_a(enumfacing), Blocks.field_150478_aa.func_176223_P().func_177226_a(BlockTorch.field_176596_a, enumfacing));
+      }
 
-        return true;
-    }
+      return true;
+   }
 }

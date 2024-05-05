@@ -2,43 +2,31 @@ package net.minecraft.client.renderer.culling;
 
 import net.minecraft.util.math.AxisAlignedBB;
 
-public class Frustum implements ICamera
-{
-    private final ClippingHelper clippingHelper;
-    private double xPosition;
-    private double yPosition;
-    private double zPosition;
+public class Frustum implements ICamera {
+   private final ClippingHelper field_78552_a;
+   private double field_78550_b;
+   private double field_78551_c;
+   private double field_78549_d;
 
-    public Frustum()
-    {
-        this(ClippingHelperImpl.getInstance());
-    }
+   public Frustum() {
+      this(ClippingHelperImpl.func_78558_a());
+   }
 
-    public Frustum(ClippingHelper p_i46196_1_)
-    {
-        this.clippingHelper = p_i46196_1_;
-    }
+   public Frustum(ClippingHelper p_i46196_1_) {
+      this.field_78552_a = p_i46196_1_;
+   }
 
-    public void setPosition(double p_78547_1_, double p_78547_3_, double p_78547_5_)
-    {
-        this.xPosition = p_78547_1_;
-        this.yPosition = p_78547_3_;
-        this.zPosition = p_78547_5_;
-    }
+   public void func_78547_a(double p_78547_1_, double p_78547_3_, double p_78547_5_) {
+      this.field_78550_b = p_78547_1_;
+      this.field_78551_c = p_78547_3_;
+      this.field_78549_d = p_78547_5_;
+   }
 
-    /**
-     * Calls the clipping helper. Returns true if the box is inside all 6 clipping planes, otherwise returns false.
-     */
-    public boolean isBoxInFrustum(double p_78548_1_, double p_78548_3_, double p_78548_5_, double p_78548_7_, double p_78548_9_, double p_78548_11_)
-    {
-        return this.clippingHelper.isBoxInFrustum(p_78548_1_ - this.xPosition, p_78548_3_ - this.yPosition, p_78548_5_ - this.zPosition, p_78548_7_ - this.xPosition, p_78548_9_ - this.yPosition, p_78548_11_ - this.zPosition);
-    }
+   public boolean func_78548_b(double p_78548_1_, double p_78548_3_, double p_78548_5_, double p_78548_7_, double p_78548_9_, double p_78548_11_) {
+      return this.field_78552_a.func_78553_b(p_78548_1_ - this.field_78550_b, p_78548_3_ - this.field_78551_c, p_78548_5_ - this.field_78549_d, p_78548_7_ - this.field_78550_b, p_78548_9_ - this.field_78551_c, p_78548_11_ - this.field_78549_d);
+   }
 
-    /**
-     * Returns true if the bounding box is inside all 6 clipping planes, otherwise returns false.
-     */
-    public boolean isBoundingBoxInFrustum(AxisAlignedBB p_78546_1_)
-    {
-        return this.isBoxInFrustum(p_78546_1_.minX, p_78546_1_.minY, p_78546_1_.minZ, p_78546_1_.maxX, p_78546_1_.maxY, p_78546_1_.maxZ);
-    }
+   public boolean func_78546_a(AxisAlignedBB p_78546_1_) {
+      return this.func_78548_b(p_78546_1_.field_72340_a, p_78546_1_.field_72338_b, p_78546_1_.field_72339_c, p_78546_1_.field_72336_d, p_78546_1_.field_72337_e, p_78546_1_.field_72334_f);
+   }
 }

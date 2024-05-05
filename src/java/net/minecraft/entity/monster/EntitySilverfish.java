@@ -27,295 +27,210 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntitySilverfish extends EntityMob
-{
-    private EntitySilverfish.AISummonSilverfish summonSilverfish;
+public class EntitySilverfish extends EntityMob {
+   private EntitySilverfish.AISummonSilverfish field_175460_b;
 
-    public EntitySilverfish(World worldIn)
-    {
-        super(worldIn);
-        this.setSize(0.4F, 0.3F);
-    }
+   public EntitySilverfish(World p_i1740_1_) {
+      super(p_i1740_1_);
+      this.func_70105_a(0.4F, 0.3F);
+   }
 
-    public static void registerFixesSilverfish(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntitySilverfish.class);
-    }
+   public static void func_189767_b(DataFixer p_189767_0_) {
+      EntityLiving.func_189752_a(p_189767_0_, EntitySilverfish.class);
+   }
 
-    protected void initEntityAI()
-    {
-        this.summonSilverfish = new EntitySilverfish.AISummonSilverfish(this);
-        this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(3, this.summonSilverfish);
-        this.tasks.addTask(4, new EntityAIAttackMelee(this, 1.0D, false));
-        this.tasks.addTask(5, new EntitySilverfish.AIHideInStone(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-    }
+   protected void func_184651_r() {
+      this.field_175460_b = new EntitySilverfish.AISummonSilverfish(this);
+      this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
+      this.field_70714_bg.func_75776_a(3, this.field_175460_b);
+      this.field_70714_bg.func_75776_a(4, new EntityAIAttackMelee(this, 1.0D, false));
+      this.field_70714_bg.func_75776_a(5, new EntitySilverfish.AIHideInStone(this));
+      this.field_70715_bh.func_75776_a(1, new EntityAIHurtByTarget(this, true, new Class[0]));
+      this.field_70715_bh.func_75776_a(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+   }
 
-    /**
-     * Returns the Y Offset of this entity.
-     */
-    public double getYOffset()
-    {
-        return 0.1D;
-    }
+   public double func_70033_W() {
+      return 0.1D;
+   }
 
-    public float getEyeHeight()
-    {
-        return 0.1F;
-    }
+   public float func_70047_e() {
+      return 0.1F;
+   }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-    }
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(8.0D);
+      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
+      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(1.0D);
+   }
 
-    /**
-     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
-     * prevent them from trampling crops
-     */
-    protected boolean canTriggerWalking()
-    {
-        return false;
-    }
+   protected boolean func_70041_e_() {
+      return false;
+   }
 
-    protected SoundEvent getAmbientSound()
-    {
-        return SoundEvents.ENTITY_SILVERFISH_AMBIENT;
-    }
+   protected SoundEvent func_184639_G() {
+      return SoundEvents.field_187793_eY;
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_SILVERFISH_HURT;
-    }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_187850_fa;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_SILVERFISH_DEATH;
-    }
+   protected SoundEvent func_184615_bR() {
+      return SoundEvents.field_187795_eZ;
+   }
 
-    protected void playStepSound(BlockPos pos, Block blockIn)
-    {
-        this.playSound(SoundEvents.ENTITY_SILVERFISH_STEP, 0.15F, 1.0F);
-    }
+   protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_) {
+      this.func_184185_a(SoundEvents.field_187852_fb, 0.15F, 1.0F);
+   }
 
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
-        if (this.isEntityInvulnerable(source))
-        {
+   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
+      if (this.func_180431_b(p_70097_1_)) {
+         return false;
+      } else {
+         if ((p_70097_1_ instanceof EntityDamageSource || p_70097_1_ == DamageSource.field_76376_m) && this.field_175460_b != null) {
+            this.field_175460_b.func_179462_f();
+         }
+
+         return super.func_70097_a(p_70097_1_, p_70097_2_);
+      }
+   }
+
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186438_t;
+   }
+
+   public void func_70071_h_() {
+      this.field_70761_aq = this.field_70177_z;
+      super.func_70071_h_();
+   }
+
+   public void func_181013_g(float p_181013_1_) {
+      this.field_70177_z = p_181013_1_;
+      super.func_181013_g(p_181013_1_);
+   }
+
+   public float func_180484_a(BlockPos p_180484_1_) {
+      return this.field_70170_p.func_180495_p(p_180484_1_.func_177977_b()).func_177230_c() == Blocks.field_150348_b ? 10.0F : super.func_180484_a(p_180484_1_);
+   }
+
+   protected boolean func_70814_o() {
+      return true;
+   }
+
+   public boolean func_70601_bi() {
+      if (super.func_70601_bi()) {
+         EntityPlayer entityplayer = this.field_70170_p.func_184136_b(this, 5.0D);
+         return entityplayer == null;
+      } else {
+         return false;
+      }
+   }
+
+   public EnumCreatureAttribute func_70668_bt() {
+      return EnumCreatureAttribute.ARTHROPOD;
+   }
+
+   static class AIHideInStone extends EntityAIWander {
+      private EnumFacing field_179483_b;
+      private boolean field_179484_c;
+
+      public AIHideInStone(EntitySilverfish p_i45827_1_) {
+         super(p_i45827_1_, 1.0D, 10);
+         this.func_75248_a(1);
+      }
+
+      public boolean func_75250_a() {
+         if (this.field_75457_a.func_70638_az() != null) {
             return false;
-        }
-        else
-        {
-            if ((source instanceof EntityDamageSource || source == DamageSource.magic) && this.summonSilverfish != null)
-            {
-                this.summonSilverfish.notifyHurt();
-            }
-
-            return super.attackEntityFrom(source, amount);
-        }
-    }
-
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_SILVERFISH;
-    }
-
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        this.renderYawOffset = this.rotationYaw;
-        super.onUpdate();
-    }
-
-    /**
-     * Set the render yaw offset
-     */
-    public void setRenderYawOffset(float offset)
-    {
-        this.rotationYaw = offset;
-        super.setRenderYawOffset(offset);
-    }
-
-    public float getBlockPathWeight(BlockPos pos)
-    {
-        return this.world.getBlockState(pos.down()).getBlock() == Blocks.STONE ? 10.0F : super.getBlockPathWeight(pos);
-    }
-
-    /**
-     * Checks to make sure the light is not too bright where the mob is spawning
-     */
-    protected boolean isValidLightLevel()
-    {
-        return true;
-    }
-
-    /**
-     * Checks if the entity's current position is a valid location to spawn this entity.
-     */
-    public boolean getCanSpawnHere()
-    {
-        if (super.getCanSpawnHere())
-        {
-            EntityPlayer entityplayer = this.world.getNearestPlayerNotCreative(this, 5.0D);
-            return entityplayer == null;
-        }
-        else
-        {
+         } else if (!this.field_75457_a.func_70661_as().func_75500_f()) {
             return false;
-        }
-    }
-
-    /**
-     * Get this Entity's EnumCreatureAttribute
-     */
-    public EnumCreatureAttribute getCreatureAttribute()
-    {
-        return EnumCreatureAttribute.ARTHROPOD;
-    }
-
-    static class AIHideInStone extends EntityAIWander
-    {
-        private EnumFacing facing;
-        private boolean doMerge;
-
-        public AIHideInStone(EntitySilverfish silverfishIn)
-        {
-            super(silverfishIn, 1.0D, 10);
-            this.setMutexBits(1);
-        }
-
-        public boolean shouldExecute()
-        {
-            if (this.entity.getAttackTarget() != null)
-            {
-                return false;
+         } else {
+            Random random = this.field_75457_a.func_70681_au();
+            if (this.field_75457_a.field_70170_p.func_82736_K().func_82766_b("mobGriefing") && random.nextInt(10) == 0) {
+               this.field_179483_b = EnumFacing.func_176741_a(random);
+               BlockPos blockpos = (new BlockPos(this.field_75457_a.field_70165_t, this.field_75457_a.field_70163_u + 0.5D, this.field_75457_a.field_70161_v)).func_177972_a(this.field_179483_b);
+               IBlockState iblockstate = this.field_75457_a.field_70170_p.func_180495_p(blockpos);
+               if (BlockSilverfish.func_176377_d(iblockstate)) {
+                  this.field_179484_c = true;
+                  return true;
+               }
             }
-            else if (!this.entity.getNavigator().noPath())
-            {
-                return false;
+
+            this.field_179484_c = false;
+            return super.func_75250_a();
+         }
+      }
+
+      public boolean func_75253_b() {
+         return this.field_179484_c ? false : super.func_75253_b();
+      }
+
+      public void func_75249_e() {
+         if (!this.field_179484_c) {
+            super.func_75249_e();
+         } else {
+            World world = this.field_75457_a.field_70170_p;
+            BlockPos blockpos = (new BlockPos(this.field_75457_a.field_70165_t, this.field_75457_a.field_70163_u + 0.5D, this.field_75457_a.field_70161_v)).func_177972_a(this.field_179483_b);
+            IBlockState iblockstate = world.func_180495_p(blockpos);
+            if (BlockSilverfish.func_176377_d(iblockstate)) {
+               world.func_180501_a(blockpos, Blocks.field_150418_aU.func_176223_P().func_177226_a(BlockSilverfish.field_176378_a, BlockSilverfish.EnumType.func_176878_a(iblockstate)), 3);
+               this.field_75457_a.func_70656_aK();
+               this.field_75457_a.func_70106_y();
             }
-            else
-            {
-                Random random = this.entity.getRNG();
 
-                if (this.entity.world.getGameRules().getBoolean("mobGriefing") && random.nextInt(10) == 0)
-                {
-                    this.facing = EnumFacing.random(random);
-                    BlockPos blockpos = (new BlockPos(this.entity.posX, this.entity.posY + 0.5D, this.entity.posZ)).offset(this.facing);
-                    IBlockState iblockstate = this.entity.world.getBlockState(blockpos);
+         }
+      }
+   }
 
-                    if (BlockSilverfish.canContainSilverfish(iblockstate))
-                    {
-                        this.doMerge = true;
-                        return true;
-                    }
-                }
+   static class AISummonSilverfish extends EntityAIBase {
+      private final EntitySilverfish field_179464_a;
+      private int field_179463_b;
 
-                this.doMerge = false;
-                return super.shouldExecute();
-            }
-        }
+      public AISummonSilverfish(EntitySilverfish p_i45826_1_) {
+         this.field_179464_a = p_i45826_1_;
+      }
 
-        public boolean continueExecuting()
-        {
-            return this.doMerge ? false : super.continueExecuting();
-        }
+      public void func_179462_f() {
+         if (this.field_179463_b == 0) {
+            this.field_179463_b = 20;
+         }
 
-        public void startExecuting()
-        {
-            if (!this.doMerge)
-            {
-                super.startExecuting();
-            }
-            else
-            {
-                World world = this.entity.world;
-                BlockPos blockpos = (new BlockPos(this.entity.posX, this.entity.posY + 0.5D, this.entity.posZ)).offset(this.facing);
-                IBlockState iblockstate = world.getBlockState(blockpos);
+      }
 
-                if (BlockSilverfish.canContainSilverfish(iblockstate))
-                {
-                    world.setBlockState(blockpos, Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.forModelBlock(iblockstate)), 3);
-                    this.entity.spawnExplosionParticle();
-                    this.entity.setDead();
-                }
-            }
-        }
-    }
+      public boolean func_75250_a() {
+         return this.field_179463_b > 0;
+      }
 
-    static class AISummonSilverfish extends EntityAIBase
-    {
-        private final EntitySilverfish silverfish;
-        private int lookForFriends;
+      public void func_75246_d() {
+         --this.field_179463_b;
+         if (this.field_179463_b <= 0) {
+            World world = this.field_179464_a.field_70170_p;
+            Random random = this.field_179464_a.func_70681_au();
+            BlockPos blockpos = new BlockPos(this.field_179464_a);
 
-        public AISummonSilverfish(EntitySilverfish silverfishIn)
-        {
-            this.silverfish = silverfishIn;
-        }
-
-        public void notifyHurt()
-        {
-            if (this.lookForFriends == 0)
-            {
-                this.lookForFriends = 20;
-            }
-        }
-
-        public boolean shouldExecute()
-        {
-            return this.lookForFriends > 0;
-        }
-
-        public void updateTask()
-        {
-            --this.lookForFriends;
-
-            if (this.lookForFriends <= 0)
-            {
-                World world = this.silverfish.world;
-                Random random = this.silverfish.getRNG();
-                BlockPos blockpos = new BlockPos(this.silverfish);
-
-                for (int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i)
-                {
-                    for (int j = 0; j <= 10 && j >= -10; j = (j <= 0 ? 1 : 0) - j)
-                    {
-                        for (int k = 0; k <= 10 && k >= -10; k = (k <= 0 ? 1 : 0) - k)
-                        {
-                            BlockPos blockpos1 = blockpos.add(j, i, k);
-                            IBlockState iblockstate = world.getBlockState(blockpos1);
-
-                            if (iblockstate.getBlock() == Blocks.MONSTER_EGG)
-                            {
-                                if (world.getGameRules().getBoolean("mobGriefing"))
-                                {
-                                    world.destroyBlock(blockpos1, true);
-                                }
-                                else
-                                {
-                                    world.setBlockState(blockpos1, ((BlockSilverfish.EnumType)iblockstate.getValue(BlockSilverfish.VARIANT)).getModelBlock(), 3);
-                                }
-
-                                if (random.nextBoolean())
-                                {
-                                    return;
-                                }
-                            }
+            for(int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i) {
+               for(int j = 0; j <= 10 && j >= -10; j = (j <= 0 ? 1 : 0) - j) {
+                  for(int k = 0; k <= 10 && k >= -10; k = (k <= 0 ? 1 : 0) - k) {
+                     BlockPos blockpos1 = blockpos.func_177982_a(j, i, k);
+                     IBlockState iblockstate = world.func_180495_p(blockpos1);
+                     if (iblockstate.func_177230_c() == Blocks.field_150418_aU) {
+                        if (world.func_82736_K().func_82766_b("mobGriefing")) {
+                           world.func_175655_b(blockpos1, true);
+                        } else {
+                           world.func_180501_a(blockpos1, ((BlockSilverfish.EnumType)iblockstate.func_177229_b(BlockSilverfish.field_176378_a)).func_176883_d(), 3);
                         }
-                    }
-                }
+
+                        if (random.nextBoolean()) {
+                           return;
+                        }
+                     }
+                  }
+               }
             }
-        }
-    }
+         }
+
+      }
+   }
 }

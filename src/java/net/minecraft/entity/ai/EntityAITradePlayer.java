@@ -3,69 +3,40 @@ package net.minecraft.entity.ai;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class EntityAITradePlayer extends EntityAIBase
-{
-    private final EntityVillager villager;
+public class EntityAITradePlayer extends EntityAIBase {
+   private final EntityVillager field_75276_a;
 
-    public EntityAITradePlayer(EntityVillager villagerIn)
-    {
-        this.villager = villagerIn;
-        this.setMutexBits(5);
-    }
+   public EntityAITradePlayer(EntityVillager p_i1658_1_) {
+      this.field_75276_a = p_i1658_1_;
+      this.func_75248_a(5);
+   }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        if (!this.villager.isEntityAlive())
-        {
+   public boolean func_75250_a() {
+      if (!this.field_75276_a.func_70089_S()) {
+         return false;
+      } else if (this.field_75276_a.func_70090_H()) {
+         return false;
+      } else if (!this.field_75276_a.field_70122_E) {
+         return false;
+      } else if (this.field_75276_a.field_70133_I) {
+         return false;
+      } else {
+         EntityPlayer entityplayer = this.field_75276_a.func_70931_l_();
+         if (entityplayer == null) {
             return false;
-        }
-        else if (this.villager.isInWater())
-        {
+         } else if (this.field_75276_a.func_70068_e(entityplayer) > 16.0D) {
             return false;
-        }
-        else if (!this.villager.onGround)
-        {
-            return false;
-        }
-        else if (this.villager.velocityChanged)
-        {
-            return false;
-        }
-        else
-        {
-            EntityPlayer entityplayer = this.villager.getCustomer();
+         } else {
+            return entityplayer.field_71070_bA != null;
+         }
+      }
+   }
 
-            if (entityplayer == null)
-            {
-                return false;
-            }
-            else if (this.villager.getDistanceSqToEntity(entityplayer) > 16.0D)
-            {
-                return false;
-            }
-            else
-            {
-                return entityplayer.openContainer != null;
-            }
-        }
-    }
+   public void func_75249_e() {
+      this.field_75276_a.func_70661_as().func_75499_g();
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        this.villager.getNavigator().clearPathEntity();
-    }
-
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        this.villager.setCustomer((EntityPlayer)null);
-    }
+   public void func_75251_c() {
+      this.field_75276_a.func_70932_a_((EntityPlayer)null);
+   }
 }

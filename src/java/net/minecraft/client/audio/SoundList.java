@@ -3,36 +3,27 @@ package net.minecraft.client.audio;
 import java.util.List;
 import javax.annotation.Nullable;
 
-public class SoundList
-{
-    private final List<Sound> sounds;
+public class SoundList {
+   private final List<Sound> field_188702_a;
+   private final boolean field_148575_b;
+   private final String field_188703_c;
 
-    /**
-     * if true it will override all the sounds from the resourcepacks loaded before
-     */
-    private final boolean replaceExisting;
-    private final String subtitle;
+   public SoundList(List<Sound> p_i46525_1_, boolean p_i46525_2_, String p_i46525_3_) {
+      this.field_188702_a = p_i46525_1_;
+      this.field_148575_b = p_i46525_2_;
+      this.field_188703_c = p_i46525_3_;
+   }
 
-    public SoundList(List<Sound> soundsIn, boolean replceIn, String subtitleIn)
-    {
-        this.sounds = soundsIn;
-        this.replaceExisting = replceIn;
-        this.subtitle = subtitleIn;
-    }
+   public List<Sound> func_188700_a() {
+      return this.field_188702_a;
+   }
 
-    public List<Sound> getSounds()
-    {
-        return this.sounds;
-    }
+   public boolean func_148574_b() {
+      return this.field_148575_b;
+   }
 
-    public boolean canReplaceExisting()
-    {
-        return this.replaceExisting;
-    }
-
-    @Nullable
-    public String getSubtitle()
-    {
-        return this.subtitle;
-    }
+   @Nullable
+   public String func_188701_c() {
+      return this.field_188703_c;
+   }
 }

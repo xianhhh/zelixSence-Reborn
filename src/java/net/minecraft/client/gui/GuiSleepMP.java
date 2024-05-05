@@ -5,64 +5,40 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.network.play.client.CPacketEntityAction;
 
-public class GuiSleepMP extends GuiChat
-{
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        super.initGui();
-        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping")));
-    }
+public class GuiSleepMP extends GuiChat {
+   public void func_73866_w_() {
+      super.func_73866_w_();
+      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 - 100, this.field_146295_m - 40, I18n.func_135052_a("multiplayer.stopSleeping")));
+   }
 
-    /**
-     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
-     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
-     */
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        if (keyCode == 1)
-        {
-            this.wakeFromSleep();
-        }
-        else if (keyCode != 28 && keyCode != 156)
-        {
-            super.keyTyped(typedChar, keyCode);
-        }
-        else
-        {
-            String s = this.inputField.getText().trim();
+   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
+      if (p_73869_2_ == 1) {
+         this.func_146418_g();
+      } else if (p_73869_2_ != 28 && p_73869_2_ != 156) {
+         super.func_73869_a(p_73869_1_, p_73869_2_);
+      } else {
+         String s = this.field_146415_a.func_146179_b().trim();
+         if (!s.isEmpty()) {
+            this.field_146297_k.field_71439_g.func_71165_d(s);
+         }
 
-            if (!s.isEmpty())
-            {
-                this.mc.player.sendChatMessage(s);
-            }
+         this.field_146415_a.func_146180_a("");
+         this.field_146297_k.field_71456_v.func_146158_b().func_146240_d();
+      }
 
-            this.inputField.setText("");
-            this.mc.ingameGUI.getChatGUI().resetScroll();
-        }
-    }
+   }
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.id == 1)
-        {
-            this.wakeFromSleep();
-        }
-        else
-        {
-            super.actionPerformed(button);
-        }
-    }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      if (p_146284_1_.field_146127_k == 1) {
+         this.func_146418_g();
+      } else {
+         super.func_146284_a(p_146284_1_);
+      }
 
-    private void wakeFromSleep()
-    {
-        NetHandlerPlayClient nethandlerplayclient = this.mc.player.connection;
-        nethandlerplayclient.sendPacket(new CPacketEntityAction(this.mc.player, CPacketEntityAction.Action.STOP_SLEEPING));
-    }
+   }
+
+   private void func_146418_g() {
+      NetHandlerPlayClient nethandlerplayclient = this.field_146297_k.field_71439_g.field_71174_a;
+      nethandlerplayclient.func_147297_a(new CPacketEntityAction(this.field_146297_k.field_71439_g, CPacketEntityAction.Action.STOP_SLEEPING));
+   }
 }

@@ -1,12 +1,11 @@
 package net.minecraft.entity;
 
-public interface IJumpingMount
-{
-    void setJumpPower(int jumpPowerIn);
+public interface IJumpingMount {
+   void func_110206_u(int var1);
 
-    boolean canJump();
+   boolean func_184776_b();
 
-    void handleStartJump(int p_184775_1_);
+   void func_184775_b(int var1);
 
-    void handleStopJump();
+   void func_184777_r_();
 }

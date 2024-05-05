@@ -7,80 +7,59 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 
-public class SPacketScoreboardObjective implements Packet<INetHandlerPlayClient>
-{
-    private String objectiveName;
-    private String objectiveValue;
-    private IScoreCriteria.EnumRenderType type;
-    private int action;
+public class SPacketScoreboardObjective implements Packet<INetHandlerPlayClient> {
+   private String field_149343_a;
+   private String field_149341_b;
+   private IScoreCriteria.EnumRenderType field_179818_c;
+   private int field_149342_c;
 
-    public SPacketScoreboardObjective()
-    {
-    }
+   public SPacketScoreboardObjective() {
+   }
 
-    public SPacketScoreboardObjective(ScoreObjective objective, int actionIn)
-    {
-        this.objectiveName = objective.getName();
-        this.objectiveValue = objective.getDisplayName();
-        this.type = objective.getCriteria().getRenderType();
-        this.action = actionIn;
-    }
+   public SPacketScoreboardObjective(ScoreObjective p_i46910_1_, int p_i46910_2_) {
+      this.field_149343_a = p_i46910_1_.func_96679_b();
+      this.field_149341_b = p_i46910_1_.func_96678_d();
+      this.field_179818_c = p_i46910_1_.func_96680_c().func_178790_c();
+      this.field_149342_c = p_i46910_2_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.objectiveName = buf.readStringFromBuffer(16);
-        this.action = buf.readByte();
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149343_a = p_148837_1_.func_150789_c(16);
+      this.field_149342_c = p_148837_1_.readByte();
+      if (this.field_149342_c == 0 || this.field_149342_c == 2) {
+         this.field_149341_b = p_148837_1_.func_150789_c(32);
+         this.field_179818_c = IScoreCriteria.EnumRenderType.func_178795_a(p_148837_1_.func_150789_c(16));
+      }
 
-        if (this.action == 0 || this.action == 2)
-        {
-            this.objectiveValue = buf.readStringFromBuffer(32);
-            this.type = IScoreCriteria.EnumRenderType.getByName(buf.readStringFromBuffer(16));
-        }
-    }
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeString(this.objectiveName);
-        buf.writeByte(this.action);
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_180714_a(this.field_149343_a);
+      p_148840_1_.writeByte(this.field_149342_c);
+      if (this.field_149342_c == 0 || this.field_149342_c == 2) {
+         p_148840_1_.func_180714_a(this.field_149341_b);
+         p_148840_1_.func_180714_a(this.field_179818_c.func_178796_a());
+      }
 
-        if (this.action == 0 || this.action == 2)
-        {
-            buf.writeString(this.objectiveValue);
-            buf.writeString(this.type.getRenderType());
-        }
-    }
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleScoreboardObjective(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147291_a(this);
+   }
 
-    public String getObjectiveName()
-    {
-        return this.objectiveName;
-    }
+   public String func_149339_c() {
+      return this.field_149343_a;
+   }
 
-    public String getObjectiveValue()
-    {
-        return this.objectiveValue;
-    }
+   public String func_149337_d() {
+      return this.field_149341_b;
+   }
 
-    public int getAction()
-    {
-        return this.action;
-    }
+   public int func_149338_e() {
+      return this.field_149342_c;
+   }
 
-    public IScoreCriteria.EnumRenderType getRenderType()
-    {
-        return this.type;
-    }
+   public IScoreCriteria.EnumRenderType func_179817_d() {
+      return this.field_179818_c;
+   }
 }

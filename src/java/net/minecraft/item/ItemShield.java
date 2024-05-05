@@ -16,72 +16,47 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-public class ItemShield extends Item
-{
-    public ItemShield()
-    {
-        this.maxStackSize = 1;
-        this.setCreativeTab(CreativeTabs.COMBAT);
-        this.setMaxDamage(336);
-        this.addPropertyOverride(new ResourceLocation("blocking"), new IItemPropertyGetter()
-        {
-            public float apply(ItemStack stack, @Nullable World worldIn, @Nullable EntityLivingBase entityIn)
-            {
-                return entityIn != null && entityIn.isHandActive() && entityIn.getActiveItemStack() == stack ? 1.0F : 0.0F;
-            }
-        });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, ItemArmor.DISPENSER_BEHAVIOR);
-    }
+public class ItemShield extends Item {
+   public ItemShield() {
+      this.field_77777_bU = 1;
+      this.func_77637_a(CreativeTabs.field_78037_j);
+      this.func_77656_e(336);
+      this.func_185043_a(new ResourceLocation("blocking"), new IItemPropertyGetter() {
+         public float func_185085_a(ItemStack p_185085_1_, @Nullable World p_185085_2_, @Nullable EntityLivingBase p_185085_3_) {
+            return p_185085_3_ != null && p_185085_3_.func_184587_cr() && p_185085_3_.func_184607_cu() == p_185085_1_ ? 1.0F : 0.0F;
+         }
+      });
+      BlockDispenser.field_149943_a.func_82595_a(this, ItemArmor.field_96605_cw);
+   }
 
-    public String getItemStackDisplayName(ItemStack stack)
-    {
-        if (stack.getSubCompound("BlockEntityTag") != null)
-        {
-            EnumDyeColor enumdyecolor = TileEntityBanner.func_190616_d(stack);
-            return I18n.translateToLocal("item.shield." + enumdyecolor.getUnlocalizedName() + ".name");
-        }
-        else
-        {
-            return I18n.translateToLocal("item.shield.name");
-        }
-    }
+   public String func_77653_i(ItemStack p_77653_1_) {
+      if (p_77653_1_.func_179543_a("BlockEntityTag") != null) {
+         EnumDyeColor enumdyecolor = TileEntityBanner.func_190616_d(p_77653_1_);
+         return I18n.func_74838_a("item.shield." + enumdyecolor.func_176762_d() + ".name");
+      } else {
+         return I18n.func_74838_a("item.shield.name");
+      }
+   }
 
-    /**
-     * allows items to add custom lines of information to the mouseover description
-     */
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
-    {
-        ItemBanner.appendHoverTextFromTileEntityTag(stack, tooltip);
-    }
+   public void func_77624_a(ItemStack p_77624_1_, @Nullable World p_77624_2_, List<String> p_77624_3_, ITooltipFlag p_77624_4_) {
+      ItemBanner.func_185054_a(p_77624_1_, p_77624_3_);
+   }
 
-    /**
-     * returns the action that specifies what animation to play when the items is being used
-     */
-    public EnumAction getItemUseAction(ItemStack stack)
-    {
-        return EnumAction.BLOCK;
-    }
+   public EnumAction func_77661_b(ItemStack p_77661_1_) {
+      return EnumAction.BLOCK;
+   }
 
-    /**
-     * How long it takes to use or consume an item
-     */
-    public int getMaxItemUseDuration(ItemStack stack)
-    {
-        return 72000;
-    }
+   public int func_77626_a(ItemStack p_77626_1_) {
+      return 72000;
+   }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
-    {
-        ItemStack itemstack = worldIn.getHeldItem(playerIn);
-        worldIn.setActiveHand(playerIn);
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
-    }
+   public ActionResult<ItemStack> func_77659_a(World p_77659_1_, EntityPlayer p_77659_2_, EnumHand p_77659_3_) {
+      ItemStack itemstack = p_77659_2_.func_184586_b(p_77659_3_);
+      p_77659_2_.func_184598_c(p_77659_3_);
+      return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+   }
 
-    /**
-     * Return whether this item is repairable in an anvil.
-     */
-    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair)
-    {
-        return repair.getItem() == Item.getItemFromBlock(Blocks.PLANKS) ? true : super.getIsRepairable(toRepair, repair);
-    }
+   public boolean func_82789_a(ItemStack p_82789_1_, ItemStack p_82789_2_) {
+      return p_82789_2_.func_77973_b() == Item.func_150898_a(Blocks.field_150344_f) ? true : super.func_82789_a(p_82789_1_, p_82789_2_);
+   }
 }

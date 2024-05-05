@@ -6,99 +6,77 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketEntityTeleport implements Packet<INetHandlerPlayClient>
-{
-    private int entityId;
-    private double posX;
-    private double posY;
-    private double posZ;
-    private byte yaw;
-    private byte pitch;
-    private boolean onGround;
+public class SPacketEntityTeleport implements Packet<INetHandlerPlayClient> {
+   private int field_149458_a;
+   private double field_149456_b;
+   private double field_149457_c;
+   private double field_149454_d;
+   private byte field_149455_e;
+   private byte field_149453_f;
+   private boolean field_179698_g;
 
-    public SPacketEntityTeleport()
-    {
-    }
+   public SPacketEntityTeleport() {
+   }
 
-    public SPacketEntityTeleport(Entity entityIn)
-    {
-        this.entityId = entityIn.getEntityId();
-        this.posX = entityIn.posX;
-        this.posY = entityIn.posY;
-        this.posZ = entityIn.posZ;
-        this.yaw = (byte)((int)(entityIn.rotationYaw * 256.0F / 360.0F));
-        this.pitch = (byte)((int)(entityIn.rotationPitch * 256.0F / 360.0F));
-        this.onGround = entityIn.onGround;
-    }
+   public SPacketEntityTeleport(Entity p_i46893_1_) {
+      this.field_149458_a = p_i46893_1_.func_145782_y();
+      this.field_149456_b = p_i46893_1_.field_70165_t;
+      this.field_149457_c = p_i46893_1_.field_70163_u;
+      this.field_149454_d = p_i46893_1_.field_70161_v;
+      this.field_149455_e = (byte)((int)(p_i46893_1_.field_70177_z * 256.0F / 360.0F));
+      this.field_149453_f = (byte)((int)(p_i46893_1_.field_70125_A * 256.0F / 360.0F));
+      this.field_179698_g = p_i46893_1_.field_70122_E;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityId = buf.readVarIntFromBuffer();
-        this.posX = buf.readDouble();
-        this.posY = buf.readDouble();
-        this.posZ = buf.readDouble();
-        this.yaw = buf.readByte();
-        this.pitch = buf.readByte();
-        this.onGround = buf.readBoolean();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149458_a = p_148837_1_.func_150792_a();
+      this.field_149456_b = p_148837_1_.readDouble();
+      this.field_149457_c = p_148837_1_.readDouble();
+      this.field_149454_d = p_148837_1_.readDouble();
+      this.field_149455_e = p_148837_1_.readByte();
+      this.field_149453_f = p_148837_1_.readByte();
+      this.field_179698_g = p_148837_1_.readBoolean();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityId);
-        buf.writeDouble(this.posX);
-        buf.writeDouble(this.posY);
-        buf.writeDouble(this.posZ);
-        buf.writeByte(this.yaw);
-        buf.writeByte(this.pitch);
-        buf.writeBoolean(this.onGround);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149458_a);
+      p_148840_1_.writeDouble(this.field_149456_b);
+      p_148840_1_.writeDouble(this.field_149457_c);
+      p_148840_1_.writeDouble(this.field_149454_d);
+      p_148840_1_.writeByte(this.field_149455_e);
+      p_148840_1_.writeByte(this.field_149453_f);
+      p_148840_1_.writeBoolean(this.field_179698_g);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleEntityTeleport(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147275_a(this);
+   }
 
-    public int getEntityId()
-    {
-        return this.entityId;
-    }
+   public int func_149451_c() {
+      return this.field_149458_a;
+   }
 
-    public double getX()
-    {
-        return this.posX;
-    }
+   public double func_186982_b() {
+      return this.field_149456_b;
+   }
 
-    public double getY()
-    {
-        return this.posY;
-    }
+   public double func_186983_c() {
+      return this.field_149457_c;
+   }
 
-    public double getZ()
-    {
-        return this.posZ;
-    }
+   public double func_186981_d() {
+      return this.field_149454_d;
+   }
 
-    public byte getYaw()
-    {
-        return this.yaw;
-    }
+   public byte func_149450_g() {
+      return this.field_149455_e;
+   }
 
-    public byte getPitch()
-    {
-        return this.pitch;
-    }
+   public byte func_149447_h() {
+      return this.field_149453_f;
+   }
 
-    public boolean getOnGround()
-    {
-        return this.onGround;
-    }
+   public boolean func_179697_g() {
+      return this.field_179698_g;
+   }
 }

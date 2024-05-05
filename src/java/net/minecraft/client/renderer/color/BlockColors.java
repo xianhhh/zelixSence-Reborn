@@ -22,169 +22,120 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeColorHelper;
 
-public class BlockColors
-{
-    private final ObjectIntIdentityMap<IBlockColor> mapBlockColors = new ObjectIntIdentityMap<IBlockColor>(32);
+public class BlockColors {
+   private final ObjectIntIdentityMap<IBlockColor> field_186725_a = new ObjectIntIdentityMap<IBlockColor>(32);
 
-    public static BlockColors init()
-    {
-        final BlockColors blockcolors = new BlockColors();
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype = (BlockDoublePlant.EnumPlantType)state.getValue(BlockDoublePlant.VARIANT);
-                return worldIn != null && pos != null && (blockdoubleplant$enumplanttype == BlockDoublePlant.EnumPlantType.GRASS || blockdoubleplant$enumplanttype == BlockDoublePlant.EnumPlantType.FERN) ? BiomeColorHelper.getGrassColorAtPos(worldIn, state.getValue(BlockDoublePlant.HALF) == BlockDoublePlant.EnumBlockHalf.UPPER ? pos.down() : pos) : -1;
+   public static BlockColors func_186723_a() {
+      final BlockColors blockcolors = new BlockColors();
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype = (BlockDoublePlant.EnumPlantType)p_186720_1_.func_177229_b(BlockDoublePlant.field_176493_a);
+            return p_186720_2_ != null && p_186720_3_ != null && (blockdoubleplant$enumplanttype == BlockDoublePlant.EnumPlantType.GRASS || blockdoubleplant$enumplanttype == BlockDoublePlant.EnumPlantType.FERN) ? BiomeColorHelper.func_180286_a(p_186720_2_, p_186720_1_.func_177229_b(BlockDoublePlant.field_176492_b) == BlockDoublePlant.EnumBlockHalf.UPPER ? p_186720_3_.func_177977_b() : p_186720_3_) : -1;
+         }
+      }, Blocks.field_150398_cm);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            if (p_186720_2_ != null && p_186720_3_ != null) {
+               TileEntity tileentity = p_186720_2_.func_175625_s(p_186720_3_);
+               if (tileentity instanceof TileEntityFlowerPot) {
+                  Item item = ((TileEntityFlowerPot)tileentity).func_145965_a();
+                  IBlockState iblockstate = Block.func_149634_a(item).func_176223_P();
+                  return blockcolors.func_186724_a(iblockstate, p_186720_2_, p_186720_3_, p_186720_4_);
+               } else {
+                  return -1;
+               }
+            } else {
+               return -1;
             }
-        }, Blocks.DOUBLE_PLANT);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                if (worldIn != null && pos != null)
-                {
-                    TileEntity tileentity = worldIn.getTileEntity(pos);
+         }
+      }, Blocks.field_150457_bL);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180286_a(p_186720_2_, p_186720_3_) : ColorizerGrass.func_77480_a(0.5D, 1.0D);
+         }
+      }, Blocks.field_150349_c);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            BlockPlanks.EnumType blockplanks$enumtype = (BlockPlanks.EnumType)p_186720_1_.func_177229_b(BlockOldLeaf.field_176239_P);
+            if (blockplanks$enumtype == BlockPlanks.EnumType.SPRUCE) {
+               return ColorizerFoliage.func_77466_a();
+            } else if (blockplanks$enumtype == BlockPlanks.EnumType.BIRCH) {
+               return ColorizerFoliage.func_77469_b();
+            } else {
+               return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180287_b(p_186720_2_, p_186720_3_) : ColorizerFoliage.func_77468_c();
+            }
+         }
+      }, Blocks.field_150362_t);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180287_b(p_186720_2_, p_186720_3_) : ColorizerFoliage.func_77468_c();
+         }
+      }, Blocks.field_150361_u);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180288_c(p_186720_2_, p_186720_3_) : -1;
+         }
+      }, Blocks.field_150355_j, Blocks.field_150358_i);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return BlockRedstoneWire.func_176337_b(((Integer)p_186720_1_.func_177229_b(BlockRedstoneWire.field_176351_O)).intValue());
+         }
+      }, Blocks.field_150488_af);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180286_a(p_186720_2_, p_186720_3_) : -1;
+         }
+      }, Blocks.field_150436_aH);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            int i = ((Integer)p_186720_1_.func_177229_b(BlockStem.field_176484_a)).intValue();
+            int j = i * 32;
+            int k = 255 - i * 8;
+            int l = i * 4;
+            return j << 16 | k << 8 | l;
+         }
+      }, Blocks.field_150394_bc, Blocks.field_150393_bb);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            if (p_186720_2_ != null && p_186720_3_ != null) {
+               return BiomeColorHelper.func_180286_a(p_186720_2_, p_186720_3_);
+            } else {
+               return p_186720_1_.func_177229_b(BlockTallGrass.field_176497_a) == BlockTallGrass.EnumType.DEAD_BUSH ? 16777215 : ColorizerGrass.func_77480_a(0.5D, 1.0D);
+            }
+         }
+      }, Blocks.field_150329_H);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? BiomeColorHelper.func_180287_b(p_186720_2_, p_186720_3_) : ColorizerFoliage.func_77468_c();
+         }
+      }, Blocks.field_150395_bd);
+      blockcolors.func_186722_a(new IBlockColor() {
+         public int func_186720_a(IBlockState p_186720_1_, @Nullable IBlockAccess p_186720_2_, @Nullable BlockPos p_186720_3_, int p_186720_4_) {
+            return p_186720_2_ != null && p_186720_3_ != null ? 2129968 : 7455580;
+         }
+      }, Blocks.field_150392_bi);
+      return blockcolors;
+   }
 
-                    if (tileentity instanceof TileEntityFlowerPot)
-                    {
-                        Item item = ((TileEntityFlowerPot)tileentity).getFlowerPotItem();
-                        IBlockState iblockstate = Block.getBlockFromItem(item).getDefaultState();
-                        return blockcolors.colorMultiplier(iblockstate, worldIn, pos, tintIndex);
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-        }, Blocks.FLOWER_POT);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : ColorizerGrass.getGrassColor(0.5D, 1.0D);
-            }
-        }, Blocks.GRASS);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                BlockPlanks.EnumType blockplanks$enumtype = (BlockPlanks.EnumType)state.getValue(BlockOldLeaf.VARIANT);
+   public int func_189991_a(IBlockState p_189991_1_, World p_189991_2_, BlockPos p_189991_3_) {
+      IBlockColor iblockcolor = this.field_186725_a.func_148745_a(Block.func_149682_b(p_189991_1_.func_177230_c()));
+      if (iblockcolor != null) {
+         return iblockcolor.func_186720_a(p_189991_1_, (IBlockAccess)null, (BlockPos)null, 0);
+      } else {
+         MapColor mapcolor = p_189991_1_.func_185909_g(p_189991_2_, p_189991_3_);
+         return mapcolor != null ? mapcolor.field_76291_p : -1;
+      }
+   }
 
-                if (blockplanks$enumtype == BlockPlanks.EnumType.SPRUCE)
-                {
-                    return ColorizerFoliage.getFoliageColorPine();
-                }
-                else if (blockplanks$enumtype == BlockPlanks.EnumType.BIRCH)
-                {
-                    return ColorizerFoliage.getFoliageColorBirch();
-                }
-                else
-                {
-                    return worldIn != null && pos != null ? BiomeColorHelper.getFoliageColorAtPos(worldIn, pos) : ColorizerFoliage.getFoliageColorBasic();
-                }
-            }
-        }, Blocks.LEAVES);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? BiomeColorHelper.getFoliageColorAtPos(worldIn, pos) : ColorizerFoliage.getFoliageColorBasic();
-            }
-        }, Blocks.LEAVES2);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? BiomeColorHelper.getWaterColorAtPos(worldIn, pos) : -1;
-            }
-        }, Blocks.WATER, Blocks.FLOWING_WATER);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return BlockRedstoneWire.colorMultiplier(((Integer)state.getValue(BlockRedstoneWire.POWER)).intValue());
-            }
-        }, Blocks.REDSTONE_WIRE);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : -1;
-            }
-        }, Blocks.REEDS);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                int i = ((Integer)state.getValue(BlockStem.AGE)).intValue();
-                int j = i * 32;
-                int k = 255 - i * 8;
-                int l = i * 4;
-                return j << 16 | k << 8 | l;
-            }
-        }, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                if (worldIn != null && pos != null)
-                {
-                    return BiomeColorHelper.getGrassColorAtPos(worldIn, pos);
-                }
-                else
-                {
-                    return state.getValue(BlockTallGrass.TYPE) == BlockTallGrass.EnumType.DEAD_BUSH ? 16777215 : ColorizerGrass.getGrassColor(0.5D, 1.0D);
-                }
-            }
-        }, Blocks.TALLGRASS);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? BiomeColorHelper.getFoliageColorAtPos(worldIn, pos) : ColorizerFoliage.getFoliageColorBasic();
-            }
-        }, Blocks.VINE);
-        blockcolors.registerBlockColorHandler(new IBlockColor()
-        {
-            public int colorMultiplier(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex)
-            {
-                return worldIn != null && pos != null ? 2129968 : 7455580;
-            }
-        }, Blocks.WATERLILY);
-        return blockcolors;
-    }
+   public int func_186724_a(IBlockState p_186724_1_, @Nullable IBlockAccess p_186724_2_, @Nullable BlockPos p_186724_3_, int p_186724_4_) {
+      IBlockColor iblockcolor = this.field_186725_a.func_148745_a(Block.func_149682_b(p_186724_1_.func_177230_c()));
+      return iblockcolor == null ? -1 : iblockcolor.func_186720_a(p_186724_1_, p_186724_2_, p_186724_3_, p_186724_4_);
+   }
 
-    public int getColor(IBlockState p_189991_1_, World p_189991_2_, BlockPos p_189991_3_)
-    {
-        IBlockColor iblockcolor = this.mapBlockColors.getByValue(Block.getIdFromBlock(p_189991_1_.getBlock()));
+   public void func_186722_a(IBlockColor p_186722_1_, Block... p_186722_2_) {
+      for(Block block : p_186722_2_) {
+         this.field_186725_a.func_148746_a(p_186722_1_, Block.func_149682_b(block));
+      }
 
-        if (iblockcolor != null)
-        {
-            return iblockcolor.colorMultiplier(p_189991_1_, (IBlockAccess)null, (BlockPos)null, 0);
-        }
-        else
-        {
-            MapColor mapcolor = p_189991_1_.getMapColor(p_189991_2_, p_189991_3_);
-            return mapcolor != null ? mapcolor.colorValue : -1;
-        }
-    }
-
-    public int colorMultiplier(IBlockState state, @Nullable IBlockAccess blockAccess, @Nullable BlockPos pos, int renderPass)
-    {
-        IBlockColor iblockcolor = this.mapBlockColors.getByValue(Block.getIdFromBlock(state.getBlock()));
-        return iblockcolor == null ? -1 : iblockcolor.colorMultiplier(state, blockAccess, pos, renderPass);
-    }
-
-    public void registerBlockColorHandler(IBlockColor blockColor, Block... blocksIn)
-    {
-        for (Block block : blocksIn)
-        {
-            this.mapBlockColors.put(blockColor, Block.getIdFromBlock(block));
-        }
-    }
+   }
 }

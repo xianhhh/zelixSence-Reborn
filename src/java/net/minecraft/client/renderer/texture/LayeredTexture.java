@@ -13,54 +13,41 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class LayeredTexture extends AbstractTexture
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    public final List<String> layeredTextureNames;
+public class LayeredTexture extends AbstractTexture {
+   private static final Logger field_147638_c = LogManager.getLogger();
+   public final List<String> field_110567_b;
 
-    public LayeredTexture(String... textureNames)
-    {
-        this.layeredTextureNames = Lists.newArrayList(textureNames);
-    }
+   public LayeredTexture(String... p_i1274_1_) {
+      this.field_110567_b = Lists.newArrayList(p_i1274_1_);
+   }
 
-    public void loadTexture(IResourceManager resourceManager) throws IOException
-    {
-        this.deleteGlTexture();
-        BufferedImage bufferedimage = null;
+   public void func_110551_a(IResourceManager p_110551_1_) throws IOException {
+      this.func_147631_c();
+      BufferedImage bufferedimage = null;
 
-        for (String s : this.layeredTextureNames)
-        {
-            IResource iresource = null;
+      for(String s : this.field_110567_b) {
+         IResource iresource = null;
 
-            try
-            {
-                if (s != null)
-                {
-                    iresource = resourceManager.getResource(new ResourceLocation(s));
-                    BufferedImage bufferedimage1 = TextureUtil.readBufferedImage(iresource.getInputStream());
+         try {
+            if (s != null) {
+               iresource = p_110551_1_.func_110536_a(new ResourceLocation(s));
+               BufferedImage bufferedimage1 = TextureUtil.func_177053_a(iresource.func_110527_b());
+               if (bufferedimage == null) {
+                  bufferedimage = new BufferedImage(bufferedimage1.getWidth(), bufferedimage1.getHeight(), 2);
+               }
 
-                    if (bufferedimage == null)
-                    {
-                        bufferedimage = new BufferedImage(bufferedimage1.getWidth(), bufferedimage1.getHeight(), 2);
-                    }
-
-                    bufferedimage.getGraphics().drawImage(bufferedimage1, 0, 0, (ImageObserver)null);
-                }
-
-                continue;
+               bufferedimage.getGraphics().drawImage(bufferedimage1, 0, 0, (ImageObserver)null);
             }
-            catch (IOException ioexception)
-            {
-                LOGGER.error("Couldn't load layered image", (Throwable)ioexception);
-            }
-            finally
-            {
-                IOUtils.closeQuietly((Closeable)iresource);
-            }
+            continue;
+         } catch (IOException ioexception) {
+            field_147638_c.error("Couldn't load layered image", (Throwable)ioexception);
+         } finally {
+            IOUtils.closeQuietly((Closeable)iresource);
+         }
 
-            return;
-        }
+         return;
+      }
 
-        TextureUtil.uploadTextureImage(this.getGlTextureId(), bufferedimage);
-    }
+      TextureUtil.func_110987_a(this.func_110552_b(), bufferedimage);
+   }
 }

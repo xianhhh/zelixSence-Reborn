@@ -5,54 +5,37 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketSteerBoat implements Packet<INetHandlerPlayServer>
-{
-    private boolean left;
-    private boolean right;
+public class CPacketSteerBoat implements Packet<INetHandlerPlayServer> {
+   private boolean field_187015_a;
+   private boolean field_187016_b;
 
-    public CPacketSteerBoat()
-    {
-    }
+   public CPacketSteerBoat() {
+   }
 
-    public CPacketSteerBoat(boolean p_i46873_1_, boolean p_i46873_2_)
-    {
-        this.left = p_i46873_1_;
-        this.right = p_i46873_2_;
-    }
+   public CPacketSteerBoat(boolean p_i46873_1_, boolean p_i46873_2_) {
+      this.field_187015_a = p_i46873_1_;
+      this.field_187016_b = p_i46873_2_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.left = buf.readBoolean();
-        this.right = buf.readBoolean();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_187015_a = p_148837_1_.readBoolean();
+      this.field_187016_b = p_148837_1_.readBoolean();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeBoolean(this.left);
-        buf.writeBoolean(this.right);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeBoolean(this.field_187015_a);
+      p_148840_1_.writeBoolean(this.field_187016_b);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.processSteerBoat(this);
-    }
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_184340_a(this);
+   }
 
-    public boolean getLeft()
-    {
-        return this.left;
-    }
+   public boolean func_187012_a() {
+      return this.field_187015_a;
+   }
 
-    public boolean getRight()
-    {
-        return this.right;
-    }
+   public boolean func_187014_b() {
+      return this.field_187016_b;
+   }
 }

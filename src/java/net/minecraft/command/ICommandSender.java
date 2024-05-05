@@ -9,63 +9,40 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
-public interface ICommandSender
-{
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    String getName();
+public interface ICommandSender {
+   String func_70005_c_();
 
-default ITextComponent getDisplayName()
-    {
-        return new TextComponentString(this.getName());
-    }
+   default ITextComponent func_145748_c_() {
+      return new TextComponentString(this.func_70005_c_());
+   }
 
-default void addChatMessage(ITextComponent component)
-    {
-    }
+   default void func_145747_a(ITextComponent p_145747_1_) {
+   }
 
-    /**
-     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
-     */
-    boolean canCommandSenderUseCommand(int permLevel, String commandName);
+   boolean func_70003_b(int var1, String var2);
 
-default BlockPos getPosition()
-    {
-        return BlockPos.ORIGIN;
-    }
+   default BlockPos func_180425_c() {
+      return BlockPos.field_177992_a;
+   }
 
-default Vec3d getPositionVector()
-    {
-        return Vec3d.ZERO;
-    }
+   default Vec3d func_174791_d() {
+      return Vec3d.field_186680_a;
+   }
 
-    /**
-     * Get the world, if available. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
-     * the overworld
-     */
-    World getEntityWorld();
+   World func_130014_f_();
 
-    @Nullable
+   @Nullable
+   default Entity func_174793_f() {
+      return null;
+   }
 
-default Entity getCommandSenderEntity()
-    {
-        return null;
-    }
+   default boolean func_174792_t_() {
+      return false;
+   }
 
-default boolean sendCommandFeedback()
-    {
-        return false;
-    }
+   default void func_174794_a(CommandResultStats.Type p_174794_1_, int p_174794_2_) {
+   }
 
-default void setCommandStat(CommandResultStats.Type type, int amount)
-    {
-    }
-
-    @Nullable
-
-    /**
-     * Get the Minecraft server instance
-     */
-    MinecraftServer getServer();
+   @Nullable
+   MinecraftServer func_184102_h();
 }

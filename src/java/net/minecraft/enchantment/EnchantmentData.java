@@ -2,18 +2,13 @@ package net.minecraft.enchantment;
 
 import net.minecraft.util.WeightedRandom;
 
-public class EnchantmentData extends WeightedRandom.Item
-{
-    /** Enchantment object associated with this EnchantmentData */
-    public final Enchantment enchantmentobj;
+public class EnchantmentData extends WeightedRandom.Item {
+   public final Enchantment field_76302_b;
+   public final int field_76303_c;
 
-    /** Enchantment level associated with this EnchantmentData */
-    public final int enchantmentLevel;
-
-    public EnchantmentData(Enchantment enchantmentObj, int enchLevel)
-    {
-        super(enchantmentObj.getRarity().getWeight());
-        this.enchantmentobj = enchantmentObj;
-        this.enchantmentLevel = enchLevel;
-    }
+   public EnchantmentData(Enchantment p_i1930_1_, int p_i1930_2_) {
+      super(p_i1930_1_.func_77324_c().func_185270_a());
+      this.field_76302_b = p_i1930_1_;
+      this.field_76303_c = p_i1930_2_;
+   }
 }

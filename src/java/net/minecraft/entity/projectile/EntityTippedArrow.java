@@ -20,274 +20,205 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
-public class EntityTippedArrow extends EntityArrow
-{
-    private static final DataParameter<Integer> COLOR = EntityDataManager.<Integer>createKey(EntityTippedArrow.class, DataSerializers.VARINT);
-    private PotionType potion = PotionTypes.EMPTY;
-    private final Set<PotionEffect> customPotionEffects = Sets.<PotionEffect>newHashSet();
-    private boolean field_191509_at;
+public class EntityTippedArrow extends EntityArrow {
+   private static final DataParameter<Integer> field_184559_f = EntityDataManager.<Integer>func_187226_a(EntityTippedArrow.class, DataSerializers.field_187192_b);
+   private PotionType field_184560_g = PotionTypes.field_185229_a;
+   private final Set<PotionEffect> field_184561_h = Sets.<PotionEffect>newHashSet();
+   private boolean field_191509_at;
 
-    public EntityTippedArrow(World worldIn)
-    {
-        super(worldIn);
-    }
+   public EntityTippedArrow(World p_i46756_1_) {
+      super(p_i46756_1_);
+   }
 
-    public EntityTippedArrow(World worldIn, double x, double y, double z)
-    {
-        super(worldIn, x, y, z);
-    }
+   public EntityTippedArrow(World p_i46757_1_, double p_i46757_2_, double p_i46757_4_, double p_i46757_6_) {
+      super(p_i46757_1_, p_i46757_2_, p_i46757_4_, p_i46757_6_);
+   }
 
-    public EntityTippedArrow(World worldIn, EntityLivingBase shooter)
-    {
-        super(worldIn, shooter);
-    }
+   public EntityTippedArrow(World p_i46758_1_, EntityLivingBase p_i46758_2_) {
+      super(p_i46758_1_, p_i46758_2_);
+   }
 
-    public void setPotionEffect(ItemStack stack)
-    {
-        if (stack.getItem() == Items.TIPPED_ARROW)
-        {
-            this.potion = PotionUtils.getPotionFromItem(stack);
-            Collection<PotionEffect> collection = PotionUtils.getFullEffectsFromItem(stack);
+   public void func_184555_a(ItemStack p_184555_1_) {
+      if (p_184555_1_.func_77973_b() == Items.field_185167_i) {
+         this.field_184560_g = PotionUtils.func_185191_c(p_184555_1_);
+         Collection<PotionEffect> collection = PotionUtils.func_185190_b(p_184555_1_);
+         if (!collection.isEmpty()) {
+            for(PotionEffect potioneffect : collection) {
+               this.field_184561_h.add(new PotionEffect(potioneffect));
+            }
+         }
 
-            if (!collection.isEmpty())
-            {
-                for (PotionEffect potioneffect : collection)
-                {
-                    this.customPotionEffects.add(new PotionEffect(potioneffect));
-                }
+         int i = func_191508_b(p_184555_1_);
+         if (i == -1) {
+            this.func_190548_o();
+         } else {
+            this.func_191507_d(i);
+         }
+      } else if (p_184555_1_.func_77973_b() == Items.field_151032_g) {
+         this.field_184560_g = PotionTypes.field_185229_a;
+         this.field_184561_h.clear();
+         this.field_70180_af.func_187227_b(field_184559_f, Integer.valueOf(-1));
+      }
+
+   }
+
+   public static int func_191508_b(ItemStack p_191508_0_) {
+      NBTTagCompound nbttagcompound = p_191508_0_.func_77978_p();
+      return nbttagcompound != null && nbttagcompound.func_150297_b("CustomPotionColor", 99) ? nbttagcompound.func_74762_e("CustomPotionColor") : -1;
+   }
+
+   private void func_190548_o() {
+      this.field_191509_at = false;
+      this.field_70180_af.func_187227_b(field_184559_f, Integer.valueOf(PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184560_g, this.field_184561_h))));
+   }
+
+   public void func_184558_a(PotionEffect p_184558_1_) {
+      this.field_184561_h.add(p_184558_1_);
+      this.func_184212_Q().func_187227_b(field_184559_f, Integer.valueOf(PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184560_g, this.field_184561_h))));
+   }
+
+   protected void func_70088_a() {
+      super.func_70088_a();
+      this.field_70180_af.func_187214_a(field_184559_f, Integer.valueOf(-1));
+   }
+
+   public void func_70071_h_() {
+      super.func_70071_h_();
+      if (this.field_70170_p.field_72995_K) {
+         if (this.field_70254_i) {
+            if (this.field_184552_b % 5 == 0) {
+               this.func_184556_b(1);
+            }
+         } else {
+            this.func_184556_b(2);
+         }
+      } else if (this.field_70254_i && this.field_184552_b != 0 && !this.field_184561_h.isEmpty() && this.field_184552_b >= 600) {
+         this.field_70170_p.func_72960_a(this, (byte)0);
+         this.field_184560_g = PotionTypes.field_185229_a;
+         this.field_184561_h.clear();
+         this.field_70180_af.func_187227_b(field_184559_f, Integer.valueOf(-1));
+      }
+
+   }
+
+   private void func_184556_b(int p_184556_1_) {
+      int i = this.func_184557_n();
+      if (i != -1 && p_184556_1_ > 0) {
+         double d0 = (double)(i >> 16 & 255) / 255.0D;
+         double d1 = (double)(i >> 8 & 255) / 255.0D;
+         double d2 = (double)(i >> 0 & 255) / 255.0D;
+
+         for(int j = 0; j < p_184556_1_; ++j) {
+            this.field_70170_p.func_175688_a(EnumParticleTypes.SPELL_MOB, this.field_70165_t + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, this.field_70163_u + this.field_70146_Z.nextDouble() * (double)this.field_70131_O, this.field_70161_v + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, d0, d1, d2);
+         }
+
+      }
+   }
+
+   public int func_184557_n() {
+      return ((Integer)this.field_70180_af.func_187225_a(field_184559_f)).intValue();
+   }
+
+   private void func_191507_d(int p_191507_1_) {
+      this.field_191509_at = true;
+      this.field_70180_af.func_187227_b(field_184559_f, Integer.valueOf(p_191507_1_));
+   }
+
+   public static void func_189660_b(DataFixer p_189660_0_) {
+      EntityArrow.func_189657_a(p_189660_0_, "TippedArrow");
+   }
+
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      if (this.field_184560_g != PotionTypes.field_185229_a && this.field_184560_g != null) {
+         p_70014_1_.func_74778_a("Potion", ((ResourceLocation)PotionType.field_185176_a.func_177774_c(this.field_184560_g)).toString());
+      }
+
+      if (this.field_191509_at) {
+         p_70014_1_.func_74768_a("Color", this.func_184557_n());
+      }
+
+      if (!this.field_184561_h.isEmpty()) {
+         NBTTagList nbttaglist = new NBTTagList();
+
+         for(PotionEffect potioneffect : this.field_184561_h) {
+            nbttaglist.func_74742_a(potioneffect.func_82719_a(new NBTTagCompound()));
+         }
+
+         p_70014_1_.func_74782_a("CustomPotionEffects", nbttaglist);
+      }
+
+   }
+
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      if (p_70037_1_.func_150297_b("Potion", 8)) {
+         this.field_184560_g = PotionUtils.func_185187_c(p_70037_1_);
+      }
+
+      for(PotionEffect potioneffect : PotionUtils.func_185192_b(p_70037_1_)) {
+         this.func_184558_a(potioneffect);
+      }
+
+      if (p_70037_1_.func_150297_b("Color", 99)) {
+         this.func_191507_d(p_70037_1_.func_74762_e("Color"));
+      } else {
+         this.func_190548_o();
+      }
+
+   }
+
+   protected void func_184548_a(EntityLivingBase p_184548_1_) {
+      super.func_184548_a(p_184548_1_);
+
+      for(PotionEffect potioneffect : this.field_184560_g.func_185170_a()) {
+         p_184548_1_.func_70690_d(new PotionEffect(potioneffect.func_188419_a(), Math.max(potioneffect.func_76459_b() / 8, 1), potioneffect.func_76458_c(), potioneffect.func_82720_e(), potioneffect.func_188418_e()));
+      }
+
+      if (!this.field_184561_h.isEmpty()) {
+         for(PotionEffect potioneffect1 : this.field_184561_h) {
+            p_184548_1_.func_70690_d(potioneffect1);
+         }
+      }
+
+   }
+
+   protected ItemStack func_184550_j() {
+      if (this.field_184561_h.isEmpty() && this.field_184560_g == PotionTypes.field_185229_a) {
+         return new ItemStack(Items.field_151032_g);
+      } else {
+         ItemStack itemstack = new ItemStack(Items.field_185167_i);
+         PotionUtils.func_185188_a(itemstack, this.field_184560_g);
+         PotionUtils.func_185184_a(itemstack, this.field_184561_h);
+         if (this.field_191509_at) {
+            NBTTagCompound nbttagcompound = itemstack.func_77978_p();
+            if (nbttagcompound == null) {
+               nbttagcompound = new NBTTagCompound();
+               itemstack.func_77982_d(nbttagcompound);
             }
 
-            int i = func_191508_b(stack);
+            nbttagcompound.func_74768_a("CustomPotionColor", this.func_184557_n());
+         }
 
-            if (i == -1)
-            {
-                this.func_190548_o();
-            }
-            else
-            {
-                this.func_191507_d(i);
-            }
-        }
-        else if (stack.getItem() == Items.ARROW)
-        {
-            this.potion = PotionTypes.EMPTY;
-            this.customPotionEffects.clear();
-            this.dataManager.set(COLOR, Integer.valueOf(-1));
-        }
-    }
+         return itemstack;
+      }
+   }
 
-    public static int func_191508_b(ItemStack p_191508_0_)
-    {
-        NBTTagCompound nbttagcompound = p_191508_0_.getTagCompound();
-        return nbttagcompound != null && nbttagcompound.hasKey("CustomPotionColor", 99) ? nbttagcompound.getInteger("CustomPotionColor") : -1;
-    }
-
-    private void func_190548_o()
-    {
-        this.field_191509_at = false;
-        this.dataManager.set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.customPotionEffects))));
-    }
-
-    public void addEffect(PotionEffect effect)
-    {
-        this.customPotionEffects.add(effect);
-        this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.customPotionEffects))));
-    }
-
-    protected void entityInit()
-    {
-        super.entityInit();
-        this.dataManager.register(COLOR, Integer.valueOf(-1));
-    }
-
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        super.onUpdate();
-
-        if (this.world.isRemote)
-        {
-            if (this.inGround)
-            {
-                if (this.timeInGround % 5 == 0)
-                {
-                    this.spawnPotionParticles(1);
-                }
-            }
-            else
-            {
-                this.spawnPotionParticles(2);
-            }
-        }
-        else if (this.inGround && this.timeInGround != 0 && !this.customPotionEffects.isEmpty() && this.timeInGround >= 600)
-        {
-            this.world.setEntityState(this, (byte)0);
-            this.potion = PotionTypes.EMPTY;
-            this.customPotionEffects.clear();
-            this.dataManager.set(COLOR, Integer.valueOf(-1));
-        }
-    }
-
-    private void spawnPotionParticles(int particleCount)
-    {
-        int i = this.getColor();
-
-        if (i != -1 && particleCount > 0)
-        {
+   public void func_70103_a(byte p_70103_1_) {
+      if (p_70103_1_ == 0) {
+         int i = this.func_184557_n();
+         if (i != -1) {
             double d0 = (double)(i >> 16 & 255) / 255.0D;
             double d1 = (double)(i >> 8 & 255) / 255.0D;
             double d2 = (double)(i >> 0 & 255) / 255.0D;
 
-            for (int j = 0; j < particleCount; ++j)
-            {
-                this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, d0, d1, d2);
+            for(int j = 0; j < 20; ++j) {
+               this.field_70170_p.func_175688_a(EnumParticleTypes.SPELL_MOB, this.field_70165_t + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, this.field_70163_u + this.field_70146_Z.nextDouble() * (double)this.field_70131_O, this.field_70161_v + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, d0, d1, d2);
             }
-        }
-    }
+         }
+      } else {
+         super.func_70103_a(p_70103_1_);
+      }
 
-    public int getColor()
-    {
-        return ((Integer)this.dataManager.get(COLOR)).intValue();
-    }
-
-    private void func_191507_d(int p_191507_1_)
-    {
-        this.field_191509_at = true;
-        this.dataManager.set(COLOR, Integer.valueOf(p_191507_1_));
-    }
-
-    public static void registerFixesTippedArrow(DataFixer fixer)
-    {
-        EntityArrow.registerFixesArrow(fixer, "TippedArrow");
-    }
-
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-
-        if (this.potion != PotionTypes.EMPTY && this.potion != null)
-        {
-            compound.setString("Potion", ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString());
-        }
-
-        if (this.field_191509_at)
-        {
-            compound.setInteger("Color", this.getColor());
-        }
-
-        if (!this.customPotionEffects.isEmpty())
-        {
-            NBTTagList nbttaglist = new NBTTagList();
-
-            for (PotionEffect potioneffect : this.customPotionEffects)
-            {
-                nbttaglist.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
-            }
-
-            compound.setTag("CustomPotionEffects", nbttaglist);
-        }
-    }
-
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-
-        if (compound.hasKey("Potion", 8))
-        {
-            this.potion = PotionUtils.getPotionTypeFromNBT(compound);
-        }
-
-        for (PotionEffect potioneffect : PotionUtils.getFullEffectsFromTag(compound))
-        {
-            this.addEffect(potioneffect);
-        }
-
-        if (compound.hasKey("Color", 99))
-        {
-            this.func_191507_d(compound.getInteger("Color"));
-        }
-        else
-        {
-            this.func_190548_o();
-        }
-    }
-
-    protected void arrowHit(EntityLivingBase living)
-    {
-        super.arrowHit(living);
-
-        for (PotionEffect potioneffect : this.potion.getEffects())
-        {
-            living.addPotionEffect(new PotionEffect(potioneffect.getPotion(), Math.max(potioneffect.getDuration() / 8, 1), potioneffect.getAmplifier(), potioneffect.getIsAmbient(), potioneffect.doesShowParticles()));
-        }
-
-        if (!this.customPotionEffects.isEmpty())
-        {
-            for (PotionEffect potioneffect1 : this.customPotionEffects)
-            {
-                living.addPotionEffect(potioneffect1);
-            }
-        }
-    }
-
-    protected ItemStack getArrowStack()
-    {
-        if (this.customPotionEffects.isEmpty() && this.potion == PotionTypes.EMPTY)
-        {
-            return new ItemStack(Items.ARROW);
-        }
-        else
-        {
-            ItemStack itemstack = new ItemStack(Items.TIPPED_ARROW);
-            PotionUtils.addPotionToItemStack(itemstack, this.potion);
-            PotionUtils.appendEffects(itemstack, this.customPotionEffects);
-
-            if (this.field_191509_at)
-            {
-                NBTTagCompound nbttagcompound = itemstack.getTagCompound();
-
-                if (nbttagcompound == null)
-                {
-                    nbttagcompound = new NBTTagCompound();
-                    itemstack.setTagCompound(nbttagcompound);
-                }
-
-                nbttagcompound.setInteger("CustomPotionColor", this.getColor());
-            }
-
-            return itemstack;
-        }
-    }
-
-    public void handleStatusUpdate(byte id)
-    {
-        if (id == 0)
-        {
-            int i = this.getColor();
-
-            if (i != -1)
-            {
-                double d0 = (double)(i >> 16 & 255) / 255.0D;
-                double d1 = (double)(i >> 8 & 255) / 255.0D;
-                double d2 = (double)(i >> 0 & 255) / 255.0D;
-
-                for (int j = 0; j < 20; ++j)
-                {
-                    this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, d0, d1, d2);
-                }
-            }
-        }
-        else
-        {
-            super.handleStatusUpdate(id);
-        }
-    }
+   }
 }

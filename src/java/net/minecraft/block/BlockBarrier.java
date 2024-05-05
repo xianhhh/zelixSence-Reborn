@@ -6,43 +6,27 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockBarrier extends Block
-{
-    protected BlockBarrier()
-    {
-        super(Material.BARRIER);
-        this.setBlockUnbreakable();
-        this.setResistance(6000001.0F);
-        this.disableStats();
-        this.translucent = true;
-    }
+public class BlockBarrier extends Block {
+   protected BlockBarrier() {
+      super(Material.field_175972_I);
+      this.func_149722_s();
+      this.func_149752_b(6000001.0F);
+      this.func_149649_H();
+      this.field_149785_s = true;
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.INVISIBLE;
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.INVISIBLE;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    public float getAmbientOcclusionLightValue(IBlockState state)
-    {
-        return 1.0F;
-    }
+   public float func_185485_f(IBlockState p_185485_1_) {
+      return 1.0F;
+   }
 
-    /**
-     * Spawns this Block's drops into the World as EntityItems.
-     */
-    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
-    {
-    }
+   public void func_180653_a(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_) {
+   }
 }

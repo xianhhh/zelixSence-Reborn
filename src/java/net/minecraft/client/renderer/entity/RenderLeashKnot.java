@@ -5,53 +5,39 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderLeashKnot extends Render<EntityLeashKnot>
-{
-    private static final ResourceLocation LEASH_KNOT_TEXTURES = new ResourceLocation("textures/entity/lead_knot.png");
-    private final ModelLeashKnot leashKnotModel = new ModelLeashKnot();
+public class RenderLeashKnot extends Render<EntityLeashKnot> {
+   private static final ResourceLocation field_110802_a = new ResourceLocation("textures/entity/lead_knot.png");
+   private final ModelLeashKnot field_110801_f = new ModelLeashKnot();
 
-    public RenderLeashKnot(RenderManager renderManagerIn)
-    {
-        super(renderManagerIn);
-    }
+   public RenderLeashKnot(RenderManager p_i46158_1_) {
+      super(p_i46158_1_);
+   }
 
-    /**
-     * Renders the desired {@code T} type Entity.
-     */
-    public void doRender(EntityLeashKnot entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-        GlStateManager.translate((float)x, (float)y, (float)z);
-        float f = 0.0625F;
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-        GlStateManager.enableAlpha();
-        this.bindEntityTexture(entity);
+   public void func_76986_a(EntityLeashKnot p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {
+      GlStateManager.func_179094_E();
+      GlStateManager.func_179129_p();
+      GlStateManager.func_179109_b((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
+      float f = 0.0625F;
+      GlStateManager.func_179091_B();
+      GlStateManager.func_179152_a(-1.0F, -1.0F, 1.0F);
+      GlStateManager.func_179141_d();
+      this.func_180548_c(p_76986_1_);
+      if (this.field_188301_f) {
+         GlStateManager.func_179142_g();
+         GlStateManager.func_187431_e(this.func_188298_c(p_76986_1_));
+      }
 
-        if (this.renderOutlines)
-        {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
-        }
+      this.field_110801_f.func_78088_a(p_76986_1_, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+      if (this.field_188301_f) {
+         GlStateManager.func_187417_n();
+         GlStateManager.func_179119_h();
+      }
 
-        this.leashKnotModel.render(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+      GlStateManager.func_179121_F();
+      super.func_76986_a(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+   }
 
-        if (this.renderOutlines)
-        {
-            GlStateManager.disableOutlineMode();
-            GlStateManager.disableColorMaterial();
-        }
-
-        GlStateManager.popMatrix();
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
-
-    /**
-     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
-     */
-    protected ResourceLocation getEntityTexture(EntityLeashKnot entity)
-    {
-        return LEASH_KNOT_TEXTURES;
-    }
+   protected ResourceLocation func_110775_a(EntityLeashKnot p_110775_1_) {
+      return field_110802_a;
+   }
 }

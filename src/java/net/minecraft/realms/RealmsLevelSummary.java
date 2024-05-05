@@ -2,69 +2,54 @@ package net.minecraft.realms;
 
 import net.minecraft.world.storage.WorldSummary;
 
-public class RealmsLevelSummary implements Comparable<RealmsLevelSummary>
-{
-    private final WorldSummary levelSummary;
+public class RealmsLevelSummary implements Comparable<RealmsLevelSummary> {
+   private final WorldSummary levelSummary;
 
-    public RealmsLevelSummary(WorldSummary levelSummaryIn)
-    {
-        this.levelSummary = levelSummaryIn;
-    }
+   public RealmsLevelSummary(WorldSummary p_i1109_1_) {
+      this.levelSummary = p_i1109_1_;
+   }
 
-    public int getGameMode()
-    {
-        return this.levelSummary.getEnumGameType().getID();
-    }
+   public int getGameMode() {
+      return this.levelSummary.func_75790_f().func_77148_a();
+   }
 
-    public String getLevelId()
-    {
-        return this.levelSummary.getFileName();
-    }
+   public String getLevelId() {
+      return this.levelSummary.func_75786_a();
+   }
 
-    public boolean hasCheats()
-    {
-        return this.levelSummary.getCheatsEnabled();
-    }
+   public boolean hasCheats() {
+      return this.levelSummary.func_75783_h();
+   }
 
-    public boolean isHardcore()
-    {
-        return this.levelSummary.isHardcoreModeEnabled();
-    }
+   public boolean isHardcore() {
+      return this.levelSummary.func_75789_g();
+   }
 
-    public boolean isRequiresConversion()
-    {
-        return this.levelSummary.requiresConversion();
-    }
+   public boolean isRequiresConversion() {
+      return this.levelSummary.func_75785_d();
+   }
 
-    public String getLevelName()
-    {
-        return this.levelSummary.getDisplayName();
-    }
+   public String getLevelName() {
+      return this.levelSummary.func_75788_b();
+   }
 
-    public long getLastPlayed()
-    {
-        return this.levelSummary.getLastTimePlayed();
-    }
+   public long getLastPlayed() {
+      return this.levelSummary.func_75784_e();
+   }
 
-    public int compareTo(WorldSummary p_compareTo_1_)
-    {
-        return this.levelSummary.compareTo(p_compareTo_1_);
-    }
+   public int compareTo(WorldSummary p_compareTo_1_) {
+      return this.levelSummary.compareTo(p_compareTo_1_);
+   }
 
-    public long getSizeOnDisk()
-    {
-        return this.levelSummary.getSizeOnDisk();
-    }
+   public long getSizeOnDisk() {
+      return this.levelSummary.func_154336_c();
+   }
 
-    public int compareTo(RealmsLevelSummary p_compareTo_1_)
-    {
-        if (this.levelSummary.getLastTimePlayed() < p_compareTo_1_.getLastPlayed())
-        {
-            return 1;
-        }
-        else
-        {
-            return this.levelSummary.getLastTimePlayed() > p_compareTo_1_.getLastPlayed() ? -1 : this.levelSummary.getFileName().compareTo(p_compareTo_1_.getLevelId());
-        }
-    }
+   public int compareTo(RealmsLevelSummary p_compareTo_1_) {
+      if (this.levelSummary.func_75784_e() < p_compareTo_1_.getLastPlayed()) {
+         return 1;
+      } else {
+         return this.levelSummary.func_75784_e() > p_compareTo_1_.getLastPlayed() ? -1 : this.levelSummary.func_75786_a().compareTo(p_compareTo_1_.getLevelId());
+      }
+   }
 }

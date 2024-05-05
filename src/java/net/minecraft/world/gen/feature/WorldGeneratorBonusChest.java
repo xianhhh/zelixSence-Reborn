@@ -10,67 +10,51 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class WorldGeneratorBonusChest extends WorldGenerator
-{
-    public boolean generate(World worldIn, Random rand, BlockPos position)
-    {
-        for (IBlockState iblockstate = worldIn.getBlockState(position); (iblockstate.getMaterial() == Material.AIR || iblockstate.getMaterial() == Material.LEAVES) && position.getY() > 1; iblockstate = worldIn.getBlockState(position))
-        {
-            position = position.down();
-        }
+public class WorldGeneratorBonusChest extends WorldGenerator {
+   public boolean func_180709_b(World p_180709_1_, Random p_180709_2_, BlockPos p_180709_3_) {
+      for(IBlockState iblockstate = p_180709_1_.func_180495_p(p_180709_3_); (iblockstate.func_185904_a() == Material.field_151579_a || iblockstate.func_185904_a() == Material.field_151584_j) && p_180709_3_.func_177956_o() > 1; iblockstate = p_180709_1_.func_180495_p(p_180709_3_)) {
+         p_180709_3_ = p_180709_3_.func_177977_b();
+      }
 
-        if (position.getY() < 1)
-        {
-            return false;
-        }
-        else
-        {
-            position = position.up();
+      if (p_180709_3_.func_177956_o() < 1) {
+         return false;
+      } else {
+         p_180709_3_ = p_180709_3_.func_177984_a();
 
-            for (int i = 0; i < 4; ++i)
-            {
-                BlockPos blockpos = position.add(rand.nextInt(4) - rand.nextInt(4), rand.nextInt(3) - rand.nextInt(3), rand.nextInt(4) - rand.nextInt(4));
+         for(int i = 0; i < 4; ++i) {
+            BlockPos blockpos = p_180709_3_.func_177982_a(p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(3) - p_180709_2_.nextInt(3), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4));
+            if (p_180709_1_.func_175623_d(blockpos) && p_180709_1_.func_180495_p(blockpos.func_177977_b()).func_185896_q()) {
+               p_180709_1_.func_180501_a(blockpos, Blocks.field_150486_ae.func_176223_P(), 2);
+               TileEntity tileentity = p_180709_1_.func_175625_s(blockpos);
+               if (tileentity instanceof TileEntityChest) {
+                  ((TileEntityChest)tileentity).func_189404_a(LootTableList.field_186420_b, p_180709_2_.nextLong());
+               }
 
-                if (worldIn.isAirBlock(blockpos) && worldIn.getBlockState(blockpos.down()).isFullyOpaque())
-                {
-                    worldIn.setBlockState(blockpos, Blocks.CHEST.getDefaultState(), 2);
-                    TileEntity tileentity = worldIn.getTileEntity(blockpos);
+               BlockPos blockpos1 = blockpos.func_177974_f();
+               BlockPos blockpos2 = blockpos.func_177976_e();
+               BlockPos blockpos3 = blockpos.func_177978_c();
+               BlockPos blockpos4 = blockpos.func_177968_d();
+               if (p_180709_1_.func_175623_d(blockpos2) && p_180709_1_.func_180495_p(blockpos2.func_177977_b()).func_185896_q()) {
+                  p_180709_1_.func_180501_a(blockpos2, Blocks.field_150478_aa.func_176223_P(), 2);
+               }
 
-                    if (tileentity instanceof TileEntityChest)
-                    {
-                        ((TileEntityChest)tileentity).setLootTable(LootTableList.CHESTS_SPAWN_BONUS_CHEST, rand.nextLong());
-                    }
+               if (p_180709_1_.func_175623_d(blockpos1) && p_180709_1_.func_180495_p(blockpos1.func_177977_b()).func_185896_q()) {
+                  p_180709_1_.func_180501_a(blockpos1, Blocks.field_150478_aa.func_176223_P(), 2);
+               }
 
-                    BlockPos blockpos1 = blockpos.east();
-                    BlockPos blockpos2 = blockpos.west();
-                    BlockPos blockpos3 = blockpos.north();
-                    BlockPos blockpos4 = blockpos.south();
+               if (p_180709_1_.func_175623_d(blockpos3) && p_180709_1_.func_180495_p(blockpos3.func_177977_b()).func_185896_q()) {
+                  p_180709_1_.func_180501_a(blockpos3, Blocks.field_150478_aa.func_176223_P(), 2);
+               }
 
-                    if (worldIn.isAirBlock(blockpos2) && worldIn.getBlockState(blockpos2.down()).isFullyOpaque())
-                    {
-                        worldIn.setBlockState(blockpos2, Blocks.TORCH.getDefaultState(), 2);
-                    }
+               if (p_180709_1_.func_175623_d(blockpos4) && p_180709_1_.func_180495_p(blockpos4.func_177977_b()).func_185896_q()) {
+                  p_180709_1_.func_180501_a(blockpos4, Blocks.field_150478_aa.func_176223_P(), 2);
+               }
 
-                    if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).isFullyOpaque())
-                    {
-                        worldIn.setBlockState(blockpos1, Blocks.TORCH.getDefaultState(), 2);
-                    }
-
-                    if (worldIn.isAirBlock(blockpos3) && worldIn.getBlockState(blockpos3.down()).isFullyOpaque())
-                    {
-                        worldIn.setBlockState(blockpos3, Blocks.TORCH.getDefaultState(), 2);
-                    }
-
-                    if (worldIn.isAirBlock(blockpos4) && worldIn.getBlockState(blockpos4.down()).isFullyOpaque())
-                    {
-                        worldIn.setBlockState(blockpos4, Blocks.TORCH.getDefaultState(), 2);
-                    }
-
-                    return true;
-                }
+               return true;
             }
+         }
 
-            return false;
-        }
-    }
+         return false;
+      }
+   }
 }

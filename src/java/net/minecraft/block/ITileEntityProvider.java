@@ -4,12 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public interface ITileEntityProvider
-{
-    @Nullable
-
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    TileEntity createNewTileEntity(World worldIn, int meta);
+public interface ITileEntityProvider {
+   @Nullable
+   TileEntity func_149915_a(World var1, int var2);
 }

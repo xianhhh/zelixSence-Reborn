@@ -3,56 +3,37 @@ package net.minecraft.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 
-public class GuiListButton extends GuiButton
-{
-    private boolean value;
+public class GuiListButton extends GuiButton {
+   private boolean field_175216_o;
+   private final String field_175215_p;
+   private final GuiPageButtonList.GuiResponder field_175214_q;
 
-    /** The localization string used by this control. */
-    private final String localizationStr;
+   public GuiListButton(GuiPageButtonList.GuiResponder p_i45539_1_, int p_i45539_2_, int p_i45539_3_, int p_i45539_4_, String p_i45539_5_, boolean p_i45539_6_) {
+      super(p_i45539_2_, p_i45539_3_, p_i45539_4_, 150, 20, "");
+      this.field_175215_p = p_i45539_5_;
+      this.field_175216_o = p_i45539_6_;
+      this.field_146126_j = this.func_175213_c();
+      this.field_175214_q = p_i45539_1_;
+   }
 
-    /** The GuiResponder Object reference. */
-    private final GuiPageButtonList.GuiResponder guiResponder;
+   private String func_175213_c() {
+      return I18n.func_135052_a(this.field_175215_p) + ": " + I18n.func_135052_a(this.field_175216_o ? "gui.yes" : "gui.no");
+   }
 
-    public GuiListButton(GuiPageButtonList.GuiResponder responder, int p_i45539_2_, int p_i45539_3_, int p_i45539_4_, String p_i45539_5_, boolean p_i45539_6_)
-    {
-        super(p_i45539_2_, p_i45539_3_, p_i45539_4_, 150, 20, "");
-        this.localizationStr = p_i45539_5_;
-        this.value = p_i45539_6_;
-        this.displayString = this.buildDisplayString();
-        this.guiResponder = responder;
-    }
+   public void func_175212_b(boolean p_175212_1_) {
+      this.field_175216_o = p_175212_1_;
+      this.field_146126_j = this.func_175213_c();
+      this.field_175214_q.func_175321_a(this.field_146127_k, p_175212_1_);
+   }
 
-    /**
-     * Builds the localized display string for this GuiListButton
-     */
-    private String buildDisplayString()
-    {
-        return I18n.format(this.localizationStr) + ": " + I18n.format(this.value ? "gui.yes" : "gui.no");
-    }
-
-    public void setValue(boolean p_175212_1_)
-    {
-        this.value = p_175212_1_;
-        this.displayString = this.buildDisplayString();
-        this.guiResponder.setEntryValue(this.id, p_175212_1_);
-    }
-
-    /**
-     * Returns true if the mouse has been pressed on this control. Equivalent of MouseListener.mousePressed(MouseEvent
-     * e).
-     */
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
-    {
-        if (super.mousePressed(mc, mouseX, mouseY))
-        {
-            this.value = !this.value;
-            this.displayString = this.buildDisplayString();
-            this.guiResponder.setEntryValue(this.id, this.value);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public boolean func_146116_c(Minecraft p_146116_1_, int p_146116_2_, int p_146116_3_) {
+      if (super.func_146116_c(p_146116_1_, p_146116_2_, p_146116_3_)) {
+         this.field_175216_o = !this.field_175216_o;
+         this.field_146126_j = this.func_175213_c();
+         this.field_175214_q.func_175321_a(this.field_146127_k, this.field_175216_o);
+         return true;
+      } else {
+         return false;
+      }
+   }
 }

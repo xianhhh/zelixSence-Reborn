@@ -10,53 +10,43 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 
-public class ContainerLocalMenu extends InventoryBasic implements ILockableContainer
-{
-    private final String guiID;
-    private final Map<Integer, Integer> dataValues = Maps.<Integer, Integer>newHashMap();
+public class ContainerLocalMenu extends InventoryBasic implements ILockableContainer {
+   private final String field_174896_a;
+   private final Map<Integer, Integer> field_174895_b = Maps.<Integer, Integer>newHashMap();
 
-    public ContainerLocalMenu(String id, ITextComponent title, int slotCount)
-    {
-        super(title, slotCount);
-        this.guiID = id;
-    }
+   public ContainerLocalMenu(String p_i46276_1_, ITextComponent p_i46276_2_, int p_i46276_3_) {
+      super(p_i46276_2_, p_i46276_3_);
+      this.field_174896_a = p_i46276_1_;
+   }
 
-    public int getField(int id)
-    {
-        return this.dataValues.containsKey(Integer.valueOf(id)) ? ((Integer)this.dataValues.get(Integer.valueOf(id))).intValue() : 0;
-    }
+   public int func_174887_a_(int p_174887_1_) {
+      return this.field_174895_b.containsKey(Integer.valueOf(p_174887_1_)) ? ((Integer)this.field_174895_b.get(Integer.valueOf(p_174887_1_))).intValue() : 0;
+   }
 
-    public void setField(int id, int value)
-    {
-        this.dataValues.put(Integer.valueOf(id), Integer.valueOf(value));
-    }
+   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
+      this.field_174895_b.put(Integer.valueOf(p_174885_1_), Integer.valueOf(p_174885_2_));
+   }
 
-    public int getFieldCount()
-    {
-        return this.dataValues.size();
-    }
+   public int func_174890_g() {
+      return this.field_174895_b.size();
+   }
 
-    public boolean isLocked()
-    {
-        return false;
-    }
+   public boolean func_174893_q_() {
+      return false;
+   }
 
-    public void setLockCode(LockCode code)
-    {
-    }
+   public void func_174892_a(LockCode p_174892_1_) {
+   }
 
-    public LockCode getLockCode()
-    {
-        return LockCode.EMPTY_CODE;
-    }
+   public LockCode func_174891_i() {
+      return LockCode.field_180162_a;
+   }
 
-    public String getGuiID()
-    {
-        return this.guiID;
-    }
+   public String func_174875_k() {
+      return this.field_174896_a;
+   }
 
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
-    {
-        throw new UnsupportedOperationException();
-    }
+   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
+      throw new UnsupportedOperationException();
+   }
 }

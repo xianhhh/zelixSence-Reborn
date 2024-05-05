@@ -1,13 +1,7 @@
 package net.minecraft.entity;
 
-public interface IRangedAttackMob
-{
-    /**
-     * Attack the specified entity using a ranged attack.
-     *  
-     * @param distanceFactor How far the target is, normalized and clamped between 0.1 and 1.0
-     */
-    void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor);
+public interface IRangedAttackMob {
+   void func_82196_d(EntityLivingBase var1, float var2);
 
-    void setSwingingArms(boolean swingingArms);
+   void func_184724_a(boolean var1);
 }

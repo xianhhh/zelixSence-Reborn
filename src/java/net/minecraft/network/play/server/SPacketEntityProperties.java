@@ -11,117 +11,93 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketEntityProperties implements Packet<INetHandlerPlayClient>
-{
-    private int entityId;
-    private final List<SPacketEntityProperties.Snapshot> snapshots = Lists.<SPacketEntityProperties.Snapshot>newArrayList();
+public class SPacketEntityProperties implements Packet<INetHandlerPlayClient> {
+   private int field_149445_a;
+   private final List<SPacketEntityProperties.Snapshot> field_149444_b = Lists.<SPacketEntityProperties.Snapshot>newArrayList();
 
-    public SPacketEntityProperties()
-    {
-    }
+   public SPacketEntityProperties() {
+   }
 
-    public SPacketEntityProperties(int entityIdIn, Collection<IAttributeInstance> instances)
-    {
-        this.entityId = entityIdIn;
+   public SPacketEntityProperties(int p_i46892_1_, Collection<IAttributeInstance> p_i46892_2_) {
+      this.field_149445_a = p_i46892_1_;
 
-        for (IAttributeInstance iattributeinstance : instances)
-        {
-            this.snapshots.add(new SPacketEntityProperties.Snapshot(iattributeinstance.getAttribute().getAttributeUnlocalizedName(), iattributeinstance.getBaseValue(), iattributeinstance.getModifiers()));
-        }
-    }
+      for(IAttributeInstance iattributeinstance : p_i46892_2_) {
+         this.field_149444_b.add(new SPacketEntityProperties.Snapshot(iattributeinstance.func_111123_a().func_111108_a(), iattributeinstance.func_111125_b(), iattributeinstance.func_111122_c()));
+      }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityId = buf.readVarIntFromBuffer();
-        int i = buf.readInt();
+   }
 
-        for (int j = 0; j < i; ++j)
-        {
-            String s = buf.readStringFromBuffer(64);
-            double d0 = buf.readDouble();
-            List<AttributeModifier> list = Lists.<AttributeModifier>newArrayList();
-            int k = buf.readVarIntFromBuffer();
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149445_a = p_148837_1_.func_150792_a();
+      int i = p_148837_1_.readInt();
 
-            for (int l = 0; l < k; ++l)
-            {
-                UUID uuid = buf.readUuid();
-                list.add(new AttributeModifier(uuid, "Unknown synced attribute modifier", buf.readDouble(), buf.readByte()));
-            }
+      for(int j = 0; j < i; ++j) {
+         String s = p_148837_1_.func_150789_c(64);
+         double d0 = p_148837_1_.readDouble();
+         List<AttributeModifier> list = Lists.<AttributeModifier>newArrayList();
+         int k = p_148837_1_.func_150792_a();
 
-            this.snapshots.add(new SPacketEntityProperties.Snapshot(s, d0, list));
-        }
-    }
+         for(int l = 0; l < k; ++l) {
+            UUID uuid = p_148837_1_.func_179253_g();
+            list.add(new AttributeModifier(uuid, "Unknown synced attribute modifier", p_148837_1_.readDouble(), p_148837_1_.readByte()));
+         }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityId);
-        buf.writeInt(this.snapshots.size());
+         this.field_149444_b.add(new SPacketEntityProperties.Snapshot(s, d0, list));
+      }
 
-        for (SPacketEntityProperties.Snapshot spacketentityproperties$snapshot : this.snapshots)
-        {
-            buf.writeString(spacketentityproperties$snapshot.getName());
-            buf.writeDouble(spacketentityproperties$snapshot.getBaseValue());
-            buf.writeVarIntToBuffer(spacketentityproperties$snapshot.getModifiers().size());
+   }
 
-            for (AttributeModifier attributemodifier : spacketentityproperties$snapshot.getModifiers())
-            {
-                buf.writeUuid(attributemodifier.getID());
-                buf.writeDouble(attributemodifier.getAmount());
-                buf.writeByte(attributemodifier.getOperation());
-            }
-        }
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149445_a);
+      p_148840_1_.writeInt(this.field_149444_b.size());
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleEntityProperties(this);
-    }
+      for(SPacketEntityProperties.Snapshot spacketentityproperties$snapshot : this.field_149444_b) {
+         p_148840_1_.func_180714_a(spacketentityproperties$snapshot.func_151409_a());
+         p_148840_1_.writeDouble(spacketentityproperties$snapshot.func_151410_b());
+         p_148840_1_.func_150787_b(spacketentityproperties$snapshot.func_151408_c().size());
 
-    public int getEntityId()
-    {
-        return this.entityId;
-    }
+         for(AttributeModifier attributemodifier : spacketentityproperties$snapshot.func_151408_c()) {
+            p_148840_1_.func_179252_a(attributemodifier.func_111167_a());
+            p_148840_1_.writeDouble(attributemodifier.func_111164_d());
+            p_148840_1_.writeByte(attributemodifier.func_111169_c());
+         }
+      }
 
-    public List<SPacketEntityProperties.Snapshot> getSnapshots()
-    {
-        return this.snapshots;
-    }
+   }
 
-    public class Snapshot
-    {
-        private final String name;
-        private final double baseValue;
-        private final Collection<AttributeModifier> modifiers;
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147290_a(this);
+   }
 
-        public Snapshot(String nameIn, double baseValueIn, Collection<AttributeModifier> modifiersIn)
-        {
-            this.name = nameIn;
-            this.baseValue = baseValueIn;
-            this.modifiers = modifiersIn;
-        }
+   public int func_149442_c() {
+      return this.field_149445_a;
+   }
 
-        public String getName()
-        {
-            return this.name;
-        }
+   public List<SPacketEntityProperties.Snapshot> func_149441_d() {
+      return this.field_149444_b;
+   }
 
-        public double getBaseValue()
-        {
-            return this.baseValue;
-        }
+   public class Snapshot {
+      private final String field_151412_b;
+      private final double field_151413_c;
+      private final Collection<AttributeModifier> field_151411_d;
 
-        public Collection<AttributeModifier> getModifiers()
-        {
-            return this.modifiers;
-        }
-    }
+      public Snapshot(String p_i47075_2_, double p_i47075_3_, Collection<AttributeModifier> p_i47075_5_) {
+         this.field_151412_b = p_i47075_2_;
+         this.field_151413_c = p_i47075_3_;
+         this.field_151411_d = p_i47075_5_;
+      }
+
+      public String func_151409_a() {
+         return this.field_151412_b;
+      }
+
+      public double func_151410_b() {
+         return this.field_151413_c;
+      }
+
+      public Collection<AttributeModifier> func_151408_c() {
+         return this.field_151411_d;
+      }
+   }
 }

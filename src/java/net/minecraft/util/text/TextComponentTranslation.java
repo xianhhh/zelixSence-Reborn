@@ -11,272 +11,199 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.util.text.translation.I18n;
 
-public class TextComponentTranslation extends TextComponentBase
-{
-    private final String key;
-    private final Object[] formatArgs;
-    private final Object syncLock = new Object();
-    private long lastTranslationUpdateTimeInMilliseconds = -1L;
-    @VisibleForTesting
-    List<ITextComponent> children = Lists.<ITextComponent>newArrayList();
-    public static final Pattern STRING_VARIABLE_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+public class TextComponentTranslation extends TextComponentBase {
+   private final String field_150276_d;
+   private final Object[] field_150277_e;
+   private final Object field_150274_f = new Object();
+   private long field_150275_g = -1L;
+   @VisibleForTesting
+   List<ITextComponent> field_150278_b = Lists.<ITextComponent>newArrayList();
+   public static final Pattern field_150279_c = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-    public TextComponentTranslation(String translationKey, Object... args)
-    {
-        this.key = translationKey;
-        this.formatArgs = args;
+   public TextComponentTranslation(String p_i45160_1_, Object... p_i45160_2_) {
+      this.field_150276_d = p_i45160_1_;
+      this.field_150277_e = p_i45160_2_;
 
-        for (Object object : args)
-        {
-            if (object instanceof ITextComponent)
-            {
-                ((ITextComponent)object).getStyle().setParentStyle(this.getStyle());
-            }
-        }
-    }
+      for(Object object : p_i45160_2_) {
+         if (object instanceof ITextComponent) {
+            ((ITextComponent)object).func_150256_b().func_150221_a(this.func_150256_b());
+         }
+      }
 
-    @VisibleForTesting
+   }
 
-    /**
-     * ensures that our children are initialized from the most recent string translation mapping.
-     */
-    synchronized void ensureInitialized()
-    {
-        synchronized (this.syncLock)
-        {
-            long i = I18n.getLastTranslationUpdateTimeInMilliseconds();
+   @VisibleForTesting
+   synchronized void func_150270_g() {
+      synchronized(this.field_150274_f) {
+         long i = I18n.func_150827_a();
+         if (i == this.field_150275_g) {
+            return;
+         }
 
-            if (i == this.lastTranslationUpdateTimeInMilliseconds)
-            {
-                return;
-            }
+         this.field_150275_g = i;
+         this.field_150278_b.clear();
+      }
 
-            this.lastTranslationUpdateTimeInMilliseconds = i;
-            this.children.clear();
-        }
+      try {
+         this.func_150269_b(I18n.func_74838_a(this.field_150276_d));
+      } catch (TextComponentTranslationFormatException textcomponenttranslationformatexception) {
+         this.field_150278_b.clear();
 
-        try
-        {
-            this.initializeFromFormat(I18n.translateToLocal(this.key));
-        }
-        catch (TextComponentTranslationFormatException textcomponenttranslationformatexception)
-        {
-            this.children.clear();
+         try {
+            this.func_150269_b(I18n.func_150826_b(this.field_150276_d));
+         } catch (TextComponentTranslationFormatException var5) {
+            throw textcomponenttranslationformatexception;
+         }
+      }
 
-            try
-            {
-                this.initializeFromFormat(I18n.translateToFallback(this.key));
-            }
-            catch (TextComponentTranslationFormatException var5)
-            {
-                throw textcomponenttranslationformatexception;
-            }
-        }
-    }
+   }
 
-    /**
-     * initializes our children from a format string, using the format args to fill in the placeholder variables.
-     */
-    protected void initializeFromFormat(String format)
-    {
-        boolean flag = false;
-        Matcher matcher = STRING_VARIABLE_PATTERN.matcher(format);
-        int i = 0;
-        int j = 0;
+   protected void func_150269_b(String p_150269_1_) {
+      boolean flag = false;
+      Matcher matcher = field_150279_c.matcher(p_150269_1_);
+      int i = 0;
+      int j = 0;
 
-        try
-        {
-            int l;
-
-            for (; matcher.find(j); j = l)
-            {
-                int k = matcher.start();
-                l = matcher.end();
-
-                if (k > j)
-                {
-                    TextComponentString textcomponentstring = new TextComponentString(String.format(format.substring(j, k)));
-                    textcomponentstring.getStyle().setParentStyle(this.getStyle());
-                    this.children.add(textcomponentstring);
-                }
-
-                String s2 = matcher.group(2);
-                String s = format.substring(k, l);
-
-                if ("%".equals(s2) && "%%".equals(s))
-                {
-                    TextComponentString textcomponentstring2 = new TextComponentString("%");
-                    textcomponentstring2.getStyle().setParentStyle(this.getStyle());
-                    this.children.add(textcomponentstring2);
-                }
-                else
-                {
-                    if (!"s".equals(s2))
-                    {
-                        throw new TextComponentTranslationFormatException(this, "Unsupported format: '" + s + "'");
-                    }
-
-                    String s1 = matcher.group(1);
-                    int i1 = s1 != null ? Integer.parseInt(s1) - 1 : i++;
-
-                    if (i1 < this.formatArgs.length)
-                    {
-                        this.children.add(this.getFormatArgumentAsComponent(i1));
-                    }
-                }
+      try {
+         int l;
+         for(; matcher.find(j); j = l) {
+            int k = matcher.start();
+            l = matcher.end();
+            if (k > j) {
+               TextComponentString textcomponentstring = new TextComponentString(String.format(p_150269_1_.substring(j, k)));
+               textcomponentstring.func_150256_b().func_150221_a(this.func_150256_b());
+               this.field_150278_b.add(textcomponentstring);
             }
 
-            if (j < format.length())
-            {
-                TextComponentString textcomponentstring1 = new TextComponentString(String.format(format.substring(j)));
-                textcomponentstring1.getStyle().setParentStyle(this.getStyle());
-                this.children.add(textcomponentstring1);
+            String s2 = matcher.group(2);
+            String s = p_150269_1_.substring(k, l);
+            if ("%".equals(s2) && "%%".equals(s)) {
+               TextComponentString textcomponentstring2 = new TextComponentString("%");
+               textcomponentstring2.func_150256_b().func_150221_a(this.func_150256_b());
+               this.field_150278_b.add(textcomponentstring2);
+            } else {
+               if (!"s".equals(s2)) {
+                  throw new TextComponentTranslationFormatException(this, "Unsupported format: '" + s + "'");
+               }
+
+               String s1 = matcher.group(1);
+               int i1 = s1 != null ? Integer.parseInt(s1) - 1 : i++;
+               if (i1 < this.field_150277_e.length) {
+                  this.field_150278_b.add(this.func_150272_a(i1));
+               }
             }
-        }
-        catch (IllegalFormatException illegalformatexception)
-        {
-            throw new TextComponentTranslationFormatException(this, illegalformatexception);
-        }
-    }
+         }
 
-    private ITextComponent getFormatArgumentAsComponent(int index)
-    {
-        if (index >= this.formatArgs.length)
-        {
-            throw new TextComponentTranslationFormatException(this, index);
-        }
-        else
-        {
-            Object object = this.formatArgs[index];
-            ITextComponent itextcomponent;
+         if (j < p_150269_1_.length()) {
+            TextComponentString textcomponentstring1 = new TextComponentString(String.format(p_150269_1_.substring(j)));
+            textcomponentstring1.func_150256_b().func_150221_a(this.func_150256_b());
+            this.field_150278_b.add(textcomponentstring1);
+         }
 
-            if (object instanceof ITextComponent)
-            {
-                itextcomponent = (ITextComponent)object;
-            }
-            else
-            {
-                itextcomponent = new TextComponentString(object == null ? "null" : object.toString());
-                itextcomponent.getStyle().setParentStyle(this.getStyle());
-            }
+      } catch (IllegalFormatException illegalformatexception) {
+         throw new TextComponentTranslationFormatException(this, illegalformatexception);
+      }
+   }
 
-            return itextcomponent;
-        }
-    }
+   private ITextComponent func_150272_a(int p_150272_1_) {
+      if (p_150272_1_ >= this.field_150277_e.length) {
+         throw new TextComponentTranslationFormatException(this, p_150272_1_);
+      } else {
+         Object object = this.field_150277_e[p_150272_1_];
+         ITextComponent itextcomponent;
+         if (object instanceof ITextComponent) {
+            itextcomponent = (ITextComponent)object;
+         } else {
+            itextcomponent = new TextComponentString(object == null ? "null" : object.toString());
+            itextcomponent.func_150256_b().func_150221_a(this.func_150256_b());
+         }
 
-    public ITextComponent setStyle(Style style)
-    {
-        super.setStyle(style);
+         return itextcomponent;
+      }
+   }
 
-        for (Object object : this.formatArgs)
-        {
-            if (object instanceof ITextComponent)
-            {
-                ((ITextComponent)object).getStyle().setParentStyle(this.getStyle());
-            }
-        }
+   public ITextComponent func_150255_a(Style p_150255_1_) {
+      super.func_150255_a(p_150255_1_);
 
-        if (this.lastTranslationUpdateTimeInMilliseconds > -1L)
-        {
-            for (ITextComponent itextcomponent : this.children)
-            {
-                itextcomponent.getStyle().setParentStyle(style);
-            }
-        }
+      for(Object object : this.field_150277_e) {
+         if (object instanceof ITextComponent) {
+            ((ITextComponent)object).func_150256_b().func_150221_a(this.func_150256_b());
+         }
+      }
 
-        return this;
-    }
+      if (this.field_150275_g > -1L) {
+         for(ITextComponent itextcomponent : this.field_150278_b) {
+            itextcomponent.func_150256_b().func_150221_a(p_150255_1_);
+         }
+      }
 
-    public Iterator<ITextComponent> iterator()
-    {
-        this.ensureInitialized();
-        return Iterators.<ITextComponent>concat(createDeepCopyIterator(this.children), createDeepCopyIterator(this.siblings));
-    }
+      return this;
+   }
 
-    /**
-     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
-     * different methods?
-     */
-    public String getUnformattedComponentText()
-    {
-        this.ensureInitialized();
-        StringBuilder stringbuilder = new StringBuilder();
+   public Iterator<ITextComponent> iterator() {
+      this.func_150270_g();
+      return Iterators.<ITextComponent>concat(func_150262_a(this.field_150278_b), func_150262_a(this.field_150264_a));
+   }
 
-        for (ITextComponent itextcomponent : this.children)
-        {
-            stringbuilder.append(itextcomponent.getUnformattedComponentText());
-        }
+   public String func_150261_e() {
+      this.func_150270_g();
+      StringBuilder stringbuilder = new StringBuilder();
 
-        return stringbuilder.toString();
-    }
+      for(ITextComponent itextcomponent : this.field_150278_b) {
+         stringbuilder.append(itextcomponent.func_150261_e());
+      }
 
-    /**
-     * Creates a copy of this component.  Almost a deep copy, except the style is shallow-copied.
-     */
-    public TextComponentTranslation createCopy()
-    {
-        Object[] aobject = new Object[this.formatArgs.length];
+      return stringbuilder.toString();
+   }
 
-        for (int i = 0; i < this.formatArgs.length; ++i)
-        {
-            if (this.formatArgs[i] instanceof ITextComponent)
-            {
-                aobject[i] = ((ITextComponent)this.formatArgs[i]).createCopy();
-            }
-            else
-            {
-                aobject[i] = this.formatArgs[i];
-            }
-        }
+   public TextComponentTranslation func_150259_f() {
+      Object[] aobject = new Object[this.field_150277_e.length];
 
-        TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(this.key, aobject);
-        textcomponenttranslation.setStyle(this.getStyle().createShallowCopy());
+      for(int i = 0; i < this.field_150277_e.length; ++i) {
+         if (this.field_150277_e[i] instanceof ITextComponent) {
+            aobject[i] = ((ITextComponent)this.field_150277_e[i]).func_150259_f();
+         } else {
+            aobject[i] = this.field_150277_e[i];
+         }
+      }
 
-        for (ITextComponent itextcomponent : this.getSiblings())
-        {
-            textcomponenttranslation.appendSibling(itextcomponent.createCopy());
-        }
+      TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(this.field_150276_d, aobject);
+      textcomponenttranslation.func_150255_a(this.func_150256_b().func_150232_l());
 
-        return textcomponenttranslation;
-    }
+      for(ITextComponent itextcomponent : this.func_150253_a()) {
+         textcomponenttranslation.func_150257_a(itextcomponent.func_150259_f());
+      }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (this == p_equals_1_)
-        {
-            return true;
-        }
-        else if (!(p_equals_1_ instanceof TextComponentTranslation))
-        {
-            return false;
-        }
-        else
-        {
-            TextComponentTranslation textcomponenttranslation = (TextComponentTranslation)p_equals_1_;
-            return Arrays.equals(this.formatArgs, textcomponenttranslation.formatArgs) && this.key.equals(textcomponenttranslation.key) && super.equals(p_equals_1_);
-        }
-    }
+      return textcomponenttranslation;
+   }
 
-    public int hashCode()
-    {
-        int i = super.hashCode();
-        i = 31 * i + this.key.hashCode();
-        i = 31 * i + Arrays.hashCode(this.formatArgs);
-        return i;
-    }
+   public boolean equals(Object p_equals_1_) {
+      if (this == p_equals_1_) {
+         return true;
+      } else if (!(p_equals_1_ instanceof TextComponentTranslation)) {
+         return false;
+      } else {
+         TextComponentTranslation textcomponenttranslation = (TextComponentTranslation)p_equals_1_;
+         return Arrays.equals(this.field_150277_e, textcomponenttranslation.field_150277_e) && this.field_150276_d.equals(textcomponenttranslation.field_150276_d) && super.equals(p_equals_1_);
+      }
+   }
 
-    public String toString()
-    {
-        return "TranslatableComponent{key='" + this.key + '\'' + ", args=" + Arrays.toString(this.formatArgs) + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
-    }
+   public int hashCode() {
+      int i = super.hashCode();
+      i = 31 * i + this.field_150276_d.hashCode();
+      i = 31 * i + Arrays.hashCode(this.field_150277_e);
+      return i;
+   }
 
-    public String getKey()
-    {
-        return this.key;
-    }
+   public String toString() {
+      return "TranslatableComponent{key='" + this.field_150276_d + '\'' + ", args=" + Arrays.toString(this.field_150277_e) + ", siblings=" + this.field_150264_a + ", style=" + this.func_150256_b() + '}';
+   }
 
-    public Object[] getFormatArgs()
-    {
-        return this.formatArgs;
-    }
+   public String func_150268_i() {
+      return this.field_150276_d;
+   }
+
+   public Object[] func_150271_j() {
+      return this.field_150277_e;
+   }
 }

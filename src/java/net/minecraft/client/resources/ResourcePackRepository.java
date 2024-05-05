@@ -42,495 +42,375 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ResourcePackRepository
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final FileFilter RESOURCE_PACK_FILTER = new FileFilter()
-    {
-        public boolean accept(File p_accept_1_)
-        {
-            boolean flag = p_accept_1_.isFile() && p_accept_1_.getName().endsWith(".zip");
-            boolean flag1 = p_accept_1_.isDirectory() && (new File(p_accept_1_, "pack.mcmeta")).isFile();
-            return flag || flag1;
-        }
-    };
-    private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
-    private static final ResourceLocation field_191400_f = new ResourceLocation("textures/misc/unknown_pack.png");
-    private final File dirResourcepacks;
-    public final IResourcePack rprDefaultResourcePack;
-    private final File dirServerResourcepacks;
-    public final MetadataSerializer rprMetadataSerializer;
-    private IResourcePack resourcePackInstance;
-    private final ReentrantLock lock = new ReentrantLock();
-    private ListenableFuture<Object> downloadingPacks;
-    private List<ResourcePackRepository.Entry> repositoryEntriesAll = Lists.<ResourcePackRepository.Entry>newArrayList();
-    public final List<ResourcePackRepository.Entry> repositoryEntries = Lists.<ResourcePackRepository.Entry>newArrayList();
+public class ResourcePackRepository {
+   private static final Logger field_177320_c = LogManager.getLogger();
+   private static final FileFilter field_110622_a = new FileFilter() {
+      public boolean accept(File p_accept_1_) {
+         boolean flag = p_accept_1_.isFile() && p_accept_1_.getName().endsWith(".zip");
+         boolean flag1 = p_accept_1_.isDirectory() && (new File(p_accept_1_, "pack.mcmeta")).isFile();
+         return flag || flag1;
+      }
+   };
+   private static final Pattern field_190117_e = Pattern.compile("^[a-fA-F0-9]{40}$");
+   private static final ResourceLocation field_191400_f = new ResourceLocation("textures/misc/unknown_pack.png");
+   private final File field_110618_d;
+   public final IResourcePack field_110620_b;
+   private final File field_148534_e;
+   public final MetadataSerializer field_110621_c;
+   private IResourcePack field_148532_f;
+   private final ReentrantLock field_177321_h = new ReentrantLock();
+   private ListenableFuture<Object> field_177322_i;
+   private List<ResourcePackRepository.Entry> field_110619_e = Lists.<ResourcePackRepository.Entry>newArrayList();
+   private final List<ResourcePackRepository.Entry> field_110617_f = Lists.<ResourcePackRepository.Entry>newArrayList();
 
-    public ResourcePackRepository(File dirResourcepacksIn, File dirServerResourcepacksIn, IResourcePack rprDefaultResourcePackIn, MetadataSerializer rprMetadataSerializerIn, GameSettings settings)
-    {
-        this.dirResourcepacks = dirResourcepacksIn;
-        this.dirServerResourcepacks = dirServerResourcepacksIn;
-        this.rprDefaultResourcePack = rprDefaultResourcePackIn;
-        this.rprMetadataSerializer = rprMetadataSerializerIn;
-        this.fixDirResourcepacks();
-        this.updateRepositoryEntriesAll();
-        Iterator<String> iterator = settings.resourcePacks.iterator();
+   public ResourcePackRepository(File p_i45101_1_, File p_i45101_2_, IResourcePack p_i45101_3_, MetadataSerializer p_i45101_4_, GameSettings p_i45101_5_) {
+      this.field_110618_d = p_i45101_1_;
+      this.field_148534_e = p_i45101_2_;
+      this.field_110620_b = p_i45101_3_;
+      this.field_110621_c = p_i45101_4_;
+      this.func_110616_f();
+      this.func_110611_a();
+      Iterator<String> iterator = p_i45101_5_.field_151453_l.iterator();
 
-        while (iterator.hasNext())
-        {
-            String s = iterator.next();
+      while(iterator.hasNext()) {
+         String s = iterator.next();
 
-            for (ResourcePackRepository.Entry resourcepackrepository$entry : this.repositoryEntriesAll)
-            {
-                if (resourcepackrepository$entry.getResourcePackName().equals(s))
-                {
-                    if (resourcepackrepository$entry.getPackFormat() == 3 || settings.incompatibleResourcePacks.contains(resourcepackrepository$entry.getResourcePackName()))
-                    {
-                        this.repositoryEntries.add(resourcepackrepository$entry);
-                        break;
-                    }
+         for(ResourcePackRepository.Entry resourcepackrepository$entry : this.field_110619_e) {
+            if (resourcepackrepository$entry.func_110515_d().equals(s)) {
+               if (resourcepackrepository$entry.func_183027_f() == 3 || p_i45101_5_.field_183018_l.contains(resourcepackrepository$entry.func_110515_d())) {
+                  this.field_110617_f.add(resourcepackrepository$entry);
+                  break;
+               }
 
-                    iterator.remove();
-                    LOGGER.warn("Removed selected resource pack {} because it's no longer compatible", (Object)resourcepackrepository$entry.getResourcePackName());
-                }
+               iterator.remove();
+               field_177320_c.warn("Removed selected resource pack {} because it's no longer compatible", (Object)resourcepackrepository$entry.func_110515_d());
             }
-        }
-    }
+         }
+      }
 
-    public static Map<String, String> getDownloadHeaders()
-    {
-        Map<String, String> map = Maps.<String, String>newHashMap();
-        map.put("X-Minecraft-Username", Minecraft.getMinecraft().getSession().getUsername());
-        map.put("X-Minecraft-UUID", Minecraft.getMinecraft().getSession().getPlayerID());
-        map.put("X-Minecraft-Version", "1.12.2");
-        return map;
-    }
+   }
 
-    private void fixDirResourcepacks()
-    {
-        if (this.dirResourcepacks.exists())
-        {
-            if (!this.dirResourcepacks.isDirectory() && (!this.dirResourcepacks.delete() || !this.dirResourcepacks.mkdirs()))
-            {
-                LOGGER.warn("Unable to recreate resourcepack folder, it exists but is not a directory: {}", (Object)this.dirResourcepacks);
+   public static Map<String, String> func_190115_a() {
+      Map<String, String> map = Maps.<String, String>newHashMap();
+      map.put("X-Minecraft-Username", Minecraft.func_71410_x().func_110432_I().func_111285_a());
+      map.put("X-Minecraft-UUID", Minecraft.func_71410_x().func_110432_I().func_148255_b());
+      map.put("X-Minecraft-Version", "1.12.2");
+      return map;
+   }
+
+   private void func_110616_f() {
+      if (this.field_110618_d.exists()) {
+         if (!this.field_110618_d.isDirectory() && (!this.field_110618_d.delete() || !this.field_110618_d.mkdirs())) {
+            field_177320_c.warn("Unable to recreate resourcepack folder, it exists but is not a directory: {}", (Object)this.field_110618_d);
+         }
+      } else if (!this.field_110618_d.mkdirs()) {
+         field_177320_c.warn("Unable to create resourcepack folder: {}", (Object)this.field_110618_d);
+      }
+
+   }
+
+   private List<File> func_110614_g() {
+      return this.field_110618_d.isDirectory() ? Arrays.asList(this.field_110618_d.listFiles(field_110622_a)) : Collections.emptyList();
+   }
+
+   private IResourcePack func_191399_b(File p_191399_1_) {
+      IResourcePack iresourcepack;
+      if (p_191399_1_.isDirectory()) {
+         iresourcepack = new FolderResourcePack(p_191399_1_);
+      } else {
+         iresourcepack = new FileResourcePack(p_191399_1_);
+      }
+
+      try {
+         PackMetadataSection packmetadatasection = (PackMetadataSection)iresourcepack.func_135058_a(this.field_110621_c, "pack");
+         if (packmetadatasection != null && packmetadatasection.func_110462_b() == 2) {
+            return new LegacyV2Adapter(iresourcepack);
+         }
+      } catch (Exception var4) {
+         ;
+      }
+
+      return iresourcepack;
+   }
+
+   public void func_110611_a() {
+      List<ResourcePackRepository.Entry> list = Lists.<ResourcePackRepository.Entry>newArrayList();
+
+      for(File file1 : this.func_110614_g()) {
+         ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(file1);
+         if (this.field_110619_e.contains(resourcepackrepository$entry)) {
+            int i = this.field_110619_e.indexOf(resourcepackrepository$entry);
+            if (i > -1 && i < this.field_110619_e.size()) {
+               list.add(this.field_110619_e.get(i));
             }
-        }
-        else if (!this.dirResourcepacks.mkdirs())
-        {
-            LOGGER.warn("Unable to create resourcepack folder: {}", (Object)this.dirResourcepacks);
-        }
-    }
-
-    private List<File> getResourcePackFiles()
-    {
-        return this.dirResourcepacks.isDirectory() ? Arrays.asList(this.dirResourcepacks.listFiles(RESOURCE_PACK_FILTER)) : Collections.emptyList();
-    }
-
-    private IResourcePack func_191399_b(File p_191399_1_)
-    {
-        IResourcePack iresourcepack;
-
-        if (p_191399_1_.isDirectory())
-        {
-            iresourcepack = new FolderResourcePack(p_191399_1_);
-        }
-        else
-        {
-            iresourcepack = new FileResourcePack(p_191399_1_);
-        }
-
-        try
-        {
-            PackMetadataSection packmetadatasection = (PackMetadataSection)iresourcepack.getPackMetadata(this.rprMetadataSerializer, "pack");
-
-            if (packmetadatasection != null && packmetadatasection.getPackFormat() == 2)
-            {
-                return new LegacyV2Adapter(iresourcepack);
+         } else {
+            try {
+               resourcepackrepository$entry.func_110516_a();
+               list.add(resourcepackrepository$entry);
+            } catch (Exception var6) {
+               list.remove(resourcepackrepository$entry);
             }
-        }
-        catch (Exception var4)
-        {
+         }
+      }
+
+      this.field_110619_e.removeAll(list);
+
+      for(ResourcePackRepository.Entry resourcepackrepository$entry1 : this.field_110619_e) {
+         resourcepackrepository$entry1.func_110517_b();
+      }
+
+      this.field_110619_e = list;
+   }
+
+   @Nullable
+   public ResourcePackRepository.Entry func_188565_b() {
+      if (this.field_148532_f != null) {
+         ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(this.field_148532_f);
+
+         try {
+            resourcepackrepository$entry.func_110516_a();
+            return resourcepackrepository$entry;
+         } catch (IOException var3) {
             ;
-        }
+         }
+      }
 
-        return iresourcepack;
-    }
+      return null;
+   }
 
-    public void updateRepositoryEntriesAll()
-    {
-        List<ResourcePackRepository.Entry> list = Lists.<ResourcePackRepository.Entry>newArrayList();
+   public List<ResourcePackRepository.Entry> func_110609_b() {
+      return ImmutableList.copyOf(this.field_110619_e);
+   }
 
-        for (File file1 : this.getResourcePackFiles())
-        {
-            ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(file1);
+   public List<ResourcePackRepository.Entry> func_110613_c() {
+      return ImmutableList.copyOf(this.field_110617_f);
+   }
 
-            if (this.repositoryEntriesAll.contains(resourcepackrepository$entry))
-            {
-                int i = this.repositoryEntriesAll.indexOf(resourcepackrepository$entry);
+   public void func_148527_a(List<ResourcePackRepository.Entry> p_148527_1_) {
+      this.field_110617_f.clear();
+      this.field_110617_f.addAll(p_148527_1_);
+   }
 
-                if (i > -1 && i < this.repositoryEntriesAll.size())
-                {
-                    list.add(this.repositoryEntriesAll.get(i));
-                }
-            }
-            else
-            {
-                try
-                {
-                    resourcepackrepository$entry.updateResourcePack();
-                    list.add(resourcepackrepository$entry);
-                }
-                catch (Exception var61)
-                {
-                    list.remove(resourcepackrepository$entry);
-                }
-            }
-        }
+   public File func_110612_e() {
+      return this.field_110618_d;
+   }
 
-        this.repositoryEntriesAll.removeAll(list);
+   public ListenableFuture<Object> func_180601_a(String p_180601_1_, String p_180601_2_) {
+      String s = DigestUtils.sha1Hex(p_180601_1_);
+      final String s1 = field_190117_e.matcher(p_180601_2_).matches() ? p_180601_2_ : "";
+      final File file1 = new File(this.field_148534_e, s);
+      this.field_177321_h.lock();
 
-        for (ResourcePackRepository.Entry resourcepackrepository$entry1 : this.repositoryEntriesAll)
-        {
-            resourcepackrepository$entry1.closeResourcePack();
-        }
-
-        this.repositoryEntriesAll = list;
-    }
-
-    @Nullable
-    public ResourcePackRepository.Entry getResourcePackEntry()
-    {
-        if (this.resourcePackInstance != null)
-        {
-            ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(this.resourcePackInstance);
-
-            try
-            {
-                resourcepackrepository$entry.updateResourcePack();
-                return resourcepackrepository$entry;
-            }
-            catch (IOException var3)
-            {
-                ;
-            }
-        }
-
-        return null;
-    }
-
-    public List<ResourcePackRepository.Entry> getRepositoryEntriesAll()
-    {
-        return ImmutableList.copyOf(this.repositoryEntriesAll);
-    }
-
-    public List<ResourcePackRepository.Entry> getRepositoryEntries()
-    {
-        return ImmutableList.copyOf(this.repositoryEntries);
-    }
-
-    public void setRepositories(List<ResourcePackRepository.Entry> repositories)
-    {
-        this.repositoryEntries.clear();
-        this.repositoryEntries.addAll(repositories);
-    }
-
-    public File getDirResourcepacks()
-    {
-        return this.dirResourcepacks;
-    }
-
-    public ListenableFuture<Object> downloadResourcePack(String url, String hash)
-    {
-        String s = DigestUtils.sha1Hex(url);
-        final String s1 = SHA1.matcher(hash).matches() ? hash : "";
-        final File file1 = new File(this.dirServerResourcepacks, s);
-        this.lock.lock();
-
-        try
-        {
-            this.clearResourcePack();
-
-            if (file1.exists())
-            {
-                if (this.checkHash(s1, file1))
-                {
-                    ListenableFuture listenablefuture2 = this.setResourcePackInstance(file1);
-                    ListenableFuture listenablefuture3 = listenablefuture2;
-                    return listenablefuture3;
-                }
-
-                LOGGER.warn("Deleting file {}", (Object)file1);
-                FileUtils.deleteQuietly(file1);
+      try {
+         this.func_148529_f();
+         if (file1.exists()) {
+            if (this.func_190113_a(s1, file1)) {
+               ListenableFuture listenablefuture1 = this.func_177319_a(file1);
+               return listenablefuture1;
             }
 
-            this.deleteOldServerResourcesPacks();
-            final GuiScreenWorking guiscreenworking = new GuiScreenWorking();
-            Map<String, String> map = getDownloadHeaders();
-            final Minecraft minecraft = Minecraft.getMinecraft();
-            Futures.getUnchecked(minecraft.addScheduledTask(new Runnable()
-            {
-                public void run()
-                {
-                    minecraft.displayGuiScreen(guiscreenworking);
-                }
-            }));
-            final SettableFuture<Object> settablefuture = SettableFuture.<Object>create();
-            this.downloadingPacks = HttpUtil.downloadResourcePack(file1, url, map, 52428800, guiscreenworking, minecraft.getProxy());
-            Futures.addCallback(this.downloadingPacks, new FutureCallback<Object>()
-            {
-                public void onSuccess(@Nullable Object p_onSuccess_1_)
-                {
-                    if (ResourcePackRepository.this.checkHash(s1, file1))
-                    {
-                        ResourcePackRepository.this.setResourcePackInstance(file1);
-                        settablefuture.set((Object)null);
-                    }
-                    else
-                    {
-                        ResourcePackRepository.LOGGER.warn("Deleting file {}", (Object)file1);
-                        FileUtils.deleteQuietly(file1);
-                    }
-                }
-                public void onFailure(Throwable p_onFailure_1_)
-                {
-                    FileUtils.deleteQuietly(file1);
-                    settablefuture.setException(p_onFailure_1_);
-                }
-            });
-            ListenableFuture listenablefuture = this.downloadingPacks;
-            ListenableFuture listenablefuture1 = listenablefuture;
-            return listenablefuture1;
-        }
-        finally
-        {
-            this.lock.unlock();
-        }
-    }
+            field_177320_c.warn("Deleting file {}", (Object)file1);
+            FileUtils.deleteQuietly(file1);
+         }
 
-    private boolean checkHash(String p_190113_1_, File p_190113_2_)
-    {
-        try
-        {
-            String s = DigestUtils.sha1Hex((InputStream)(new FileInputStream(p_190113_2_)));
+         this.func_183028_i();
+         final GuiScreenWorking guiscreenworking = new GuiScreenWorking();
+         Map<String, String> map = func_190115_a();
+         final Minecraft minecraft = Minecraft.func_71410_x();
+         Futures.getUnchecked(minecraft.func_152344_a(new Runnable() {
+            public void run() {
+               minecraft.func_147108_a(guiscreenworking);
+            }
+         }));
+         final SettableFuture<Object> settablefuture = SettableFuture.<Object>create();
+         this.field_177322_i = HttpUtil.func_180192_a(file1, p_180601_1_, map, 52428800, guiscreenworking, minecraft.func_110437_J());
+         Futures.addCallback(this.field_177322_i, new FutureCallback<Object>() {
+            public void onSuccess(@Nullable Object p_onSuccess_1_) {
+               if (ResourcePackRepository.this.func_190113_a(s1, file1)) {
+                  ResourcePackRepository.this.func_177319_a(file1);
+                  settablefuture.set((Object)null);
+               } else {
+                  ResourcePackRepository.field_177320_c.warn("Deleting file {}", (Object)file1);
+                  FileUtils.deleteQuietly(file1);
+               }
 
-            if (p_190113_1_.isEmpty())
-            {
-                LOGGER.info("Found file {} without verification hash", (Object)p_190113_2_);
-                return true;
             }
 
-            if (s.toLowerCase(java.util.Locale.ROOT).equals(p_190113_1_.toLowerCase(java.util.Locale.ROOT)))
-            {
-                LOGGER.info("Found file {} matching requested hash {}", p_190113_2_, p_190113_1_);
-                return true;
+            public void onFailure(Throwable p_onFailure_1_) {
+               FileUtils.deleteQuietly(file1);
+               settablefuture.setException(p_onFailure_1_);
             }
+         });
+         ListenableFuture listenablefuture = this.field_177322_i;
+         return listenablefuture;
+      } finally {
+         this.field_177321_h.unlock();
+      }
+   }
 
-            LOGGER.warn("File {} had wrong hash (expected {}, found {}).", p_190113_2_, p_190113_1_, s);
-        }
-        catch (IOException ioexception1)
-        {
-            LOGGER.warn("File {} couldn't be hashed.", p_190113_2_, ioexception1);
-        }
-
-        return false;
-    }
-
-    private boolean validatePack(File p_190112_1_)
-    {
-        ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(p_190112_1_);
-
-        try
-        {
-            resourcepackrepository$entry.updateResourcePack();
+   private boolean func_190113_a(String p_190113_1_, File p_190113_2_) {
+      try {
+         String s = DigestUtils.sha1Hex((InputStream)(new FileInputStream(p_190113_2_)));
+         if (p_190113_1_.isEmpty()) {
+            field_177320_c.info("Found file {} without verification hash", (Object)p_190113_2_);
             return true;
-        }
-        catch (Exception exception)
-        {
-            LOGGER.warn("Server resourcepack is invalid, ignoring it", (Throwable)exception);
-            return false;
-        }
-    }
+         }
 
-    /**
-     * Keep only the 10 most recent resources packs, delete the others
-     */
-    private void deleteOldServerResourcesPacks()
-    {
-        try
-        {
-            List<File> list = Lists.newArrayList(FileUtils.listFiles(this.dirServerResourcepacks, TrueFileFilter.TRUE, (IOFileFilter)null));
-            Collections.sort(list, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
-            int i = 0;
+         if (s.toLowerCase(java.util.Locale.ROOT).equals(p_190113_1_.toLowerCase(java.util.Locale.ROOT))) {
+            field_177320_c.info("Found file {} matching requested hash {}", p_190113_2_, p_190113_1_);
+            return true;
+         }
 
-            for (File file1 : list)
-            {
-                if (i++ >= 10)
-                {
-                    LOGGER.info("Deleting old server resource pack {}", (Object)file1.getName());
-                    FileUtils.deleteQuietly(file1);
-                }
+         field_177320_c.warn("File {} had wrong hash (expected {}, found {}).", p_190113_2_, p_190113_1_, s);
+      } catch (IOException ioexception) {
+         field_177320_c.warn("File {} couldn't be hashed.", p_190113_2_, ioexception);
+      }
+
+      return false;
+   }
+
+   private boolean func_190112_b(File p_190112_1_) {
+      ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(p_190112_1_);
+
+      try {
+         resourcepackrepository$entry.func_110516_a();
+         return true;
+      } catch (Exception exception) {
+         field_177320_c.warn("Server resourcepack is invalid, ignoring it", (Throwable)exception);
+         return false;
+      }
+   }
+
+   private void func_183028_i() {
+      try {
+         List<File> list = Lists.newArrayList(FileUtils.listFiles(this.field_148534_e, TrueFileFilter.TRUE, (IOFileFilter)null));
+         Collections.sort(list, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+         int i = 0;
+
+         for(File file1 : list) {
+            if (i++ >= 10) {
+               field_177320_c.info("Deleting old server resource pack {}", (Object)file1.getName());
+               FileUtils.deleteQuietly(file1);
             }
-        }
-        catch (IllegalArgumentException illegalargumentexception1)
-        {
-            LOGGER.error("Error while deleting old server resource pack : {}", (Object)illegalargumentexception1.getMessage());
-        }
-    }
+         }
+      } catch (IllegalArgumentException illegalargumentexception) {
+         field_177320_c.error("Error while deleting old server resource pack : {}", (Object)illegalargumentexception.getMessage());
+      }
 
-    public ListenableFuture<Object> setResourcePackInstance(File resourceFile)
-    {
-        if (!this.validatePack(resourceFile))
-        {
-            return Futures.<Object>immediateFailedFuture(new RuntimeException("Invalid resourcepack"));
-        }
-        else
-        {
-            this.resourcePackInstance = new FileResourcePack(resourceFile);
-            return Minecraft.getMinecraft().scheduleResourcesRefresh();
-        }
-    }
+   }
 
-    @Nullable
+   public ListenableFuture<Object> func_177319_a(File p_177319_1_) {
+      if (!this.func_190112_b(p_177319_1_)) {
+         return Futures.<Object>immediateFailedFuture(new RuntimeException("Invalid resourcepack"));
+      } else {
+         this.field_148532_f = new FileResourcePack(p_177319_1_);
+         return Minecraft.func_71410_x().func_175603_A();
+      }
+   }
 
-    /**
-     * Getter for the IResourcePack instance associated with this ResourcePackRepository
-     */
-    public IResourcePack getResourcePackInstance()
-    {
-        return this.resourcePackInstance;
-    }
+   @Nullable
+   public IResourcePack func_148530_e() {
+      return this.field_148532_f;
+   }
 
-    public void clearResourcePack()
-    {
-        this.lock.lock();
+   public void func_148529_f() {
+      this.field_177321_h.lock();
 
-        try
-        {
-            if (this.downloadingPacks != null)
-            {
-                this.downloadingPacks.cancel(true);
+      try {
+         if (this.field_177322_i != null) {
+            this.field_177322_i.cancel(true);
+         }
+
+         this.field_177322_i = null;
+         if (this.field_148532_f != null) {
+            this.field_148532_f = null;
+            Minecraft.func_71410_x().func_175603_A();
+         }
+      } finally {
+         this.field_177321_h.unlock();
+      }
+
+   }
+
+   public class Entry {
+      private final IResourcePack field_110524_c;
+      private PackMetadataSection field_110521_d;
+      private ResourceLocation field_110520_f;
+
+      private Entry(File p_i1295_2_) {
+         this(ResourcePackRepository.this.func_191399_b(p_i1295_2_));
+      }
+
+      private Entry(IResourcePack p_i46558_2_) {
+         this.field_110524_c = p_i46558_2_;
+      }
+
+      public void func_110516_a() throws IOException {
+         this.field_110521_d = (PackMetadataSection)this.field_110524_c.func_135058_a(ResourcePackRepository.this.field_110621_c, "pack");
+         this.func_110517_b();
+      }
+
+      public void func_110518_a(TextureManager p_110518_1_) {
+         BufferedImage bufferedimage = null;
+
+         try {
+            bufferedimage = this.field_110524_c.func_110586_a();
+         } catch (IOException var5) {
+            ;
+         }
+
+         if (bufferedimage == null) {
+            try {
+               bufferedimage = TextureUtil.func_177053_a(Minecraft.func_71410_x().func_110442_L().func_110536_a(ResourcePackRepository.field_191400_f).func_110527_b());
+            } catch (IOException ioexception) {
+               throw new Error("Couldn't bind resource pack icon", ioexception);
             }
+         }
 
-            this.downloadingPacks = null;
+         if (this.field_110520_f == null) {
+            this.field_110520_f = p_110518_1_.func_110578_a("texturepackicon", new DynamicTexture(bufferedimage));
+         }
 
-            if (this.resourcePackInstance != null)
-            {
-                this.resourcePackInstance = null;
-                Minecraft.getMinecraft().scheduleResourcesRefresh();
-            }
-        }
-        finally
-        {
-            this.lock.unlock();
-        }
-    }
+         p_110518_1_.func_110577_a(this.field_110520_f);
+      }
 
-    public class Entry
-    {
-        private final IResourcePack reResourcePack;
-        private PackMetadataSection rePackMetadataSection;
-        private ResourceLocation locationTexturePackIcon;
+      public void func_110517_b() {
+         if (this.field_110524_c instanceof Closeable) {
+            IOUtils.closeQuietly((Closeable)this.field_110524_c);
+         }
 
-        private Entry(File resourcePackFileIn)
-        {
-            this(ResourcePackRepository.this.func_191399_b(resourcePackFileIn));
-        }
+      }
 
-        private Entry(IResourcePack reResourcePackIn)
-        {
-            this.reResourcePack = reResourcePackIn;
-        }
+      public IResourcePack func_110514_c() {
+         return this.field_110524_c;
+      }
 
-        public void updateResourcePack() throws IOException
-        {
-            this.rePackMetadataSection = (PackMetadataSection)this.reResourcePack.getPackMetadata(ResourcePackRepository.this.rprMetadataSerializer, "pack");
-            this.closeResourcePack();
-        }
+      public String func_110515_d() {
+         return this.field_110524_c.func_130077_b();
+      }
 
-        public void bindTexturePackIcon(TextureManager textureManagerIn)
-        {
-            BufferedImage bufferedimage = null;
+      public String func_110519_e() {
+         return this.field_110521_d == null ? TextFormatting.RED + "Invalid pack.mcmeta (or missing 'pack' section)" : this.field_110521_d.func_152805_a().func_150254_d();
+      }
 
-            if (this.locationTexturePackIcon == null)
-            {
-                try
-                {
-                    bufferedimage = this.reResourcePack.getPackImage();
-                }
-                catch (IOException var5)
-                {
-                    ;
-                }
+      public int func_183027_f() {
+         return this.field_110521_d == null ? 0 : this.field_110521_d.func_110462_b();
+      }
 
-                if (bufferedimage == null)
-                {
-                    try
-                    {
-                        bufferedimage = TextureUtil.readBufferedImage(Minecraft.getMinecraft().getResourceManager().getResource(ResourcePackRepository.field_191400_f).getInputStream());
-                    }
-                    catch (IOException ioexception)
-                    {
-                        throw new Error("Couldn't bind resource pack icon", ioexception);
-                    }
-                }
-            }
+      public boolean equals(Object p_equals_1_) {
+         if (this == p_equals_1_) {
+            return true;
+         } else {
+            return p_equals_1_ instanceof ResourcePackRepository.Entry ? this.toString().equals(p_equals_1_.toString()) : false;
+         }
+      }
 
-            if (this.locationTexturePackIcon == null)
-            {
-                this.locationTexturePackIcon = textureManagerIn.getDynamicTextureLocation("texturepackicon", new DynamicTexture(bufferedimage));
-            }
+      public int hashCode() {
+         return this.toString().hashCode();
+      }
 
-            textureManagerIn.bindTexture(this.locationTexturePackIcon);
-        }
-
-        public void closeResourcePack()
-        {
-            if (this.reResourcePack instanceof Closeable)
-            {
-                IOUtils.closeQuietly((Closeable)this.reResourcePack);
-            }
-        }
-
-        public IResourcePack getResourcePack()
-        {
-            return this.reResourcePack;
-        }
-
-        public String getResourcePackName()
-        {
-            return this.reResourcePack.getPackName();
-        }
-
-        public String getTexturePackDescription()
-        {
-            return this.rePackMetadataSection == null ? TextFormatting.RED + "Invalid pack.mcmeta (or missing 'pack' section)" : this.rePackMetadataSection.getPackDescription().getFormattedText();
-        }
-
-        public int getPackFormat()
-        {
-            return this.rePackMetadataSection == null ? 0 : this.rePackMetadataSection.getPackFormat();
-        }
-
-        public boolean equals(Object p_equals_1_)
-        {
-            if (this == p_equals_1_)
-            {
-                return true;
-            }
-            else
-            {
-                return p_equals_1_ instanceof ResourcePackRepository.Entry ? this.toString().equals(p_equals_1_.toString()) : false;
-            }
-        }
-
-        public int hashCode()
-        {
-            return this.toString().hashCode();
-        }
-
-        public String toString()
-        {
-            return String.format("%s:%s", this.reResourcePack.getPackName(), this.reResourcePack instanceof FolderResourcePack ? "folder" : "zip");
-        }
-    }
+      public String toString() {
+         return String.format("%s:%s", this.field_110524_c.func_130077_b(), this.field_110524_c instanceof FolderResourcePack ? "folder" : "zip");
+      }
+   }
 }

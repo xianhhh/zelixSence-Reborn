@@ -15,109 +15,81 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockPressurePlate extends BlockBasePressurePlate
-{
-    public static final PropertyBool POWERED = PropertyBool.create("powered");
-    private final BlockPressurePlate.Sensitivity sensitivity;
+public class BlockPressurePlate extends BlockBasePressurePlate {
+   public static final PropertyBool field_176580_a = PropertyBool.func_177716_a("powered");
+   private final BlockPressurePlate.Sensitivity field_150069_a;
 
-    protected BlockPressurePlate(Material materialIn, BlockPressurePlate.Sensitivity sensitivityIn)
-    {
-        super(materialIn);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(POWERED, Boolean.valueOf(false)));
-        this.sensitivity = sensitivityIn;
-    }
+   protected BlockPressurePlate(Material p_i45693_1_, BlockPressurePlate.Sensitivity p_i45693_2_) {
+      super(p_i45693_1_);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176580_a, Boolean.valueOf(false)));
+      this.field_150069_a = p_i45693_2_;
+   }
 
-    protected int getRedstoneStrength(IBlockState state)
-    {
-        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 15 : 0;
-    }
+   protected int func_176576_e(IBlockState p_176576_1_) {
+      return ((Boolean)p_176576_1_.func_177229_b(field_176580_a)).booleanValue() ? 15 : 0;
+   }
 
-    protected IBlockState setRedstoneStrength(IBlockState state, int strength)
-    {
-        return state.withProperty(POWERED, Boolean.valueOf(strength > 0));
-    }
+   protected IBlockState func_176575_a(IBlockState p_176575_1_, int p_176575_2_) {
+      return p_176575_1_.func_177226_a(field_176580_a, Boolean.valueOf(p_176575_2_ > 0));
+   }
 
-    protected void playClickOnSound(World worldIn, BlockPos color)
-    {
-        if (this.blockMaterial == Material.WOOD)
-        {
-            worldIn.playSound((EntityPlayer)null, color, SoundEvents.BLOCK_WOOD_PRESSPLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.8F);
-        }
-        else
-        {
-            worldIn.playSound((EntityPlayer)null, color, SoundEvents.BLOCK_STONE_PRESSPLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
-        }
-    }
+   protected void func_185507_b(World p_185507_1_, BlockPos p_185507_2_) {
+      if (this.field_149764_J == Material.field_151575_d) {
+         p_185507_1_.func_184133_a((EntityPlayer)null, p_185507_2_, SoundEvents.field_187895_gX, SoundCategory.BLOCKS, 0.3F, 0.8F);
+      } else {
+         p_185507_1_.func_184133_a((EntityPlayer)null, p_185507_2_, SoundEvents.field_187901_ga, SoundCategory.BLOCKS, 0.3F, 0.6F);
+      }
 
-    protected void playClickOffSound(World worldIn, BlockPos pos)
-    {
-        if (this.blockMaterial == Material.WOOD)
-        {
-            worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_WOOD_PRESSPLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.7F);
-        }
-        else
-        {
-            worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_STONE_PRESSPLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.5F);
-        }
-    }
+   }
 
-    protected int computeRedstoneStrength(World worldIn, BlockPos pos)
-    {
-        AxisAlignedBB axisalignedbb = PRESSURE_AABB.offset(pos);
-        List <? extends Entity > list;
+   protected void func_185508_c(World p_185508_1_, BlockPos p_185508_2_) {
+      if (this.field_149764_J == Material.field_151575_d) {
+         p_185508_1_.func_184133_a((EntityPlayer)null, p_185508_2_, SoundEvents.field_187893_gW, SoundCategory.BLOCKS, 0.3F, 0.7F);
+      } else {
+         p_185508_1_.func_184133_a((EntityPlayer)null, p_185508_2_, SoundEvents.field_187847_fZ, SoundCategory.BLOCKS, 0.3F, 0.5F);
+      }
 
-        switch (this.sensitivity)
-        {
-            case EVERYTHING:
-                list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb);
-                break;
+   }
 
-            case MOBS:
-                list = worldIn.<Entity>getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb);
-                break;
+   protected int func_180669_e(World p_180669_1_, BlockPos p_180669_2_) {
+      AxisAlignedBB axisalignedbb = field_185511_c.func_186670_a(p_180669_2_);
+      List<? extends Entity> list;
+      switch(this.field_150069_a) {
+      case EVERYTHING:
+         list = p_180669_1_.func_72839_b((Entity)null, axisalignedbb);
+         break;
+      case MOBS:
+         list = p_180669_1_.<Entity>func_72872_a(EntityLivingBase.class, axisalignedbb);
+         break;
+      default:
+         return 0;
+      }
 
-            default:
-                return 0;
-        }
-
-        if (!list.isEmpty())
-        {
-            for (Entity entity : list)
-            {
-                if (!entity.doesEntityNotTriggerPressurePlate())
-                {
-                    return 15;
-                }
+      if (!list.isEmpty()) {
+         for(Entity entity : list) {
+            if (!entity.func_145773_az()) {
+               return 15;
             }
-        }
+         }
+      }
 
-        return 0;
-    }
+      return 0;
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(POWERED, Boolean.valueOf(meta == 1));
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176580_a, Boolean.valueOf(p_176203_1_ == 1));
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 1 : 0;
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Boolean)p_176201_1_.func_177229_b(field_176580_a)).booleanValue() ? 1 : 0;
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {POWERED});
-    }
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176580_a});
+   }
 
-    public static enum Sensitivity
-    {
-        EVERYTHING,
-        MOBS;
-    }
+   public static enum Sensitivity {
+      EVERYTHING,
+      MOBS;
+   }
 }

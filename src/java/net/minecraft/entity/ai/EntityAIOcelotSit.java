@@ -10,97 +10,61 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class EntityAIOcelotSit extends EntityAIMoveToBlock
-{
-    private final EntityOcelot ocelot;
+public class EntityAIOcelotSit extends EntityAIMoveToBlock {
+   private final EntityOcelot field_151493_a;
 
-    public EntityAIOcelotSit(EntityOcelot ocelotIn, double p_i45315_2_)
-    {
-        super(ocelotIn, p_i45315_2_, 8);
-        this.ocelot = ocelotIn;
-    }
+   public EntityAIOcelotSit(EntityOcelot p_i45315_1_, double p_i45315_2_) {
+      super(p_i45315_1_, p_i45315_2_, 8);
+      this.field_151493_a = p_i45315_1_;
+   }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        return this.ocelot.isTamed() && !this.ocelot.isSitting() && super.shouldExecute();
-    }
+   public boolean func_75250_a() {
+      return this.field_151493_a.func_70909_n() && !this.field_151493_a.func_70906_o() && super.func_75250_a();
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        super.startExecuting();
-        this.ocelot.getAISit().setSitting(false);
-    }
+   public void func_75249_e() {
+      super.func_75249_e();
+      this.field_151493_a.func_70907_r().func_75270_a(false);
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        super.resetTask();
-        this.ocelot.setSitting(false);
-    }
+   public void func_75251_c() {
+      super.func_75251_c();
+      this.field_151493_a.func_70904_g(false);
+   }
 
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        super.updateTask();
-        this.ocelot.getAISit().setSitting(false);
+   public void func_75246_d() {
+      super.func_75246_d();
+      this.field_151493_a.func_70907_r().func_75270_a(false);
+      if (!this.func_179487_f()) {
+         this.field_151493_a.func_70904_g(false);
+      } else if (!this.field_151493_a.func_70906_o()) {
+         this.field_151493_a.func_70904_g(true);
+      }
 
-        if (!this.getIsAboveDestination())
-        {
-            this.ocelot.setSitting(false);
-        }
-        else if (!this.ocelot.isSitting())
-        {
-            this.ocelot.setSitting(true);
-        }
-    }
+   }
 
-    /**
-     * Return true to set given position as destination
-     */
-    protected boolean shouldMoveTo(World worldIn, BlockPos pos)
-    {
-        if (!worldIn.isAirBlock(pos.up()))
-        {
-            return false;
-        }
-        else
-        {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-            Block block = iblockstate.getBlock();
-
-            if (block == Blocks.CHEST)
-            {
-                TileEntity tileentity = worldIn.getTileEntity(pos);
-
-                if (tileentity instanceof TileEntityChest && ((TileEntityChest)tileentity).numPlayersUsing < 1)
-                {
-                    return true;
-                }
+   protected boolean func_179488_a(World p_179488_1_, BlockPos p_179488_2_) {
+      if (!p_179488_1_.func_175623_d(p_179488_2_.func_177984_a())) {
+         return false;
+      } else {
+         IBlockState iblockstate = p_179488_1_.func_180495_p(p_179488_2_);
+         Block block = iblockstate.func_177230_c();
+         if (block == Blocks.field_150486_ae) {
+            TileEntity tileentity = p_179488_1_.func_175625_s(p_179488_2_);
+            if (tileentity instanceof TileEntityChest && ((TileEntityChest)tileentity).field_145987_o < 1) {
+               return true;
             }
-            else
-            {
-                if (block == Blocks.LIT_FURNACE)
-                {
-                    return true;
-                }
-
-                if (block == Blocks.BED && iblockstate.getValue(BlockBed.PART) != BlockBed.EnumPartType.HEAD)
-                {
-                    return true;
-                }
+         } else {
+            if (block == Blocks.field_150470_am) {
+               return true;
             }
 
-            return false;
-        }
-    }
+            if (block == Blocks.field_150324_C && iblockstate.func_177229_b(BlockBed.field_176472_a) != BlockBed.EnumPartType.HEAD) {
+               return true;
+            }
+         }
+
+         return false;
+      }
+   }
 }

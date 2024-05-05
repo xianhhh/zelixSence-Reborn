@@ -2,45 +2,25 @@ package net.minecraft.command;
 
 import net.minecraft.server.MinecraftServer;
 
-public class CommandReload extends CommandBase
-{
-    /**
-     * Gets the name of the command
-     */
-    public String getCommandName()
-    {
-        return "reload";
-    }
+public class CommandReload extends CommandBase {
+   public String func_71517_b() {
+      return "reload";
+   }
 
-    /**
-     * Return the required permission level for this command.
-     */
-    public int getRequiredPermissionLevel()
-    {
-        return 3;
-    }
+   public int func_82362_a() {
+      return 3;
+   }
 
-    /**
-     * Gets the usage string for the command.
-     */
-    public String getCommandUsage(ICommandSender sender)
-    {
-        return "commands.reload.usage";
-    }
+   public String func_71518_a(ICommandSender p_71518_1_) {
+      return "commands.reload.usage";
+   }
 
-    /**
-     * Callback for when the command is executed
-     */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
-    {
-        if (args.length > 0)
-        {
-            throw new WrongUsageException("commands.reload.usage", new Object[0]);
-        }
-        else
-        {
-            server.func_193031_aM();
-            notifyCommandListener(sender, this, "commands.reload.success", new Object[0]);
-        }
-    }
+   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
+      if (p_184881_3_.length > 0) {
+         throw new WrongUsageException("commands.reload.usage", new Object[0]);
+      } else {
+         p_184881_1_.func_193031_aM();
+         func_152373_a(p_184881_2_, this, "commands.reload.success", new Object[0]);
+      }
+   }
 }

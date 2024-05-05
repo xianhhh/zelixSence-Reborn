@@ -18,140 +18,87 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockStructure extends BlockContainer
-{
-    public static final PropertyEnum<TileEntityStructure.Mode> MODE = PropertyEnum.<TileEntityStructure.Mode>create("mode", TileEntityStructure.Mode.class);
+public class BlockStructure extends BlockContainer {
+   public static final PropertyEnum<TileEntityStructure.Mode> field_185587_a = PropertyEnum.<TileEntityStructure.Mode>func_177709_a("mode", TileEntityStructure.Mode.class);
 
-    public BlockStructure()
-    {
-        super(Material.IRON, MapColor.SILVER);
-        this.setDefaultState(this.blockState.getBaseState());
-    }
+   public BlockStructure() {
+      super(Material.field_151573_f, MapColor.field_151680_x);
+      this.func_180632_j(this.field_176227_L.func_177621_b());
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityStructure();
-    }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityStructure();
+   }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
-        return tileentity instanceof TileEntityStructure ? ((TileEntityStructure)tileentity).usedBy(playerIn) : false;
-    }
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      TileEntity tileentity = p_180639_1_.func_175625_s(p_180639_2_);
+      return tileentity instanceof TileEntityStructure ? ((TileEntityStructure)tileentity).func_189701_a(p_180639_4_) : false;
+   }
 
-    /**
-     * Called by ItemBlocks after a block is set in the world, to allow post-place logic
-     */
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        if (!worldIn.isRemote)
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void func_180633_a(World p_180633_1_, BlockPos p_180633_2_, IBlockState p_180633_3_, EntityLivingBase p_180633_4_, ItemStack p_180633_5_) {
+      if (!p_180633_1_.field_72995_K) {
+         TileEntity tileentity = p_180633_1_.func_175625_s(p_180633_2_);
+         if (tileentity instanceof TileEntityStructure) {
+            TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
+            tileentitystructure.func_189720_a(p_180633_4_);
+         }
+      }
+   }
 
-            if (tileentity instanceof TileEntityStructure)
-            {
-                TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
-                tileentitystructure.createdBy(placer);
+   public int func_149745_a(Random p_149745_1_) {
+      return 0;
+   }
+
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.MODEL;
+   }
+
+   public IBlockState func_180642_a(World p_180642_1_, BlockPos p_180642_2_, EnumFacing p_180642_3_, float p_180642_4_, float p_180642_5_, float p_180642_6_, int p_180642_7_, EntityLivingBase p_180642_8_) {
+      return this.func_176223_P().func_177226_a(field_185587_a, TileEntityStructure.Mode.DATA);
+   }
+
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_185587_a, TileEntityStructure.Mode.func_185108_a(p_176203_1_));
+   }
+
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((TileEntityStructure.Mode)p_176201_1_.func_177229_b(field_185587_a)).func_185110_a();
+   }
+
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_185587_a});
+   }
+
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      if (!p_189540_2_.field_72995_K) {
+         TileEntity tileentity = p_189540_2_.func_175625_s(p_189540_3_);
+         if (tileentity instanceof TileEntityStructure) {
+            TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
+            boolean flag = p_189540_2_.func_175640_z(p_189540_3_);
+            boolean flag1 = tileentitystructure.func_189722_G();
+            if (flag && !flag1) {
+               tileentitystructure.func_189723_d(true);
+               this.func_189874_a(tileentitystructure);
+            } else if (!flag && flag1) {
+               tileentitystructure.func_189723_d(false);
             }
-        }
-    }
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    public int quantityDropped(Random random)
-    {
-        return 0;
-    }
+         }
+      }
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
+   private void func_189874_a(TileEntityStructure p_189874_1_) {
+      switch(p_189874_1_.func_189700_k()) {
+      case SAVE:
+         p_189874_1_.func_189712_b(false);
+         break;
+      case LOAD:
+         p_189874_1_.func_189714_c(false);
+         break;
+      case CORNER:
+         p_189874_1_.func_189706_E();
+      case DATA:
+      }
 
-    /**
-     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
-     * IBlockstate
-     */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
-        return this.getDefaultState().withProperty(MODE, TileEntityStructure.Mode.DATA);
-    }
-
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(MODE, TileEntityStructure.Mode.getById(meta));
-    }
-
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((TileEntityStructure.Mode)state.getValue(MODE)).getModeId();
-    }
-
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {MODE});
-    }
-
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        if (!worldIn.isRemote)
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
-
-            if (tileentity instanceof TileEntityStructure)
-            {
-                TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
-                boolean flag = worldIn.isBlockPowered(pos);
-                boolean flag1 = tileentitystructure.isPowered();
-
-                if (flag && !flag1)
-                {
-                    tileentitystructure.setPowered(true);
-                    this.trigger(tileentitystructure);
-                }
-                else if (!flag && flag1)
-                {
-                    tileentitystructure.setPowered(false);
-                }
-            }
-        }
-    }
-
-    private void trigger(TileEntityStructure p_189874_1_)
-    {
-        switch (p_189874_1_.getMode())
-        {
-            case SAVE:
-                p_189874_1_.save(false);
-                break;
-
-            case LOAD:
-                p_189874_1_.load(false);
-                break;
-
-            case CORNER:
-                p_189874_1_.unloadStructure();
-
-            case DATA:
-        }
-    }
+   }
 }

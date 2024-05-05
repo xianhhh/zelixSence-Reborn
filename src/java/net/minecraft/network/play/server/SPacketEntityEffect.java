@@ -7,110 +7,82 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
-public class SPacketEntityEffect implements Packet<INetHandlerPlayClient>
-{
-    private int entityId;
-    private byte effectId;
-    private byte amplifier;
-    private int duration;
-    private byte flags;
+public class SPacketEntityEffect implements Packet<INetHandlerPlayClient> {
+   private int field_149434_a;
+   private byte field_149432_b;
+   private byte field_149433_c;
+   private int field_149431_d;
+   private byte field_186985_e;
 
-    public SPacketEntityEffect()
-    {
-    }
+   public SPacketEntityEffect() {
+   }
 
-    public SPacketEntityEffect(int entityIdIn, PotionEffect effect)
-    {
-        this.entityId = entityIdIn;
-        this.effectId = (byte)(Potion.getIdFromPotion(effect.getPotion()) & 255);
-        this.amplifier = (byte)(effect.getAmplifier() & 255);
+   public SPacketEntityEffect(int p_i46891_1_, PotionEffect p_i46891_2_) {
+      this.field_149434_a = p_i46891_1_;
+      this.field_149432_b = (byte)(Potion.func_188409_a(p_i46891_2_.func_188419_a()) & 255);
+      this.field_149433_c = (byte)(p_i46891_2_.func_76458_c() & 255);
+      if (p_i46891_2_.func_76459_b() > 32767) {
+         this.field_149431_d = 32767;
+      } else {
+         this.field_149431_d = p_i46891_2_.func_76459_b();
+      }
 
-        if (effect.getDuration() > 32767)
-        {
-            this.duration = 32767;
-        }
-        else
-        {
-            this.duration = effect.getDuration();
-        }
+      this.field_186985_e = 0;
+      if (p_i46891_2_.func_82720_e()) {
+         this.field_186985_e = (byte)(this.field_186985_e | 1);
+      }
 
-        this.flags = 0;
+      if (p_i46891_2_.func_188418_e()) {
+         this.field_186985_e = (byte)(this.field_186985_e | 2);
+      }
 
-        if (effect.getIsAmbient())
-        {
-            this.flags = (byte)(this.flags | 1);
-        }
+   }
 
-        if (effect.doesShowParticles())
-        {
-            this.flags = (byte)(this.flags | 2);
-        }
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149434_a = p_148837_1_.func_150792_a();
+      this.field_149432_b = p_148837_1_.readByte();
+      this.field_149433_c = p_148837_1_.readByte();
+      this.field_149431_d = p_148837_1_.func_150792_a();
+      this.field_186985_e = p_148837_1_.readByte();
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityId = buf.readVarIntFromBuffer();
-        this.effectId = buf.readByte();
-        this.amplifier = buf.readByte();
-        this.duration = buf.readVarIntFromBuffer();
-        this.flags = buf.readByte();
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149434_a);
+      p_148840_1_.writeByte(this.field_149432_b);
+      p_148840_1_.writeByte(this.field_149433_c);
+      p_148840_1_.func_150787_b(this.field_149431_d);
+      p_148840_1_.writeByte(this.field_186985_e);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityId);
-        buf.writeByte(this.effectId);
-        buf.writeByte(this.amplifier);
-        buf.writeVarIntToBuffer(this.duration);
-        buf.writeByte(this.flags);
-    }
+   public boolean func_149429_c() {
+      return this.field_149431_d == 32767;
+   }
 
-    public boolean isMaxDuration()
-    {
-        return this.duration == 32767;
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147260_a(this);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleEntityEffect(this);
-    }
+   public int func_149426_d() {
+      return this.field_149434_a;
+   }
 
-    public int getEntityId()
-    {
-        return this.entityId;
-    }
+   public byte func_149427_e() {
+      return this.field_149432_b;
+   }
 
-    public byte getEffectId()
-    {
-        return this.effectId;
-    }
+   public byte func_149428_f() {
+      return this.field_149433_c;
+   }
 
-    public byte getAmplifier()
-    {
-        return this.amplifier;
-    }
+   public int func_180755_e() {
+      return this.field_149431_d;
+   }
 
-    public int getDuration()
-    {
-        return this.duration;
-    }
+   public boolean func_179707_f() {
+      return (this.field_186985_e & 2) == 2;
+   }
 
-    public boolean doesShowParticles()
-    {
-        return (this.flags & 2) == 2;
-    }
-
-    public boolean getIsAmbient()
-    {
-        return (this.flags & 1) == 1;
-    }
+   public boolean func_186984_g() {
+      return (this.field_186985_e & 1) == 1;
+   }
 }

@@ -15,427 +15,279 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
 
-public abstract class PathNavigate
-{
-    protected EntityLiving theEntity;
-    protected World worldObj;
-    @Nullable
+public abstract class PathNavigate {
+   protected EntityLiving field_75515_a;
+   protected World field_75513_b;
+   @Nullable
+   protected Path field_75514_c;
+   protected double field_75511_d;
+   private final IAttributeInstance field_75512_e;
+   protected int field_75510_g;
+   private int field_75520_h;
+   private Vec3d field_75521_i = Vec3d.field_186680_a;
+   private Vec3d field_188557_k = Vec3d.field_186680_a;
+   private long field_188558_l;
+   private long field_188559_m;
+   private double field_188560_n;
+   protected float field_188561_o = 0.5F;
+   protected boolean field_188562_p;
+   private long field_188563_q;
+   protected NodeProcessor field_179695_a;
+   private BlockPos field_188564_r;
+   private final PathFinder field_179681_j;
 
-    /** The PathEntity being followed. */
-    protected Path currentPath;
-    protected double speed;
+   public PathNavigate(EntityLiving p_i1671_1_, World p_i1671_2_) {
+      this.field_75515_a = p_i1671_1_;
+      this.field_75513_b = p_i1671_2_;
+      this.field_75512_e = p_i1671_1_.func_110148_a(SharedMonsterAttributes.field_111265_b);
+      this.field_179681_j = this.func_179679_a();
+   }
 
-    /**
-     * The number of blocks (extra) +/- in each axis that get pulled out as cache for the pathfinder's search space
-     */
-    private final IAttributeInstance pathSearchRange;
+   protected abstract PathFinder func_179679_a();
 
-    /** Time, in number of ticks, following the current path */
-    protected int totalTicks;
+   public void func_75489_a(double p_75489_1_) {
+      this.field_75511_d = p_75489_1_;
+   }
 
-    /**
-     * The time when the last position check was done (to detect successful movement)
-     */
-    private int ticksAtLastPos;
+   public float func_111269_d() {
+      return (float)this.field_75512_e.func_111126_e();
+   }
 
-    /**
-     * Coordinates of the entity's position last time a check was done (part of monitoring getting 'stuck')
-     */
-    private Vec3d lastPosCheck = Vec3d.ZERO;
-    private Vec3d timeoutCachedNode = Vec3d.ZERO;
-    private long timeoutTimer;
-    private long lastTimeoutCheck;
-    private double timeoutLimit;
-    protected float maxDistanceToWaypoint = 0.5F;
-    protected boolean tryUpdatePath;
-    private long lastTimeUpdated;
-    protected NodeProcessor nodeProcessor;
-    private BlockPos targetPos;
-    private final PathFinder pathFinder;
+   public boolean func_188553_i() {
+      return this.field_188562_p;
+   }
 
-    public PathNavigate(EntityLiving entitylivingIn, World worldIn)
-    {
-        this.theEntity = entitylivingIn;
-        this.worldObj = worldIn;
-        this.pathSearchRange = entitylivingIn.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-        this.pathFinder = this.getPathFinder();
-    }
+   public void func_188554_j() {
+      if (this.field_75513_b.func_82737_E() - this.field_188563_q > 20L) {
+         if (this.field_188564_r != null) {
+            this.field_75514_c = null;
+            this.field_75514_c = this.func_179680_a(this.field_188564_r);
+            this.field_188563_q = this.field_75513_b.func_82737_E();
+            this.field_188562_p = false;
+         }
+      } else {
+         this.field_188562_p = true;
+      }
 
-    protected abstract PathFinder getPathFinder();
+   }
 
-    /**
-     * Sets the speed
-     */
-    public void setSpeed(double speedIn)
-    {
-        this.speed = speedIn;
-    }
+   @Nullable
+   public final Path func_75488_a(double p_75488_1_, double p_75488_3_, double p_75488_5_) {
+      return this.func_179680_a(new BlockPos(p_75488_1_, p_75488_3_, p_75488_5_));
+   }
 
-    /**
-     * Gets the maximum distance that the path finding will search in.
-     */
-    public float getPathSearchRange()
-    {
-        return (float)this.pathSearchRange.getAttributeValue();
-    }
+   @Nullable
+   public Path func_179680_a(BlockPos p_179680_1_) {
+      if (!this.func_75485_k()) {
+         return null;
+      } else if (this.field_75514_c != null && !this.field_75514_c.func_75879_b() && p_179680_1_.equals(this.field_188564_r)) {
+         return this.field_75514_c;
+      } else {
+         this.field_188564_r = p_179680_1_;
+         float f = this.func_111269_d();
+         this.field_75513_b.field_72984_F.func_76320_a("pathfind");
+         BlockPos blockpos = new BlockPos(this.field_75515_a);
+         int i = (int)(f + 8.0F);
+         ChunkCache chunkcache = new ChunkCache(this.field_75513_b, blockpos.func_177982_a(-i, -i, -i), blockpos.func_177982_a(i, i, i), 0);
+         Path path = this.field_179681_j.func_186336_a(chunkcache, this.field_75515_a, this.field_188564_r, f);
+         this.field_75513_b.field_72984_F.func_76319_b();
+         return path;
+      }
+   }
 
-    /**
-     * Returns true if path can be changed by {@link net.minecraft.pathfinding.PathNavigate#onUpdateNavigation()
-     * onUpdateNavigation()}
-     */
-    public boolean canUpdatePathOnTimeout()
-    {
-        return this.tryUpdatePath;
-    }
-
-    public void updatePath()
-    {
-        if (this.worldObj.getTotalWorldTime() - this.lastTimeUpdated > 20L)
-        {
-            if (this.targetPos != null)
-            {
-                this.currentPath = null;
-                this.currentPath = this.getPathToPos(this.targetPos);
-                this.lastTimeUpdated = this.worldObj.getTotalWorldTime();
-                this.tryUpdatePath = false;
-            }
-        }
-        else
-        {
-            this.tryUpdatePath = true;
-        }
-    }
-
-    @Nullable
-
-    /**
-     * Returns the path to the given coordinates. Args : x, y, z
-     */
-    public final Path getPathToXYZ(double x, double y, double z)
-    {
-        return this.getPathToPos(new BlockPos(x, y, z));
-    }
-
-    @Nullable
-
-    /**
-     * Returns path to given BlockPos
-     */
-    public Path getPathToPos(BlockPos pos)
-    {
-        if (!this.canNavigate())
-        {
-            return null;
-        }
-        else if (this.currentPath != null && !this.currentPath.isFinished() && pos.equals(this.targetPos))
-        {
-            return this.currentPath;
-        }
-        else
-        {
-            this.targetPos = pos;
-            float f = this.getPathSearchRange();
-            this.worldObj.theProfiler.startSection("pathfind");
-            BlockPos blockpos = new BlockPos(this.theEntity);
-            int i = (int)(f + 8.0F);
-            ChunkCache chunkcache = new ChunkCache(this.worldObj, blockpos.add(-i, -i, -i), blockpos.add(i, i, i), 0);
-            Path path = this.pathFinder.findPath(chunkcache, this.theEntity, this.targetPos, f);
-            this.worldObj.theProfiler.endSection();
+   @Nullable
+   public Path func_75494_a(Entity p_75494_1_) {
+      if (!this.func_75485_k()) {
+         return null;
+      } else {
+         BlockPos blockpos = new BlockPos(p_75494_1_);
+         if (this.field_75514_c != null && !this.field_75514_c.func_75879_b() && blockpos.equals(this.field_188564_r)) {
+            return this.field_75514_c;
+         } else {
+            this.field_188564_r = blockpos;
+            float f = this.func_111269_d();
+            this.field_75513_b.field_72984_F.func_76320_a("pathfind");
+            BlockPos blockpos1 = (new BlockPos(this.field_75515_a)).func_177984_a();
+            int i = (int)(f + 16.0F);
+            ChunkCache chunkcache = new ChunkCache(this.field_75513_b, blockpos1.func_177982_a(-i, -i, -i), blockpos1.func_177982_a(i, i, i), 0);
+            Path path = this.field_179681_j.func_186333_a(chunkcache, this.field_75515_a, p_75494_1_, f);
+            this.field_75513_b.field_72984_F.func_76319_b();
             return path;
-        }
-    }
+         }
+      }
+   }
 
-    @Nullable
+   public boolean func_75492_a(double p_75492_1_, double p_75492_3_, double p_75492_5_, double p_75492_7_) {
+      return this.func_75484_a(this.func_75488_a(p_75492_1_, p_75492_3_, p_75492_5_), p_75492_7_);
+   }
 
-    /**
-     * Returns the path to the given EntityLiving. Args : entity
-     */
-    public Path getPathToEntityLiving(Entity entityIn)
-    {
-        if (!this.canNavigate())
-        {
-            return null;
-        }
-        else
-        {
-            BlockPos blockpos = new BlockPos(entityIn);
+   public boolean func_75497_a(Entity p_75497_1_, double p_75497_2_) {
+      Path path = this.func_75494_a(p_75497_1_);
+      return path != null && this.func_75484_a(path, p_75497_2_);
+   }
 
-            if (this.currentPath != null && !this.currentPath.isFinished() && blockpos.equals(this.targetPos))
-            {
-                return this.currentPath;
-            }
-            else
-            {
-                this.targetPos = blockpos;
-                float f = this.getPathSearchRange();
-                this.worldObj.theProfiler.startSection("pathfind");
-                BlockPos blockpos1 = (new BlockPos(this.theEntity)).up();
-                int i = (int)(f + 16.0F);
-                ChunkCache chunkcache = new ChunkCache(this.worldObj, blockpos1.add(-i, -i, -i), blockpos1.add(i, i, i), 0);
-                Path path = this.pathFinder.findPath(chunkcache, this.theEntity, entityIn, f);
-                this.worldObj.theProfiler.endSection();
-                return path;
-            }
-        }
-    }
+   public boolean func_75484_a(@Nullable Path p_75484_1_, double p_75484_2_) {
+      if (p_75484_1_ == null) {
+         this.field_75514_c = null;
+         return false;
+      } else {
+         if (!p_75484_1_.func_75876_a(this.field_75514_c)) {
+            this.field_75514_c = p_75484_1_;
+         }
 
-    /**
-     * Try to find and set a path to XYZ. Returns true if successful. Args : x, y, z, speed
-     */
-    public boolean tryMoveToXYZ(double x, double y, double z, double speedIn)
-    {
-        return this.setPath(this.getPathToXYZ(x, y, z), speedIn);
-    }
-
-    /**
-     * Try to find and set a path to EntityLiving. Returns true if successful. Args : entity, speed
-     */
-    public boolean tryMoveToEntityLiving(Entity entityIn, double speedIn)
-    {
-        Path path = this.getPathToEntityLiving(entityIn);
-        return path != null && this.setPath(path, speedIn);
-    }
-
-    /**
-     * Sets a new path. If it's diferent from the old path. Checks to adjust path for sun avoiding, and stores start
-     * coords. Args : path, speed
-     */
-    public boolean setPath(@Nullable Path pathentityIn, double speedIn)
-    {
-        if (pathentityIn == null)
-        {
-            this.currentPath = null;
+         this.func_75487_m();
+         if (this.field_75514_c.func_75874_d() <= 0) {
             return false;
-        }
-        else
-        {
-            if (!pathentityIn.isSamePath(this.currentPath))
-            {
-                this.currentPath = pathentityIn;
+         } else {
+            this.field_75511_d = p_75484_2_;
+            Vec3d vec3d = this.func_75502_i();
+            this.field_75520_h = this.field_75510_g;
+            this.field_75521_i = vec3d;
+            return true;
+         }
+      }
+   }
+
+   @Nullable
+   public Path func_75505_d() {
+      return this.field_75514_c;
+   }
+
+   public void func_75501_e() {
+      ++this.field_75510_g;
+      if (this.field_188562_p) {
+         this.func_188554_j();
+      }
+
+      if (!this.func_75500_f()) {
+         if (this.func_75485_k()) {
+            this.func_75508_h();
+         } else if (this.field_75514_c != null && this.field_75514_c.func_75873_e() < this.field_75514_c.func_75874_d()) {
+            Vec3d vec3d = this.func_75502_i();
+            Vec3d vec3d1 = this.field_75514_c.func_75881_a(this.field_75515_a, this.field_75514_c.func_75873_e());
+            if (vec3d.field_72448_b > vec3d1.field_72448_b && !this.field_75515_a.field_70122_E && MathHelper.func_76128_c(vec3d.field_72450_a) == MathHelper.func_76128_c(vec3d1.field_72450_a) && MathHelper.func_76128_c(vec3d.field_72449_c) == MathHelper.func_76128_c(vec3d1.field_72449_c)) {
+               this.field_75514_c.func_75872_c(this.field_75514_c.func_75873_e() + 1);
             }
+         }
 
-            this.removeSunnyPath();
+         this.func_192876_m();
+         if (!this.func_75500_f()) {
+            Vec3d vec3d2 = this.field_75514_c.func_75878_a(this.field_75515_a);
+            BlockPos blockpos = (new BlockPos(vec3d2)).func_177977_b();
+            AxisAlignedBB axisalignedbb = this.field_75513_b.func_180495_p(blockpos).func_185900_c(this.field_75513_b, blockpos);
+            vec3d2 = vec3d2.func_178786_a(0.0D, 1.0D - axisalignedbb.field_72337_e, 0.0D);
+            this.field_75515_a.func_70605_aq().func_75642_a(vec3d2.field_72450_a, vec3d2.field_72448_b, vec3d2.field_72449_c, this.field_75511_d);
+         }
+      }
+   }
 
-            if (this.currentPath.getCurrentPathLength() <= 0)
-            {
-                return false;
+   protected void func_192876_m() {
+   }
+
+   protected void func_75508_h() {
+      Vec3d vec3d = this.func_75502_i();
+      int i = this.field_75514_c.func_75874_d();
+
+      for(int j = this.field_75514_c.func_75873_e(); j < this.field_75514_c.func_75874_d(); ++j) {
+         if ((double)this.field_75514_c.func_75877_a(j).field_75837_b != Math.floor(vec3d.field_72448_b)) {
+            i = j;
+            break;
+         }
+      }
+
+      this.field_188561_o = this.field_75515_a.field_70130_N > 0.75F ? this.field_75515_a.field_70130_N / 2.0F : 0.75F - this.field_75515_a.field_70130_N / 2.0F;
+      Vec3d vec3d1 = this.field_75514_c.func_186310_f();
+      if (MathHelper.func_76135_e((float)(this.field_75515_a.field_70165_t - (vec3d1.field_72450_a + 0.5D))) < this.field_188561_o && MathHelper.func_76135_e((float)(this.field_75515_a.field_70161_v - (vec3d1.field_72449_c + 0.5D))) < this.field_188561_o && Math.abs(this.field_75515_a.field_70163_u - vec3d1.field_72448_b) < 1.0D) {
+         this.field_75514_c.func_75872_c(this.field_75514_c.func_75873_e() + 1);
+      }
+
+      int k = MathHelper.func_76123_f(this.field_75515_a.field_70130_N);
+      int l = MathHelper.func_76123_f(this.field_75515_a.field_70131_O);
+      int i1 = k;
+
+      for(int j1 = i - 1; j1 >= this.field_75514_c.func_75873_e(); --j1) {
+         if (this.func_75493_a(vec3d, this.field_75514_c.func_75881_a(this.field_75515_a, j1), k, l, i1)) {
+            this.field_75514_c.func_75872_c(j1);
+            break;
+         }
+      }
+
+      this.func_179677_a(vec3d);
+   }
+
+   protected void func_179677_a(Vec3d p_179677_1_) {
+      if (this.field_75510_g - this.field_75520_h > 100) {
+         if (p_179677_1_.func_72436_e(this.field_75521_i) < 2.25D) {
+            this.func_75499_g();
+         }
+
+         this.field_75520_h = this.field_75510_g;
+         this.field_75521_i = p_179677_1_;
+      }
+
+      if (this.field_75514_c != null && !this.field_75514_c.func_75879_b()) {
+         Vec3d vec3d = this.field_75514_c.func_186310_f();
+         if (vec3d.equals(this.field_188557_k)) {
+            this.field_188558_l += System.currentTimeMillis() - this.field_188559_m;
+         } else {
+            this.field_188557_k = vec3d;
+            double d0 = p_179677_1_.func_72438_d(this.field_188557_k);
+            this.field_188560_n = this.field_75515_a.func_70689_ay() > 0.0F ? d0 / (double)this.field_75515_a.func_70689_ay() * 1000.0D : 0.0D;
+         }
+
+         if (this.field_188560_n > 0.0D && (double)this.field_188558_l > this.field_188560_n * 3.0D) {
+            this.field_188557_k = Vec3d.field_186680_a;
+            this.field_188558_l = 0L;
+            this.field_188560_n = 0.0D;
+            this.func_75499_g();
+         }
+
+         this.field_188559_m = System.currentTimeMillis();
+      }
+
+   }
+
+   public boolean func_75500_f() {
+      return this.field_75514_c == null || this.field_75514_c.func_75879_b();
+   }
+
+   public void func_75499_g() {
+      this.field_75514_c = null;
+   }
+
+   protected abstract Vec3d func_75502_i();
+
+   protected abstract boolean func_75485_k();
+
+   protected boolean func_75506_l() {
+      return this.field_75515_a.func_70090_H() || this.field_75515_a.func_180799_ab();
+   }
+
+   protected void func_75487_m() {
+      if (this.field_75514_c != null) {
+         for(int i = 0; i < this.field_75514_c.func_75874_d(); ++i) {
+            PathPoint pathpoint = this.field_75514_c.func_75877_a(i);
+            PathPoint pathpoint1 = i + 1 < this.field_75514_c.func_75874_d() ? this.field_75514_c.func_75877_a(i + 1) : null;
+            IBlockState iblockstate = this.field_75513_b.func_180495_p(new BlockPos(pathpoint.field_75839_a, pathpoint.field_75837_b, pathpoint.field_75838_c));
+            Block block = iblockstate.func_177230_c();
+            if (block == Blocks.field_150383_bp) {
+               this.field_75514_c.func_186309_a(i, pathpoint.func_186283_a(pathpoint.field_75839_a, pathpoint.field_75837_b + 1, pathpoint.field_75838_c));
+               if (pathpoint1 != null && pathpoint.field_75837_b >= pathpoint1.field_75837_b) {
+                  this.field_75514_c.func_186309_a(i + 1, pathpoint1.func_186283_a(pathpoint1.field_75839_a, pathpoint.field_75837_b + 1, pathpoint1.field_75838_c));
+               }
             }
-            else
-            {
-                this.speed = speedIn;
-                Vec3d vec3d = this.getEntityPosition();
-                this.ticksAtLastPos = this.totalTicks;
-                this.lastPosCheck = vec3d;
-                return true;
-            }
-        }
-    }
+         }
 
-    @Nullable
+      }
+   }
 
-    /**
-     * gets the actively used PathEntity
-     */
-    public Path getPath()
-    {
-        return this.currentPath;
-    }
+   protected abstract boolean func_75493_a(Vec3d var1, Vec3d var2, int var3, int var4, int var5);
 
-    public void onUpdateNavigation()
-    {
-        ++this.totalTicks;
+   public boolean func_188555_b(BlockPos p_188555_1_) {
+      return this.field_75513_b.func_180495_p(p_188555_1_.func_177977_b()).func_185913_b();
+   }
 
-        if (this.tryUpdatePath)
-        {
-            this.updatePath();
-        }
-
-        if (!this.noPath())
-        {
-            if (this.canNavigate())
-            {
-                this.pathFollow();
-            }
-            else if (this.currentPath != null && this.currentPath.getCurrentPathIndex() < this.currentPath.getCurrentPathLength())
-            {
-                Vec3d vec3d = this.getEntityPosition();
-                Vec3d vec3d1 = this.currentPath.getVectorFromIndex(this.theEntity, this.currentPath.getCurrentPathIndex());
-
-                if (vec3d.yCoord > vec3d1.yCoord && !this.theEntity.onGround && MathHelper.floor(vec3d.xCoord) == MathHelper.floor(vec3d1.xCoord) && MathHelper.floor(vec3d.zCoord) == MathHelper.floor(vec3d1.zCoord))
-                {
-                    this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
-                }
-            }
-
-            this.func_192876_m();
-
-            if (!this.noPath())
-            {
-                Vec3d vec3d2 = this.currentPath.getPosition(this.theEntity);
-                BlockPos blockpos = (new BlockPos(vec3d2)).down();
-                AxisAlignedBB axisalignedbb = this.worldObj.getBlockState(blockpos).getBoundingBox(this.worldObj, blockpos);
-                vec3d2 = vec3d2.subtract(0.0D, 1.0D - axisalignedbb.maxY, 0.0D);
-                this.theEntity.getMoveHelper().setMoveTo(vec3d2.xCoord, vec3d2.yCoord, vec3d2.zCoord, this.speed);
-            }
-        }
-    }
-
-    protected void func_192876_m()
-    {
-    }
-
-    protected void pathFollow()
-    {
-        Vec3d vec3d = this.getEntityPosition();
-        int i = this.currentPath.getCurrentPathLength();
-
-        for (int j = this.currentPath.getCurrentPathIndex(); j < this.currentPath.getCurrentPathLength(); ++j)
-        {
-            if ((double)this.currentPath.getPathPointFromIndex(j).yCoord != Math.floor(vec3d.yCoord))
-            {
-                i = j;
-                break;
-            }
-        }
-
-        this.maxDistanceToWaypoint = this.theEntity.width > 0.75F ? this.theEntity.width / 2.0F : 0.75F - this.theEntity.width / 2.0F;
-        Vec3d vec3d1 = this.currentPath.getCurrentPos();
-
-        if (MathHelper.abs((float)(this.theEntity.posX - (vec3d1.xCoord + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(this.theEntity.posZ - (vec3d1.zCoord + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.theEntity.posY - vec3d1.yCoord) < 1.0D)
-        {
-            this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
-        }
-
-        int k = MathHelper.ceil(this.theEntity.width);
-        int l = MathHelper.ceil(this.theEntity.height);
-        int i1 = k;
-
-        for (int j1 = i - 1; j1 >= this.currentPath.getCurrentPathIndex(); --j1)
-        {
-            if (this.isDirectPathBetweenPoints(vec3d, this.currentPath.getVectorFromIndex(this.theEntity, j1), k, l, i1))
-            {
-                this.currentPath.setCurrentPathIndex(j1);
-                break;
-            }
-        }
-
-        this.checkForStuck(vec3d);
-    }
-
-    /**
-     * Checks if entity haven't been moved when last checked and if so, clears current {@link
-     * net.minecraft.pathfinding.PathEntity}
-     */
-    protected void checkForStuck(Vec3d positionVec3)
-    {
-        if (this.totalTicks - this.ticksAtLastPos > 100)
-        {
-            if (positionVec3.squareDistanceTo(this.lastPosCheck) < 2.25D)
-            {
-                this.clearPathEntity();
-            }
-
-            this.ticksAtLastPos = this.totalTicks;
-            this.lastPosCheck = positionVec3;
-        }
-
-        if (this.currentPath != null && !this.currentPath.isFinished())
-        {
-            Vec3d vec3d = this.currentPath.getCurrentPos();
-
-            if (vec3d.equals(this.timeoutCachedNode))
-            {
-                this.timeoutTimer += System.currentTimeMillis() - this.lastTimeoutCheck;
-            }
-            else
-            {
-                this.timeoutCachedNode = vec3d;
-                double d0 = positionVec3.distanceTo(this.timeoutCachedNode);
-                this.timeoutLimit = this.theEntity.getAIMoveSpeed() > 0.0F ? d0 / (double)this.theEntity.getAIMoveSpeed() * 1000.0D : 0.0D;
-            }
-
-            if (this.timeoutLimit > 0.0D && (double)this.timeoutTimer > this.timeoutLimit * 3.0D)
-            {
-                this.timeoutCachedNode = Vec3d.ZERO;
-                this.timeoutTimer = 0L;
-                this.timeoutLimit = 0.0D;
-                this.clearPathEntity();
-            }
-
-            this.lastTimeoutCheck = System.currentTimeMillis();
-        }
-    }
-
-    /**
-     * If null path or reached the end
-     */
-    public boolean noPath()
-    {
-        return this.currentPath == null || this.currentPath.isFinished();
-    }
-
-    /**
-     * sets active PathEntity to null
-     */
-    public void clearPathEntity()
-    {
-        this.currentPath = null;
-    }
-
-    protected abstract Vec3d getEntityPosition();
-
-    /**
-     * If on ground or swimming and can swim
-     */
-    protected abstract boolean canNavigate();
-
-    /**
-     * Returns true if the entity is in water or lava, false otherwise
-     */
-    protected boolean isInLiquid()
-    {
-        return this.theEntity.isInWater() || this.theEntity.isInLava();
-    }
-
-    /**
-     * Trims path data from the end to the first sun covered block
-     */
-    protected void removeSunnyPath()
-    {
-        if (this.currentPath != null)
-        {
-            for (int i = 0; i < this.currentPath.getCurrentPathLength(); ++i)
-            {
-                PathPoint pathpoint = this.currentPath.getPathPointFromIndex(i);
-                PathPoint pathpoint1 = i + 1 < this.currentPath.getCurrentPathLength() ? this.currentPath.getPathPointFromIndex(i + 1) : null;
-                IBlockState iblockstate = this.worldObj.getBlockState(new BlockPos(pathpoint.xCoord, pathpoint.yCoord, pathpoint.zCoord));
-                Block block = iblockstate.getBlock();
-
-                if (block == Blocks.CAULDRON)
-                {
-                    this.currentPath.setPoint(i, pathpoint.cloneMove(pathpoint.xCoord, pathpoint.yCoord + 1, pathpoint.zCoord));
-
-                    if (pathpoint1 != null && pathpoint.yCoord >= pathpoint1.yCoord)
-                    {
-                        this.currentPath.setPoint(i + 1, pathpoint1.cloneMove(pathpoint1.xCoord, pathpoint.yCoord + 1, pathpoint1.zCoord));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks if the specified entity can safely walk to the specified location.
-     */
-    protected abstract boolean isDirectPathBetweenPoints(Vec3d posVec31, Vec3d posVec32, int sizeX, int sizeY, int sizeZ);
-
-    public boolean canEntityStandOnPos(BlockPos pos)
-    {
-        return this.worldObj.getBlockState(pos.down()).isFullBlock();
-    }
-
-    public NodeProcessor getNodeProcessor()
-    {
-        return this.nodeProcessor;
-    }
+   public NodeProcessor func_189566_q() {
+      return this.field_179695_a;
+   }
 }

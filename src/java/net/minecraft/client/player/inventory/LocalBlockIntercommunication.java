@@ -6,48 +6,32 @@ import net.minecraft.inventory.Container;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
 
-public class LocalBlockIntercommunication implements IInteractionObject
-{
-    private final String guiID;
-    private final ITextComponent displayName;
+public class LocalBlockIntercommunication implements IInteractionObject {
+   private final String field_175126_a;
+   private final ITextComponent field_175125_b;
 
-    public LocalBlockIntercommunication(String guiIdIn, ITextComponent displayNameIn)
-    {
-        this.guiID = guiIdIn;
-        this.displayName = displayNameIn;
-    }
+   public LocalBlockIntercommunication(String p_i46277_1_, ITextComponent p_i46277_2_) {
+      this.field_175126_a = p_i46277_1_;
+      this.field_175125_b = p_i46277_2_;
+   }
 
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
-    {
-        throw new UnsupportedOperationException();
-    }
+   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
+      throw new UnsupportedOperationException();
+   }
 
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.displayName.getUnformattedText();
-    }
+   public String func_70005_c_() {
+      return this.field_175125_b.func_150260_c();
+   }
 
-    /**
-     * Returns true if this thing is named
-     */
-    public boolean hasCustomName()
-    {
-        return true;
-    }
+   public boolean func_145818_k_() {
+      return true;
+   }
 
-    public String getGuiID()
-    {
-        return this.guiID;
-    }
+   public String func_174875_k() {
+      return this.field_175126_a;
+   }
 
-    /**
-     * Get the formatted ChatComponent that will be used for the sender's username in chat
-     */
-    public ITextComponent getDisplayName()
-    {
-        return this.displayName;
-    }
+   public ITextComponent func_145748_c_() {
+      return this.field_175125_b;
+   }
 }

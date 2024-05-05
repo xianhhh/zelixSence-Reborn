@@ -7,48 +7,34 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
-public abstract class EntityGolem extends EntityCreature implements IAnimals
-{
-    public EntityGolem(World worldIn)
-    {
-        super(worldIn);
-    }
+public abstract class EntityGolem extends EntityCreature implements IAnimals {
+   public EntityGolem(World p_i1686_1_) {
+      super(p_i1686_1_);
+   }
 
-    public void fall(float distance, float damageMultiplier)
-    {
-    }
+   public void func_180430_e(float p_180430_1_, float p_180430_2_) {
+   }
 
-    @Nullable
-    protected SoundEvent getAmbientSound()
-    {
-        return null;
-    }
+   @Nullable
+   protected SoundEvent func_184639_G() {
+      return null;
+   }
 
-    @Nullable
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return null;
-    }
+   @Nullable
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return null;
+   }
 
-    @Nullable
-    protected SoundEvent getDeathSound()
-    {
-        return null;
-    }
+   @Nullable
+   protected SoundEvent func_184615_bR() {
+      return null;
+   }
 
-    /**
-     * Get number of ticks, at least during which the living entity will be silent.
-     */
-    public int getTalkInterval()
-    {
-        return 120;
-    }
+   public int func_70627_aG() {
+      return 120;
+   }
 
-    /**
-     * Determines if an entity can be despawned, used on idle far away entities
-     */
-    protected boolean canDespawn()
-    {
-        return false;
-    }
+   protected boolean func_70692_ba() {
+      return false;
+   }
 }

@@ -32,262 +32,168 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockHopper extends BlockContainer
-{
-    public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate<EnumFacing>()
-    {
-        public boolean apply(@Nullable EnumFacing p_apply_1_)
-        {
-            return p_apply_1_ != EnumFacing.UP;
-        }
-    });
-    public static final PropertyBool ENABLED = PropertyBool.create("enabled");
-    protected static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D);
-    protected static final AxisAlignedBB SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
-    protected static final AxisAlignedBB NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB WEST_AABB = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
+public class BlockHopper extends BlockContainer {
+   public static final PropertyDirection field_176430_a = PropertyDirection.func_177712_a("facing", new Predicate<EnumFacing>() {
+      public boolean apply(@Nullable EnumFacing p_apply_1_) {
+         return p_apply_1_ != EnumFacing.UP;
+      }
+   });
+   public static final PropertyBool field_176429_b = PropertyBool.func_177716_a("enabled");
+   protected static final AxisAlignedBB field_185571_c = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D);
+   protected static final AxisAlignedBB field_185572_d = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
+   protected static final AxisAlignedBB field_185573_e = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 1.0D, 1.0D);
+   protected static final AxisAlignedBB field_185574_f = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+   protected static final AxisAlignedBB field_185575_g = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
 
-    public BlockHopper()
-    {
-        super(Material.IRON, MapColor.STONE);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.DOWN).withProperty(ENABLED, Boolean.valueOf(true)));
-        this.setCreativeTab(CreativeTabs.REDSTONE);
-    }
+   public BlockHopper() {
+      super(Material.field_151573_f, MapColor.field_151665_m);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176430_a, EnumFacing.DOWN).func_177226_a(field_176429_b, Boolean.valueOf(true)));
+      this.func_149647_a(CreativeTabs.field_78028_d);
+   }
 
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return FULL_BLOCK_AABB;
-    }
+   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
+      return field_185505_j;
+   }
 
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185477_7_)
-    {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, BASE_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, EAST_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, WEST_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, SOUTH_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, NORTH_AABB);
-    }
+   public void func_185477_a(IBlockState p_185477_1_, World p_185477_2_, BlockPos p_185477_3_, AxisAlignedBB p_185477_4_, List<AxisAlignedBB> p_185477_5_, @Nullable Entity p_185477_6_, boolean p_185477_7_) {
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185571_c);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185575_g);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185574_f);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185572_d);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185573_e);
+   }
 
-    /**
-     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
-     * IBlockstate
-     */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
-        EnumFacing enumfacing = facing.getOpposite();
+   public IBlockState func_180642_a(World p_180642_1_, BlockPos p_180642_2_, EnumFacing p_180642_3_, float p_180642_4_, float p_180642_5_, float p_180642_6_, int p_180642_7_, EntityLivingBase p_180642_8_) {
+      EnumFacing enumfacing = p_180642_3_.func_176734_d();
+      if (enumfacing == EnumFacing.UP) {
+         enumfacing = EnumFacing.DOWN;
+      }
 
-        if (enumfacing == EnumFacing.UP)
-        {
-            enumfacing = EnumFacing.DOWN;
-        }
+      return this.func_176223_P().func_177226_a(field_176430_a, enumfacing).func_177226_a(field_176429_b, Boolean.valueOf(true));
+   }
 
-        return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(ENABLED, Boolean.valueOf(true));
-    }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityHopper();
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityHopper();
-    }
+   public void func_180633_a(World p_180633_1_, BlockPos p_180633_2_, IBlockState p_180633_3_, EntityLivingBase p_180633_4_, ItemStack p_180633_5_) {
+      super.func_180633_a(p_180633_1_, p_180633_2_, p_180633_3_, p_180633_4_, p_180633_5_);
+      if (p_180633_5_.func_82837_s()) {
+         TileEntity tileentity = p_180633_1_.func_175625_s(p_180633_2_);
+         if (tileentity instanceof TileEntityHopper) {
+            ((TileEntityHopper)tileentity).func_190575_a(p_180633_5_.func_82833_r());
+         }
+      }
 
-    /**
-     * Called by ItemBlocks after a block is set in the world, to allow post-place logic
-     */
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+   }
 
-        if (stack.hasDisplayName())
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+   public boolean func_185481_k(IBlockState p_185481_1_) {
+      return true;
+   }
 
-            if (tileentity instanceof TileEntityHopper)
-            {
-                ((TileEntityHopper)tileentity).func_190575_a(stack.getDisplayName());
-            }
-        }
-    }
+   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
+      this.func_176427_e(p_176213_1_, p_176213_2_, p_176213_3_);
+   }
 
-    /**
-     * Checks if an IBlockState represents a block that is opaque and a full cube.
-     */
-    public boolean isFullyOpaque(IBlockState state)
-    {
-        return true;
-    }
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      if (p_180639_1_.field_72995_K) {
+         return true;
+      } else {
+         TileEntity tileentity = p_180639_1_.func_175625_s(p_180639_2_);
+         if (tileentity instanceof TileEntityHopper) {
+            p_180639_4_.func_71007_a((TileEntityHopper)tileentity);
+            p_180639_4_.func_71029_a(StatList.field_188084_R);
+         }
 
-    /**
-     * Called after the block is set in the Chunk data, but before the Tile Entity is set
-     */
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        this.updateState(worldIn, pos, state);
-    }
+         return true;
+      }
+   }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        if (worldIn.isRemote)
-        {
-            return true;
-        }
-        else
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      this.func_176427_e(p_189540_2_, p_189540_3_, p_189540_1_);
+   }
 
-            if (tileentity instanceof TileEntityHopper)
-            {
-                playerIn.displayGUIChest((TileEntityHopper)tileentity);
-                playerIn.addStat(StatList.HOPPER_INSPECTED);
-            }
+   private void func_176427_e(World p_176427_1_, BlockPos p_176427_2_, IBlockState p_176427_3_) {
+      boolean flag = !p_176427_1_.func_175640_z(p_176427_2_);
+      if (flag != ((Boolean)p_176427_3_.func_177229_b(field_176429_b)).booleanValue()) {
+         p_176427_1_.func_180501_a(p_176427_2_, p_176427_3_.func_177226_a(field_176429_b, Boolean.valueOf(flag)), 4);
+      }
 
-            return true;
-        }
-    }
+   }
 
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        this.updateState(worldIn, pos, state);
-    }
+   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
+      TileEntity tileentity = p_180663_1_.func_175625_s(p_180663_2_);
+      if (tileentity instanceof TileEntityHopper) {
+         InventoryHelper.func_180175_a(p_180663_1_, p_180663_2_, (TileEntityHopper)tileentity);
+         p_180663_1_.func_175666_e(p_180663_2_, this);
+      }
 
-    private void updateState(World worldIn, BlockPos pos, IBlockState state)
-    {
-        boolean flag = !worldIn.isBlockPowered(pos);
+      super.func_180663_b(p_180663_1_, p_180663_2_, p_180663_3_);
+   }
 
-        if (flag != ((Boolean)state.getValue(ENABLED)).booleanValue())
-        {
-            worldIn.setBlockState(pos, state.withProperty(ENABLED, Boolean.valueOf(flag)), 4);
-        }
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.MODEL;
+   }
 
-    /**
-     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
-     */
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-        if (tileentity instanceof TileEntityHopper)
-        {
-            InventoryHelper.dropInventoryItems(worldIn, pos, (TileEntityHopper)tileentity);
-            worldIn.updateComparatorOutputLevel(pos, this);
-        }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-        super.breakBlock(worldIn, pos, state);
-    }
+   public boolean func_176225_a(IBlockState p_176225_1_, IBlockAccess p_176225_2_, BlockPos p_176225_3_, EnumFacing p_176225_4_) {
+      return true;
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
+   public static EnumFacing func_176428_b(int p_176428_0_) {
+      return EnumFacing.func_82600_a(p_176428_0_ & 7);
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public static boolean func_149917_c(int p_149917_0_) {
+      return (p_149917_0_ & 8) != 8;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149740_M(IBlockState p_149740_1_) {
+      return true;
+   }
 
-    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        return true;
-    }
+   public int func_180641_l(IBlockState p_180641_1_, World p_180641_2_, BlockPos p_180641_3_) {
+      return Container.func_178144_a(p_180641_2_.func_175625_s(p_180641_3_));
+   }
 
-    public static EnumFacing getFacing(int meta)
-    {
-        return EnumFacing.getFront(meta & 7);
-    }
+   public BlockRenderLayer func_180664_k() {
+      return BlockRenderLayer.CUTOUT_MIPPED;
+   }
 
-    /**
-     * Get's the hopper's active status from the 8-bit of the metadata. Note that the metadata stores whether the block
-     * is powered, so this returns true when that bit is 0.
-     */
-    public static boolean isEnabled(int meta)
-    {
-        return (meta & 8) != 8;
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176430_a, func_176428_b(p_176203_1_)).func_177226_a(field_176429_b, Boolean.valueOf(func_149917_c(p_176203_1_)));
+   }
 
-    public boolean hasComparatorInputOverride(IBlockState state)
-    {
-        return true;
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      int i = 0;
+      i = i | ((EnumFacing)p_176201_1_.func_177229_b(field_176430_a)).func_176745_a();
+      if (!((Boolean)p_176201_1_.func_177229_b(field_176429_b)).booleanValue()) {
+         i |= 8;
+      }
 
-    public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos)
-    {
-        return Container.calcRedstone(worldIn.getTileEntity(pos));
-    }
+      return i;
+   }
 
-    public BlockRenderLayer getBlockLayer()
-    {
-        return BlockRenderLayer.CUTOUT_MIPPED;
-    }
+   public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
+      return p_185499_1_.func_177226_a(field_176430_a, p_185499_2_.func_185831_a((EnumFacing)p_185499_1_.func_177229_b(field_176430_a)));
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(FACING, getFacing(meta)).withProperty(ENABLED, Boolean.valueOf(isEnabled(meta)));
-    }
+   public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
+      return p_185471_1_.func_185907_a(p_185471_2_.func_185800_a((EnumFacing)p_185471_1_.func_177229_b(field_176430_a)));
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        int i = 0;
-        i = i | ((EnumFacing)state.getValue(FACING)).getIndex();
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176430_a, field_176429_b});
+   }
 
-        if (!((Boolean)state.getValue(ENABLED)).booleanValue())
-        {
-            i |= 8;
-        }
-
-        return i;
-    }
-
-    /**
-     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
-     * blockstate.
-     */
-    public IBlockState withRotation(IBlockState state, Rotation rot)
-    {
-        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
-    }
-
-    /**
-     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
-     * blockstate.
-     */
-    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
-    {
-        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
-    }
-
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {FACING, ENABLED});
-    }
-
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        return p_193383_4_ == EnumFacing.UP ? BlockFaceShape.BOWL : BlockFaceShape.UNDEFINED;
-    }
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      return p_193383_4_ == EnumFacing.UP ? BlockFaceShape.BOWL : BlockFaceShape.UNDEFINED;
+   }
 }

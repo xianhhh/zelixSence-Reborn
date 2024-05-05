@@ -10,63 +10,45 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 
-public class SPacketStatistics implements Packet<INetHandlerPlayClient>
-{
-    private Map<StatBase, Integer> statisticMap;
+public class SPacketStatistics implements Packet<INetHandlerPlayClient> {
+   private Map<StatBase, Integer> field_148976_a;
 
-    public SPacketStatistics()
-    {
-    }
+   public SPacketStatistics() {
+   }
 
-    public SPacketStatistics(Map<StatBase, Integer> statisticMapIn)
-    {
-        this.statisticMap = statisticMapIn;
-    }
+   public SPacketStatistics(Map<StatBase, Integer> p_i46969_1_) {
+      this.field_148976_a = p_i46969_1_;
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleStatistics(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147293_a(this);
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        int i = buf.readVarIntFromBuffer();
-        this.statisticMap = Maps.<StatBase, Integer>newHashMap();
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      int i = p_148837_1_.func_150792_a();
+      this.field_148976_a = Maps.<StatBase, Integer>newHashMap();
 
-        for (int j = 0; j < i; ++j)
-        {
-            StatBase statbase = StatList.getOneShotStat(buf.readStringFromBuffer(32767));
-            int k = buf.readVarIntFromBuffer();
+      for(int j = 0; j < i; ++j) {
+         StatBase statbase = StatList.func_151177_a(p_148837_1_.func_150789_c(32767));
+         int k = p_148837_1_.func_150792_a();
+         if (statbase != null) {
+            this.field_148976_a.put(statbase, Integer.valueOf(k));
+         }
+      }
 
-            if (statbase != null)
-            {
-                this.statisticMap.put(statbase, Integer.valueOf(k));
-            }
-        }
-    }
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.statisticMap.size());
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_148976_a.size());
 
-        for (Entry<StatBase, Integer> entry : this.statisticMap.entrySet())
-        {
-            buf.writeString((entry.getKey()).statId);
-            buf.writeVarIntToBuffer(((Integer)entry.getValue()).intValue());
-        }
-    }
+      for(Entry<StatBase, Integer> entry : this.field_148976_a.entrySet()) {
+         p_148840_1_.func_180714_a((entry.getKey()).field_75975_e);
+         p_148840_1_.func_150787_b(((Integer)entry.getValue()).intValue());
+      }
 
-    public Map<StatBase, Integer> getStatisticMap()
-    {
-        return this.statisticMap;
-    }
+   }
+
+   public Map<StatBase, Integer> func_148974_c() {
+      return this.field_148976_a;
+   }
 }

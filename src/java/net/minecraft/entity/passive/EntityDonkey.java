@@ -10,65 +10,48 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityDonkey extends AbstractChestHorse
-{
-    public EntityDonkey(World p_i47298_1_)
-    {
-        super(p_i47298_1_);
-    }
+public class EntityDonkey extends AbstractChestHorse {
+   public EntityDonkey(World p_i47298_1_) {
+      super(p_i47298_1_);
+   }
 
-    public static void func_190699_b(DataFixer p_190699_0_)
-    {
-        AbstractChestHorse.func_190694_b(p_190699_0_, EntityDonkey.class);
-    }
+   public static void func_190699_b(DataFixer p_190699_0_) {
+      AbstractChestHorse.func_190694_b(p_190699_0_, EntityDonkey.class);
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.field_191190_H;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_191190_H;
+   }
 
-    protected SoundEvent getAmbientSound()
-    {
-        super.getAmbientSound();
-        return SoundEvents.ENTITY_DONKEY_AMBIENT;
-    }
+   protected SoundEvent func_184639_G() {
+      super.func_184639_G();
+      return SoundEvents.field_187580_av;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        super.getDeathSound();
-        return SoundEvents.ENTITY_DONKEY_DEATH;
-    }
+   protected SoundEvent func_184615_bR() {
+      super.func_184615_bR();
+      return SoundEvents.field_187586_ay;
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        super.getHurtSound(p_184601_1_);
-        return SoundEvents.ENTITY_DONKEY_HURT;
-    }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      super.func_184601_bQ(p_184601_1_);
+      return SoundEvents.field_187588_az;
+   }
 
-    /**
-     * Returns true if the mob is currently able to mate with the specified mob.
-     */
-    public boolean canMateWith(EntityAnimal otherAnimal)
-    {
-        if (otherAnimal == this)
-        {
-            return false;
-        }
-        else if (!(otherAnimal instanceof EntityDonkey) && !(otherAnimal instanceof EntityHorse))
-        {
-            return false;
-        }
-        else
-        {
-            return this.canMate() && ((AbstractHorse)otherAnimal).canMate();
-        }
-    }
+   public boolean func_70878_b(EntityAnimal p_70878_1_) {
+      if (p_70878_1_ == this) {
+         return false;
+      } else if (!(p_70878_1_ instanceof EntityDonkey) && !(p_70878_1_ instanceof EntityHorse)) {
+         return false;
+      } else {
+         return this.func_110200_cJ() && ((AbstractHorse)p_70878_1_).func_110200_cJ();
+      }
+   }
 
-    public EntityAgeable createChild(EntityAgeable ageable)
-    {
-        AbstractHorse abstracthorse = (AbstractHorse)(ageable instanceof EntityHorse ? new EntityMule(this.world) : new EntityDonkey(this.world));
-        this.func_190681_a(ageable, abstracthorse);
-        return abstracthorse;
-    }
+   public EntityAgeable func_90011_a(EntityAgeable p_90011_1_) {
+      AbstractHorse abstracthorse = (AbstractHorse)(p_90011_1_ instanceof EntityHorse ? new EntityMule(this.field_70170_p) : new EntityDonkey(this.field_70170_p));
+      this.func_190681_a(p_90011_1_, abstracthorse);
+      return abstracthorse;
+   }
 }

@@ -3,87 +3,55 @@ package net.minecraft.util;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Validate;
 
-public class BitArray
-{
-    /** The long array that is used to store the data for this BitArray. */
-    private final long[] longArray;
+public class BitArray {
+   private final long[] field_188145_a;
+   private final int field_188146_b;
+   private final long field_188147_c;
+   private final int field_188148_d;
 
-    /** Number of bits a single entry takes up */
-    private final int bitsPerEntry;
+   public BitArray(int p_i46832_1_, int p_i46832_2_) {
+      Validate.inclusiveBetween(1L, 32L, (long)p_i46832_1_);
+      this.field_188148_d = p_i46832_2_;
+      this.field_188146_b = p_i46832_1_;
+      this.field_188147_c = (1L << p_i46832_1_) - 1L;
+      this.field_188145_a = new long[MathHelper.func_154354_b(p_i46832_2_ * p_i46832_1_, 64) / 64];
+   }
 
-    /**
-     * The maximum value for a single entry. This also asks as a bitmask for a single entry.
-     * For instance, if bitsPerEntry were 5, this value would be 31 (ie, {@code 0b00011111}).
-     */
-    private final long maxEntryValue;
+   public void func_188141_a(int p_188141_1_, int p_188141_2_) {
+      Validate.inclusiveBetween(0L, (long)(this.field_188148_d - 1), (long)p_188141_1_);
+      Validate.inclusiveBetween(0L, this.field_188147_c, (long)p_188141_2_);
+      int i = p_188141_1_ * this.field_188146_b;
+      int j = i / 64;
+      int k = ((p_188141_1_ + 1) * this.field_188146_b - 1) / 64;
+      int l = i % 64;
+      this.field_188145_a[j] = this.field_188145_a[j] & ~(this.field_188147_c << l) | ((long)p_188141_2_ & this.field_188147_c) << l;
+      if (j != k) {
+         int i1 = 64 - l;
+         int j1 = this.field_188146_b - i1;
+         this.field_188145_a[k] = this.field_188145_a[k] >>> j1 << j1 | ((long)p_188141_2_ & this.field_188147_c) >> i1;
+      }
 
-    /**
-     * Number of entries in this array (<b>not</b> the length of the long array that internally backs this array)
-     */
-    private final int arraySize;
+   }
 
-    public BitArray(int bitsPerEntryIn, int arraySizeIn)
-    {
-        Validate.inclusiveBetween(1L, 32L, (long)bitsPerEntryIn);
-        this.arraySize = arraySizeIn;
-        this.bitsPerEntry = bitsPerEntryIn;
-        this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;
-        this.longArray = new long[MathHelper.roundUp(arraySizeIn * bitsPerEntryIn, 64) / 64];
-    }
+   public int func_188142_a(int p_188142_1_) {
+      Validate.inclusiveBetween(0L, (long)(this.field_188148_d - 1), (long)p_188142_1_);
+      int i = p_188142_1_ * this.field_188146_b;
+      int j = i / 64;
+      int k = ((p_188142_1_ + 1) * this.field_188146_b - 1) / 64;
+      int l = i % 64;
+      if (j == k) {
+         return (int)(this.field_188145_a[j] >>> l & this.field_188147_c);
+      } else {
+         int i1 = 64 - l;
+         return (int)((this.field_188145_a[j] >>> l | this.field_188145_a[k] << i1) & this.field_188147_c);
+      }
+   }
 
-    /**
-     * Sets the entry at the given location to the given value
-     */
-    public void setAt(int index, int value)
-    {
-        Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
-        Validate.inclusiveBetween(0L, this.maxEntryValue, (long)value);
-        int i = index * this.bitsPerEntry;
-        int j = i / 64;
-        int k = ((index + 1) * this.bitsPerEntry - 1) / 64;
-        int l = i % 64;
-        this.longArray[j] = this.longArray[j] & ~(this.maxEntryValue << l) | ((long)value & this.maxEntryValue) << l;
+   public long[] func_188143_a() {
+      return this.field_188145_a;
+   }
 
-        if (j != k)
-        {
-            int i1 = 64 - l;
-            int j1 = this.bitsPerEntry - i1;
-            this.longArray[k] = this.longArray[k] >>> j1 << j1 | ((long)value & this.maxEntryValue) >> i1;
-        }
-    }
-
-    /**
-     * Gets the entry at the given index
-     */
-    public int getAt(int index)
-    {
-        Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
-        int i = index * this.bitsPerEntry;
-        int j = i / 64;
-        int k = ((index + 1) * this.bitsPerEntry - 1) / 64;
-        int l = i % 64;
-
-        if (j == k)
-        {
-            return (int)(this.longArray[j] >>> l & this.maxEntryValue);
-        }
-        else
-        {
-            int i1 = 64 - l;
-            return (int)((this.longArray[j] >>> l | this.longArray[k] << i1) & this.maxEntryValue);
-        }
-    }
-
-    /**
-     * Gets the long array that is used to store the data in this BitArray. This is useful for sending packet data.
-     */
-    public long[] getBackingLongArray()
-    {
-        return this.longArray;
-    }
-
-    public int size()
-    {
-        return this.arraySize;
-    }
+   public int func_188144_b() {
+      return this.field_188148_d;
+   }
 }

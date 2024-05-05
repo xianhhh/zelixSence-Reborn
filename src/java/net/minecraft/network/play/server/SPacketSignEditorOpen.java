@@ -6,45 +6,29 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 
-public class SPacketSignEditorOpen implements Packet<INetHandlerPlayClient>
-{
-    private BlockPos signPosition;
+public class SPacketSignEditorOpen implements Packet<INetHandlerPlayClient> {
+   private BlockPos field_179778_a;
 
-    public SPacketSignEditorOpen()
-    {
-    }
+   public SPacketSignEditorOpen() {
+   }
 
-    public SPacketSignEditorOpen(BlockPos posIn)
-    {
-        this.signPosition = posIn;
-    }
+   public SPacketSignEditorOpen(BlockPos p_i46934_1_) {
+      this.field_179778_a = p_i46934_1_;
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleSignEditorOpen(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147268_a(this);
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.signPosition = buf.readBlockPos();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_179778_a = p_148837_1_.func_179259_c();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeBlockPos(this.signPosition);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_179255_a(this.field_179778_a);
+   }
 
-    public BlockPos getSignPosition()
-    {
-        return this.signPosition;
-    }
+   public BlockPos func_179777_a() {
+      return this.field_179778_a;
+   }
 }

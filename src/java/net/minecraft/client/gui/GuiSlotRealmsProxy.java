@@ -3,77 +3,55 @@ package net.minecraft.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.realms.RealmsScrolledSelectionList;
 
-public class GuiSlotRealmsProxy extends GuiSlot
-{
-    private final RealmsScrolledSelectionList selectionList;
+public class GuiSlotRealmsProxy extends GuiSlot {
+   private final RealmsScrolledSelectionList field_154340_k;
 
-    public GuiSlotRealmsProxy(RealmsScrolledSelectionList selectionListIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
-    {
-        super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
-        this.selectionList = selectionListIn;
-    }
+   public GuiSlotRealmsProxy(RealmsScrolledSelectionList p_i1085_1_, int p_i1085_2_, int p_i1085_3_, int p_i1085_4_, int p_i1085_5_, int p_i1085_6_) {
+      super(Minecraft.func_71410_x(), p_i1085_2_, p_i1085_3_, p_i1085_4_, p_i1085_5_, p_i1085_6_);
+      this.field_154340_k = p_i1085_1_;
+   }
 
-    protected int getSize()
-    {
-        return this.selectionList.getItemCount();
-    }
+   protected int func_148127_b() {
+      return this.field_154340_k.getItemCount();
+   }
 
-    /**
-     * The element in the slot that was clicked, boolean for whether it was double clicked or not
-     */
-    protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
-    {
-        this.selectionList.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
-    }
+   protected void func_148144_a(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_) {
+      this.field_154340_k.selectItem(p_148144_1_, p_148144_2_, p_148144_3_, p_148144_4_);
+   }
 
-    /**
-     * Returns true if the element passed in is currently selected
-     */
-    protected boolean isSelected(int slotIndex)
-    {
-        return this.selectionList.isSelectedItem(slotIndex);
-    }
+   protected boolean func_148131_a(int p_148131_1_) {
+      return this.field_154340_k.isSelectedItem(p_148131_1_);
+   }
 
-    protected void drawBackground()
-    {
-        this.selectionList.renderBackground();
-    }
+   protected void func_148123_a() {
+      this.field_154340_k.renderBackground();
+   }
 
-    protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
-    {
-        this.selectionList.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
-    }
+   protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_) {
+      this.field_154340_k.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
+   }
 
-    public int getWidth()
-    {
-        return this.width;
-    }
+   public int func_154338_k() {
+      return this.field_148155_a;
+   }
 
-    public int getMouseY()
-    {
-        return this.mouseY;
-    }
+   public int func_154339_l() {
+      return this.field_148162_h;
+   }
 
-    public int getMouseX()
-    {
-        return this.mouseX;
-    }
+   public int func_154337_m() {
+      return this.field_148150_g;
+   }
 
-    /**
-     * Return the height of the content being scrolled
-     */
-    protected int getContentHeight()
-    {
-        return this.selectionList.getMaxPosition();
-    }
+   protected int func_148138_e() {
+      return this.field_154340_k.getMaxPosition();
+   }
 
-    protected int getScrollBarX()
-    {
-        return this.selectionList.getScrollbarPosition();
-    }
+   protected int func_148137_d() {
+      return this.field_154340_k.getScrollbarPosition();
+   }
 
-    public void handleMouseInput()
-    {
-        super.handleMouseInput();
-    }
+   public void func_178039_p() {
+      super.func_178039_p();
+   }
 }

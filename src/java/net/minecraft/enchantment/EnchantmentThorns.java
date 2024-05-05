@@ -9,87 +9,54 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 
-public class EnchantmentThorns extends Enchantment
-{
-    public EnchantmentThorns(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
-    {
-        super(rarityIn, EnumEnchantmentType.ARMOR_CHEST, slots);
-        this.setName("thorns");
-    }
+public class EnchantmentThorns extends Enchantment {
+   public EnchantmentThorns(Enchantment.Rarity p_i46722_1_, EntityEquipmentSlot... p_i46722_2_) {
+      super(p_i46722_1_, EnumEnchantmentType.ARMOR_CHEST, p_i46722_2_);
+      this.func_77322_b("thorns");
+   }
 
-    /**
-     * Returns the minimal value of enchantability needed on the enchantment level passed.
-     */
-    public int getMinEnchantability(int enchantmentLevel)
-    {
-        return 10 + 20 * (enchantmentLevel - 1);
-    }
+   public int func_77321_a(int p_77321_1_) {
+      return 10 + 20 * (p_77321_1_ - 1);
+   }
 
-    /**
-     * Returns the maximum value of enchantability nedded on the enchantment level passed.
-     */
-    public int getMaxEnchantability(int enchantmentLevel)
-    {
-        return super.getMinEnchantability(enchantmentLevel) + 50;
-    }
+   public int func_77317_b(int p_77317_1_) {
+      return super.func_77321_a(p_77317_1_) + 50;
+   }
 
-    /**
-     * Returns the maximum level that the enchantment can have.
-     */
-    public int getMaxLevel()
-    {
-        return 3;
-    }
+   public int func_77325_b() {
+      return 3;
+   }
 
-    /**
-     * Determines if this enchantment can be applied to a specific ItemStack.
-     */
-    public boolean canApply(ItemStack stack)
-    {
-        return stack.getItem() instanceof ItemArmor ? true : super.canApply(stack);
-    }
+   public boolean func_92089_a(ItemStack p_92089_1_) {
+      return p_92089_1_.func_77973_b() instanceof ItemArmor ? true : super.func_92089_a(p_92089_1_);
+   }
 
-    /**
-     * Whenever an entity that has this enchantment on one of its associated items is damaged this method will be
-     * called.
-     */
-    public void onUserHurt(EntityLivingBase user, Entity attacker, int level)
-    {
-        Random random = user.getRNG();
-        ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.THORNS, user);
+   public void func_151367_b(EntityLivingBase p_151367_1_, Entity p_151367_2_, int p_151367_3_) {
+      Random random = p_151367_1_.func_70681_au();
+      ItemStack itemstack = EnchantmentHelper.func_92099_a(Enchantments.field_92091_k, p_151367_1_);
+      if (func_92094_a(p_151367_3_, random)) {
+         if (p_151367_2_ != null) {
+            p_151367_2_.func_70097_a(DamageSource.func_92087_a(p_151367_1_), (float)func_92095_b(p_151367_3_, random));
+         }
 
-        if (shouldHit(level, random))
-        {
-            if (attacker != null)
-            {
-                attacker.attackEntityFrom(DamageSource.causeThornsDamage(user), (float)getDamage(level, random));
-            }
+         if (!itemstack.func_190926_b()) {
+            itemstack.func_77972_a(3, p_151367_1_);
+         }
+      } else if (!itemstack.func_190926_b()) {
+         itemstack.func_77972_a(1, p_151367_1_);
+      }
 
-            if (!itemstack.func_190926_b())
-            {
-                itemstack.damageItem(3, user);
-            }
-        }
-        else if (!itemstack.func_190926_b())
-        {
-            itemstack.damageItem(1, user);
-        }
-    }
+   }
 
-    public static boolean shouldHit(int level, Random rnd)
-    {
-        if (level <= 0)
-        {
-            return false;
-        }
-        else
-        {
-            return rnd.nextFloat() < 0.15F * (float)level;
-        }
-    }
+   public static boolean func_92094_a(int p_92094_0_, Random p_92094_1_) {
+      if (p_92094_0_ <= 0) {
+         return false;
+      } else {
+         return p_92094_1_.nextFloat() < 0.15F * (float)p_92094_0_;
+      }
+   }
 
-    public static int getDamage(int level, Random rnd)
-    {
-        return level > 10 ? level - 10 : 1 + rnd.nextInt(4);
-    }
+   public static int func_92095_b(int p_92095_0_, Random p_92095_1_) {
+      return p_92095_0_ > 10 ? p_92095_0_ - 10 : 1 + p_92095_1_.nextInt(4);
+   }
 }

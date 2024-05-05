@@ -19,116 +19,77 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockNote extends BlockContainer
-{
-    private static final List<SoundEvent> INSTRUMENTS = Lists.newArrayList(SoundEvents.BLOCK_NOTE_HARP, SoundEvents.BLOCK_NOTE_BASEDRUM, SoundEvents.BLOCK_NOTE_SNARE, SoundEvents.BLOCK_NOTE_HAT, SoundEvents.BLOCK_NOTE_BASS, SoundEvents.field_193809_ey, SoundEvents.field_193807_ew, SoundEvents.field_193810_ez, SoundEvents.field_193808_ex, SoundEvents.field_193785_eE);
+public class BlockNote extends BlockContainer {
+   private static final List<SoundEvent> field_176434_a = Lists.newArrayList(SoundEvents.field_187682_dG, SoundEvents.field_187676_dE, SoundEvents.field_187688_dI, SoundEvents.field_187685_dH, SoundEvents.field_187679_dF, SoundEvents.field_193809_ey, SoundEvents.field_193807_ew, SoundEvents.field_193810_ez, SoundEvents.field_193808_ex, SoundEvents.field_193785_eE);
 
-    public BlockNote()
-    {
-        super(Material.WOOD);
-        this.setCreativeTab(CreativeTabs.REDSTONE);
-    }
+   public BlockNote() {
+      super(Material.field_151575_d);
+      this.func_149647_a(CreativeTabs.field_78028_d);
+   }
 
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        boolean flag = worldIn.isBlockPowered(pos);
-        TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      boolean flag = p_189540_2_.func_175640_z(p_189540_3_);
+      TileEntity tileentity = p_189540_2_.func_175625_s(p_189540_3_);
+      if (tileentity instanceof TileEntityNote) {
+         TileEntityNote tileentitynote = (TileEntityNote)tileentity;
+         if (tileentitynote.field_145880_i != flag) {
+            if (flag) {
+               tileentitynote.func_175108_a(p_189540_2_, p_189540_3_);
+            }
 
-        if (tileentity instanceof TileEntityNote)
-        {
+            tileentitynote.field_145880_i = flag;
+         }
+      }
+
+   }
+
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      if (p_180639_1_.field_72995_K) {
+         return true;
+      } else {
+         TileEntity tileentity = p_180639_1_.func_175625_s(p_180639_2_);
+         if (tileentity instanceof TileEntityNote) {
             TileEntityNote tileentitynote = (TileEntityNote)tileentity;
+            tileentitynote.func_145877_a();
+            tileentitynote.func_175108_a(p_180639_1_, p_180639_2_);
+            p_180639_4_.func_71029_a(StatList.field_188087_U);
+         }
 
-            if (tileentitynote.previousRedstoneState != flag)
-            {
-                if (flag)
-                {
-                    tileentitynote.triggerNote(worldIn, pos);
-                }
+         return true;
+      }
+   }
 
-                tileentitynote.previousRedstoneState = flag;
-            }
-        }
-    }
+   public void func_180649_a(World p_180649_1_, BlockPos p_180649_2_, EntityPlayer p_180649_3_) {
+      if (!p_180649_1_.field_72995_K) {
+         TileEntity tileentity = p_180649_1_.func_175625_s(p_180649_2_);
+         if (tileentity instanceof TileEntityNote) {
+            ((TileEntityNote)tileentity).func_175108_a(p_180649_1_, p_180649_2_);
+            p_180649_3_.func_71029_a(StatList.field_188086_T);
+         }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        if (worldIn.isRemote)
-        {
-            return true;
-        }
-        else
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+      }
+   }
 
-            if (tileentity instanceof TileEntityNote)
-            {
-                TileEntityNote tileentitynote = (TileEntityNote)tileentity;
-                tileentitynote.changePitch();
-                tileentitynote.triggerNote(worldIn, pos);
-                playerIn.addStat(StatList.NOTEBLOCK_TUNED);
-            }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityNote();
+   }
 
-            return true;
-        }
-    }
+   private SoundEvent func_185576_e(int p_185576_1_) {
+      if (p_185576_1_ < 0 || p_185576_1_ >= field_176434_a.size()) {
+         p_185576_1_ = 0;
+      }
 
-    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
-    {
-        if (!worldIn.isRemote)
-        {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+      return field_176434_a.get(p_185576_1_);
+   }
 
-            if (tileentity instanceof TileEntityNote)
-            {
-                ((TileEntityNote)tileentity).triggerNote(worldIn, pos);
-                playerIn.addStat(StatList.NOTEBLOCK_PLAYED);
-            }
-        }
-    }
+   public boolean func_189539_a(IBlockState p_189539_1_, World p_189539_2_, BlockPos p_189539_3_, int p_189539_4_, int p_189539_5_) {
+      float f = (float)Math.pow(2.0D, (double)(p_189539_5_ - 12) / 12.0D);
+      p_189539_2_.func_184133_a((EntityPlayer)null, p_189539_3_, this.func_185576_e(p_189539_4_), SoundCategory.RECORDS, 3.0F, f);
+      p_189539_2_.func_175688_a(EnumParticleTypes.NOTE, (double)p_189539_3_.func_177958_n() + 0.5D, (double)p_189539_3_.func_177956_o() + 1.2D, (double)p_189539_3_.func_177952_p() + 0.5D, (double)p_189539_5_ / 24.0D, 0.0D, 0.0D);
+      return true;
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityNote();
-    }
-
-    private SoundEvent getInstrument(int p_185576_1_)
-    {
-        if (p_185576_1_ < 0 || p_185576_1_ >= INSTRUMENTS.size())
-        {
-            p_185576_1_ = 0;
-        }
-
-        return INSTRUMENTS.get(p_185576_1_);
-    }
-
-    /**
-     * Called on both Client and Server when World#addBlockEvent is called. On the Server, this may perform additional
-     * changes to the world, like pistons replacing the block with an extended base. On the client, the update may
-     * involve replacing tile entities, playing sounds, or performing other visual actions to reflect the server side
-     * changes.
-     */
-    public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
-    {
-        float f = (float)Math.pow(2.0D, (double)(param - 12) / 12.0D);
-        worldIn.playSound((EntityPlayer)null, pos, this.getInstrument(id), SoundCategory.RECORDS, 3.0F, f);
-        worldIn.spawnParticle(EnumParticleTypes.NOTE, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.2D, (double)pos.getZ() + 0.5D, (double)param / 24.0D, 0.0D, 0.0D);
-        return true;
-    }
-
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.MODEL;
+   }
 }

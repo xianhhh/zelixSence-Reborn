@@ -10,99 +10,77 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 
-public class SPacketMultiBlockChange implements Packet<INetHandlerPlayClient>
-{
-    private ChunkPos chunkPos;
-    private SPacketMultiBlockChange.BlockUpdateData[] changedBlocks;
+public class SPacketMultiBlockChange implements Packet<INetHandlerPlayClient> {
+   private ChunkPos field_148925_b;
+   private SPacketMultiBlockChange.BlockUpdateData[] field_179845_b;
 
-    public SPacketMultiBlockChange()
-    {
-    }
+   public SPacketMultiBlockChange() {
+   }
 
-    public SPacketMultiBlockChange(int p_i46959_1_, short[] p_i46959_2_, Chunk p_i46959_3_)
-    {
-        this.chunkPos = new ChunkPos(p_i46959_3_.xPosition, p_i46959_3_.zPosition);
-        this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[p_i46959_1_];
+   public SPacketMultiBlockChange(int p_i46959_1_, short[] p_i46959_2_, Chunk p_i46959_3_) {
+      this.field_148925_b = new ChunkPos(p_i46959_3_.field_76635_g, p_i46959_3_.field_76647_h);
+      this.field_179845_b = new SPacketMultiBlockChange.BlockUpdateData[p_i46959_1_];
 
-        for (int i = 0; i < this.changedBlocks.length; ++i)
-        {
-            this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(p_i46959_2_[i], p_i46959_3_);
-        }
-    }
+      for(int i = 0; i < this.field_179845_b.length; ++i) {
+         this.field_179845_b[i] = new SPacketMultiBlockChange.BlockUpdateData(p_i46959_2_[i], p_i46959_3_);
+      }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.chunkPos = new ChunkPos(buf.readInt(), buf.readInt());
-        this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[buf.readVarIntFromBuffer()];
+   }
 
-        for (int i = 0; i < this.changedBlocks.length; ++i)
-        {
-            this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(buf.readShort(), Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer()));
-        }
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_148925_b = new ChunkPos(p_148837_1_.readInt(), p_148837_1_.readInt());
+      this.field_179845_b = new SPacketMultiBlockChange.BlockUpdateData[p_148837_1_.func_150792_a()];
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeInt(this.chunkPos.chunkXPos);
-        buf.writeInt(this.chunkPos.chunkZPos);
-        buf.writeVarIntToBuffer(this.changedBlocks.length);
+      for(int i = 0; i < this.field_179845_b.length; ++i) {
+         this.field_179845_b[i] = new SPacketMultiBlockChange.BlockUpdateData(p_148837_1_.readShort(), Block.field_176229_d.func_148745_a(p_148837_1_.func_150792_a()));
+      }
 
-        for (SPacketMultiBlockChange.BlockUpdateData spacketmultiblockchange$blockupdatedata : this.changedBlocks)
-        {
-            buf.writeShort(spacketmultiblockchange$blockupdatedata.getOffset());
-            buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(spacketmultiblockchange$blockupdatedata.getBlockState()));
-        }
-    }
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleMultiBlockChange(this);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeInt(this.field_148925_b.field_77276_a);
+      p_148840_1_.writeInt(this.field_148925_b.field_77275_b);
+      p_148840_1_.func_150787_b(this.field_179845_b.length);
 
-    public SPacketMultiBlockChange.BlockUpdateData[] getChangedBlocks()
-    {
-        return this.changedBlocks;
-    }
+      for(SPacketMultiBlockChange.BlockUpdateData spacketmultiblockchange$blockupdatedata : this.field_179845_b) {
+         p_148840_1_.writeShort(spacketmultiblockchange$blockupdatedata.func_180089_b());
+         p_148840_1_.func_150787_b(Block.field_176229_d.func_148747_b(spacketmultiblockchange$blockupdatedata.func_180088_c()));
+      }
 
-    public class BlockUpdateData
-    {
-        private final short offset;
-        private final IBlockState blockState;
+   }
 
-        public BlockUpdateData(short p_i46544_2_, IBlockState p_i46544_3_)
-        {
-            this.offset = p_i46544_2_;
-            this.blockState = p_i46544_3_;
-        }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147287_a(this);
+   }
 
-        public BlockUpdateData(short p_i46545_2_, Chunk p_i46545_3_)
-        {
-            this.offset = p_i46545_2_;
-            this.blockState = p_i46545_3_.getBlockState(this.getPos());
-        }
+   public SPacketMultiBlockChange.BlockUpdateData[] func_179844_a() {
+      return this.field_179845_b;
+   }
 
-        public BlockPos getPos()
-        {
-            return new BlockPos(SPacketMultiBlockChange.this.chunkPos.getBlock(this.offset >> 12 & 15, this.offset & 255, this.offset >> 8 & 15));
-        }
+   public class BlockUpdateData {
+      private final short field_180091_b;
+      private final IBlockState field_180092_c;
 
-        public short getOffset()
-        {
-            return this.offset;
-        }
+      public BlockUpdateData(short p_i46544_2_, IBlockState p_i46544_3_) {
+         this.field_180091_b = p_i46544_2_;
+         this.field_180092_c = p_i46544_3_;
+      }
 
-        public IBlockState getBlockState()
-        {
-            return this.blockState;
-        }
-    }
+      public BlockUpdateData(short p_i46545_2_, Chunk p_i46545_3_) {
+         this.field_180091_b = p_i46545_2_;
+         this.field_180092_c = p_i46545_3_.func_177435_g(this.func_180090_a());
+      }
+
+      public BlockPos func_180090_a() {
+         return new BlockPos(SPacketMultiBlockChange.this.field_148925_b.func_180331_a(this.field_180091_b >> 12 & 15, this.field_180091_b & 255, this.field_180091_b >> 8 & 15));
+      }
+
+      public short func_180089_b() {
+         return this.field_180091_b;
+      }
+
+      public IBlockState func_180088_c() {
+         return this.field_180092_c;
+      }
+   }
 }

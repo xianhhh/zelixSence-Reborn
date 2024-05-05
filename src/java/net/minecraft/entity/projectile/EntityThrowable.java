@@ -21,396 +21,292 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class EntityThrowable extends Entity implements IProjectile
-{
-    private int xTile;
-    private int yTile;
-    private int zTile;
-    private Block inTile;
-    protected boolean inGround;
-    public int throwableShake;
+public abstract class EntityThrowable extends Entity implements IProjectile {
+   private int field_145788_c;
+   private int field_145786_d;
+   private int field_145787_e;
+   private Block field_174853_f;
+   protected boolean field_174854_a;
+   public int field_70191_b;
+   protected EntityLivingBase field_70192_c;
+   private String field_85053_h;
+   private int field_70194_h;
+   private int field_70195_i;
+   public Entity field_184539_c;
+   private int field_184540_av;
 
-    /** The entity that threw this throwable item. */
-    protected EntityLivingBase thrower;
-    private String throwerName;
-    private int ticksInGround;
-    private int ticksInAir;
-    public Entity ignoreEntity;
-    private int ignoreTime;
+   public EntityThrowable(World p_i1776_1_) {
+      super(p_i1776_1_);
+      this.field_145788_c = -1;
+      this.field_145786_d = -1;
+      this.field_145787_e = -1;
+      this.func_70105_a(0.25F, 0.25F);
+   }
 
-    public EntityThrowable(World worldIn)
-    {
-        super(worldIn);
-        this.xTile = -1;
-        this.yTile = -1;
-        this.zTile = -1;
-        this.setSize(0.25F, 0.25F);
-    }
+   public EntityThrowable(World p_i1778_1_, double p_i1778_2_, double p_i1778_4_, double p_i1778_6_) {
+      this(p_i1778_1_);
+      this.func_70107_b(p_i1778_2_, p_i1778_4_, p_i1778_6_);
+   }
 
-    public EntityThrowable(World worldIn, double x, double y, double z)
-    {
-        this(worldIn);
-        this.setPosition(x, y, z);
-    }
+   public EntityThrowable(World p_i1777_1_, EntityLivingBase p_i1777_2_) {
+      this(p_i1777_1_, p_i1777_2_.field_70165_t, p_i1777_2_.field_70163_u + (double)p_i1777_2_.func_70047_e() - 0.10000000149011612D, p_i1777_2_.field_70161_v);
+      this.field_70192_c = p_i1777_2_;
+   }
 
-    public EntityThrowable(World worldIn, EntityLivingBase throwerIn)
-    {
-        this(worldIn, throwerIn.posX, throwerIn.posY + (double)throwerIn.getEyeHeight() - 0.10000000149011612D, throwerIn.posZ);
-        this.thrower = throwerIn;
-    }
+   protected void func_70088_a() {
+   }
 
-    protected void entityInit()
-    {
-    }
+   public boolean func_70112_a(double p_70112_1_) {
+      double d0 = this.func_174813_aQ().func_72320_b() * 4.0D;
+      if (Double.isNaN(d0)) {
+         d0 = 4.0D;
+      }
 
-    /**
-     * Checks if the entity is in range to render.
-     */
-    public boolean isInRangeToRenderDist(double distance)
-    {
-        double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
+      d0 = d0 * 64.0D;
+      return p_70112_1_ < d0 * d0;
+   }
 
-        if (Double.isNaN(d0))
-        {
-            d0 = 4.0D;
-        }
+   public void func_184538_a(Entity p_184538_1_, float p_184538_2_, float p_184538_3_, float p_184538_4_, float p_184538_5_, float p_184538_6_) {
+      float f = -MathHelper.func_76126_a(p_184538_3_ * 0.017453292F) * MathHelper.func_76134_b(p_184538_2_ * 0.017453292F);
+      float f1 = -MathHelper.func_76126_a((p_184538_2_ + p_184538_4_) * 0.017453292F);
+      float f2 = MathHelper.func_76134_b(p_184538_3_ * 0.017453292F) * MathHelper.func_76134_b(p_184538_2_ * 0.017453292F);
+      this.func_70186_c((double)f, (double)f1, (double)f2, p_184538_5_, p_184538_6_);
+      this.field_70159_w += p_184538_1_.field_70159_w;
+      this.field_70179_y += p_184538_1_.field_70179_y;
+      if (!p_184538_1_.field_70122_E) {
+         this.field_70181_x += p_184538_1_.field_70181_x;
+      }
 
-        d0 = d0 * 64.0D;
-        return distance < d0 * d0;
-    }
+   }
 
-    /**
-     * Sets throwable heading based on an entity that's throwing it
-     */
-    public void setHeadingFromThrower(Entity entityThrower, float rotationPitchIn, float rotationYawIn, float pitchOffset, float velocity, float inaccuracy)
-    {
-        float f = -MathHelper.sin(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
-        float f1 = -MathHelper.sin((rotationPitchIn + pitchOffset) * 0.017453292F);
-        float f2 = MathHelper.cos(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
-        this.setThrowableHeading((double)f, (double)f1, (double)f2, velocity, inaccuracy);
-        this.motionX += entityThrower.motionX;
-        this.motionZ += entityThrower.motionZ;
+   public void func_70186_c(double p_70186_1_, double p_70186_3_, double p_70186_5_, float p_70186_7_, float p_70186_8_) {
+      float f = MathHelper.func_76133_a(p_70186_1_ * p_70186_1_ + p_70186_3_ * p_70186_3_ + p_70186_5_ * p_70186_5_);
+      p_70186_1_ = p_70186_1_ / (double)f;
+      p_70186_3_ = p_70186_3_ / (double)f;
+      p_70186_5_ = p_70186_5_ / (double)f;
+      p_70186_1_ = p_70186_1_ + this.field_70146_Z.nextGaussian() * 0.007499999832361937D * (double)p_70186_8_;
+      p_70186_3_ = p_70186_3_ + this.field_70146_Z.nextGaussian() * 0.007499999832361937D * (double)p_70186_8_;
+      p_70186_5_ = p_70186_5_ + this.field_70146_Z.nextGaussian() * 0.007499999832361937D * (double)p_70186_8_;
+      p_70186_1_ = p_70186_1_ * (double)p_70186_7_;
+      p_70186_3_ = p_70186_3_ * (double)p_70186_7_;
+      p_70186_5_ = p_70186_5_ * (double)p_70186_7_;
+      this.field_70159_w = p_70186_1_;
+      this.field_70181_x = p_70186_3_;
+      this.field_70179_y = p_70186_5_;
+      float f1 = MathHelper.func_76133_a(p_70186_1_ * p_70186_1_ + p_70186_5_ * p_70186_5_);
+      this.field_70177_z = (float)(MathHelper.func_181159_b(p_70186_1_, p_70186_5_) * 57.2957763671875D);
+      this.field_70125_A = (float)(MathHelper.func_181159_b(p_70186_3_, (double)f1) * 57.2957763671875D);
+      this.field_70126_B = this.field_70177_z;
+      this.field_70127_C = this.field_70125_A;
+      this.field_70194_h = 0;
+   }
 
-        if (!entityThrower.onGround)
-        {
-            this.motionY += entityThrower.motionY;
-        }
-    }
+   public void func_70016_h(double p_70016_1_, double p_70016_3_, double p_70016_5_) {
+      this.field_70159_w = p_70016_1_;
+      this.field_70181_x = p_70016_3_;
+      this.field_70179_y = p_70016_5_;
+      if (this.field_70127_C == 0.0F && this.field_70126_B == 0.0F) {
+         float f = MathHelper.func_76133_a(p_70016_1_ * p_70016_1_ + p_70016_5_ * p_70016_5_);
+         this.field_70177_z = (float)(MathHelper.func_181159_b(p_70016_1_, p_70016_5_) * 57.2957763671875D);
+         this.field_70125_A = (float)(MathHelper.func_181159_b(p_70016_3_, (double)f) * 57.2957763671875D);
+         this.field_70126_B = this.field_70177_z;
+         this.field_70127_C = this.field_70125_A;
+      }
 
-    /**
-     * Similar to setArrowHeading, it's point the throwable entity to a x, y, z direction.
-     */
-    public void setThrowableHeading(double x, double y, double z, float velocity, float inaccuracy)
-    {
-        float f = MathHelper.sqrt(x * x + y * y + z * z);
-        x = x / (double)f;
-        y = y / (double)f;
-        z = z / (double)f;
-        x = x + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-        y = y + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-        z = z + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-        x = x * (double)velocity;
-        y = y * (double)velocity;
-        z = z * (double)velocity;
-        this.motionX = x;
-        this.motionY = y;
-        this.motionZ = z;
-        float f1 = MathHelper.sqrt(x * x + z * z);
-        this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
-        this.rotationPitch = (float)(MathHelper.atan2(y, (double)f1) * (180D / Math.PI));
-        this.prevRotationYaw = this.rotationYaw;
-        this.prevRotationPitch = this.rotationPitch;
-        this.ticksInGround = 0;
-    }
+   }
 
-    /**
-     * Updates the velocity of the entity to a new value.
-     */
-    public void setVelocity(double x, double y, double z)
-    {
-        this.motionX = x;
-        this.motionY = y;
-        this.motionZ = z;
+   public void func_70071_h_() {
+      this.field_70142_S = this.field_70165_t;
+      this.field_70137_T = this.field_70163_u;
+      this.field_70136_U = this.field_70161_v;
+      super.func_70071_h_();
+      if (this.field_70191_b > 0) {
+         --this.field_70191_b;
+      }
 
-        if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
-        {
-            float f = MathHelper.sqrt(x * x + z * z);
-            this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
-            this.rotationPitch = (float)(MathHelper.atan2(y, (double)f) * (180D / Math.PI));
-            this.prevRotationYaw = this.rotationYaw;
-            this.prevRotationPitch = this.rotationPitch;
-        }
-    }
-
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        this.lastTickPosX = this.posX;
-        this.lastTickPosY = this.posY;
-        this.lastTickPosZ = this.posZ;
-        super.onUpdate();
-
-        if (this.throwableShake > 0)
-        {
-            --this.throwableShake;
-        }
-
-        if (this.inGround)
-        {
-            if (this.world.getBlockState(new BlockPos(this.xTile, this.yTile, this.zTile)).getBlock() == this.inTile)
-            {
-                ++this.ticksInGround;
-
-                if (this.ticksInGround == 1200)
-                {
-                    this.setDead();
-                }
-
-                return;
+      if (this.field_174854_a) {
+         if (this.field_70170_p.func_180495_p(new BlockPos(this.field_145788_c, this.field_145786_d, this.field_145787_e)).func_177230_c() == this.field_174853_f) {
+            ++this.field_70194_h;
+            if (this.field_70194_h == 1200) {
+               this.func_70106_y();
             }
 
-            this.inGround = false;
-            this.motionX *= (double)(this.rand.nextFloat() * 0.2F);
-            this.motionY *= (double)(this.rand.nextFloat() * 0.2F);
-            this.motionZ *= (double)(this.rand.nextFloat() * 0.2F);
-            this.ticksInGround = 0;
-            this.ticksInAir = 0;
-        }
-        else
-        {
-            ++this.ticksInAir;
-        }
+            return;
+         }
 
-        Vec3d vec3d = new Vec3d(this.posX, this.posY, this.posZ);
-        Vec3d vec3d1 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-        RayTraceResult raytraceresult = this.world.rayTraceBlocks(vec3d, vec3d1);
-        vec3d = new Vec3d(this.posX, this.posY, this.posZ);
-        vec3d1 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+         this.field_174854_a = false;
+         this.field_70159_w *= (double)(this.field_70146_Z.nextFloat() * 0.2F);
+         this.field_70181_x *= (double)(this.field_70146_Z.nextFloat() * 0.2F);
+         this.field_70179_y *= (double)(this.field_70146_Z.nextFloat() * 0.2F);
+         this.field_70194_h = 0;
+         this.field_70195_i = 0;
+      } else {
+         ++this.field_70195_i;
+      }
 
-        if (raytraceresult != null)
-        {
-            vec3d1 = new Vec3d(raytraceresult.hitVec.xCoord, raytraceresult.hitVec.yCoord, raytraceresult.hitVec.zCoord);
-        }
+      Vec3d vec3d = new Vec3d(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+      Vec3d vec3d1 = new Vec3d(this.field_70165_t + this.field_70159_w, this.field_70163_u + this.field_70181_x, this.field_70161_v + this.field_70179_y);
+      RayTraceResult raytraceresult = this.field_70170_p.func_72933_a(vec3d, vec3d1);
+      vec3d = new Vec3d(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+      vec3d1 = new Vec3d(this.field_70165_t + this.field_70159_w, this.field_70163_u + this.field_70181_x, this.field_70161_v + this.field_70179_y);
+      if (raytraceresult != null) {
+         vec3d1 = new Vec3d(raytraceresult.field_72307_f.field_72450_a, raytraceresult.field_72307_f.field_72448_b, raytraceresult.field_72307_f.field_72449_c);
+      }
 
-        Entity entity = null;
-        List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D));
-        double d0 = 0.0D;
-        boolean flag = false;
+      Entity entity = null;
+      List<Entity> list = this.field_70170_p.func_72839_b(this, this.func_174813_aQ().func_72321_a(this.field_70159_w, this.field_70181_x, this.field_70179_y).func_186662_g(1.0D));
+      double d0 = 0.0D;
+      boolean flag = false;
 
-        for (int i = 0; i < list.size(); ++i)
-        {
-            Entity entity1 = list.get(i);
-
-            if (entity1.canBeCollidedWith())
-            {
-                if (entity1 == this.ignoreEntity)
-                {
-                    flag = true;
-                }
-                else if (this.thrower != null && this.ticksExisted < 2 && this.ignoreEntity == null)
-                {
-                    this.ignoreEntity = entity1;
-                    flag = true;
-                }
-                else
-                {
-                    flag = false;
-                    AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expandXyz(0.30000001192092896D);
-                    RayTraceResult raytraceresult1 = axisalignedbb.calculateIntercept(vec3d, vec3d1);
-
-                    if (raytraceresult1 != null)
-                    {
-                        double d1 = vec3d.squareDistanceTo(raytraceresult1.hitVec);
-
-                        if (d1 < d0 || d0 == 0.0D)
-                        {
-                            entity = entity1;
-                            d0 = d1;
-                        }
-                    }
-                }
+      for(int i = 0; i < list.size(); ++i) {
+         Entity entity1 = list.get(i);
+         if (entity1.func_70067_L()) {
+            if (entity1 == this.field_184539_c) {
+               flag = true;
+            } else if (this.field_70192_c != null && this.field_70173_aa < 2 && this.field_184539_c == null) {
+               this.field_184539_c = entity1;
+               flag = true;
+            } else {
+               flag = false;
+               AxisAlignedBB axisalignedbb = entity1.func_174813_aQ().func_186662_g(0.30000001192092896D);
+               RayTraceResult raytraceresult1 = axisalignedbb.func_72327_a(vec3d, vec3d1);
+               if (raytraceresult1 != null) {
+                  double d1 = vec3d.func_72436_e(raytraceresult1.field_72307_f);
+                  if (d1 < d0 || d0 == 0.0D) {
+                     entity = entity1;
+                     d0 = d1;
+                  }
+               }
             }
-        }
+         }
+      }
 
-        if (this.ignoreEntity != null)
-        {
-            if (flag)
-            {
-                this.ignoreTime = 2;
+      if (this.field_184539_c != null) {
+         if (flag) {
+            this.field_184540_av = 2;
+         } else if (this.field_184540_av-- <= 0) {
+            this.field_184539_c = null;
+         }
+      }
+
+      if (entity != null) {
+         raytraceresult = new RayTraceResult(entity);
+      }
+
+      if (raytraceresult != null) {
+         if (raytraceresult.field_72313_a == RayTraceResult.Type.BLOCK && this.field_70170_p.func_180495_p(raytraceresult.func_178782_a()).func_177230_c() == Blocks.field_150427_aO) {
+            this.func_181015_d(raytraceresult.func_178782_a());
+         } else {
+            this.func_70184_a(raytraceresult);
+         }
+      }
+
+      this.field_70165_t += this.field_70159_w;
+      this.field_70163_u += this.field_70181_x;
+      this.field_70161_v += this.field_70179_y;
+      float f = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
+      this.field_70177_z = (float)(MathHelper.func_181159_b(this.field_70159_w, this.field_70179_y) * 57.2957763671875D);
+
+      for(this.field_70125_A = (float)(MathHelper.func_181159_b(this.field_70181_x, (double)f) * 57.2957763671875D); this.field_70125_A - this.field_70127_C < -180.0F; this.field_70127_C -= 360.0F) {
+         ;
+      }
+
+      while(this.field_70125_A - this.field_70127_C >= 180.0F) {
+         this.field_70127_C += 360.0F;
+      }
+
+      while(this.field_70177_z - this.field_70126_B < -180.0F) {
+         this.field_70126_B -= 360.0F;
+      }
+
+      while(this.field_70177_z - this.field_70126_B >= 180.0F) {
+         this.field_70126_B += 360.0F;
+      }
+
+      this.field_70125_A = this.field_70127_C + (this.field_70125_A - this.field_70127_C) * 0.2F;
+      this.field_70177_z = this.field_70126_B + (this.field_70177_z - this.field_70126_B) * 0.2F;
+      float f1 = 0.99F;
+      float f2 = this.func_70185_h();
+      if (this.func_70090_H()) {
+         for(int j = 0; j < 4; ++j) {
+            float f3 = 0.25F;
+            this.field_70170_p.func_175688_a(EnumParticleTypes.WATER_BUBBLE, this.field_70165_t - this.field_70159_w * 0.25D, this.field_70163_u - this.field_70181_x * 0.25D, this.field_70161_v - this.field_70179_y * 0.25D, this.field_70159_w, this.field_70181_x, this.field_70179_y);
+         }
+
+         f1 = 0.8F;
+      }
+
+      this.field_70159_w *= (double)f1;
+      this.field_70181_x *= (double)f1;
+      this.field_70179_y *= (double)f1;
+      if (!this.func_189652_ae()) {
+         this.field_70181_x -= (double)f2;
+      }
+
+      this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+   }
+
+   protected float func_70185_h() {
+      return 0.03F;
+   }
+
+   protected abstract void func_70184_a(RayTraceResult var1);
+
+   public static void func_189661_a(DataFixer p_189661_0_, String p_189661_1_) {
+   }
+
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      p_70014_1_.func_74768_a("xTile", this.field_145788_c);
+      p_70014_1_.func_74768_a("yTile", this.field_145786_d);
+      p_70014_1_.func_74768_a("zTile", this.field_145787_e);
+      ResourceLocation resourcelocation = Block.field_149771_c.func_177774_c(this.field_174853_f);
+      p_70014_1_.func_74778_a("inTile", resourcelocation == null ? "" : resourcelocation.toString());
+      p_70014_1_.func_74774_a("shake", (byte)this.field_70191_b);
+      p_70014_1_.func_74774_a("inGround", (byte)(this.field_174854_a ? 1 : 0));
+      if ((this.field_85053_h == null || this.field_85053_h.isEmpty()) && this.field_70192_c instanceof EntityPlayer) {
+         this.field_85053_h = this.field_70192_c.func_70005_c_();
+      }
+
+      p_70014_1_.func_74778_a("ownerName", this.field_85053_h == null ? "" : this.field_85053_h);
+   }
+
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      this.field_145788_c = p_70037_1_.func_74762_e("xTile");
+      this.field_145786_d = p_70037_1_.func_74762_e("yTile");
+      this.field_145787_e = p_70037_1_.func_74762_e("zTile");
+      if (p_70037_1_.func_150297_b("inTile", 8)) {
+         this.field_174853_f = Block.func_149684_b(p_70037_1_.func_74779_i("inTile"));
+      } else {
+         this.field_174853_f = Block.func_149729_e(p_70037_1_.func_74771_c("inTile") & 255);
+      }
+
+      this.field_70191_b = p_70037_1_.func_74771_c("shake") & 255;
+      this.field_174854_a = p_70037_1_.func_74771_c("inGround") == 1;
+      this.field_70192_c = null;
+      this.field_85053_h = p_70037_1_.func_74779_i("ownerName");
+      if (this.field_85053_h != null && this.field_85053_h.isEmpty()) {
+         this.field_85053_h = null;
+      }
+
+      this.field_70192_c = this.func_85052_h();
+   }
+
+   @Nullable
+   public EntityLivingBase func_85052_h() {
+      if (this.field_70192_c == null && this.field_85053_h != null && !this.field_85053_h.isEmpty()) {
+         this.field_70192_c = this.field_70170_p.func_72924_a(this.field_85053_h);
+         if (this.field_70192_c == null && this.field_70170_p instanceof WorldServer) {
+            try {
+               Entity entity = ((WorldServer)this.field_70170_p).func_175733_a(UUID.fromString(this.field_85053_h));
+               if (entity instanceof EntityLivingBase) {
+                  this.field_70192_c = (EntityLivingBase)entity;
+               }
+            } catch (Throwable var2) {
+               this.field_70192_c = null;
             }
-            else if (this.ignoreTime-- <= 0)
-            {
-                this.ignoreEntity = null;
-            }
-        }
+         }
+      }
 
-        if (entity != null)
-        {
-            raytraceresult = new RayTraceResult(entity);
-        }
-
-        if (raytraceresult != null)
-        {
-            if (raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK && this.world.getBlockState(raytraceresult.getBlockPos()).getBlock() == Blocks.PORTAL)
-            {
-                this.setPortal(raytraceresult.getBlockPos());
-            }
-            else
-            {
-                this.onImpact(raytraceresult);
-            }
-        }
-
-        this.posX += this.motionX;
-        this.posY += this.motionY;
-        this.posZ += this.motionZ;
-        float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-        this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
-
-        for (this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f) * (180D / Math.PI)); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
-        {
-            ;
-        }
-
-        while (this.rotationPitch - this.prevRotationPitch >= 180.0F)
-        {
-            this.prevRotationPitch += 360.0F;
-        }
-
-        while (this.rotationYaw - this.prevRotationYaw < -180.0F)
-        {
-            this.prevRotationYaw -= 360.0F;
-        }
-
-        while (this.rotationYaw - this.prevRotationYaw >= 180.0F)
-        {
-            this.prevRotationYaw += 360.0F;
-        }
-
-        this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
-        this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
-        float f1 = 0.99F;
-        float f2 = this.getGravityVelocity();
-
-        if (this.isInWater())
-        {
-            for (int j = 0; j < 4; ++j)
-            {
-                float f3 = 0.25F;
-                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
-            }
-
-            f1 = 0.8F;
-        }
-
-        this.motionX *= (double)f1;
-        this.motionY *= (double)f1;
-        this.motionZ *= (double)f1;
-
-        if (!this.hasNoGravity())
-        {
-            this.motionY -= (double)f2;
-        }
-
-        this.setPosition(this.posX, this.posY, this.posZ);
-    }
-
-    /**
-     * Gets the amount of gravity to apply to the thrown entity with each tick.
-     */
-    protected float getGravityVelocity()
-    {
-        return 0.03F;
-    }
-
-    /**
-     * Called when this EntityThrowable hits a block or entity.
-     */
-    protected abstract void onImpact(RayTraceResult result);
-
-    public static void registerFixesThrowable(DataFixer fixer, String name)
-    {
-    }
-
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        compound.setInteger("xTile", this.xTile);
-        compound.setInteger("yTile", this.yTile);
-        compound.setInteger("zTile", this.zTile);
-        ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(this.inTile);
-        compound.setString("inTile", resourcelocation == null ? "" : resourcelocation.toString());
-        compound.setByte("shake", (byte)this.throwableShake);
-        compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-
-        if ((this.throwerName == null || this.throwerName.isEmpty()) && this.thrower instanceof EntityPlayer)
-        {
-            this.throwerName = this.thrower.getName();
-        }
-
-        compound.setString("ownerName", this.throwerName == null ? "" : this.throwerName);
-    }
-
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        this.xTile = compound.getInteger("xTile");
-        this.yTile = compound.getInteger("yTile");
-        this.zTile = compound.getInteger("zTile");
-
-        if (compound.hasKey("inTile", 8))
-        {
-            this.inTile = Block.getBlockFromName(compound.getString("inTile"));
-        }
-        else
-        {
-            this.inTile = Block.getBlockById(compound.getByte("inTile") & 255);
-        }
-
-        this.throwableShake = compound.getByte("shake") & 255;
-        this.inGround = compound.getByte("inGround") == 1;
-        this.thrower = null;
-        this.throwerName = compound.getString("ownerName");
-
-        if (this.throwerName != null && this.throwerName.isEmpty())
-        {
-            this.throwerName = null;
-        }
-
-        this.thrower = this.getThrower();
-    }
-
-    @Nullable
-    public EntityLivingBase getThrower()
-    {
-        if (this.thrower == null && this.throwerName != null && !this.throwerName.isEmpty())
-        {
-            this.thrower = this.world.getPlayerEntityByName(this.throwerName);
-
-            if (this.thrower == null && this.world instanceof WorldServer)
-            {
-                try
-                {
-                    Entity entity = ((WorldServer)this.world).getEntityFromUuid(UUID.fromString(this.throwerName));
-
-                    if (entity instanceof EntityLivingBase)
-                    {
-                        this.thrower = (EntityLivingBase)entity;
-                    }
-                }
-                catch (Throwable var2)
-                {
-                    this.thrower = null;
-                }
-            }
-        }
-
-        return this.thrower;
-    }
+      return this.field_70192_c;
+   }
 }

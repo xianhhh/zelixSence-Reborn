@@ -6,58 +6,31 @@ import javax.annotation.Nullable;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.util.IProgressUpdate;
 
-public interface ISaveFormat
-{
-    /**
-     * Returns the name of the save format.
-     */
-    String getName();
+public interface ISaveFormat {
+   String func_154333_a();
 
-    /**
-     * Returns back a loader for the specified save directory
-     */
-    ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata);
+   ISaveHandler func_75804_a(String var1, boolean var2);
 
-    List<WorldSummary> getSaveList() throws AnvilConverterException;
+   List<WorldSummary> func_75799_b() throws AnvilConverterException;
 
-    void flushCache();
+   void func_75800_d();
 
-    @Nullable
+   @Nullable
+   WorldInfo func_75803_c(String var1);
 
-    /**
-     * Returns the world's WorldInfo object
-     */
-    WorldInfo getWorldInfo(String saveName);
+   boolean func_154335_d(String var1);
 
-    boolean isNewLevelIdAcceptable(String saveName);
+   boolean func_75802_e(String var1);
 
-    /**
-     * Deletes a world directory.
-     */
-    boolean deleteWorldDirectory(String saveName);
+   void func_75806_a(String var1, String var2);
 
-    /**
-     * Renames the world by storing the new name in level.dat. It does *not* rename the directory containing the world
-     * data.
-     */
-    void renameWorld(String dirName, String newName);
+   boolean func_154334_a(String var1);
 
-    boolean isConvertible(String saveName);
+   boolean func_75801_b(String var1);
 
-    /**
-     * gets if the map is old chunk saving (true) or McRegion (false)
-     */
-    boolean isOldMapFormat(String saveName);
+   boolean func_75805_a(String var1, IProgressUpdate var2);
 
-    /**
-     * converts the map to mcRegion
-     */
-    boolean convertMapFormat(String filename, IProgressUpdate progressCallback);
+   boolean func_90033_f(String var1);
 
-    /**
-     * Return whether the given world can be loaded.
-     */
-    boolean canLoadWorld(String saveName);
-
-    File getFile(String p_186352_1_, String p_186352_2_);
+   File func_186352_b(String var1, String var2);
 }

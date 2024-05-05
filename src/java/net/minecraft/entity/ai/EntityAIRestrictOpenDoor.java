@@ -6,94 +6,56 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 
-public class EntityAIRestrictOpenDoor extends EntityAIBase
-{
-    private final EntityCreature entityObj;
-    private VillageDoorInfo frontDoor;
+public class EntityAIRestrictOpenDoor extends EntityAIBase {
+   private final EntityCreature field_75275_a;
+   private VillageDoorInfo field_75274_b;
 
-    public EntityAIRestrictOpenDoor(EntityCreature creatureIn)
-    {
-        this.entityObj = creatureIn;
+   public EntityAIRestrictOpenDoor(EntityCreature p_i1651_1_) {
+      this.field_75275_a = p_i1651_1_;
+      if (!(p_i1651_1_.func_70661_as() instanceof PathNavigateGround)) {
+         throw new IllegalArgumentException("Unsupported mob type for RestrictOpenDoorGoal");
+      }
+   }
 
-        if (!(creatureIn.getNavigator() instanceof PathNavigateGround))
-        {
-            throw new IllegalArgumentException("Unsupported mob type for RestrictOpenDoorGoal");
-        }
-    }
-
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        if (this.entityObj.world.isDaytime())
-        {
+   public boolean func_75250_a() {
+      if (this.field_75275_a.field_70170_p.func_72935_r()) {
+         return false;
+      } else {
+         BlockPos blockpos = new BlockPos(this.field_75275_a);
+         Village village = this.field_75275_a.field_70170_p.func_175714_ae().func_176056_a(blockpos, 16);
+         if (village == null) {
             return false;
-        }
-        else
-        {
-            BlockPos blockpos = new BlockPos(this.entityObj);
-            Village village = this.entityObj.world.getVillageCollection().getNearestVillage(blockpos, 16);
-
-            if (village == null)
-            {
-                return false;
+         } else {
+            this.field_75274_b = village.func_179865_b(blockpos);
+            if (this.field_75274_b == null) {
+               return false;
+            } else {
+               return (double)this.field_75274_b.func_179846_b(blockpos) < 2.25D;
             }
-            else
-            {
-                this.frontDoor = village.getNearestDoor(blockpos);
+         }
+      }
+   }
 
-                if (this.frontDoor == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return (double)this.frontDoor.getDistanceToInsideBlockSq(blockpos) < 2.25D;
-                }
-            }
-        }
-    }
+   public boolean func_75253_b() {
+      if (this.field_75275_a.field_70170_p.func_72935_r()) {
+         return false;
+      } else {
+         return !this.field_75274_b.func_179851_i() && this.field_75274_b.func_179850_c(new BlockPos(this.field_75275_a));
+      }
+   }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        if (this.entityObj.world.isDaytime())
-        {
-            return false;
-        }
-        else
-        {
-            return !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entityObj));
-        }
-    }
+   public void func_75249_e() {
+      ((PathNavigateGround)this.field_75275_a.func_70661_as()).func_179688_b(false);
+      ((PathNavigateGround)this.field_75275_a.func_70661_as()).func_179691_c(false);
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        ((PathNavigateGround)this.entityObj.getNavigator()).setBreakDoors(false);
-        ((PathNavigateGround)this.entityObj.getNavigator()).setEnterDoors(false);
-    }
+   public void func_75251_c() {
+      ((PathNavigateGround)this.field_75275_a.func_70661_as()).func_179688_b(true);
+      ((PathNavigateGround)this.field_75275_a.func_70661_as()).func_179691_c(true);
+      this.field_75274_b = null;
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        ((PathNavigateGround)this.entityObj.getNavigator()).setBreakDoors(true);
-        ((PathNavigateGround)this.entityObj.getNavigator()).setEnterDoors(true);
-        this.frontDoor = null;
-    }
-
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        this.frontDoor.incrementDoorOpeningRestrictionCounter();
-    }
+   public void func_75246_d() {
+      this.field_75274_b.func_75470_e();
+   }
 }

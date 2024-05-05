@@ -24,395 +24,308 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.util.vector.Matrix4f;
 
-public class ShaderGroup
-{
-    private final Framebuffer mainFramebuffer;
-    private final IResourceManager resourceManager;
-    private final String shaderGroupName;
-    private final List<Shader> listShaders = Lists.<Shader>newArrayList();
-    private final Map<String, Framebuffer> mapFramebuffers = Maps.<String, Framebuffer>newHashMap();
-    private final List<Framebuffer> listFramebuffers = Lists.<Framebuffer>newArrayList();
-    private Matrix4f projectionMatrix;
-    private int mainFramebufferWidth;
-    private int mainFramebufferHeight;
-    private float time;
-    private float lastStamp;
+public class ShaderGroup {
+   private final Framebuffer field_148035_a;
+   private final IResourceManager field_148033_b;
+   private final String field_148034_c;
+   private final List<Shader> field_148031_d = Lists.<Shader>newArrayList();
+   private final Map<String, Framebuffer> field_148032_e = Maps.<String, Framebuffer>newHashMap();
+   private final List<Framebuffer> field_148029_f = Lists.<Framebuffer>newArrayList();
+   private Matrix4f field_148030_g;
+   private int field_148038_h;
+   private int field_148039_i;
+   private float field_148036_j;
+   private float field_148037_k;
 
-    public ShaderGroup(TextureManager p_i1050_1_, IResourceManager resourceManagerIn, Framebuffer mainFramebufferIn, ResourceLocation p_i1050_4_) throws JsonException, IOException, JsonSyntaxException
-    {
-        this.resourceManager = resourceManagerIn;
-        this.mainFramebuffer = mainFramebufferIn;
-        this.time = 0.0F;
-        this.lastStamp = 0.0F;
-        this.mainFramebufferWidth = mainFramebufferIn.framebufferWidth;
-        this.mainFramebufferHeight = mainFramebufferIn.framebufferHeight;
-        this.shaderGroupName = p_i1050_4_.toString();
-        this.resetProjectionMatrix();
-        this.parseGroup(p_i1050_1_, p_i1050_4_);
-    }
+   public ShaderGroup(TextureManager p_i1050_1_, IResourceManager p_i1050_2_, Framebuffer p_i1050_3_, ResourceLocation p_i1050_4_) throws JsonException, IOException, JsonSyntaxException {
+      this.field_148033_b = p_i1050_2_;
+      this.field_148035_a = p_i1050_3_;
+      this.field_148036_j = 0.0F;
+      this.field_148037_k = 0.0F;
+      this.field_148038_h = p_i1050_3_.field_147621_c;
+      this.field_148039_i = p_i1050_3_.field_147618_d;
+      this.field_148034_c = p_i1050_4_.toString();
+      this.func_148024_c();
+      this.func_152765_a(p_i1050_1_, p_i1050_4_);
+   }
 
-    public void parseGroup(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException, IOException, JsonSyntaxException
-    {
-        JsonParser jsonparser = new JsonParser();
-        IResource iresource = null;
+   public void func_152765_a(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException, IOException, JsonSyntaxException {
+      JsonParser jsonparser = new JsonParser();
+      IResource iresource = null;
 
-        try
-        {
-            iresource = this.resourceManager.getResource(p_152765_2_);
-            JsonObject jsonobject = jsonparser.parse(IOUtils.toString(iresource.getInputStream(), StandardCharsets.UTF_8)).getAsJsonObject();
-
-            if (JsonUtils.isJsonArray(jsonobject, "targets"))
-            {
-                JsonArray jsonarray = jsonobject.getAsJsonArray("targets");
-                int i = 0;
-
-                for (JsonElement jsonelement : jsonarray)
-                {
-                    try
-                    {
-                        this.initTarget(jsonelement);
-                    }
-                    catch (Exception exception1)
-                    {
-                        JsonException jsonexception1 = JsonException.forException(exception1);
-                        jsonexception1.prependJsonKey("targets[" + i + "]");
-                        throw jsonexception1;
-                    }
-
-                    ++i;
-                }
-            }
-
-            if (JsonUtils.isJsonArray(jsonobject, "passes"))
-            {
-                JsonArray jsonarray1 = jsonobject.getAsJsonArray("passes");
-                int j = 0;
-
-                for (JsonElement jsonelement1 : jsonarray1)
-                {
-                    try
-                    {
-                        this.parsePass(p_152765_1_, jsonelement1);
-                    }
-                    catch (Exception exception)
-                    {
-                        JsonException jsonexception2 = JsonException.forException(exception);
-                        jsonexception2.prependJsonKey("passes[" + j + "]");
-                        throw jsonexception2;
-                    }
-
-                    ++j;
-                }
-            }
-        }
-        catch (Exception exception2)
-        {
-            JsonException jsonexception = JsonException.forException(exception2);
-            jsonexception.setFilenameAndFlush(p_152765_2_.getResourcePath());
-            throw jsonexception;
-        }
-        finally
-        {
-            IOUtils.closeQuietly((Closeable)iresource);
-        }
-    }
-
-    private void initTarget(JsonElement p_148027_1_) throws JsonException
-    {
-        if (JsonUtils.isString(p_148027_1_))
-        {
-            this.addFramebuffer(p_148027_1_.getAsString(), this.mainFramebufferWidth, this.mainFramebufferHeight);
-        }
-        else
-        {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_148027_1_, "target");
-            String s = JsonUtils.getString(jsonobject, "name");
-            int i = JsonUtils.getInt(jsonobject, "width", this.mainFramebufferWidth);
-            int j = JsonUtils.getInt(jsonobject, "height", this.mainFramebufferHeight);
-
-            if (this.mapFramebuffers.containsKey(s))
-            {
-                throw new JsonException(s + " is already defined");
-            }
-
-            this.addFramebuffer(s, i, j);
-        }
-    }
-
-    private void parsePass(TextureManager p_152764_1_, JsonElement p_152764_2_) throws JsonException, IOException
-    {
-        JsonObject jsonobject = JsonUtils.getJsonObject(p_152764_2_, "pass");
-        String s = JsonUtils.getString(jsonobject, "name");
-        String s1 = JsonUtils.getString(jsonobject, "intarget");
-        String s2 = JsonUtils.getString(jsonobject, "outtarget");
-        Framebuffer framebuffer = this.getFramebuffer(s1);
-        Framebuffer framebuffer1 = this.getFramebuffer(s2);
-
-        if (framebuffer == null)
-        {
-            throw new JsonException("Input target '" + s1 + "' does not exist");
-        }
-        else if (framebuffer1 == null)
-        {
-            throw new JsonException("Output target '" + s2 + "' does not exist");
-        }
-        else
-        {
-            Shader shader = this.addShader(s, framebuffer, framebuffer1);
-            JsonArray jsonarray = JsonUtils.getJsonArray(jsonobject, "auxtargets", (JsonArray)null);
-
-            if (jsonarray != null)
-            {
-                int i = 0;
-
-                for (JsonElement jsonelement : jsonarray)
-                {
-                    try
-                    {
-                        JsonObject jsonobject1 = JsonUtils.getJsonObject(jsonelement, "auxtarget");
-                        String s4 = JsonUtils.getString(jsonobject1, "name");
-                        String s3 = JsonUtils.getString(jsonobject1, "id");
-                        Framebuffer framebuffer2 = this.getFramebuffer(s3);
-
-                        if (framebuffer2 == null)
-                        {
-                            ResourceLocation resourcelocation = new ResourceLocation("textures/effect/" + s3 + ".png");
-                            IResource iresource = null;
-
-                            try
-                            {
-                                iresource = this.resourceManager.getResource(resourcelocation);
-                            }
-                            catch (FileNotFoundException var29)
-                            {
-                                throw new JsonException("Render target or texture '" + s3 + "' does not exist");
-                            }
-                            finally
-                            {
-                                IOUtils.closeQuietly((Closeable)iresource);
-                            }
-
-                            p_152764_1_.bindTexture(resourcelocation);
-                            ITextureObject lvt_20_2_ = p_152764_1_.getTexture(resourcelocation);
-                            int lvt_21_1_ = JsonUtils.getInt(jsonobject1, "width");
-                            int lvt_22_1_ = JsonUtils.getInt(jsonobject1, "height");
-                            boolean lvt_23_1_ = JsonUtils.getBoolean(jsonobject1, "bilinear");
-
-                            if (lvt_23_1_)
-                            {
-                                GlStateManager.glTexParameteri(3553, 10241, 9729);
-                                GlStateManager.glTexParameteri(3553, 10240, 9729);
-                            }
-                            else
-                            {
-                                GlStateManager.glTexParameteri(3553, 10241, 9728);
-                                GlStateManager.glTexParameteri(3553, 10240, 9728);
-                            }
-
-                            shader.addAuxFramebuffer(s4, Integer.valueOf(lvt_20_2_.getGlTextureId()), lvt_21_1_, lvt_22_1_);
-                        }
-                        else
-                        {
-                            shader.addAuxFramebuffer(s4, framebuffer2, framebuffer2.framebufferTextureWidth, framebuffer2.framebufferTextureHeight);
-                        }
-                    }
-                    catch (Exception exception1)
-                    {
-                        JsonException jsonexception = JsonException.forException(exception1);
-                        jsonexception.prependJsonKey("auxtargets[" + i + "]");
-                        throw jsonexception;
-                    }
-
-                    ++i;
-                }
-            }
-
-            JsonArray jsonarray1 = JsonUtils.getJsonArray(jsonobject, "uniforms", (JsonArray)null);
-
-            if (jsonarray1 != null)
-            {
-                int l = 0;
-
-                for (JsonElement jsonelement1 : jsonarray1)
-                {
-                    try
-                    {
-                        this.initUniform(jsonelement1);
-                    }
-                    catch (Exception exception)
-                    {
-                        JsonException jsonexception1 = JsonException.forException(exception);
-                        jsonexception1.prependJsonKey("uniforms[" + l + "]");
-                        throw jsonexception1;
-                    }
-
-                    ++l;
-                }
-            }
-        }
-    }
-
-    private void initUniform(JsonElement p_148028_1_) throws JsonException
-    {
-        JsonObject jsonobject = JsonUtils.getJsonObject(p_148028_1_, "uniform");
-        String s = JsonUtils.getString(jsonobject, "name");
-        ShaderUniform shaderuniform = ((Shader)this.listShaders.get(this.listShaders.size() - 1)).getShaderManager().getShaderUniform(s);
-
-        if (shaderuniform == null)
-        {
-            throw new JsonException("Uniform '" + s + "' does not exist");
-        }
-        else
-        {
-            float[] afloat = new float[4];
+      try {
+         iresource = this.field_148033_b.func_110536_a(p_152765_2_);
+         JsonObject jsonobject = jsonparser.parse(IOUtils.toString(iresource.func_110527_b(), StandardCharsets.UTF_8)).getAsJsonObject();
+         if (JsonUtils.func_151202_d(jsonobject, "targets")) {
+            JsonArray jsonarray = jsonobject.getAsJsonArray("targets");
             int i = 0;
 
-            for (JsonElement jsonelement : JsonUtils.getJsonArray(jsonobject, "values"))
-            {
-                try
-                {
-                    afloat[i] = JsonUtils.getFloat(jsonelement, "value");
-                }
-                catch (Exception exception)
-                {
-                    JsonException jsonexception = JsonException.forException(exception);
-                    jsonexception.prependJsonKey("values[" + i + "]");
-                    throw jsonexception;
-                }
+            for(JsonElement jsonelement : jsonarray) {
+               try {
+                  this.func_148027_a(jsonelement);
+               } catch (Exception exception1) {
+                  JsonException jsonexception1 = JsonException.func_151379_a(exception1);
+                  jsonexception1.func_151380_a("targets[" + i + "]");
+                  throw jsonexception1;
+               }
 
-                ++i;
+               ++i;
+            }
+         }
+
+         if (JsonUtils.func_151202_d(jsonobject, "passes")) {
+            JsonArray jsonarray1 = jsonobject.getAsJsonArray("passes");
+            int j = 0;
+
+            for(JsonElement jsonelement1 : jsonarray1) {
+               try {
+                  this.func_152764_a(p_152765_1_, jsonelement1);
+               } catch (Exception exception) {
+                  JsonException jsonexception2 = JsonException.func_151379_a(exception);
+                  jsonexception2.func_151380_a("passes[" + j + "]");
+                  throw jsonexception2;
+               }
+
+               ++j;
+            }
+         }
+      } catch (Exception exception2) {
+         JsonException jsonexception = JsonException.func_151379_a(exception2);
+         jsonexception.func_151381_b(p_152765_2_.func_110623_a());
+         throw jsonexception;
+      } finally {
+         IOUtils.closeQuietly((Closeable)iresource);
+      }
+
+   }
+
+   private void func_148027_a(JsonElement p_148027_1_) throws JsonException {
+      if (JsonUtils.func_151211_a(p_148027_1_)) {
+         this.func_148020_a(p_148027_1_.getAsString(), this.field_148038_h, this.field_148039_i);
+      } else {
+         JsonObject jsonobject = JsonUtils.func_151210_l(p_148027_1_, "target");
+         String s = JsonUtils.func_151200_h(jsonobject, "name");
+         int i = JsonUtils.func_151208_a(jsonobject, "width", this.field_148038_h);
+         int j = JsonUtils.func_151208_a(jsonobject, "height", this.field_148039_i);
+         if (this.field_148032_e.containsKey(s)) {
+            throw new JsonException(s + " is already defined");
+         }
+
+         this.func_148020_a(s, i, j);
+      }
+
+   }
+
+   private void func_152764_a(TextureManager p_152764_1_, JsonElement p_152764_2_) throws JsonException, IOException {
+      JsonObject jsonobject = JsonUtils.func_151210_l(p_152764_2_, "pass");
+      String s = JsonUtils.func_151200_h(jsonobject, "name");
+      String s1 = JsonUtils.func_151200_h(jsonobject, "intarget");
+      String s2 = JsonUtils.func_151200_h(jsonobject, "outtarget");
+      Framebuffer framebuffer = this.func_148017_a(s1);
+      Framebuffer framebuffer1 = this.func_148017_a(s2);
+      if (framebuffer == null) {
+         throw new JsonException("Input target '" + s1 + "' does not exist");
+      } else if (framebuffer1 == null) {
+         throw new JsonException("Output target '" + s2 + "' does not exist");
+      } else {
+         Shader shader = this.func_148023_a(s, framebuffer, framebuffer1);
+         JsonArray jsonarray = JsonUtils.func_151213_a(jsonobject, "auxtargets", (JsonArray)null);
+         if (jsonarray != null) {
+            int i = 0;
+
+            for(JsonElement jsonelement : jsonarray) {
+               try {
+                  JsonObject jsonobject1 = JsonUtils.func_151210_l(jsonelement, "auxtarget");
+                  String s4 = JsonUtils.func_151200_h(jsonobject1, "name");
+                  String s3 = JsonUtils.func_151200_h(jsonobject1, "id");
+                  Framebuffer framebuffer2 = this.func_148017_a(s3);
+                  if (framebuffer2 == null) {
+                     ResourceLocation resourcelocation = new ResourceLocation("textures/effect/" + s3 + ".png");
+                     IResource iresource = null;
+
+                     try {
+                        iresource = this.field_148033_b.func_110536_a(resourcelocation);
+                     } catch (FileNotFoundException var29) {
+                        throw new JsonException("Render target or texture '" + s3 + "' does not exist");
+                     } finally {
+                        IOUtils.closeQuietly((Closeable)iresource);
+                     }
+
+                     p_152764_1_.func_110577_a(resourcelocation);
+                     ITextureObject lvt_20_2_ = p_152764_1_.func_110581_b(resourcelocation);
+                     int lvt_21_1_ = JsonUtils.func_151203_m(jsonobject1, "width");
+                     int lvt_22_1_ = JsonUtils.func_151203_m(jsonobject1, "height");
+                     boolean lvt_23_1_ = JsonUtils.func_151212_i(jsonobject1, "bilinear");
+                     if (lvt_23_1_) {
+                        GlStateManager.func_187421_b(3553, 10241, 9729);
+                        GlStateManager.func_187421_b(3553, 10240, 9729);
+                     } else {
+                        GlStateManager.func_187421_b(3553, 10241, 9728);
+                        GlStateManager.func_187421_b(3553, 10240, 9728);
+                     }
+
+                     shader.func_148041_a(s4, Integer.valueOf(lvt_20_2_.func_110552_b()), lvt_21_1_, lvt_22_1_);
+                  } else {
+                     shader.func_148041_a(s4, framebuffer2, framebuffer2.field_147622_a, framebuffer2.field_147620_b);
+                  }
+               } catch (Exception exception1) {
+                  JsonException jsonexception = JsonException.func_151379_a(exception1);
+                  jsonexception.func_151380_a("auxtargets[" + i + "]");
+                  throw jsonexception;
+               }
+
+               ++i;
+            }
+         }
+
+         JsonArray jsonarray1 = JsonUtils.func_151213_a(jsonobject, "uniforms", (JsonArray)null);
+         if (jsonarray1 != null) {
+            int l = 0;
+
+            for(JsonElement jsonelement1 : jsonarray1) {
+               try {
+                  this.func_148028_c(jsonelement1);
+               } catch (Exception exception) {
+                  JsonException jsonexception1 = JsonException.func_151379_a(exception);
+                  jsonexception1.func_151380_a("uniforms[" + l + "]");
+                  throw jsonexception1;
+               }
+
+               ++l;
+            }
+         }
+
+      }
+   }
+
+   private void func_148028_c(JsonElement p_148028_1_) throws JsonException {
+      JsonObject jsonobject = JsonUtils.func_151210_l(p_148028_1_, "uniform");
+      String s = JsonUtils.func_151200_h(jsonobject, "name");
+      ShaderUniform shaderuniform = ((Shader)this.field_148031_d.get(this.field_148031_d.size() - 1)).func_148043_c().func_147991_a(s);
+      if (shaderuniform == null) {
+         throw new JsonException("Uniform '" + s + "' does not exist");
+      } else {
+         float[] afloat = new float[4];
+         int i = 0;
+
+         for(JsonElement jsonelement : JsonUtils.func_151214_t(jsonobject, "values")) {
+            try {
+               afloat[i] = JsonUtils.func_151220_d(jsonelement, "value");
+            } catch (Exception exception) {
+               JsonException jsonexception = JsonException.func_151379_a(exception);
+               jsonexception.func_151380_a("values[" + i + "]");
+               throw jsonexception;
             }
 
-            switch (i)
-            {
-                case 0:
-                default:
-                    break;
+            ++i;
+         }
 
-                case 1:
-                    shaderuniform.set(afloat[0]);
-                    break;
+         switch(i) {
+         case 0:
+         default:
+            break;
+         case 1:
+            shaderuniform.func_148090_a(afloat[0]);
+            break;
+         case 2:
+            shaderuniform.func_148087_a(afloat[0], afloat[1]);
+            break;
+         case 3:
+            shaderuniform.func_148095_a(afloat[0], afloat[1], afloat[2]);
+            break;
+         case 4:
+            shaderuniform.func_148081_a(afloat[0], afloat[1], afloat[2], afloat[3]);
+         }
 
-                case 2:
-                    shaderuniform.set(afloat[0], afloat[1]);
-                    break;
+      }
+   }
 
-                case 3:
-                    shaderuniform.set(afloat[0], afloat[1], afloat[2]);
-                    break;
+   public Framebuffer func_177066_a(String p_177066_1_) {
+      return this.field_148032_e.get(p_177066_1_);
+   }
 
-                case 4:
-                    shaderuniform.set(afloat[0], afloat[1], afloat[2], afloat[3]);
-            }
-        }
-    }
+   public void func_148020_a(String p_148020_1_, int p_148020_2_, int p_148020_3_) {
+      Framebuffer framebuffer = new Framebuffer(p_148020_2_, p_148020_3_, true);
+      framebuffer.func_147604_a(0.0F, 0.0F, 0.0F, 0.0F);
+      this.field_148032_e.put(p_148020_1_, framebuffer);
+      if (p_148020_2_ == this.field_148038_h && p_148020_3_ == this.field_148039_i) {
+         this.field_148029_f.add(framebuffer);
+      }
 
-    public Framebuffer getFramebufferRaw(String p_177066_1_)
-    {
-        return this.mapFramebuffers.get(p_177066_1_);
-    }
+   }
 
-    public void addFramebuffer(String p_148020_1_, int p_148020_2_, int p_148020_3_)
-    {
-        Framebuffer framebuffer = new Framebuffer(p_148020_2_, p_148020_3_, true);
-        framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
-        this.mapFramebuffers.put(p_148020_1_, framebuffer);
+   public void func_148021_a() {
+      for(Framebuffer framebuffer : this.field_148032_e.values()) {
+         framebuffer.func_147608_a();
+      }
 
-        if (p_148020_2_ == this.mainFramebufferWidth && p_148020_3_ == this.mainFramebufferHeight)
-        {
-            this.listFramebuffers.add(framebuffer);
-        }
-    }
+      for(Shader shader : this.field_148031_d) {
+         shader.func_148044_b();
+      }
 
-    public void deleteShaderGroup()
-    {
-        for (Framebuffer framebuffer : this.mapFramebuffers.values())
-        {
-            framebuffer.deleteFramebuffer();
-        }
+      this.field_148031_d.clear();
+   }
 
-        for (Shader shader : this.listShaders)
-        {
-            shader.deleteShader();
-        }
+   public Shader func_148023_a(String p_148023_1_, Framebuffer p_148023_2_, Framebuffer p_148023_3_) throws JsonException, IOException {
+      Shader shader = new Shader(this.field_148033_b, p_148023_1_, p_148023_2_, p_148023_3_);
+      this.field_148031_d.add(this.field_148031_d.size(), shader);
+      return shader;
+   }
 
-        this.listShaders.clear();
-    }
+   private void func_148024_c() {
+      this.field_148030_g = new Matrix4f();
+      this.field_148030_g.setIdentity();
+      this.field_148030_g.m00 = 2.0F / (float)this.field_148035_a.field_147622_a;
+      this.field_148030_g.m11 = 2.0F / (float)(-this.field_148035_a.field_147620_b);
+      this.field_148030_g.m22 = -0.0020001999F;
+      this.field_148030_g.m33 = 1.0F;
+      this.field_148030_g.m03 = -1.0F;
+      this.field_148030_g.m13 = 1.0F;
+      this.field_148030_g.m23 = -1.0001999F;
+   }
 
-    public Shader addShader(String p_148023_1_, Framebuffer p_148023_2_, Framebuffer p_148023_3_) throws JsonException, IOException
-    {
-        Shader shader = new Shader(this.resourceManager, p_148023_1_, p_148023_2_, p_148023_3_);
-        this.listShaders.add(this.listShaders.size(), shader);
-        return shader;
-    }
+   public void func_148026_a(int p_148026_1_, int p_148026_2_) {
+      this.field_148038_h = this.field_148035_a.field_147622_a;
+      this.field_148039_i = this.field_148035_a.field_147620_b;
+      this.func_148024_c();
 
-    private void resetProjectionMatrix()
-    {
-        this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.setIdentity();
-        this.projectionMatrix.m00 = 2.0F / (float)this.mainFramebuffer.framebufferTextureWidth;
-        this.projectionMatrix.m11 = 2.0F / (float)(-this.mainFramebuffer.framebufferTextureHeight);
-        this.projectionMatrix.m22 = -0.0020001999F;
-        this.projectionMatrix.m33 = 1.0F;
-        this.projectionMatrix.m03 = -1.0F;
-        this.projectionMatrix.m13 = 1.0F;
-        this.projectionMatrix.m23 = -1.0001999F;
-    }
+      for(Shader shader : this.field_148031_d) {
+         shader.func_148045_a(this.field_148030_g);
+      }
 
-    public void createBindFramebuffers(int width, int height)
-    {
-        this.mainFramebufferWidth = this.mainFramebuffer.framebufferTextureWidth;
-        this.mainFramebufferHeight = this.mainFramebuffer.framebufferTextureHeight;
-        this.resetProjectionMatrix();
+      for(Framebuffer framebuffer : this.field_148029_f) {
+         framebuffer.func_147613_a(p_148026_1_, p_148026_2_);
+      }
 
-        for (Shader shader : this.listShaders)
-        {
-            shader.setProjectionMatrix(this.projectionMatrix);
-        }
+   }
 
-        for (Framebuffer framebuffer : this.listFramebuffers)
-        {
-            framebuffer.createBindFramebuffer(width, height);
-        }
-    }
+   public void func_148018_a(float p_148018_1_) {
+      if (p_148018_1_ < this.field_148037_k) {
+         this.field_148036_j += 1.0F - this.field_148037_k;
+         this.field_148036_j += p_148018_1_;
+      } else {
+         this.field_148036_j += p_148018_1_ - this.field_148037_k;
+      }
 
-    public void loadShaderGroup(float partialTicks)
-    {
-        if (partialTicks < this.lastStamp)
-        {
-            this.time += 1.0F - this.lastStamp;
-            this.time += partialTicks;
-        }
-        else
-        {
-            this.time += partialTicks - this.lastStamp;
-        }
+      for(this.field_148037_k = p_148018_1_; this.field_148036_j > 20.0F; this.field_148036_j -= 20.0F) {
+         ;
+      }
 
-        for (this.lastStamp = partialTicks; this.time > 20.0F; this.time -= 20.0F)
-        {
-            ;
-        }
+      for(Shader shader : this.field_148031_d) {
+         shader.func_148042_a(this.field_148036_j / 20.0F);
+      }
 
-        for (Shader shader : this.listShaders)
-        {
-            shader.loadShader(this.time / 20.0F);
-        }
-    }
+   }
 
-    public final String getShaderGroupName()
-    {
-        return this.shaderGroupName;
-    }
+   public final String func_148022_b() {
+      return this.field_148034_c;
+   }
 
-    private Framebuffer getFramebuffer(String p_148017_1_)
-    {
-        if (p_148017_1_ == null)
-        {
-            return null;
-        }
-        else
-        {
-            return p_148017_1_.equals("minecraft:main") ? this.mainFramebuffer : (Framebuffer)this.mapFramebuffers.get(p_148017_1_);
-        }
-    }
+   private Framebuffer func_148017_a(String p_148017_1_) {
+      if (p_148017_1_ == null) {
+         return null;
+      } else {
+         return p_148017_1_.equals("minecraft:main") ? this.field_148035_a : (Framebuffer)this.field_148032_e.get(p_148017_1_);
+      }
+   }
 }

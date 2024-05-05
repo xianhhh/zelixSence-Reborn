@@ -1,62 +1,31 @@
 package net.minecraft.util.text.translation;
 
 @Deprecated
-public class I18n
-{
-    private static final LanguageMap localizedName = LanguageMap.getInstance();
+public class I18n {
+   private static final LanguageMap field_74839_a = LanguageMap.func_74808_a();
+   private static final LanguageMap field_150828_b = new LanguageMap();
 
-    /**
-     * A StringTranslate instance using the hardcoded default locale (en_US).  Used as a fallback in case the shared
-     * StringTranslate singleton instance fails to translate a key.
-     */
-    private static final LanguageMap fallbackTranslator = new LanguageMap();
+   @Deprecated
+   public static String func_74838_a(String p_74838_0_) {
+      return field_74839_a.func_74805_b(p_74838_0_);
+   }
 
-    @Deprecated
+   @Deprecated
+   public static String func_74837_a(String p_74837_0_, Object... p_74837_1_) {
+      return field_74839_a.func_74803_a(p_74837_0_, p_74837_1_);
+   }
 
-    /**
-     * Translates a Stat name
-     */
-    public static String translateToLocal(String key)
-    {
-        return localizedName.translateKey(key);
-    }
+   @Deprecated
+   public static String func_150826_b(String p_150826_0_) {
+      return field_150828_b.func_74805_b(p_150826_0_);
+   }
 
-    @Deprecated
+   @Deprecated
+   public static boolean func_94522_b(String p_94522_0_) {
+      return field_74839_a.func_94520_b(p_94522_0_);
+   }
 
-    /**
-     * Translates a Stat name with format args
-     */
-    public static String translateToLocalFormatted(String key, Object... format)
-    {
-        return localizedName.translateKeyFormat(key, format);
-    }
-
-    @Deprecated
-
-    /**
-     * Translates a Stat name using the fallback (hardcoded en_US) locale.  Looks like it's only intended to be used if
-     * translateToLocal fails.
-     */
-    public static String translateToFallback(String key)
-    {
-        return fallbackTranslator.translateKey(key);
-    }
-
-    @Deprecated
-
-    /**
-     * Determines whether or not translateToLocal will find a translation for the given key.
-     */
-    public static boolean canTranslate(String key)
-    {
-        return localizedName.isKeyTranslated(key);
-    }
-
-    /**
-     * Gets the time, in milliseconds since epoch, that the translation mapping was last updated
-     */
-    public static long getLastTranslationUpdateTimeInMilliseconds()
-    {
-        return localizedName.getLastUpdateTimeInMilliseconds();
-    }
+   public static long func_150827_a() {
+      return field_74839_a.func_150510_c();
+   }
 }

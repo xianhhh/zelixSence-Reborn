@@ -9,40 +9,33 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityGiantZombie extends EntityMob
-{
-    public EntityGiantZombie(World worldIn)
-    {
-        super(worldIn);
-        this.setSize(this.width * 6.0F, this.height * 6.0F);
-    }
+public class EntityGiantZombie extends EntityMob {
+   public EntityGiantZombie(World p_i1736_1_) {
+      super(p_i1736_1_);
+      this.func_70105_a(this.field_70130_N * 6.0F, this.field_70131_O * 6.0F);
+   }
 
-    public static void registerFixesGiantZombie(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntityGiantZombie.class);
-    }
+   public static void func_189765_b(DataFixer p_189765_0_) {
+      EntityLiving.func_189752_a(p_189765_0_, EntityGiantZombie.class);
+   }
 
-    public float getEyeHeight()
-    {
-        return 10.440001F;
-    }
+   public float func_70047_e() {
+      return 10.440001F;
+   }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(50.0D);
-    }
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(100.0D);
+      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.5D);
+      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(50.0D);
+   }
 
-    public float getBlockPathWeight(BlockPos pos)
-    {
-        return this.world.getLightBrightness(pos) - 0.5F;
-    }
+   public float func_180484_a(BlockPos p_180484_1_) {
+      return this.field_70170_p.func_175724_o(p_180484_1_) - 0.5F;
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_GIANT;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186437_s;
+   }
 }

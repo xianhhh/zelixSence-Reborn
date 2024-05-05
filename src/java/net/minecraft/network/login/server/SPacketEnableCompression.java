@@ -5,45 +5,29 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 
-public class SPacketEnableCompression implements Packet<INetHandlerLoginClient>
-{
-    private int compressionThreshold;
+public class SPacketEnableCompression implements Packet<INetHandlerLoginClient> {
+   private int field_179733_a;
 
-    public SPacketEnableCompression()
-    {
-    }
+   public SPacketEnableCompression() {
+   }
 
-    public SPacketEnableCompression(int thresholdIn)
-    {
-        this.compressionThreshold = thresholdIn;
-    }
+   public SPacketEnableCompression(int p_i46854_1_) {
+      this.field_179733_a = p_i46854_1_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.compressionThreshold = buf.readVarIntFromBuffer();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_179733_a = p_148837_1_.func_150792_a();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.compressionThreshold);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_179733_a);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerLoginClient handler)
-    {
-        handler.handleEnableCompression(this);
-    }
+   public void func_148833_a(INetHandlerLoginClient p_148833_1_) {
+      p_148833_1_.func_180464_a(this);
+   }
 
-    public int getCompressionThreshold()
-    {
-        return this.compressionThreshold;
-    }
+   public int func_179731_a() {
+      return this.field_179733_a;
+   }
 }

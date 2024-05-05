@@ -8,51 +8,25 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 
-public interface ISaveHandler
-{
-    @Nullable
+public interface ISaveHandler {
+   @Nullable
+   WorldInfo func_75757_d();
 
-    /**
-     * Loads and returns the world info
-     */
-    WorldInfo loadWorldInfo();
+   void func_75762_c() throws MinecraftException;
 
-    /**
-     * Checks the session lock to prevent save collisions
-     */
-    void checkSessionLock() throws MinecraftException;
+   IChunkLoader func_75763_a(WorldProvider var1);
 
-    /**
-     * initializes and returns the chunk loader for the specified world provider
-     */
-    IChunkLoader getChunkLoader(WorldProvider provider);
+   void func_75755_a(WorldInfo var1, NBTTagCompound var2);
 
-    /**
-     * Saves the given World Info with the given NBTTagCompound as the Player.
-     */
-    void saveWorldInfoWithPlayer(WorldInfo worldInformation, NBTTagCompound tagCompound);
+   void func_75761_a(WorldInfo var1);
 
-    /**
-     * used to update level.dat from old format to MCRegion format
-     */
-    void saveWorldInfo(WorldInfo worldInformation);
+   IPlayerFileData func_75756_e();
 
-    IPlayerFileData getPlayerNBTManager();
+   void func_75759_a();
 
-    /**
-     * Called to flush all changes to disk, waiting for them to complete.
-     */
-    void flush();
+   File func_75765_b();
 
-    /**
-     * Gets the File object corresponding to the base directory of this world.
-     */
-    File getWorldDirectory();
+   File func_75758_b(String var1);
 
-    /**
-     * Gets the file location of the given map
-     */
-    File getMapFileFromName(String mapName);
-
-    TemplateManager getStructureTemplateManager();
+   TemplateManager func_186340_h();
 }

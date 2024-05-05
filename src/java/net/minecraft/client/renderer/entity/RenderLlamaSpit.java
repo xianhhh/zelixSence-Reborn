@@ -5,50 +5,36 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.projectile.EntityLlamaSpit;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderLlamaSpit extends Render<EntityLlamaSpit>
-{
-    private static final ResourceLocation field_191333_a = new ResourceLocation("textures/entity/llama/spit.png");
-    private final ModelLlamaSpit field_191334_f = new ModelLlamaSpit();
+public class RenderLlamaSpit extends Render<EntityLlamaSpit> {
+   private static final ResourceLocation field_191333_a = new ResourceLocation("textures/entity/llama/spit.png");
+   private final ModelLlamaSpit field_191334_f = new ModelLlamaSpit();
 
-    public RenderLlamaSpit(RenderManager p_i47202_1_)
-    {
-        super(p_i47202_1_);
-    }
+   public RenderLlamaSpit(RenderManager p_i47202_1_) {
+      super(p_i47202_1_);
+   }
 
-    /**
-     * Renders the desired {@code T} type Entity.
-     */
-    public void doRender(EntityLlamaSpit entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate((float)x, (float)y + 0.15F, (float)z);
-        GlStateManager.rotate(entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks - 90.0F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks, 0.0F, 0.0F, 1.0F);
-        this.bindEntityTexture(entity);
+   public void func_76986_a(EntityLlamaSpit p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {
+      GlStateManager.func_179094_E();
+      GlStateManager.func_179109_b((float)p_76986_2_, (float)p_76986_4_ + 0.15F, (float)p_76986_6_);
+      GlStateManager.func_179114_b(p_76986_1_.field_70126_B + (p_76986_1_.field_70177_z - p_76986_1_.field_70126_B) * p_76986_9_ - 90.0F, 0.0F, 1.0F, 0.0F);
+      GlStateManager.func_179114_b(p_76986_1_.field_70127_C + (p_76986_1_.field_70125_A - p_76986_1_.field_70127_C) * p_76986_9_, 0.0F, 0.0F, 1.0F);
+      this.func_180548_c(p_76986_1_);
+      if (this.field_188301_f) {
+         GlStateManager.func_179142_g();
+         GlStateManager.func_187431_e(this.func_188298_c(p_76986_1_));
+      }
 
-        if (this.renderOutlines)
-        {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
-        }
+      this.field_191334_f.func_78088_a(p_76986_1_, p_76986_9_, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
+      if (this.field_188301_f) {
+         GlStateManager.func_187417_n();
+         GlStateManager.func_179119_h();
+      }
 
-        this.field_191334_f.render(entity, partialTicks, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
+      GlStateManager.func_179121_F();
+      super.func_76986_a(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+   }
 
-        if (this.renderOutlines)
-        {
-            GlStateManager.disableOutlineMode();
-            GlStateManager.disableColorMaterial();
-        }
-
-        GlStateManager.popMatrix();
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
-
-    /**
-     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
-     */
-    protected ResourceLocation getEntityTexture(EntityLlamaSpit entity)
-    {
-        return field_191333_a;
-    }
+   protected ResourceLocation func_110775_a(EntityLlamaSpit p_110775_1_) {
+      return field_191333_a;
+   }
 }

@@ -10,86 +10,49 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import optifine.Config;
-import optifine.CustomItems;
 
-public class LayerElytra implements LayerRenderer<EntityLivingBase>
-{
-    /** The basic Elytra texture. */
-    private static final ResourceLocation TEXTURE_ELYTRA = new ResourceLocation("textures/entity/elytra.png");
-    protected final RenderLivingBase<?> renderPlayer;
+public class LayerElytra implements LayerRenderer<EntityLivingBase> {
+   private static final ResourceLocation field_188355_a = new ResourceLocation("textures/entity/elytra.png");
+   protected final RenderLivingBase<?> field_188356_b;
+   private final ModelElytra field_188357_c = new ModelElytra();
 
-    /** The model used by the Elytra. */
-    private final ModelElytra modelElytra = new ModelElytra();
+   public LayerElytra(RenderLivingBase<?> p_i47185_1_) {
+      this.field_188356_b = p_i47185_1_;
+   }
 
-    public LayerElytra(RenderLivingBase<?> p_i47185_1_)
-    {
-        this.renderPlayer = p_i47185_1_;
-    }
-
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
-    {
-        ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-
-        if (itemstack.getItem() == Items.ELYTRA)
-        {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-
-            if (entitylivingbaseIn instanceof AbstractClientPlayer)
-            {
-                AbstractClientPlayer abstractclientplayer = (AbstractClientPlayer)entitylivingbaseIn;
-
-                if (abstractclientplayer.isPlayerInfoSet() && abstractclientplayer.getLocationElytra() != null)
-                {
-                    this.renderPlayer.bindTexture(abstractclientplayer.getLocationElytra());
-                }
-                else if (abstractclientplayer.hasElytraCape() && abstractclientplayer.hasPlayerInfo() && abstractclientplayer.getLocationCape() != null && abstractclientplayer.isWearing(EnumPlayerModelParts.CAPE))
-                {
-                    this.renderPlayer.bindTexture(abstractclientplayer.getLocationCape());
-                }
-                else
-                {
-                    ResourceLocation resourcelocation1 = TEXTURE_ELYTRA;
-
-                    if (Config.isCustomItems())
-                    {
-                        resourcelocation1 = CustomItems.getCustomElytraTexture(itemstack, resourcelocation1);
-                    }
-
-                    this.renderPlayer.bindTexture(resourcelocation1);
-                }
+   public void func_177141_a(EntityLivingBase p_177141_1_, float p_177141_2_, float p_177141_3_, float p_177141_4_, float p_177141_5_, float p_177141_6_, float p_177141_7_, float p_177141_8_) {
+      ItemStack itemstack = p_177141_1_.func_184582_a(EntityEquipmentSlot.CHEST);
+      if (itemstack.func_77973_b() == Items.field_185160_cR) {
+         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.func_179147_l();
+         GlStateManager.func_187401_a(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+         if (p_177141_1_ instanceof AbstractClientPlayer) {
+            AbstractClientPlayer abstractclientplayer = (AbstractClientPlayer)p_177141_1_;
+            if (abstractclientplayer.func_184833_s() && abstractclientplayer.func_184834_t() != null) {
+               this.field_188356_b.func_110776_a(abstractclientplayer.func_184834_t());
+            } else if (abstractclientplayer.func_152122_n() && abstractclientplayer.func_110303_q() != null && abstractclientplayer.func_175148_a(EnumPlayerModelParts.CAPE)) {
+               this.field_188356_b.func_110776_a(abstractclientplayer.func_110303_q());
+            } else {
+               this.field_188356_b.func_110776_a(field_188355_a);
             }
-            else
-            {
-                ResourceLocation resourcelocation = TEXTURE_ELYTRA;
+         } else {
+            this.field_188356_b.func_110776_a(field_188355_a);
+         }
 
-                if (Config.isCustomItems())
-                {
-                    resourcelocation = CustomItems.getCustomElytraTexture(itemstack, resourcelocation);
-                }
+         GlStateManager.func_179094_E();
+         GlStateManager.func_179109_b(0.0F, 0.0F, 0.125F);
+         this.field_188357_c.func_78087_a(p_177141_2_, p_177141_3_, p_177141_5_, p_177141_6_, p_177141_7_, p_177141_8_, p_177141_1_);
+         this.field_188357_c.func_78088_a(p_177141_1_, p_177141_2_, p_177141_3_, p_177141_5_, p_177141_6_, p_177141_7_, p_177141_8_);
+         if (itemstack.func_77948_v()) {
+            LayerArmorBase.func_188364_a(this.field_188356_b, p_177141_1_, this.field_188357_c, p_177141_2_, p_177141_3_, p_177141_4_, p_177141_5_, p_177141_6_, p_177141_7_, p_177141_8_);
+         }
 
-                this.renderPlayer.bindTexture(resourcelocation);
-            }
+         GlStateManager.func_179084_k();
+         GlStateManager.func_179121_F();
+      }
+   }
 
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(0.0F, 0.0F, 0.125F);
-            this.modelElytra.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entitylivingbaseIn);
-            this.modelElytra.render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
-
-            if (itemstack.isItemEnchanted())
-            {
-                LayerArmorBase.renderEnchantedGlint(this.renderPlayer, entitylivingbaseIn, this.modelElytra, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
-            }
-
-            GlStateManager.disableBlend();
-            GlStateManager.popMatrix();
-        }
-    }
-
-    public boolean shouldCombineTextures()
-    {
-        return false;
-    }
+   public boolean func_177142_b() {
+      return false;
+   }
 }

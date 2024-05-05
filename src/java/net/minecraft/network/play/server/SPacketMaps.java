@@ -8,132 +8,105 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
 
-public class SPacketMaps implements Packet<INetHandlerPlayClient>
-{
-    private int mapId;
-    private byte mapScale;
-    private boolean trackingPosition;
-    private MapDecoration[] icons;
-    private int minX;
-    private int minZ;
-    private int columns;
-    private int rows;
-    private byte[] mapDataBytes;
+public class SPacketMaps implements Packet<INetHandlerPlayClient> {
+   private int field_149191_a;
+   private byte field_179739_b;
+   private boolean field_186950_c;
+   private MapDecoration[] field_179740_c;
+   private int field_179737_d;
+   private int field_179738_e;
+   private int field_179735_f;
+   private int field_179736_g;
+   private byte[] field_179741_h;
 
-    public SPacketMaps()
-    {
-    }
+   public SPacketMaps() {
+   }
 
-    public SPacketMaps(int mapIdIn, byte mapScaleIn, boolean trackingPositionIn, Collection<MapDecoration> iconsIn, byte[] p_i46937_5_, int minXIn, int minZIn, int columnsIn, int rowsIn)
-    {
-        this.mapId = mapIdIn;
-        this.mapScale = mapScaleIn;
-        this.trackingPosition = trackingPositionIn;
-        this.icons = (MapDecoration[])iconsIn.toArray(new MapDecoration[iconsIn.size()]);
-        this.minX = minXIn;
-        this.minZ = minZIn;
-        this.columns = columnsIn;
-        this.rows = rowsIn;
-        this.mapDataBytes = new byte[columnsIn * rowsIn];
+   public SPacketMaps(int p_i46937_1_, byte p_i46937_2_, boolean p_i46937_3_, Collection<MapDecoration> p_i46937_4_, byte[] p_i46937_5_, int p_i46937_6_, int p_i46937_7_, int p_i46937_8_, int p_i46937_9_) {
+      this.field_149191_a = p_i46937_1_;
+      this.field_179739_b = p_i46937_2_;
+      this.field_186950_c = p_i46937_3_;
+      this.field_179740_c = (MapDecoration[])p_i46937_4_.toArray(new MapDecoration[p_i46937_4_.size()]);
+      this.field_179737_d = p_i46937_6_;
+      this.field_179738_e = p_i46937_7_;
+      this.field_179735_f = p_i46937_8_;
+      this.field_179736_g = p_i46937_9_;
+      this.field_179741_h = new byte[p_i46937_8_ * p_i46937_9_];
 
-        for (int i = 0; i < columnsIn; ++i)
-        {
-            for (int j = 0; j < rowsIn; ++j)
-            {
-                this.mapDataBytes[i + j * columnsIn] = p_i46937_5_[minXIn + i + (minZIn + j) * 128];
-            }
-        }
-    }
+      for(int i = 0; i < p_i46937_8_; ++i) {
+         for(int j = 0; j < p_i46937_9_; ++j) {
+            this.field_179741_h[i + j * p_i46937_8_] = p_i46937_5_[p_i46937_6_ + i + (p_i46937_7_ + j) * 128];
+         }
+      }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.mapId = buf.readVarIntFromBuffer();
-        this.mapScale = buf.readByte();
-        this.trackingPosition = buf.readBoolean();
-        this.icons = new MapDecoration[buf.readVarIntFromBuffer()];
+   }
 
-        for (int i = 0; i < this.icons.length; ++i)
-        {
-            short short1 = (short)buf.readByte();
-            this.icons[i] = new MapDecoration(MapDecoration.Type.func_191159_a((byte)(short1 >> 4 & 15)), buf.readByte(), buf.readByte(), (byte)(short1 & 15));
-        }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149191_a = p_148837_1_.func_150792_a();
+      this.field_179739_b = p_148837_1_.readByte();
+      this.field_186950_c = p_148837_1_.readBoolean();
+      this.field_179740_c = new MapDecoration[p_148837_1_.func_150792_a()];
 
-        this.columns = buf.readUnsignedByte();
+      for(int i = 0; i < this.field_179740_c.length; ++i) {
+         short short1 = (short)p_148837_1_.readByte();
+         this.field_179740_c[i] = new MapDecoration(MapDecoration.Type.func_191159_a((byte)(short1 >> 4 & 15)), p_148837_1_.readByte(), p_148837_1_.readByte(), (byte)(short1 & 15));
+      }
 
-        if (this.columns > 0)
-        {
-            this.rows = buf.readUnsignedByte();
-            this.minX = buf.readUnsignedByte();
-            this.minZ = buf.readUnsignedByte();
-            this.mapDataBytes = buf.readByteArray();
-        }
-    }
+      this.field_179735_f = p_148837_1_.readUnsignedByte();
+      if (this.field_179735_f > 0) {
+         this.field_179736_g = p_148837_1_.readUnsignedByte();
+         this.field_179737_d = p_148837_1_.readUnsignedByte();
+         this.field_179738_e = p_148837_1_.readUnsignedByte();
+         this.field_179741_h = p_148837_1_.func_179251_a();
+      }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.mapId);
-        buf.writeByte(this.mapScale);
-        buf.writeBoolean(this.trackingPosition);
-        buf.writeVarIntToBuffer(this.icons.length);
+   }
 
-        for (MapDecoration mapdecoration : this.icons)
-        {
-            buf.writeByte((mapdecoration.getType() & 15) << 4 | mapdecoration.getRotation() & 15);
-            buf.writeByte(mapdecoration.getX());
-            buf.writeByte(mapdecoration.getY());
-        }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149191_a);
+      p_148840_1_.writeByte(this.field_179739_b);
+      p_148840_1_.writeBoolean(this.field_186950_c);
+      p_148840_1_.func_150787_b(this.field_179740_c.length);
 
-        buf.writeByte(this.columns);
+      for(MapDecoration mapdecoration : this.field_179740_c) {
+         p_148840_1_.writeByte((mapdecoration.func_176110_a() & 15) << 4 | mapdecoration.func_176111_d() & 15);
+         p_148840_1_.writeByte(mapdecoration.func_176112_b());
+         p_148840_1_.writeByte(mapdecoration.func_176113_c());
+      }
 
-        if (this.columns > 0)
-        {
-            buf.writeByte(this.rows);
-            buf.writeByte(this.minX);
-            buf.writeByte(this.minZ);
-            buf.writeByteArray(this.mapDataBytes);
-        }
-    }
+      p_148840_1_.writeByte(this.field_179735_f);
+      if (this.field_179735_f > 0) {
+         p_148840_1_.writeByte(this.field_179736_g);
+         p_148840_1_.writeByte(this.field_179737_d);
+         p_148840_1_.writeByte(this.field_179738_e);
+         p_148840_1_.func_179250_a(this.field_179741_h);
+      }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleMaps(this);
-    }
+   }
 
-    public int getMapId()
-    {
-        return this.mapId;
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147264_a(this);
+   }
 
-    /**
-     * Sets new MapData from the packet to given MapData param
-     */
-    public void setMapdataTo(MapData mapdataIn)
-    {
-        mapdataIn.scale = this.mapScale;
-        mapdataIn.trackingPosition = this.trackingPosition;
-        mapdataIn.mapDecorations.clear();
+   public int func_149188_c() {
+      return this.field_149191_a;
+   }
 
-        for (int i = 0; i < this.icons.length; ++i)
-        {
-            MapDecoration mapdecoration = this.icons[i];
-            mapdataIn.mapDecorations.put("icon-" + i, mapdecoration);
-        }
+   public void func_179734_a(MapData p_179734_1_) {
+      p_179734_1_.field_76197_d = this.field_179739_b;
+      p_179734_1_.field_186210_e = this.field_186950_c;
+      p_179734_1_.field_76203_h.clear();
 
-        for (int j = 0; j < this.columns; ++j)
-        {
-            for (int k = 0; k < this.rows; ++k)
-            {
-                mapdataIn.colors[this.minX + j + (this.minZ + k) * 128] = this.mapDataBytes[j + k * this.columns];
-            }
-        }
-    }
+      for(int i = 0; i < this.field_179740_c.length; ++i) {
+         MapDecoration mapdecoration = this.field_179740_c[i];
+         p_179734_1_.field_76203_h.put("icon-" + i, mapdecoration);
+      }
+
+      for(int j = 0; j < this.field_179735_f; ++j) {
+         for(int k = 0; k < this.field_179736_g; ++k) {
+            p_179734_1_.field_76198_e[this.field_179737_d + j + (this.field_179738_e + k) * 128] = this.field_179741_h[j + k * this.field_179735_f];
+         }
+      }
+
+   }
 }

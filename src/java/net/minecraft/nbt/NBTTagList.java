@@ -9,314 +9,206 @@ import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NBTTagList extends NBTBase
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private List<NBTBase> tagList = Lists.<NBTBase>newArrayList();
+public class NBTTagList extends NBTBase {
+   private static final Logger field_179239_b = LogManager.getLogger();
+   private List<NBTBase> field_74747_a = Lists.<NBTBase>newArrayList();
+   private byte field_74746_b = 0;
 
-    /**
-     * The type byte for the tags in the list - they must all be of the same type.
-     */
-    private byte tagType = 0;
+   void func_74734_a(DataOutput p_74734_1_) throws IOException {
+      if (this.field_74747_a.isEmpty()) {
+         this.field_74746_b = 0;
+      } else {
+         this.field_74746_b = ((NBTBase)this.field_74747_a.get(0)).func_74732_a();
+      }
 
-    /**
-     * Write the actual data contents of the tag, implemented in NBT extension classes
-     */
-    void write(DataOutput output) throws IOException
-    {
-        if (this.tagList.isEmpty())
-        {
-            this.tagType = 0;
-        }
-        else
-        {
-            this.tagType = ((NBTBase)this.tagList.get(0)).getId();
-        }
+      p_74734_1_.writeByte(this.field_74746_b);
+      p_74734_1_.writeInt(this.field_74747_a.size());
 
-        output.writeByte(this.tagType);
-        output.writeInt(this.tagList.size());
+      for(int i = 0; i < this.field_74747_a.size(); ++i) {
+         ((NBTBase)this.field_74747_a.get(i)).func_74734_a(p_74734_1_);
+      }
 
-        for (int i = 0; i < this.tagList.size(); ++i)
-        {
-            ((NBTBase)this.tagList.get(i)).write(output);
-        }
-    }
+   }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
-    {
-        sizeTracker.read(296L);
+   void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException {
+      p_152446_3_.func_152450_a(296L);
+      if (p_152446_2_ > 512) {
+         throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
+      } else {
+         this.field_74746_b = p_152446_1_.readByte();
+         int i = p_152446_1_.readInt();
+         if (this.field_74746_b == 0 && i > 0) {
+            throw new RuntimeException("Missing type on ListTag");
+         } else {
+            p_152446_3_.func_152450_a(32L * (long)i);
+            this.field_74747_a = Lists.<NBTBase>newArrayListWithCapacity(i);
 
-        if (depth > 512)
-        {
-            throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
-        }
-        else
-        {
-            this.tagType = input.readByte();
-            int i = input.readInt();
-
-            if (this.tagType == 0 && i > 0)
-            {
-                throw new RuntimeException("Missing type on ListTag");
-            }
-            else
-            {
-                sizeTracker.read(32L * (long)i);
-                this.tagList = Lists.<NBTBase>newArrayListWithCapacity(i);
-
-                for (int j = 0; j < i; ++j)
-                {
-                    NBTBase nbtbase = NBTBase.createNewByType(this.tagType);
-                    nbtbase.read(input, depth + 1, sizeTracker);
-                    this.tagList.add(nbtbase);
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets the type byte for the tag.
-     */
-    public byte getId()
-    {
-        return 9;
-    }
-
-    public String toString()
-    {
-        StringBuilder stringbuilder = new StringBuilder("[");
-
-        for (int i = 0; i < this.tagList.size(); ++i)
-        {
-            if (i != 0)
-            {
-                stringbuilder.append(',');
+            for(int j = 0; j < i; ++j) {
+               NBTBase nbtbase = NBTBase.func_150284_a(this.field_74746_b);
+               nbtbase.func_152446_a(p_152446_1_, p_152446_2_ + 1, p_152446_3_);
+               this.field_74747_a.add(nbtbase);
             }
 
-            stringbuilder.append(this.tagList.get(i));
-        }
+         }
+      }
+   }
 
-        return stringbuilder.append(']').toString();
-    }
+   public byte func_74732_a() {
+      return 9;
+   }
 
-    /**
-     * Adds the provided tag to the end of the list. There is no check to verify this tag is of the same type as any
-     * previous tag.
-     */
-    public void appendTag(NBTBase nbt)
-    {
-        if (nbt.getId() == 0)
-        {
-            LOGGER.warn("Invalid TagEnd added to ListTag");
-        }
-        else
-        {
-            if (this.tagType == 0)
-            {
-                this.tagType = nbt.getId();
-            }
-            else if (this.tagType != nbt.getId())
-            {
-                LOGGER.warn("Adding mismatching tag types to tag list");
-                return;
-            }
+   public String toString() {
+      StringBuilder stringbuilder = new StringBuilder("[");
 
-            this.tagList.add(nbt);
-        }
-    }
+      for(int i = 0; i < this.field_74747_a.size(); ++i) {
+         if (i != 0) {
+            stringbuilder.append(',');
+         }
 
-    /**
-     * Set the given index to the given tag
-     */
-    public void set(int idx, NBTBase nbt)
-    {
-        if (nbt.getId() == 0)
-        {
-            LOGGER.warn("Invalid TagEnd added to ListTag");
-        }
-        else if (idx >= 0 && idx < this.tagList.size())
-        {
-            if (this.tagType == 0)
-            {
-                this.tagType = nbt.getId();
-            }
-            else if (this.tagType != nbt.getId())
-            {
-                LOGGER.warn("Adding mismatching tag types to tag list");
-                return;
-            }
+         stringbuilder.append(this.field_74747_a.get(i));
+      }
 
-            this.tagList.set(idx, nbt);
-        }
-        else
-        {
-            LOGGER.warn("index out of bounds to set tag in tag list");
-        }
-    }
+      return stringbuilder.append(']').toString();
+   }
 
-    /**
-     * Removes a tag at the given index.
-     */
-    public NBTBase removeTag(int i)
-    {
-        return this.tagList.remove(i);
-    }
+   public void func_74742_a(NBTBase p_74742_1_) {
+      if (p_74742_1_.func_74732_a() == 0) {
+         field_179239_b.warn("Invalid TagEnd added to ListTag");
+      } else {
+         if (this.field_74746_b == 0) {
+            this.field_74746_b = p_74742_1_.func_74732_a();
+         } else if (this.field_74746_b != p_74742_1_.func_74732_a()) {
+            field_179239_b.warn("Adding mismatching tag types to tag list");
+            return;
+         }
 
-    /**
-     * Return whether this compound has no tags.
-     */
-    public boolean hasNoTags()
-    {
-        return this.tagList.isEmpty();
-    }
+         this.field_74747_a.add(p_74742_1_);
+      }
+   }
 
-    /**
-     * Retrieves the NBTTagCompound at the specified index in the list
-     */
-    public NBTTagCompound getCompoundTagAt(int i)
-    {
-        if (i >= 0 && i < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(i);
+   public void func_150304_a(int p_150304_1_, NBTBase p_150304_2_) {
+      if (p_150304_2_.func_74732_a() == 0) {
+         field_179239_b.warn("Invalid TagEnd added to ListTag");
+      } else if (p_150304_1_ >= 0 && p_150304_1_ < this.field_74747_a.size()) {
+         if (this.field_74746_b == 0) {
+            this.field_74746_b = p_150304_2_.func_74732_a();
+         } else if (this.field_74746_b != p_150304_2_.func_74732_a()) {
+            field_179239_b.warn("Adding mismatching tag types to tag list");
+            return;
+         }
 
-            if (nbtbase.getId() == 10)
-            {
-                return (NBTTagCompound)nbtbase;
-            }
-        }
+         this.field_74747_a.set(p_150304_1_, p_150304_2_);
+      } else {
+         field_179239_b.warn("index out of bounds to set tag in tag list");
+      }
+   }
 
-        return new NBTTagCompound();
-    }
+   public NBTBase func_74744_a(int p_74744_1_) {
+      return this.field_74747_a.remove(p_74744_1_);
+   }
 
-    public int getIntAt(int p_186858_1_)
-    {
-        if (p_186858_1_ >= 0 && p_186858_1_ < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(p_186858_1_);
+   public boolean func_82582_d() {
+      return this.field_74747_a.isEmpty();
+   }
 
-            if (nbtbase.getId() == 3)
-            {
-                return ((NBTTagInt)nbtbase).getInt();
-            }
-        }
+   public NBTTagCompound func_150305_b(int p_150305_1_) {
+      if (p_150305_1_ >= 0 && p_150305_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_150305_1_);
+         if (nbtbase.func_74732_a() == 10) {
+            return (NBTTagCompound)nbtbase;
+         }
+      }
 
-        return 0;
-    }
+      return new NBTTagCompound();
+   }
 
-    public int[] getIntArrayAt(int i)
-    {
-        if (i >= 0 && i < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(i);
+   public int func_186858_c(int p_186858_1_) {
+      if (p_186858_1_ >= 0 && p_186858_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_186858_1_);
+         if (nbtbase.func_74732_a() == 3) {
+            return ((NBTTagInt)nbtbase).func_150287_d();
+         }
+      }
 
-            if (nbtbase.getId() == 11)
-            {
-                return ((NBTTagIntArray)nbtbase).getIntArray();
-            }
-        }
+      return 0;
+   }
 
-        return new int[0];
-    }
+   public int[] func_150306_c(int p_150306_1_) {
+      if (p_150306_1_ >= 0 && p_150306_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_150306_1_);
+         if (nbtbase.func_74732_a() == 11) {
+            return ((NBTTagIntArray)nbtbase).func_150302_c();
+         }
+      }
 
-    public double getDoubleAt(int i)
-    {
-        if (i >= 0 && i < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(i);
+      return new int[0];
+   }
 
-            if (nbtbase.getId() == 6)
-            {
-                return ((NBTTagDouble)nbtbase).getDouble();
-            }
-        }
+   public double func_150309_d(int p_150309_1_) {
+      if (p_150309_1_ >= 0 && p_150309_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_150309_1_);
+         if (nbtbase.func_74732_a() == 6) {
+            return ((NBTTagDouble)nbtbase).func_150286_g();
+         }
+      }
 
-        return 0.0D;
-    }
+      return 0.0D;
+   }
 
-    public float getFloatAt(int i)
-    {
-        if (i >= 0 && i < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(i);
+   public float func_150308_e(int p_150308_1_) {
+      if (p_150308_1_ >= 0 && p_150308_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_150308_1_);
+         if (nbtbase.func_74732_a() == 5) {
+            return ((NBTTagFloat)nbtbase).func_150288_h();
+         }
+      }
 
-            if (nbtbase.getId() == 5)
-            {
-                return ((NBTTagFloat)nbtbase).getFloat();
-            }
-        }
+      return 0.0F;
+   }
 
-        return 0.0F;
-    }
+   public String func_150307_f(int p_150307_1_) {
+      if (p_150307_1_ >= 0 && p_150307_1_ < this.field_74747_a.size()) {
+         NBTBase nbtbase = this.field_74747_a.get(p_150307_1_);
+         return nbtbase.func_74732_a() == 8 ? nbtbase.func_150285_a_() : nbtbase.toString();
+      } else {
+         return "";
+      }
+   }
 
-    /**
-     * Retrieves the tag String value at the specified index in the list
-     */
-    public String getStringTagAt(int i)
-    {
-        if (i >= 0 && i < this.tagList.size())
-        {
-            NBTBase nbtbase = this.tagList.get(i);
-            return nbtbase.getId() == 8 ? nbtbase.getString() : nbtbase.toString();
-        }
-        else
-        {
-            return "";
-        }
-    }
+   public NBTBase func_179238_g(int p_179238_1_) {
+      return (NBTBase)(p_179238_1_ >= 0 && p_179238_1_ < this.field_74747_a.size() ? (NBTBase)this.field_74747_a.get(p_179238_1_) : new NBTTagEnd());
+   }
 
-    /**
-     * Get the tag at the given position
-     */
-    public NBTBase get(int idx)
-    {
-        return (NBTBase)(idx >= 0 && idx < this.tagList.size() ? (NBTBase)this.tagList.get(idx) : new NBTTagEnd());
-    }
+   public int func_74745_c() {
+      return this.field_74747_a.size();
+   }
 
-    /**
-     * Returns the number of tags in the list.
-     */
-    public int tagCount()
-    {
-        return this.tagList.size();
-    }
+   public NBTTagList func_74737_b() {
+      NBTTagList nbttaglist = new NBTTagList();
+      nbttaglist.field_74746_b = this.field_74746_b;
 
-    /**
-     * Creates a clone of the tag.
-     */
-    public NBTTagList copy()
-    {
-        NBTTagList nbttaglist = new NBTTagList();
-        nbttaglist.tagType = this.tagType;
+      for(NBTBase nbtbase : this.field_74747_a) {
+         NBTBase nbtbase1 = nbtbase.func_74737_b();
+         nbttaglist.field_74747_a.add(nbtbase1);
+      }
 
-        for (NBTBase nbtbase : this.tagList)
-        {
-            NBTBase nbtbase1 = nbtbase.copy();
-            nbttaglist.tagList.add(nbtbase1);
-        }
+      return nbttaglist;
+   }
 
-        return nbttaglist;
-    }
+   public boolean equals(Object p_equals_1_) {
+      if (!super.equals(p_equals_1_)) {
+         return false;
+      } else {
+         NBTTagList nbttaglist = (NBTTagList)p_equals_1_;
+         return this.field_74746_b == nbttaglist.field_74746_b && Objects.equals(this.field_74747_a, nbttaglist.field_74747_a);
+      }
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (!super.equals(p_equals_1_))
-        {
-            return false;
-        }
-        else
-        {
-            NBTTagList nbttaglist = (NBTTagList)p_equals_1_;
-            return this.tagType == nbttaglist.tagType && Objects.equals(this.tagList, nbttaglist.tagList);
-        }
-    }
+   public int hashCode() {
+      return super.hashCode() ^ this.field_74747_a.hashCode();
+   }
 
-    public int hashCode()
-    {
-        return super.hashCode() ^ this.tagList.hashCode();
-    }
-
-    public int getTagType()
-    {
-        return this.tagType;
-    }
+   public int func_150303_d() {
+      return this.field_74746_b;
+   }
 }

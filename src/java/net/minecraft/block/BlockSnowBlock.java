@@ -10,37 +10,26 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-public class BlockSnowBlock extends Block
-{
-    protected BlockSnowBlock()
-    {
-        super(Material.CRAFTED_SNOW);
-        this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+public class BlockSnowBlock extends Block {
+   protected BlockSnowBlock() {
+      super(Material.field_151596_z);
+      this.func_149675_a(true);
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Items.SNOWBALL;
-    }
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Items.field_151126_ay;
+   }
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    public int quantityDropped(Random random)
-    {
-        return 4;
-    }
+   public int func_149745_a(Random p_149745_1_) {
+      return 4;
+   }
 
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-        if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11)
-        {
-            this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
-            worldIn.setBlockToAir(pos);
-        }
-    }
+   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
+      if (p_180650_1_.func_175642_b(EnumSkyBlock.BLOCK, p_180650_2_) > 11) {
+         this.func_176226_b(p_180650_1_, p_180650_2_, p_180650_1_.func_180495_p(p_180650_2_), 0);
+         p_180650_1_.func_175698_g(p_180650_2_);
+      }
+
+   }
 }

@@ -5,18 +5,12 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.util.math.BlockPos;
 
-public interface ICommandManager
-{
-    /**
-     * Attempt to execute a command. This method should return the number of times that the command was executed. If the
-     * command does not exist or if the player does not have permission, 0 will be returned. A number greater than 1 can
-     * be returned if a player selector is used.
-     */
-    int executeCommand(ICommandSender sender, String rawCommand);
+public interface ICommandManager {
+   int func_71556_a(ICommandSender var1, String var2);
 
-    List<String> getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos);
+   List<String> func_180524_a(ICommandSender var1, String var2, @Nullable BlockPos var3);
 
-    List<ICommand> getPossibleCommands(ICommandSender sender);
+   List<ICommand> func_71557_a(ICommandSender var1);
 
-    Map<String, ICommand> getCommands();
+   Map<String, ICommand> func_71555_a();
 }

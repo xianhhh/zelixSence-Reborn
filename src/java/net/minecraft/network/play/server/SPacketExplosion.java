@@ -9,139 +9,113 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class SPacketExplosion implements Packet<INetHandlerPlayClient>
-{
-    private double posX;
-    private double posY;
-    private double posZ;
-    private float strength;
-    private List<BlockPos> affectedBlockPositions;
-    private float motionX;
-    private float motionY;
-    private float motionZ;
+public class SPacketExplosion implements Packet<INetHandlerPlayClient> {
+   private double field_149158_a;
+   private double field_149156_b;
+   private double field_149157_c;
+   private float field_149154_d;
+   private List<BlockPos> field_149155_e;
+   private float field_149152_f;
+   private float field_149153_g;
+   private float field_149159_h;
 
-    public SPacketExplosion()
-    {
-    }
+   public SPacketExplosion() {
+   }
 
-    public SPacketExplosion(double xIn, double yIn, double zIn, float strengthIn, List<BlockPos> affectedBlockPositionsIn, Vec3d motion)
-    {
-        this.posX = xIn;
-        this.posY = yIn;
-        this.posZ = zIn;
-        this.strength = strengthIn;
-        this.affectedBlockPositions = Lists.newArrayList(affectedBlockPositionsIn);
+   public SPacketExplosion(double p_i47099_1_, double p_i47099_3_, double p_i47099_5_, float p_i47099_7_, List<BlockPos> p_i47099_8_, Vec3d p_i47099_9_) {
+      this.field_149158_a = p_i47099_1_;
+      this.field_149156_b = p_i47099_3_;
+      this.field_149157_c = p_i47099_5_;
+      this.field_149154_d = p_i47099_7_;
+      this.field_149155_e = Lists.newArrayList(p_i47099_8_);
+      if (p_i47099_9_ != null) {
+         this.field_149152_f = (float)p_i47099_9_.field_72450_a;
+         this.field_149153_g = (float)p_i47099_9_.field_72448_b;
+         this.field_149159_h = (float)p_i47099_9_.field_72449_c;
+      }
 
-        if (motion != null)
-        {
-            this.motionX = (float)motion.xCoord;
-            this.motionY = (float)motion.yCoord;
-            this.motionZ = (float)motion.zCoord;
-        }
-    }
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.posX = (double)buf.readFloat();
-        this.posY = (double)buf.readFloat();
-        this.posZ = (double)buf.readFloat();
-        this.strength = buf.readFloat();
-        int i = buf.readInt();
-        this.affectedBlockPositions = Lists.<BlockPos>newArrayListWithCapacity(i);
-        int j = (int)this.posX;
-        int k = (int)this.posY;
-        int l = (int)this.posZ;
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149158_a = (double)p_148837_1_.readFloat();
+      this.field_149156_b = (double)p_148837_1_.readFloat();
+      this.field_149157_c = (double)p_148837_1_.readFloat();
+      this.field_149154_d = p_148837_1_.readFloat();
+      int i = p_148837_1_.readInt();
+      this.field_149155_e = Lists.<BlockPos>newArrayListWithCapacity(i);
+      int j = (int)this.field_149158_a;
+      int k = (int)this.field_149156_b;
+      int l = (int)this.field_149157_c;
 
-        for (int i1 = 0; i1 < i; ++i1)
-        {
-            int j1 = buf.readByte() + j;
-            int k1 = buf.readByte() + k;
-            int l1 = buf.readByte() + l;
-            this.affectedBlockPositions.add(new BlockPos(j1, k1, l1));
-        }
+      for(int i1 = 0; i1 < i; ++i1) {
+         int j1 = p_148837_1_.readByte() + j;
+         int k1 = p_148837_1_.readByte() + k;
+         int l1 = p_148837_1_.readByte() + l;
+         this.field_149155_e.add(new BlockPos(j1, k1, l1));
+      }
 
-        this.motionX = buf.readFloat();
-        this.motionY = buf.readFloat();
-        this.motionZ = buf.readFloat();
-    }
+      this.field_149152_f = p_148837_1_.readFloat();
+      this.field_149153_g = p_148837_1_.readFloat();
+      this.field_149159_h = p_148837_1_.readFloat();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeFloat((float)this.posX);
-        buf.writeFloat((float)this.posY);
-        buf.writeFloat((float)this.posZ);
-        buf.writeFloat(this.strength);
-        buf.writeInt(this.affectedBlockPositions.size());
-        int i = (int)this.posX;
-        int j = (int)this.posY;
-        int k = (int)this.posZ;
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeFloat((float)this.field_149158_a);
+      p_148840_1_.writeFloat((float)this.field_149156_b);
+      p_148840_1_.writeFloat((float)this.field_149157_c);
+      p_148840_1_.writeFloat(this.field_149154_d);
+      p_148840_1_.writeInt(this.field_149155_e.size());
+      int i = (int)this.field_149158_a;
+      int j = (int)this.field_149156_b;
+      int k = (int)this.field_149157_c;
 
-        for (BlockPos blockpos : this.affectedBlockPositions)
-        {
-            int l = blockpos.getX() - i;
-            int i1 = blockpos.getY() - j;
-            int j1 = blockpos.getZ() - k;
-            buf.writeByte(l);
-            buf.writeByte(i1);
-            buf.writeByte(j1);
-        }
+      for(BlockPos blockpos : this.field_149155_e) {
+         int l = blockpos.func_177958_n() - i;
+         int i1 = blockpos.func_177956_o() - j;
+         int j1 = blockpos.func_177952_p() - k;
+         p_148840_1_.writeByte(l);
+         p_148840_1_.writeByte(i1);
+         p_148840_1_.writeByte(j1);
+      }
 
-        buf.writeFloat(this.motionX);
-        buf.writeFloat(this.motionY);
-        buf.writeFloat(this.motionZ);
-    }
+      p_148840_1_.writeFloat(this.field_149152_f);
+      p_148840_1_.writeFloat(this.field_149153_g);
+      p_148840_1_.writeFloat(this.field_149159_h);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleExplosion(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147283_a(this);
+   }
 
-    public float getMotionX()
-    {
-        return this.motionX;
-    }
+   public float func_149149_c() {
+      return this.field_149152_f;
+   }
 
-    public float getMotionY()
-    {
-        return this.motionY;
-    }
+   public float func_149144_d() {
+      return this.field_149153_g;
+   }
 
-    public float getMotionZ()
-    {
-        return this.motionZ;
-    }
+   public float func_149147_e() {
+      return this.field_149159_h;
+   }
 
-    public double getX()
-    {
-        return this.posX;
-    }
+   public double func_149148_f() {
+      return this.field_149158_a;
+   }
 
-    public double getY()
-    {
-        return this.posY;
-    }
+   public double func_149143_g() {
+      return this.field_149156_b;
+   }
 
-    public double getZ()
-    {
-        return this.posZ;
-    }
+   public double func_149145_h() {
+      return this.field_149157_c;
+   }
 
-    public float getStrength()
-    {
-        return this.strength;
-    }
+   public float func_149146_i() {
+      return this.field_149154_d;
+   }
 
-    public List<BlockPos> getAffectedBlockPositions()
-    {
-        return this.affectedBlockPositions;
-    }
+   public List<BlockPos> func_149150_j() {
+      return this.field_149155_e;
+   }
 }

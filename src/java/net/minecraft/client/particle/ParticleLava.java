@@ -5,80 +5,65 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public class ParticleLava extends Particle
-{
-    private final float lavaParticleScale;
+public class ParticleLava extends Particle {
+   private final float field_70586_a;
 
-    protected ParticleLava(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn)
-    {
-        super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
-        this.motionX *= 0.800000011920929D;
-        this.motionY *= 0.800000011920929D;
-        this.motionZ *= 0.800000011920929D;
-        this.motionY = (double)(this.rand.nextFloat() * 0.4F + 0.05F);
-        this.particleRed = 1.0F;
-        this.particleGreen = 1.0F;
-        this.particleBlue = 1.0F;
-        this.particleScale *= this.rand.nextFloat() * 2.0F + 0.2F;
-        this.lavaParticleScale = this.particleScale;
-        this.particleMaxAge = (int)(16.0D / (Math.random() * 0.8D + 0.2D));
-        this.setParticleTextureIndex(49);
-    }
+   protected ParticleLava(World p_i1215_1_, double p_i1215_2_, double p_i1215_4_, double p_i1215_6_) {
+      super(p_i1215_1_, p_i1215_2_, p_i1215_4_, p_i1215_6_, 0.0D, 0.0D, 0.0D);
+      this.field_187129_i *= 0.800000011920929D;
+      this.field_187130_j *= 0.800000011920929D;
+      this.field_187131_k *= 0.800000011920929D;
+      this.field_187130_j = (double)(this.field_187136_p.nextFloat() * 0.4F + 0.05F);
+      this.field_70552_h = 1.0F;
+      this.field_70553_i = 1.0F;
+      this.field_70551_j = 1.0F;
+      this.field_70544_f *= this.field_187136_p.nextFloat() * 2.0F + 0.2F;
+      this.field_70586_a = this.field_70544_f;
+      this.field_70547_e = (int)(16.0D / (Math.random() * 0.8D + 0.2D));
+      this.func_70536_a(49);
+   }
 
-    public int getBrightnessForRender(float p_189214_1_)
-    {
-        int i = super.getBrightnessForRender(p_189214_1_);
-        int j = 240;
-        int k = i >> 16 & 255;
-        return 240 | k << 16;
-    }
+   public int func_189214_a(float p_189214_1_) {
+      int i = super.func_189214_a(p_189214_1_);
+      int j = 240;
+      int k = i >> 16 & 255;
+      return 240 | k << 16;
+   }
 
-    /**
-     * Renders the particle
-     */
-    public void renderParticle(BufferBuilder worldRendererIn, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
-    {
-        float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge;
-        this.particleScale = this.lavaParticleScale * (1.0F - f * f);
-        super.renderParticle(worldRendererIn, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
-    }
+   public void func_180434_a(BufferBuilder p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_) {
+      float f = ((float)this.field_70546_d + p_180434_3_) / (float)this.field_70547_e;
+      this.field_70544_f = this.field_70586_a * (1.0F - f * f);
+      super.func_180434_a(p_180434_1_, p_180434_2_, p_180434_3_, p_180434_4_, p_180434_5_, p_180434_6_, p_180434_7_, p_180434_8_);
+   }
 
-    public void onUpdate()
-    {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
+   public void func_189213_a() {
+      this.field_187123_c = this.field_187126_f;
+      this.field_187124_d = this.field_187127_g;
+      this.field_187125_e = this.field_187128_h;
+      if (this.field_70546_d++ >= this.field_70547_e) {
+         this.func_187112_i();
+      }
 
-        if (this.particleAge++ >= this.particleMaxAge)
-        {
-            this.setExpired();
-        }
+      float f = (float)this.field_70546_d / (float)this.field_70547_e;
+      if (this.field_187136_p.nextFloat() > f) {
+         this.field_187122_b.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, this.field_187126_f, this.field_187127_g, this.field_187128_h, this.field_187129_i, this.field_187130_j, this.field_187131_k);
+      }
 
-        float f = (float)this.particleAge / (float)this.particleMaxAge;
+      this.field_187130_j -= 0.03D;
+      this.func_187110_a(this.field_187129_i, this.field_187130_j, this.field_187131_k);
+      this.field_187129_i *= 0.9990000128746033D;
+      this.field_187130_j *= 0.9990000128746033D;
+      this.field_187131_k *= 0.9990000128746033D;
+      if (this.field_187132_l) {
+         this.field_187129_i *= 0.699999988079071D;
+         this.field_187131_k *= 0.699999988079071D;
+      }
 
-        if (this.rand.nextFloat() > f)
-        {
-            this.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ);
-        }
+   }
 
-        this.motionY -= 0.03D;
-        this.moveEntity(this.motionX, this.motionY, this.motionZ);
-        this.motionX *= 0.9990000128746033D;
-        this.motionY *= 0.9990000128746033D;
-        this.motionZ *= 0.9990000128746033D;
-
-        if (this.isCollided)
-        {
-            this.motionX *= 0.699999988079071D;
-            this.motionZ *= 0.699999988079071D;
-        }
-    }
-
-    public static class Factory implements IParticleFactory
-    {
-        public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_)
-        {
-            return new ParticleLava(worldIn, xCoordIn, yCoordIn, zCoordIn);
-        }
-    }
+   public static class Factory implements IParticleFactory {
+      public Particle func_178902_a(int p_178902_1_, World p_178902_2_, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int... p_178902_15_) {
+         return new ParticleLava(p_178902_2_, p_178902_3_, p_178902_5_, p_178902_7_);
+      }
+   }
 }

@@ -13,167 +13,99 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-public class EmptyChunk extends Chunk
-{
-    public EmptyChunk(World worldIn, int x, int z)
-    {
-        super(worldIn, x, z);
-    }
+public class EmptyChunk extends Chunk {
+   public EmptyChunk(World p_i1994_1_, int p_i1994_2_, int p_i1994_3_) {
+      super(p_i1994_1_, p_i1994_2_, p_i1994_3_);
+   }
 
-    /**
-     * Checks whether the chunk is at the X/Z location specified
-     */
-    public boolean isAtLocation(int x, int z)
-    {
-        return x == this.xPosition && z == this.zPosition;
-    }
+   public boolean func_76600_a(int p_76600_1_, int p_76600_2_) {
+      return p_76600_1_ == this.field_76635_g && p_76600_2_ == this.field_76647_h;
+   }
 
-    /**
-     * Returns the value in the height map at this x, z coordinate in the chunk
-     */
-    public int getHeightValue(int x, int z)
-    {
-        return 0;
-    }
+   public int func_76611_b(int p_76611_1_, int p_76611_2_) {
+      return 0;
+   }
 
-    /**
-     * Generates the height map for a chunk from scratch
-     */
-    public void generateHeightMap()
-    {
-    }
+   public void func_76590_a() {
+   }
 
-    /**
-     * Generates the initial skylight map for the chunk upon generation or load.
-     */
-    public void generateSkylightMap()
-    {
-    }
+   public void func_76603_b() {
+   }
 
-    public IBlockState getBlockState(BlockPos pos)
-    {
-        return Blocks.AIR.getDefaultState();
-    }
+   public IBlockState func_177435_g(BlockPos p_177435_1_) {
+      return Blocks.field_150350_a.func_176223_P();
+   }
 
-    public int getBlockLightOpacity(BlockPos pos)
-    {
-        return 255;
-    }
+   public int func_177437_b(BlockPos p_177437_1_) {
+      return 255;
+   }
 
-    public int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos)
-    {
-        return p_177413_1_.defaultLightValue;
-    }
+   public int func_177413_a(EnumSkyBlock p_177413_1_, BlockPos p_177413_2_) {
+      return p_177413_1_.field_77198_c;
+   }
 
-    public void setLightFor(EnumSkyBlock p_177431_1_, BlockPos pos, int value)
-    {
-    }
+   public void func_177431_a(EnumSkyBlock p_177431_1_, BlockPos p_177431_2_, int p_177431_3_) {
+   }
 
-    public int getLightSubtracted(BlockPos pos, int amount)
-    {
-        return 0;
-    }
+   public int func_177443_a(BlockPos p_177443_1_, int p_177443_2_) {
+      return 0;
+   }
 
-    /**
-     * Adds an entity to the chunk.
-     */
-    public void addEntity(Entity entityIn)
-    {
-    }
+   public void func_76612_a(Entity p_76612_1_) {
+   }
 
-    /**
-     * removes entity using its y chunk coordinate as its index
-     */
-    public void removeEntity(Entity entityIn)
-    {
-    }
+   public void func_76622_b(Entity p_76622_1_) {
+   }
 
-    /**
-     * Removes entity at the specified index from the entity array.
-     */
-    public void removeEntityAtIndex(Entity entityIn, int index)
-    {
-    }
+   public void func_76608_a(Entity p_76608_1_, int p_76608_2_) {
+   }
 
-    public boolean canSeeSky(BlockPos pos)
-    {
-        return false;
-    }
+   public boolean func_177444_d(BlockPos p_177444_1_) {
+      return false;
+   }
 
-    @Nullable
-    public TileEntity getTileEntity(BlockPos pos, Chunk.EnumCreateEntityType p_177424_2_)
-    {
-        return null;
-    }
+   @Nullable
+   public TileEntity func_177424_a(BlockPos p_177424_1_, Chunk.EnumCreateEntityType p_177424_2_) {
+      return null;
+   }
 
-    public void addTileEntity(TileEntity tileEntityIn)
-    {
-    }
+   public void func_150813_a(TileEntity p_150813_1_) {
+   }
 
-    public void addTileEntity(BlockPos pos, TileEntity tileEntityIn)
-    {
-    }
+   public void func_177426_a(BlockPos p_177426_1_, TileEntity p_177426_2_) {
+   }
 
-    public void removeTileEntity(BlockPos pos)
-    {
-    }
+   public void func_177425_e(BlockPos p_177425_1_) {
+   }
 
-    /**
-     * Called when this Chunk is loaded by the ChunkProvider
-     */
-    public void onChunkLoad()
-    {
-    }
+   public void func_76631_c() {
+   }
 
-    /**
-     * Called when this Chunk is unloaded by the ChunkProvider
-     */
-    public void onChunkUnload()
-    {
-    }
+   public void func_76623_d() {
+   }
 
-    /**
-     * Sets the isModified flag for this Chunk
-     */
-    public void setChunkModified()
-    {
-    }
+   public void func_76630_e() {
+   }
 
-    /**
-     * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
-     */
-    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > p_177414_4_)
-    {
-    }
+   public void func_177414_a(@Nullable Entity p_177414_1_, AxisAlignedBB p_177414_2_, List<Entity> p_177414_3_, Predicate<? super Entity> p_177414_4_) {
+   }
 
-    public <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > filter)
-    {
-    }
+   public <T extends Entity> void func_177430_a(Class<? extends T> p_177430_1_, AxisAlignedBB p_177430_2_, List<T> p_177430_3_, Predicate<? super T> p_177430_4_) {
+   }
 
-    /**
-     * Returns true if this Chunk needs to be saved
-     */
-    public boolean needsSaving(boolean p_76601_1_)
-    {
-        return false;
-    }
+   public boolean func_76601_a(boolean p_76601_1_) {
+      return false;
+   }
 
-    public Random getRandomWithSeed(long seed)
-    {
-        return new Random(this.getWorld().getSeed() + (long)(this.xPosition * this.xPosition * 4987142) + (long)(this.xPosition * 5947611) + (long)(this.zPosition * this.zPosition) * 4392871L + (long)(this.zPosition * 389711) ^ seed);
-    }
+   public Random func_76617_a(long p_76617_1_) {
+      return new Random(this.func_177412_p().func_72905_C() + (long)(this.field_76635_g * this.field_76635_g * 4987142) + (long)(this.field_76635_g * 5947611) + (long)(this.field_76647_h * this.field_76647_h) * 4392871L + (long)(this.field_76647_h * 389711) ^ p_76617_1_);
+   }
 
-    public boolean isEmpty()
-    {
-        return true;
-    }
+   public boolean func_76621_g() {
+      return true;
+   }
 
-    /**
-     * Returns whether the ExtendedBlockStorages containing levels (in blocks) from arg 1 to arg 2 are fully empty
-     * (true) or not (false).
-     */
-    public boolean getAreLevelsEmpty(int startY, int endY)
-    {
-        return true;
-    }
+   public boolean func_76606_c(int p_76606_1_, int p_76606_2_) {
+      return true;
+   }
 }

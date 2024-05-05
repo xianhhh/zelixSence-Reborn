@@ -2,47 +2,27 @@ package net.minecraft.world.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class WorldSavedData
-{
-    /** The name of the map data nbt */
-    public final String mapName;
+public abstract class WorldSavedData {
+   public final String field_76190_i;
+   private boolean field_76189_a;
 
-    /** Whether this MapDataBase needs saving to disk. */
-    private boolean dirty;
+   public WorldSavedData(String p_i2141_1_) {
+      this.field_76190_i = p_i2141_1_;
+   }
 
-    public WorldSavedData(String name)
-    {
-        this.mapName = name;
-    }
+   public abstract void func_76184_a(NBTTagCompound var1);
 
-    /**
-     * reads in data from the NBTTagCompound into this MapDataBase
-     */
-    public abstract void readFromNBT(NBTTagCompound nbt);
+   public abstract NBTTagCompound func_189551_b(NBTTagCompound var1);
 
-    public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
+   public void func_76185_a() {
+      this.func_76186_a(true);
+   }
 
-    /**
-     * Marks this MapDataBase dirty, to be saved to disk when the level next saves.
-     */
-    public void markDirty()
-    {
-        this.setDirty(true);
-    }
+   public void func_76186_a(boolean p_76186_1_) {
+      this.field_76189_a = p_76186_1_;
+   }
 
-    /**
-     * Sets the dirty state of this MapDataBase, whether it needs saving to disk.
-     */
-    public void setDirty(boolean isDirty)
-    {
-        this.dirty = isDirty;
-    }
-
-    /**
-     * Whether this MapDataBase needs saving to disk.
-     */
-    public boolean isDirty()
-    {
-        return this.dirty;
-    }
+   public boolean func_76188_b() {
+      return this.field_76189_a;
+   }
 }

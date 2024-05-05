@@ -5,45 +5,29 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketConfirmTeleport implements Packet<INetHandlerPlayServer>
-{
-    private int telportId;
+public class CPacketConfirmTeleport implements Packet<INetHandlerPlayServer> {
+   private int field_186988_a;
 
-    public CPacketConfirmTeleport()
-    {
-    }
+   public CPacketConfirmTeleport() {
+   }
 
-    public CPacketConfirmTeleport(int teleportIdIn)
-    {
-        this.telportId = teleportIdIn;
-    }
+   public CPacketConfirmTeleport(int p_i46889_1_) {
+      this.field_186988_a = p_i46889_1_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.telportId = buf.readVarIntFromBuffer();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_186988_a = p_148837_1_.func_150792_a();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.telportId);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_186988_a);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.processConfirmTeleport(this);
-    }
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_184339_a(this);
+   }
 
-    public int getTeleportId()
-    {
-        return this.telportId;
-    }
+   public int func_186987_a() {
+      return this.field_186988_a;
+   }
 }

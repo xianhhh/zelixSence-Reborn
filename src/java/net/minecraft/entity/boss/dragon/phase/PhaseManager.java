@@ -4,54 +4,43 @@ import net.minecraft.entity.boss.EntityDragon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PhaseManager
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final EntityDragon dragon;
-    private final IPhase[] phases = new IPhase[PhaseList.getTotalPhases()];
-    private IPhase phase;
+public class PhaseManager {
+   private static final Logger field_188759_a = LogManager.getLogger();
+   private final EntityDragon field_188760_b;
+   private final IPhase[] field_188761_c = new IPhase[PhaseList.func_188739_c()];
+   private IPhase field_188762_d;
 
-    public PhaseManager(EntityDragon dragonIn)
-    {
-        this.dragon = dragonIn;
-        this.setPhase(PhaseList.HOVER);
-    }
+   public PhaseManager(EntityDragon p_i46781_1_) {
+      this.field_188760_b = p_i46781_1_;
+      this.func_188758_a(PhaseList.field_188751_k);
+   }
 
-    public void setPhase(PhaseList<?> phaseIn)
-    {
-        if (this.phase == null || phaseIn != this.phase.getPhaseList())
-        {
-            if (this.phase != null)
-            {
-                this.phase.removeAreaEffect();
-            }
+   public void func_188758_a(PhaseList<?> p_188758_1_) {
+      if (this.field_188762_d == null || p_188758_1_ != this.field_188762_d.func_188652_i()) {
+         if (this.field_188762_d != null) {
+            this.field_188762_d.func_188658_e();
+         }
 
-            this.phase = this.getPhase(phaseIn);
+         this.field_188762_d = this.func_188757_b(p_188758_1_);
+         if (!this.field_188760_b.field_70170_p.field_72995_K) {
+            this.field_188760_b.func_184212_Q().func_187227_b(EntityDragon.field_184674_a, Integer.valueOf(p_188758_1_.func_188740_b()));
+         }
 
-            if (!this.dragon.world.isRemote)
-            {
-                this.dragon.getDataManager().set(EntityDragon.PHASE, Integer.valueOf(phaseIn.getId()));
-            }
+         field_188759_a.debug("Dragon is now in phase {} on the {}", p_188758_1_, this.field_188760_b.field_70170_p.field_72995_K ? "client" : "server");
+         this.field_188762_d.func_188660_d();
+      }
+   }
 
-            LOGGER.debug("Dragon is now in phase {} on the {}", phaseIn, this.dragon.world.isRemote ? "client" : "server");
-            this.phase.initPhase();
-        }
-    }
+   public IPhase func_188756_a() {
+      return this.field_188762_d;
+   }
 
-    public IPhase getCurrentPhase()
-    {
-        return this.phase;
-    }
+   public <T extends IPhase> T func_188757_b(PhaseList<T> p_188757_1_) {
+      int i = p_188757_1_.func_188740_b();
+      if (this.field_188761_c[i] == null) {
+         this.field_188761_c[i] = p_188757_1_.func_188736_a(this.field_188760_b);
+      }
 
-    public <T extends IPhase> T getPhase(PhaseList<T> phaseIn)
-    {
-        int i = phaseIn.getId();
-
-        if (this.phases[i] == null)
-        {
-            this.phases[i] = phaseIn.createPhase(this.dragon);
-        }
-
-        return (T)this.phases[i];
-    }
+      return (T)this.field_188761_c[i];
+   }
 }

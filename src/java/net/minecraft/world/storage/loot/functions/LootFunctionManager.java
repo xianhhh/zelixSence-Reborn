@@ -15,105 +15,78 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 
-public class LootFunctionManager
-{
-    private static final Map < ResourceLocation, LootFunction.Serializer<? >> NAME_TO_SERIALIZER_MAP = Maps. < ResourceLocation, LootFunction.Serializer<? >> newHashMap();
-    private static final Map < Class <? extends LootFunction > , LootFunction.Serializer<? >> CLASS_TO_SERIALIZER_MAP = Maps. < Class <? extends LootFunction > , LootFunction.Serializer<? >> newHashMap();
+public class LootFunctionManager {
+   private static final Map<ResourceLocation, LootFunction.Serializer<?>> field_186584_a = Maps.<ResourceLocation, LootFunction.Serializer<?>>newHashMap();
+   private static final Map<Class<? extends LootFunction>, LootFunction.Serializer<?>> field_186585_b = Maps.<Class<? extends LootFunction>, LootFunction.Serializer<?>>newHashMap();
 
-    public static <T extends LootFunction> void registerFunction(LootFunction.Serializer <? extends T > p_186582_0_)
-    {
-        ResourceLocation resourcelocation = p_186582_0_.getFunctionName();
-        Class<T> oclass = (Class<T>)p_186582_0_.getFunctionClass();
+   public static <T extends LootFunction> void func_186582_a(LootFunction.Serializer<? extends T> p_186582_0_) {
+      ResourceLocation resourcelocation = p_186582_0_.func_186529_a();
+      Class<T> oclass = p_186582_0_.func_186531_b();
+      if (field_186584_a.containsKey(resourcelocation)) {
+         throw new IllegalArgumentException("Can't re-register item function name " + resourcelocation);
+      } else if (field_186585_b.containsKey(oclass)) {
+         throw new IllegalArgumentException("Can't re-register item function class " + oclass.getName());
+      } else {
+         field_186584_a.put(resourcelocation, p_186582_0_);
+         field_186585_b.put(oclass, p_186582_0_);
+      }
+   }
 
-        if (NAME_TO_SERIALIZER_MAP.containsKey(resourcelocation))
-        {
-            throw new IllegalArgumentException("Can't re-register item function name " + resourcelocation);
-        }
-        else if (CLASS_TO_SERIALIZER_MAP.containsKey(oclass))
-        {
-            throw new IllegalArgumentException("Can't re-register item function class " + oclass.getName());
-        }
-        else
-        {
-            NAME_TO_SERIALIZER_MAP.put(resourcelocation, p_186582_0_);
-            CLASS_TO_SERIALIZER_MAP.put(oclass, p_186582_0_);
-        }
-    }
+   public static LootFunction.Serializer<?> func_186583_a(ResourceLocation p_186583_0_) {
+      LootFunction.Serializer<?> serializer = (LootFunction.Serializer)field_186584_a.get(p_186583_0_);
+      if (serializer == null) {
+         throw new IllegalArgumentException("Unknown loot item function '" + p_186583_0_ + "'");
+      } else {
+         return serializer;
+      }
+   }
 
-    public static LootFunction.Serializer<?> getSerializerForName(ResourceLocation location)
-    {
-        LootFunction.Serializer<?> serializer = (LootFunction.Serializer)NAME_TO_SERIALIZER_MAP.get(location);
+   public static <T extends LootFunction> LootFunction.Serializer<T> func_186581_a(T p_186581_0_) {
+      LootFunction.Serializer<T> serializer = (LootFunction.Serializer)field_186585_b.get(p_186581_0_.getClass());
+      if (serializer == null) {
+         throw new IllegalArgumentException("Unknown loot item function " + p_186581_0_);
+      } else {
+         return serializer;
+      }
+   }
 
-        if (serializer == null)
-        {
-            throw new IllegalArgumentException("Unknown loot item function '" + location + "'");
-        }
-        else
-        {
-            return serializer;
-        }
-    }
+   static {
+      func_186582_a(new SetCount.Serializer());
+      func_186582_a(new SetMetadata.Serializer());
+      func_186582_a(new EnchantWithLevels.Serializer());
+      func_186582_a(new EnchantRandomly.Serializer());
+      func_186582_a(new SetNBT.Serializer());
+      func_186582_a(new Smelt.Serializer());
+      func_186582_a(new LootingEnchantBonus.Serializer());
+      func_186582_a(new SetDamage.Serializer());
+      func_186582_a(new SetAttributes.Serializer());
+   }
 
-    public static <T extends LootFunction> LootFunction.Serializer<T> getSerializerFor(T functionClass)
-    {
-        LootFunction.Serializer<T> serializer = (LootFunction.Serializer)CLASS_TO_SERIALIZER_MAP.get(functionClass.getClass());
+   public static class Serializer implements JsonDeserializer<LootFunction>, JsonSerializer<LootFunction> {
+      public LootFunction deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+         JsonObject jsonobject = JsonUtils.func_151210_l(p_deserialize_1_, "function");
+         ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.func_151200_h(jsonobject, "function"));
 
-        if (serializer == null)
-        {
-            throw new IllegalArgumentException("Unknown loot item function " + functionClass);
-        }
-        else
-        {
-            return serializer;
-        }
-    }
+         LootFunction.Serializer<?> serializer;
+         try {
+            serializer = LootFunctionManager.func_186583_a(resourcelocation);
+         } catch (IllegalArgumentException var8) {
+            throw new JsonSyntaxException("Unknown function '" + resourcelocation + "'");
+         }
 
-    static
-    {
-        registerFunction(new SetCount.Serializer());
-        registerFunction(new SetMetadata.Serializer());
-        registerFunction(new EnchantWithLevels.Serializer());
-        registerFunction(new EnchantRandomly.Serializer());
-        registerFunction(new SetNBT.Serializer());
-        registerFunction(new Smelt.Serializer());
-        registerFunction(new LootingEnchantBonus.Serializer());
-        registerFunction(new SetDamage.Serializer());
-        registerFunction(new SetAttributes.Serializer());
-    }
+         return serializer.func_186530_b(jsonobject, p_deserialize_3_, (LootCondition[])JsonUtils.func_188177_a(jsonobject, "conditions", new LootCondition[0], p_deserialize_3_, LootCondition[].class));
+      }
 
-    public static class Serializer implements JsonDeserializer<LootFunction>, JsonSerializer<LootFunction>
-    {
-        public LootFunction deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
-        {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "function");
-            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(jsonobject, "function"));
-            LootFunction.Serializer<?> serializer;
+      public JsonElement serialize(LootFunction p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
+         LootFunction.Serializer<LootFunction> serializer = LootFunctionManager.<LootFunction>func_186581_a(p_serialize_1_);
+         JsonObject jsonobject = new JsonObject();
+         serializer.func_186532_a(jsonobject, p_serialize_1_, p_serialize_3_);
+         jsonobject.addProperty("function", serializer.func_186529_a().toString());
+         if (p_serialize_1_.func_186554_a() != null && p_serialize_1_.func_186554_a().length > 0) {
+            jsonobject.add("conditions", p_serialize_3_.serialize(p_serialize_1_.func_186554_a()));
+         }
 
-            try
-            {
-                serializer = LootFunctionManager.getSerializerForName(resourcelocation);
-            }
-            catch (IllegalArgumentException var8)
-            {
-                throw new JsonSyntaxException("Unknown function '" + resourcelocation + "'");
-            }
-
-            return serializer.deserialize(jsonobject, p_deserialize_3_, (LootCondition[])JsonUtils.deserializeClass(jsonobject, "conditions", new LootCondition[0], p_deserialize_3_, LootCondition[].class));
-        }
-
-        public JsonElement serialize(LootFunction p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)
-        {
-            LootFunction.Serializer<LootFunction> serializer = LootFunctionManager.<LootFunction>getSerializerFor(p_serialize_1_);
-            JsonObject jsonobject = new JsonObject();
-            serializer.serialize(jsonobject, p_serialize_1_, p_serialize_3_);
-            jsonobject.addProperty("function", serializer.getFunctionName().toString());
-
-            if (p_serialize_1_.getConditions() != null && p_serialize_1_.getConditions().length > 0)
-            {
-                jsonobject.add("conditions", p_serialize_3_.serialize(p_serialize_1_.getConditions()));
-            }
-
-            return jsonobject;
-        }
-    }
+         return jsonobject;
+      }
+   }
 }

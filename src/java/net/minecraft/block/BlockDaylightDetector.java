@@ -25,177 +25,120 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockDaylightDetector extends BlockContainer
-{
-    public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
-    protected static final AxisAlignedBB DAYLIGHT_DETECTOR_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D);
-    private final boolean inverted;
+public class BlockDaylightDetector extends BlockContainer {
+   public static final PropertyInteger field_176436_a = PropertyInteger.func_177719_a("power", 0, 15);
+   protected static final AxisAlignedBB field_185566_b = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D);
+   private final boolean field_176435_b;
 
-    public BlockDaylightDetector(boolean inverted)
-    {
-        super(Material.WOOD);
-        this.inverted = inverted;
-        this.setDefaultState(this.blockState.getBaseState().withProperty(POWER, Integer.valueOf(0)));
-        this.setCreativeTab(CreativeTabs.REDSTONE);
-        this.setHardness(0.2F);
-        this.setSoundType(SoundType.WOOD);
-        this.setUnlocalizedName("daylightDetector");
-    }
+   public BlockDaylightDetector(boolean p_i45729_1_) {
+      super(Material.field_151575_d);
+      this.field_176435_b = p_i45729_1_;
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176436_a, Integer.valueOf(0)));
+      this.func_149647_a(CreativeTabs.field_78028_d);
+      this.func_149711_c(0.2F);
+      this.func_149672_a(SoundType.field_185848_a);
+      this.func_149663_c("daylightDetector");
+   }
 
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return DAYLIGHT_DETECTOR_AABB;
-    }
+   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
+      return field_185566_b;
+   }
 
-    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        return ((Integer)blockState.getValue(POWER)).intValue();
-    }
+   public int func_180656_a(IBlockState p_180656_1_, IBlockAccess p_180656_2_, BlockPos p_180656_3_, EnumFacing p_180656_4_) {
+      return ((Integer)p_180656_1_.func_177229_b(field_176436_a)).intValue();
+   }
 
-    public void updatePower(World worldIn, BlockPos pos)
-    {
-        if (worldIn.provider.func_191066_m())
-        {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-            int i = worldIn.getLightFor(EnumSkyBlock.SKY, pos) - worldIn.getSkylightSubtracted();
-            float f = worldIn.getCelestialAngleRadians(1.0F);
+   public void func_180677_d(World p_180677_1_, BlockPos p_180677_2_) {
+      if (p_180677_1_.field_73011_w.func_191066_m()) {
+         IBlockState iblockstate = p_180677_1_.func_180495_p(p_180677_2_);
+         int i = p_180677_1_.func_175642_b(EnumSkyBlock.SKY, p_180677_2_) - p_180677_1_.func_175657_ab();
+         float f = p_180677_1_.func_72929_e(1.0F);
+         if (this.field_176435_b) {
+            i = 15 - i;
+         }
 
-            if (this.inverted)
-            {
-                i = 15 - i;
+         if (i > 0 && !this.field_176435_b) {
+            float f1 = f < 3.1415927F ? 0.0F : 6.2831855F;
+            f = f + (f1 - f) * 0.2F;
+            i = Math.round((float)i * MathHelper.func_76134_b(f));
+         }
+
+         i = MathHelper.func_76125_a(i, 0, 15);
+         if (((Integer)iblockstate.func_177229_b(field_176436_a)).intValue() != i) {
+            p_180677_1_.func_180501_a(p_180677_2_, iblockstate.func_177226_a(field_176436_a, Integer.valueOf(i)), 3);
+         }
+
+      }
+   }
+
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      if (p_180639_4_.func_175142_cm()) {
+         if (p_180639_1_.field_72995_K) {
+            return true;
+         } else {
+            if (this.field_176435_b) {
+               p_180639_1_.func_180501_a(p_180639_2_, Blocks.field_150453_bW.func_176223_P().func_177226_a(field_176436_a, p_180639_3_.func_177229_b(field_176436_a)), 4);
+               Blocks.field_150453_bW.func_180677_d(p_180639_1_, p_180639_2_);
+            } else {
+               p_180639_1_.func_180501_a(p_180639_2_, Blocks.field_180402_cm.func_176223_P().func_177226_a(field_176436_a, p_180639_3_.func_177229_b(field_176436_a)), 4);
+               Blocks.field_180402_cm.func_180677_d(p_180639_1_, p_180639_2_);
             }
 
-            if (i > 0 && !this.inverted)
-            {
-                float f1 = f < (float)Math.PI ? 0.0F : ((float)Math.PI * 2F);
-                f = f + (f1 - f) * 0.2F;
-                i = Math.round((float)i * MathHelper.cos(f));
-            }
+            return true;
+         }
+      } else {
+         return super.func_180639_a(p_180639_1_, p_180639_2_, p_180639_3_, p_180639_4_, p_180639_5_, p_180639_6_, p_180639_7_, p_180639_8_, p_180639_9_);
+      }
+   }
 
-            i = MathHelper.clamp(i, 0, 15);
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Item.func_150898_a(Blocks.field_150453_bW);
+   }
 
-            if (((Integer)iblockstate.getValue(POWER)).intValue() != i)
-            {
-                worldIn.setBlockState(pos, iblockstate.withProperty(POWER, Integer.valueOf(i)), 3);
-            }
-        }
-    }
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      return new ItemStack(Blocks.field_150453_bW);
+   }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        if (playerIn.isAllowEdit())
-        {
-            if (worldIn.isRemote)
-            {
-                return true;
-            }
-            else
-            {
-                if (this.inverted)
-                {
-                    worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-                    Blocks.DAYLIGHT_DETECTOR.updatePower(worldIn, pos);
-                }
-                else
-                {
-                    worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-                    Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(worldIn, pos);
-                }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-                return true;
-            }
-        }
-        else
-        {
-            return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY);
-        }
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Item.getItemFromBlock(Blocks.DAYLIGHT_DETECTOR);
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.MODEL;
+   }
 
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return new ItemStack(Blocks.DAYLIGHT_DETECTOR);
-    }
+   public boolean func_149744_f(IBlockState p_149744_1_) {
+      return true;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityDaylightDetector();
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176436_a, Integer.valueOf(p_176203_1_));
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Integer)p_176201_1_.func_177229_b(field_176436_a)).intValue();
+   }
 
-    /**
-     * Can this block provide power. Only wire currently seems to have this change based on its state.
-     */
-    public boolean canProvidePower(IBlockState state)
-    {
-        return true;
-    }
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176436_a});
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityDaylightDetector();
-    }
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      if (!this.field_176435_b) {
+         super.func_149666_a(p_149666_1_, p_149666_2_);
+      }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(POWER, Integer.valueOf(meta));
-    }
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(POWER)).intValue();
-    }
-
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {POWER});
-    }
-
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        if (!this.inverted)
-        {
-            super.getSubBlocks(itemIn, tab);
-        }
-    }
-
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
-    }
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
+   }
 }

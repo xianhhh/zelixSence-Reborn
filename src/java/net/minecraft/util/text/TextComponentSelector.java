@@ -1,69 +1,43 @@
 package net.minecraft.util.text;
 
-public class TextComponentSelector extends TextComponentBase
-{
-    /**
-     * The selector used to find the matching entities of this text component
-     */
-    private final String selector;
+public class TextComponentSelector extends TextComponentBase {
+   private final String field_179993_b;
 
-    public TextComponentSelector(String selectorIn)
-    {
-        this.selector = selectorIn;
-    }
+   public TextComponentSelector(String p_i45996_1_) {
+      this.field_179993_b = p_i45996_1_;
+   }
 
-    /**
-     * Gets the selector of this component, in plain text.
-     */
-    public String getSelector()
-    {
-        return this.selector;
-    }
+   public String func_179992_g() {
+      return this.field_179993_b;
+   }
 
-    /**
-     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
-     * different methods?
-     */
-    public String getUnformattedComponentText()
-    {
-        return this.selector;
-    }
+   public String func_150261_e() {
+      return this.field_179993_b;
+   }
 
-    /**
-     * Creates a copy of this component.  Almost a deep copy, except the style is shallow-copied.
-     */
-    public TextComponentSelector createCopy()
-    {
-        TextComponentSelector textcomponentselector = new TextComponentSelector(this.selector);
-        textcomponentselector.setStyle(this.getStyle().createShallowCopy());
+   public TextComponentSelector func_150259_f() {
+      TextComponentSelector textcomponentselector = new TextComponentSelector(this.field_179993_b);
+      textcomponentselector.func_150255_a(this.func_150256_b().func_150232_l());
 
-        for (ITextComponent itextcomponent : this.getSiblings())
-        {
-            textcomponentselector.appendSibling(itextcomponent.createCopy());
-        }
+      for(ITextComponent itextcomponent : this.func_150253_a()) {
+         textcomponentselector.func_150257_a(itextcomponent.func_150259_f());
+      }
 
-        return textcomponentselector;
-    }
+      return textcomponentselector;
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (this == p_equals_1_)
-        {
-            return true;
-        }
-        else if (!(p_equals_1_ instanceof TextComponentSelector))
-        {
-            return false;
-        }
-        else
-        {
-            TextComponentSelector textcomponentselector = (TextComponentSelector)p_equals_1_;
-            return this.selector.equals(textcomponentselector.selector) && super.equals(p_equals_1_);
-        }
-    }
+   public boolean equals(Object p_equals_1_) {
+      if (this == p_equals_1_) {
+         return true;
+      } else if (!(p_equals_1_ instanceof TextComponentSelector)) {
+         return false;
+      } else {
+         TextComponentSelector textcomponentselector = (TextComponentSelector)p_equals_1_;
+         return this.field_179993_b.equals(textcomponentselector.field_179993_b) && super.equals(p_equals_1_);
+      }
+   }
 
-    public String toString()
-    {
-        return "SelectorComponent{pattern='" + this.selector + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
-    }
+   public String toString() {
+      return "SelectorComponent{pattern='" + this.field_179993_b + '\'' + ", siblings=" + this.field_150264_a + ", style=" + this.func_150256_b() + '}';
+   }
 }

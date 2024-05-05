@@ -8,73 +8,48 @@ import java.util.Random;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 
-public abstract class ModelBase
-{
-    public float swingProgress;
-    public boolean isRiding;
-    public boolean isChild = true;
-    public List<ModelRenderer> boxList = Lists.<ModelRenderer>newArrayList();
-    private final Map<String, TextureOffset> modelTextureMap = Maps.<String, TextureOffset>newHashMap();
-    public int textureWidth = 64;
-    public int textureHeight = 32;
+public abstract class ModelBase {
+   public float field_78095_p;
+   public boolean field_78093_q;
+   public boolean field_78091_s = true;
+   public List<ModelRenderer> field_78092_r = Lists.<ModelRenderer>newArrayList();
+   private final Map<String, TextureOffset> field_78094_a = Maps.<String, TextureOffset>newHashMap();
+   public int field_78090_t = 64;
+   public int field_78089_u = 32;
 
-    /**
-     * Sets the models various rotation angles then renders the model.
-     */
-    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
-    {
-    }
+   public void func_78088_a(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_) {
+   }
 
-    /**
-     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms
-     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how
-     * "far" arms and legs can swing at most.
-     */
-    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
-    {
-    }
+   public void func_78087_a(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity p_78087_7_) {
+   }
 
-    /**
-     * Used for easily adding entity-dependent animations. The second and third float params here are the same second
-     * and third as in the setRotationAngles method.
-     */
-    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime)
-    {
-    }
+   public void func_78086_a(EntityLivingBase p_78086_1_, float p_78086_2_, float p_78086_3_, float p_78086_4_) {
+   }
 
-    public ModelRenderer getRandomModelBox(Random rand)
-    {
-        return this.boxList.get(rand.nextInt(this.boxList.size()));
-    }
+   public ModelRenderer func_85181_a(Random p_85181_1_) {
+      return this.field_78092_r.get(p_85181_1_.nextInt(this.field_78092_r.size()));
+   }
 
-    protected void setTextureOffset(String partName, int x, int y)
-    {
-        this.modelTextureMap.put(partName, new TextureOffset(x, y));
-    }
+   protected void func_78085_a(String p_78085_1_, int p_78085_2_, int p_78085_3_) {
+      this.field_78094_a.put(p_78085_1_, new TextureOffset(p_78085_2_, p_78085_3_));
+   }
 
-    public TextureOffset getTextureOffset(String partName)
-    {
-        return this.modelTextureMap.get(partName);
-    }
+   public TextureOffset func_78084_a(String p_78084_1_) {
+      return this.field_78094_a.get(p_78084_1_);
+   }
 
-    /**
-     * Copies the angles from one object to another. This is used when objects should stay aligned with each other, like
-     * the hair over a players head.
-     */
-    public static void copyModelAngles(ModelRenderer source, ModelRenderer dest)
-    {
-        dest.rotateAngleX = source.rotateAngleX;
-        dest.rotateAngleY = source.rotateAngleY;
-        dest.rotateAngleZ = source.rotateAngleZ;
-        dest.rotationPointX = source.rotationPointX;
-        dest.rotationPointY = source.rotationPointY;
-        dest.rotationPointZ = source.rotationPointZ;
-    }
+   public static void func_178685_a(ModelRenderer p_178685_0_, ModelRenderer p_178685_1_) {
+      p_178685_1_.field_78795_f = p_178685_0_.field_78795_f;
+      p_178685_1_.field_78796_g = p_178685_0_.field_78796_g;
+      p_178685_1_.field_78808_h = p_178685_0_.field_78808_h;
+      p_178685_1_.field_78800_c = p_178685_0_.field_78800_c;
+      p_178685_1_.field_78797_d = p_178685_0_.field_78797_d;
+      p_178685_1_.field_78798_e = p_178685_0_.field_78798_e;
+   }
 
-    public void setModelAttributes(ModelBase model)
-    {
-        this.swingProgress = model.swingProgress;
-        this.isRiding = model.isRiding;
-        this.isChild = model.isChild;
-    }
+   public void func_178686_a(ModelBase p_178686_1_) {
+      this.field_78095_p = p_178686_1_.field_78095_p;
+      this.field_78093_q = p_178686_1_.field_78093_q;
+      this.field_78091_s = p_178686_1_.field_78091_s;
+   }
 }

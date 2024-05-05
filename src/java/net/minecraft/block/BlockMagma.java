@@ -19,61 +19,44 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class BlockMagma extends Block
-{
-    public BlockMagma()
-    {
-        super(Material.ROCK);
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-        this.setLightLevel(0.2F);
-        this.setTickRandomly(true);
-    }
+public class BlockMagma extends Block {
+   public BlockMagma() {
+      super(Material.field_151576_e);
+      this.func_149647_a(CreativeTabs.field_78030_b);
+      this.func_149715_a(0.2F);
+      this.func_149675_a(true);
+   }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return MapColor.NETHERRACK;
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return MapColor.field_151655_K;
+   }
 
-    /**
-     * Triggered whenever an entity collides with this block (enters into the block)
-     */
-    public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
-    {
-        if (!entityIn.isImmuneToFire() && entityIn instanceof EntityLivingBase && !EnchantmentHelper.hasFrostWalkerEnchantment((EntityLivingBase)entityIn))
-        {
-            entityIn.attackEntityFrom(DamageSource.hotFloor, 1.0F);
-        }
+   public void func_176199_a(World p_176199_1_, BlockPos p_176199_2_, Entity p_176199_3_) {
+      if (!p_176199_3_.func_70045_F() && p_176199_3_ instanceof EntityLivingBase && !EnchantmentHelper.func_189869_j((EntityLivingBase)p_176199_3_)) {
+         p_176199_3_.func_70097_a(DamageSource.field_190095_e, 1.0F);
+      }
 
-        super.onEntityWalk(worldIn, pos, entityIn);
-    }
+      super.func_176199_a(p_176199_1_, p_176199_2_, p_176199_3_);
+   }
 
-    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return 15728880;
-    }
+   public int func_185484_c(IBlockState p_185484_1_, IBlockAccess p_185484_2_, BlockPos p_185484_3_) {
+      return 15728880;
+   }
 
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-        BlockPos blockpos = pos.up();
-        IBlockState iblockstate = worldIn.getBlockState(blockpos);
+   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
+      BlockPos blockpos = p_180650_2_.func_177984_a();
+      IBlockState iblockstate = p_180650_1_.func_180495_p(blockpos);
+      if (iblockstate.func_177230_c() == Blocks.field_150355_j || iblockstate.func_177230_c() == Blocks.field_150358_i) {
+         p_180650_1_.func_175698_g(blockpos);
+         p_180650_1_.func_184133_a((EntityPlayer)null, p_180650_2_, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 0.5F, 2.6F + (p_180650_1_.field_73012_v.nextFloat() - p_180650_1_.field_73012_v.nextFloat()) * 0.8F);
+         if (p_180650_1_ instanceof WorldServer) {
+            ((WorldServer)p_180650_1_).func_175739_a(EnumParticleTypes.SMOKE_LARGE, (double)blockpos.func_177958_n() + 0.5D, (double)blockpos.func_177956_o() + 0.25D, (double)blockpos.func_177952_p() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
+         }
+      }
 
-        if (iblockstate.getBlock() == Blocks.WATER || iblockstate.getBlock() == Blocks.FLOWING_WATER)
-        {
-            worldIn.setBlockToAir(blockpos);
-            worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
+   }
 
-            if (worldIn instanceof WorldServer)
-            {
-                ((WorldServer)worldIn).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.25D, (double)blockpos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
-            }
-        }
-    }
-
-    public boolean canEntitySpawn(IBlockState state, Entity entityIn)
-    {
-        return entityIn.isImmuneToFire();
-    }
+   public boolean func_189872_a(IBlockState p_189872_1_, Entity p_189872_2_) {
+      return p_189872_2_.func_70045_F();
+   }
 }

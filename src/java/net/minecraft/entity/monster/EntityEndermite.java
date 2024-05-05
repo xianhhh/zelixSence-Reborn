@@ -24,199 +24,132 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityEndermite extends EntityMob
-{
-    private int lifetime;
-    private boolean playerSpawned;
+public class EntityEndermite extends EntityMob {
+   private int field_175497_b;
+   private boolean field_175498_c;
 
-    public EntityEndermite(World worldIn)
-    {
-        super(worldIn);
-        this.experienceValue = 3;
-        this.setSize(0.4F, 0.3F);
-    }
+   public EntityEndermite(World p_i45840_1_) {
+      super(p_i45840_1_);
+      this.field_70728_aV = 3;
+      this.func_70105_a(0.4F, 0.3F);
+   }
 
-    protected void initEntityAI()
-    {
-        this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAIAttackMelee(this, 1.0D, false));
-        this.tasks.addTask(3, new EntityAIWanderAvoidWater(this, 1.0D));
-        this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(8, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-    }
+   protected void func_184651_r() {
+      this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
+      this.field_70714_bg.func_75776_a(2, new EntityAIAttackMelee(this, 1.0D, false));
+      this.field_70714_bg.func_75776_a(3, new EntityAIWanderAvoidWater(this, 1.0D));
+      this.field_70714_bg.func_75776_a(7, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+      this.field_70714_bg.func_75776_a(8, new EntityAILookIdle(this));
+      this.field_70715_bh.func_75776_a(1, new EntityAIHurtByTarget(this, true, new Class[0]));
+      this.field_70715_bh.func_75776_a(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+   }
 
-    public float getEyeHeight()
-    {
-        return 0.1F;
-    }
+   public float func_70047_e() {
+      return 0.1F;
+   }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0D);
-    }
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(8.0D);
+      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
+      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(2.0D);
+   }
 
-    /**
-     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
-     * prevent them from trampling crops
-     */
-    protected boolean canTriggerWalking()
-    {
-        return false;
-    }
+   protected boolean func_70041_e_() {
+      return false;
+   }
 
-    protected SoundEvent getAmbientSound()
-    {
-        return SoundEvents.ENTITY_ENDERMITE_AMBIENT;
-    }
+   protected SoundEvent func_184639_G() {
+      return SoundEvents.field_187535_aY;
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_ENDERMITE_HURT;
-    }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_187590_ba;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_ENDERMITE_DEATH;
-    }
+   protected SoundEvent func_184615_bR() {
+      return SoundEvents.field_187536_aZ;
+   }
 
-    protected void playStepSound(BlockPos pos, Block blockIn)
-    {
-        this.playSound(SoundEvents.ENTITY_ENDERMITE_STEP, 0.15F, 1.0F);
-    }
+   protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_) {
+      this.func_184185_a(SoundEvents.field_187592_bb, 0.15F, 1.0F);
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_ENDERMITE;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186382_ag;
+   }
 
-    public static void registerFixesEndermite(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntityEndermite.class);
-    }
+   public static void func_189764_b(DataFixer p_189764_0_) {
+      EntityLiving.func_189752_a(p_189764_0_, EntityEndermite.class);
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.lifetime = compound.getInteger("Lifetime");
-        this.playerSpawned = compound.getBoolean("PlayerSpawned");
-    }
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.field_175497_b = p_70037_1_.func_74762_e("Lifetime");
+      this.field_175498_c = p_70037_1_.func_74767_n("PlayerSpawned");
+   }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("Lifetime", this.lifetime);
-        compound.setBoolean("PlayerSpawned", this.playerSpawned);
-    }
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74768_a("Lifetime", this.field_175497_b);
+      p_70014_1_.func_74757_a("PlayerSpawned", this.field_175498_c);
+   }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        this.renderYawOffset = this.rotationYaw;
-        super.onUpdate();
-    }
+   public void func_70071_h_() {
+      this.field_70761_aq = this.field_70177_z;
+      super.func_70071_h_();
+   }
 
-    /**
-     * Set the render yaw offset
-     */
-    public void setRenderYawOffset(float offset)
-    {
-        this.rotationYaw = offset;
-        super.setRenderYawOffset(offset);
-    }
+   public void func_181013_g(float p_181013_1_) {
+      this.field_70177_z = p_181013_1_;
+      super.func_181013_g(p_181013_1_);
+   }
 
-    /**
-     * Returns the Y Offset of this entity.
-     */
-    public double getYOffset()
-    {
-        return 0.1D;
-    }
+   public double func_70033_W() {
+      return 0.1D;
+   }
 
-    public boolean isSpawnedByPlayer()
-    {
-        return this.playerSpawned;
-    }
+   public boolean func_175495_n() {
+      return this.field_175498_c;
+   }
 
-    /**
-     * Sets if this mob was spawned by a player or not.
-     */
-    public void setSpawnedByPlayer(boolean spawnedByPlayer)
-    {
-        this.playerSpawned = spawnedByPlayer;
-    }
+   public void func_175496_a(boolean p_175496_1_) {
+      this.field_175498_c = p_175496_1_;
+   }
 
-    /**
-     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
-     * use this to react to sunlight and start to burn.
-     */
-    public void onLivingUpdate()
-    {
-        super.onLivingUpdate();
+   public void func_70636_d() {
+      super.func_70636_d();
+      if (this.field_70170_p.field_72995_K) {
+         for(int i = 0; i < 2; ++i) {
+            this.field_70170_p.func_175688_a(EnumParticleTypes.PORTAL, this.field_70165_t + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, this.field_70163_u + this.field_70146_Z.nextDouble() * (double)this.field_70131_O, this.field_70161_v + (this.field_70146_Z.nextDouble() - 0.5D) * (double)this.field_70130_N, (this.field_70146_Z.nextDouble() - 0.5D) * 2.0D, -this.field_70146_Z.nextDouble(), (this.field_70146_Z.nextDouble() - 0.5D) * 2.0D);
+         }
+      } else {
+         if (!this.func_104002_bU()) {
+            ++this.field_175497_b;
+         }
 
-        if (this.world.isRemote)
-        {
-            for (int i = 0; i < 2; ++i)
-            {
-                this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
-            }
-        }
-        else
-        {
-            if (!this.isNoDespawnRequired())
-            {
-                ++this.lifetime;
-            }
+         if (this.field_175497_b >= 2400) {
+            this.func_70106_y();
+         }
+      }
 
-            if (this.lifetime >= 2400)
-            {
-                this.setDead();
-            }
-        }
-    }
+   }
 
-    /**
-     * Checks to make sure the light is not too bright where the mob is spawning
-     */
-    protected boolean isValidLightLevel()
-    {
-        return true;
-    }
+   protected boolean func_70814_o() {
+      return true;
+   }
 
-    /**
-     * Checks if the entity's current position is a valid location to spawn this entity.
-     */
-    public boolean getCanSpawnHere()
-    {
-        if (super.getCanSpawnHere())
-        {
-            EntityPlayer entityplayer = this.world.getClosestPlayerToEntity(this, 5.0D);
-            return entityplayer == null;
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public boolean func_70601_bi() {
+      if (super.func_70601_bi()) {
+         EntityPlayer entityplayer = this.field_70170_p.func_72890_a(this, 5.0D);
+         return entityplayer == null;
+      } else {
+         return false;
+      }
+   }
 
-    /**
-     * Get this Entity's EnumCreatureAttribute
-     */
-    public EnumCreatureAttribute getCreatureAttribute()
-    {
-        return EnumCreatureAttribute.ARTHROPOD;
-    }
+   public EnumCreatureAttribute func_70668_bt() {
+      return EnumCreatureAttribute.ARTHROPOD;
+   }
 }

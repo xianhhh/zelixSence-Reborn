@@ -5,75 +5,55 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderWitherSkull extends Render<EntityWitherSkull>
-{
-    private static final ResourceLocation INVULNERABLE_WITHER_TEXTURES = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
-    private static final ResourceLocation WITHER_TEXTURES = new ResourceLocation("textures/entity/wither/wither.png");
+public class RenderWitherSkull extends Render<EntityWitherSkull> {
+   private static final ResourceLocation field_110811_a = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
+   private static final ResourceLocation field_110810_f = new ResourceLocation("textures/entity/wither/wither.png");
+   private final ModelSkeletonHead field_82401_a = new ModelSkeletonHead();
 
-    /** The Skeleton's head model. */
-    private final ModelSkeletonHead skeletonHeadModel = new ModelSkeletonHead();
+   public RenderWitherSkull(RenderManager p_i46129_1_) {
+      super(p_i46129_1_);
+   }
 
-    public RenderWitherSkull(RenderManager renderManagerIn)
-    {
-        super(renderManagerIn);
-    }
+   private float func_82400_a(float p_82400_1_, float p_82400_2_, float p_82400_3_) {
+      float f;
+      for(f = p_82400_2_ - p_82400_1_; f < -180.0F; f += 360.0F) {
+         ;
+      }
 
-    private float getRenderYaw(float p_82400_1_, float p_82400_2_, float p_82400_3_)
-    {
-        float f;
+      while(f >= 180.0F) {
+         f -= 360.0F;
+      }
 
-        for (f = p_82400_2_ - p_82400_1_; f < -180.0F; f += 360.0F)
-        {
-            ;
-        }
+      return p_82400_1_ + p_82400_3_ * f;
+   }
 
-        while (f >= 180.0F)
-        {
-            f -= 360.0F;
-        }
+   public void func_76986_a(EntityWitherSkull p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {
+      GlStateManager.func_179094_E();
+      GlStateManager.func_179129_p();
+      float f = this.func_82400_a(p_76986_1_.field_70126_B, p_76986_1_.field_70177_z, p_76986_9_);
+      float f1 = p_76986_1_.field_70127_C + (p_76986_1_.field_70125_A - p_76986_1_.field_70127_C) * p_76986_9_;
+      GlStateManager.func_179109_b((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
+      float f2 = 0.0625F;
+      GlStateManager.func_179091_B();
+      GlStateManager.func_179152_a(-1.0F, -1.0F, 1.0F);
+      GlStateManager.func_179141_d();
+      this.func_180548_c(p_76986_1_);
+      if (this.field_188301_f) {
+         GlStateManager.func_179142_g();
+         GlStateManager.func_187431_e(this.func_188298_c(p_76986_1_));
+      }
 
-        return p_82400_1_ + p_82400_3_ * f;
-    }
+      this.field_82401_a.func_78088_a(p_76986_1_, 0.0F, 0.0F, 0.0F, f, f1, 0.0625F);
+      if (this.field_188301_f) {
+         GlStateManager.func_187417_n();
+         GlStateManager.func_179119_h();
+      }
 
-    /**
-     * Renders the desired {@code T} type Entity.
-     */
-    public void doRender(EntityWitherSkull entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-        float f = this.getRenderYaw(entity.prevRotationYaw, entity.rotationYaw, partialTicks);
-        float f1 = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
-        GlStateManager.translate((float)x, (float)y, (float)z);
-        float f2 = 0.0625F;
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-        GlStateManager.enableAlpha();
-        this.bindEntityTexture(entity);
+      GlStateManager.func_179121_F();
+      super.func_76986_a(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+   }
 
-        if (this.renderOutlines)
-        {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
-        }
-
-        this.skeletonHeadModel.render(entity, 0.0F, 0.0F, 0.0F, f, f1, 0.0625F);
-
-        if (this.renderOutlines)
-        {
-            GlStateManager.disableOutlineMode();
-            GlStateManager.disableColorMaterial();
-        }
-
-        GlStateManager.popMatrix();
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
-
-    /**
-     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
-     */
-    protected ResourceLocation getEntityTexture(EntityWitherSkull entity)
-    {
-        return entity.isInvulnerable() ? INVULNERABLE_WITHER_TEXTURES : WITHER_TEXTURES;
-    }
+   protected ResourceLocation func_110775_a(EntityWitherSkull p_110775_1_) {
+      return p_110775_1_.func_82342_d() ? field_110811_a : field_110810_f;
+   }
 }

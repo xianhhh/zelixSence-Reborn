@@ -13,358 +13,267 @@ import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
-public class RecipesBanners
-{
-    public static class RecipeAddPattern implements IRecipe
-    {
-        public boolean matches(InventoryCrafting inv, World worldIn)
-        {
-            boolean flag = false;
+public class RecipesBanners {
+   public static class RecipeAddPattern implements IRecipe {
+      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_) {
+         boolean flag = false;
 
-            for (int i = 0; i < inv.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack = inv.getStackInSlot(i);
+         for(int i = 0; i < p_77569_1_.func_70302_i_(); ++i) {
+            ItemStack itemstack = p_77569_1_.func_70301_a(i);
+            if (itemstack.func_77973_b() == Items.field_179564_cE) {
+               if (flag) {
+                  return false;
+               }
 
-                if (itemstack.getItem() == Items.BANNER)
-                {
-                    if (flag)
-                    {
-                        return false;
-                    }
+               if (TileEntityBanner.func_175113_c(itemstack) >= 6) {
+                  return false;
+               }
 
-                    if (TileEntityBanner.getPatterns(itemstack) >= 6)
-                    {
-                        return false;
-                    }
+               flag = true;
+            }
+         }
 
-                    flag = true;
-                }
+         if (!flag) {
+            return false;
+         } else {
+            return this.func_190933_c(p_77569_1_) != null;
+         }
+      }
+
+      public ItemStack func_77572_b(InventoryCrafting p_77572_1_) {
+         ItemStack itemstack = ItemStack.field_190927_a;
+
+         for(int i = 0; i < p_77572_1_.func_70302_i_(); ++i) {
+            ItemStack itemstack1 = p_77572_1_.func_70301_a(i);
+            if (!itemstack1.func_190926_b() && itemstack1.func_77973_b() == Items.field_179564_cE) {
+               itemstack = itemstack1.func_77946_l();
+               itemstack.func_190920_e(1);
+               break;
+            }
+         }
+
+         BannerPattern bannerpattern = this.func_190933_c(p_77572_1_);
+         if (bannerpattern != null) {
+            int k = 0;
+
+            for(int j = 0; j < p_77572_1_.func_70302_i_(); ++j) {
+               ItemStack itemstack2 = p_77572_1_.func_70301_a(j);
+               if (itemstack2.func_77973_b() == Items.field_151100_aR) {
+                  k = itemstack2.func_77960_j();
+                  break;
+               }
             }
 
-            if (!flag)
-            {
-                return false;
-            }
-            else
-            {
-                return this.func_190933_c(inv) != null;
-            }
-        }
-
-        public ItemStack getCraftingResult(InventoryCrafting inv)
-        {
-            ItemStack itemstack = ItemStack.field_190927_a;
-
-            for (int i = 0; i < inv.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack1 = inv.getStackInSlot(i);
-
-                if (!itemstack1.func_190926_b() && itemstack1.getItem() == Items.BANNER)
-                {
-                    itemstack = itemstack1.copy();
-                    itemstack.func_190920_e(1);
-                    break;
-                }
+            NBTTagCompound nbttagcompound1 = itemstack.func_190925_c("BlockEntityTag");
+            NBTTagList nbttaglist;
+            if (nbttagcompound1.func_150297_b("Patterns", 9)) {
+               nbttaglist = nbttagcompound1.func_150295_c("Patterns", 10);
+            } else {
+               nbttaglist = new NBTTagList();
+               nbttagcompound1.func_74782_a("Patterns", nbttaglist);
             }
 
-            BannerPattern bannerpattern = this.func_190933_c(inv);
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.func_74778_a("Pattern", bannerpattern.func_190993_b());
+            nbttagcompound.func_74768_a("Color", k);
+            nbttaglist.func_74742_a(nbttagcompound);
+         }
 
-            if (bannerpattern != null)
-            {
-                int k = 0;
+         return itemstack;
+      }
 
-                for (int j = 0; j < inv.getSizeInventory(); ++j)
-                {
-                    ItemStack itemstack2 = inv.getStackInSlot(j);
+      public ItemStack func_77571_b() {
+         return ItemStack.field_190927_a;
+      }
 
-                    if (itemstack2.getItem() == Items.DYE)
-                    {
-                        k = itemstack2.getMetadata();
-                        break;
-                    }
-                }
+      public NonNullList<ItemStack> func_179532_b(InventoryCrafting p_179532_1_) {
+         NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(p_179532_1_.func_70302_i_(), ItemStack.field_190927_a);
 
-                NBTTagCompound nbttagcompound1 = itemstack.func_190925_c("BlockEntityTag");
-                NBTTagList nbttaglist;
-
-                if (nbttagcompound1.hasKey("Patterns", 9))
-                {
-                    nbttaglist = nbttagcompound1.getTagList("Patterns", 10);
-                }
-                else
-                {
-                    nbttaglist = new NBTTagList();
-                    nbttagcompound1.setTag("Patterns", nbttaglist);
-                }
-
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setString("Pattern", bannerpattern.func_190993_b());
-                nbttagcompound.setInteger("Color", k);
-                nbttaglist.appendTag(nbttagcompound);
+         for(int i = 0; i < nonnulllist.size(); ++i) {
+            ItemStack itemstack = p_179532_1_.func_70301_a(i);
+            if (itemstack.func_77973_b().func_77634_r()) {
+               nonnulllist.set(i, new ItemStack(itemstack.func_77973_b().func_77668_q()));
             }
+         }
 
-            return itemstack;
-        }
+         return nonnulllist;
+      }
 
-        public ItemStack getRecipeOutput()
-        {
-            return ItemStack.field_190927_a;
-        }
+      @Nullable
+      private BannerPattern func_190933_c(InventoryCrafting p_190933_1_) {
+         for(BannerPattern bannerpattern : BannerPattern.values()) {
+            if (bannerpattern.func_191000_d()) {
+               boolean flag = true;
+               if (bannerpattern.func_190999_e()) {
+                  boolean flag1 = false;
+                  boolean flag2 = false;
 
-        public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
-        {
-            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+                  for(int i = 0; i < p_190933_1_.func_70302_i_() && flag; ++i) {
+                     ItemStack itemstack = p_190933_1_.func_70301_a(i);
+                     if (!itemstack.func_190926_b() && itemstack.func_77973_b() != Items.field_179564_cE) {
+                        if (itemstack.func_77973_b() == Items.field_151100_aR) {
+                           if (flag2) {
+                              flag = false;
+                              break;
+                           }
 
-            for (int i = 0; i < nonnulllist.size(); ++i)
-            {
-                ItemStack itemstack = inv.getStackInSlot(i);
+                           flag2 = true;
+                        } else {
+                           if (flag1 || !itemstack.func_77969_a(bannerpattern.func_190998_f())) {
+                              flag = false;
+                              break;
+                           }
 
-                if (itemstack.getItem().hasContainerItem())
-                {
-                    nonnulllist.set(i, new ItemStack(itemstack.getItem().getContainerItem()));
-                }
-            }
+                           flag1 = true;
+                        }
+                     }
+                  }
 
-            return nonnulllist;
-        }
+                  if (!flag1 || !flag2) {
+                     flag = false;
+                  }
+               } else if (p_190933_1_.func_70302_i_() == bannerpattern.func_190996_c().length * bannerpattern.func_190996_c()[0].length()) {
+                  int j = -1;
 
-        @Nullable
-        private BannerPattern func_190933_c(InventoryCrafting p_190933_1_)
-        {
-            for (BannerPattern bannerpattern : BannerPattern.values())
-            {
-                if (bannerpattern.func_191000_d())
-                {
-                    boolean flag = true;
-
-                    if (bannerpattern.func_190999_e())
-                    {
-                        boolean flag1 = false;
-                        boolean flag2 = false;
-
-                        for (int i = 0; i < p_190933_1_.getSizeInventory() && flag; ++i)
-                        {
-                            ItemStack itemstack = p_190933_1_.getStackInSlot(i);
-
-                            if (!itemstack.func_190926_b() && itemstack.getItem() != Items.BANNER)
-                            {
-                                if (itemstack.getItem() == Items.DYE)
-                                {
-                                    if (flag2)
-                                    {
-                                        flag = false;
-                                        break;
-                                    }
-
-                                    flag2 = true;
-                                }
-                                else
-                                {
-                                    if (flag1 || !itemstack.isItemEqual(bannerpattern.func_190998_f()))
-                                    {
-                                        flag = false;
-                                        break;
-                                    }
-
-                                    flag1 = true;
-                                }
-                            }
+                  for(int k = 0; k < p_190933_1_.func_70302_i_() && flag; ++k) {
+                     int l = k / 3;
+                     int i1 = k % 3;
+                     ItemStack itemstack1 = p_190933_1_.func_70301_a(k);
+                     if (!itemstack1.func_190926_b() && itemstack1.func_77973_b() != Items.field_179564_cE) {
+                        if (itemstack1.func_77973_b() != Items.field_151100_aR) {
+                           flag = false;
+                           break;
                         }
 
-                        if (!flag1 || !flag2)
-                        {
-                            flag = false;
+                        if (j != -1 && j != itemstack1.func_77960_j()) {
+                           flag = false;
+                           break;
                         }
-                    }
-                    else if (p_190933_1_.getSizeInventory() == bannerpattern.func_190996_c().length * bannerpattern.func_190996_c()[0].length())
-                    {
-                        int j = -1;
 
-                        for (int k = 0; k < p_190933_1_.getSizeInventory() && flag; ++k)
-                        {
-                            int l = k / 3;
-                            int i1 = k % 3;
-                            ItemStack itemstack1 = p_190933_1_.getStackInSlot(k);
-
-                            if (!itemstack1.func_190926_b() && itemstack1.getItem() != Items.BANNER)
-                            {
-                                if (itemstack1.getItem() != Items.DYE)
-                                {
-                                    flag = false;
-                                    break;
-                                }
-
-                                if (j != -1 && j != itemstack1.getMetadata())
-                                {
-                                    flag = false;
-                                    break;
-                                }
-
-                                if (bannerpattern.func_190996_c()[l].charAt(i1) == ' ')
-                                {
-                                    flag = false;
-                                    break;
-                                }
-
-                                j = itemstack1.getMetadata();
-                            }
-                            else if (bannerpattern.func_190996_c()[l].charAt(i1) != ' ')
-                            {
-                                flag = false;
-                                break;
-                            }
+                        if (bannerpattern.func_190996_c()[l].charAt(i1) == ' ') {
+                           flag = false;
+                           break;
                         }
-                    }
-                    else
-                    {
+
+                        j = itemstack1.func_77960_j();
+                     } else if (bannerpattern.func_190996_c()[l].charAt(i1) != ' ') {
                         flag = false;
-                    }
+                        break;
+                     }
+                  }
+               } else {
+                  flag = false;
+               }
 
-                    if (flag)
-                    {
-                        return bannerpattern;
-                    }
-                }
+               if (flag) {
+                  return bannerpattern;
+               }
             }
+         }
 
-            return null;
-        }
+         return null;
+      }
 
-        public boolean func_192399_d()
-        {
-            return true;
-        }
+      public boolean func_192399_d() {
+         return true;
+      }
 
-        public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
-        {
-            return p_194133_1_ >= 3 && p_194133_2_ >= 3;
-        }
-    }
+      public boolean func_194133_a(int p_194133_1_, int p_194133_2_) {
+         return p_194133_1_ >= 3 && p_194133_2_ >= 3;
+      }
+   }
 
-    public static class RecipeDuplicatePattern implements IRecipe
-    {
-        public boolean matches(InventoryCrafting inv, World worldIn)
-        {
-            ItemStack itemstack = ItemStack.field_190927_a;
-            ItemStack itemstack1 = ItemStack.field_190927_a;
+   public static class RecipeDuplicatePattern implements IRecipe {
+      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_) {
+         ItemStack itemstack = ItemStack.field_190927_a;
+         ItemStack itemstack1 = ItemStack.field_190927_a;
 
-            for (int i = 0; i < inv.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack2 = inv.getStackInSlot(i);
+         for(int i = 0; i < p_77569_1_.func_70302_i_(); ++i) {
+            ItemStack itemstack2 = p_77569_1_.func_70301_a(i);
+            if (!itemstack2.func_190926_b()) {
+               if (itemstack2.func_77973_b() != Items.field_179564_cE) {
+                  return false;
+               }
 
-                if (!itemstack2.func_190926_b())
-                {
-                    if (itemstack2.getItem() != Items.BANNER)
-                    {
-                        return false;
-                    }
+               if (!itemstack.func_190926_b() && !itemstack1.func_190926_b()) {
+                  return false;
+               }
 
-                    if (!itemstack.func_190926_b() && !itemstack1.func_190926_b())
-                    {
-                        return false;
-                    }
+               EnumDyeColor enumdyecolor = ItemBanner.func_179225_h(itemstack2);
+               boolean flag = TileEntityBanner.func_175113_c(itemstack2) > 0;
+               if (!itemstack.func_190926_b()) {
+                  if (flag) {
+                     return false;
+                  }
 
-                    EnumDyeColor enumdyecolor = ItemBanner.getBaseColor(itemstack2);
-                    boolean flag = TileEntityBanner.getPatterns(itemstack2) > 0;
+                  if (enumdyecolor != ItemBanner.func_179225_h(itemstack)) {
+                     return false;
+                  }
 
-                    if (!itemstack.func_190926_b())
-                    {
-                        if (flag)
-                        {
-                            return false;
-                        }
+                  itemstack1 = itemstack2;
+               } else if (!itemstack1.func_190926_b()) {
+                  if (!flag) {
+                     return false;
+                  }
 
-                        if (enumdyecolor != ItemBanner.getBaseColor(itemstack))
-                        {
-                            return false;
-                        }
+                  if (enumdyecolor != ItemBanner.func_179225_h(itemstack1)) {
+                     return false;
+                  }
 
-                        itemstack1 = itemstack2;
-                    }
-                    else if (!itemstack1.func_190926_b())
-                    {
-                        if (!flag)
-                        {
-                            return false;
-                        }
-
-                        if (enumdyecolor != ItemBanner.getBaseColor(itemstack1))
-                        {
-                            return false;
-                        }
-
-                        itemstack = itemstack2;
-                    }
-                    else if (flag)
-                    {
-                        itemstack = itemstack2;
-                    }
-                    else
-                    {
-                        itemstack1 = itemstack2;
-                    }
-                }
+                  itemstack = itemstack2;
+               } else if (flag) {
+                  itemstack = itemstack2;
+               } else {
+                  itemstack1 = itemstack2;
+               }
             }
+         }
 
-            return !itemstack.func_190926_b() && !itemstack1.func_190926_b();
-        }
+         return !itemstack.func_190926_b() && !itemstack1.func_190926_b();
+      }
 
-        public ItemStack getCraftingResult(InventoryCrafting inv)
-        {
-            for (int i = 0; i < inv.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack = inv.getStackInSlot(i);
-
-                if (!itemstack.func_190926_b() && TileEntityBanner.getPatterns(itemstack) > 0)
-                {
-                    ItemStack itemstack1 = itemstack.copy();
-                    itemstack1.func_190920_e(1);
-                    return itemstack1;
-                }
+      public ItemStack func_77572_b(InventoryCrafting p_77572_1_) {
+         for(int i = 0; i < p_77572_1_.func_70302_i_(); ++i) {
+            ItemStack itemstack = p_77572_1_.func_70301_a(i);
+            if (!itemstack.func_190926_b() && TileEntityBanner.func_175113_c(itemstack) > 0) {
+               ItemStack itemstack1 = itemstack.func_77946_l();
+               itemstack1.func_190920_e(1);
+               return itemstack1;
             }
+         }
 
-            return ItemStack.field_190927_a;
-        }
+         return ItemStack.field_190927_a;
+      }
 
-        public ItemStack getRecipeOutput()
-        {
-            return ItemStack.field_190927_a;
-        }
+      public ItemStack func_77571_b() {
+         return ItemStack.field_190927_a;
+      }
 
-        public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
-        {
-            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+      public NonNullList<ItemStack> func_179532_b(InventoryCrafting p_179532_1_) {
+         NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(p_179532_1_.func_70302_i_(), ItemStack.field_190927_a);
 
-            for (int i = 0; i < nonnulllist.size(); ++i)
-            {
-                ItemStack itemstack = inv.getStackInSlot(i);
-
-                if (!itemstack.func_190926_b())
-                {
-                    if (itemstack.getItem().hasContainerItem())
-                    {
-                        nonnulllist.set(i, new ItemStack(itemstack.getItem().getContainerItem()));
-                    }
-                    else if (itemstack.hasTagCompound() && TileEntityBanner.getPatterns(itemstack) > 0)
-                    {
-                        ItemStack itemstack1 = itemstack.copy();
-                        itemstack1.func_190920_e(1);
-                        nonnulllist.set(i, itemstack1);
-                    }
-                }
+         for(int i = 0; i < nonnulllist.size(); ++i) {
+            ItemStack itemstack = p_179532_1_.func_70301_a(i);
+            if (!itemstack.func_190926_b()) {
+               if (itemstack.func_77973_b().func_77634_r()) {
+                  nonnulllist.set(i, new ItemStack(itemstack.func_77973_b().func_77668_q()));
+               } else if (itemstack.func_77942_o() && TileEntityBanner.func_175113_c(itemstack) > 0) {
+                  ItemStack itemstack1 = itemstack.func_77946_l();
+                  itemstack1.func_190920_e(1);
+                  nonnulllist.set(i, itemstack1);
+               }
             }
+         }
 
-            return nonnulllist;
-        }
+         return nonnulllist;
+      }
 
-        public boolean func_192399_d()
-        {
-            return true;
-        }
+      public boolean func_192399_d() {
+         return true;
+      }
 
-        public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
-        {
-            return p_194133_1_ * p_194133_2_ >= 2;
-        }
-    }
+      public boolean func_194133_a(int p_194133_1_, int p_194133_2_) {
+         return p_194133_1_ * p_194133_2_ >= 2;
+      }
+   }
 }

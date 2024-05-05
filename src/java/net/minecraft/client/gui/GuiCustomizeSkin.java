@@ -5,120 +5,81 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 
-public class GuiCustomizeSkin extends GuiScreen
-{
-    /** The parent GUI for this GUI */
-    private final GuiScreen parentScreen;
+public class GuiCustomizeSkin extends GuiScreen {
+   private final GuiScreen field_175361_a;
+   private String field_175360_f;
 
-    /** The title of the GUI. */
-    private String title;
+   public GuiCustomizeSkin(GuiScreen p_i45516_1_) {
+      this.field_175361_a = p_i45516_1_;
+   }
 
-    public GuiCustomizeSkin(GuiScreen parentScreenIn)
-    {
-        this.parentScreen = parentScreenIn;
-    }
+   public void func_73866_w_() {
+      int i = 0;
+      this.field_175360_f = I18n.func_135052_a("options.skinCustomisation.title");
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        int i = 0;
-        this.title = I18n.format("options.skinCustomisation.title");
+      for(EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts.values()) {
+         this.field_146292_n.add(new GuiCustomizeSkin.ButtonPart(enumplayermodelparts.func_179328_b(), this.field_146294_l / 2 - 155 + i % 2 * 160, this.field_146295_m / 6 + 24 * (i >> 1), 150, 20, enumplayermodelparts));
+         ++i;
+      }
 
-        for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts.values())
-        {
-            this.buttonList.add(new GuiCustomizeSkin.ButtonPart(enumplayermodelparts.getPartId(), this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20, enumplayermodelparts));
-            ++i;
-        }
+      this.field_146292_n.add(new GuiOptionButton(199, this.field_146294_l / 2 - 155 + i % 2 * 160, this.field_146295_m / 6 + 24 * (i >> 1), GameSettings.Options.MAIN_HAND, this.field_146297_k.field_71474_y.func_74297_c(GameSettings.Options.MAIN_HAND)));
+      ++i;
+      if (i % 2 == 1) {
+         ++i;
+      }
 
-        this.buttonList.add(new GuiOptionButton(199, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), GameSettings.Options.MAIN_HAND, this.mc.gameSettings.getKeyBinding(GameSettings.Options.MAIN_HAND)));
-        ++i;
+      this.field_146292_n.add(new GuiButton(200, this.field_146294_l / 2 - 100, this.field_146295_m / 6 + 24 * (i >> 1), I18n.func_135052_a("gui.done")));
+   }
 
-        if (i % 2 == 1)
-        {
-            ++i;
-        }
+   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
+      if (p_73869_2_ == 1) {
+         this.field_146297_k.field_71474_y.func_74303_b();
+      }
 
-        this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), I18n.format("gui.done")));
-    }
+      super.func_73869_a(p_73869_1_, p_73869_2_);
+   }
 
-    /**
-     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
-     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
-     */
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        if (keyCode == 1)
-        {
-            this.mc.gameSettings.saveOptions();
-        }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      if (p_146284_1_.field_146124_l) {
+         if (p_146284_1_.field_146127_k == 200) {
+            this.field_146297_k.field_71474_y.func_74303_b();
+            this.field_146297_k.func_147108_a(this.field_175361_a);
+         } else if (p_146284_1_.field_146127_k == 199) {
+            this.field_146297_k.field_71474_y.func_74306_a(GameSettings.Options.MAIN_HAND, 1);
+            p_146284_1_.field_146126_j = this.field_146297_k.field_71474_y.func_74297_c(GameSettings.Options.MAIN_HAND);
+            this.field_146297_k.field_71474_y.func_82879_c();
+         } else if (p_146284_1_ instanceof GuiCustomizeSkin.ButtonPart) {
+            EnumPlayerModelParts enumplayermodelparts = ((GuiCustomizeSkin.ButtonPart)p_146284_1_).field_175234_p;
+            this.field_146297_k.field_71474_y.func_178877_a(enumplayermodelparts);
+            p_146284_1_.field_146126_j = this.func_175358_a(enumplayermodelparts);
+         }
 
-        super.keyTyped(typedChar, keyCode);
-    }
+      }
+   }
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.enabled)
-        {
-            if (button.id == 200)
-            {
-                this.mc.gameSettings.saveOptions();
-                this.mc.displayGuiScreen(this.parentScreen);
-            }
-            else if (button.id == 199)
-            {
-                this.mc.gameSettings.setOptionValue(GameSettings.Options.MAIN_HAND, 1);
-                button.displayString = this.mc.gameSettings.getKeyBinding(GameSettings.Options.MAIN_HAND);
-                this.mc.gameSettings.sendSettingsToServer();
-            }
-            else if (button instanceof GuiCustomizeSkin.ButtonPart)
-            {
-                EnumPlayerModelParts enumplayermodelparts = ((GuiCustomizeSkin.ButtonPart)button).playerModelParts;
-                this.mc.gameSettings.switchModelPartEnabled(enumplayermodelparts);
-                button.displayString = this.getMessage(enumplayermodelparts);
-            }
-        }
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.func_73732_a(this.field_146289_q, this.field_175360_f, this.field_146294_l / 2, 20, 16777215);
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
 
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 20, 16777215);
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+   private String func_175358_a(EnumPlayerModelParts p_175358_1_) {
+      String s;
+      if (this.field_146297_k.field_71474_y.func_178876_d().contains(p_175358_1_)) {
+         s = I18n.func_135052_a("options.on");
+      } else {
+         s = I18n.func_135052_a("options.off");
+      }
 
-    private String getMessage(EnumPlayerModelParts playerModelParts)
-    {
-        String s;
+      return p_175358_1_.func_179326_d().func_150254_d() + ": " + s;
+   }
 
-        if (this.mc.gameSettings.getModelParts().contains(playerModelParts))
-        {
-            s = I18n.format("options.on");
-        }
-        else
-        {
-            s = I18n.format("options.off");
-        }
+   class ButtonPart extends GuiButton {
+      private final EnumPlayerModelParts field_175234_p;
 
-        return playerModelParts.getName().getFormattedText() + ": " + s;
-    }
-
-    class ButtonPart extends GuiButton
-    {
-        private final EnumPlayerModelParts playerModelParts;
-
-        private ButtonPart(int p_i45514_2_, int p_i45514_3_, int p_i45514_4_, int p_i45514_5_, int p_i45514_6_, EnumPlayerModelParts playerModelParts)
-        {
-            super(p_i45514_2_, p_i45514_3_, p_i45514_4_, p_i45514_5_, p_i45514_6_, GuiCustomizeSkin.this.getMessage(playerModelParts));
-            this.playerModelParts = playerModelParts;
-        }
-    }
+      private ButtonPart(int p_i45514_2_, int p_i45514_3_, int p_i45514_4_, int p_i45514_5_, int p_i45514_6_, EnumPlayerModelParts p_i45514_7_) {
+         super(p_i45514_2_, p_i45514_3_, p_i45514_4_, p_i45514_5_, p_i45514_6_, GuiCustomizeSkin.this.func_175358_a(p_i45514_7_));
+         this.field_175234_p = p_i45514_7_;
+      }
+   }
 }

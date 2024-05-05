@@ -6,71 +6,50 @@ import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderVillager extends RenderLiving<EntityVillager>
-{
-    private static final ResourceLocation VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/villager.png");
-    private static final ResourceLocation FARMER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/farmer.png");
-    private static final ResourceLocation LIBRARIAN_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/librarian.png");
-    private static final ResourceLocation PRIEST_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/priest.png");
-    private static final ResourceLocation SMITH_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/smith.png");
-    private static final ResourceLocation BUTCHER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/butcher.png");
+public class RenderVillager extends RenderLiving<EntityVillager> {
+   private static final ResourceLocation field_110903_f = new ResourceLocation("textures/entity/villager/villager.png");
+   private static final ResourceLocation field_110904_g = new ResourceLocation("textures/entity/villager/farmer.png");
+   private static final ResourceLocation field_110908_h = new ResourceLocation("textures/entity/villager/librarian.png");
+   private static final ResourceLocation field_110907_k = new ResourceLocation("textures/entity/villager/priest.png");
+   private static final ResourceLocation field_110905_l = new ResourceLocation("textures/entity/villager/smith.png");
+   private static final ResourceLocation field_110906_m = new ResourceLocation("textures/entity/villager/butcher.png");
 
-    public RenderVillager(RenderManager renderManagerIn)
-    {
-        super(renderManagerIn, new ModelVillager(0.0F), 0.5F);
-        this.addLayer(new LayerCustomHead(this.getMainModel().villagerHead));
-    }
+   public RenderVillager(RenderManager p_i46132_1_) {
+      super(p_i46132_1_, new ModelVillager(0.0F), 0.5F);
+      this.func_177094_a(new LayerCustomHead(this.func_177087_b().field_78191_a));
+   }
 
-    public ModelVillager getMainModel()
-    {
-        return (ModelVillager)super.getMainModel();
-    }
+   public ModelVillager func_177087_b() {
+      return (ModelVillager)super.func_177087_b();
+   }
 
-    /**
-     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
-     */
-    protected ResourceLocation getEntityTexture(EntityVillager entity)
-    {
-        switch (entity.getProfession())
-        {
-            case 0:
-                return FARMER_VILLAGER_TEXTURES;
+   protected ResourceLocation func_110775_a(EntityVillager p_110775_1_) {
+      switch(p_110775_1_.func_70946_n()) {
+      case 0:
+         return field_110904_g;
+      case 1:
+         return field_110908_h;
+      case 2:
+         return field_110907_k;
+      case 3:
+         return field_110905_l;
+      case 4:
+         return field_110906_m;
+      case 5:
+      default:
+         return field_110903_f;
+      }
+   }
 
-            case 1:
-                return LIBRARIAN_VILLAGER_TEXTURES;
+   protected void func_77041_b(EntityVillager p_77041_1_, float p_77041_2_) {
+      float f = 0.9375F;
+      if (p_77041_1_.func_70874_b() < 0) {
+         f = (float)((double)f * 0.5D);
+         this.field_76989_e = 0.25F;
+      } else {
+         this.field_76989_e = 0.5F;
+      }
 
-            case 2:
-                return PRIEST_VILLAGER_TEXTURES;
-
-            case 3:
-                return SMITH_VILLAGER_TEXTURES;
-
-            case 4:
-                return BUTCHER_VILLAGER_TEXTURES;
-
-            case 5:
-            default:
-                return VILLAGER_TEXTURES;
-        }
-    }
-
-    /**
-     * Allows the render to do state modifications necessary before the model is rendered.
-     */
-    protected void preRenderCallback(EntityVillager entitylivingbaseIn, float partialTickTime)
-    {
-        float f = 0.9375F;
-
-        if (entitylivingbaseIn.getGrowingAge() < 0)
-        {
-            f = (float)((double)f * 0.5D);
-            this.shadowSize = 0.25F;
-        }
-        else
-        {
-            this.shadowSize = 0.5F;
-        }
-
-        GlStateManager.scale(f, f, f);
-    }
+      GlStateManager.func_179152_a(f, f, f);
+   }
 }

@@ -2,50 +2,33 @@ package net.minecraft.item;
 
 import net.minecraft.block.Block;
 
-public class ItemColored extends ItemBlock
-{
-    private String[] subtypeNames;
+public class ItemColored extends ItemBlock {
+   private String[] field_150945_c;
 
-    public ItemColored(Block block, boolean hasSubtypes)
-    {
-        super(block);
+   public ItemColored(Block p_i45332_1_, boolean p_i45332_2_) {
+      super(p_i45332_1_);
+      if (p_i45332_2_) {
+         this.func_77656_e(0);
+         this.func_77627_a(true);
+      }
 
-        if (hasSubtypes)
-        {
-            this.setMaxDamage(0);
-            this.setHasSubtypes(true);
-        }
-    }
+   }
 
-    /**
-     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
-     * placed as a Block (mostly used with ItemBlocks).
-     */
-    public int getMetadata(int damage)
-    {
-        return damage;
-    }
+   public int func_77647_b(int p_77647_1_) {
+      return p_77647_1_;
+   }
 
-    public ItemColored setSubtypeNames(String[] names)
-    {
-        this.subtypeNames = names;
-        return this;
-    }
+   public ItemColored func_150943_a(String[] p_150943_1_) {
+      this.field_150945_c = p_150943_1_;
+      return this;
+   }
 
-    /**
-     * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
-     * different names based on their damage or NBT.
-     */
-    public String getUnlocalizedName(ItemStack stack)
-    {
-        if (this.subtypeNames == null)
-        {
-            return super.getUnlocalizedName(stack);
-        }
-        else
-        {
-            int i = stack.getMetadata();
-            return i >= 0 && i < this.subtypeNames.length ? super.getUnlocalizedName(stack) + "." + this.subtypeNames[i] : super.getUnlocalizedName(stack);
-        }
-    }
+   public String func_77667_c(ItemStack p_77667_1_) {
+      if (this.field_150945_c == null) {
+         return super.func_77667_c(p_77667_1_);
+      } else {
+         int i = p_77667_1_.func_77960_j();
+         return i >= 0 && i < this.field_150945_c.length ? super.func_77667_c(p_77667_1_) + "." + this.field_150945_c[i] : super.func_77667_c(p_77667_1_);
+      }
+   }
 }

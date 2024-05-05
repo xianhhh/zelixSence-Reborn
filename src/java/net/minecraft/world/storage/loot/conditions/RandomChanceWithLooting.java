@@ -10,45 +10,36 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
 
-public class RandomChanceWithLooting implements LootCondition
-{
-    private final float chance;
-    private final float lootingMultiplier;
+public class RandomChanceWithLooting implements LootCondition {
+   private final float field_186627_a;
+   private final float field_186628_b;
 
-    public RandomChanceWithLooting(float chanceIn, float lootingMultiplierIn)
-    {
-        this.chance = chanceIn;
-        this.lootingMultiplier = lootingMultiplierIn;
-    }
+   public RandomChanceWithLooting(float p_i46614_1_, float p_i46614_2_) {
+      this.field_186627_a = p_i46614_1_;
+      this.field_186628_b = p_i46614_2_;
+   }
 
-    public boolean testCondition(Random rand, LootContext context)
-    {
-        int i = 0;
+   public boolean func_186618_a(Random p_186618_1_, LootContext p_186618_2_) {
+      int i = 0;
+      if (p_186618_2_.func_186492_c() instanceof EntityLivingBase) {
+         i = EnchantmentHelper.func_185283_h((EntityLivingBase)p_186618_2_.func_186492_c());
+      }
 
-        if (context.getKiller() instanceof EntityLivingBase)
-        {
-            i = EnchantmentHelper.getLootingModifier((EntityLivingBase)context.getKiller());
-        }
+      return p_186618_1_.nextFloat() < this.field_186627_a + (float)i * this.field_186628_b;
+   }
 
-        return rand.nextFloat() < this.chance + (float)i * this.lootingMultiplier;
-    }
+   public static class Serializer extends LootCondition.Serializer<RandomChanceWithLooting> {
+      protected Serializer() {
+         super(new ResourceLocation("random_chance_with_looting"), RandomChanceWithLooting.class);
+      }
 
-    public static class Serializer extends LootCondition.Serializer<RandomChanceWithLooting>
-    {
-        protected Serializer()
-        {
-            super(new ResourceLocation("random_chance_with_looting"), RandomChanceWithLooting.class);
-        }
+      public void func_186605_a(JsonObject p_186605_1_, RandomChanceWithLooting p_186605_2_, JsonSerializationContext p_186605_3_) {
+         p_186605_1_.addProperty("chance", Float.valueOf(p_186605_2_.field_186627_a));
+         p_186605_1_.addProperty("looting_multiplier", Float.valueOf(p_186605_2_.field_186628_b));
+      }
 
-        public void serialize(JsonObject json, RandomChanceWithLooting value, JsonSerializationContext context)
-        {
-            json.addProperty("chance", Float.valueOf(value.chance));
-            json.addProperty("looting_multiplier", Float.valueOf(value.lootingMultiplier));
-        }
-
-        public RandomChanceWithLooting deserialize(JsonObject json, JsonDeserializationContext context)
-        {
-            return new RandomChanceWithLooting(JsonUtils.getFloat(json, "chance"), JsonUtils.getFloat(json, "looting_multiplier"));
-        }
-    }
+      public RandomChanceWithLooting func_186603_b(JsonObject p_186603_1_, JsonDeserializationContext p_186603_2_) {
+         return new RandomChanceWithLooting(JsonUtils.func_151217_k(p_186603_1_, "chance"), JsonUtils.func_151217_k(p_186603_1_, "looting_multiplier"));
+      }
+   }
 }

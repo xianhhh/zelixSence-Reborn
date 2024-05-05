@@ -1,34 +1,20 @@
 package net.minecraft.block.material;
 
-public class MaterialTransparent extends Material
-{
-    public MaterialTransparent(MapColor color)
-    {
-        super(color);
-        this.setReplaceable();
-    }
+public class MaterialTransparent extends Material {
+   public MaterialTransparent(MapColor p_i2113_1_) {
+      super(p_i2113_1_);
+      this.func_76231_i();
+   }
 
-    /**
-     * Returns true if the block is a considered solid. This is true by default.
-     */
-    public boolean isSolid()
-    {
-        return false;
-    }
+   public boolean func_76220_a() {
+      return false;
+   }
 
-    /**
-     * Will prevent grass from growing on dirt underneath and kill any grass below it if it returns true
-     */
-    public boolean blocksLight()
-    {
-        return false;
-    }
+   public boolean func_76228_b() {
+      return false;
+   }
 
-    /**
-     * Returns if this material is considered solid or not
-     */
-    public boolean blocksMovement()
-    {
-        return false;
-    }
+   public boolean func_76230_c() {
+      return false;
+   }
 }

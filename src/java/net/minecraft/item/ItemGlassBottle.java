@@ -21,79 +21,56 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class ItemGlassBottle extends Item
-{
-    public ItemGlassBottle()
-    {
-        this.setCreativeTab(CreativeTabs.BREWING);
-    }
+public class ItemGlassBottle extends Item {
+   public ItemGlassBottle() {
+      this.func_77637_a(CreativeTabs.field_78038_k);
+   }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
-    {
-        List<EntityAreaEffectCloud> list = itemStackIn.<EntityAreaEffectCloud>getEntitiesWithinAABB(EntityAreaEffectCloud.class, worldIn.getEntityBoundingBox().expandXyz(2.0D), new Predicate<EntityAreaEffectCloud>()
-        {
-            public boolean apply(@Nullable EntityAreaEffectCloud p_apply_1_)
-            {
-                return p_apply_1_ != null && p_apply_1_.isEntityAlive() && p_apply_1_.getOwner() instanceof EntityDragon;
-            }
-        });
-        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+   public ActionResult<ItemStack> func_77659_a(World p_77659_1_, EntityPlayer p_77659_2_, EnumHand p_77659_3_) {
+      List<EntityAreaEffectCloud> list = p_77659_1_.<EntityAreaEffectCloud>func_175647_a(EntityAreaEffectCloud.class, p_77659_2_.func_174813_aQ().func_186662_g(2.0D), new Predicate<EntityAreaEffectCloud>() {
+         public boolean apply(@Nullable EntityAreaEffectCloud p_apply_1_) {
+            return p_apply_1_ != null && p_apply_1_.func_70089_S() && p_apply_1_.func_184494_w() instanceof EntityDragon;
+         }
+      });
+      ItemStack itemstack = p_77659_2_.func_184586_b(p_77659_3_);
+      if (!list.isEmpty()) {
+         EntityAreaEffectCloud entityareaeffectcloud = list.get(0);
+         entityareaeffectcloud.func_184483_a(entityareaeffectcloud.func_184490_j() - 0.5F);
+         p_77659_1_.func_184148_a((EntityPlayer)null, p_77659_2_.field_70165_t, p_77659_2_.field_70163_u, p_77659_2_.field_70161_v, SoundEvents.field_187618_I, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+         return new ActionResult(EnumActionResult.SUCCESS, this.func_185061_a(itemstack, p_77659_2_, new ItemStack(Items.field_185157_bK)));
+      } else {
+         RayTraceResult raytraceresult = this.func_77621_a(p_77659_1_, p_77659_2_, true);
+         if (raytraceresult == null) {
+            return new ActionResult(EnumActionResult.PASS, itemstack);
+         } else {
+            if (raytraceresult.field_72313_a == RayTraceResult.Type.BLOCK) {
+               BlockPos blockpos = raytraceresult.func_178782_a();
+               if (!p_77659_1_.func_175660_a(p_77659_2_, blockpos) || !p_77659_2_.func_175151_a(blockpos.func_177972_a(raytraceresult.field_178784_b), raytraceresult.field_178784_b, itemstack)) {
+                  return new ActionResult(EnumActionResult.PASS, itemstack);
+               }
 
-        if (!list.isEmpty())
-        {
-            EntityAreaEffectCloud entityareaeffectcloud = list.get(0);
-            entityareaeffectcloud.setRadius(entityareaeffectcloud.getRadius() - 0.5F);
-            itemStackIn.playSound((EntityPlayer)null, worldIn.posX, worldIn.posY, worldIn.posZ, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-            return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(itemstack, worldIn, new ItemStack(Items.DRAGON_BREATH)));
-        }
-        else
-        {
-            RayTraceResult raytraceresult = this.rayTrace(itemStackIn, worldIn, true);
-
-            if (raytraceresult == null)
-            {
-                return new ActionResult(EnumActionResult.PASS, itemstack);
-            }
-            else
-            {
-                if (raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK)
-                {
-                    BlockPos blockpos = raytraceresult.getBlockPos();
-
-                    if (!itemStackIn.isBlockModifiable(worldIn, blockpos) || !worldIn.canPlayerEdit(blockpos.offset(raytraceresult.sideHit), raytraceresult.sideHit, itemstack))
-                    {
-                        return new ActionResult(EnumActionResult.PASS, itemstack);
-                    }
-
-                    if (itemStackIn.getBlockState(blockpos).getMaterial() == Material.WATER)
-                    {
-                        itemStackIn.playSound(worldIn, worldIn.posX, worldIn.posY, worldIn.posZ, SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-                        return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(itemstack, worldIn, PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), PotionTypes.WATER)));
-                    }
-                }
-
-                return new ActionResult(EnumActionResult.PASS, itemstack);
-            }
-        }
-    }
-
-    protected ItemStack turnBottleIntoItem(ItemStack p_185061_1_, EntityPlayer player, ItemStack stack)
-    {
-        p_185061_1_.func_190918_g(1);
-        player.addStat(StatList.getObjectUseStats(this));
-
-        if (p_185061_1_.func_190926_b())
-        {
-            return stack;
-        }
-        else
-        {
-            if (!player.inventory.addItemStackToInventory(stack))
-            {
-                player.dropItem(stack, false);
+               if (p_77659_1_.func_180495_p(blockpos).func_185904_a() == Material.field_151586_h) {
+                  p_77659_1_.func_184148_a(p_77659_2_, p_77659_2_.field_70165_t, p_77659_2_.field_70163_u, p_77659_2_.field_70161_v, SoundEvents.field_187615_H, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                  return new ActionResult(EnumActionResult.SUCCESS, this.func_185061_a(itemstack, p_77659_2_, PotionUtils.func_185188_a(new ItemStack(Items.field_151068_bn), PotionTypes.field_185230_b)));
+               }
             }
 
-            return p_185061_1_;
-        }
-    }
+            return new ActionResult(EnumActionResult.PASS, itemstack);
+         }
+      }
+   }
+
+   protected ItemStack func_185061_a(ItemStack p_185061_1_, EntityPlayer p_185061_2_, ItemStack p_185061_3_) {
+      p_185061_1_.func_190918_g(1);
+      p_185061_2_.func_71029_a(StatList.func_188057_b(this));
+      if (p_185061_1_.func_190926_b()) {
+         return p_185061_3_;
+      } else {
+         if (!p_185061_2_.field_71071_by.func_70441_a(p_185061_3_)) {
+            p_185061_2_.func_71019_a(p_185061_3_, false);
+         }
+
+         return p_185061_1_;
+      }
+   }
 }

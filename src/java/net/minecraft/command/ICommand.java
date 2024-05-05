@@ -5,34 +5,18 @@ import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
-public interface ICommand extends Comparable<ICommand>
-{
-    /**
-     * Gets the name of the command
-     */
-    String getCommandName();
+public interface ICommand extends Comparable<ICommand> {
+   String func_71517_b();
 
-    /**
-     * Gets the usage string for the command.
-     */
-    String getCommandUsage(ICommandSender sender);
+   String func_71518_a(ICommandSender var1);
 
-    List<String> getCommandAliases();
+   List<String> func_71514_a();
 
-    /**
-     * Callback for when the command is executed
-     */
-    void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException;
+   void func_184881_a(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException;
 
-    /**
-     * Check if the given ICommandSender has permission to execute this command
-     */
-    boolean checkPermission(MinecraftServer server, ICommandSender sender);
+   boolean func_184882_a(MinecraftServer var1, ICommandSender var2);
 
-    List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos);
+   List<String> func_184883_a(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4);
 
-    /**
-     * Return whether the specified command parameter index is a username parameter.
-     */
-    boolean isUsernameIndex(String[] args, int index);
+   boolean func_82358_a(String[] var1, int var2);
 }

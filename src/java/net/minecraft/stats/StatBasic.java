@@ -2,25 +2,18 @@ package net.minecraft.stats;
 
 import net.minecraft.util.text.ITextComponent;
 
-public class StatBasic extends StatBase
-{
-    public StatBasic(String statIdIn, ITextComponent statNameIn, IStatType typeIn)
-    {
-        super(statIdIn, statNameIn, typeIn);
-    }
+public class StatBasic extends StatBase {
+   public StatBasic(String p_i45303_1_, ITextComponent p_i45303_2_, IStatType p_i45303_3_) {
+      super(p_i45303_1_, p_i45303_2_, p_i45303_3_);
+   }
 
-    public StatBasic(String statIdIn, ITextComponent statNameIn)
-    {
-        super(statIdIn, statNameIn);
-    }
+   public StatBasic(String p_i45304_1_, ITextComponent p_i45304_2_) {
+      super(p_i45304_1_, p_i45304_2_);
+   }
 
-    /**
-     * Register the stat into StatList.
-     */
-    public StatBase registerStat()
-    {
-        super.registerStat();
-        StatList.BASIC_STATS.add(this);
-        return this;
-    }
+   public StatBase func_75971_g() {
+      super.func_75971_g();
+      StatList.field_188094_c.add(this);
+      return this;
+   }
 }

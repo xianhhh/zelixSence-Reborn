@@ -1,71 +1,32 @@
 package net.minecraft.entity.ai;
 
-public abstract class EntityAIBase
-{
-    /**
-     * A bitmask telling which other tasks may not run concurrently. The test is a simple bitwise AND - if it yields
-     * zero, the two tasks may run concurrently, if not - they must run exclusively from each other.
-     */
-    private int mutexBits;
+public abstract class EntityAIBase {
+   private int field_75254_a;
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public abstract boolean shouldExecute();
+   public abstract boolean func_75250_a();
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        return this.shouldExecute();
-    }
+   public boolean func_75253_b() {
+      return this.func_75250_a();
+   }
 
-    /**
-     * Determine if this AI Task is interruptible by a higher (= lower value) priority task. All vanilla AITask have
-     * this value set to true.
-     */
-    public boolean isInterruptible()
-    {
-        return true;
-    }
+   public boolean func_75252_g() {
+      return true;
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-    }
+   public void func_75249_e() {
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-    }
+   public void func_75251_c() {
+   }
 
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-    }
+   public void func_75246_d() {
+   }
 
-    /**
-     * Sets a bitmask telling which other tasks may not run concurrently. The test is a simple bitwise AND - if it
-     * yields zero, the two tasks may run concurrently, if not - they must run exclusively from each other.
-     */
-    public void setMutexBits(int mutexBitsIn)
-    {
-        this.mutexBits = mutexBitsIn;
-    }
+   public void func_75248_a(int p_75248_1_) {
+      this.field_75254_a = p_75248_1_;
+   }
 
-    /**
-     * Get a bitmask telling which other tasks may not run concurrently. The test is a simple bitwise AND - if it yields
-     * zero, the two tasks may run concurrently, if not - they must run exclusively from each other.
-     */
-    public int getMutexBits()
-    {
-        return this.mutexBits;
-    }
+   public int func_75247_h() {
+      return this.field_75254_a;
+   }
 }

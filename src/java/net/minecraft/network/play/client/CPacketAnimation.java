@@ -6,45 +6,29 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
 
-public class CPacketAnimation implements Packet<INetHandlerPlayServer>
-{
-    private EnumHand hand;
+public class CPacketAnimation implements Packet<INetHandlerPlayServer> {
+   private EnumHand field_187019_a;
 
-    public CPacketAnimation()
-    {
-    }
+   public CPacketAnimation() {
+   }
 
-    public CPacketAnimation(EnumHand handIn)
-    {
-        this.hand = handIn;
-    }
+   public CPacketAnimation(EnumHand p_i46860_1_) {
+      this.field_187019_a = p_i46860_1_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.hand = (EnumHand)buf.readEnumValue(EnumHand.class);
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_187019_a = (EnumHand)p_148837_1_.func_179257_a(EnumHand.class);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeEnumValue(this.hand);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_179249_a(this.field_187019_a);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.handleAnimation(this);
-    }
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_175087_a(this);
+   }
 
-    public EnumHand getHand()
-    {
-        return this.hand;
-    }
+   public EnumHand func_187018_a() {
+      return this.field_187019_a;
+   }
 }

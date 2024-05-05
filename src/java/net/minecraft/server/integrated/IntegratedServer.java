@@ -31,498 +31,292 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import optifine.Reflector;
-import optifine.WorldServerOF;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IntegratedServer extends MinecraftServer
-{
-    private static final Logger LOGGER = LogManager.getLogger();
+public class IntegratedServer extends MinecraftServer {
+   private static final Logger field_147148_h = LogManager.getLogger();
+   private final Minecraft field_71349_l;
+   private final WorldSettings field_71350_m;
+   private boolean field_71348_o;
+   private boolean field_71346_p;
+   private ThreadLanServerPing field_71345_q;
 
-    /** The Minecraft instance. */
-    private final Minecraft mc;
-    private final WorldSettings theWorldSettings;
-    private boolean isGamePaused;
-    private boolean isPublic;
-    private ThreadLanServerPing lanServerPing;
+   public IntegratedServer(Minecraft p_i46523_1_, String p_i46523_2_, String p_i46523_3_, WorldSettings p_i46523_4_, YggdrasilAuthenticationService p_i46523_5_, MinecraftSessionService p_i46523_6_, GameProfileRepository p_i46523_7_, PlayerProfileCache p_i46523_8_) {
+      super(new File(p_i46523_1_.field_71412_D, "saves"), p_i46523_1_.func_110437_J(), p_i46523_1_.func_184126_aj(), p_i46523_5_, p_i46523_6_, p_i46523_7_, p_i46523_8_);
+      this.func_71224_l(p_i46523_1_.func_110432_I().func_111285_a());
+      this.func_71261_m(p_i46523_2_);
+      this.func_71246_n(p_i46523_3_);
+      this.func_71204_b(p_i46523_1_.func_71355_q());
+      this.func_71194_c(p_i46523_4_.func_77167_c());
+      this.func_71191_d(256);
+      this.func_184105_a(new IntegratedPlayerList(this));
+      this.field_71349_l = p_i46523_1_;
+      this.field_71350_m = this.func_71242_L() ? WorldServerDemo.field_73071_a : p_i46523_4_;
+   }
 
-    public IntegratedServer(Minecraft clientIn, String folderNameIn, String worldNameIn, WorldSettings worldSettingsIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn)
-    {
-        super(new File(clientIn.mcDataDir, "saves"), clientIn.getProxy(), clientIn.getDataFixer(), authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
-        this.setServerOwner(clientIn.getSession().getUsername());
-        this.setFolderName(folderNameIn);
-        this.setWorldName(worldNameIn);
-        this.setDemo(clientIn.isDemo());
-        this.canCreateBonusChest(worldSettingsIn.isBonusChestEnabled());
-        this.setBuildLimit(256);
-        this.setPlayerList(new IntegratedPlayerList(this));
-        this.mc = clientIn;
-        this.theWorldSettings = this.isDemo() ? WorldServerDemo.DEMO_WORLD_SETTINGS : worldSettingsIn;
-    }
+   public ServerCommandManager func_175582_h() {
+      return new IntegratedServerCommandManager(this);
+   }
 
-    public ServerCommandManager createNewCommandManager()
-    {
-        return new IntegratedServerCommandManager(this);
-    }
+   public void func_71247_a(String p_71247_1_, String p_71247_2_, long p_71247_3_, WorldType p_71247_5_, String p_71247_6_) {
+      this.func_71237_c(p_71247_1_);
+      this.field_71305_c = new WorldServer[3];
+      this.field_71312_k = new long[this.field_71305_c.length][100];
+      ISaveHandler isavehandler = this.func_71254_M().func_75804_a(p_71247_1_, true);
+      this.func_175584_a(this.func_71270_I(), isavehandler);
+      WorldInfo worldinfo = isavehandler.func_75757_d();
+      if (worldinfo == null) {
+         worldinfo = new WorldInfo(this.field_71350_m, p_71247_2_);
+      } else {
+         worldinfo.func_76062_a(p_71247_2_);
+      }
 
-    public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, String generatorOptions)
-    {
-        this.convertMapIfNeeded(saveName);
-        ISaveHandler isavehandler = this.getActiveAnvilConverter().getSaveLoader(saveName, true);
-        this.setResourcePackFromWorld(this.getFolderName(), isavehandler);
-        WorldInfo worldinfo = isavehandler.loadWorldInfo();
+      for(int i = 0; i < this.field_71305_c.length; ++i) {
+         int j = 0;
+         if (i == 1) {
+            j = -1;
+         }
 
-        if (Reflector.DimensionManager.exists())
-        {
-            WorldServer worldserver = this.isDemo() ? (WorldServer)((WorldServer)(new WorldServerDemo(this, isavehandler, worldinfo, 0, this.theProfiler)).init()) : (WorldServer)(new WorldServerOF(this, isavehandler, worldinfo, 0, this.theProfiler)).init();
-            worldserver.initialize(this.theWorldSettings);
-            Integer[] ainteger = (Integer[])Reflector.call(Reflector.DimensionManager_getStaticDimensionIDs);
-            Integer[] ainteger1 = ainteger;
-            int i1 = ainteger.length;
+         if (i == 2) {
+            j = 1;
+         }
 
-            for (int j1 = 0; j1 < i1; ++j1)
-            {
-                int k = ainteger1[j1].intValue();
-                WorldServer worldserver1 = k == 0 ? worldserver : (WorldServer)((WorldServer)(new WorldServerMulti(this, isavehandler, k, worldserver, this.theProfiler)).init());
-                worldserver1.addEventListener(new ServerWorldEventHandler(this, worldserver1));
-
-                if (!this.isSinglePlayer())
-                {
-                    worldserver1.getWorldInfo().setGameType(this.getGameType());
-                }
-
-                if (Reflector.EventBus.exists())
-                {
-                    Reflector.postForgeBusEvent(Reflector.WorldEvent_Load_Constructor, worldserver1);
-                }
+         if (i == 0) {
+            if (this.func_71242_L()) {
+               this.field_71305_c[i] = (WorldServer)(new WorldServerDemo(this, isavehandler, worldinfo, j, this.field_71304_b)).func_175643_b();
+            } else {
+               this.field_71305_c[i] = (WorldServer)(new WorldServer(this, isavehandler, worldinfo, j, this.field_71304_b)).func_175643_b();
             }
 
-            this.getPlayerList().setPlayerManager(new WorldServer[] {worldserver});
+            this.field_71305_c[i].func_72963_a(this.field_71350_m);
+         } else {
+            this.field_71305_c[i] = (WorldServer)(new WorldServerMulti(this, isavehandler, j, this.field_71305_c[0], this.field_71304_b)).func_175643_b();
+         }
 
-            if (worldserver.getWorldInfo().getDifficulty() == null)
-            {
-                this.setDifficultyForAllWorlds(this.mc.gameSettings.difficulty);
+         this.field_71305_c[i].func_72954_a(new ServerWorldEventHandler(this, this.field_71305_c[i]));
+      }
+
+      this.func_184103_al().func_72364_a(this.field_71305_c);
+      if (this.field_71305_c[0].func_72912_H().func_176130_y() == null) {
+         this.func_147139_a(this.field_71349_l.field_71474_y.field_74318_M);
+      }
+
+      this.func_71222_d();
+   }
+
+   public boolean func_71197_b() throws IOException {
+      field_147148_h.info("Starting integrated minecraft server version 1.12.2");
+      this.func_71229_d(true);
+      this.func_71251_e(true);
+      this.func_71257_f(true);
+      this.func_71188_g(true);
+      this.func_71245_h(true);
+      field_147148_h.info("Generating keypair");
+      this.func_71253_a(CryptManager.func_75891_b());
+      this.func_71247_a(this.func_71270_I(), this.func_71221_J(), this.field_71350_m.func_77160_d(), this.field_71350_m.func_77165_h(), this.field_71350_m.func_82749_j());
+      this.func_71205_p(this.func_71214_G() + " - " + this.field_71305_c[0].func_72912_H().func_76065_j());
+      return true;
+   }
+
+   public void func_71217_p() {
+      boolean flag = this.field_71348_o;
+      this.field_71348_o = Minecraft.func_71410_x().func_147114_u() != null && Minecraft.func_71410_x().func_147113_T();
+      if (!flag && this.field_71348_o) {
+         field_147148_h.info("Saving and pausing game...");
+         this.func_184103_al().func_72389_g();
+         this.func_71267_a(false);
+      }
+
+      if (this.field_71348_o) {
+         synchronized(this.field_175589_i) {
+            while(!this.field_175589_i.isEmpty()) {
+               Util.func_181617_a(this.field_175589_i.poll(), field_147148_h);
             }
-        }
-        else
-        {
-            this.worldServers = new WorldServer[3];
-            this.timeOfLastDimensionTick = new long[this.worldServers.length][100];
-            this.setResourcePackFromWorld(this.getFolderName(), isavehandler);
+         }
+      } else {
+         super.func_71217_p();
+         if (this.field_71349_l.field_71474_y.field_151451_c != this.func_184103_al().func_72395_o()) {
+            field_147148_h.info("Changing view distance to {}, from {}", Integer.valueOf(this.field_71349_l.field_71474_y.field_151451_c), Integer.valueOf(this.func_184103_al().func_72395_o()));
+            this.func_184103_al().func_152611_a(this.field_71349_l.field_71474_y.field_151451_c);
+         }
 
-            if (worldinfo == null)
-            {
-                worldinfo = new WorldInfo(this.theWorldSettings, worldNameIn);
+         if (this.field_71349_l.field_71441_e != null) {
+            WorldInfo worldinfo1 = this.field_71305_c[0].func_72912_H();
+            WorldInfo worldinfo = this.field_71349_l.field_71441_e.func_72912_H();
+            if (!worldinfo1.func_176123_z() && worldinfo.func_176130_y() != worldinfo1.func_176130_y()) {
+               field_147148_h.info("Changing difficulty to {}, from {}", worldinfo.func_176130_y(), worldinfo1.func_176130_y());
+               this.func_147139_a(worldinfo.func_176130_y());
+            } else if (worldinfo.func_176123_z() && !worldinfo1.func_176123_z()) {
+               field_147148_h.info("Locking difficulty to {}", (Object)worldinfo.func_176130_y());
+
+               for(WorldServer worldserver : this.field_71305_c) {
+                  if (worldserver != null) {
+                     worldserver.func_72912_H().func_180783_e(true);
+                  }
+               }
             }
-            else
-            {
-                worldinfo.setWorldName(worldNameIn);
+         }
+      }
+
+   }
+
+   public boolean func_71225_e() {
+      return false;
+   }
+
+   public GameType func_71265_f() {
+      return this.field_71350_m.func_77162_e();
+   }
+
+   public EnumDifficulty func_147135_j() {
+      return this.field_71349_l.field_71441_e.func_72912_H().func_176130_y();
+   }
+
+   public boolean func_71199_h() {
+      return this.field_71350_m.func_77158_f();
+   }
+
+   public boolean func_181034_q() {
+      return true;
+   }
+
+   public boolean func_183002_r() {
+      return true;
+   }
+
+   public void func_71267_a(boolean p_71267_1_) {
+      super.func_71267_a(p_71267_1_);
+   }
+
+   public File func_71238_n() {
+      return this.field_71349_l.field_71412_D;
+   }
+
+   public boolean func_71262_S() {
+      return false;
+   }
+
+   public boolean func_181035_ah() {
+      return false;
+   }
+
+   public void func_71228_a(CrashReport p_71228_1_) {
+      this.field_71349_l.func_71404_a(p_71228_1_);
+   }
+
+   public CrashReport func_71230_b(CrashReport p_71230_1_) {
+      p_71230_1_ = super.func_71230_b(p_71230_1_);
+      p_71230_1_.func_85056_g().func_189529_a("Type", new ICrashReportDetail<String>() {
+         public String call() throws Exception {
+            return "Integrated Server (map_client.txt)";
+         }
+      });
+      p_71230_1_.func_85056_g().func_189529_a("Is Modded", new ICrashReportDetail<String>() {
+         public String call() throws Exception {
+            String s = ClientBrandRetriever.getClientModName();
+            if (!s.equals("vanilla")) {
+               return "Definitely; Client brand changed to '" + s + "'";
+            } else {
+               s = IntegratedServer.this.getServerModName();
+               if (!"vanilla".equals(s)) {
+                  return "Definitely; Server brand changed to '" + s + "'";
+               } else {
+                  return Minecraft.class.getSigners() == null ? "Very likely; Jar signature invalidated" : "Probably not. Jar signature remains and both client + server brands are untouched.";
+               }
             }
+         }
+      });
+      return p_71230_1_;
+   }
 
-            for (int l = 0; l < this.worldServers.length; ++l)
-            {
-                int i1 = 0;
+   public void func_147139_a(EnumDifficulty p_147139_1_) {
+      super.func_147139_a(p_147139_1_);
+      if (this.field_71349_l.field_71441_e != null) {
+         this.field_71349_l.field_71441_e.func_72912_H().func_176144_a(p_147139_1_);
+      }
 
-                if (l == 1)
-                {
-                    i1 = -1;
-                }
+   }
 
-                if (l == 2)
-                {
-                    i1 = 1;
-                }
+   public void func_70000_a(Snooper p_70000_1_) {
+      super.func_70000_a(p_70000_1_);
+      p_70000_1_.func_152768_a("snooper_partner", this.field_71349_l.func_71378_E().func_80006_f());
+   }
 
-                if (l == 0)
-                {
-                    if (this.isDemo())
-                    {
-                        this.worldServers[l] = (WorldServer)(new WorldServerDemo(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
-                    }
-                    else
-                    {
-                        this.worldServers[l] = (WorldServer)(new WorldServerOF(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
-                    }
+   public boolean func_70002_Q() {
+      return Minecraft.func_71410_x().func_70002_Q();
+   }
 
-                    this.worldServers[l].initialize(this.theWorldSettings);
-                }
-                else
-                {
-                    this.worldServers[l] = (WorldServer)(new WorldServerMulti(this, isavehandler, i1, this.worldServers[0], this.theProfiler)).init();
-                }
+   public String func_71206_a(GameType p_71206_1_, boolean p_71206_2_) {
+      try {
+         int i = -1;
 
-                this.worldServers[l].addEventListener(new ServerWorldEventHandler(this, this.worldServers[l]));
-            }
+         try {
+            i = HttpUtil.func_76181_a();
+         } catch (IOException var5) {
+            ;
+         }
 
-            this.getPlayerList().setPlayerManager(this.worldServers);
+         if (i <= 0) {
+            i = 25564;
+         }
 
-            if (this.worldServers[0].getWorldInfo().getDifficulty() == null)
-            {
-                this.setDifficultyForAllWorlds(this.mc.gameSettings.difficulty);
-            }
-        }
+         this.func_147137_ag().func_151265_a((InetAddress)null, i);
+         field_147148_h.info("Started on {}", (int)i);
+         this.field_71346_p = true;
+         this.field_71345_q = new ThreadLanServerPing(this.func_71273_Y(), i + "");
+         this.field_71345_q.start();
+         this.func_184103_al().func_152604_a(p_71206_1_);
+         this.func_184103_al().func_72387_b(p_71206_2_);
+         this.field_71349_l.field_71439_g.func_184839_n(p_71206_2_ ? 4 : 0);
+         return i + "";
+      } catch (IOException var6) {
+         return null;
+      }
+   }
 
-        this.initialWorldChunkLoad();
-    }
+   public void func_71260_j() {
+      super.func_71260_j();
+      if (this.field_71345_q != null) {
+         this.field_71345_q.interrupt();
+         this.field_71345_q = null;
+      }
 
-    /**
-     * Initialises the server and starts it.
-     */
-    public boolean startServer() throws IOException
-    {
-        LOGGER.info("Starting integrated minecraft server version 1.12.2");
-        this.setOnlineMode(true);
-        this.setCanSpawnAnimals(true);
-        this.setCanSpawnNPCs(true);
-        this.setAllowPvp(true);
-        this.setAllowFlight(true);
-        LOGGER.info("Generating keypair");
-        this.setKeyPair(CryptManager.generateKeyPair());
+   }
 
-        if (Reflector.FMLCommonHandler_handleServerAboutToStart.exists())
-        {
-            Object object = Reflector.call(Reflector.FMLCommonHandler_instance);
-
-            if (!Reflector.callBoolean(object, Reflector.FMLCommonHandler_handleServerAboutToStart, this))
-            {
-                return false;
-            }
-        }
-
-        this.loadAllWorlds(this.getFolderName(), this.getWorldName(), this.theWorldSettings.getSeed(), this.theWorldSettings.getTerrainType(), this.theWorldSettings.getGeneratorOptions());
-        this.setMOTD(this.getServerOwner() + " - " + this.worldServers[0].getWorldInfo().getWorldName());
-
-        if (Reflector.FMLCommonHandler_handleServerStarting.exists())
-        {
-            Object object1 = Reflector.call(Reflector.FMLCommonHandler_instance);
-
-            if (Reflector.FMLCommonHandler_handleServerStarting.getReturnType() == Boolean.TYPE)
-            {
-                return Reflector.callBoolean(object1, Reflector.FMLCommonHandler_handleServerStarting, this);
-            }
-
-            Reflector.callVoid(object1, Reflector.FMLCommonHandler_handleServerStarting, this);
-        }
-
-        return true;
-    }
-
-    /**
-     * Main function called by run() every loop.
-     */
-    public void tick()
-    {
-        boolean flag = this.isGamePaused;
-        this.isGamePaused = Minecraft.getMinecraft().getConnection() != null && Minecraft.getMinecraft().isGamePaused();
-
-        if (!flag && this.isGamePaused)
-        {
-            LOGGER.info("Saving and pausing game...");
-            this.getPlayerList().saveAllPlayerData();
-            this.saveAllWorlds(false);
-        }
-
-        if (this.isGamePaused)
-        {
-            synchronized (this.futureTaskQueue)
-            {
-                while (!this.futureTaskQueue.isEmpty())
-                {
-                    Util.runTask(this.futureTaskQueue.poll(), LOGGER);
-                }
-            }
-        }
-        else
-        {
-            super.tick();
-
-            if (this.mc.gameSettings.renderDistanceChunks != this.getPlayerList().getViewDistance())
-            {
-                LOGGER.info("Changing view distance to {}, from {}", Integer.valueOf(this.mc.gameSettings.renderDistanceChunks), Integer.valueOf(this.getPlayerList().getViewDistance()));
-                this.getPlayerList().setViewDistance(this.mc.gameSettings.renderDistanceChunks);
-            }
-
-            if (this.mc.world != null)
-            {
-                WorldInfo worldinfo1 = this.worldServers[0].getWorldInfo();
-                WorldInfo worldinfo = this.mc.world.getWorldInfo();
-
-                if (!worldinfo1.isDifficultyLocked() && worldinfo.getDifficulty() != worldinfo1.getDifficulty())
-                {
-                    LOGGER.info("Changing difficulty to {}, from {}", worldinfo.getDifficulty(), worldinfo1.getDifficulty());
-                    this.setDifficultyForAllWorlds(worldinfo.getDifficulty());
-                }
-                else if (worldinfo.isDifficultyLocked() && !worldinfo1.isDifficultyLocked())
-                {
-                    LOGGER.info("Locking difficulty to {}", (Object)worldinfo.getDifficulty());
-
-                    for (WorldServer worldserver : this.worldServers)
-                    {
-                        if (worldserver != null)
-                        {
-                            worldserver.getWorldInfo().setDifficultyLocked(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean canStructuresSpawn()
-    {
-        return false;
-    }
-
-    public GameType getGameType()
-    {
-        return this.theWorldSettings.getGameType();
-    }
-
-    /**
-     * Get the server's difficulty
-     */
-    public EnumDifficulty getDifficulty()
-    {
-        return this.mc.world == null ? this.mc.gameSettings.difficulty : this.mc.world.getWorldInfo().getDifficulty();
-    }
-
-    /**
-     * Defaults to false.
-     */
-    public boolean isHardcore()
-    {
-        return this.theWorldSettings.getHardcoreEnabled();
-    }
-
-    /**
-     * Get if RCON command events should be broadcast to ops
-     */
-    public boolean shouldBroadcastRconToOps()
-    {
-        return true;
-    }
-
-    /**
-     * Get if console command events should be broadcast to ops
-     */
-    public boolean shouldBroadcastConsoleToOps()
-    {
-        return true;
-    }
-
-    /**
-     * par1 indicates if a log message should be output.
-     */
-    public void saveAllWorlds(boolean isSilent)
-    {
-        super.saveAllWorlds(isSilent);
-    }
-
-    public File getDataDirectory()
-    {
-        return this.mc.mcDataDir;
-    }
-
-    public boolean isDedicatedServer()
-    {
-        return false;
-    }
-
-    /**
-     * Get if native transport should be used. Native transport means linux server performance improvements and
-     * optimized packet sending/receiving on linux
-     */
-    public boolean shouldUseNativeTransport()
-    {
-        return false;
-    }
-
-    /**
-     * Called on exit from the main run() loop.
-     */
-    public void finalTick(CrashReport report)
-    {
-        this.mc.crashed(report);
-    }
-
-    /**
-     * Adds the server info, including from theWorldServer, to the crash report.
-     */
-    public CrashReport addServerInfoToCrashReport(CrashReport report)
-    {
-        report = super.addServerInfoToCrashReport(report);
-        report.getCategory().setDetail("Type", new ICrashReportDetail<String>()
-        {
-            public String call() throws Exception
-            {
-                return "Integrated Server (map_client.txt)";
-            }
-        });
-        report.getCategory().setDetail("Is Modded", new ICrashReportDetail<String>()
-        {
-            public String call() throws Exception
-            {
-                String s = ClientBrandRetriever.getClientModName();
-
-                if (!s.equals("vanilla"))
-                {
-                    return "Definitely; Client brand changed to '" + s + "'";
-                }
-                else
-                {
-                    s = IntegratedServer.this.getServerModName();
-
-                    if (!"vanilla".equals(s))
-                    {
-                        return "Definitely; Server brand changed to '" + s + "'";
-                    }
-                    else
-                    {
-                        return Minecraft.class.getSigners() == null ? "Very likely; Jar signature invalidated" : "Probably not. Jar signature remains and both client + server brands are untouched.";
-                    }
-                }
-            }
-        });
-        return report;
-    }
-
-    public void setDifficultyForAllWorlds(EnumDifficulty difficulty)
-    {
-        super.setDifficultyForAllWorlds(difficulty);
-
-        if (this.mc.world != null)
-        {
-            this.mc.world.getWorldInfo().setDifficulty(difficulty);
-        }
-    }
-
-    public void addServerStatsToSnooper(Snooper playerSnooper)
-    {
-        super.addServerStatsToSnooper(playerSnooper);
-        playerSnooper.addClientStat("snooper_partner", this.mc.getPlayerUsageSnooper().getUniqueID());
-    }
-
-    /**
-     * Returns whether snooping is enabled or not.
-     */
-    public boolean isSnooperEnabled()
-    {
-        return Minecraft.getMinecraft().isSnooperEnabled();
-    }
-
-    /**
-     * On dedicated does nothing. On integrated, sets commandsAllowedForAll, gameType and allows external connections.
-     */
-    public String shareToLAN(GameType type, boolean allowCheats)
-    {
-        try
-        {
-            int i = -1;
-
-            try
-            {
-                i = HttpUtil.getSuitableLanPort();
-            }
-            catch (IOException var5)
-            {
-                ;
+   public void func_71263_m() {
+      Futures.getUnchecked(this.func_152344_a(new Runnable() {
+         public void run() {
+            for(EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.func_184103_al().func_181057_v())) {
+               if (!entityplayermp.func_110124_au().equals(IntegratedServer.this.field_71349_l.field_71439_g.func_110124_au())) {
+                  IntegratedServer.this.func_184103_al().func_72367_e(entityplayermp);
+               }
             }
 
-            if (i <= 0)
-            {
-                i = 25564;
-            }
+         }
+      }));
+      super.func_71263_m();
+      if (this.field_71345_q != null) {
+         this.field_71345_q.interrupt();
+         this.field_71345_q = null;
+      }
 
-            this.getNetworkSystem().addLanEndpoint((InetAddress)null, i);
-            LOGGER.info("Started on {}", (int)i);
-            this.isPublic = true;
-            this.lanServerPing = new ThreadLanServerPing(this.getMOTD(), i + "");
-            this.lanServerPing.start();
-            this.getPlayerList().setGameType(type);
-            this.getPlayerList().setCommandsAllowedForAll(allowCheats);
-            this.mc.player.setPermissionLevel(allowCheats ? 4 : 0);
-            return i + "";
-        }
-        catch (IOException var61)
-        {
-            return null;
-        }
-    }
+   }
 
-    /**
-     * Saves all necessary data as preparation for stopping the server.
-     */
-    public void stopServer()
-    {
-        super.stopServer();
+   public boolean func_71344_c() {
+      return this.field_71346_p;
+   }
 
-        if (this.lanServerPing != null)
-        {
-            this.lanServerPing.interrupt();
-            this.lanServerPing = null;
-        }
-    }
+   public void func_71235_a(GameType p_71235_1_) {
+      super.func_71235_a(p_71235_1_);
+      this.func_184103_al().func_152604_a(p_71235_1_);
+   }
 
-    /**
-     * Sets the serverRunning variable to false, in order to get the server to shut down.
-     */
-    public void initiateShutdown()
-    {
-        if (!Reflector.MinecraftForge.exists() || this.isServerRunning())
-        {
-            Futures.getUnchecked(this.addScheduledTask(new Runnable()
-            {
-                public void run()
-                {
-                    for (EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.getPlayerList().getPlayerList()))
-                    {
-                        if (!entityplayermp.getUniqueID().equals(IntegratedServer.this.mc.player.getUniqueID()))
-                        {
-                            IntegratedServer.this.getPlayerList().playerLoggedOut(entityplayermp);
-                        }
-                    }
-                }
-            }));
-        }
+   public boolean func_82356_Z() {
+      return true;
+   }
 
-        super.initiateShutdown();
-
-        if (this.lanServerPing != null)
-        {
-            this.lanServerPing.interrupt();
-            this.lanServerPing = null;
-        }
-    }
-
-    /**
-     * Returns true if this integrated server is open to LAN
-     */
-    public boolean getPublic()
-    {
-        return this.isPublic;
-    }
-
-    /**
-     * Sets the game type for all worlds.
-     */
-    public void setGameType(GameType gameMode)
-    {
-        super.setGameType(gameMode);
-        this.getPlayerList().setGameType(gameMode);
-    }
-
-    /**
-     * Return whether command blocks are enabled.
-     */
-    public boolean isCommandBlockEnabled()
-    {
-        return true;
-    }
-
-    public int getOpPermissionLevel()
-    {
-        return 4;
-    }
+   public int func_110455_j() {
+      return 4;
+   }
 }

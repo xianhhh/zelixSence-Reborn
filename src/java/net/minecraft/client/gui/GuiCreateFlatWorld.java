@@ -16,263 +16,182 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import net.minecraft.world.gen.FlatLayerInfo;
 
-public class GuiCreateFlatWorld extends GuiScreen
-{
-    private final GuiCreateWorld createWorldGui;
-    private FlatGeneratorInfo theFlatGeneratorInfo = FlatGeneratorInfo.getDefaultFlatGenerator();
+public class GuiCreateFlatWorld extends GuiScreen {
+   private final GuiCreateWorld field_146385_f;
+   private FlatGeneratorInfo field_146387_g = FlatGeneratorInfo.func_82649_e();
+   private String field_146393_h;
+   private String field_146394_i;
+   private String field_146391_r;
+   private GuiCreateFlatWorld.Details field_146390_s;
+   private GuiButton field_146389_t;
+   private GuiButton field_146388_u;
+   private GuiButton field_146386_v;
 
-    /** The title given to the flat world currently in creation */
-    private String flatWorldTitle;
+   public GuiCreateFlatWorld(GuiCreateWorld p_i1029_1_, String p_i1029_2_) {
+      this.field_146385_f = p_i1029_1_;
+      this.func_146383_a(p_i1029_2_);
+   }
 
-    /** The text used to identify the material for a layer */
-    private String materialText;
+   public String func_146384_e() {
+      return this.field_146387_g.toString();
+   }
 
-    /** The text used to identify the height of a layer */
-    private String heightText;
-    private GuiCreateFlatWorld.Details createFlatWorldListSlotGui;
+   public void func_146383_a(String p_146383_1_) {
+      this.field_146387_g = FlatGeneratorInfo.func_82651_a(p_146383_1_);
+   }
 
-    /** The (unused and permenantly hidden) add layer button */
-    private GuiButton addLayerButton;
+   public void func_73866_w_() {
+      this.field_146292_n.clear();
+      this.field_146393_h = I18n.func_135052_a("createWorld.customize.flat.title");
+      this.field_146394_i = I18n.func_135052_a("createWorld.customize.flat.tile");
+      this.field_146391_r = I18n.func_135052_a("createWorld.customize.flat.height");
+      this.field_146390_s = new GuiCreateFlatWorld.Details();
+      this.field_146389_t = this.func_189646_b(new GuiButton(2, this.field_146294_l / 2 - 154, this.field_146295_m - 52, 100, 20, I18n.func_135052_a("createWorld.customize.flat.addLayer") + " (NYI)"));
+      this.field_146388_u = this.func_189646_b(new GuiButton(3, this.field_146294_l / 2 - 50, this.field_146295_m - 52, 100, 20, I18n.func_135052_a("createWorld.customize.flat.editLayer") + " (NYI)"));
+      this.field_146386_v = this.func_189646_b(new GuiButton(4, this.field_146294_l / 2 - 155, this.field_146295_m - 52, 150, 20, I18n.func_135052_a("createWorld.customize.flat.removeLayer")));
+      this.field_146292_n.add(new GuiButton(0, this.field_146294_l / 2 - 155, this.field_146295_m - 28, 150, 20, I18n.func_135052_a("gui.done")));
+      this.field_146292_n.add(new GuiButton(5, this.field_146294_l / 2 + 5, this.field_146295_m - 52, 150, 20, I18n.func_135052_a("createWorld.customize.presets")));
+      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 + 5, this.field_146295_m - 28, 150, 20, I18n.func_135052_a("gui.cancel")));
+      this.field_146389_t.field_146125_m = false;
+      this.field_146388_u.field_146125_m = false;
+      this.field_146387_g.func_82645_d();
+      this.func_146375_g();
+   }
 
-    /** The (unused and permenantly hidden) edit layer button */
-    private GuiButton editLayerButton;
+   public void func_146274_d() throws IOException {
+      super.func_146274_d();
+      this.field_146390_s.func_178039_p();
+   }
 
-    /** The remove layer button */
-    private GuiButton removeLayerButton;
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      int i = this.field_146387_g.func_82650_c().size() - this.field_146390_s.field_148228_k - 1;
+      if (p_146284_1_.field_146127_k == 1) {
+         this.field_146297_k.func_147108_a(this.field_146385_f);
+      } else if (p_146284_1_.field_146127_k == 0) {
+         this.field_146385_f.field_146334_a = this.func_146384_e();
+         this.field_146297_k.func_147108_a(this.field_146385_f);
+      } else if (p_146284_1_.field_146127_k == 5) {
+         this.field_146297_k.func_147108_a(new GuiFlatPresets(this));
+      } else if (p_146284_1_.field_146127_k == 4 && this.func_146382_i()) {
+         this.field_146387_g.func_82650_c().remove(i);
+         this.field_146390_s.field_148228_k = Math.min(this.field_146390_s.field_148228_k, this.field_146387_g.func_82650_c().size() - 1);
+      }
 
-    public GuiCreateFlatWorld(GuiCreateWorld createWorldGuiIn, String preset)
-    {
-        this.createWorldGui = createWorldGuiIn;
-        this.setPreset(preset);
-    }
+      this.field_146387_g.func_82645_d();
+      this.func_146375_g();
+   }
 
-    /**
-     * Gets the superflat preset in the text format described on the Superflat article on the Minecraft Wiki
-     */
-    public String getPreset()
-    {
-        return this.theFlatGeneratorInfo.toString();
-    }
+   public void func_146375_g() {
+      boolean flag = this.func_146382_i();
+      this.field_146386_v.field_146124_l = flag;
+      this.field_146388_u.field_146124_l = flag;
+      this.field_146388_u.field_146124_l = false;
+      this.field_146389_t.field_146124_l = false;
+   }
 
-    /**
-     * Sets the superflat preset. Invalid or null values will result in the default superflat preset being used.
-     */
-    public void setPreset(String preset)
-    {
-        this.theFlatGeneratorInfo = FlatGeneratorInfo.createFlatGeneratorFromString(preset);
-    }
+   private boolean func_146382_i() {
+      return this.field_146390_s.field_148228_k > -1 && this.field_146390_s.field_148228_k < this.field_146387_g.func_82650_c().size();
+   }
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        this.buttonList.clear();
-        this.flatWorldTitle = I18n.format("createWorld.customize.flat.title");
-        this.materialText = I18n.format("createWorld.customize.flat.tile");
-        this.heightText = I18n.format("createWorld.customize.flat.height");
-        this.createFlatWorldListSlotGui = new GuiCreateFlatWorld.Details();
-        this.addLayerButton = this.addButton(new GuiButton(2, this.width / 2 - 154, this.height - 52, 100, 20, I18n.format("createWorld.customize.flat.addLayer") + " (NYI)"));
-        this.editLayerButton = this.addButton(new GuiButton(3, this.width / 2 - 50, this.height - 52, 100, 20, I18n.format("createWorld.customize.flat.editLayer") + " (NYI)"));
-        this.removeLayerButton = this.addButton(new GuiButton(4, this.width / 2 - 155, this.height - 52, 150, 20, I18n.format("createWorld.customize.flat.removeLayer")));
-        this.buttonList.add(new GuiButton(0, this.width / 2 - 155, this.height - 28, 150, 20, I18n.format("gui.done")));
-        this.buttonList.add(new GuiButton(5, this.width / 2 + 5, this.height - 52, 150, 20, I18n.format("createWorld.customize.presets")));
-        this.buttonList.add(new GuiButton(1, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.cancel")));
-        this.addLayerButton.visible = false;
-        this.editLayerButton.visible = false;
-        this.theFlatGeneratorInfo.updateLayers();
-        this.onLayersChanged();
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.field_146390_s.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
+      this.func_73732_a(this.field_146289_q, this.field_146393_h, this.field_146294_l / 2, 8, 16777215);
+      int i = this.field_146294_l / 2 - 92 - 16;
+      this.func_73731_b(this.field_146289_q, this.field_146394_i, i, 32, 16777215);
+      this.func_73731_b(this.field_146289_q, this.field_146391_r, i + 2 + 213 - this.field_146289_q.func_78256_a(this.field_146391_r), 32, 16777215);
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
 
-    /**
-     * Handles mouse input.
-     */
-    public void handleMouseInput() throws IOException
-    {
-        super.handleMouseInput();
-        this.createFlatWorldListSlotGui.handleMouseInput();
-    }
+   class Details extends GuiSlot {
+      public int field_148228_k = -1;
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        int i = this.theFlatGeneratorInfo.getFlatLayers().size() - this.createFlatWorldListSlotGui.selectedLayer - 1;
+      public Details() {
+         super(GuiCreateFlatWorld.this.field_146297_k, GuiCreateFlatWorld.this.field_146294_l, GuiCreateFlatWorld.this.field_146295_m, 43, GuiCreateFlatWorld.this.field_146295_m - 60, 24);
+      }
 
-        if (button.id == 1)
-        {
-            this.mc.displayGuiScreen(this.createWorldGui);
-        }
-        else if (button.id == 0)
-        {
-            this.createWorldGui.chunkProviderSettingsJson = this.getPreset();
-            this.mc.displayGuiScreen(this.createWorldGui);
-        }
-        else if (button.id == 5)
-        {
-            this.mc.displayGuiScreen(new GuiFlatPresets(this));
-        }
-        else if (button.id == 4 && this.hasSelectedLayer())
-        {
-            this.theFlatGeneratorInfo.getFlatLayers().remove(i);
-            this.createFlatWorldListSlotGui.selectedLayer = Math.min(this.createFlatWorldListSlotGui.selectedLayer, this.theFlatGeneratorInfo.getFlatLayers().size() - 1);
-        }
+      private void func_148225_a(int p_148225_1_, int p_148225_2_, ItemStack p_148225_3_) {
+         this.func_148226_e(p_148225_1_ + 1, p_148225_2_ + 1);
+         GlStateManager.func_179091_B();
+         if (!p_148225_3_.func_190926_b()) {
+            RenderHelper.func_74520_c();
+            GuiCreateFlatWorld.this.field_146296_j.func_175042_a(p_148225_3_, p_148225_1_ + 2, p_148225_2_ + 2);
+            RenderHelper.func_74518_a();
+         }
 
-        this.theFlatGeneratorInfo.updateLayers();
-        this.onLayersChanged();
-    }
+         GlStateManager.func_179101_C();
+      }
 
-    /**
-     * Would update whether or not the edit and remove buttons are enabled, but is currently disabled and always
-     * disables the buttons (which are invisible anyways)
-     */
-    public void onLayersChanged()
-    {
-        boolean flag = this.hasSelectedLayer();
-        this.removeLayerButton.enabled = flag;
-        this.editLayerButton.enabled = flag;
-        this.editLayerButton.enabled = false;
-        this.addLayerButton.enabled = false;
-    }
+      private void func_148226_e(int p_148226_1_, int p_148226_2_) {
+         this.func_148224_c(p_148226_1_, p_148226_2_, 0, 0);
+      }
 
-    /**
-     * Returns whether there is a valid layer selection
-     */
-    private boolean hasSelectedLayer()
-    {
-        return this.createFlatWorldListSlotGui.selectedLayer > -1 && this.createFlatWorldListSlotGui.selectedLayer < this.theFlatGeneratorInfo.getFlatLayers().size();
-    }
+      private void func_148224_c(int p_148224_1_, int p_148224_2_, int p_148224_3_, int p_148224_4_) {
+         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
+         this.field_148161_k.func_110434_K().func_110577_a(Gui.field_110323_l);
+         float f = 0.0078125F;
+         float f1 = 0.0078125F;
+         int i = 18;
+         int j = 18;
+         Tessellator tessellator = Tessellator.func_178181_a();
+         BufferBuilder bufferbuilder = tessellator.func_178180_c();
+         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181707_g);
+         bufferbuilder.func_181662_b((double)(p_148224_1_ + 0), (double)(p_148224_2_ + 18), (double)GuiCreateFlatWorld.this.field_73735_i).func_187315_a((double)((float)(p_148224_3_ + 0) * 0.0078125F), (double)((float)(p_148224_4_ + 18) * 0.0078125F)).func_181675_d();
+         bufferbuilder.func_181662_b((double)(p_148224_1_ + 18), (double)(p_148224_2_ + 18), (double)GuiCreateFlatWorld.this.field_73735_i).func_187315_a((double)((float)(p_148224_3_ + 18) * 0.0078125F), (double)((float)(p_148224_4_ + 18) * 0.0078125F)).func_181675_d();
+         bufferbuilder.func_181662_b((double)(p_148224_1_ + 18), (double)(p_148224_2_ + 0), (double)GuiCreateFlatWorld.this.field_73735_i).func_187315_a((double)((float)(p_148224_3_ + 18) * 0.0078125F), (double)((float)(p_148224_4_ + 0) * 0.0078125F)).func_181675_d();
+         bufferbuilder.func_181662_b((double)(p_148224_1_ + 0), (double)(p_148224_2_ + 0), (double)GuiCreateFlatWorld.this.field_73735_i).func_187315_a((double)((float)(p_148224_3_ + 0) * 0.0078125F), (double)((float)(p_148224_4_ + 0) * 0.0078125F)).func_181675_d();
+         tessellator.func_78381_a();
+      }
 
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.createFlatWorldListSlotGui.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, this.flatWorldTitle, this.width / 2, 8, 16777215);
-        int i = this.width / 2 - 92 - 16;
-        this.drawString(this.fontRendererObj, this.materialText, i, 32, 16777215);
-        this.drawString(this.fontRendererObj, this.heightText, i + 2 + 213 - this.fontRendererObj.getStringWidth(this.heightText), 32, 16777215);
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+      protected int func_148127_b() {
+         return GuiCreateFlatWorld.this.field_146387_g.func_82650_c().size();
+      }
 
-    class Details extends GuiSlot
-    {
-        public int selectedLayer = -1;
+      protected void func_148144_a(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_) {
+         this.field_148228_k = p_148144_1_;
+         GuiCreateFlatWorld.this.func_146375_g();
+      }
 
-        public Details()
-        {
-            super(GuiCreateFlatWorld.this.mc, GuiCreateFlatWorld.this.width, GuiCreateFlatWorld.this.height, 43, GuiCreateFlatWorld.this.height - 60, 24);
-        }
+      protected boolean func_148131_a(int p_148131_1_) {
+         return p_148131_1_ == this.field_148228_k;
+      }
 
-        private void drawItem(int x, int z, ItemStack itemToDraw)
-        {
-            this.drawItemBackground(x + 1, z + 1);
-            GlStateManager.enableRescaleNormal();
+      protected void func_148123_a() {
+      }
 
-            if (!itemToDraw.func_190926_b())
-            {
-                RenderHelper.enableGUIStandardItemLighting();
-                GuiCreateFlatWorld.this.itemRender.renderItemIntoGUI(itemToDraw, x + 2, z + 2);
-                RenderHelper.disableStandardItemLighting();
+      protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_) {
+         FlatLayerInfo flatlayerinfo = (FlatLayerInfo)GuiCreateFlatWorld.this.field_146387_g.func_82650_c().get(GuiCreateFlatWorld.this.field_146387_g.func_82650_c().size() - p_192637_1_ - 1);
+         IBlockState iblockstate = flatlayerinfo.func_175900_c();
+         Block block = iblockstate.func_177230_c();
+         Item item = Item.func_150898_a(block);
+         if (item == Items.field_190931_a) {
+            if (block != Blocks.field_150355_j && block != Blocks.field_150358_i) {
+               if (block == Blocks.field_150353_l || block == Blocks.field_150356_k) {
+                  item = Items.field_151129_at;
+               }
+            } else {
+               item = Items.field_151131_as;
             }
+         }
 
-            GlStateManager.disableRescaleNormal();
-        }
+         ItemStack itemstack = new ItemStack(item, 1, item.func_77614_k() ? block.func_176201_c(iblockstate) : 0);
+         String s = item.func_77653_i(itemstack);
+         this.func_148225_a(p_192637_2_, p_192637_3_, itemstack);
+         GuiCreateFlatWorld.this.field_146289_q.func_78276_b(s, p_192637_2_ + 18 + 5, p_192637_3_ + 3, 16777215);
+         String s1;
+         if (p_192637_1_ == 0) {
+            s1 = I18n.func_135052_a("createWorld.customize.flat.layer.top", flatlayerinfo.func_82657_a());
+         } else if (p_192637_1_ == GuiCreateFlatWorld.this.field_146387_g.func_82650_c().size() - 1) {
+            s1 = I18n.func_135052_a("createWorld.customize.flat.layer.bottom", flatlayerinfo.func_82657_a());
+         } else {
+            s1 = I18n.func_135052_a("createWorld.customize.flat.layer", flatlayerinfo.func_82657_a());
+         }
 
-        private void drawItemBackground(int x, int y)
-        {
-            this.drawItemBackground(x, y, 0, 0);
-        }
+         GuiCreateFlatWorld.this.field_146289_q.func_78276_b(s1, p_192637_2_ + 2 + 213 - GuiCreateFlatWorld.this.field_146289_q.func_78256_a(s1), p_192637_3_ + 3, 16777215);
+      }
 
-        private void drawItemBackground(int x, int z, int textureX, int textureY)
-        {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.mc.getTextureManager().bindTexture(Gui.STAT_ICONS);
-            float f = 0.0078125F;
-            float f1 = 0.0078125F;
-            int i = 18;
-            int j = 18;
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuffer();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-            bufferbuilder.pos((double)(x + 0), (double)(z + 18), (double)GuiCreateFlatWorld.this.zLevel).tex((double)((float)(textureX + 0) * 0.0078125F), (double)((float)(textureY + 18) * 0.0078125F)).endVertex();
-            bufferbuilder.pos((double)(x + 18), (double)(z + 18), (double)GuiCreateFlatWorld.this.zLevel).tex((double)((float)(textureX + 18) * 0.0078125F), (double)((float)(textureY + 18) * 0.0078125F)).endVertex();
-            bufferbuilder.pos((double)(x + 18), (double)(z + 0), (double)GuiCreateFlatWorld.this.zLevel).tex((double)((float)(textureX + 18) * 0.0078125F), (double)((float)(textureY + 0) * 0.0078125F)).endVertex();
-            bufferbuilder.pos((double)(x + 0), (double)(z + 0), (double)GuiCreateFlatWorld.this.zLevel).tex((double)((float)(textureX + 0) * 0.0078125F), (double)((float)(textureY + 0) * 0.0078125F)).endVertex();
-            tessellator.draw();
-        }
-
-        protected int getSize()
-        {
-            return GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().size();
-        }
-
-        protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
-        {
-            this.selectedLayer = slotIndex;
-            GuiCreateFlatWorld.this.onLayersChanged();
-        }
-
-        protected boolean isSelected(int slotIndex)
-        {
-            return slotIndex == this.selectedLayer;
-        }
-
-        protected void drawBackground()
-        {
-        }
-
-        protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
-        {
-            FlatLayerInfo flatlayerinfo = (FlatLayerInfo)GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().get(GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().size() - p_192637_1_ - 1);
-            IBlockState iblockstate = flatlayerinfo.getLayerMaterial();
-            Block block = iblockstate.getBlock();
-            Item item = Item.getItemFromBlock(block);
-
-            if (item == Items.field_190931_a)
-            {
-                if (block != Blocks.WATER && block != Blocks.FLOWING_WATER)
-                {
-                    if (block == Blocks.LAVA || block == Blocks.FLOWING_LAVA)
-                    {
-                        item = Items.LAVA_BUCKET;
-                    }
-                }
-                else
-                {
-                    item = Items.WATER_BUCKET;
-                }
-            }
-
-            ItemStack itemstack = new ItemStack(item, 1, item.getHasSubtypes() ? block.getMetaFromState(iblockstate) : 0);
-            String s = item.getItemStackDisplayName(itemstack);
-            this.drawItem(p_192637_2_, p_192637_3_, itemstack);
-            GuiCreateFlatWorld.this.fontRendererObj.drawString(s, p_192637_2_ + 18 + 5, p_192637_3_ + 3, 16777215);
-            String s1;
-
-            if (p_192637_1_ == 0)
-            {
-                s1 = I18n.format("createWorld.customize.flat.layer.top", flatlayerinfo.getLayerCount());
-            }
-            else if (p_192637_1_ == GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().size() - 1)
-            {
-                s1 = I18n.format("createWorld.customize.flat.layer.bottom", flatlayerinfo.getLayerCount());
-            }
-            else
-            {
-                s1 = I18n.format("createWorld.customize.flat.layer", flatlayerinfo.getLayerCount());
-            }
-
-            GuiCreateFlatWorld.this.fontRendererObj.drawString(s1, p_192637_2_ + 2 + 213 - GuiCreateFlatWorld.this.fontRendererObj.getStringWidth(s1), p_192637_3_ + 3, 16777215);
-        }
-
-        protected int getScrollBarX()
-        {
-            return this.width - 70;
-        }
-    }
+      protected int func_148137_d() {
+         return this.field_148155_a - 70;
+      }
+   }
 }

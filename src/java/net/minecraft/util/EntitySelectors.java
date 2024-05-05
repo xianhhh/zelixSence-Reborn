@@ -12,166 +12,112 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
 
-public final class EntitySelectors
-{
-    public static final Predicate<Entity> IS_ALIVE = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return p_apply_1_.isEntityAlive();
-        }
-    };
-    public static final Predicate<Entity> IS_STANDALONE = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return p_apply_1_.isEntityAlive() && !p_apply_1_.isBeingRidden() && !p_apply_1_.isRiding();
-        }
-    };
-    public static final Predicate<Entity> HAS_INVENTORY = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return p_apply_1_ instanceof IInventory && p_apply_1_.isEntityAlive();
-        }
-    };
-    public static final Predicate<Entity> CAN_AI_TARGET = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return !(p_apply_1_ instanceof EntityPlayer) || !((EntityPlayer)p_apply_1_).isSpectator() && !((EntityPlayer)p_apply_1_).isCreative();
-        }
-    };
-    public static final Predicate<Entity> NOT_SPECTATING = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return !(p_apply_1_ instanceof EntityPlayer) || !((EntityPlayer)p_apply_1_).isSpectator();
-        }
-    };
+public final class EntitySelectors {
+   public static final Predicate<Entity> field_94557_a = new Predicate<Entity>() {
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         return p_apply_1_.func_70089_S();
+      }
+   };
+   public static final Predicate<Entity> field_152785_b = new Predicate<Entity>() {
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         return p_apply_1_.func_70089_S() && !p_apply_1_.func_184207_aI() && !p_apply_1_.func_184218_aH();
+      }
+   };
+   public static final Predicate<Entity> field_96566_b = new Predicate<Entity>() {
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         return p_apply_1_ instanceof IInventory && p_apply_1_.func_70089_S();
+      }
+   };
+   public static final Predicate<Entity> field_188444_d = new Predicate<Entity>() {
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         return !(p_apply_1_ instanceof EntityPlayer) || !((EntityPlayer)p_apply_1_).func_175149_v() && !((EntityPlayer)p_apply_1_).func_184812_l_();
+      }
+   };
+   public static final Predicate<Entity> field_180132_d = new Predicate<Entity>() {
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         return !(p_apply_1_ instanceof EntityPlayer) || !((EntityPlayer)p_apply_1_).func_175149_v();
+      }
+   };
 
-    public static <T extends Entity> Predicate<T> withinRange(final double x, final double y, final double z, double range)
-    {
-        final double d0 = range * range;
-        return new Predicate<T>()
-        {
-            public boolean apply(@Nullable T p_apply_1_)
-            {
-                return p_apply_1_ != null && p_apply_1_.getDistanceSq(x, y, z) <= d0;
+   public static <T extends Entity> Predicate<T> func_188443_a(final double p_188443_0_, final double p_188443_2_, final double p_188443_4_, double p_188443_6_) {
+      final double d0 = p_188443_6_ * p_188443_6_;
+      return new Predicate<T>() {
+         public boolean apply(@Nullable T p_apply_1_) {
+            return p_apply_1_ != null && p_apply_1_.func_70092_e(p_188443_0_, p_188443_2_, p_188443_4_) <= d0;
+         }
+      };
+   }
+
+   public static <T extends Entity> Predicate<T> func_188442_a(final Entity p_188442_0_) {
+      final Team team = p_188442_0_.func_96124_cp();
+      final Team.CollisionRule team$collisionrule = team == null ? Team.CollisionRule.ALWAYS : team.func_186681_k();
+      return team$collisionrule == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() : Predicates.and(field_180132_d, new Predicate<Entity>() {
+         public boolean apply(@Nullable Entity p_apply_1_) {
+            if (!p_apply_1_.func_70104_M()) {
+               return false;
+            } else if (!p_188442_0_.field_70170_p.field_72995_K || p_apply_1_ instanceof EntityPlayer && ((EntityPlayer)p_apply_1_).func_175144_cb()) {
+               Team team1 = p_apply_1_.func_96124_cp();
+               Team.CollisionRule team$collisionrule1 = team1 == null ? Team.CollisionRule.ALWAYS : team1.func_186681_k();
+               if (team$collisionrule1 == Team.CollisionRule.NEVER) {
+                  return false;
+               } else {
+                  boolean flag = team != null && team.func_142054_a(team1);
+                  if ((team$collisionrule == Team.CollisionRule.HIDE_FOR_OWN_TEAM || team$collisionrule1 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && flag) {
+                     return false;
+                  } else {
+                     return team$collisionrule != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && team$collisionrule1 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || flag;
+                  }
+               }
+            } else {
+               return false;
             }
-        };
-    }
+         }
+      });
+   }
 
-    public static <T extends Entity> Predicate<T> getTeamCollisionPredicate(final Entity entityIn)
-    {
-        final Team team = entityIn.getTeam();
-        final Team.CollisionRule team$collisionrule = team == null ? Team.CollisionRule.ALWAYS : team.getCollisionRule();
-        Predicate<?> ret = team$collisionrule == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() : Predicates.and(NOT_SPECTATING, new Predicate<Entity>()
-        {
-            public boolean apply(@Nullable Entity p_apply_1_)
-            {
-                if (!p_apply_1_.canBePushed())
-                {
-                    return false;
-                }
-                else if (!entityIn.world.isRemote || p_apply_1_ instanceof EntityPlayer && ((EntityPlayer)p_apply_1_).isUser())
-                {
-                    Team team1 = p_apply_1_.getTeam();
-                    Team.CollisionRule team$collisionrule1 = team1 == null ? Team.CollisionRule.ALWAYS : team1.getCollisionRule();
+   public static Predicate<Entity> func_191324_b(final Entity p_191324_0_) {
+      return new Predicate<Entity>() {
+         public boolean apply(@Nullable Entity p_apply_1_) {
+            while(true) {
+               if (p_apply_1_.func_184218_aH()) {
+                  p_apply_1_ = p_apply_1_.func_184187_bx();
+                  if (p_apply_1_ != p_191324_0_) {
+                     continue;
+                  }
 
-                    if (team$collisionrule1 == Team.CollisionRule.NEVER)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        boolean flag = team != null && team.isSameTeam(team1);
+                  return false;
+               }
 
-                        if ((team$collisionrule == Team.CollisionRule.HIDE_FOR_OWN_TEAM || team$collisionrule1 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && flag)
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            return team$collisionrule != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && team$collisionrule1 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || flag;
-                        }
-                    }
-                }
-                else
-                {
-                    return false;
-                }
+               return true;
             }
-        });
-        return (Predicate<T>)ret;
-    }
+         }
+      };
+   }
 
-    public static Predicate<Entity> func_191324_b(final Entity p_191324_0_)
-    {
-        return new Predicate<Entity>()
-        {
-            public boolean apply(@Nullable Entity p_apply_1_)
-            {
-                while (true)
-                {
-                    if (p_apply_1_.isRiding())
-                    {
-                        p_apply_1_ = p_apply_1_.getRidingEntity();
+   public static class ArmoredMob implements Predicate<Entity> {
+      private final ItemStack field_96567_c;
 
-                        if (p_apply_1_ != p_191324_0_)
-                        {
-                            continue;
-                        }
+      public ArmoredMob(ItemStack p_i1584_1_) {
+         this.field_96567_c = p_i1584_1_;
+      }
 
-                        return false;
-                    }
-
-                    return true;
-                }
+      public boolean apply(@Nullable Entity p_apply_1_) {
+         if (!p_apply_1_.func_70089_S()) {
+            return false;
+         } else if (!(p_apply_1_ instanceof EntityLivingBase)) {
+            return false;
+         } else {
+            EntityLivingBase entitylivingbase = (EntityLivingBase)p_apply_1_;
+            if (!entitylivingbase.func_184582_a(EntityLiving.func_184640_d(this.field_96567_c)).func_190926_b()) {
+               return false;
+            } else if (entitylivingbase instanceof EntityLiving) {
+               return ((EntityLiving)entitylivingbase).func_98052_bS();
+            } else if (entitylivingbase instanceof EntityArmorStand) {
+               return true;
+            } else {
+               return entitylivingbase instanceof EntityPlayer;
             }
-        };
-    }
-
-    public static class ArmoredMob implements Predicate<Entity>
-    {
-        private final ItemStack armor;
-
-        public ArmoredMob(ItemStack armor)
-        {
-            this.armor = armor;
-        }
-
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            if (!p_apply_1_.isEntityAlive())
-            {
-                return false;
-            }
-            else if (!(p_apply_1_ instanceof EntityLivingBase))
-            {
-                return false;
-            }
-            else
-            {
-                EntityLivingBase entitylivingbase = (EntityLivingBase)p_apply_1_;
-
-                if (!entitylivingbase.getItemStackFromSlot(EntityLiving.getSlotForItemStack(this.armor)).func_190926_b())
-                {
-                    return false;
-                }
-                else if (entitylivingbase instanceof EntityLiving)
-                {
-                    return ((EntityLiving)entitylivingbase).canPickUpLoot();
-                }
-                else if (entitylivingbase instanceof EntityArmorStand)
-                {
-                    return true;
-                }
-                else
-                {
-                    return entitylivingbase instanceof EntityPlayer;
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }

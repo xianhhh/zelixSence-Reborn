@@ -7,32 +7,20 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerLoginServer;
 import net.minecraft.util.text.ITextComponent;
 
-public class NetHandlerHandshakeMemory implements INetHandlerHandshakeServer
-{
-    private final MinecraftServer mcServer;
-    private final NetworkManager networkManager;
+public class NetHandlerHandshakeMemory implements INetHandlerHandshakeServer {
+   private final MinecraftServer field_147385_a;
+   private final NetworkManager field_147384_b;
 
-    public NetHandlerHandshakeMemory(MinecraftServer mcServerIn, NetworkManager networkManagerIn)
-    {
-        this.mcServer = mcServerIn;
-        this.networkManager = networkManagerIn;
-    }
+   public NetHandlerHandshakeMemory(MinecraftServer p_i45287_1_, NetworkManager p_i45287_2_) {
+      this.field_147385_a = p_i45287_1_;
+      this.field_147384_b = p_i45287_2_;
+   }
 
-    /**
-     * There are two recognized intentions for initiating a handshake: logging in and acquiring server status. The
-     * NetworkManager's protocol will be reconfigured according to the specified intention, although a login-intention
-     * must pass a versioncheck or receive a disconnect otherwise
-     */
-    public void processHandshake(C00Handshake packetIn)
-    {
-        this.networkManager.setConnectionState(packetIn.getRequestedState());
-        this.networkManager.setNetHandler(new NetHandlerLoginServer(this.mcServer, this.networkManager));
-    }
+   public void func_147383_a(C00Handshake p_147383_1_) {
+      this.field_147384_b.func_150723_a(p_147383_1_.func_149594_c());
+      this.field_147384_b.func_150719_a(new NetHandlerLoginServer(this.field_147385_a, this.field_147384_b));
+   }
 
-    /**
-     * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
-     */
-    public void onDisconnect(ITextComponent reason)
-    {
-    }
+   public void func_147231_a(ITextComponent p_147231_1_) {
+   }
 }

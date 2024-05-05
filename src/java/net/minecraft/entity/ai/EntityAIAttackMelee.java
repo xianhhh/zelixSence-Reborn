@@ -8,174 +8,108 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class EntityAIAttackMelee extends EntityAIBase
-{
-    World worldObj;
-    protected EntityCreature attacker;
+public class EntityAIAttackMelee extends EntityAIBase {
+   World field_75443_a;
+   protected EntityCreature field_75441_b;
+   protected int field_75439_d;
+   double field_75440_e;
+   boolean field_75437_f;
+   Path field_75438_g;
+   private int field_75445_i;
+   private double field_151497_i;
+   private double field_151495_j;
+   private double field_151496_k;
+   protected final int field_188493_g = 20;
 
-    /**
-     * An amount of decrementing ticks that allows the entity to attack once the tick reaches 0.
-     */
-    protected int attackTick;
+   public EntityAIAttackMelee(EntityCreature p_i1636_1_, double p_i1636_2_, boolean p_i1636_4_) {
+      this.field_75441_b = p_i1636_1_;
+      this.field_75443_a = p_i1636_1_.field_70170_p;
+      this.field_75440_e = p_i1636_2_;
+      this.field_75437_f = p_i1636_4_;
+      this.func_75248_a(3);
+   }
 
-    /** The speed with which the mob will approach the target */
-    double speedTowardsTarget;
+   public boolean func_75250_a() {
+      EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
+      if (entitylivingbase == null) {
+         return false;
+      } else if (!entitylivingbase.func_70089_S()) {
+         return false;
+      } else {
+         this.field_75438_g = this.field_75441_b.func_70661_as().func_75494_a(entitylivingbase);
+         if (this.field_75438_g != null) {
+            return true;
+         } else {
+            return this.func_179512_a(entitylivingbase) >= this.field_75441_b.func_70092_e(entitylivingbase.field_70165_t, entitylivingbase.func_174813_aQ().field_72338_b, entitylivingbase.field_70161_v);
+         }
+      }
+   }
 
-    /**
-     * When true, the mob will continue chasing its target, even if it can't find a path to them right now.
-     */
-    boolean longMemory;
+   public boolean func_75253_b() {
+      EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
+      if (entitylivingbase == null) {
+         return false;
+      } else if (!entitylivingbase.func_70089_S()) {
+         return false;
+      } else if (!this.field_75437_f) {
+         return !this.field_75441_b.func_70661_as().func_75500_f();
+      } else if (!this.field_75441_b.func_180485_d(new BlockPos(entitylivingbase))) {
+         return false;
+      } else {
+         return !(entitylivingbase instanceof EntityPlayer) || !((EntityPlayer)entitylivingbase).func_175149_v() && !((EntityPlayer)entitylivingbase).func_184812_l_();
+      }
+   }
 
-    /** The PathEntity of our entity. */
-    Path entityPathEntity;
-    private int delayCounter;
-    private double targetX;
-    private double targetY;
-    private double targetZ;
-    protected final int attackInterval = 20;
+   public void func_75249_e() {
+      this.field_75441_b.func_70661_as().func_75484_a(this.field_75438_g, this.field_75440_e);
+      this.field_75445_i = 0;
+   }
 
-    public EntityAIAttackMelee(EntityCreature creature, double speedIn, boolean useLongMemory)
-    {
-        this.attacker = creature;
-        this.worldObj = creature.world;
-        this.speedTowardsTarget = speedIn;
-        this.longMemory = useLongMemory;
-        this.setMutexBits(3);
-    }
+   public void func_75251_c() {
+      EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
+      if (entitylivingbase instanceof EntityPlayer && (((EntityPlayer)entitylivingbase).func_175149_v() || ((EntityPlayer)entitylivingbase).func_184812_l_())) {
+         this.field_75441_b.func_70624_b((EntityLivingBase)null);
+      }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
+      this.field_75441_b.func_70661_as().func_75499_g();
+   }
 
-        if (entitylivingbase == null)
-        {
-            return false;
-        }
-        else if (!entitylivingbase.isEntityAlive())
-        {
-            return false;
-        }
-        else
-        {
-            this.entityPathEntity = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
+   public void func_75246_d() {
+      EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
+      this.field_75441_b.func_70671_ap().func_75651_a(entitylivingbase, 30.0F, 30.0F);
+      double d0 = this.field_75441_b.func_70092_e(entitylivingbase.field_70165_t, entitylivingbase.func_174813_aQ().field_72338_b, entitylivingbase.field_70161_v);
+      --this.field_75445_i;
+      if ((this.field_75437_f || this.field_75441_b.func_70635_at().func_75522_a(entitylivingbase)) && this.field_75445_i <= 0 && (this.field_151497_i == 0.0D && this.field_151495_j == 0.0D && this.field_151496_k == 0.0D || entitylivingbase.func_70092_e(this.field_151497_i, this.field_151495_j, this.field_151496_k) >= 1.0D || this.field_75441_b.func_70681_au().nextFloat() < 0.05F)) {
+         this.field_151497_i = entitylivingbase.field_70165_t;
+         this.field_151495_j = entitylivingbase.func_174813_aQ().field_72338_b;
+         this.field_151496_k = entitylivingbase.field_70161_v;
+         this.field_75445_i = 4 + this.field_75441_b.func_70681_au().nextInt(7);
+         if (d0 > 1024.0D) {
+            this.field_75445_i += 10;
+         } else if (d0 > 256.0D) {
+            this.field_75445_i += 5;
+         }
 
-            if (this.entityPathEntity != null)
-            {
-                return true;
-            }
-            else
-            {
-                return this.getAttackReachSqr(entitylivingbase) >= this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            }
-        }
-    }
+         if (!this.field_75441_b.func_70661_as().func_75497_a(entitylivingbase, this.field_75440_e)) {
+            this.field_75445_i += 15;
+         }
+      }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
+      this.field_75439_d = Math.max(this.field_75439_d - 1, 0);
+      this.func_190102_a(entitylivingbase, d0);
+   }
 
-        if (entitylivingbase == null)
-        {
-            return false;
-        }
-        else if (!entitylivingbase.isEntityAlive())
-        {
-            return false;
-        }
-        else if (!this.longMemory)
-        {
-            return !this.attacker.getNavigator().noPath();
-        }
-        else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase)))
-        {
-            return false;
-        }
-        else
-        {
-            return !(entitylivingbase instanceof EntityPlayer) || !((EntityPlayer)entitylivingbase).isSpectator() && !((EntityPlayer)entitylivingbase).isCreative();
-        }
-    }
+   protected void func_190102_a(EntityLivingBase p_190102_1_, double p_190102_2_) {
+      double d0 = this.func_179512_a(p_190102_1_);
+      if (p_190102_2_ <= d0 && this.field_75439_d <= 0) {
+         this.field_75439_d = 20;
+         this.field_75441_b.func_184609_a(EnumHand.MAIN_HAND);
+         this.field_75441_b.func_70652_k(p_190102_1_);
+      }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        this.attacker.getNavigator().setPath(this.entityPathEntity, this.speedTowardsTarget);
-        this.delayCounter = 0;
-    }
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
-
-        if (entitylivingbase instanceof EntityPlayer && (((EntityPlayer)entitylivingbase).isSpectator() || ((EntityPlayer)entitylivingbase).isCreative()))
-        {
-            this.attacker.setAttackTarget((EntityLivingBase)null);
-        }
-
-        this.attacker.getNavigator().clearPathEntity();
-    }
-
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
-        this.attacker.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
-        double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-        --this.delayCounter;
-
-        if ((this.longMemory || this.attacker.getEntitySenses().canSee(entitylivingbase)) && this.delayCounter <= 0 && (this.targetX == 0.0D && this.targetY == 0.0D && this.targetZ == 0.0D || entitylivingbase.getDistanceSq(this.targetX, this.targetY, this.targetZ) >= 1.0D || this.attacker.getRNG().nextFloat() < 0.05F))
-        {
-            this.targetX = entitylivingbase.posX;
-            this.targetY = entitylivingbase.getEntityBoundingBox().minY;
-            this.targetZ = entitylivingbase.posZ;
-            this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
-
-            if (d0 > 1024.0D)
-            {
-                this.delayCounter += 10;
-            }
-            else if (d0 > 256.0D)
-            {
-                this.delayCounter += 5;
-            }
-
-            if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget))
-            {
-                this.delayCounter += 15;
-            }
-        }
-
-        this.attackTick = Math.max(this.attackTick - 1, 0);
-        this.checkAndPerformAttack(entitylivingbase, d0);
-    }
-
-    protected void checkAndPerformAttack(EntityLivingBase p_190102_1_, double p_190102_2_)
-    {
-        double d0 = this.getAttackReachSqr(p_190102_1_);
-
-        if (p_190102_2_ <= d0 && this.attackTick <= 0)
-        {
-            this.attackTick = 20;
-            this.attacker.swingArm(EnumHand.MAIN_HAND);
-            this.attacker.attackEntityAsMob(p_190102_1_);
-        }
-    }
-
-    protected double getAttackReachSqr(EntityLivingBase attackTarget)
-    {
-        return (double)(this.attacker.width * 2.0F * this.attacker.width * 2.0F + attackTarget.width);
-    }
+   protected double func_179512_a(EntityLivingBase p_179512_1_) {
+      return (double)(this.field_75441_b.field_70130_N * 2.0F * this.field_75441_b.field_70130_N * 2.0F + p_179512_1_.field_70130_N);
+   }
 }

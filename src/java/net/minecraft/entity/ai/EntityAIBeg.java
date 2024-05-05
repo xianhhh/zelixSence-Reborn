@@ -7,97 +7,62 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
-public class EntityAIBeg extends EntityAIBase
-{
-    private final EntityWolf theWolf;
-    private EntityPlayer thePlayer;
-    private final World worldObject;
-    private final float minPlayerDistance;
-    private int timeoutCounter;
+public class EntityAIBeg extends EntityAIBase {
+   private final EntityWolf field_75387_a;
+   private EntityPlayer field_75385_b;
+   private final World field_75386_c;
+   private final float field_75383_d;
+   private int field_75384_e;
 
-    public EntityAIBeg(EntityWolf wolf, float minDistance)
-    {
-        this.theWolf = wolf;
-        this.worldObject = wolf.world;
-        this.minPlayerDistance = minDistance;
-        this.setMutexBits(2);
-    }
+   public EntityAIBeg(EntityWolf p_i1617_1_, float p_i1617_2_) {
+      this.field_75387_a = p_i1617_1_;
+      this.field_75386_c = p_i1617_1_.field_70170_p;
+      this.field_75383_d = p_i1617_2_;
+      this.func_75248_a(2);
+   }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        this.thePlayer = this.worldObject.getClosestPlayerToEntity(this.theWolf, (double)this.minPlayerDistance);
-        return this.thePlayer == null ? false : this.hasPlayerGotBoneInHand(this.thePlayer);
-    }
+   public boolean func_75250_a() {
+      this.field_75385_b = this.field_75386_c.func_72890_a(this.field_75387_a, (double)this.field_75383_d);
+      return this.field_75385_b == null ? false : this.func_75382_a(this.field_75385_b);
+   }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        if (!this.thePlayer.isEntityAlive())
-        {
-            return false;
-        }
-        else if (this.theWolf.getDistanceSqToEntity(this.thePlayer) > (double)(this.minPlayerDistance * this.minPlayerDistance))
-        {
-            return false;
-        }
-        else
-        {
-            return this.timeoutCounter > 0 && this.hasPlayerGotBoneInHand(this.thePlayer);
-        }
-    }
+   public boolean func_75253_b() {
+      if (!this.field_75385_b.func_70089_S()) {
+         return false;
+      } else if (this.field_75387_a.func_70068_e(this.field_75385_b) > (double)(this.field_75383_d * this.field_75383_d)) {
+         return false;
+      } else {
+         return this.field_75384_e > 0 && this.func_75382_a(this.field_75385_b);
+      }
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        this.theWolf.setBegging(true);
-        this.timeoutCounter = 40 + this.theWolf.getRNG().nextInt(40);
-    }
+   public void func_75249_e() {
+      this.field_75387_a.func_70918_i(true);
+      this.field_75384_e = 40 + this.field_75387_a.func_70681_au().nextInt(40);
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        this.theWolf.setBegging(false);
-        this.thePlayer = null;
-    }
+   public void func_75251_c() {
+      this.field_75387_a.func_70918_i(false);
+      this.field_75385_b = null;
+   }
 
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        this.theWolf.getLookHelper().setLookPosition(this.thePlayer.posX, this.thePlayer.posY + (double)this.thePlayer.getEyeHeight(), this.thePlayer.posZ, 10.0F, (float)this.theWolf.getVerticalFaceSpeed());
-        --this.timeoutCounter;
-    }
+   public void func_75246_d() {
+      this.field_75387_a.func_70671_ap().func_75650_a(this.field_75385_b.field_70165_t, this.field_75385_b.field_70163_u + (double)this.field_75385_b.func_70047_e(), this.field_75385_b.field_70161_v, 10.0F, (float)this.field_75387_a.func_70646_bf());
+      --this.field_75384_e;
+   }
 
-    /**
-     * Gets if the Player has the Bone in the hand.
-     */
-    private boolean hasPlayerGotBoneInHand(EntityPlayer player)
-    {
-        for (EnumHand enumhand : EnumHand.values())
-        {
-            ItemStack itemstack = player.getHeldItem(enumhand);
+   private boolean func_75382_a(EntityPlayer p_75382_1_) {
+      for(EnumHand enumhand : EnumHand.values()) {
+         ItemStack itemstack = p_75382_1_.func_184586_b(enumhand);
+         if (this.field_75387_a.func_70909_n() && itemstack.func_77973_b() == Items.field_151103_aS) {
+            return true;
+         }
 
-            if (this.theWolf.isTamed() && itemstack.getItem() == Items.BONE)
-            {
-                return true;
-            }
+         if (this.field_75387_a.func_70877_b(itemstack)) {
+            return true;
+         }
+      }
 
-            if (this.theWolf.isBreedingItem(itemstack))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+      return false;
+   }
 }

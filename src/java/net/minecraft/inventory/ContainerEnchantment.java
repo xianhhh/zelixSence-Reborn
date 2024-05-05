@@ -20,433 +20,308 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ContainerEnchantment extends Container
-{
-    /** SlotEnchantmentTable object with ItemStack to be enchanted */
-    public IInventory tableInventory;
+public class ContainerEnchantment extends Container {
+   public IInventory field_75168_e;
+   private final World field_75172_h;
+   private final BlockPos field_178150_j;
+   private final Random field_75169_l;
+   public int field_178149_f;
+   public int[] field_75167_g;
+   public int[] field_185001_h;
+   public int[] field_185002_i;
 
-    /** current world (for bookshelf counting) */
-    private final World worldPointer;
-    private final BlockPos position;
-    private final Random rand;
-    public int xpSeed;
+   public ContainerEnchantment(InventoryPlayer p_i45797_1_, World p_i45797_2_) {
+      this(p_i45797_1_, p_i45797_2_, BlockPos.field_177992_a);
+   }
 
-    /** 3-member array storing the enchantment levels of each slot */
-    public int[] enchantLevels;
-    public int[] enchantClue;
-    public int[] worldClue;
+   public ContainerEnchantment(InventoryPlayer p_i45798_1_, World p_i45798_2_, BlockPos p_i45798_3_) {
+      this.field_75168_e = new InventoryBasic("Enchant", true, 2) {
+         public int func_70297_j_() {
+            return 64;
+         }
 
-    public ContainerEnchantment(InventoryPlayer playerInv, World worldIn)
-    {
-        this(playerInv, worldIn, BlockPos.ORIGIN);
-    }
-
-    public ContainerEnchantment(InventoryPlayer playerInv, World worldIn, BlockPos pos)
-    {
-        this.tableInventory = new InventoryBasic("Enchant", true, 2)
-        {
-            public int getInventoryStackLimit()
-            {
-                return 64;
-            }
-            public void markDirty()
-            {
-                super.markDirty();
-                ContainerEnchantment.this.onCraftMatrixChanged(this);
-            }
-        };
-        this.rand = new Random();
-        this.enchantLevels = new int[3];
-        this.enchantClue = new int[] { -1, -1, -1};
-        this.worldClue = new int[] { -1, -1, -1};
-        this.worldPointer = worldIn;
-        this.position = pos;
-        this.xpSeed = playerInv.player.getXPSeed();
-        this.addSlotToContainer(new Slot(this.tableInventory, 0, 15, 47)
-        {
-            public boolean isItemValid(ItemStack stack)
-            {
-                return true;
-            }
-            public int getSlotStackLimit()
-            {
-                return 1;
-            }
-        });
-        this.addSlotToContainer(new Slot(this.tableInventory, 1, 35, 47)
-        {
-            public boolean isItemValid(ItemStack stack)
-            {
-                return stack.getItem() == Items.DYE && EnumDyeColor.byDyeDamage(stack.getMetadata()) == EnumDyeColor.BLUE;
-            }
-        });
-
-        for (int i = 0; i < 3; ++i)
-        {
-            for (int j = 0; j < 9; ++j)
-            {
-                this.addSlotToContainer(new Slot(playerInv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-            }
-        }
-
-        for (int k = 0; k < 9; ++k)
-        {
-            this.addSlotToContainer(new Slot(playerInv, k, 8 + k * 18, 142));
-        }
-    }
-
-    protected void broadcastData(IContainerListener crafting)
-    {
-        crafting.sendProgressBarUpdate(this, 0, this.enchantLevels[0]);
-        crafting.sendProgressBarUpdate(this, 1, this.enchantLevels[1]);
-        crafting.sendProgressBarUpdate(this, 2, this.enchantLevels[2]);
-        crafting.sendProgressBarUpdate(this, 3, this.xpSeed & -16);
-        crafting.sendProgressBarUpdate(this, 4, this.enchantClue[0]);
-        crafting.sendProgressBarUpdate(this, 5, this.enchantClue[1]);
-        crafting.sendProgressBarUpdate(this, 6, this.enchantClue[2]);
-        crafting.sendProgressBarUpdate(this, 7, this.worldClue[0]);
-        crafting.sendProgressBarUpdate(this, 8, this.worldClue[1]);
-        crafting.sendProgressBarUpdate(this, 9, this.worldClue[2]);
-    }
-
-    public void addListener(IContainerListener listener)
-    {
-        super.addListener(listener);
-        this.broadcastData(listener);
-    }
-
-    /**
-     * Looks for changes made in the container, sends them to every listener.
-     */
-    public void detectAndSendChanges()
-    {
-        super.detectAndSendChanges();
-
-        for (int i = 0; i < this.listeners.size(); ++i)
-        {
-            IContainerListener icontainerlistener = this.listeners.get(i);
-            this.broadcastData(icontainerlistener);
-        }
-    }
-
-    public void updateProgressBar(int id, int data)
-    {
-        if (id >= 0 && id <= 2)
-        {
-            this.enchantLevels[id] = data;
-        }
-        else if (id == 3)
-        {
-            this.xpSeed = data;
-        }
-        else if (id >= 4 && id <= 6)
-        {
-            this.enchantClue[id - 4] = data;
-        }
-        else if (id >= 7 && id <= 9)
-        {
-            this.worldClue[id - 7] = data;
-        }
-        else
-        {
-            super.updateProgressBar(id, data);
-        }
-    }
-
-    /**
-     * Callback for when the crafting matrix is changed.
-     */
-    public void onCraftMatrixChanged(IInventory inventoryIn)
-    {
-        if (inventoryIn == this.tableInventory)
-        {
-            ItemStack itemstack = inventoryIn.getStackInSlot(0);
-
-            if (!itemstack.func_190926_b() && itemstack.isItemEnchantable())
-            {
-                if (!this.worldPointer.isRemote)
-                {
-                    int l = 0;
-
-                    for (int j = -1; j <= 1; ++j)
-                    {
-                        for (int k = -1; k <= 1; ++k)
-                        {
-                            if ((j != 0 || k != 0) && this.worldPointer.isAirBlock(this.position.add(k, 0, j)) && this.worldPointer.isAirBlock(this.position.add(k, 1, j)))
-                            {
-                                if (this.worldPointer.getBlockState(this.position.add(k * 2, 0, j * 2)).getBlock() == Blocks.BOOKSHELF)
-                                {
-                                    ++l;
-                                }
-
-                                if (this.worldPointer.getBlockState(this.position.add(k * 2, 1, j * 2)).getBlock() == Blocks.BOOKSHELF)
-                                {
-                                    ++l;
-                                }
-
-                                if (k != 0 && j != 0)
-                                {
-                                    if (this.worldPointer.getBlockState(this.position.add(k * 2, 0, j)).getBlock() == Blocks.BOOKSHELF)
-                                    {
-                                        ++l;
-                                    }
-
-                                    if (this.worldPointer.getBlockState(this.position.add(k * 2, 1, j)).getBlock() == Blocks.BOOKSHELF)
-                                    {
-                                        ++l;
-                                    }
-
-                                    if (this.worldPointer.getBlockState(this.position.add(k, 0, j * 2)).getBlock() == Blocks.BOOKSHELF)
-                                    {
-                                        ++l;
-                                    }
-
-                                    if (this.worldPointer.getBlockState(this.position.add(k, 1, j * 2)).getBlock() == Blocks.BOOKSHELF)
-                                    {
-                                        ++l;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    this.rand.setSeed((long)this.xpSeed);
-
-                    for (int i1 = 0; i1 < 3; ++i1)
-                    {
-                        this.enchantLevels[i1] = EnchantmentHelper.calcItemStackEnchantability(this.rand, i1, l, itemstack);
-                        this.enchantClue[i1] = -1;
-                        this.worldClue[i1] = -1;
-
-                        if (this.enchantLevels[i1] < i1 + 1)
-                        {
-                            this.enchantLevels[i1] = 0;
-                        }
-                    }
-
-                    for (int j1 = 0; j1 < 3; ++j1)
-                    {
-                        if (this.enchantLevels[j1] > 0)
-                        {
-                            List<EnchantmentData> list = this.getEnchantmentList(itemstack, j1, this.enchantLevels[j1]);
-
-                            if (list != null && !list.isEmpty())
-                            {
-                                EnchantmentData enchantmentdata = list.get(this.rand.nextInt(list.size()));
-                                this.enchantClue[j1] = Enchantment.getEnchantmentID(enchantmentdata.enchantmentobj);
-                                this.worldClue[j1] = enchantmentdata.enchantmentLevel;
-                            }
-                        }
-                    }
-
-                    this.detectAndSendChanges();
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    this.enchantLevels[i] = 0;
-                    this.enchantClue[i] = -1;
-                    this.worldClue[i] = -1;
-                }
-            }
-        }
-    }
-
-    /**
-     * Handles the given Button-click on the server, currently only used by enchanting. Name is for legacy.
-     */
-    public boolean enchantItem(EntityPlayer playerIn, int id)
-    {
-        ItemStack itemstack = this.tableInventory.getStackInSlot(0);
-        ItemStack itemstack1 = this.tableInventory.getStackInSlot(1);
-        int i = id + 1;
-
-        if ((itemstack1.func_190926_b() || itemstack1.func_190916_E() < i) && !playerIn.capabilities.isCreativeMode)
-        {
-            return false;
-        }
-        else if (this.enchantLevels[id] > 0 && !itemstack.func_190926_b() && (playerIn.experienceLevel >= i && playerIn.experienceLevel >= this.enchantLevels[id] || playerIn.capabilities.isCreativeMode))
-        {
-            if (!this.worldPointer.isRemote)
-            {
-                List<EnchantmentData> list = this.getEnchantmentList(itemstack, id, this.enchantLevels[id]);
-
-                if (!list.isEmpty())
-                {
-                    playerIn.func_192024_a(itemstack, i);
-                    boolean flag = itemstack.getItem() == Items.BOOK;
-
-                    if (flag)
-                    {
-                        itemstack = new ItemStack(Items.ENCHANTED_BOOK);
-                        this.tableInventory.setInventorySlotContents(0, itemstack);
-                    }
-
-                    for (int j = 0; j < list.size(); ++j)
-                    {
-                        EnchantmentData enchantmentdata = list.get(j);
-
-                        if (flag)
-                        {
-                            ItemEnchantedBook.addEnchantment(itemstack, enchantmentdata);
-                        }
-                        else
-                        {
-                            itemstack.addEnchantment(enchantmentdata.enchantmentobj, enchantmentdata.enchantmentLevel);
-                        }
-                    }
-
-                    if (!playerIn.capabilities.isCreativeMode)
-                    {
-                        itemstack1.func_190918_g(i);
-
-                        if (itemstack1.func_190926_b())
-                        {
-                            this.tableInventory.setInventorySlotContents(1, ItemStack.field_190927_a);
-                        }
-                    }
-
-                    playerIn.addStat(StatList.ITEM_ENCHANTED);
-
-                    if (playerIn instanceof EntityPlayerMP)
-                    {
-                        CriteriaTriggers.field_192129_i.func_192190_a((EntityPlayerMP)playerIn, itemstack, i);
-                    }
-
-                    this.tableInventory.markDirty();
-                    this.xpSeed = playerIn.getXPSeed();
-                    this.onCraftMatrixChanged(this.tableInventory);
-                    this.worldPointer.playSound((EntityPlayer)null, this.position, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0F, this.worldPointer.rand.nextFloat() * 0.1F + 0.9F);
-                }
-            }
-
+         public void func_70296_d() {
+            super.func_70296_d();
+            ContainerEnchantment.this.func_75130_a(this);
+         }
+      };
+      this.field_75169_l = new Random();
+      this.field_75167_g = new int[3];
+      this.field_185001_h = new int[]{-1, -1, -1};
+      this.field_185002_i = new int[]{-1, -1, -1};
+      this.field_75172_h = p_i45798_2_;
+      this.field_178150_j = p_i45798_3_;
+      this.field_178149_f = p_i45798_1_.field_70458_d.func_175138_ci();
+      this.func_75146_a(new Slot(this.field_75168_e, 0, 15, 47) {
+         public boolean func_75214_a(ItemStack p_75214_1_) {
             return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+         }
 
-    private List<EnchantmentData> getEnchantmentList(ItemStack stack, int p_178148_2_, int p_178148_3_)
-    {
-        this.rand.setSeed((long)(this.xpSeed + p_178148_2_));
-        List<EnchantmentData> list = EnchantmentHelper.buildEnchantmentList(this.rand, stack, p_178148_3_, false);
+         public int func_75219_a() {
+            return 1;
+         }
+      });
+      this.func_75146_a(new Slot(this.field_75168_e, 1, 35, 47) {
+         public boolean func_75214_a(ItemStack p_75214_1_) {
+            return p_75214_1_.func_77973_b() == Items.field_151100_aR && EnumDyeColor.func_176766_a(p_75214_1_.func_77960_j()) == EnumDyeColor.BLUE;
+         }
+      });
 
-        if (stack.getItem() == Items.BOOK && list.size() > 1)
-        {
-            list.remove(this.rand.nextInt(list.size()));
-        }
+      for(int i = 0; i < 3; ++i) {
+         for(int j = 0; j < 9; ++j) {
+            this.func_75146_a(new Slot(p_i45798_1_, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+         }
+      }
 
-        return list;
-    }
+      for(int k = 0; k < 9; ++k) {
+         this.func_75146_a(new Slot(p_i45798_1_, k, 8 + k * 18, 142));
+      }
 
-    public int getLapisAmount()
-    {
-        ItemStack itemstack = this.tableInventory.getStackInSlot(1);
-        return itemstack.func_190926_b() ? 0 : itemstack.func_190916_E();
-    }
+   }
 
-    /**
-     * Called when the container is closed.
-     */
-    public void onContainerClosed(EntityPlayer playerIn)
-    {
-        super.onContainerClosed(playerIn);
+   protected void func_185000_c(IContainerListener p_185000_1_) {
+      p_185000_1_.func_71112_a(this, 0, this.field_75167_g[0]);
+      p_185000_1_.func_71112_a(this, 1, this.field_75167_g[1]);
+      p_185000_1_.func_71112_a(this, 2, this.field_75167_g[2]);
+      p_185000_1_.func_71112_a(this, 3, this.field_178149_f & -16);
+      p_185000_1_.func_71112_a(this, 4, this.field_185001_h[0]);
+      p_185000_1_.func_71112_a(this, 5, this.field_185001_h[1]);
+      p_185000_1_.func_71112_a(this, 6, this.field_185001_h[2]);
+      p_185000_1_.func_71112_a(this, 7, this.field_185002_i[0]);
+      p_185000_1_.func_71112_a(this, 8, this.field_185002_i[1]);
+      p_185000_1_.func_71112_a(this, 9, this.field_185002_i[2]);
+   }
 
-        if (!this.worldPointer.isRemote)
-        {
-            this.func_193327_a(playerIn, playerIn.world, this.tableInventory);
-        }
-    }
+   public void func_75132_a(IContainerListener p_75132_1_) {
+      super.func_75132_a(p_75132_1_);
+      this.func_185000_c(p_75132_1_);
+   }
 
-    /**
-     * Determines whether supplied player can use this container
-     */
-    public boolean canInteractWith(EntityPlayer playerIn)
-    {
-        if (this.worldPointer.getBlockState(this.position).getBlock() != Blocks.ENCHANTING_TABLE)
-        {
-            return false;
-        }
-        else
-        {
-            return playerIn.getDistanceSq((double)this.position.getX() + 0.5D, (double)this.position.getY() + 0.5D, (double)this.position.getZ() + 0.5D) <= 64.0D;
-        }
-    }
+   public void func_75142_b() {
+      super.func_75142_b();
 
-    /**
-     * Take a stack from the specified inventory slot.
-     */
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
-    {
-        ItemStack itemstack = ItemStack.field_190927_a;
-        Slot slot = this.inventorySlots.get(index);
+      for(int i = 0; i < this.field_75149_d.size(); ++i) {
+         IContainerListener icontainerlistener = this.field_75149_d.get(i);
+         this.func_185000_c(icontainerlistener);
+      }
 
-        if (slot != null && slot.getHasStack())
-        {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
+   }
 
-            if (index == 0)
-            {
-                if (!this.mergeItemStack(itemstack1, 2, 38, true))
-                {
-                    return ItemStack.field_190927_a;
-                }
+   public void func_75137_b(int p_75137_1_, int p_75137_2_) {
+      if (p_75137_1_ >= 0 && p_75137_1_ <= 2) {
+         this.field_75167_g[p_75137_1_] = p_75137_2_;
+      } else if (p_75137_1_ == 3) {
+         this.field_178149_f = p_75137_2_;
+      } else if (p_75137_1_ >= 4 && p_75137_1_ <= 6) {
+         this.field_185001_h[p_75137_1_ - 4] = p_75137_2_;
+      } else if (p_75137_1_ >= 7 && p_75137_1_ <= 9) {
+         this.field_185002_i[p_75137_1_ - 7] = p_75137_2_;
+      } else {
+         super.func_75137_b(p_75137_1_, p_75137_2_);
+      }
+
+   }
+
+   public void func_75130_a(IInventory p_75130_1_) {
+      if (p_75130_1_ == this.field_75168_e) {
+         ItemStack itemstack = p_75130_1_.func_70301_a(0);
+         if (!itemstack.func_190926_b() && itemstack.func_77956_u()) {
+            if (!this.field_75172_h.field_72995_K) {
+               int l = 0;
+
+               for(int j = -1; j <= 1; ++j) {
+                  for(int k = -1; k <= 1; ++k) {
+                     if ((j != 0 || k != 0) && this.field_75172_h.func_175623_d(this.field_178150_j.func_177982_a(k, 0, j)) && this.field_75172_h.func_175623_d(this.field_178150_j.func_177982_a(k, 1, j))) {
+                        if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k * 2, 0, j * 2)).func_177230_c() == Blocks.field_150342_X) {
+                           ++l;
+                        }
+
+                        if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k * 2, 1, j * 2)).func_177230_c() == Blocks.field_150342_X) {
+                           ++l;
+                        }
+
+                        if (k != 0 && j != 0) {
+                           if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k * 2, 0, j)).func_177230_c() == Blocks.field_150342_X) {
+                              ++l;
+                           }
+
+                           if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k * 2, 1, j)).func_177230_c() == Blocks.field_150342_X) {
+                              ++l;
+                           }
+
+                           if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k, 0, j * 2)).func_177230_c() == Blocks.field_150342_X) {
+                              ++l;
+                           }
+
+                           if (this.field_75172_h.func_180495_p(this.field_178150_j.func_177982_a(k, 1, j * 2)).func_177230_c() == Blocks.field_150342_X) {
+                              ++l;
+                           }
+                        }
+                     }
+                  }
+               }
+
+               this.field_75169_l.setSeed((long)this.field_178149_f);
+
+               for(int i1 = 0; i1 < 3; ++i1) {
+                  this.field_75167_g[i1] = EnchantmentHelper.func_77514_a(this.field_75169_l, i1, l, itemstack);
+                  this.field_185001_h[i1] = -1;
+                  this.field_185002_i[i1] = -1;
+                  if (this.field_75167_g[i1] < i1 + 1) {
+                     this.field_75167_g[i1] = 0;
+                  }
+               }
+
+               for(int j1 = 0; j1 < 3; ++j1) {
+                  if (this.field_75167_g[j1] > 0) {
+                     List<EnchantmentData> list = this.func_178148_a(itemstack, j1, this.field_75167_g[j1]);
+                     if (list != null && !list.isEmpty()) {
+                        EnchantmentData enchantmentdata = list.get(this.field_75169_l.nextInt(list.size()));
+                        this.field_185001_h[j1] = Enchantment.func_185258_b(enchantmentdata.field_76302_b);
+                        this.field_185002_i[j1] = enchantmentdata.field_76303_c;
+                     }
+                  }
+               }
+
+               this.func_75142_b();
             }
-            else if (index == 1)
-            {
-                if (!this.mergeItemStack(itemstack1, 2, 38, true))
-                {
-                    return ItemStack.field_190927_a;
-                }
+         } else {
+            for(int i = 0; i < 3; ++i) {
+               this.field_75167_g[i] = 0;
+               this.field_185001_h[i] = -1;
+               this.field_185002_i[i] = -1;
             }
-            else if (itemstack1.getItem() == Items.DYE && EnumDyeColor.byDyeDamage(itemstack1.getMetadata()) == EnumDyeColor.BLUE)
-            {
-                if (!this.mergeItemStack(itemstack1, 1, 2, true))
-                {
-                    return ItemStack.field_190927_a;
-                }
-            }
-            else
-            {
-                if (((Slot)this.inventorySlots.get(0)).getHasStack() || !((Slot)this.inventorySlots.get(0)).isItemValid(itemstack1))
-                {
-                    return ItemStack.field_190927_a;
-                }
+         }
+      }
 
-                if (itemstack1.hasTagCompound() && itemstack1.func_190916_E() == 1)
-                {
-                    ((Slot)this.inventorySlots.get(0)).putStack(itemstack1.copy());
-                    itemstack1.func_190920_e(0);
-                }
-                else if (!itemstack1.func_190926_b())
-                {
-                    ((Slot)this.inventorySlots.get(0)).putStack(new ItemStack(itemstack1.getItem(), 1, itemstack1.getMetadata()));
-                    itemstack1.func_190918_g(1);
-                }
+   }
+
+   public boolean func_75140_a(EntityPlayer p_75140_1_, int p_75140_2_) {
+      ItemStack itemstack = this.field_75168_e.func_70301_a(0);
+      ItemStack itemstack1 = this.field_75168_e.func_70301_a(1);
+      int i = p_75140_2_ + 1;
+      if ((itemstack1.func_190926_b() || itemstack1.func_190916_E() < i) && !p_75140_1_.field_71075_bZ.field_75098_d) {
+         return false;
+      } else if (this.field_75167_g[p_75140_2_] > 0 && !itemstack.func_190926_b() && (p_75140_1_.field_71068_ca >= i && p_75140_1_.field_71068_ca >= this.field_75167_g[p_75140_2_] || p_75140_1_.field_71075_bZ.field_75098_d)) {
+         if (!this.field_75172_h.field_72995_K) {
+            List<EnchantmentData> list = this.func_178148_a(itemstack, p_75140_2_, this.field_75167_g[p_75140_2_]);
+            if (!list.isEmpty()) {
+               p_75140_1_.func_192024_a(itemstack, i);
+               boolean flag = itemstack.func_77973_b() == Items.field_151122_aG;
+               if (flag) {
+                  itemstack = new ItemStack(Items.field_151134_bR);
+                  this.field_75168_e.func_70299_a(0, itemstack);
+               }
+
+               for(int j = 0; j < list.size(); ++j) {
+                  EnchantmentData enchantmentdata = list.get(j);
+                  if (flag) {
+                     ItemEnchantedBook.func_92115_a(itemstack, enchantmentdata);
+                  } else {
+                     itemstack.func_77966_a(enchantmentdata.field_76302_b, enchantmentdata.field_76303_c);
+                  }
+               }
+
+               if (!p_75140_1_.field_71075_bZ.field_75098_d) {
+                  itemstack1.func_190918_g(i);
+                  if (itemstack1.func_190926_b()) {
+                     this.field_75168_e.func_70299_a(1, ItemStack.field_190927_a);
+                  }
+               }
+
+               p_75140_1_.func_71029_a(StatList.field_188091_Y);
+               if (p_75140_1_ instanceof EntityPlayerMP) {
+                  CriteriaTriggers.field_192129_i.func_192190_a((EntityPlayerMP)p_75140_1_, itemstack, i);
+               }
+
+               this.field_75168_e.func_70296_d();
+               this.field_178149_f = p_75140_1_.func_175138_ci();
+               this.func_75130_a(this.field_75168_e);
+               this.field_75172_h.func_184133_a((EntityPlayer)null, this.field_178150_j, SoundEvents.field_190021_aL, SoundCategory.BLOCKS, 1.0F, this.field_75172_h.field_73012_v.nextFloat() * 0.1F + 0.9F);
+            }
+         }
+
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   private List<EnchantmentData> func_178148_a(ItemStack p_178148_1_, int p_178148_2_, int p_178148_3_) {
+      this.field_75169_l.setSeed((long)(this.field_178149_f + p_178148_2_));
+      List<EnchantmentData> list = EnchantmentHelper.func_77513_b(this.field_75169_l, p_178148_1_, p_178148_3_, false);
+      if (p_178148_1_.func_77973_b() == Items.field_151122_aG && list.size() > 1) {
+         list.remove(this.field_75169_l.nextInt(list.size()));
+      }
+
+      return list;
+   }
+
+   public int func_178147_e() {
+      ItemStack itemstack = this.field_75168_e.func_70301_a(1);
+      return itemstack.func_190926_b() ? 0 : itemstack.func_190916_E();
+   }
+
+   public void func_75134_a(EntityPlayer p_75134_1_) {
+      super.func_75134_a(p_75134_1_);
+      if (!this.field_75172_h.field_72995_K) {
+         this.func_193327_a(p_75134_1_, p_75134_1_.field_70170_p, this.field_75168_e);
+      }
+   }
+
+   public boolean func_75145_c(EntityPlayer p_75145_1_) {
+      if (this.field_75172_h.func_180495_p(this.field_178150_j).func_177230_c() != Blocks.field_150381_bn) {
+         return false;
+      } else {
+         return p_75145_1_.func_70092_e((double)this.field_178150_j.func_177958_n() + 0.5D, (double)this.field_178150_j.func_177956_o() + 0.5D, (double)this.field_178150_j.func_177952_p() + 0.5D) <= 64.0D;
+      }
+   }
+
+   public ItemStack func_82846_b(EntityPlayer p_82846_1_, int p_82846_2_) {
+      ItemStack itemstack = ItemStack.field_190927_a;
+      Slot slot = this.field_75151_b.get(p_82846_2_);
+      if (slot != null && slot.func_75216_d()) {
+         ItemStack itemstack1 = slot.func_75211_c();
+         itemstack = itemstack1.func_77946_l();
+         if (p_82846_2_ == 0) {
+            if (!this.func_75135_a(itemstack1, 2, 38, true)) {
+               return ItemStack.field_190927_a;
+            }
+         } else if (p_82846_2_ == 1) {
+            if (!this.func_75135_a(itemstack1, 2, 38, true)) {
+               return ItemStack.field_190927_a;
+            }
+         } else if (itemstack1.func_77973_b() == Items.field_151100_aR && EnumDyeColor.func_176766_a(itemstack1.func_77960_j()) == EnumDyeColor.BLUE) {
+            if (!this.func_75135_a(itemstack1, 1, 2, true)) {
+               return ItemStack.field_190927_a;
+            }
+         } else {
+            if (((Slot)this.field_75151_b.get(0)).func_75216_d() || !((Slot)this.field_75151_b.get(0)).func_75214_a(itemstack1)) {
+               return ItemStack.field_190927_a;
             }
 
-            if (itemstack1.func_190926_b())
-            {
-                slot.putStack(ItemStack.field_190927_a);
+            if (itemstack1.func_77942_o() && itemstack1.func_190916_E() == 1) {
+               ((Slot)this.field_75151_b.get(0)).func_75215_d(itemstack1.func_77946_l());
+               itemstack1.func_190920_e(0);
+            } else if (!itemstack1.func_190926_b()) {
+               ((Slot)this.field_75151_b.get(0)).func_75215_d(new ItemStack(itemstack1.func_77973_b(), 1, itemstack1.func_77960_j()));
+               itemstack1.func_190918_g(1);
             }
-            else
-            {
-                slot.onSlotChanged();
-            }
+         }
 
-            if (itemstack1.func_190916_E() == itemstack.func_190916_E())
-            {
-                return ItemStack.field_190927_a;
-            }
+         if (itemstack1.func_190926_b()) {
+            slot.func_75215_d(ItemStack.field_190927_a);
+         } else {
+            slot.func_75218_e();
+         }
 
-            slot.func_190901_a(playerIn, itemstack1);
-        }
+         if (itemstack1.func_190916_E() == itemstack.func_190916_E()) {
+            return ItemStack.field_190927_a;
+         }
 
-        return itemstack;
-    }
+         slot.func_190901_a(p_82846_1_, itemstack1);
+      }
+
+      return itemstack;
+   }
 }

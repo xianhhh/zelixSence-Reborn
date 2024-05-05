@@ -33,202 +33,145 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityChicken extends EntityAnimal
-{
-    private static final Set<Item> TEMPTATION_ITEMS = Sets.newHashSet(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS);
-    public float wingRotation;
-    public float destPos;
-    public float oFlapSpeed;
-    public float oFlap;
-    public float wingRotDelta = 1.0F;
+public class EntityChicken extends EntityAnimal {
+   private static final Set<Item> field_184761_bD = Sets.newHashSet(Items.field_151014_N, Items.field_151081_bc, Items.field_151080_bb, Items.field_185163_cU);
+   public float field_70886_e;
+   public float field_70883_f;
+   public float field_70884_g;
+   public float field_70888_h;
+   public float field_70889_i = 1.0F;
+   public int field_70887_j;
+   public boolean field_152118_bv;
 
-    /** The time until the next egg is spawned. */
-    public int timeUntilNextEgg;
-    public boolean chickenJockey;
+   public EntityChicken(World p_i1682_1_) {
+      super(p_i1682_1_);
+      this.func_70105_a(0.4F, 0.7F);
+      this.field_70887_j = this.field_70146_Z.nextInt(6000) + 6000;
+      this.func_184644_a(PathNodeType.WATER, 0.0F);
+   }
 
-    public EntityChicken(World worldIn)
-    {
-        super(worldIn);
-        this.setSize(0.4F, 0.7F);
-        this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
-        this.setPathPriority(PathNodeType.WATER, 0.0F);
-    }
+   protected void func_184651_r() {
+      this.field_70714_bg.func_75776_a(0, new EntityAISwimming(this));
+      this.field_70714_bg.func_75776_a(1, new EntityAIPanic(this, 1.4D));
+      this.field_70714_bg.func_75776_a(2, new EntityAIMate(this, 1.0D));
+      this.field_70714_bg.func_75776_a(3, new EntityAITempt(this, 1.0D, false, field_184761_bD));
+      this.field_70714_bg.func_75776_a(4, new EntityAIFollowParent(this, 1.1D));
+      this.field_70714_bg.func_75776_a(5, new EntityAIWanderAvoidWater(this, 1.0D));
+      this.field_70714_bg.func_75776_a(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+      this.field_70714_bg.func_75776_a(7, new EntityAILookIdle(this));
+   }
 
-    protected void initEntityAI()
-    {
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new EntityAIPanic(this, 1.4D));
-        this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
-        this.tasks.addTask(3, new EntityAITempt(this, 1.0D, false, TEMPTATION_ITEMS));
-        this.tasks.addTask(4, new EntityAIFollowParent(this, 1.1D));
-        this.tasks.addTask(5, new EntityAIWanderAvoidWater(this, 1.0D));
-        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-        this.tasks.addTask(7, new EntityAILookIdle(this));
-    }
+   public float func_70047_e() {
+      return this.field_70131_O;
+   }
 
-    public float getEyeHeight()
-    {
-        return this.height;
-    }
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(4.0D);
+      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
+   }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(4.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
-    }
+   public void func_70636_d() {
+      super.func_70636_d();
+      this.field_70888_h = this.field_70886_e;
+      this.field_70884_g = this.field_70883_f;
+      this.field_70883_f = (float)((double)this.field_70883_f + (double)(this.field_70122_E ? -1 : 4) * 0.3D);
+      this.field_70883_f = MathHelper.func_76131_a(this.field_70883_f, 0.0F, 1.0F);
+      if (!this.field_70122_E && this.field_70889_i < 1.0F) {
+         this.field_70889_i = 1.0F;
+      }
 
-    /**
-     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
-     * use this to react to sunlight and start to burn.
-     */
-    public void onLivingUpdate()
-    {
-        super.onLivingUpdate();
-        this.oFlap = this.wingRotation;
-        this.oFlapSpeed = this.destPos;
-        this.destPos = (float)((double)this.destPos + (double)(this.onGround ? -1 : 4) * 0.3D);
-        this.destPos = MathHelper.clamp(this.destPos, 0.0F, 1.0F);
+      this.field_70889_i = (float)((double)this.field_70889_i * 0.9D);
+      if (!this.field_70122_E && this.field_70181_x < 0.0D) {
+         this.field_70181_x *= 0.6D;
+      }
 
-        if (!this.onGround && this.wingRotDelta < 1.0F)
-        {
-            this.wingRotDelta = 1.0F;
-        }
+      this.field_70886_e += this.field_70889_i * 2.0F;
+      if (!this.field_70170_p.field_72995_K && !this.func_70631_g_() && !this.func_152116_bZ() && --this.field_70887_j <= 0) {
+         this.func_184185_a(SoundEvents.field_187665_Y, 1.0F, (this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F + 1.0F);
+         this.func_145779_a(Items.field_151110_aK, 1);
+         this.field_70887_j = this.field_70146_Z.nextInt(6000) + 6000;
+      }
 
-        this.wingRotDelta = (float)((double)this.wingRotDelta * 0.9D);
+   }
 
-        if (!this.onGround && this.motionY < 0.0D)
-        {
-            this.motionY *= 0.6D;
-        }
+   public void func_180430_e(float p_180430_1_, float p_180430_2_) {
+   }
 
-        this.wingRotation += this.wingRotDelta * 2.0F;
+   protected SoundEvent func_184639_G() {
+      return SoundEvents.field_187660_W;
+   }
 
-        if (!this.world.isRemote && !this.isChild() && !this.isChickenJockey() && --this.timeUntilNextEgg <= 0)
-        {
-            this.playSound(SoundEvents.ENTITY_CHICKEN_EGG, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-            this.dropItem(Items.EGG, 1);
-            this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
-        }
-    }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_187666_Z;
+   }
 
-    public void fall(float distance, float damageMultiplier)
-    {
-    }
+   protected SoundEvent func_184615_bR() {
+      return SoundEvents.field_187663_X;
+   }
 
-    protected SoundEvent getAmbientSound()
-    {
-        return SoundEvents.ENTITY_CHICKEN_AMBIENT;
-    }
+   protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_) {
+      this.func_184185_a(SoundEvents.field_187538_aa, 0.15F, 1.0F);
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_CHICKEN_HURT;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186394_B;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_CHICKEN_DEATH;
-    }
+   public EntityChicken func_90011_a(EntityAgeable p_90011_1_) {
+      return new EntityChicken(this.field_70170_p);
+   }
 
-    protected void playStepSound(BlockPos pos, Block blockIn)
-    {
-        this.playSound(SoundEvents.ENTITY_CHICKEN_STEP, 0.15F, 1.0F);
-    }
+   public boolean func_70877_b(ItemStack p_70877_1_) {
+      return field_184761_bD.contains(p_70877_1_.func_77973_b());
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_CHICKEN;
-    }
+   protected int func_70693_a(EntityPlayer p_70693_1_) {
+      return this.func_152116_bZ() ? 10 : super.func_70693_a(p_70693_1_);
+   }
 
-    public EntityChicken createChild(EntityAgeable ageable)
-    {
-        return new EntityChicken(this.world);
-    }
+   public static void func_189789_b(DataFixer p_189789_0_) {
+      EntityLiving.func_189752_a(p_189789_0_, EntityChicken.class);
+   }
 
-    /**
-     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
-     * the animal type)
-     */
-    public boolean isBreedingItem(ItemStack stack)
-    {
-        return TEMPTATION_ITEMS.contains(stack.getItem());
-    }
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.field_152118_bv = p_70037_1_.func_74767_n("IsChickenJockey");
+      if (p_70037_1_.func_74764_b("EggLayTime")) {
+         this.field_70887_j = p_70037_1_.func_74762_e("EggLayTime");
+      }
 
-    /**
-     * Get the experience points the entity currently has.
-     */
-    protected int getExperiencePoints(EntityPlayer player)
-    {
-        return this.isChickenJockey() ? 10 : super.getExperiencePoints(player);
-    }
+   }
 
-    public static void registerFixesChicken(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntityChicken.class);
-    }
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74757_a("IsChickenJockey", this.field_152118_bv);
+      p_70014_1_.func_74768_a("EggLayTime", this.field_70887_j);
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.chickenJockey = compound.getBoolean("IsChickenJockey");
+   protected boolean func_70692_ba() {
+      return this.func_152116_bZ() && !this.func_184207_aI();
+   }
 
-        if (compound.hasKey("EggLayTime"))
-        {
-            this.timeUntilNextEgg = compound.getInteger("EggLayTime");
-        }
-    }
+   public void func_184232_k(Entity p_184232_1_) {
+      super.func_184232_k(p_184232_1_);
+      float f = MathHelper.func_76126_a(this.field_70761_aq * 0.017453292F);
+      float f1 = MathHelper.func_76134_b(this.field_70761_aq * 0.017453292F);
+      float f2 = 0.1F;
+      float f3 = 0.0F;
+      p_184232_1_.func_70107_b(this.field_70165_t + (double)(0.1F * f), this.field_70163_u + (double)(this.field_70131_O * 0.5F) + p_184232_1_.func_70033_W() + 0.0D, this.field_70161_v - (double)(0.1F * f1));
+      if (p_184232_1_ instanceof EntityLivingBase) {
+         ((EntityLivingBase)p_184232_1_).field_70761_aq = this.field_70761_aq;
+      }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setBoolean("IsChickenJockey", this.chickenJockey);
-        compound.setInteger("EggLayTime", this.timeUntilNextEgg);
-    }
+   }
 
-    /**
-     * Determines if an entity can be despawned, used on idle far away entities
-     */
-    protected boolean canDespawn()
-    {
-        return this.isChickenJockey() && !this.isBeingRidden();
-    }
+   public boolean func_152116_bZ() {
+      return this.field_152118_bv;
+   }
 
-    public void updatePassenger(Entity passenger)
-    {
-        super.updatePassenger(passenger);
-        float f = MathHelper.sin(this.renderYawOffset * 0.017453292F);
-        float f1 = MathHelper.cos(this.renderYawOffset * 0.017453292F);
-        float f2 = 0.1F;
-        float f3 = 0.0F;
-        passenger.setPosition(this.posX + (double)(0.1F * f), this.posY + (double)(this.height * 0.5F) + passenger.getYOffset() + 0.0D, this.posZ - (double)(0.1F * f1));
-
-        if (passenger instanceof EntityLivingBase)
-        {
-            ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
-        }
-    }
-
-    /**
-     * Determines if this chicken is a jokey with a zombie riding it.
-     */
-    public boolean isChickenJockey()
-    {
-        return this.chickenJockey;
-    }
-
-    /**
-     * Sets whether this chicken is a jockey or not.
-     */
-    public void setChickenJockey(boolean jockey)
-    {
-        this.chickenJockey = jockey;
-    }
+   public void func_152117_i(boolean p_152117_1_) {
+      this.field_152118_bv = p_152117_1_;
+   }
 }

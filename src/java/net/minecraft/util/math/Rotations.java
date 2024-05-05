@@ -3,72 +3,47 @@ package net.minecraft.util.math;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 
-public class Rotations
-{
-    /** Rotation on the X axis */
-    protected final float x;
+public class Rotations {
+   protected final float field_179419_a;
+   protected final float field_179417_b;
+   protected final float field_179418_c;
 
-    /** Rotation on the Y axis */
-    protected final float y;
+   public Rotations(float p_i46009_1_, float p_i46009_2_, float p_i46009_3_) {
+      this.field_179419_a = !Float.isInfinite(p_i46009_1_) && !Float.isNaN(p_i46009_1_) ? p_i46009_1_ % 360.0F : 0.0F;
+      this.field_179417_b = !Float.isInfinite(p_i46009_2_) && !Float.isNaN(p_i46009_2_) ? p_i46009_2_ % 360.0F : 0.0F;
+      this.field_179418_c = !Float.isInfinite(p_i46009_3_) && !Float.isNaN(p_i46009_3_) ? p_i46009_3_ % 360.0F : 0.0F;
+   }
 
-    /** Rotation on the Z axis */
-    protected final float z;
+   public Rotations(NBTTagList p_i46010_1_) {
+      this(p_i46010_1_.func_150308_e(0), p_i46010_1_.func_150308_e(1), p_i46010_1_.func_150308_e(2));
+   }
 
-    public Rotations(float x, float y, float z)
-    {
-        this.x = !Float.isInfinite(x) && !Float.isNaN(x) ? x % 360.0F : 0.0F;
-        this.y = !Float.isInfinite(y) && !Float.isNaN(y) ? y % 360.0F : 0.0F;
-        this.z = !Float.isInfinite(z) && !Float.isNaN(z) ? z % 360.0F : 0.0F;
-    }
+   public NBTTagList func_179414_a() {
+      NBTTagList nbttaglist = new NBTTagList();
+      nbttaglist.func_74742_a(new NBTTagFloat(this.field_179419_a));
+      nbttaglist.func_74742_a(new NBTTagFloat(this.field_179417_b));
+      nbttaglist.func_74742_a(new NBTTagFloat(this.field_179418_c));
+      return nbttaglist;
+   }
 
-    public Rotations(NBTTagList nbt)
-    {
-        this(nbt.getFloatAt(0), nbt.getFloatAt(1), nbt.getFloatAt(2));
-    }
+   public boolean equals(Object p_equals_1_) {
+      if (!(p_equals_1_ instanceof Rotations)) {
+         return false;
+      } else {
+         Rotations rotations = (Rotations)p_equals_1_;
+         return this.field_179419_a == rotations.field_179419_a && this.field_179417_b == rotations.field_179417_b && this.field_179418_c == rotations.field_179418_c;
+      }
+   }
 
-    public NBTTagList writeToNBT()
-    {
-        NBTTagList nbttaglist = new NBTTagList();
-        nbttaglist.appendTag(new NBTTagFloat(this.x));
-        nbttaglist.appendTag(new NBTTagFloat(this.y));
-        nbttaglist.appendTag(new NBTTagFloat(this.z));
-        return nbttaglist;
-    }
+   public float func_179415_b() {
+      return this.field_179419_a;
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (!(p_equals_1_ instanceof Rotations))
-        {
-            return false;
-        }
-        else
-        {
-            Rotations rotations = (Rotations)p_equals_1_;
-            return this.x == rotations.x && this.y == rotations.y && this.z == rotations.z;
-        }
-    }
+   public float func_179416_c() {
+      return this.field_179417_b;
+   }
 
-    /**
-     * Gets the X axis rotation
-     */
-    public float getX()
-    {
-        return this.x;
-    }
-
-    /**
-     * Gets the Y axis rotation
-     */
-    public float getY()
-    {
-        return this.y;
-    }
-
-    /**
-     * Gets the Z axis rotation
-     */
-    public float getZ()
-    {
-        return this.z;
-    }
+   public float func_179413_d() {
+      return this.field_179418_c;
+   }
 }

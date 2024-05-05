@@ -3,68 +3,38 @@ package net.minecraft.entity.ai;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 
-public class EntityAICreeperSwell extends EntityAIBase
-{
-    /** The creeper that is swelling. */
-    EntityCreeper swellingCreeper;
+public class EntityAICreeperSwell extends EntityAIBase {
+   EntityCreeper field_75269_a;
+   EntityLivingBase field_75268_b;
 
-    /**
-     * The creeper's attack target. This is used for the changing of the creeper's state.
-     */
-    EntityLivingBase creeperAttackTarget;
+   public EntityAICreeperSwell(EntityCreeper p_i1655_1_) {
+      this.field_75269_a = p_i1655_1_;
+      this.func_75248_a(1);
+   }
 
-    public EntityAICreeperSwell(EntityCreeper entitycreeperIn)
-    {
-        this.swellingCreeper = entitycreeperIn;
-        this.setMutexBits(1);
-    }
+   public boolean func_75250_a() {
+      EntityLivingBase entitylivingbase = this.field_75269_a.func_70638_az();
+      return this.field_75269_a.func_70832_p() > 0 || entitylivingbase != null && this.field_75269_a.func_70068_e(entitylivingbase) < 9.0D;
+   }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        EntityLivingBase entitylivingbase = this.swellingCreeper.getAttackTarget();
-        return this.swellingCreeper.getCreeperState() > 0 || entitylivingbase != null && this.swellingCreeper.getDistanceSqToEntity(entitylivingbase) < 9.0D;
-    }
+   public void func_75249_e() {
+      this.field_75269_a.func_70661_as().func_75499_g();
+      this.field_75268_b = this.field_75269_a.func_70638_az();
+   }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        this.swellingCreeper.getNavigator().clearPathEntity();
-        this.creeperAttackTarget = this.swellingCreeper.getAttackTarget();
-    }
+   public void func_75251_c() {
+      this.field_75268_b = null;
+   }
 
-    /**
-     * Resets the task
-     */
-    public void resetTask()
-    {
-        this.creeperAttackTarget = null;
-    }
-
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        if (this.creeperAttackTarget == null)
-        {
-            this.swellingCreeper.setCreeperState(-1);
-        }
-        else if (this.swellingCreeper.getDistanceSqToEntity(this.creeperAttackTarget) > 49.0D)
-        {
-            this.swellingCreeper.setCreeperState(-1);
-        }
-        else if (!this.swellingCreeper.getEntitySenses().canSee(this.creeperAttackTarget))
-        {
-            this.swellingCreeper.setCreeperState(-1);
-        }
-        else
-        {
-            this.swellingCreeper.setCreeperState(1);
-        }
-    }
+   public void func_75246_d() {
+      if (this.field_75268_b == null) {
+         this.field_75269_a.func_70829_a(-1);
+      } else if (this.field_75269_a.func_70068_e(this.field_75268_b) > 49.0D) {
+         this.field_75269_a.func_70829_a(-1);
+      } else if (!this.field_75269_a.func_70635_at().func_75522_a(this.field_75268_b)) {
+         this.field_75269_a.func_70829_a(-1);
+      } else {
+         this.field_75269_a.func_70829_a(1);
+      }
+   }
 }

@@ -32,308 +32,215 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockCauldron extends Block
-{
-    public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 3);
-    protected static final AxisAlignedBB AABB_LEGS = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.3125D, 1.0D);
-    protected static final AxisAlignedBB AABB_WALL_NORTH = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
-    protected static final AxisAlignedBB AABB_WALL_SOUTH = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB AABB_WALL_EAST = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB AABB_WALL_WEST = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
+public class BlockCauldron extends Block {
+   public static final PropertyInteger field_176591_a = PropertyInteger.func_177719_a("level", 0, 3);
+   protected static final AxisAlignedBB field_185596_b = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.3125D, 1.0D);
+   protected static final AxisAlignedBB field_185597_c = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
+   protected static final AxisAlignedBB field_185598_d = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 1.0D, 1.0D);
+   protected static final AxisAlignedBB field_185599_e = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+   protected static final AxisAlignedBB field_185600_f = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
 
-    public BlockCauldron()
-    {
-        super(Material.IRON, MapColor.STONE);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(0)));
-    }
+   public BlockCauldron() {
+      super(Material.field_151573_f, MapColor.field_151665_m);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176591_a, Integer.valueOf(0)));
+   }
 
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185477_7_)
-    {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_LEGS);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_WEST);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_NORTH);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_EAST);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_SOUTH);
-    }
+   public void func_185477_a(IBlockState p_185477_1_, World p_185477_2_, BlockPos p_185477_3_, AxisAlignedBB p_185477_4_, List<AxisAlignedBB> p_185477_5_, @Nullable Entity p_185477_6_, boolean p_185477_7_) {
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185596_b);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185600_f);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185597_c);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185599_e);
+      func_185492_a(p_185477_3_, p_185477_4_, p_185477_5_, field_185598_d);
+   }
 
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return FULL_BLOCK_AABB;
-    }
+   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
+      return field_185505_j;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-    /**
-     * Called When an Entity Collided with the Block
-     */
-    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
-    {
-        int i = ((Integer)state.getValue(LEVEL)).intValue();
-        float f = (float)pos.getY() + (6.0F + (float)(3 * i)) / 16.0F;
+   public void func_180634_a(World p_180634_1_, BlockPos p_180634_2_, IBlockState p_180634_3_, Entity p_180634_4_) {
+      int i = ((Integer)p_180634_3_.func_177229_b(field_176591_a)).intValue();
+      float f = (float)p_180634_2_.func_177956_o() + (6.0F + (float)(3 * i)) / 16.0F;
+      if (!p_180634_1_.field_72995_K && p_180634_4_.func_70027_ad() && i > 0 && p_180634_4_.func_174813_aQ().field_72338_b <= (double)f) {
+         p_180634_4_.func_70066_B();
+         this.func_176590_a(p_180634_1_, p_180634_2_, p_180634_3_, i - 1);
+      }
 
-        if (!worldIn.isRemote && entityIn.isBurning() && i > 0 && entityIn.getEntityBoundingBox().minY <= (double)f)
-        {
-            entityIn.extinguish();
-            this.setWaterLevel(worldIn, pos, state, i - 1);
-        }
-    }
+   }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        ItemStack itemstack = playerIn.getHeldItem(hand);
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      ItemStack itemstack = p_180639_4_.func_184586_b(p_180639_5_);
+      if (itemstack.func_190926_b()) {
+         return true;
+      } else {
+         int i = ((Integer)p_180639_3_.func_177229_b(field_176591_a)).intValue();
+         Item item = itemstack.func_77973_b();
+         if (item == Items.field_151131_as) {
+            if (i < 3 && !p_180639_1_.field_72995_K) {
+               if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+                  p_180639_4_.func_184611_a(p_180639_5_, new ItemStack(Items.field_151133_ar));
+               }
 
-        if (itemstack.func_190926_b())
-        {
+               p_180639_4_.func_71029_a(StatList.field_188077_K);
+               this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, 3);
+               p_180639_1_.func_184133_a((EntityPlayer)null, p_180639_2_, SoundEvents.field_187624_K, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            }
+
             return true;
-        }
-        else
-        {
-            int i = ((Integer)state.getValue(LEVEL)).intValue();
-            Item item = itemstack.getItem();
+         } else if (item == Items.field_151133_ar) {
+            if (i == 3 && !p_180639_1_.field_72995_K) {
+               if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+                  itemstack.func_190918_g(1);
+                  if (itemstack.func_190926_b()) {
+                     p_180639_4_.func_184611_a(p_180639_5_, new ItemStack(Items.field_151131_as));
+                  } else if (!p_180639_4_.field_71071_by.func_70441_a(new ItemStack(Items.field_151131_as))) {
+                     p_180639_4_.func_71019_a(new ItemStack(Items.field_151131_as), false);
+                  }
+               }
 
-            if (item == Items.WATER_BUCKET)
-            {
-                if (i < 3 && !worldIn.isRemote)
-                {
-                    if (!playerIn.capabilities.isCreativeMode)
-                    {
-                        playerIn.setHeldItem(hand, new ItemStack(Items.BUCKET));
-                    }
-
-                    playerIn.addStat(StatList.CAULDRON_FILLED);
-                    this.setWaterLevel(worldIn, pos, state, 3);
-                    worldIn.playSound((EntityPlayer)null, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                }
-
-                return true;
+               p_180639_4_.func_71029_a(StatList.field_188078_L);
+               this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, 0);
+               p_180639_1_.func_184133_a((EntityPlayer)null, p_180639_2_, SoundEvents.field_187630_M, SoundCategory.BLOCKS, 1.0F, 1.0F);
             }
-            else if (item == Items.BUCKET)
-            {
-                if (i == 3 && !worldIn.isRemote)
-                {
-                    if (!playerIn.capabilities.isCreativeMode)
-                    {
-                        itemstack.func_190918_g(1);
 
-                        if (itemstack.func_190926_b())
-                        {
-                            playerIn.setHeldItem(hand, new ItemStack(Items.WATER_BUCKET));
-                        }
-                        else if (!playerIn.inventory.addItemStackToInventory(new ItemStack(Items.WATER_BUCKET)))
-                        {
-                            playerIn.dropItem(new ItemStack(Items.WATER_BUCKET), false);
-                        }
-                    }
+            return true;
+         } else if (item == Items.field_151069_bo) {
+            if (i > 0 && !p_180639_1_.field_72995_K) {
+               if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+                  ItemStack itemstack3 = PotionUtils.func_185188_a(new ItemStack(Items.field_151068_bn), PotionTypes.field_185230_b);
+                  p_180639_4_.func_71029_a(StatList.field_188078_L);
+                  itemstack.func_190918_g(1);
+                  if (itemstack.func_190926_b()) {
+                     p_180639_4_.func_184611_a(p_180639_5_, itemstack3);
+                  } else if (!p_180639_4_.field_71071_by.func_70441_a(itemstack3)) {
+                     p_180639_4_.func_71019_a(itemstack3, false);
+                  } else if (p_180639_4_ instanceof EntityPlayerMP) {
+                     ((EntityPlayerMP)p_180639_4_).func_71120_a(p_180639_4_.field_71069_bz);
+                  }
+               }
 
-                    playerIn.addStat(StatList.CAULDRON_USED);
-                    this.setWaterLevel(worldIn, pos, state, 0);
-                    worldIn.playSound((EntityPlayer)null, pos, SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                }
-
-                return true;
+               p_180639_1_.func_184133_a((EntityPlayer)null, p_180639_2_, SoundEvents.field_187615_H, SoundCategory.BLOCKS, 1.0F, 1.0F);
+               this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, i - 1);
             }
-            else if (item == Items.GLASS_BOTTLE)
-            {
-                if (i > 0 && !worldIn.isRemote)
-                {
-                    if (!playerIn.capabilities.isCreativeMode)
-                    {
-                        ItemStack itemstack3 = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), PotionTypes.WATER);
-                        playerIn.addStat(StatList.CAULDRON_USED);
-                        itemstack.func_190918_g(1);
 
-                        if (itemstack.func_190926_b())
-                        {
-                            playerIn.setHeldItem(hand, itemstack3);
-                        }
-                        else if (!playerIn.inventory.addItemStackToInventory(itemstack3))
-                        {
-                            playerIn.dropItem(itemstack3, false);
-                        }
-                        else if (playerIn instanceof EntityPlayerMP)
-                        {
-                            ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
-                        }
-                    }
+            return true;
+         } else if (item == Items.field_151068_bn && PotionUtils.func_185191_c(itemstack) == PotionTypes.field_185230_b) {
+            if (i < 3 && !p_180639_1_.field_72995_K) {
+               if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+                  ItemStack itemstack2 = new ItemStack(Items.field_151069_bo);
+                  p_180639_4_.func_71029_a(StatList.field_188078_L);
+                  p_180639_4_.func_184611_a(p_180639_5_, itemstack2);
+                  if (p_180639_4_ instanceof EntityPlayerMP) {
+                     ((EntityPlayerMP)p_180639_4_).func_71120_a(p_180639_4_.field_71069_bz);
+                  }
+               }
 
-                    worldIn.playSound((EntityPlayer)null, pos, SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    this.setWaterLevel(worldIn, pos, state, i - 1);
-                }
-
-                return true;
+               p_180639_1_.func_184133_a((EntityPlayer)null, p_180639_2_, SoundEvents.field_191241_J, SoundCategory.BLOCKS, 1.0F, 1.0F);
+               this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, i + 1);
             }
-            else if (item == Items.POTIONITEM && PotionUtils.getPotionFromItem(itemstack) == PotionTypes.WATER)
-            {
-                if (i < 3 && !worldIn.isRemote)
-                {
-                    if (!playerIn.capabilities.isCreativeMode)
-                    {
-                        ItemStack itemstack2 = new ItemStack(Items.GLASS_BOTTLE);
-                        playerIn.addStat(StatList.CAULDRON_USED);
-                        playerIn.setHeldItem(hand, itemstack2);
 
-                        if (playerIn instanceof EntityPlayerMP)
-                        {
-                            ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
-                        }
-                    }
-
-                    worldIn.playSound((EntityPlayer)null, pos, SoundEvents.field_191241_J, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    this.setWaterLevel(worldIn, pos, state, i + 1);
-                }
-
-                return true;
+            return true;
+         } else {
+            if (i > 0 && item instanceof ItemArmor) {
+               ItemArmor itemarmor = (ItemArmor)item;
+               if (itemarmor.func_82812_d() == ItemArmor.ArmorMaterial.LEATHER && itemarmor.func_82816_b_(itemstack) && !p_180639_1_.field_72995_K) {
+                  itemarmor.func_82815_c(itemstack);
+                  this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, i - 1);
+                  p_180639_4_.func_71029_a(StatList.field_188079_M);
+                  return true;
+               }
             }
-            else
-            {
-                if (i > 0 && item instanceof ItemArmor)
-                {
-                    ItemArmor itemarmor = (ItemArmor)item;
 
-                    if (itemarmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && itemarmor.hasColor(itemstack) && !worldIn.isRemote)
-                    {
-                        itemarmor.removeColor(itemstack);
-                        this.setWaterLevel(worldIn, pos, state, i - 1);
-                        playerIn.addStat(StatList.ARMOR_CLEANED);
-                        return true;
-                    }
-                }
+            if (i > 0 && item instanceof ItemBanner) {
+               if (TileEntityBanner.func_175113_c(itemstack) > 0 && !p_180639_1_.field_72995_K) {
+                  ItemStack itemstack1 = itemstack.func_77946_l();
+                  itemstack1.func_190920_e(1);
+                  TileEntityBanner.func_175117_e(itemstack1);
+                  p_180639_4_.func_71029_a(StatList.field_188080_N);
+                  if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+                     itemstack.func_190918_g(1);
+                     this.func_176590_a(p_180639_1_, p_180639_2_, p_180639_3_, i - 1);
+                  }
 
-                if (i > 0 && item instanceof ItemBanner)
-                {
-                    if (TileEntityBanner.getPatterns(itemstack) > 0 && !worldIn.isRemote)
-                    {
-                        ItemStack itemstack1 = itemstack.copy();
-                        itemstack1.func_190920_e(1);
-                        TileEntityBanner.removeBannerData(itemstack1);
-                        playerIn.addStat(StatList.BANNER_CLEANED);
+                  if (itemstack.func_190926_b()) {
+                     p_180639_4_.func_184611_a(p_180639_5_, itemstack1);
+                  } else if (!p_180639_4_.field_71071_by.func_70441_a(itemstack1)) {
+                     p_180639_4_.func_71019_a(itemstack1, false);
+                  } else if (p_180639_4_ instanceof EntityPlayerMP) {
+                     ((EntityPlayerMP)p_180639_4_).func_71120_a(p_180639_4_.field_71069_bz);
+                  }
+               }
 
-                        if (!playerIn.capabilities.isCreativeMode)
-                        {
-                            itemstack.func_190918_g(1);
-                            this.setWaterLevel(worldIn, pos, state, i - 1);
-                        }
-
-                        if (itemstack.func_190926_b())
-                        {
-                            playerIn.setHeldItem(hand, itemstack1);
-                        }
-                        else if (!playerIn.inventory.addItemStackToInventory(itemstack1))
-                        {
-                            playerIn.dropItem(itemstack1, false);
-                        }
-                        else if (playerIn instanceof EntityPlayerMP)
-                        {
-                            ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
-                        }
-                    }
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+               return true;
+            } else {
+               return false;
             }
-        }
-    }
+         }
+      }
+   }
 
-    public void setWaterLevel(World worldIn, BlockPos pos, IBlockState state, int level)
-    {
-        worldIn.setBlockState(pos, state.withProperty(LEVEL, Integer.valueOf(MathHelper.clamp(level, 0, 3))), 2);
-        worldIn.updateComparatorOutputLevel(pos, this);
-    }
+   public void func_176590_a(World p_176590_1_, BlockPos p_176590_2_, IBlockState p_176590_3_, int p_176590_4_) {
+      p_176590_1_.func_180501_a(p_176590_2_, p_176590_3_.func_177226_a(field_176591_a, Integer.valueOf(MathHelper.func_76125_a(p_176590_4_, 0, 3))), 2);
+      p_176590_1_.func_175666_e(p_176590_2_, this);
+   }
 
-    /**
-     * Called similar to random ticks, but only when it is raining.
-     */
-    public void fillWithRain(World worldIn, BlockPos pos)
-    {
-        if (worldIn.rand.nextInt(20) == 1)
-        {
-            float f = worldIn.getBiome(pos).getFloatTemperature(pos);
-
-            if (worldIn.getBiomeProvider().getTemperatureAtHeight(f, pos.getY()) >= 0.15F)
-            {
-                IBlockState iblockstate = worldIn.getBlockState(pos);
-
-                if (((Integer)iblockstate.getValue(LEVEL)).intValue() < 3)
-                {
-                    worldIn.setBlockState(pos, iblockstate.cycleProperty(LEVEL), 2);
-                }
+   public void func_176224_k(World p_176224_1_, BlockPos p_176224_2_) {
+      if (p_176224_1_.field_73012_v.nextInt(20) == 1) {
+         float f = p_176224_1_.func_180494_b(p_176224_2_).func_180626_a(p_176224_2_);
+         if (p_176224_1_.func_72959_q().func_76939_a(f, p_176224_2_.func_177956_o()) >= 0.15F) {
+            IBlockState iblockstate = p_176224_1_.func_180495_p(p_176224_2_);
+            if (((Integer)iblockstate.func_177229_b(field_176591_a)).intValue() < 3) {
+               p_176224_1_.func_180501_a(p_176224_2_, iblockstate.func_177231_a(field_176591_a), 2);
             }
-        }
-    }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Items.CAULDRON;
-    }
+         }
+      }
+   }
 
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return new ItemStack(Items.CAULDRON);
-    }
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Items.field_151066_bu;
+   }
 
-    public boolean hasComparatorInputOverride(IBlockState state)
-    {
-        return true;
-    }
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      return new ItemStack(Items.field_151066_bu);
+   }
 
-    public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos)
-    {
-        return ((Integer)blockState.getValue(LEVEL)).intValue();
-    }
+   public boolean func_149740_M(IBlockState p_149740_1_) {
+      return true;
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(LEVEL, Integer.valueOf(meta));
-    }
+   public int func_180641_l(IBlockState p_180641_1_, World p_180641_2_, BlockPos p_180641_3_) {
+      return ((Integer)p_180641_1_.func_177229_b(field_176591_a)).intValue();
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(LEVEL)).intValue();
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176591_a, Integer.valueOf(p_176203_1_));
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {LEVEL});
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Integer)p_176201_1_.func_177229_b(field_176591_a)).intValue();
+   }
 
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
-    {
-        return true;
-    }
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176591_a});
+   }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        if (p_193383_4_ == EnumFacing.UP)
-        {
-            return BlockFaceShape.BOWL;
-        }
-        else
-        {
-            return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.UNDEFINED : BlockFaceShape.SOLID;
-        }
-    }
+   public boolean func_176205_b(IBlockAccess p_176205_1_, BlockPos p_176205_2_) {
+      return true;
+   }
+
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      if (p_193383_4_ == EnumFacing.UP) {
+         return BlockFaceShape.BOWL;
+      } else {
+         return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.UNDEFINED : BlockFaceShape.SOLID;
+      }
+   }
 }

@@ -5,27 +5,14 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.status.INetHandlerStatusServer;
 
-public class CPacketServerQuery implements Packet<INetHandlerStatusServer>
-{
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-    }
+public class CPacketServerQuery implements Packet<INetHandlerStatusServer> {
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerStatusServer handler)
-    {
-        handler.processServerQuery(this);
-    }
+   public void func_148833_a(INetHandlerStatusServer p_148833_1_) {
+      p_148833_1_.func_147312_a(this);
+   }
 }

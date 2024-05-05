@@ -4,161 +4,89 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class Slot
-{
-    /** The index of the slot in the inventory. */
-    private final int slotIndex;
+public class Slot {
+   private final int field_75225_a;
+   public final IInventory field_75224_c;
+   public int field_75222_d;
+   public int field_75223_e;
+   public int field_75221_f;
 
-    /** The inventory we want to extract a slot from. */
-    public final IInventory inventory;
+   public Slot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
+      this.field_75224_c = p_i1824_1_;
+      this.field_75225_a = p_i1824_2_;
+      this.field_75223_e = p_i1824_3_;
+      this.field_75221_f = p_i1824_4_;
+   }
 
-    /** the id of the slot(also the index in the inventory arraylist) */
-    public int slotNumber;
+   public void func_75220_a(ItemStack p_75220_1_, ItemStack p_75220_2_) {
+      int i = p_75220_2_.func_190916_E() - p_75220_1_.func_190916_E();
+      if (i > 0) {
+         this.func_75210_a(p_75220_2_, i);
+      }
 
-    /** display position of the inventory slot on the screen x axis */
-    public int xDisplayPosition;
+   }
 
-    /** display position of the inventory slot on the screen y axis */
-    public int yDisplayPosition;
+   protected void func_75210_a(ItemStack p_75210_1_, int p_75210_2_) {
+   }
 
-    public Slot(IInventory inventoryIn, int index, int xPosition, int yPosition)
-    {
-        this.inventory = inventoryIn;
-        this.slotIndex = index;
-        this.xDisplayPosition = xPosition;
-        this.yDisplayPosition = yPosition;
-    }
+   protected void func_190900_b(int p_190900_1_) {
+   }
 
-    /**
-     * if par2 has more items than par1, onCrafting(item,countIncrease) is called
-     */
-    public void onSlotChange(ItemStack p_75220_1_, ItemStack p_75220_2_)
-    {
-        int i = p_75220_2_.func_190916_E() - p_75220_1_.func_190916_E();
+   protected void func_75208_c(ItemStack p_75208_1_) {
+   }
 
-        if (i > 0)
-        {
-            this.onCrafting(p_75220_2_, i);
-        }
-    }
+   public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_) {
+      this.func_75218_e();
+      return p_190901_2_;
+   }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood. Typically increases an
-     * internal count then calls onCrafting(item).
-     */
-    protected void onCrafting(ItemStack stack, int amount)
-    {
-    }
+   public boolean func_75214_a(ItemStack p_75214_1_) {
+      return true;
+   }
 
-    protected void func_190900_b(int p_190900_1_)
-    {
-    }
+   public ItemStack func_75211_c() {
+      return this.field_75224_c.func_70301_a(this.field_75225_a);
+   }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
-     */
-    protected void onCrafting(ItemStack stack)
-    {
-    }
+   public boolean func_75216_d() {
+      return !this.func_75211_c().func_190926_b();
+   }
 
-    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
-    {
-        this.onSlotChanged();
-        return p_190901_2_;
-    }
+   public void func_75215_d(ItemStack p_75215_1_) {
+      this.field_75224_c.func_70299_a(this.field_75225_a, p_75215_1_);
+      this.func_75218_e();
+   }
 
-    /**
-     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
-     */
-    public boolean isItemValid(ItemStack stack)
-    {
-        return true;
-    }
+   public void func_75218_e() {
+      this.field_75224_c.func_70296_d();
+   }
 
-    /**
-     * Helper fnct to get the stack in the slot.
-     */
-    public ItemStack getStack()
-    {
-        return this.inventory.getStackInSlot(this.slotIndex);
-    }
+   public int func_75219_a() {
+      return this.field_75224_c.func_70297_j_();
+   }
 
-    /**
-     * Returns if this slot contains a stack.
-     */
-    public boolean getHasStack()
-    {
-        return !this.getStack().func_190926_b();
-    }
+   public int func_178170_b(ItemStack p_178170_1_) {
+      return this.func_75219_a();
+   }
 
-    /**
-     * Helper method to put a stack in the slot.
-     */
-    public void putStack(ItemStack stack)
-    {
-        this.inventory.setInventorySlotContents(this.slotIndex, stack);
-        this.onSlotChanged();
-    }
+   @Nullable
+   public String func_178171_c() {
+      return null;
+   }
 
-    /**
-     * Called when the stack in a Slot changes
-     */
-    public void onSlotChanged()
-    {
-        this.inventory.markDirty();
-    }
+   public ItemStack func_75209_a(int p_75209_1_) {
+      return this.field_75224_c.func_70298_a(this.field_75225_a, p_75209_1_);
+   }
 
-    /**
-     * Returns the maximum stack size for a given slot (usually the same as getInventoryStackLimit(), but 1 in the case
-     * of armor slots)
-     */
-    public int getSlotStackLimit()
-    {
-        return this.inventory.getInventoryStackLimit();
-    }
+   public boolean func_75217_a(IInventory p_75217_1_, int p_75217_2_) {
+      return p_75217_1_ == this.field_75224_c && p_75217_2_ == this.field_75225_a;
+   }
 
-    public int getItemStackLimit(ItemStack stack)
-    {
-        return this.getSlotStackLimit();
-    }
+   public boolean func_82869_a(EntityPlayer p_82869_1_) {
+      return true;
+   }
 
-    @Nullable
-    public String getSlotTexture()
-    {
-        return null;
-    }
-
-    /**
-     * Decrease the size of the stack in slot (first int arg) by the amount of the second int arg. Returns the new
-     * stack.
-     */
-    public ItemStack decrStackSize(int amount)
-    {
-        return this.inventory.decrStackSize(this.slotIndex, amount);
-    }
-
-    /**
-     * returns true if the slot exists in the given inventory and location
-     */
-    public boolean isHere(IInventory inv, int slotIn)
-    {
-        return inv == this.inventory && slotIn == this.slotIndex;
-    }
-
-    /**
-     * Return whether this slot's stack can be taken from this slot.
-     */
-    public boolean canTakeStack(EntityPlayer playerIn)
-    {
-        return true;
-    }
-
-    /**
-     * Actualy only call when we want to render the white square effect over the slots. Return always True, except for
-     * the armor slot of the Donkey/Mule (we can't interact with the Undead and Skeleton horses)
-     */
-    public boolean canBeHovered()
-    {
-        return true;
-    }
+   public boolean func_111238_b() {
+      return true;
+   }
 }

@@ -114,1495 +114,1046 @@ import net.minecraft.world.storage.loot.ILootContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntityPlayerMP extends EntityPlayer implements IContainerListener
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private String language = "en_US";
+public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
+   private static final Logger field_147102_bM = LogManager.getLogger();
+   private String field_71148_cg = "en_US";
+   public NetHandlerPlayServer field_71135_a;
+   public final MinecraftServer field_71133_b;
+   public final PlayerInteractionManager field_71134_c;
+   public double field_71131_d;
+   public double field_71132_e;
+   private final List<Integer> field_71130_g = Lists.<Integer>newLinkedList();
+   private final PlayerAdvancements field_192042_bX;
+   private final StatisticsManagerServer field_147103_bO;
+   private float field_130068_bO = Float.MIN_VALUE;
+   private int field_184852_bV = Integer.MIN_VALUE;
+   private int field_184853_bW = Integer.MIN_VALUE;
+   private int field_184854_bX = Integer.MIN_VALUE;
+   private int field_184855_bY = Integer.MIN_VALUE;
+   private int field_184856_bZ = Integer.MIN_VALUE;
+   private float field_71149_ch = -1.0E8F;
+   private int field_71146_ci = -99999999;
+   private boolean field_71147_cj = true;
+   private int field_71144_ck = -99999999;
+   private int field_147101_bU = 60;
+   private EntityPlayer.EnumChatVisibility field_71143_cn;
+   private boolean field_71140_co = true;
+   private long field_143005_bX = System.currentTimeMillis();
+   private Entity field_175401_bS;
+   private boolean field_184851_cj;
+   private boolean field_192040_cp;
+   private final RecipeBookServer field_192041_cq = new RecipeBookServer();
+   private Vec3d field_193107_ct;
+   private int field_193108_cu;
+   private boolean field_193109_cv;
+   private Vec3d field_193110_cw;
+   private int field_71139_cq;
+   public boolean field_71137_h;
+   public int field_71138_i;
+   public boolean field_71136_j;
 
-    /**
-     * The NetServerHandler assigned to this player by the ServerConfigurationManager.
-     */
-    public NetHandlerPlayServer connection;
+   public EntityPlayerMP(MinecraftServer p_i45285_1_, WorldServer p_i45285_2_, GameProfile p_i45285_3_, PlayerInteractionManager p_i45285_4_) {
+      super(p_i45285_2_, p_i45285_3_);
+      p_i45285_4_.field_73090_b = this;
+      this.field_71134_c = p_i45285_4_;
+      BlockPos blockpos = p_i45285_2_.func_175694_M();
+      if (p_i45285_2_.field_73011_w.func_191066_m() && p_i45285_2_.func_72912_H().func_76077_q() != GameType.ADVENTURE) {
+         int i = Math.max(0, p_i45285_1_.func_184108_a(p_i45285_2_));
+         int j = MathHelper.func_76128_c(p_i45285_2_.func_175723_af().func_177729_b((double)blockpos.func_177958_n(), (double)blockpos.func_177952_p()));
+         if (j < i) {
+            i = j;
+         }
 
-    /** Reference to the MinecraftServer object. */
-    public final MinecraftServer mcServer;
+         if (j <= 1) {
+            i = 1;
+         }
 
-    /** The player interaction manager for this player */
-    public final PlayerInteractionManager interactionManager;
+         blockpos = p_i45285_2_.func_175672_r(blockpos.func_177982_a(this.field_70146_Z.nextInt(i * 2 + 1) - i, 0, this.field_70146_Z.nextInt(i * 2 + 1) - i));
+      }
 
-    /** player X position as seen by PlayerManager */
-    public double managedPosX;
+      this.field_71133_b = p_i45285_1_;
+      this.field_147103_bO = p_i45285_1_.func_184103_al().func_152602_a(this);
+      this.field_192042_bX = p_i45285_1_.func_184103_al().func_192054_h(this);
+      this.field_70138_W = 1.0F;
+      this.func_174828_a(blockpos, 0.0F, 0.0F);
 
-    /** player Z position as seen by PlayerManager */
-    public double managedPosZ;
-    private final List<Integer> entityRemoveQueue = Lists.<Integer>newLinkedList();
-    private final PlayerAdvancements field_192042_bX;
-    private final StatisticsManagerServer statsFile;
+      while(!p_i45285_2_.func_184144_a(this, this.func_174813_aQ()).isEmpty() && this.field_70163_u < 255.0D) {
+         this.func_70107_b(this.field_70165_t, this.field_70163_u + 1.0D, this.field_70161_v);
+      }
 
-    /**
-     * the total health of the player, includes actual health and absorption health. Updated every tick.
-     */
-    private float lastHealthScore = Float.MIN_VALUE;
-    private int lastFoodScore = Integer.MIN_VALUE;
-    private int lastAirScore = Integer.MIN_VALUE;
-    private int lastArmorScore = Integer.MIN_VALUE;
-    private int lastLevelScore = Integer.MIN_VALUE;
-    private int lastExperienceScore = Integer.MIN_VALUE;
+   }
 
-    /** amount of health the client was last set to */
-    private float lastHealth = -1.0E8F;
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      if (p_70037_1_.func_150297_b("playerGameType", 99)) {
+         if (this.func_184102_h().func_104056_am()) {
+            this.field_71134_c.func_73076_a(this.func_184102_h().func_71265_f());
+         } else {
+            this.field_71134_c.func_73076_a(GameType.func_77146_a(p_70037_1_.func_74762_e("playerGameType")));
+         }
+      }
 
-    /** set to foodStats.GetFoodLevel */
-    private int lastFoodLevel = -99999999;
+      if (p_70037_1_.func_150297_b("enteredNetherPosition", 10)) {
+         NBTTagCompound nbttagcompound = p_70037_1_.func_74775_l("enteredNetherPosition");
+         this.field_193110_cw = new Vec3d(nbttagcompound.func_74769_h("x"), nbttagcompound.func_74769_h("y"), nbttagcompound.func_74769_h("z"));
+      }
 
-    /** set to foodStats.getSaturationLevel() == 0.0F each tick */
-    private boolean wasHungry = true;
+      this.field_192040_cp = p_70037_1_.func_74767_n("seenCredits");
+      if (p_70037_1_.func_150297_b("recipeBook", 10)) {
+         this.field_192041_cq.func_192825_a(p_70037_1_.func_74775_l("recipeBook"));
+      }
 
-    /** Amount of experience the client was last set to */
-    private int lastExperience = -99999999;
-    private int respawnInvulnerabilityTicks = 60;
-    private EntityPlayer.EnumChatVisibility chatVisibility;
-    private boolean chatColours = true;
-    private long playerLastActiveTime = System.currentTimeMillis();
+   }
 
-    /** The entity the player is currently spectating through. */
-    private Entity spectatingEntity;
-    private boolean invulnerableDimensionChange;
-    private boolean field_192040_cp;
-    private final RecipeBookServer field_192041_cq = new RecipeBookServer();
-    private Vec3d field_193107_ct;
-    private int field_193108_cu;
-    private boolean field_193109_cv;
-    private Vec3d field_193110_cw;
-
-    /**
-     * The currently in use window ID. Incremented every time a window is opened.
-     */
-    private int currentWindowId;
-
-    /**
-     * set to true when player is moving quantity of items from one inventory to another(crafting) but item in either
-     * slot is not changed
-     */
-    public boolean isChangingQuantityOnly;
-    public int ping;
-
-    /**
-     * Set when a player beats the ender dragon, used to respawn the player at the spawn point while retaining inventory
-     * and XP
-     */
-    public boolean playerConqueredTheEnd;
-
-    public EntityPlayerMP(MinecraftServer server, WorldServer worldIn, GameProfile profile, PlayerInteractionManager interactionManagerIn)
-    {
-        super(worldIn, profile);
-        interactionManagerIn.thisPlayerMP = this;
-        this.interactionManager = interactionManagerIn;
-        BlockPos blockpos = worldIn.getSpawnPoint();
-
-        if (worldIn.provider.func_191066_m() && worldIn.getWorldInfo().getGameType() != GameType.ADVENTURE)
-        {
-            int i = Math.max(0, server.getSpawnRadius(worldIn));
-            int j = MathHelper.floor(worldIn.getWorldBorder().getClosestDistance((double)blockpos.getX(), (double)blockpos.getZ()));
-
-            if (j < i)
-            {
-                i = j;
+   public static void func_191522_a(DataFixer p_191522_0_) {
+      p_191522_0_.func_188258_a(FixTypes.PLAYER, new IDataWalker() {
+         public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_) {
+            if (p_188266_2_.func_150297_b("RootVehicle", 10)) {
+               NBTTagCompound nbttagcompound = p_188266_2_.func_74775_l("RootVehicle");
+               if (nbttagcompound.func_150297_b("Entity", 10)) {
+                  nbttagcompound.func_74782_a("Entity", p_188266_1_.func_188251_a(FixTypes.ENTITY, nbttagcompound.func_74775_l("Entity"), p_188266_3_));
+               }
             }
 
-            if (j <= 1)
-            {
-                i = 1;
+            return p_188266_2_;
+         }
+      });
+   }
+
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74768_a("playerGameType", this.field_71134_c.func_73081_b().func_77148_a());
+      p_70014_1_.func_74757_a("seenCredits", this.field_192040_cp);
+      if (this.field_193110_cw != null) {
+         NBTTagCompound nbttagcompound = new NBTTagCompound();
+         nbttagcompound.func_74780_a("x", this.field_193110_cw.field_72450_a);
+         nbttagcompound.func_74780_a("y", this.field_193110_cw.field_72448_b);
+         nbttagcompound.func_74780_a("z", this.field_193110_cw.field_72449_c);
+         p_70014_1_.func_74782_a("enteredNetherPosition", nbttagcompound);
+      }
+
+      Entity entity1 = this.func_184208_bv();
+      Entity entity = this.func_184187_bx();
+      if (entity != null && entity1 != this && entity1.func_184180_b(EntityPlayerMP.class).size() == 1) {
+         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+         NBTTagCompound nbttagcompound2 = new NBTTagCompound();
+         entity1.func_70039_c(nbttagcompound2);
+         nbttagcompound1.func_186854_a("Attach", entity.func_110124_au());
+         nbttagcompound1.func_74782_a("Entity", nbttagcompound2);
+         p_70014_1_.func_74782_a("RootVehicle", nbttagcompound1);
+      }
+
+      p_70014_1_.func_74782_a("recipeBook", this.field_192041_cq.func_192824_e());
+   }
+
+   public void func_82242_a(int p_82242_1_) {
+      super.func_82242_a(p_82242_1_);
+      this.field_71144_ck = -1;
+   }
+
+   public void func_192024_a(ItemStack p_192024_1_, int p_192024_2_) {
+      super.func_192024_a(p_192024_1_, p_192024_2_);
+      this.field_71144_ck = -1;
+   }
+
+   public void func_71116_b() {
+      this.field_71070_bA.func_75132_a(this);
+   }
+
+   public void func_152111_bt() {
+      super.func_152111_bt();
+      this.field_71135_a.func_147359_a(new SPacketCombatEvent(this.func_110142_aN(), SPacketCombatEvent.Event.ENTER_COMBAT));
+   }
+
+   public void func_152112_bu() {
+      super.func_152112_bu();
+      this.field_71135_a.func_147359_a(new SPacketCombatEvent(this.func_110142_aN(), SPacketCombatEvent.Event.END_COMBAT));
+   }
+
+   protected void func_191955_a(IBlockState p_191955_1_) {
+      CriteriaTriggers.field_192124_d.func_192193_a(this, p_191955_1_);
+   }
+
+   protected CooldownTracker func_184815_l() {
+      return new CooldownTrackerServer(this);
+   }
+
+   public void func_70071_h_() {
+      this.field_71134_c.func_73075_a();
+      --this.field_147101_bU;
+      if (this.field_70172_ad > 0) {
+         --this.field_70172_ad;
+      }
+
+      this.field_71070_bA.func_75142_b();
+      if (!this.field_70170_p.field_72995_K && !this.field_71070_bA.func_75145_c(this)) {
+         this.func_71053_j();
+         this.field_71070_bA = this.field_71069_bz;
+      }
+
+      while(!this.field_71130_g.isEmpty()) {
+         int i = Math.min(this.field_71130_g.size(), Integer.MAX_VALUE);
+         int[] aint = new int[i];
+         Iterator<Integer> iterator = this.field_71130_g.iterator();
+         int j = 0;
+
+         while(iterator.hasNext() && j < i) {
+            aint[j++] = ((Integer)iterator.next()).intValue();
+            iterator.remove();
+         }
+
+         this.field_71135_a.func_147359_a(new SPacketDestroyEntities(aint));
+      }
+
+      Entity entity = this.func_175398_C();
+      if (entity != this) {
+         if (entity.func_70089_S()) {
+            this.func_70080_a(entity.field_70165_t, entity.field_70163_u, entity.field_70161_v, entity.field_70177_z, entity.field_70125_A);
+            this.field_71133_b.func_184103_al().func_72358_d(this);
+            if (this.func_70093_af()) {
+               this.func_175399_e(this);
             }
+         } else {
+            this.func_175399_e(this);
+         }
+      }
 
-            blockpos = worldIn.getTopSolidOrLiquidBlock(blockpos.add(this.rand.nextInt(i * 2 + 1) - i, 0, this.rand.nextInt(i * 2 + 1) - i));
-        }
+      CriteriaTriggers.field_193135_v.func_193182_a(this);
+      if (this.field_193107_ct != null) {
+         CriteriaTriggers.field_193133_t.func_193162_a(this, this.field_193107_ct, this.field_70173_aa - this.field_193108_cu);
+      }
 
-        this.mcServer = server;
-        this.statsFile = server.getPlayerList().getPlayerStatsFile(this);
-        this.field_192042_bX = server.getPlayerList().func_192054_h(this);
-        this.stepHeight = 1.0F;
-        this.moveToBlockPosAndAngles(blockpos, 0.0F, 0.0F);
+      this.field_192042_bX.func_192741_b(this);
+   }
 
-        while (!worldIn.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && this.posY < 255.0D)
-        {
-            this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
-        }
-    }
+   public void func_71127_g() {
+      try {
+         super.func_70071_h_();
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-
-        if (compound.hasKey("playerGameType", 99))
-        {
-            if (this.getServer().getForceGamemode())
-            {
-                this.interactionManager.setGameType(this.getServer().getGameType());
+         for(int i = 0; i < this.field_71071_by.func_70302_i_(); ++i) {
+            ItemStack itemstack = this.field_71071_by.func_70301_a(i);
+            if (!itemstack.func_190926_b() && itemstack.func_77973_b().func_77643_m_()) {
+               Packet<?> packet = ((ItemMapBase)itemstack.func_77973_b()).func_150911_c(itemstack, this.field_70170_p, this);
+               if (packet != null) {
+                  this.field_71135_a.func_147359_a(packet);
+               }
             }
-            else
-            {
-                this.interactionManager.setGameType(GameType.getByID(compound.getInteger("playerGameType")));
+         }
+
+         if (this.func_110143_aJ() != this.field_71149_ch || this.field_71146_ci != this.field_71100_bB.func_75116_a() || this.field_71100_bB.func_75115_e() == 0.0F != this.field_71147_cj) {
+            this.field_71135_a.func_147359_a(new SPacketUpdateHealth(this.func_110143_aJ(), this.field_71100_bB.func_75116_a(), this.field_71100_bB.func_75115_e()));
+            this.field_71149_ch = this.func_110143_aJ();
+            this.field_71146_ci = this.field_71100_bB.func_75116_a();
+            this.field_71147_cj = this.field_71100_bB.func_75115_e() == 0.0F;
+         }
+
+         if (this.func_110143_aJ() + this.func_110139_bj() != this.field_130068_bO) {
+            this.field_130068_bO = this.func_110143_aJ() + this.func_110139_bj();
+            this.func_184849_a(IScoreCriteria.field_96638_f, MathHelper.func_76123_f(this.field_130068_bO));
+         }
+
+         if (this.field_71100_bB.func_75116_a() != this.field_184852_bV) {
+            this.field_184852_bV = this.field_71100_bB.func_75116_a();
+            this.func_184849_a(IScoreCriteria.field_186698_h, MathHelper.func_76123_f((float)this.field_184852_bV));
+         }
+
+         if (this.func_70086_ai() != this.field_184853_bW) {
+            this.field_184853_bW = this.func_70086_ai();
+            this.func_184849_a(IScoreCriteria.field_186699_i, MathHelper.func_76123_f((float)this.field_184853_bW));
+         }
+
+         if (this.func_70658_aO() != this.field_184854_bX) {
+            this.field_184854_bX = this.func_70658_aO();
+            this.func_184849_a(IScoreCriteria.field_186700_j, MathHelper.func_76123_f((float)this.field_184854_bX));
+         }
+
+         if (this.field_71067_cb != this.field_184856_bZ) {
+            this.field_184856_bZ = this.field_71067_cb;
+            this.func_184849_a(IScoreCriteria.field_186701_k, MathHelper.func_76123_f((float)this.field_184856_bZ));
+         }
+
+         if (this.field_71068_ca != this.field_184855_bY) {
+            this.field_184855_bY = this.field_71068_ca;
+            this.func_184849_a(IScoreCriteria.field_186702_l, MathHelper.func_76123_f((float)this.field_184855_bY));
+         }
+
+         if (this.field_71067_cb != this.field_71144_ck) {
+            this.field_71144_ck = this.field_71067_cb;
+            this.field_71135_a.func_147359_a(new SPacketSetExperience(this.field_71106_cc, this.field_71067_cb, this.field_71068_ca));
+         }
+
+         if (this.field_70173_aa % 20 == 0) {
+            CriteriaTriggers.field_192135_o.func_192215_a(this);
+         }
+
+      } catch (Throwable throwable) {
+         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Ticking player");
+         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Player being ticked");
+         this.func_85029_a(crashreportcategory);
+         throw new ReportedException(crashreport);
+      }
+   }
+
+   private void func_184849_a(IScoreCriteria p_184849_1_, int p_184849_2_) {
+      for(ScoreObjective scoreobjective : this.func_96123_co().func_96520_a(p_184849_1_)) {
+         Score score = this.func_96123_co().func_96529_a(this.func_70005_c_(), scoreobjective);
+         score.func_96647_c(p_184849_2_);
+      }
+
+   }
+
+   public void func_70645_a(DamageSource p_70645_1_) {
+      boolean flag = this.field_70170_p.func_82736_K().func_82766_b("showDeathMessages");
+      this.field_71135_a.func_147359_a(new SPacketCombatEvent(this.func_110142_aN(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+      if (flag) {
+         Team team = this.func_96124_cp();
+         if (team != null && team.func_178771_j() != Team.EnumVisible.ALWAYS) {
+            if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+               this.field_71133_b.func_184103_al().func_177453_a(this, this.func_110142_aN().func_151521_b());
+            } else if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+               this.field_71133_b.func_184103_al().func_177452_b(this, this.func_110142_aN().func_151521_b());
             }
-        }
+         } else {
+            this.field_71133_b.func_184103_al().func_148539_a(this.func_110142_aN().func_151521_b());
+         }
+      }
 
-        if (compound.hasKey("enteredNetherPosition", 10))
-        {
-            NBTTagCompound nbttagcompound = compound.getCompoundTag("enteredNetherPosition");
-            this.field_193110_cw = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
-        }
+      this.func_192030_dh();
+      if (!this.field_70170_p.func_82736_K().func_82766_b("keepInventory") && !this.func_175149_v()) {
+         this.func_190776_cN();
+         this.field_71071_by.func_70436_m();
+      }
 
-        this.field_192040_cp = compound.getBoolean("seenCredits");
+      for(ScoreObjective scoreobjective : this.field_70170_p.func_96441_U().func_96520_a(IScoreCriteria.field_96642_c)) {
+         Score score = this.func_96123_co().func_96529_a(this.func_70005_c_(), scoreobjective);
+         score.func_96648_a();
+      }
 
-        if (compound.hasKey("recipeBook", 10))
-        {
-            this.field_192041_cq.func_192825_a(compound.getCompoundTag("recipeBook"));
-        }
-    }
+      EntityLivingBase entitylivingbase = this.func_94060_bK();
+      if (entitylivingbase != null) {
+         EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.field_75627_a.get(EntityList.func_191301_a(entitylivingbase));
+         if (entitylist$entityegginfo != null) {
+            this.func_71029_a(entitylist$entityegginfo.field_151513_e);
+         }
 
-    public static void func_191522_a(DataFixer p_191522_0_)
-    {
-        p_191522_0_.registerWalker(FixTypes.PLAYER, new IDataWalker()
-        {
-            public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn)
-            {
-                if (compound.hasKey("RootVehicle", 10))
-                {
-                    NBTTagCompound nbttagcompound = compound.getCompoundTag("RootVehicle");
+         entitylivingbase.func_191956_a(this, this.field_70744_aE, p_70645_1_);
+      }
 
-                    if (nbttagcompound.hasKey("Entity", 10))
-                    {
-                        nbttagcompound.setTag("Entity", fixer.process(FixTypes.ENTITY, nbttagcompound.getCompoundTag("Entity"), versionIn));
-                    }
-                }
+      this.func_71029_a(StatList.field_188069_A);
+      this.func_175145_a(StatList.field_188098_h);
+      this.func_70066_B();
+      this.func_70052_a(0, false);
+      this.func_110142_aN().func_94549_h();
+   }
 
-                return compound;
+   public void func_191956_a(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_) {
+      if (p_191956_1_ != this) {
+         super.func_191956_a(p_191956_1_, p_191956_2_, p_191956_3_);
+         this.func_85039_t(p_191956_2_);
+         Collection<ScoreObjective> collection = this.func_96123_co().func_96520_a(IScoreCriteria.field_96640_e);
+         if (p_191956_1_ instanceof EntityPlayer) {
+            this.func_71029_a(StatList.field_75932_A);
+            collection.addAll(this.func_96123_co().func_96520_a(IScoreCriteria.field_96639_d));
+         } else {
+            this.func_71029_a(StatList.field_188070_B);
+         }
+
+         collection.addAll(this.func_192038_E(p_191956_1_));
+
+         for(ScoreObjective scoreobjective : collection) {
+            this.func_96123_co().func_96529_a(this.func_70005_c_(), scoreobjective).func_96648_a();
+         }
+
+         CriteriaTriggers.field_192122_b.func_192211_a(this, p_191956_1_, p_191956_3_);
+      }
+   }
+
+   private Collection<ScoreObjective> func_192038_E(Entity p_192038_1_) {
+      String s = p_192038_1_ instanceof EntityPlayer ? p_192038_1_.func_70005_c_() : p_192038_1_.func_189512_bd();
+      ScorePlayerTeam scoreplayerteam = this.func_96123_co().func_96509_i(this.func_70005_c_());
+      if (scoreplayerteam != null) {
+         int i = scoreplayerteam.func_178775_l().func_175746_b();
+         if (i >= 0 && i < IScoreCriteria.field_178793_i.length) {
+            for(ScoreObjective scoreobjective : this.func_96123_co().func_96520_a(IScoreCriteria.field_178793_i[i])) {
+               Score score = this.func_96123_co().func_96529_a(s, scoreobjective);
+               score.func_96648_a();
             }
-        });
-    }
+         }
+      }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("playerGameType", this.interactionManager.getGameType().getID());
-        compound.setBoolean("seenCredits", this.field_192040_cp);
+      ScorePlayerTeam scoreplayerteam1 = this.func_96123_co().func_96509_i(s);
+      if (scoreplayerteam1 != null) {
+         int j = scoreplayerteam1.func_178775_l().func_175746_b();
+         if (j >= 0 && j < IScoreCriteria.field_178792_h.length) {
+            return this.func_96123_co().func_96520_a(IScoreCriteria.field_178792_h[j]);
+         }
+      }
 
-        if (this.field_193110_cw != null)
-        {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setDouble("x", this.field_193110_cw.xCoord);
-            nbttagcompound.setDouble("y", this.field_193110_cw.yCoord);
-            nbttagcompound.setDouble("z", this.field_193110_cw.zCoord);
-            compound.setTag("enteredNetherPosition", nbttagcompound);
-        }
+      return Lists.<ScoreObjective>newArrayList();
+   }
 
-        Entity entity1 = this.getLowestRidingEntity();
-        Entity entity = this.getRidingEntity();
-
-        if (entity != null && entity1 != this && entity1.getRecursivePassengersByType(EntityPlayerMP.class).size() == 1)
-        {
-            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-            NBTTagCompound nbttagcompound2 = new NBTTagCompound();
-            entity1.writeToNBTOptional(nbttagcompound2);
-            nbttagcompound1.setUniqueId("Attach", entity.getUniqueID());
-            nbttagcompound1.setTag("Entity", nbttagcompound2);
-            compound.setTag("RootVehicle", nbttagcompound1);
-        }
-
-        compound.setTag("recipeBook", this.field_192041_cq.func_192824_e());
-    }
-
-    /**
-     * Add experience levels to this player.
-     */
-    public void addExperienceLevel(int levels)
-    {
-        super.addExperienceLevel(levels);
-        this.lastExperience = -1;
-    }
-
-    public void func_192024_a(ItemStack p_192024_1_, int p_192024_2_)
-    {
-        super.func_192024_a(p_192024_1_, p_192024_2_);
-        this.lastExperience = -1;
-    }
-
-    public void addSelfToInternalCraftingInventory()
-    {
-        this.openContainer.addListener(this);
-    }
-
-    /**
-     * Sends an ENTER_COMBAT packet to the client
-     */
-    public void sendEnterCombat()
-    {
-        super.sendEnterCombat();
-        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTER_COMBAT));
-    }
-
-    /**
-     * Sends an END_COMBAT packet to the client
-     */
-    public void sendEndCombat()
-    {
-        super.sendEndCombat();
-        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.END_COMBAT));
-    }
-
-    protected void func_191955_a(IBlockState p_191955_1_)
-    {
-        CriteriaTriggers.field_192124_d.func_192193_a(this, p_191955_1_);
-    }
-
-    protected CooldownTracker createCooldownTracker()
-    {
-        return new CooldownTrackerServer(this);
-    }
-
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        this.interactionManager.updateBlockRemoving();
-        --this.respawnInvulnerabilityTicks;
-
-        if (this.hurtResistantTime > 0)
-        {
-            --this.hurtResistantTime;
-        }
-
-        this.openContainer.detectAndSendChanges();
-
-        if (!this.world.isRemote && !this.openContainer.canInteractWith(this))
-        {
-            this.closeScreen();
-            this.openContainer = this.inventoryContainer;
-        }
-
-        while (!this.entityRemoveQueue.isEmpty())
-        {
-            int i = Math.min(this.entityRemoveQueue.size(), Integer.MAX_VALUE);
-            int[] aint = new int[i];
-            Iterator<Integer> iterator = this.entityRemoveQueue.iterator();
-            int j = 0;
-
-            while (iterator.hasNext() && j < i)
-            {
-                aint[j++] = ((Integer)iterator.next()).intValue();
-                iterator.remove();
-            }
-
-            this.connection.sendPacket(new SPacketDestroyEntities(aint));
-        }
-
-        Entity entity = this.getSpectatingEntity();
-
-        if (entity != this)
-        {
-            if (entity.isEntityAlive())
-            {
-                this.setPositionAndRotation(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
-                this.mcServer.getPlayerList().serverUpdateMovingPlayer(this);
-
-                if (this.isSneaking())
-                {
-                    this.setSpectatingEntity(this);
-                }
-            }
-            else
-            {
-                this.setSpectatingEntity(this);
-            }
-        }
-
-        CriteriaTriggers.field_193135_v.func_193182_a(this);
-
-        if (this.field_193107_ct != null)
-        {
-            CriteriaTriggers.field_193133_t.func_193162_a(this, this.field_193107_ct, this.ticksExisted - this.field_193108_cu);
-        }
-
-        this.field_192042_bX.func_192741_b(this);
-    }
-
-    public void onUpdateEntity()
-    {
-        try
-        {
-            super.onUpdate();
-
-            for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
-            {
-                ItemStack itemstack = this.inventory.getStackInSlot(i);
-
-                if (!itemstack.func_190926_b() && itemstack.getItem().isMap())
-                {
-                    Packet<?> packet = ((ItemMapBase)itemstack.getItem()).createMapDataPacket(itemstack, this.world, this);
-
-                    if (packet != null)
-                    {
-                        this.connection.sendPacket(packet);
-                    }
-                }
-            }
-
-            if (this.getHealth() != this.lastHealth || this.lastFoodLevel != this.foodStats.getFoodLevel() || this.foodStats.getSaturationLevel() == 0.0F != this.wasHungry)
-            {
-                this.connection.sendPacket(new SPacketUpdateHealth(this.getHealth(), this.foodStats.getFoodLevel(), this.foodStats.getSaturationLevel()));
-                this.lastHealth = this.getHealth();
-                this.lastFoodLevel = this.foodStats.getFoodLevel();
-                this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;
-            }
-
-            if (this.getHealth() + this.getAbsorptionAmount() != this.lastHealthScore)
-            {
-                this.lastHealthScore = this.getHealth() + this.getAbsorptionAmount();
-                this.updateScorePoints(IScoreCriteria.HEALTH, MathHelper.ceil(this.lastHealthScore));
-            }
-
-            if (this.foodStats.getFoodLevel() != this.lastFoodScore)
-            {
-                this.lastFoodScore = this.foodStats.getFoodLevel();
-                this.updateScorePoints(IScoreCriteria.FOOD, MathHelper.ceil((float)this.lastFoodScore));
-            }
-
-            if (this.getAir() != this.lastAirScore)
-            {
-                this.lastAirScore = this.getAir();
-                this.updateScorePoints(IScoreCriteria.AIR, MathHelper.ceil((float)this.lastAirScore));
-            }
-
-            if (this.getTotalArmorValue() != this.lastArmorScore)
-            {
-                this.lastArmorScore = this.getTotalArmorValue();
-                this.updateScorePoints(IScoreCriteria.ARMOR, MathHelper.ceil((float)this.lastArmorScore));
-            }
-
-            if (this.experienceTotal != this.lastExperienceScore)
-            {
-                this.lastExperienceScore = this.experienceTotal;
-                this.updateScorePoints(IScoreCriteria.XP, MathHelper.ceil((float)this.lastExperienceScore));
-            }
-
-            if (this.experienceLevel != this.lastLevelScore)
-            {
-                this.lastLevelScore = this.experienceLevel;
-                this.updateScorePoints(IScoreCriteria.LEVEL, MathHelper.ceil((float)this.lastLevelScore));
-            }
-
-            if (this.experienceTotal != this.lastExperience)
-            {
-                this.lastExperience = this.experienceTotal;
-                this.connection.sendPacket(new SPacketSetExperience(this.experience, this.experienceTotal, this.experienceLevel));
-            }
-
-            if (this.ticksExisted % 20 == 0)
-            {
-                CriteriaTriggers.field_192135_o.func_192215_a(this);
-            }
-        }
-        catch (Throwable throwable)
-        {
-            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking player");
-            CrashReportCategory crashreportcategory = crashreport.makeCategory("Player being ticked");
-            this.addEntityCrashInfo(crashreportcategory);
-            throw new ReportedException(crashreport);
-        }
-    }
-
-    private void updateScorePoints(IScoreCriteria criteria, int points)
-    {
-        for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(criteria))
-        {
-            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
-            score.setScorePoints(points);
-        }
-    }
-
-    /**
-     * Called when the mob's health reaches 0.
-     */
-    public void onDeath(DamageSource cause)
-    {
-        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
-        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
-
-        if (flag)
-        {
-            Team team = this.getTeam();
-
-            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS)
-            {
-                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS)
-                {
-                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers(this, this.getCombatTracker().getDeathMessage());
-                }
-                else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM)
-                {
-                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers(this, this.getCombatTracker().getDeathMessage());
-                }
-            }
-            else
-            {
-                this.mcServer.getPlayerList().sendChatMsg(this.getCombatTracker().getDeathMessage());
-            }
-        }
-
-        this.func_192030_dh();
-
-        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator())
-        {
-            this.func_190776_cN();
-            this.inventory.dropAllItems();
-        }
-
-        for (ScoreObjective scoreobjective : this.world.getScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT))
-        {
-            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
-            score.incrementScore();
-        }
-
-        EntityLivingBase entitylivingbase = this.getAttackingEntity();
-
-        if (entitylivingbase != null)
-        {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.func_191301_a(entitylivingbase));
-
-            if (entitylist$entityegginfo != null)
-            {
-                this.addStat(entitylist$entityegginfo.entityKilledByStat);
-            }
-
-            entitylivingbase.func_191956_a(this, this.scoreValue, cause);
-        }
-
-        this.addStat(StatList.DEATHS);
-        this.takeStat(StatList.TIME_SINCE_DEATH);
-        this.extinguish();
-        this.setFlag(0, false);
-        this.getCombatTracker().reset();
-    }
-
-    public void func_191956_a(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_)
-    {
-        if (p_191956_1_ != this)
-        {
-            super.func_191956_a(p_191956_1_, p_191956_2_, p_191956_3_);
-            this.addScore(p_191956_2_);
-            Collection<ScoreObjective> collection = this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.TOTAL_KILL_COUNT);
-
-            if (p_191956_1_ instanceof EntityPlayer)
-            {
-                this.addStat(StatList.PLAYER_KILLS);
-                collection.addAll(this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.PLAYER_KILL_COUNT));
-            }
-            else
-            {
-                this.addStat(StatList.MOB_KILLS);
-            }
-
-            collection.addAll(this.func_192038_E(p_191956_1_));
-
-            for (ScoreObjective scoreobjective : collection)
-            {
-                this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective).incrementScore();
-            }
-
-            CriteriaTriggers.field_192122_b.func_192211_a(this, p_191956_1_, p_191956_3_);
-        }
-    }
-
-    private Collection<ScoreObjective> func_192038_E(Entity p_192038_1_)
-    {
-        String s = p_192038_1_ instanceof EntityPlayer ? p_192038_1_.getName() : p_192038_1_.getCachedUniqueIdString();
-        ScorePlayerTeam scoreplayerteam = this.getWorldScoreboard().getPlayersTeam(this.getName());
-
-        if (scoreplayerteam != null)
-        {
-            int i = scoreplayerteam.getChatFormat().getColorIndex();
-
-            if (i >= 0 && i < IScoreCriteria.KILLED_BY_TEAM.length)
-            {
-                for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.KILLED_BY_TEAM[i]))
-                {
-                    Score score = this.getWorldScoreboard().getOrCreateScore(s, scoreobjective);
-                    score.incrementScore();
-                }
-            }
-        }
-
-        ScorePlayerTeam scoreplayerteam1 = this.getWorldScoreboard().getPlayersTeam(s);
-
-        if (scoreplayerteam1 != null)
-        {
-            int j = scoreplayerteam1.getChatFormat().getColorIndex();
-
-            if (j >= 0 && j < IScoreCriteria.TEAM_KILL.length)
-            {
-                return this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.TEAM_KILL[j]);
-            }
-        }
-
-        return Lists.<ScoreObjective>newArrayList();
-    }
-
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
-        if (this.isEntityInvulnerable(source))
-        {
+   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
+      if (this.func_180431_b(p_70097_1_)) {
+         return false;
+      } else {
+         boolean flag = this.field_71133_b.func_71262_S() && this.func_175400_cq() && "fall".equals(p_70097_1_.field_76373_n);
+         if (!flag && this.field_147101_bU > 0 && p_70097_1_ != DamageSource.field_76380_i) {
             return false;
-        }
-        else
-        {
-            boolean flag = this.mcServer.isDedicatedServer() && this.canPlayersAttack() && "fall".equals(source.damageType);
+         } else {
+            if (p_70097_1_ instanceof EntityDamageSource) {
+               Entity entity = p_70097_1_.func_76346_g();
+               if (entity instanceof EntityPlayer && !this.func_96122_a((EntityPlayer)entity)) {
+                  return false;
+               }
 
-            if (!flag && this.respawnInvulnerabilityTicks > 0 && source != DamageSource.outOfWorld)
-            {
-                return false;
-            }
-            else
-            {
-                if (source instanceof EntityDamageSource)
-                {
-                    Entity entity = source.getEntity();
-
-                    if (entity instanceof EntityPlayer && !this.canAttackPlayer((EntityPlayer)entity))
-                    {
-                        return false;
-                    }
-
-                    if (entity instanceof EntityArrow)
-                    {
-                        EntityArrow entityarrow = (EntityArrow)entity;
-
-                        if (entityarrow.shootingEntity instanceof EntityPlayer && !this.canAttackPlayer((EntityPlayer)entityarrow.shootingEntity))
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return super.attackEntityFrom(source, amount);
-            }
-        }
-    }
-
-    public boolean canAttackPlayer(EntityPlayer other)
-    {
-        return !this.canPlayersAttack() ? false : super.canAttackPlayer(other);
-    }
-
-    /**
-     * Returns if other players can attack this player
-     */
-    private boolean canPlayersAttack()
-    {
-        return this.mcServer.isPVPEnabled();
-    }
-
-    @Nullable
-    public Entity changeDimension(int dimensionIn)
-    {
-        this.invulnerableDimensionChange = true;
-
-        if (this.dimension == 0 && dimensionIn == -1)
-        {
-            this.field_193110_cw = new Vec3d(this.posX, this.posY, this.posZ);
-        }
-        else if (this.dimension != -1 && dimensionIn != 0)
-        {
-            this.field_193110_cw = null;
-        }
-
-        if (this.dimension == 1 && dimensionIn == 1)
-        {
-            this.world.removeEntity(this);
-
-            if (!this.playerConqueredTheEnd)
-            {
-                this.playerConqueredTheEnd = true;
-                this.connection.sendPacket(new SPacketChangeGameState(4, this.field_192040_cp ? 0.0F : 1.0F));
-                this.field_192040_cp = true;
+               if (entity instanceof EntityArrow) {
+                  EntityArrow entityarrow = (EntityArrow)entity;
+                  if (entityarrow.field_70250_c instanceof EntityPlayer && !this.func_96122_a((EntityPlayer)entityarrow.field_70250_c)) {
+                     return false;
+                  }
+               }
             }
 
-            return this;
-        }
-        else
-        {
-            if (this.dimension == 0 && dimensionIn == 1)
-            {
-                dimensionIn = 1;
+            return super.func_70097_a(p_70097_1_, p_70097_2_);
+         }
+      }
+   }
+
+   public boolean func_96122_a(EntityPlayer p_96122_1_) {
+      return !this.func_175400_cq() ? false : super.func_96122_a(p_96122_1_);
+   }
+
+   private boolean func_175400_cq() {
+      return this.field_71133_b.func_71219_W();
+   }
+
+   @Nullable
+   public Entity func_184204_a(int p_184204_1_) {
+      this.field_184851_cj = true;
+      if (this.field_71093_bK == 0 && p_184204_1_ == -1) {
+         this.field_193110_cw = new Vec3d(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+      } else if (this.field_71093_bK != -1 && p_184204_1_ != 0) {
+         this.field_193110_cw = null;
+      }
+
+      if (this.field_71093_bK == 1 && p_184204_1_ == 1) {
+         this.field_70170_p.func_72900_e(this);
+         if (!this.field_71136_j) {
+            this.field_71136_j = true;
+            this.field_71135_a.func_147359_a(new SPacketChangeGameState(4, this.field_192040_cp ? 0.0F : 1.0F));
+            this.field_192040_cp = true;
+         }
+
+         return this;
+      } else {
+         if (this.field_71093_bK == 0 && p_184204_1_ == 1) {
+            p_184204_1_ = 1;
+         }
+
+         this.field_71133_b.func_184103_al().func_187242_a(this, p_184204_1_);
+         this.field_71135_a.func_147359_a(new SPacketEffect(1032, BlockPos.field_177992_a, 0, false));
+         this.field_71144_ck = -1;
+         this.field_71149_ch = -1.0F;
+         this.field_71146_ci = -1;
+         return this;
+      }
+   }
+
+   public boolean func_174827_a(EntityPlayerMP p_174827_1_) {
+      if (p_174827_1_.func_175149_v()) {
+         return this.func_175398_C() == this;
+      } else {
+         return this.func_175149_v() ? false : super.func_174827_a(p_174827_1_);
+      }
+   }
+
+   private void func_147097_b(TileEntity p_147097_1_) {
+      if (p_147097_1_ != null) {
+         SPacketUpdateTileEntity spacketupdatetileentity = p_147097_1_.func_189518_D_();
+         if (spacketupdatetileentity != null) {
+            this.field_71135_a.func_147359_a(spacketupdatetileentity);
+         }
+      }
+
+   }
+
+   public void func_71001_a(Entity p_71001_1_, int p_71001_2_) {
+      super.func_71001_a(p_71001_1_, p_71001_2_);
+      this.field_71070_bA.func_75142_b();
+   }
+
+   public EntityPlayer.SleepResult func_180469_a(BlockPos p_180469_1_) {
+      EntityPlayer.SleepResult entityplayer$sleepresult = super.func_180469_a(p_180469_1_);
+      if (entityplayer$sleepresult == EntityPlayer.SleepResult.OK) {
+         this.func_71029_a(StatList.field_188064_ad);
+         Packet<?> packet = new SPacketUseBed(this, p_180469_1_);
+         this.func_71121_q().func_73039_n().func_151247_a(this, packet);
+         this.field_71135_a.func_147364_a(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
+         this.field_71135_a.func_147359_a(packet);
+         CriteriaTriggers.field_192136_p.func_192215_a(this);
+      }
+
+      return entityplayer$sleepresult;
+   }
+
+   public void func_70999_a(boolean p_70999_1_, boolean p_70999_2_, boolean p_70999_3_) {
+      if (this.func_70608_bn()) {
+         this.func_71121_q().func_73039_n().func_151248_b(this, new SPacketAnimation(this, 2));
+      }
+
+      super.func_70999_a(p_70999_1_, p_70999_2_, p_70999_3_);
+      if (this.field_71135_a != null) {
+         this.field_71135_a.func_147364_a(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
+      }
+
+   }
+
+   public boolean func_184205_a(Entity p_184205_1_, boolean p_184205_2_) {
+      Entity entity = this.func_184187_bx();
+      if (!super.func_184205_a(p_184205_1_, p_184205_2_)) {
+         return false;
+      } else {
+         Entity entity1 = this.func_184187_bx();
+         if (entity1 != entity && this.field_71135_a != null) {
+            this.field_71135_a.func_147364_a(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
+         }
+
+         return true;
+      }
+   }
+
+   public void func_184210_p() {
+      Entity entity = this.func_184187_bx();
+      super.func_184210_p();
+      Entity entity1 = this.func_184187_bx();
+      if (entity1 != entity && this.field_71135_a != null) {
+         this.field_71135_a.func_147364_a(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
+      }
+
+   }
+
+   public boolean func_180431_b(DamageSource p_180431_1_) {
+      return super.func_180431_b(p_180431_1_) || this.func_184850_K();
+   }
+
+   protected void func_184231_a(double p_184231_1_, boolean p_184231_3_, IBlockState p_184231_4_, BlockPos p_184231_5_) {
+   }
+
+   protected void func_184594_b(BlockPos p_184594_1_) {
+      if (!this.func_175149_v()) {
+         super.func_184594_b(p_184594_1_);
+      }
+
+   }
+
+   public void func_71122_b(double p_71122_1_, boolean p_71122_3_) {
+      int i = MathHelper.func_76128_c(this.field_70165_t);
+      int j = MathHelper.func_76128_c(this.field_70163_u - 0.20000000298023224D);
+      int k = MathHelper.func_76128_c(this.field_70161_v);
+      BlockPos blockpos = new BlockPos(i, j, k);
+      IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos);
+      if (iblockstate.func_185904_a() == Material.field_151579_a) {
+         BlockPos blockpos1 = blockpos.func_177977_b();
+         IBlockState iblockstate1 = this.field_70170_p.func_180495_p(blockpos1);
+         Block block = iblockstate1.func_177230_c();
+         if (block instanceof BlockFence || block instanceof BlockWall || block instanceof BlockFenceGate) {
+            blockpos = blockpos1;
+            iblockstate = iblockstate1;
+         }
+      }
+
+      super.func_184231_a(p_71122_1_, p_71122_3_, iblockstate, blockpos);
+   }
+
+   public void func_175141_a(TileEntitySign p_175141_1_) {
+      p_175141_1_.func_145912_a(this);
+      this.field_71135_a.func_147359_a(new SPacketSignEditorOpen(p_175141_1_.func_174877_v()));
+   }
+
+   private void func_71117_bO() {
+      this.field_71139_cq = this.field_71139_cq % 100 + 1;
+   }
+
+   public void func_180468_a(IInteractionObject p_180468_1_) {
+      if (p_180468_1_ instanceof ILootContainer && ((ILootContainer)p_180468_1_).func_184276_b() != null && this.func_175149_v()) {
+         this.func_146105_b((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).func_150255_a((new Style()).func_150238_a(TextFormatting.RED)), true);
+      } else {
+         this.func_71117_bO();
+         this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, p_180468_1_.func_174875_k(), p_180468_1_.func_145748_c_()));
+         this.field_71070_bA = p_180468_1_.func_174876_a(this.field_71071_by, this);
+         this.field_71070_bA.field_75152_c = this.field_71139_cq;
+         this.field_71070_bA.func_75132_a(this);
+      }
+   }
+
+   public void func_71007_a(IInventory p_71007_1_) {
+      if (p_71007_1_ instanceof ILootContainer && ((ILootContainer)p_71007_1_).func_184276_b() != null && this.func_175149_v()) {
+         this.func_146105_b((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).func_150255_a((new Style()).func_150238_a(TextFormatting.RED)), true);
+      } else {
+         if (this.field_71070_bA != this.field_71069_bz) {
+            this.func_71053_j();
+         }
+
+         if (p_71007_1_ instanceof ILockableContainer) {
+            ILockableContainer ilockablecontainer = (ILockableContainer)p_71007_1_;
+            if (ilockablecontainer.func_174893_q_() && !this.func_175146_a(ilockablecontainer.func_174891_i()) && !this.func_175149_v()) {
+               this.field_71135_a.func_147359_a(new SPacketChat(new TextComponentTranslation("container.isLocked", new Object[]{p_71007_1_.func_145748_c_()}), ChatType.GAME_INFO));
+               this.field_71135_a.func_147359_a(new SPacketSoundEffect(SoundEvents.field_187654_U, SoundCategory.BLOCKS, this.field_70165_t, this.field_70163_u, this.field_70161_v, 1.0F, 1.0F));
+               return;
             }
+         }
 
-            this.mcServer.getPlayerList().changePlayerDimension(this, dimensionIn);
-            this.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
-            this.lastExperience = -1;
-            this.lastHealth = -1.0F;
-            this.lastFoodLevel = -1;
-            return this;
-        }
-    }
+         this.func_71117_bO();
+         if (p_71007_1_ instanceof IInteractionObject) {
+            this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, ((IInteractionObject)p_71007_1_).func_174875_k(), p_71007_1_.func_145748_c_(), p_71007_1_.func_70302_i_()));
+            this.field_71070_bA = ((IInteractionObject)p_71007_1_).func_174876_a(this.field_71071_by, this);
+         } else {
+            this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, "minecraft:container", p_71007_1_.func_145748_c_(), p_71007_1_.func_70302_i_()));
+            this.field_71070_bA = new ContainerChest(this.field_71071_by, p_71007_1_, this);
+         }
 
-    public boolean isSpectatedByPlayer(EntityPlayerMP player)
-    {
-        if (player.isSpectator())
-        {
-            return this.getSpectatingEntity() == this;
-        }
-        else
-        {
-            return this.isSpectator() ? false : super.isSpectatedByPlayer(player);
-        }
-    }
+         this.field_71070_bA.field_75152_c = this.field_71139_cq;
+         this.field_71070_bA.func_75132_a(this);
+      }
+   }
 
-    private void sendTileEntityUpdate(TileEntity p_147097_1_)
-    {
-        if (p_147097_1_ != null)
-        {
-            SPacketUpdateTileEntity spacketupdatetileentity = p_147097_1_.getUpdatePacket();
+   public void func_180472_a(IMerchant p_180472_1_) {
+      this.func_71117_bO();
+      this.field_71070_bA = new ContainerMerchant(this.field_71071_by, p_180472_1_, this.field_70170_p);
+      this.field_71070_bA.field_75152_c = this.field_71139_cq;
+      this.field_71070_bA.func_75132_a(this);
+      IInventory iinventory = ((ContainerMerchant)this.field_71070_bA).func_75174_d();
+      ITextComponent itextcomponent = p_180472_1_.func_145748_c_();
+      this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, "minecraft:villager", itextcomponent, iinventory.func_70302_i_()));
+      MerchantRecipeList merchantrecipelist = p_180472_1_.func_70934_b(this);
+      if (merchantrecipelist != null) {
+         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+         packetbuffer.writeInt(this.field_71139_cq);
+         merchantrecipelist.func_151391_a(packetbuffer);
+         this.field_71135_a.func_147359_a(new SPacketCustomPayload("MC|TrList", packetbuffer));
+      }
 
-            if (spacketupdatetileentity != null)
-            {
-                this.connection.sendPacket(spacketupdatetileentity);
+   }
+
+   public void func_184826_a(AbstractHorse p_184826_1_, IInventory p_184826_2_) {
+      if (this.field_71070_bA != this.field_71069_bz) {
+         this.func_71053_j();
+      }
+
+      this.func_71117_bO();
+      this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, "EntityHorse", p_184826_2_.func_145748_c_(), p_184826_2_.func_70302_i_(), p_184826_1_.func_145782_y()));
+      this.field_71070_bA = new ContainerHorseInventory(this.field_71071_by, p_184826_2_, p_184826_1_, this);
+      this.field_71070_bA.field_75152_c = this.field_71139_cq;
+      this.field_71070_bA.func_75132_a(this);
+   }
+
+   public void func_184814_a(ItemStack p_184814_1_, EnumHand p_184814_2_) {
+      Item item = p_184814_1_.func_77973_b();
+      if (item == Items.field_151164_bB) {
+         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+         packetbuffer.func_179249_a(p_184814_2_);
+         this.field_71135_a.func_147359_a(new SPacketCustomPayload("MC|BOpen", packetbuffer));
+      }
+
+   }
+
+   public void func_184824_a(TileEntityCommandBlock p_184824_1_) {
+      p_184824_1_.func_184252_d(true);
+      this.func_147097_b(p_184824_1_);
+   }
+
+   public void func_71111_a(Container p_71111_1_, int p_71111_2_, ItemStack p_71111_3_) {
+      if (!(p_71111_1_.func_75139_a(p_71111_2_) instanceof SlotCrafting)) {
+         if (p_71111_1_ == this.field_71069_bz) {
+            CriteriaTriggers.field_192125_e.func_192208_a(this, this.field_71071_by);
+         }
+
+         if (!this.field_71137_h) {
+            this.field_71135_a.func_147359_a(new SPacketSetSlot(p_71111_1_.field_75152_c, p_71111_2_, p_71111_3_));
+         }
+      }
+   }
+
+   public void func_71120_a(Container p_71120_1_) {
+      this.func_71110_a(p_71120_1_, p_71120_1_.func_75138_a());
+   }
+
+   public void func_71110_a(Container p_71110_1_, NonNullList<ItemStack> p_71110_2_) {
+      this.field_71135_a.func_147359_a(new SPacketWindowItems(p_71110_1_.field_75152_c, p_71110_2_));
+      this.field_71135_a.func_147359_a(new SPacketSetSlot(-1, -1, this.field_71071_by.func_70445_o()));
+   }
+
+   public void func_71112_a(Container p_71112_1_, int p_71112_2_, int p_71112_3_) {
+      this.field_71135_a.func_147359_a(new SPacketWindowProperty(p_71112_1_.field_75152_c, p_71112_2_, p_71112_3_));
+   }
+
+   public void func_175173_a(Container p_175173_1_, IInventory p_175173_2_) {
+      for(int i = 0; i < p_175173_2_.func_174890_g(); ++i) {
+         this.field_71135_a.func_147359_a(new SPacketWindowProperty(p_175173_1_.field_75152_c, i, p_175173_2_.func_174887_a_(i)));
+      }
+
+   }
+
+   public void func_71053_j() {
+      this.field_71135_a.func_147359_a(new SPacketCloseWindow(this.field_71070_bA.field_75152_c));
+      this.func_71128_l();
+   }
+
+   public void func_71113_k() {
+      if (!this.field_71137_h) {
+         this.field_71135_a.func_147359_a(new SPacketSetSlot(-1, -1, this.field_71071_by.func_70445_o()));
+      }
+   }
+
+   public void func_71128_l() {
+      this.field_71070_bA.func_75134_a(this);
+      this.field_71070_bA = this.field_71069_bz;
+   }
+
+   public void func_110430_a(float p_110430_1_, float p_110430_2_, boolean p_110430_3_, boolean p_110430_4_) {
+      if (this.func_184218_aH()) {
+         if (p_110430_1_ >= -1.0F && p_110430_1_ <= 1.0F) {
+            this.field_70702_br = p_110430_1_;
+         }
+
+         if (p_110430_2_ >= -1.0F && p_110430_2_ <= 1.0F) {
+            this.field_191988_bg = p_110430_2_;
+         }
+
+         this.field_70703_bu = p_110430_3_;
+         this.func_70095_a(p_110430_4_);
+      }
+
+   }
+
+   public void func_71064_a(StatBase p_71064_1_, int p_71064_2_) {
+      if (p_71064_1_ != null) {
+         this.field_147103_bO.func_150871_b(this, p_71064_1_, p_71064_2_);
+
+         for(ScoreObjective scoreobjective : this.func_96123_co().func_96520_a(p_71064_1_.func_150952_k())) {
+            this.func_96123_co().func_96529_a(this.func_70005_c_(), scoreobjective).func_96649_a(p_71064_2_);
+         }
+
+      }
+   }
+
+   public void func_175145_a(StatBase p_175145_1_) {
+      if (p_175145_1_ != null) {
+         this.field_147103_bO.func_150873_a(this, p_175145_1_, 0);
+
+         for(ScoreObjective scoreobjective : this.func_96123_co().func_96520_a(p_175145_1_.func_150952_k())) {
+            this.func_96123_co().func_96529_a(this.func_70005_c_(), scoreobjective).func_96647_c(0);
+         }
+
+      }
+   }
+
+   public void func_192021_a(List<IRecipe> p_192021_1_) {
+      this.field_192041_cq.func_193835_a(p_192021_1_, this);
+   }
+
+   public void func_193102_a(ResourceLocation[] p_193102_1_) {
+      List<IRecipe> list = Lists.<IRecipe>newArrayList();
+
+      for(ResourceLocation resourcelocation : p_193102_1_) {
+         list.add(CraftingManager.func_193373_a(resourcelocation));
+      }
+
+      this.func_192021_a(list);
+   }
+
+   public void func_192022_b(List<IRecipe> p_192022_1_) {
+      this.field_192041_cq.func_193834_b(p_192022_1_, this);
+   }
+
+   public void func_71123_m() {
+      this.field_193109_cv = true;
+      this.func_184226_ay();
+      if (this.field_71083_bS) {
+         this.func_70999_a(true, false, false);
+      }
+
+   }
+
+   public boolean func_193105_t() {
+      return this.field_193109_cv;
+   }
+
+   public void func_71118_n() {
+      this.field_71149_ch = -1.0E8F;
+   }
+
+   public void func_146105_b(ITextComponent p_146105_1_, boolean p_146105_2_) {
+      this.field_71135_a.func_147359_a(new SPacketChat(p_146105_1_, p_146105_2_ ? ChatType.GAME_INFO : ChatType.CHAT));
+   }
+
+   protected void func_71036_o() {
+      if (!this.field_184627_bm.func_190926_b() && this.func_184587_cr()) {
+         this.field_71135_a.func_147359_a(new SPacketEntityStatus(this, (byte)9));
+         super.func_71036_o();
+      }
+
+   }
+
+   public void func_193104_a(EntityPlayerMP p_193104_1_, boolean p_193104_2_) {
+      if (p_193104_2_) {
+         this.field_71071_by.func_70455_b(p_193104_1_.field_71071_by);
+         this.func_70606_j(p_193104_1_.func_110143_aJ());
+         this.field_71100_bB = p_193104_1_.field_71100_bB;
+         this.field_71068_ca = p_193104_1_.field_71068_ca;
+         this.field_71067_cb = p_193104_1_.field_71067_cb;
+         this.field_71106_cc = p_193104_1_.field_71106_cc;
+         this.func_85040_s(p_193104_1_.func_71037_bA());
+         this.field_181016_an = p_193104_1_.field_181016_an;
+         this.field_181017_ao = p_193104_1_.field_181017_ao;
+         this.field_181018_ap = p_193104_1_.field_181018_ap;
+      } else if (this.field_70170_p.func_82736_K().func_82766_b("keepInventory") || p_193104_1_.func_175149_v()) {
+         this.field_71071_by.func_70455_b(p_193104_1_.field_71071_by);
+         this.field_71068_ca = p_193104_1_.field_71068_ca;
+         this.field_71067_cb = p_193104_1_.field_71067_cb;
+         this.field_71106_cc = p_193104_1_.field_71106_cc;
+         this.func_85040_s(p_193104_1_.func_71037_bA());
+      }
+
+      this.field_175152_f = p_193104_1_.field_175152_f;
+      this.field_71078_a = p_193104_1_.field_71078_a;
+      this.func_184212_Q().func_187227_b(field_184827_bp, p_193104_1_.func_184212_Q().func_187225_a(field_184827_bp));
+      this.field_71144_ck = -1;
+      this.field_71149_ch = -1.0F;
+      this.field_71146_ci = -1;
+      this.field_192041_cq.func_193824_a(p_193104_1_.field_192041_cq);
+      this.field_71130_g.addAll(p_193104_1_.field_71130_g);
+      this.field_192040_cp = p_193104_1_.field_192040_cp;
+      this.field_193110_cw = p_193104_1_.field_193110_cw;
+      this.func_192029_h(p_193104_1_.func_192023_dk());
+      this.func_192031_i(p_193104_1_.func_192025_dl());
+   }
+
+   protected void func_70670_a(PotionEffect p_70670_1_) {
+      super.func_70670_a(p_70670_1_);
+      this.field_71135_a.func_147359_a(new SPacketEntityEffect(this.func_145782_y(), p_70670_1_));
+      if (p_70670_1_.func_188419_a() == MobEffects.field_188424_y) {
+         this.field_193108_cu = this.field_70173_aa;
+         this.field_193107_ct = new Vec3d(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+      }
+
+      CriteriaTriggers.field_193139_z.func_193153_a(this);
+   }
+
+   protected void func_70695_b(PotionEffect p_70695_1_, boolean p_70695_2_) {
+      super.func_70695_b(p_70695_1_, p_70695_2_);
+      this.field_71135_a.func_147359_a(new SPacketEntityEffect(this.func_145782_y(), p_70695_1_));
+      CriteriaTriggers.field_193139_z.func_193153_a(this);
+   }
+
+   protected void func_70688_c(PotionEffect p_70688_1_) {
+      super.func_70688_c(p_70688_1_);
+      this.field_71135_a.func_147359_a(new SPacketRemoveEntityEffect(this.func_145782_y(), p_70688_1_.func_188419_a()));
+      if (p_70688_1_.func_188419_a() == MobEffects.field_188424_y) {
+         this.field_193107_ct = null;
+      }
+
+      CriteriaTriggers.field_193139_z.func_193153_a(this);
+   }
+
+   public void func_70634_a(double p_70634_1_, double p_70634_3_, double p_70634_5_) {
+      this.field_71135_a.func_147364_a(p_70634_1_, p_70634_3_, p_70634_5_, this.field_70177_z, this.field_70125_A);
+   }
+
+   public void func_71009_b(Entity p_71009_1_) {
+      this.func_71121_q().func_73039_n().func_151248_b(this, new SPacketAnimation(p_71009_1_, 4));
+   }
+
+   public void func_71047_c(Entity p_71047_1_) {
+      this.func_71121_q().func_73039_n().func_151248_b(this, new SPacketAnimation(p_71047_1_, 5));
+   }
+
+   public void func_71016_p() {
+      if (this.field_71135_a != null) {
+         this.field_71135_a.func_147359_a(new SPacketPlayerAbilities(this.field_71075_bZ));
+         this.func_175135_B();
+      }
+   }
+
+   public WorldServer func_71121_q() {
+      return (WorldServer)this.field_70170_p;
+   }
+
+   public void func_71033_a(GameType p_71033_1_) {
+      this.field_71134_c.func_73076_a(p_71033_1_);
+      this.field_71135_a.func_147359_a(new SPacketChangeGameState(3, (float)p_71033_1_.func_77148_a()));
+      if (p_71033_1_ == GameType.SPECTATOR) {
+         this.func_192030_dh();
+         this.func_184210_p();
+      } else {
+         this.func_175399_e(this);
+      }
+
+      this.func_71016_p();
+      this.func_175136_bO();
+   }
+
+   public boolean func_175149_v() {
+      return this.field_71134_c.func_73081_b() == GameType.SPECTATOR;
+   }
+
+   public boolean func_184812_l_() {
+      return this.field_71134_c.func_73081_b() == GameType.CREATIVE;
+   }
+
+   public void func_145747_a(ITextComponent p_145747_1_) {
+      this.field_71135_a.func_147359_a(new SPacketChat(p_145747_1_));
+   }
+
+   public boolean func_70003_b(int p_70003_1_, String p_70003_2_) {
+      if ("seed".equals(p_70003_2_) && !this.field_71133_b.func_71262_S()) {
+         return true;
+      } else if (!"tell".equals(p_70003_2_) && !"help".equals(p_70003_2_) && !"me".equals(p_70003_2_) && !"trigger".equals(p_70003_2_)) {
+         if (this.field_71133_b.func_184103_al().func_152596_g(this.func_146103_bH())) {
+            UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.field_71133_b.func_184103_al().func_152603_m().func_152683_b(this.func_146103_bH());
+            if (userlistopsentry != null) {
+               return userlistopsentry.func_152644_a() >= p_70003_1_;
+            } else {
+               return this.field_71133_b.func_110455_j() >= p_70003_1_;
             }
-        }
-    }
-
-    /**
-     * Called when the entity picks up an item.
-     */
-    public void onItemPickup(Entity entityIn, int quantity)
-    {
-        super.onItemPickup(entityIn, quantity);
-        this.openContainer.detectAndSendChanges();
-    }
-
-    public EntityPlayer.SleepResult trySleep(BlockPos bedLocation)
-    {
-        EntityPlayer.SleepResult entityplayer$sleepresult = super.trySleep(bedLocation);
-
-        if (entityplayer$sleepresult == EntityPlayer.SleepResult.OK)
-        {
-            this.addStat(StatList.SLEEP_IN_BED);
-            Packet<?> packet = new SPacketUseBed(this, bedLocation);
-            this.getServerWorld().getEntityTracker().sendToAllTrackingEntity(this, packet);
-            this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-            this.connection.sendPacket(packet);
-            CriteriaTriggers.field_192136_p.func_192215_a(this);
-        }
-
-        return entityplayer$sleepresult;
-    }
-
-    /**
-     * Wake up the player if they're sleeping.
-     */
-    public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn)
-    {
-        if (this.isPlayerSleeping())
-        {
-            this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(this, 2));
-        }
-
-        super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-
-        if (this.connection != null)
-        {
-            this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-        }
-    }
-
-    public boolean startRiding(Entity entityIn, boolean force)
-    {
-        Entity entity = this.getRidingEntity();
-
-        if (!super.startRiding(entityIn, force))
-        {
+         } else {
             return false;
-        }
-        else
-        {
-            Entity entity1 = this.getRidingEntity();
-
-            if (entity1 != entity && this.connection != null)
-            {
-                this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-            }
-
-            return true;
-        }
-    }
-
-    public void dismountRidingEntity()
-    {
-        Entity entity = this.getRidingEntity();
-        super.dismountRidingEntity();
-        Entity entity1 = this.getRidingEntity();
-
-        if (entity1 != entity && this.connection != null)
-        {
-            this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-        }
-    }
-
-    /**
-     * Returns whether this Entity is invulnerable to the given DamageSource.
-     */
-    public boolean isEntityInvulnerable(DamageSource source)
-    {
-        return super.isEntityInvulnerable(source) || this.isInvulnerableDimensionChange();
-    }
-
-    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos)
-    {
-    }
-
-    protected void frostWalk(BlockPos pos)
-    {
-        if (!this.isSpectator())
-        {
-            super.frostWalk(pos);
-        }
-    }
-
-    /**
-     * process player falling based on movement packet
-     */
-    public void handleFalling(double y, boolean onGroundIn)
-    {
-        int i = MathHelper.floor(this.posX);
-        int j = MathHelper.floor(this.posY - 0.20000000298023224D);
-        int k = MathHelper.floor(this.posZ);
-        BlockPos blockpos = new BlockPos(i, j, k);
-        IBlockState iblockstate = this.world.getBlockState(blockpos);
-
-        if (iblockstate.getMaterial() == Material.AIR)
-        {
-            BlockPos blockpos1 = blockpos.down();
-            IBlockState iblockstate1 = this.world.getBlockState(blockpos1);
-            Block block = iblockstate1.getBlock();
-
-            if (block instanceof BlockFence || block instanceof BlockWall || block instanceof BlockFenceGate)
-            {
-                blockpos = blockpos1;
-                iblockstate = iblockstate1;
-            }
-        }
-
-        super.updateFallState(y, onGroundIn, iblockstate, blockpos);
-    }
-
-    public void openEditSign(TileEntitySign signTile)
-    {
-        signTile.setPlayer(this);
-        this.connection.sendPacket(new SPacketSignEditorOpen(signTile.getPos()));
-    }
-
-    /**
-     * get the next window id to use
-     */
-    private void getNextWindowId()
-    {
-        this.currentWindowId = this.currentWindowId % 100 + 1;
-    }
-
-    public void displayGui(IInteractionObject guiOwner)
-    {
-        if (guiOwner instanceof ILootContainer && ((ILootContainer)guiOwner).getLootTable() != null && this.isSpectator())
-        {
-            this.addChatComponentMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
-        }
-        else
-        {
-            this.getNextWindowId();
-            this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, guiOwner.getGuiID(), guiOwner.getDisplayName()));
-            this.openContainer = guiOwner.createContainer(this.inventory, this);
-            this.openContainer.windowId = this.currentWindowId;
-            this.openContainer.addListener(this);
-        }
-    }
-
-    /**
-     * Displays the GUI for interacting with a chest inventory.
-     */
-    public void displayGUIChest(IInventory chestInventory)
-    {
-        if (chestInventory instanceof ILootContainer && ((ILootContainer)chestInventory).getLootTable() != null && this.isSpectator())
-        {
-            this.addChatComponentMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
-        }
-        else
-        {
-            if (this.openContainer != this.inventoryContainer)
-            {
-                this.closeScreen();
-            }
-
-            if (chestInventory instanceof ILockableContainer)
-            {
-                ILockableContainer ilockablecontainer = (ILockableContainer)chestInventory;
-
-                if (ilockablecontainer.isLocked() && !this.canOpen(ilockablecontainer.getLockCode()) && !this.isSpectator())
-                {
-                    this.connection.sendPacket(new SPacketChat(new TextComponentTranslation("container.isLocked", new Object[] {chestInventory.getDisplayName()}), ChatType.GAME_INFO));
-                    this.connection.sendPacket(new SPacketSoundEffect(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, this.posX, this.posY, this.posZ, 1.0F, 1.0F));
-                    return;
-                }
-            }
-
-            this.getNextWindowId();
-
-            if (chestInventory instanceof IInteractionObject)
-            {
-                this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, ((IInteractionObject)chestInventory).getGuiID(), chestInventory.getDisplayName(), chestInventory.getSizeInventory()));
-                this.openContainer = ((IInteractionObject)chestInventory).createContainer(this.inventory, this);
-            }
-            else
-            {
-                this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, "minecraft:container", chestInventory.getDisplayName(), chestInventory.getSizeInventory()));
-                this.openContainer = new ContainerChest(this.inventory, chestInventory, this);
-            }
-
-            this.openContainer.windowId = this.currentWindowId;
-            this.openContainer.addListener(this);
-        }
-    }
-
-    public void displayVillagerTradeGui(IMerchant villager)
-    {
-        this.getNextWindowId();
-        this.openContainer = new ContainerMerchant(this.inventory, villager, this.world);
-        this.openContainer.windowId = this.currentWindowId;
-        this.openContainer.addListener(this);
-        IInventory iinventory = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-        ITextComponent itextcomponent = villager.getDisplayName();
-        this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
-        MerchantRecipeList merchantrecipelist = villager.getRecipes(this);
-
-        if (merchantrecipelist != null)
-        {
-            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-            packetbuffer.writeInt(this.currentWindowId);
-            merchantrecipelist.writeToBuf(packetbuffer);
-            this.connection.sendPacket(new SPacketCustomPayload("MC|TrList", packetbuffer));
-        }
-    }
-
-    public void openGuiHorseInventory(AbstractHorse horse, IInventory inventoryIn)
-    {
-        if (this.openContainer != this.inventoryContainer)
-        {
-            this.closeScreen();
-        }
-
-        this.getNextWindowId();
-        this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, "EntityHorse", inventoryIn.getDisplayName(), inventoryIn.getSizeInventory(), horse.getEntityId()));
-        this.openContainer = new ContainerHorseInventory(this.inventory, inventoryIn, horse, this);
-        this.openContainer.windowId = this.currentWindowId;
-        this.openContainer.addListener(this);
-    }
-
-    public void openBook(ItemStack stack, EnumHand hand)
-    {
-        Item item = stack.getItem();
-
-        if (item == Items.WRITTEN_BOOK)
-        {
-            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-            packetbuffer.writeEnumValue(hand);
-            this.connection.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
-        }
-    }
-
-    public void displayGuiCommandBlock(TileEntityCommandBlock commandBlock)
-    {
-        commandBlock.setSendToClient(true);
-        this.sendTileEntityUpdate(commandBlock);
-    }
-
-    /**
-     * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
-     * contents of that slot.
-     */
-    public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack)
-    {
-        if (!(containerToSend.getSlot(slotInd) instanceof SlotCrafting))
-        {
-            if (containerToSend == this.inventoryContainer)
-            {
-                CriteriaTriggers.field_192125_e.func_192208_a(this, this.inventory);
-            }
-
-            if (!this.isChangingQuantityOnly)
-            {
-                this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
-            }
-        }
-    }
-
-    public void sendContainerToPlayer(Container containerIn)
-    {
-        this.updateCraftingInventory(containerIn, containerIn.getInventory());
-    }
-
-    /**
-     * update the crafting window inventory with the items in the list
-     */
-    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
-    {
-        this.connection.sendPacket(new SPacketWindowItems(containerToSend.windowId, itemsList));
-        this.connection.sendPacket(new SPacketSetSlot(-1, -1, this.inventory.getItemStack()));
-    }
-
-    /**
-     * Sends two ints to the client-side Container. Used for furnace burning time, smelting progress, brewing progress,
-     * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
-     * value. Both are truncated to shorts in non-local SMP.
-     */
-    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
-    {
-        this.connection.sendPacket(new SPacketWindowProperty(containerIn.windowId, varToUpdate, newValue));
-    }
-
-    public void sendAllWindowProperties(Container containerIn, IInventory inventory)
-    {
-        for (int i = 0; i < inventory.getFieldCount(); ++i)
-        {
-            this.connection.sendPacket(new SPacketWindowProperty(containerIn.windowId, i, inventory.getField(i)));
-        }
-    }
-
-    /**
-     * set current crafting inventory back to the 2x2 square
-     */
-    public void closeScreen()
-    {
-        this.connection.sendPacket(new SPacketCloseWindow(this.openContainer.windowId));
-        this.closeContainer();
-    }
-
-    /**
-     * updates item held by mouse
-     */
-    public void updateHeldItem()
-    {
-        if (!this.isChangingQuantityOnly)
-        {
-            this.connection.sendPacket(new SPacketSetSlot(-1, -1, this.inventory.getItemStack()));
-        }
-    }
-
-    /**
-     * Closes the container the player currently has open.
-     */
-    public void closeContainer()
-    {
-        this.openContainer.onContainerClosed(this);
-        this.openContainer = this.inventoryContainer;
-    }
-
-    public void setEntityActionState(float strafe, float forward, boolean jumping, boolean sneaking)
-    {
-        if (this.isRiding())
-        {
-            if (strafe >= -1.0F && strafe <= 1.0F)
-            {
-                this.moveStrafing = strafe;
-            }
-
-            if (forward >= -1.0F && forward <= 1.0F)
-            {
-                this.field_191988_bg = forward;
-            }
-
-            this.isJumping = jumping;
-            this.setSneaking(sneaking);
-        }
-    }
-
-    /**
-     * Adds a value to a statistic field.
-     */
-    public void addStat(StatBase stat, int amount)
-    {
-        if (stat != null)
-        {
-            this.statsFile.increaseStat(this, stat, amount);
-
-            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(stat.getCriteria()))
-            {
-                this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective).increaseScore(amount);
-            }
-        }
-    }
-
-    public void takeStat(StatBase stat)
-    {
-        if (stat != null)
-        {
-            this.statsFile.unlockAchievement(this, stat, 0);
-
-            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(stat.getCriteria()))
-            {
-                this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective).setScorePoints(0);
-            }
-        }
-    }
-
-    public void func_192021_a(List<IRecipe> p_192021_1_)
-    {
-        this.field_192041_cq.func_193835_a(p_192021_1_, this);
-    }
-
-    public void func_193102_a(ResourceLocation[] p_193102_1_)
-    {
-        List<IRecipe> list = Lists.<IRecipe>newArrayList();
-
-        for (ResourceLocation resourcelocation : p_193102_1_)
-        {
-            list.add(CraftingManager.func_193373_a(resourcelocation));
-        }
-
-        this.func_192021_a(list);
-    }
-
-    public void func_192022_b(List<IRecipe> p_192022_1_)
-    {
-        this.field_192041_cq.func_193834_b(p_192022_1_, this);
-    }
-
-    public void mountEntityAndWakeUp()
-    {
-        this.field_193109_cv = true;
-        this.removePassengers();
-
-        if (this.sleeping)
-        {
-            this.wakeUpPlayer(true, false, false);
-        }
-    }
-
-    public boolean func_193105_t()
-    {
-        return this.field_193109_cv;
-    }
-
-    /**
-     * this function is called when a players inventory is sent to him, lastHealth is updated on any dimension
-     * transitions, then reset.
-     */
-    public void setPlayerHealthUpdated()
-    {
-        this.lastHealth = -1.0E8F;
-    }
-
-    public void addChatComponentMessage(ITextComponent chatComponent, boolean p_146105_2_)
-    {
-        this.connection.sendPacket(new SPacketChat(chatComponent, p_146105_2_ ? ChatType.GAME_INFO : ChatType.CHAT));
-    }
-
-    /**
-     * Used for when item use count runs out, ie: eating completed
-     */
-    protected void onItemUseFinish()
-    {
-        if (!this.activeItemStack.func_190926_b() && this.isHandActive())
-        {
-            this.connection.sendPacket(new SPacketEntityStatus(this, (byte)9));
-            super.onItemUseFinish();
-        }
-    }
-
-    public void func_193104_a(EntityPlayerMP p_193104_1_, boolean p_193104_2_)
-    {
-        if (p_193104_2_)
-        {
-            this.inventory.copyInventory(p_193104_1_.inventory);
-            this.setHealth(p_193104_1_.getHealth());
-            this.foodStats = p_193104_1_.foodStats;
-            this.experienceLevel = p_193104_1_.experienceLevel;
-            this.experienceTotal = p_193104_1_.experienceTotal;
-            this.experience = p_193104_1_.experience;
-            this.setScore(p_193104_1_.getScore());
-            this.lastPortalPos = p_193104_1_.lastPortalPos;
-            this.lastPortalVec = p_193104_1_.lastPortalVec;
-            this.teleportDirection = p_193104_1_.teleportDirection;
-        }
-        else if (this.world.getGameRules().getBoolean("keepInventory") || p_193104_1_.isSpectator())
-        {
-            this.inventory.copyInventory(p_193104_1_.inventory);
-            this.experienceLevel = p_193104_1_.experienceLevel;
-            this.experienceTotal = p_193104_1_.experienceTotal;
-            this.experience = p_193104_1_.experience;
-            this.setScore(p_193104_1_.getScore());
-        }
-
-        this.xpSeed = p_193104_1_.xpSeed;
-        this.theInventoryEnderChest = p_193104_1_.theInventoryEnderChest;
-        this.getDataManager().set(PLAYER_MODEL_FLAG, p_193104_1_.getDataManager().get(PLAYER_MODEL_FLAG));
-        this.lastExperience = -1;
-        this.lastHealth = -1.0F;
-        this.lastFoodLevel = -1;
-        this.field_192041_cq.func_193824_a(p_193104_1_.field_192041_cq);
-        this.entityRemoveQueue.addAll(p_193104_1_.entityRemoveQueue);
-        this.field_192040_cp = p_193104_1_.field_192040_cp;
-        this.field_193110_cw = p_193104_1_.field_193110_cw;
-        this.func_192029_h(p_193104_1_.func_192023_dk());
-        this.func_192031_i(p_193104_1_.func_192025_dl());
-    }
-
-    protected void onNewPotionEffect(PotionEffect id)
-    {
-        super.onNewPotionEffect(id);
-        this.connection.sendPacket(new SPacketEntityEffect(this.getEntityId(), id));
-
-        if (id.getPotion() == MobEffects.LEVITATION)
-        {
-            this.field_193108_cu = this.ticksExisted;
-            this.field_193107_ct = new Vec3d(this.posX, this.posY, this.posZ);
-        }
-
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
-    }
-
-    protected void onChangedPotionEffect(PotionEffect id, boolean p_70695_2_)
-    {
-        super.onChangedPotionEffect(id, p_70695_2_);
-        this.connection.sendPacket(new SPacketEntityEffect(this.getEntityId(), id));
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
-    }
-
-    protected void onFinishedPotionEffect(PotionEffect effect)
-    {
-        super.onFinishedPotionEffect(effect);
-        this.connection.sendPacket(new SPacketRemoveEntityEffect(this.getEntityId(), effect.getPotion()));
-
-        if (effect.getPotion() == MobEffects.LEVITATION)
-        {
-            this.field_193107_ct = null;
-        }
-
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
-    }
-
-    /**
-     * Sets the position of the entity and updates the 'last' variables
-     */
-    public void setPositionAndUpdate(double x, double y, double z)
-    {
-        this.connection.setPlayerLocation(x, y, z, this.rotationYaw, this.rotationPitch);
-    }
-
-    /**
-     * Called when the entity is dealt a critical hit.
-     */
-    public void onCriticalHit(Entity entityHit)
-    {
-        this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(entityHit, 4));
-    }
-
-    public void onEnchantmentCritical(Entity entityHit)
-    {
-        this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(entityHit, 5));
-    }
-
-    /**
-     * Sends the player's abilities to the server (if there is one).
-     */
-    public void sendPlayerAbilities()
-    {
-        if (this.connection != null)
-        {
-            this.connection.sendPacket(new SPacketPlayerAbilities(this.capabilities));
-            this.updatePotionMetadata();
-        }
-    }
-
-    public WorldServer getServerWorld()
-    {
-        return (WorldServer)this.world;
-    }
-
-    /**
-     * Sets the player's game mode and sends it to them.
-     */
-    public void setGameType(GameType gameType)
-    {
-        this.interactionManager.setGameType(gameType);
-        this.connection.sendPacket(new SPacketChangeGameState(3, (float)gameType.getID()));
-
-        if (gameType == GameType.SPECTATOR)
-        {
-            this.func_192030_dh();
-            this.dismountRidingEntity();
-        }
-        else
-        {
-            this.setSpectatingEntity(this);
-        }
-
-        this.sendPlayerAbilities();
-        this.markPotionsDirty();
-    }
-
-    /**
-     * Returns true if the player is in spectator mode.
-     */
-    public boolean isSpectator()
-    {
-        return this.interactionManager.getGameType() == GameType.SPECTATOR;
-    }
-
-    public boolean isCreative()
-    {
-        return this.interactionManager.getGameType() == GameType.CREATIVE;
-    }
-
-    /**
-     * Send a chat message to the CommandSender
-     */
-    public void addChatMessage(ITextComponent component)
-    {
-        this.connection.sendPacket(new SPacketChat(component));
-    }
-
-    /**
-     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
-     */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
-    {
-        if ("seed".equals(commandName) && !this.mcServer.isDedicatedServer())
-        {
-            return true;
-        }
-        else if (!"tell".equals(commandName) && !"help".equals(commandName) && !"me".equals(commandName) && !"trigger".equals(commandName))
-        {
-            if (this.mcServer.getPlayerList().canSendCommands(this.getGameProfile()))
-            {
-                UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.mcServer.getPlayerList().getOppedPlayers().getEntry(this.getGameProfile());
-
-                if (userlistopsentry != null)
-                {
-                    return userlistopsentry.getPermissionLevel() >= permLevel;
-                }
-                else
-                {
-                    return this.mcServer.getOpPermissionLevel() >= permLevel;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    /**
-     * Gets the player's IP address. Used in /banip.
-     */
-    public String getPlayerIP()
-    {
-        String s = this.connection.netManager.getRemoteAddress().toString();
-        s = s.substring(s.indexOf("/") + 1);
-        s = s.substring(0, s.indexOf(":"));
-        return s;
-    }
-
-    public void handleClientSettings(CPacketClientSettings packetIn)
-    {
-        this.language = packetIn.getLang();
-        this.chatVisibility = packetIn.getChatVisibility();
-        this.chatColours = packetIn.isColorsEnabled();
-        this.getDataManager().set(PLAYER_MODEL_FLAG, Byte.valueOf((byte)packetIn.getModelPartFlags()));
-        this.getDataManager().set(MAIN_HAND, Byte.valueOf((byte)(packetIn.getMainHand() == EnumHandSide.LEFT ? 0 : 1)));
-    }
-
-    public EntityPlayer.EnumChatVisibility getChatVisibility()
-    {
-        return this.chatVisibility;
-    }
-
-    public void loadResourcePack(String url, String hash)
-    {
-        this.connection.sendPacket(new SPacketResourcePackSend(url, hash));
-    }
-
-    /**
-     * Get the position in the world. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
-     * the coordinates 0, 0, 0
-     */
-    public BlockPos getPosition()
-    {
-        return new BlockPos(this.posX, this.posY + 0.5D, this.posZ);
-    }
-
-    public void markPlayerActive()
-    {
-        this.playerLastActiveTime = MinecraftServer.getCurrentTimeMillis();
-    }
-
-    /**
-     * Gets the stats file for reading achievements
-     */
-    public StatisticsManagerServer getStatFile()
-    {
-        return this.statsFile;
-    }
-
-    public RecipeBookServer func_192037_E()
-    {
-        return this.field_192041_cq;
-    }
-
-    /**
-     * Sends a packet to the player to remove an entity.
-     */
-    public void removeEntity(Entity entityIn)
-    {
-        if (entityIn instanceof EntityPlayer)
-        {
-            this.connection.sendPacket(new SPacketDestroyEntities(new int[] {entityIn.getEntityId()}));
-        }
-        else
-        {
-            this.entityRemoveQueue.add(Integer.valueOf(entityIn.getEntityId()));
-        }
-    }
-
-    public void addEntity(Entity entityIn)
-    {
-        this.entityRemoveQueue.remove(Integer.valueOf(entityIn.getEntityId()));
-    }
-
-    /**
-     * Clears potion metadata values if the entity has no potion effects. Otherwise, updates potion effect color,
-     * ambience, and invisibility metadata values
-     */
-    protected void updatePotionMetadata()
-    {
-        if (this.isSpectator())
-        {
-            this.resetPotionEffectMetadata();
-            this.setInvisible(true);
-        }
-        else
-        {
-            super.updatePotionMetadata();
-        }
-
-        this.getServerWorld().getEntityTracker().updateVisibility(this);
-    }
-
-    public Entity getSpectatingEntity()
-    {
-        return (Entity)(this.spectatingEntity == null ? this : this.spectatingEntity);
-    }
-
-    public void setSpectatingEntity(Entity entityToSpectate)
-    {
-        Entity entity = this.getSpectatingEntity();
-        this.spectatingEntity = (Entity)(entityToSpectate == null ? this : entityToSpectate);
-
-        if (entity != this.spectatingEntity)
-        {
-            this.connection.sendPacket(new SPacketCamera(this.spectatingEntity));
-            this.setPositionAndUpdate(this.spectatingEntity.posX, this.spectatingEntity.posY, this.spectatingEntity.posZ);
-        }
-    }
-
-    /**
-     * Decrements the counter for the remaining time until the entity may use a portal again.
-     */
-    protected void decrementTimeUntilPortal()
-    {
-        if (this.timeUntilPortal > 0 && !this.invulnerableDimensionChange)
-        {
-            --this.timeUntilPortal;
-        }
-    }
-
-    /**
-     * Attacks for the player the targeted entity with the currently equipped item.  The equipped item has hitEntity
-     * called on it. Args: targetEntity
-     */
-    public void attackTargetEntityWithCurrentItem(Entity targetEntity)
-    {
-        if (this.interactionManager.getGameType() == GameType.SPECTATOR)
-        {
-            this.setSpectatingEntity(targetEntity);
-        }
-        else
-        {
-            super.attackTargetEntityWithCurrentItem(targetEntity);
-        }
-    }
-
-    public long getLastActiveTime()
-    {
-        return this.playerLastActiveTime;
-    }
-
-    @Nullable
-
-    /**
-     * Returns null which indicates the tab list should just display the player's name, return a different value to
-     * display the specified text instead of the player's name
-     */
-    public ITextComponent getTabListDisplayName()
-    {
-        return null;
-    }
-
-    public void swingArm(EnumHand hand)
-    {
-        super.swingArm(hand);
-        this.resetCooldown();
-    }
-
-    public boolean isInvulnerableDimensionChange()
-    {
-        return this.invulnerableDimensionChange;
-    }
-
-    public void clearInvulnerableDimensionChange()
-    {
-        this.invulnerableDimensionChange = false;
-    }
-
-    public void setElytraFlying()
-    {
-        this.setFlag(7, true);
-    }
-
-    public void clearElytraFlying()
-    {
-        this.setFlag(7, true);
-        this.setFlag(7, false);
-    }
-
-    public PlayerAdvancements func_192039_O()
-    {
-        return this.field_192042_bX;
-    }
-
-    @Nullable
-    public Vec3d func_193106_Q()
-    {
-        return this.field_193110_cw;
-    }
+         }
+      } else {
+         return true;
+      }
+   }
+
+   public String func_71114_r() {
+      String s = this.field_71135_a.field_147371_a.func_74430_c().toString();
+      s = s.substring(s.indexOf("/") + 1);
+      s = s.substring(0, s.indexOf(":"));
+      return s;
+   }
+
+   public void func_147100_a(CPacketClientSettings p_147100_1_) {
+      this.field_71148_cg = p_147100_1_.func_149524_c();
+      this.field_71143_cn = p_147100_1_.func_149523_e();
+      this.field_71140_co = p_147100_1_.func_149520_f();
+      this.func_184212_Q().func_187227_b(field_184827_bp, Byte.valueOf((byte)p_147100_1_.func_149521_d()));
+      this.func_184212_Q().func_187227_b(field_184828_bq, Byte.valueOf((byte)(p_147100_1_.func_186991_f() == EnumHandSide.LEFT ? 0 : 1)));
+   }
+
+   public EntityPlayer.EnumChatVisibility func_147096_v() {
+      return this.field_71143_cn;
+   }
+
+   public void func_175397_a(String p_175397_1_, String p_175397_2_) {
+      this.field_71135_a.func_147359_a(new SPacketResourcePackSend(p_175397_1_, p_175397_2_));
+   }
+
+   public BlockPos func_180425_c() {
+      return new BlockPos(this.field_70165_t, this.field_70163_u + 0.5D, this.field_70161_v);
+   }
+
+   public void func_143004_u() {
+      this.field_143005_bX = MinecraftServer.func_130071_aq();
+   }
+
+   public StatisticsManagerServer func_147099_x() {
+      return this.field_147103_bO;
+   }
+
+   public RecipeBookServer func_192037_E() {
+      return this.field_192041_cq;
+   }
+
+   public void func_152339_d(Entity p_152339_1_) {
+      if (p_152339_1_ instanceof EntityPlayer) {
+         this.field_71135_a.func_147359_a(new SPacketDestroyEntities(new int[]{p_152339_1_.func_145782_y()}));
+      } else {
+         this.field_71130_g.add(Integer.valueOf(p_152339_1_.func_145782_y()));
+      }
+
+   }
+
+   public void func_184848_d(Entity p_184848_1_) {
+      this.field_71130_g.remove(Integer.valueOf(p_184848_1_.func_145782_y()));
+   }
+
+   protected void func_175135_B() {
+      if (this.func_175149_v()) {
+         this.func_175133_bi();
+         this.func_82142_c(true);
+      } else {
+         super.func_175135_B();
+      }
+
+      this.func_71121_q().func_73039_n().func_180245_a(this);
+   }
+
+   public Entity func_175398_C() {
+      return (Entity)(this.field_175401_bS == null ? this : this.field_175401_bS);
+   }
+
+   public void func_175399_e(Entity p_175399_1_) {
+      Entity entity = this.func_175398_C();
+      this.field_175401_bS = (Entity)(p_175399_1_ == null ? this : p_175399_1_);
+      if (entity != this.field_175401_bS) {
+         this.field_71135_a.func_147359_a(new SPacketCamera(this.field_175401_bS));
+         this.func_70634_a(this.field_175401_bS.field_70165_t, this.field_175401_bS.field_70163_u, this.field_175401_bS.field_70161_v);
+      }
+
+   }
+
+   protected void func_184173_H() {
+      if (this.field_71088_bW > 0 && !this.field_184851_cj) {
+         --this.field_71088_bW;
+      }
+
+   }
+
+   public void func_71059_n(Entity p_71059_1_) {
+      if (this.field_71134_c.func_73081_b() == GameType.SPECTATOR) {
+         this.func_175399_e(p_71059_1_);
+      } else {
+         super.func_71059_n(p_71059_1_);
+      }
+
+   }
+
+   public long func_154331_x() {
+      return this.field_143005_bX;
+   }
+
+   @Nullable
+   public ITextComponent func_175396_E() {
+      return null;
+   }
+
+   public void func_184609_a(EnumHand p_184609_1_) {
+      super.func_184609_a(p_184609_1_);
+      this.func_184821_cY();
+   }
+
+   public boolean func_184850_K() {
+      return this.field_184851_cj;
+   }
+
+   public void func_184846_L() {
+      this.field_184851_cj = false;
+   }
+
+   public void func_184847_M() {
+      this.func_70052_a(7, true);
+   }
+
+   public void func_189103_N() {
+      this.func_70052_a(7, true);
+      this.func_70052_a(7, false);
+   }
+
+   public PlayerAdvancements func_192039_O() {
+      return this.field_192042_bX;
+   }
+
+   @Nullable
+   public Vec3d func_193106_Q() {
+      return this.field_193110_cw;
+   }
 }

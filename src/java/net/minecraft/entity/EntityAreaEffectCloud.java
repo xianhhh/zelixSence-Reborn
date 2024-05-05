@@ -24,521 +24,400 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class EntityAreaEffectCloud extends Entity
-{
-    private static final DataParameter<Float> RADIUS = EntityDataManager.<Float>createKey(EntityAreaEffectCloud.class, DataSerializers.FLOAT);
-    private static final DataParameter<Integer> COLOR = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> IGNORE_RADIUS = EntityDataManager.<Boolean>createKey(EntityAreaEffectCloud.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> PARTICLE = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> PARTICLE_PARAM_1 = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> PARTICLE_PARAM_2 = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
-    private PotionType potion;
-    private final List<PotionEffect> effects;
-    private final Map<Entity, Integer> reapplicationDelayMap;
-    private int duration;
-    private int waitTime;
-    private int reapplicationDelay;
-    private boolean colorSet;
-    private int durationOnUse;
-    private float radiusOnUse;
-    private float radiusPerTick;
-    private EntityLivingBase owner;
-    private UUID ownerUniqueId;
+public class EntityAreaEffectCloud extends Entity {
+   private static final DataParameter<Float> field_184498_a = EntityDataManager.<Float>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187193_c);
+   private static final DataParameter<Integer> field_184499_b = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
+   private static final DataParameter<Boolean> field_184500_c = EntityDataManager.<Boolean>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187198_h);
+   private static final DataParameter<Integer> field_184501_d = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
+   private static final DataParameter<Integer> field_189736_e = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
+   private static final DataParameter<Integer> field_189737_f = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
+   private PotionType field_184502_e;
+   private final List<PotionEffect> field_184503_f;
+   private final Map<Entity, Integer> field_184504_g;
+   private int field_184505_h;
+   private int field_184506_as;
+   private int field_184507_at;
+   private boolean field_184508_au;
+   private int field_184509_av;
+   private float field_184510_aw;
+   private float field_184511_ax;
+   private EntityLivingBase field_184512_ay;
+   private UUID field_184513_az;
 
-    public EntityAreaEffectCloud(World worldIn)
-    {
-        super(worldIn);
-        this.potion = PotionTypes.EMPTY;
-        this.effects = Lists.<PotionEffect>newArrayList();
-        this.reapplicationDelayMap = Maps.<Entity, Integer>newHashMap();
-        this.duration = 600;
-        this.waitTime = 20;
-        this.reapplicationDelay = 20;
-        this.noClip = true;
-        this.isImmuneToFire = true;
-        this.setRadius(3.0F);
-    }
+   public EntityAreaEffectCloud(World p_i46809_1_) {
+      super(p_i46809_1_);
+      this.field_184502_e = PotionTypes.field_185229_a;
+      this.field_184503_f = Lists.<PotionEffect>newArrayList();
+      this.field_184504_g = Maps.<Entity, Integer>newHashMap();
+      this.field_184505_h = 600;
+      this.field_184506_as = 20;
+      this.field_184507_at = 20;
+      this.field_70145_X = true;
+      this.field_70178_ae = true;
+      this.func_184483_a(3.0F);
+   }
 
-    public EntityAreaEffectCloud(World worldIn, double x, double y, double z)
-    {
-        this(worldIn);
-        this.setPosition(x, y, z);
-    }
+   public EntityAreaEffectCloud(World p_i46810_1_, double p_i46810_2_, double p_i46810_4_, double p_i46810_6_) {
+      this(p_i46810_1_);
+      this.func_70107_b(p_i46810_2_, p_i46810_4_, p_i46810_6_);
+   }
 
-    protected void entityInit()
-    {
-        this.getDataManager().register(COLOR, Integer.valueOf(0));
-        this.getDataManager().register(RADIUS, Float.valueOf(0.5F));
-        this.getDataManager().register(IGNORE_RADIUS, Boolean.valueOf(false));
-        this.getDataManager().register(PARTICLE, Integer.valueOf(EnumParticleTypes.SPELL_MOB.getParticleID()));
-        this.getDataManager().register(PARTICLE_PARAM_1, Integer.valueOf(0));
-        this.getDataManager().register(PARTICLE_PARAM_2, Integer.valueOf(0));
-    }
+   protected void func_70088_a() {
+      this.func_184212_Q().func_187214_a(field_184499_b, Integer.valueOf(0));
+      this.func_184212_Q().func_187214_a(field_184498_a, Float.valueOf(0.5F));
+      this.func_184212_Q().func_187214_a(field_184500_c, Boolean.valueOf(false));
+      this.func_184212_Q().func_187214_a(field_184501_d, Integer.valueOf(EnumParticleTypes.SPELL_MOB.func_179348_c()));
+      this.func_184212_Q().func_187214_a(field_189736_e, Integer.valueOf(0));
+      this.func_184212_Q().func_187214_a(field_189737_f, Integer.valueOf(0));
+   }
 
-    public void setRadius(float radiusIn)
-    {
-        double d0 = this.posX;
-        double d1 = this.posY;
-        double d2 = this.posZ;
-        this.setSize(radiusIn * 2.0F, 0.5F);
-        this.setPosition(d0, d1, d2);
+   public void func_184483_a(float p_184483_1_) {
+      double d0 = this.field_70165_t;
+      double d1 = this.field_70163_u;
+      double d2 = this.field_70161_v;
+      this.func_70105_a(p_184483_1_ * 2.0F, 0.5F);
+      this.func_70107_b(d0, d1, d2);
+      if (!this.field_70170_p.field_72995_K) {
+         this.func_184212_Q().func_187227_b(field_184498_a, Float.valueOf(p_184483_1_));
+      }
 
-        if (!this.world.isRemote)
-        {
-            this.getDataManager().set(RADIUS, Float.valueOf(radiusIn));
-        }
-    }
+   }
 
-    public float getRadius()
-    {
-        return ((Float)this.getDataManager().get(RADIUS)).floatValue();
-    }
+   public float func_184490_j() {
+      return ((Float)this.func_184212_Q().func_187225_a(field_184498_a)).floatValue();
+   }
 
-    public void setPotion(PotionType potionIn)
-    {
-        this.potion = potionIn;
+   public void func_184484_a(PotionType p_184484_1_) {
+      this.field_184502_e = p_184484_1_;
+      if (!this.field_184508_au) {
+         this.func_190618_C();
+      }
 
-        if (!this.colorSet)
-        {
-            this.func_190618_C();
-        }
-    }
+   }
 
-    private void func_190618_C()
-    {
-        if (this.potion == PotionTypes.EMPTY && this.effects.isEmpty())
-        {
-            this.getDataManager().set(COLOR, Integer.valueOf(0));
-        }
-        else
-        {
-            this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.effects))));
-        }
-    }
+   private void func_190618_C() {
+      if (this.field_184502_e == PotionTypes.field_185229_a && this.field_184503_f.isEmpty()) {
+         this.func_184212_Q().func_187227_b(field_184499_b, Integer.valueOf(0));
+      } else {
+         this.func_184212_Q().func_187227_b(field_184499_b, Integer.valueOf(PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184502_e, this.field_184503_f))));
+      }
 
-    public void addEffect(PotionEffect effect)
-    {
-        this.effects.add(effect);
+   }
 
-        if (!this.colorSet)
-        {
-            this.func_190618_C();
-        }
-    }
+   public void func_184496_a(PotionEffect p_184496_1_) {
+      this.field_184503_f.add(p_184496_1_);
+      if (!this.field_184508_au) {
+         this.func_190618_C();
+      }
 
-    public int getColor()
-    {
-        return ((Integer)this.getDataManager().get(COLOR)).intValue();
-    }
+   }
 
-    public void setColor(int colorIn)
-    {
-        this.colorSet = true;
-        this.getDataManager().set(COLOR, Integer.valueOf(colorIn));
-    }
+   public int func_184492_k() {
+      return ((Integer)this.func_184212_Q().func_187225_a(field_184499_b)).intValue();
+   }
 
-    public EnumParticleTypes getParticle()
-    {
-        return EnumParticleTypes.getParticleFromId(((Integer)this.getDataManager().get(PARTICLE)).intValue());
-    }
+   public void func_184482_a(int p_184482_1_) {
+      this.field_184508_au = true;
+      this.func_184212_Q().func_187227_b(field_184499_b, Integer.valueOf(p_184482_1_));
+   }
 
-    public void setParticle(EnumParticleTypes particleIn)
-    {
-        this.getDataManager().set(PARTICLE, Integer.valueOf(particleIn.getParticleID()));
-    }
+   public EnumParticleTypes func_184493_l() {
+      return EnumParticleTypes.func_179342_a(((Integer)this.func_184212_Q().func_187225_a(field_184501_d)).intValue());
+   }
 
-    public int getParticleParam1()
-    {
-        return ((Integer)this.getDataManager().get(PARTICLE_PARAM_1)).intValue();
-    }
+   public void func_184491_a(EnumParticleTypes p_184491_1_) {
+      this.func_184212_Q().func_187227_b(field_184501_d, Integer.valueOf(p_184491_1_.func_179348_c()));
+   }
 
-    public void setParticleParam1(int particleParam)
-    {
-        this.getDataManager().set(PARTICLE_PARAM_1, Integer.valueOf(particleParam));
-    }
+   public int func_189733_n() {
+      return ((Integer)this.func_184212_Q().func_187225_a(field_189736_e)).intValue();
+   }
 
-    public int getParticleParam2()
-    {
-        return ((Integer)this.getDataManager().get(PARTICLE_PARAM_2)).intValue();
-    }
+   public void func_189734_b(int p_189734_1_) {
+      this.func_184212_Q().func_187227_b(field_189736_e, Integer.valueOf(p_189734_1_));
+   }
 
-    public void setParticleParam2(int particleParam)
-    {
-        this.getDataManager().set(PARTICLE_PARAM_2, Integer.valueOf(particleParam));
-    }
+   public int func_189735_o() {
+      return ((Integer)this.func_184212_Q().func_187225_a(field_189737_f)).intValue();
+   }
 
-    /**
-     * Sets if the radius should be ignored, and the effect should be shown in a single point instead of an area
-     */
-    protected void setIgnoreRadius(boolean ignoreRadius)
-    {
-        this.getDataManager().set(IGNORE_RADIUS, Boolean.valueOf(ignoreRadius));
-    }
+   public void func_189732_d(int p_189732_1_) {
+      this.func_184212_Q().func_187227_b(field_189737_f, Integer.valueOf(p_189732_1_));
+   }
 
-    /**
-     * Returns true if the radius should be ignored, and the effect should be shown in a single point instead of an area
-     */
-    public boolean shouldIgnoreRadius()
-    {
-        return ((Boolean)this.getDataManager().get(IGNORE_RADIUS)).booleanValue();
-    }
+   protected void func_184488_a(boolean p_184488_1_) {
+      this.func_184212_Q().func_187227_b(field_184500_c, Boolean.valueOf(p_184488_1_));
+   }
 
-    public int getDuration()
-    {
-        return this.duration;
-    }
+   public boolean func_184497_n() {
+      return ((Boolean)this.func_184212_Q().func_187225_a(field_184500_c)).booleanValue();
+   }
 
-    public void setDuration(int durationIn)
-    {
-        this.duration = durationIn;
-    }
+   public int func_184489_o() {
+      return this.field_184505_h;
+   }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        super.onUpdate();
-        boolean flag = this.shouldIgnoreRadius();
-        float f = this.getRadius();
+   public void func_184486_b(int p_184486_1_) {
+      this.field_184505_h = p_184486_1_;
+   }
 
-        if (this.world.isRemote)
-        {
-            EnumParticleTypes enumparticletypes = this.getParticle();
-            int[] aint = new int[enumparticletypes.getArgumentCount()];
+   public void func_70071_h_() {
+      super.func_70071_h_();
+      boolean flag = this.func_184497_n();
+      float f = this.func_184490_j();
+      if (this.field_70170_p.field_72995_K) {
+         EnumParticleTypes enumparticletypes = this.func_184493_l();
+         int[] aint = new int[enumparticletypes.func_179345_d()];
+         if (aint.length > 0) {
+            aint[0] = this.func_189733_n();
+         }
 
-            if (aint.length > 0)
-            {
-                aint[0] = this.getParticleParam1();
+         if (aint.length > 1) {
+            aint[1] = this.func_189735_o();
+         }
+
+         if (flag) {
+            if (this.field_70146_Z.nextBoolean()) {
+               for(int i = 0; i < 2; ++i) {
+                  float f1 = this.field_70146_Z.nextFloat() * 6.2831855F;
+                  float f2 = MathHelper.func_76129_c(this.field_70146_Z.nextFloat()) * 0.2F;
+                  float f3 = MathHelper.func_76134_b(f1) * f2;
+                  float f4 = MathHelper.func_76126_a(f1) * f2;
+                  if (enumparticletypes == EnumParticleTypes.SPELL_MOB) {
+                     int j = this.field_70146_Z.nextBoolean() ? 16777215 : this.func_184492_k();
+                     int k = j >> 16 & 255;
+                     int l = j >> 8 & 255;
+                     int i1 = j & 255;
+                     this.field_70170_p.func_190523_a(EnumParticleTypes.SPELL_MOB.func_179348_c(), this.field_70165_t + (double)f3, this.field_70163_u, this.field_70161_v + (double)f4, (double)((float)k / 255.0F), (double)((float)l / 255.0F), (double)((float)i1 / 255.0F));
+                  } else {
+                     this.field_70170_p.func_190523_a(enumparticletypes.func_179348_c(), this.field_70165_t + (double)f3, this.field_70163_u, this.field_70161_v + (double)f4, 0.0D, 0.0D, 0.0D, aint);
+                  }
+               }
+            }
+         } else {
+            float f5 = 3.1415927F * f * f;
+
+            for(int k1 = 0; (float)k1 < f5; ++k1) {
+               float f6 = this.field_70146_Z.nextFloat() * 6.2831855F;
+               float f7 = MathHelper.func_76129_c(this.field_70146_Z.nextFloat()) * f;
+               float f8 = MathHelper.func_76134_b(f6) * f7;
+               float f9 = MathHelper.func_76126_a(f6) * f7;
+               if (enumparticletypes == EnumParticleTypes.SPELL_MOB) {
+                  int l1 = this.func_184492_k();
+                  int i2 = l1 >> 16 & 255;
+                  int j2 = l1 >> 8 & 255;
+                  int j1 = l1 & 255;
+                  this.field_70170_p.func_190523_a(EnumParticleTypes.SPELL_MOB.func_179348_c(), this.field_70165_t + (double)f8, this.field_70163_u, this.field_70161_v + (double)f9, (double)((float)i2 / 255.0F), (double)((float)j2 / 255.0F), (double)((float)j1 / 255.0F));
+               } else {
+                  this.field_70170_p.func_190523_a(enumparticletypes.func_179348_c(), this.field_70165_t + (double)f8, this.field_70163_u, this.field_70161_v + (double)f9, (0.5D - this.field_70146_Z.nextDouble()) * 0.15D, 0.009999999776482582D, (0.5D - this.field_70146_Z.nextDouble()) * 0.15D, aint);
+               }
+            }
+         }
+      } else {
+         if (this.field_70173_aa >= this.field_184506_as + this.field_184505_h) {
+            this.func_70106_y();
+            return;
+         }
+
+         boolean flag1 = this.field_70173_aa < this.field_184506_as;
+         if (flag != flag1) {
+            this.func_184488_a(flag1);
+         }
+
+         if (flag1) {
+            return;
+         }
+
+         if (this.field_184511_ax != 0.0F) {
+            f += this.field_184511_ax;
+            if (f < 0.5F) {
+               this.func_70106_y();
+               return;
             }
 
-            if (aint.length > 1)
-            {
-                aint[1] = this.getParticleParam2();
+            this.func_184483_a(f);
+         }
+
+         if (this.field_70173_aa % 5 == 0) {
+            Iterator<Entry<Entity, Integer>> iterator = this.field_184504_g.entrySet().iterator();
+
+            while(iterator.hasNext()) {
+               Entry<Entity, Integer> entry = (Entry)iterator.next();
+               if (this.field_70173_aa >= ((Integer)entry.getValue()).intValue()) {
+                  iterator.remove();
+               }
             }
 
-            if (flag)
-            {
-                if (this.rand.nextBoolean())
-                {
-                    for (int i = 0; i < 2; ++i)
-                    {
-                        float f1 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-                        float f2 = MathHelper.sqrt(this.rand.nextFloat()) * 0.2F;
-                        float f3 = MathHelper.cos(f1) * f2;
-                        float f4 = MathHelper.sin(f1) * f2;
+            iterator = Lists.<Entry<Entity, Integer>>newArrayList();
 
-                        if (enumparticletypes == EnumParticleTypes.SPELL_MOB)
-                        {
-                            int j = this.rand.nextBoolean() ? 16777215 : this.getColor();
-                            int k = j >> 16 & 255;
-                            int l = j >> 8 & 255;
-                            int i1 = j & 255;
-                            this.world.func_190523_a(EnumParticleTypes.SPELL_MOB.getParticleID(), this.posX + (double)f3, this.posY, this.posZ + (double)f4, (double)((float)k / 255.0F), (double)((float)l / 255.0F), (double)((float)i1 / 255.0F));
+            for(PotionEffect potioneffect1 : this.field_184502_e.func_185170_a()) {
+               iterator.add(new PotionEffect(potioneffect1.func_188419_a(), potioneffect1.func_76459_b() / 4, potioneffect1.func_76458_c(), potioneffect1.func_82720_e(), potioneffect1.func_188418_e()));
+            }
+
+            iterator.addAll(this.field_184503_f);
+            if (iterator.isEmpty()) {
+               this.field_184504_g.clear();
+            } else {
+               List<EntityLivingBase> list = this.field_70170_p.<EntityLivingBase>func_72872_a(EntityLivingBase.class, this.func_174813_aQ());
+               if (!list.isEmpty()) {
+                  for(EntityLivingBase entitylivingbase : list) {
+                     if (!this.field_184504_g.containsKey(entitylivingbase) && entitylivingbase.func_184603_cC()) {
+                        double d0 = entitylivingbase.field_70165_t - this.field_70165_t;
+                        double d1 = entitylivingbase.field_70161_v - this.field_70161_v;
+                        double d2 = d0 * d0 + d1 * d1;
+                        if (d2 <= (double)(f * f)) {
+                           this.field_184504_g.put(entitylivingbase, Integer.valueOf(this.field_70173_aa + this.field_184507_at));
+
+                           for(PotionEffect potioneffect : iterator) {
+                              if (potioneffect.func_188419_a().func_76403_b()) {
+                                 potioneffect.func_188419_a().func_180793_a(this, this.func_184494_w(), entitylivingbase, potioneffect.func_76458_c(), 0.5D);
+                              } else {
+                                 entitylivingbase.func_70690_d(new PotionEffect(potioneffect));
+                              }
+                           }
+
+                           if (this.field_184510_aw != 0.0F) {
+                              f += this.field_184510_aw;
+                              if (f < 0.5F) {
+                                 this.func_70106_y();
+                                 return;
+                              }
+
+                              this.func_184483_a(f);
+                           }
+
+                           if (this.field_184509_av != 0) {
+                              this.field_184505_h += this.field_184509_av;
+                              if (this.field_184505_h <= 0) {
+                                 this.func_70106_y();
+                                 return;
+                              }
+                           }
                         }
-                        else
-                        {
-                            this.world.func_190523_a(enumparticletypes.getParticleID(), this.posX + (double)f3, this.posY, this.posZ + (double)f4, 0.0D, 0.0D, 0.0D, aint);
-                        }
-                    }
-                }
+                     }
+                  }
+               }
             }
-            else
-            {
-                float f5 = (float)Math.PI * f * f;
+         }
+      }
 
-                for (int k1 = 0; (float)k1 < f5; ++k1)
-                {
-                    float f6 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-                    float f7 = MathHelper.sqrt(this.rand.nextFloat()) * f;
-                    float f8 = MathHelper.cos(f6) * f7;
-                    float f9 = MathHelper.sin(f6) * f7;
+   }
 
-                    if (enumparticletypes == EnumParticleTypes.SPELL_MOB)
-                    {
-                        int l1 = this.getColor();
-                        int i2 = l1 >> 16 & 255;
-                        int j2 = l1 >> 8 & 255;
-                        int j1 = l1 & 255;
-                        this.world.func_190523_a(EnumParticleTypes.SPELL_MOB.getParticleID(), this.posX + (double)f8, this.posY, this.posZ + (double)f9, (double)((float)i2 / 255.0F), (double)((float)j2 / 255.0F), (double)((float)j1 / 255.0F));
-                    }
-                    else
-                    {
-                        this.world.func_190523_a(enumparticletypes.getParticleID(), this.posX + (double)f8, this.posY, this.posZ + (double)f9, (0.5D - this.rand.nextDouble()) * 0.15D, 0.009999999776482582D, (0.5D - this.rand.nextDouble()) * 0.15D, aint);
-                    }
-                }
+   public void func_184495_b(float p_184495_1_) {
+      this.field_184510_aw = p_184495_1_;
+   }
+
+   public void func_184487_c(float p_184487_1_) {
+      this.field_184511_ax = p_184487_1_;
+   }
+
+   public void func_184485_d(int p_184485_1_) {
+      this.field_184506_as = p_184485_1_;
+   }
+
+   public void func_184481_a(@Nullable EntityLivingBase p_184481_1_) {
+      this.field_184512_ay = p_184481_1_;
+      this.field_184513_az = p_184481_1_ == null ? null : p_184481_1_.func_110124_au();
+   }
+
+   @Nullable
+   public EntityLivingBase func_184494_w() {
+      if (this.field_184512_ay == null && this.field_184513_az != null && this.field_70170_p instanceof WorldServer) {
+         Entity entity = ((WorldServer)this.field_70170_p).func_175733_a(this.field_184513_az);
+         if (entity instanceof EntityLivingBase) {
+            this.field_184512_ay = (EntityLivingBase)entity;
+         }
+      }
+
+      return this.field_184512_ay;
+   }
+
+   protected void func_70037_a(NBTTagCompound p_70037_1_) {
+      this.field_70173_aa = p_70037_1_.func_74762_e("Age");
+      this.field_184505_h = p_70037_1_.func_74762_e("Duration");
+      this.field_184506_as = p_70037_1_.func_74762_e("WaitTime");
+      this.field_184507_at = p_70037_1_.func_74762_e("ReapplicationDelay");
+      this.field_184509_av = p_70037_1_.func_74762_e("DurationOnUse");
+      this.field_184510_aw = p_70037_1_.func_74760_g("RadiusOnUse");
+      this.field_184511_ax = p_70037_1_.func_74760_g("RadiusPerTick");
+      this.func_184483_a(p_70037_1_.func_74760_g("Radius"));
+      this.field_184513_az = p_70037_1_.func_186857_a("OwnerUUID");
+      if (p_70037_1_.func_150297_b("Particle", 8)) {
+         EnumParticleTypes enumparticletypes = EnumParticleTypes.func_186831_a(p_70037_1_.func_74779_i("Particle"));
+         if (enumparticletypes != null) {
+            this.func_184491_a(enumparticletypes);
+            this.func_189734_b(p_70037_1_.func_74762_e("ParticleParam1"));
+            this.func_189732_d(p_70037_1_.func_74762_e("ParticleParam2"));
+         }
+      }
+
+      if (p_70037_1_.func_150297_b("Color", 99)) {
+         this.func_184482_a(p_70037_1_.func_74762_e("Color"));
+      }
+
+      if (p_70037_1_.func_150297_b("Potion", 8)) {
+         this.func_184484_a(PotionUtils.func_185187_c(p_70037_1_));
+      }
+
+      if (p_70037_1_.func_150297_b("Effects", 9)) {
+         NBTTagList nbttaglist = p_70037_1_.func_150295_c("Effects", 10);
+         this.field_184503_f.clear();
+
+         for(int i = 0; i < nbttaglist.func_74745_c(); ++i) {
+            PotionEffect potioneffect = PotionEffect.func_82722_b(nbttaglist.func_150305_b(i));
+            if (potioneffect != null) {
+               this.func_184496_a(potioneffect);
             }
-        }
-        else
-        {
-            if (this.ticksExisted >= this.waitTime + this.duration)
-            {
-                this.setDead();
-                return;
-            }
+         }
+      }
 
-            boolean flag1 = this.ticksExisted < this.waitTime;
+   }
 
-            if (flag != flag1)
-            {
-                this.setIgnoreRadius(flag1);
-            }
+   protected void func_70014_b(NBTTagCompound p_70014_1_) {
+      p_70014_1_.func_74768_a("Age", this.field_70173_aa);
+      p_70014_1_.func_74768_a("Duration", this.field_184505_h);
+      p_70014_1_.func_74768_a("WaitTime", this.field_184506_as);
+      p_70014_1_.func_74768_a("ReapplicationDelay", this.field_184507_at);
+      p_70014_1_.func_74768_a("DurationOnUse", this.field_184509_av);
+      p_70014_1_.func_74776_a("RadiusOnUse", this.field_184510_aw);
+      p_70014_1_.func_74776_a("RadiusPerTick", this.field_184511_ax);
+      p_70014_1_.func_74776_a("Radius", this.func_184490_j());
+      p_70014_1_.func_74778_a("Particle", this.func_184493_l().func_179346_b());
+      p_70014_1_.func_74768_a("ParticleParam1", this.func_189733_n());
+      p_70014_1_.func_74768_a("ParticleParam2", this.func_189735_o());
+      if (this.field_184513_az != null) {
+         p_70014_1_.func_186854_a("OwnerUUID", this.field_184513_az);
+      }
 
-            if (flag1)
-            {
-                return;
-            }
+      if (this.field_184508_au) {
+         p_70014_1_.func_74768_a("Color", this.func_184492_k());
+      }
 
-            if (this.radiusPerTick != 0.0F)
-            {
-                f += this.radiusPerTick;
+      if (this.field_184502_e != PotionTypes.field_185229_a && this.field_184502_e != null) {
+         p_70014_1_.func_74778_a("Potion", ((ResourceLocation)PotionType.field_185176_a.func_177774_c(this.field_184502_e)).toString());
+      }
 
-                if (f < 0.5F)
-                {
-                    this.setDead();
-                    return;
-                }
+      if (!this.field_184503_f.isEmpty()) {
+         NBTTagList nbttaglist = new NBTTagList();
 
-                this.setRadius(f);
-            }
+         for(PotionEffect potioneffect : this.field_184503_f) {
+            nbttaglist.func_74742_a(potioneffect.func_82719_a(new NBTTagCompound()));
+         }
 
-            if (this.ticksExisted % 5 == 0)
-            {
-                Iterator<Entry<Entity, Integer>> iterator = this.reapplicationDelayMap.entrySet().iterator();
+         p_70014_1_.func_74782_a("Effects", nbttaglist);
+      }
 
-                while (iterator.hasNext())
-                {
-                    Entry<Entity, Integer> entry = (Entry)iterator.next();
+   }
 
-                    if (this.ticksExisted >= ((Integer)entry.getValue()).intValue())
-                    {
-                        iterator.remove();
-                    }
-                }
+   public void func_184206_a(DataParameter<?> p_184206_1_) {
+      if (field_184498_a.equals(p_184206_1_)) {
+         this.func_184483_a(this.func_184490_j());
+      }
 
-                List<PotionEffect> lstPotions = Lists.newArrayList();
+      super.func_184206_a(p_184206_1_);
+   }
 
-                for (PotionEffect potioneffect1 : this.potion.getEffects())
-                {
-                    lstPotions.add(new PotionEffect(potioneffect1.getPotion(), potioneffect1.getDuration() / 4, potioneffect1.getAmplifier(), potioneffect1.getIsAmbient(), potioneffect1.doesShowParticles()));
-                }
-
-                lstPotions.addAll(this.effects);
-
-                if (lstPotions.isEmpty())
-                {
-                    this.reapplicationDelayMap.clear();
-                }
-                else
-                {
-                    List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox());
-
-                    if (!list.isEmpty())
-                    {
-                        for (EntityLivingBase entitylivingbase : list)
-                        {
-                            if (!this.reapplicationDelayMap.containsKey(entitylivingbase) && entitylivingbase.canBeHitWithPotion())
-                            {
-                                double d0 = entitylivingbase.posX - this.posX;
-                                double d1 = entitylivingbase.posZ - this.posZ;
-                                double d2 = d0 * d0 + d1 * d1;
-
-                                if (d2 <= (double)(f * f))
-                                {
-                                    this.reapplicationDelayMap.put(entitylivingbase, Integer.valueOf(this.ticksExisted + this.reapplicationDelay));
-
-                                    for (PotionEffect potioneffect : lstPotions)
-                                    {
-                                        if (potioneffect.getPotion().isInstant())
-                                        {
-                                            potioneffect.getPotion().affectEntity(this, this.getOwner(), entitylivingbase, potioneffect.getAmplifier(), 0.5D);
-                                        }
-                                        else
-                                        {
-                                            entitylivingbase.addPotionEffect(new PotionEffect(potioneffect));
-                                        }
-                                    }
-
-                                    if (this.radiusOnUse != 0.0F)
-                                    {
-                                        f += this.radiusOnUse;
-
-                                        if (f < 0.5F)
-                                        {
-                                            this.setDead();
-                                            return;
-                                        }
-
-                                        this.setRadius(f);
-                                    }
-
-                                    if (this.durationOnUse != 0)
-                                    {
-                                        this.duration += this.durationOnUse;
-
-                                        if (this.duration <= 0)
-                                        {
-                                            this.setDead();
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void setRadiusOnUse(float radiusOnUseIn)
-    {
-        this.radiusOnUse = radiusOnUseIn;
-    }
-
-    public void setRadiusPerTick(float radiusPerTickIn)
-    {
-        this.radiusPerTick = radiusPerTickIn;
-    }
-
-    public void setWaitTime(int waitTimeIn)
-    {
-        this.waitTime = waitTimeIn;
-    }
-
-    public void setOwner(@Nullable EntityLivingBase ownerIn)
-    {
-        this.owner = ownerIn;
-        this.ownerUniqueId = ownerIn == null ? null : ownerIn.getUniqueID();
-    }
-
-    @Nullable
-    public EntityLivingBase getOwner()
-    {
-        if (this.owner == null && this.ownerUniqueId != null && this.world instanceof WorldServer)
-        {
-            Entity entity = ((WorldServer)this.world).getEntityFromUuid(this.ownerUniqueId);
-
-            if (entity instanceof EntityLivingBase)
-            {
-                this.owner = (EntityLivingBase)entity;
-            }
-        }
-
-        return this.owner;
-    }
-
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    protected void readEntityFromNBT(NBTTagCompound compound)
-    {
-        this.ticksExisted = compound.getInteger("Age");
-        this.duration = compound.getInteger("Duration");
-        this.waitTime = compound.getInteger("WaitTime");
-        this.reapplicationDelay = compound.getInteger("ReapplicationDelay");
-        this.durationOnUse = compound.getInteger("DurationOnUse");
-        this.radiusOnUse = compound.getFloat("RadiusOnUse");
-        this.radiusPerTick = compound.getFloat("RadiusPerTick");
-        this.setRadius(compound.getFloat("Radius"));
-        this.ownerUniqueId = compound.getUniqueId("OwnerUUID");
-
-        if (compound.hasKey("Particle", 8))
-        {
-            EnumParticleTypes enumparticletypes = EnumParticleTypes.getByName(compound.getString("Particle"));
-
-            if (enumparticletypes != null)
-            {
-                this.setParticle(enumparticletypes);
-                this.setParticleParam1(compound.getInteger("ParticleParam1"));
-                this.setParticleParam2(compound.getInteger("ParticleParam2"));
-            }
-        }
-
-        if (compound.hasKey("Color", 99))
-        {
-            this.setColor(compound.getInteger("Color"));
-        }
-
-        if (compound.hasKey("Potion", 8))
-        {
-            this.setPotion(PotionUtils.getPotionTypeFromNBT(compound));
-        }
-
-        if (compound.hasKey("Effects", 9))
-        {
-            NBTTagList nbttaglist = compound.getTagList("Effects", 10);
-            this.effects.clear();
-
-            for (int i = 0; i < nbttaglist.tagCount(); ++i)
-            {
-                PotionEffect potioneffect = PotionEffect.readCustomPotionEffectFromNBT(nbttaglist.getCompoundTagAt(i));
-
-                if (potioneffect != null)
-                {
-                    this.addEffect(potioneffect);
-                }
-            }
-        }
-    }
-
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    protected void writeEntityToNBT(NBTTagCompound compound)
-    {
-        compound.setInteger("Age", this.ticksExisted);
-        compound.setInteger("Duration", this.duration);
-        compound.setInteger("WaitTime", this.waitTime);
-        compound.setInteger("ReapplicationDelay", this.reapplicationDelay);
-        compound.setInteger("DurationOnUse", this.durationOnUse);
-        compound.setFloat("RadiusOnUse", this.radiusOnUse);
-        compound.setFloat("RadiusPerTick", this.radiusPerTick);
-        compound.setFloat("Radius", this.getRadius());
-        compound.setString("Particle", this.getParticle().getParticleName());
-        compound.setInteger("ParticleParam1", this.getParticleParam1());
-        compound.setInteger("ParticleParam2", this.getParticleParam2());
-
-        if (this.ownerUniqueId != null)
-        {
-            compound.setUniqueId("OwnerUUID", this.ownerUniqueId);
-        }
-
-        if (this.colorSet)
-        {
-            compound.setInteger("Color", this.getColor());
-        }
-
-        if (this.potion != PotionTypes.EMPTY && this.potion != null)
-        {
-            compound.setString("Potion", ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString());
-        }
-
-        if (!this.effects.isEmpty())
-        {
-            NBTTagList nbttaglist = new NBTTagList();
-
-            for (PotionEffect potioneffect : this.effects)
-            {
-                nbttaglist.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
-            }
-
-            compound.setTag("Effects", nbttaglist);
-        }
-    }
-
-    public void notifyDataManagerChange(DataParameter<?> key)
-    {
-        if (RADIUS.equals(key))
-        {
-            this.setRadius(this.getRadius());
-        }
-
-        super.notifyDataManagerChange(key);
-    }
-
-    public EnumPushReaction getPushReaction()
-    {
-        return EnumPushReaction.IGNORE;
-    }
+   public EnumPushReaction func_184192_z() {
+      return EnumPushReaction.IGNORE;
+   }
 }

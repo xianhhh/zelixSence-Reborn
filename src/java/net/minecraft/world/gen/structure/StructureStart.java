@@ -9,180 +9,138 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
-public abstract class StructureStart
-{
-    protected List<StructureComponent> components = Lists.<StructureComponent>newLinkedList();
-    protected StructureBoundingBox boundingBox;
-    private int chunkPosX;
-    private int chunkPosZ;
+public abstract class StructureStart {
+   protected List<StructureComponent> field_75075_a = Lists.<StructureComponent>newLinkedList();
+   protected StructureBoundingBox field_75074_b;
+   private int field_143024_c;
+   private int field_143023_d;
 
-    public StructureStart()
-    {
-    }
+   public StructureStart() {
+   }
 
-    public StructureStart(int chunkX, int chunkZ)
-    {
-        this.chunkPosX = chunkX;
-        this.chunkPosZ = chunkZ;
-    }
+   public StructureStart(int p_i43002_1_, int p_i43002_2_) {
+      this.field_143024_c = p_i43002_1_;
+      this.field_143023_d = p_i43002_2_;
+   }
 
-    public StructureBoundingBox getBoundingBox()
-    {
-        return this.boundingBox;
-    }
+   public StructureBoundingBox func_75071_a() {
+      return this.field_75074_b;
+   }
 
-    public List<StructureComponent> getComponents()
-    {
-        return this.components;
-    }
+   public List<StructureComponent> func_186161_c() {
+      return this.field_75075_a;
+   }
 
-    /**
-     * Keeps iterating Structure Pieces and spawning them until the checks tell it to stop
-     */
-    public void generateStructure(World worldIn, Random rand, StructureBoundingBox structurebb)
-    {
-        Iterator<StructureComponent> iterator = this.components.iterator();
+   public void func_75068_a(World p_75068_1_, Random p_75068_2_, StructureBoundingBox p_75068_3_) {
+      Iterator<StructureComponent> iterator = this.field_75075_a.iterator();
 
-        while (iterator.hasNext())
-        {
-            StructureComponent structurecomponent = iterator.next();
+      while(iterator.hasNext()) {
+         StructureComponent structurecomponent = iterator.next();
+         if (structurecomponent.func_74874_b().func_78884_a(p_75068_3_) && !structurecomponent.func_74875_a(p_75068_1_, p_75068_2_, p_75068_3_)) {
+            iterator.remove();
+         }
+      }
 
-            if (structurecomponent.getBoundingBox().intersectsWith(structurebb) && !structurecomponent.addComponentParts(worldIn, rand, structurebb))
-            {
-                iterator.remove();
-            }
-        }
-    }
+   }
 
-    /**
-     * Calculates total bounding box based on components' bounding boxes and saves it to boundingBox
-     */
-    protected void updateBoundingBox()
-    {
-        this.boundingBox = StructureBoundingBox.getNewBoundingBox();
+   protected void func_75072_c() {
+      this.field_75074_b = StructureBoundingBox.func_78887_a();
 
-        for (StructureComponent structurecomponent : this.components)
-        {
-            this.boundingBox.expandTo(structurecomponent.getBoundingBox());
-        }
-    }
+      for(StructureComponent structurecomponent : this.field_75075_a) {
+         this.field_75074_b.func_78888_b(structurecomponent.func_74874_b());
+      }
 
-    public NBTTagCompound writeStructureComponentsToNBT(int chunkX, int chunkZ)
-    {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setString("id", MapGenStructureIO.getStructureStartName(this));
-        nbttagcompound.setInteger("ChunkX", chunkX);
-        nbttagcompound.setInteger("ChunkZ", chunkZ);
-        nbttagcompound.setTag("BB", this.boundingBox.toNBTTagIntArray());
-        NBTTagList nbttaglist = new NBTTagList();
+   }
 
-        for (StructureComponent structurecomponent : this.components)
-        {
-            nbttaglist.appendTag(structurecomponent.createStructureBaseNBT());
-        }
+   public NBTTagCompound func_143021_a(int p_143021_1_, int p_143021_2_) {
+      NBTTagCompound nbttagcompound = new NBTTagCompound();
+      nbttagcompound.func_74778_a("id", MapGenStructureIO.func_143033_a(this));
+      nbttagcompound.func_74768_a("ChunkX", p_143021_1_);
+      nbttagcompound.func_74768_a("ChunkZ", p_143021_2_);
+      nbttagcompound.func_74782_a("BB", this.field_75074_b.func_151535_h());
+      NBTTagList nbttaglist = new NBTTagList();
 
-        nbttagcompound.setTag("Children", nbttaglist);
-        this.writeToNBT(nbttagcompound);
-        return nbttagcompound;
-    }
+      for(StructureComponent structurecomponent : this.field_75075_a) {
+         nbttaglist.func_74742_a(structurecomponent.func_143010_b());
+      }
 
-    public void writeToNBT(NBTTagCompound tagCompound)
-    {
-    }
+      nbttagcompound.func_74782_a("Children", nbttaglist);
+      this.func_143022_a(nbttagcompound);
+      return nbttagcompound;
+   }
 
-    public void readStructureComponentsFromNBT(World worldIn, NBTTagCompound tagCompound)
-    {
-        this.chunkPosX = tagCompound.getInteger("ChunkX");
-        this.chunkPosZ = tagCompound.getInteger("ChunkZ");
+   public void func_143022_a(NBTTagCompound p_143022_1_) {
+   }
 
-        if (tagCompound.hasKey("BB"))
-        {
-            this.boundingBox = new StructureBoundingBox(tagCompound.getIntArray("BB"));
-        }
+   public void func_143020_a(World p_143020_1_, NBTTagCompound p_143020_2_) {
+      this.field_143024_c = p_143020_2_.func_74762_e("ChunkX");
+      this.field_143023_d = p_143020_2_.func_74762_e("ChunkZ");
+      if (p_143020_2_.func_74764_b("BB")) {
+         this.field_75074_b = new StructureBoundingBox(p_143020_2_.func_74759_k("BB"));
+      }
 
-        NBTTagList nbttaglist = tagCompound.getTagList("Children", 10);
+      NBTTagList nbttaglist = p_143020_2_.func_150295_c("Children", 10);
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
-        {
-            this.components.add(MapGenStructureIO.getStructureComponent(nbttaglist.getCompoundTagAt(i), worldIn));
-        }
+      for(int i = 0; i < nbttaglist.func_74745_c(); ++i) {
+         this.field_75075_a.add(MapGenStructureIO.func_143032_b(nbttaglist.func_150305_b(i), p_143020_1_));
+      }
 
-        this.readFromNBT(tagCompound);
-    }
+      this.func_143017_b(p_143020_2_);
+   }
 
-    public void readFromNBT(NBTTagCompound tagCompound)
-    {
-    }
+   public void func_143017_b(NBTTagCompound p_143017_1_) {
+   }
 
-    /**
-     * offsets the structure Bounding Boxes up to a certain height, typically 63 - 10
-     */
-    protected void markAvailableHeight(World worldIn, Random rand, int p_75067_3_)
-    {
-        int i = worldIn.getSeaLevel() - p_75067_3_;
-        int j = this.boundingBox.getYSize() + 1;
+   protected void func_75067_a(World p_75067_1_, Random p_75067_2_, int p_75067_3_) {
+      int i = p_75067_1_.func_181545_F() - p_75067_3_;
+      int j = this.field_75074_b.func_78882_c() + 1;
+      if (j < i) {
+         j += p_75067_2_.nextInt(i - j);
+      }
 
-        if (j < i)
-        {
-            j += rand.nextInt(i - j);
-        }
+      int k = j - this.field_75074_b.field_78894_e;
+      this.field_75074_b.func_78886_a(0, k, 0);
 
-        int k = j - this.boundingBox.maxY;
-        this.boundingBox.offset(0, k, 0);
+      for(StructureComponent structurecomponent : this.field_75075_a) {
+         structurecomponent.func_181138_a(0, k, 0);
+      }
 
-        for (StructureComponent structurecomponent : this.components)
-        {
-            structurecomponent.offset(0, k, 0);
-        }
-    }
+   }
 
-    protected void setRandomHeight(World worldIn, Random rand, int p_75070_3_, int p_75070_4_)
-    {
-        int i = p_75070_4_ - p_75070_3_ + 1 - this.boundingBox.getYSize();
-        int j;
+   protected void func_75070_a(World p_75070_1_, Random p_75070_2_, int p_75070_3_, int p_75070_4_) {
+      int i = p_75070_4_ - p_75070_3_ + 1 - this.field_75074_b.func_78882_c();
+      int j;
+      if (i > 1) {
+         j = p_75070_3_ + p_75070_2_.nextInt(i);
+      } else {
+         j = p_75070_3_;
+      }
 
-        if (i > 1)
-        {
-            j = p_75070_3_ + rand.nextInt(i);
-        }
-        else
-        {
-            j = p_75070_3_;
-        }
+      int k = j - this.field_75074_b.field_78895_b;
+      this.field_75074_b.func_78886_a(0, k, 0);
 
-        int k = j - this.boundingBox.minY;
-        this.boundingBox.offset(0, k, 0);
+      for(StructureComponent structurecomponent : this.field_75075_a) {
+         structurecomponent.func_181138_a(0, k, 0);
+      }
 
-        for (StructureComponent structurecomponent : this.components)
-        {
-            structurecomponent.offset(0, k, 0);
-        }
-    }
+   }
 
-    /**
-     * currently only defined for Villages, returns true if Village has more than 2 non-road components
-     */
-    public boolean isSizeableStructure()
-    {
-        return true;
-    }
+   public boolean func_75069_d() {
+      return true;
+   }
 
-    public boolean isValidForPostProcess(ChunkPos pair)
-    {
-        return true;
-    }
+   public boolean func_175788_a(ChunkPos p_175788_1_) {
+      return true;
+   }
 
-    public void notifyPostProcessAt(ChunkPos pair)
-    {
-    }
+   public void func_175787_b(ChunkPos p_175787_1_) {
+   }
 
-    public int getChunkPosX()
-    {
-        return this.chunkPosX;
-    }
+   public int func_143019_e() {
+      return this.field_143024_c;
+   }
 
-    public int getChunkPosZ()
-    {
-        return this.chunkPosZ;
-    }
+   public int func_143018_f() {
+      return this.field_143023_d;
+   }
 }

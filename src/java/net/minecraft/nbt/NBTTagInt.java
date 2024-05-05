@@ -4,92 +4,66 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagInt extends NBTPrimitive
-{
-    /** The integer value for the tag. */
-    private int data;
+public class NBTTagInt extends NBTPrimitive {
+   private int field_74748_a;
 
-    NBTTagInt()
-    {
-    }
+   NBTTagInt() {
+   }
 
-    public NBTTagInt(int data)
-    {
-        this.data = data;
-    }
+   public NBTTagInt(int p_i45133_1_) {
+      this.field_74748_a = p_i45133_1_;
+   }
 
-    /**
-     * Write the actual data contents of the tag, implemented in NBT extension classes
-     */
-    void write(DataOutput output) throws IOException
-    {
-        output.writeInt(this.data);
-    }
+   void func_74734_a(DataOutput p_74734_1_) throws IOException {
+      p_74734_1_.writeInt(this.field_74748_a);
+   }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
-    {
-        sizeTracker.read(96L);
-        this.data = input.readInt();
-    }
+   void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException {
+      p_152446_3_.func_152450_a(96L);
+      this.field_74748_a = p_152446_1_.readInt();
+   }
 
-    /**
-     * Gets the type byte for the tag.
-     */
-    public byte getId()
-    {
-        return 3;
-    }
+   public byte func_74732_a() {
+      return 3;
+   }
 
-    public String toString()
-    {
-        return String.valueOf(this.data);
-    }
+   public String toString() {
+      return String.valueOf(this.field_74748_a);
+   }
 
-    /**
-     * Creates a clone of the tag.
-     */
-    public NBTTagInt copy()
-    {
-        return new NBTTagInt(this.data);
-    }
+   public NBTTagInt func_74737_b() {
+      return new NBTTagInt(this.field_74748_a);
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        return super.equals(p_equals_1_) && this.data == ((NBTTagInt)p_equals_1_).data;
-    }
+   public boolean equals(Object p_equals_1_) {
+      return super.equals(p_equals_1_) && this.field_74748_a == ((NBTTagInt)p_equals_1_).field_74748_a;
+   }
 
-    public int hashCode()
-    {
-        return super.hashCode() ^ this.data;
-    }
+   public int hashCode() {
+      return super.hashCode() ^ this.field_74748_a;
+   }
 
-    public long getLong()
-    {
-        return (long)this.data;
-    }
+   public long func_150291_c() {
+      return (long)this.field_74748_a;
+   }
 
-    public int getInt()
-    {
-        return this.data;
-    }
+   public int func_150287_d() {
+      return this.field_74748_a;
+   }
 
-    public short getShort()
-    {
-        return (short)(this.data & 65535);
-    }
+   public short func_150289_e() {
+      return (short)(this.field_74748_a & '\uffff');
+   }
 
-    public byte getByte()
-    {
-        return (byte)(this.data & 255);
-    }
+   public byte func_150290_f() {
+      return (byte)(this.field_74748_a & 255);
+   }
 
-    public double getDouble()
-    {
-        return (double)this.data;
-    }
+   public double func_150286_g() {
+      return (double)this.field_74748_a;
+   }
 
-    public float getFloat()
-    {
-        return (float)this.data;
-    }
+   public float func_150288_h() {
+      return (float)this.field_74748_a;
+   }
 }

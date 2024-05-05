@@ -8,272 +8,222 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
-public class Framebuffer
-{
-    public int framebufferTextureWidth;
-    public int framebufferTextureHeight;
-    public int framebufferWidth;
-    public int framebufferHeight;
-    public boolean useDepth;
-    public int framebufferObject;
-    public int framebufferTexture;
-    public int depthBuffer;
-    public float[] framebufferColor;
-    public int framebufferFilter;
+public class Framebuffer {
+   public int field_147622_a;
+   public int field_147620_b;
+   public int field_147621_c;
+   public int field_147618_d;
+   public boolean field_147619_e;
+   public int field_147616_f;
+   public int field_147617_g;
+   public int field_147624_h;
+   public float[] field_147625_i;
+   public int field_147623_j;
 
-    public Framebuffer(int width, int height, boolean useDepthIn)
-    {
-        this.useDepth = useDepthIn;
-        this.framebufferObject = -1;
-        this.framebufferTexture = -1;
-        this.depthBuffer = -1;
-        this.framebufferColor = new float[4];
-        this.framebufferColor[0] = 1.0F;
-        this.framebufferColor[1] = 1.0F;
-        this.framebufferColor[2] = 1.0F;
-        this.framebufferColor[3] = 0.0F;
-        this.createBindFramebuffer(width, height);
-    }
+   public Framebuffer(int p_i45078_1_, int p_i45078_2_, boolean p_i45078_3_) {
+      this.field_147619_e = p_i45078_3_;
+      this.field_147616_f = -1;
+      this.field_147617_g = -1;
+      this.field_147624_h = -1;
+      this.field_147625_i = new float[4];
+      this.field_147625_i[0] = 1.0F;
+      this.field_147625_i[1] = 1.0F;
+      this.field_147625_i[2] = 1.0F;
+      this.field_147625_i[3] = 0.0F;
+      this.func_147613_a(p_i45078_1_, p_i45078_2_);
+   }
 
-    public void createBindFramebuffer(int width, int height)
-    {
-        if (!OpenGlHelper.isFramebufferEnabled())
-        {
-            this.framebufferWidth = width;
-            this.framebufferHeight = height;
-        }
-        else
-        {
-            GlStateManager.enableDepth();
+   public void func_147613_a(int p_147613_1_, int p_147613_2_) {
+      if (!OpenGlHelper.func_148822_b()) {
+         this.field_147621_c = p_147613_1_;
+         this.field_147618_d = p_147613_2_;
+      } else {
+         GlStateManager.func_179126_j();
+         if (this.field_147616_f >= 0) {
+            this.func_147608_a();
+         }
 
-            if (this.framebufferObject >= 0)
-            {
-                this.deleteFramebuffer();
-            }
+         this.func_147605_b(p_147613_1_, p_147613_2_);
+         this.func_147611_b();
+         OpenGlHelper.func_153171_g(OpenGlHelper.field_153198_e, 0);
+      }
+   }
 
-            this.createFramebuffer(width, height);
-            this.checkFramebufferComplete();
-            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, 0);
-        }
-    }
+   public void func_147608_a() {
+      if (OpenGlHelper.func_148822_b()) {
+         this.func_147606_d();
+         this.func_147609_e();
+         if (this.field_147624_h > -1) {
+            OpenGlHelper.func_153184_g(this.field_147624_h);
+            this.field_147624_h = -1;
+         }
 
-    public void deleteFramebuffer()
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            this.unbindFramebufferTexture();
-            this.unbindFramebuffer();
+         if (this.field_147617_g > -1) {
+            TextureUtil.func_147942_a(this.field_147617_g);
+            this.field_147617_g = -1;
+         }
 
-            if (this.depthBuffer > -1)
-            {
-                OpenGlHelper.glDeleteRenderbuffers(this.depthBuffer);
-                this.depthBuffer = -1;
-            }
+         if (this.field_147616_f > -1) {
+            OpenGlHelper.func_153171_g(OpenGlHelper.field_153198_e, 0);
+            OpenGlHelper.func_153174_h(this.field_147616_f);
+            this.field_147616_f = -1;
+         }
 
-            if (this.framebufferTexture > -1)
-            {
-                TextureUtil.deleteTexture(this.framebufferTexture);
-                this.framebufferTexture = -1;
-            }
+      }
+   }
 
-            if (this.framebufferObject > -1)
-            {
-                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, 0);
-                OpenGlHelper.glDeleteFramebuffers(this.framebufferObject);
-                this.framebufferObject = -1;
-            }
-        }
-    }
+   public void func_147605_b(int p_147605_1_, int p_147605_2_) {
+      this.field_147621_c = p_147605_1_;
+      this.field_147618_d = p_147605_2_;
+      this.field_147622_a = p_147605_1_;
+      this.field_147620_b = p_147605_2_;
+      if (!OpenGlHelper.func_148822_b()) {
+         this.func_147614_f();
+      } else {
+         this.field_147616_f = OpenGlHelper.func_153165_e();
+         this.field_147617_g = TextureUtil.func_110996_a();
+         if (this.field_147619_e) {
+            this.field_147624_h = OpenGlHelper.func_153185_f();
+         }
 
-    public void createFramebuffer(int width, int height)
-    {
-        this.framebufferWidth = width;
-        this.framebufferHeight = height;
-        this.framebufferTextureWidth = width;
-        this.framebufferTextureHeight = height;
+         this.func_147607_a(9728);
+         GlStateManager.func_179144_i(this.field_147617_g);
+         GlStateManager.func_187419_a(3553, 0, 32856, this.field_147622_a, this.field_147620_b, 0, 6408, 5121, (IntBuffer)null);
+         OpenGlHelper.func_153171_g(OpenGlHelper.field_153198_e, this.field_147616_f);
+         OpenGlHelper.func_153188_a(OpenGlHelper.field_153198_e, OpenGlHelper.field_153200_g, 3553, this.field_147617_g, 0);
+         if (this.field_147619_e) {
+            OpenGlHelper.func_153176_h(OpenGlHelper.field_153199_f, this.field_147624_h);
+            OpenGlHelper.func_153186_a(OpenGlHelper.field_153199_f, 33190, this.field_147622_a, this.field_147620_b);
+            OpenGlHelper.func_153190_b(OpenGlHelper.field_153198_e, OpenGlHelper.field_153201_h, OpenGlHelper.field_153199_f, this.field_147624_h);
+         }
 
-        if (!OpenGlHelper.isFramebufferEnabled())
-        {
-            this.framebufferClear();
-        }
-        else
-        {
-            this.framebufferObject = OpenGlHelper.glGenFramebuffers();
-            this.framebufferTexture = TextureUtil.glGenTextures();
+         this.func_147614_f();
+         this.func_147606_d();
+      }
+   }
 
-            if (this.useDepth)
-            {
-                this.depthBuffer = OpenGlHelper.glGenRenderbuffers();
-            }
+   public void func_147607_a(int p_147607_1_) {
+      if (OpenGlHelper.func_148822_b()) {
+         this.field_147623_j = p_147607_1_;
+         GlStateManager.func_179144_i(this.field_147617_g);
+         GlStateManager.func_187421_b(3553, 10241, p_147607_1_);
+         GlStateManager.func_187421_b(3553, 10240, p_147607_1_);
+         GlStateManager.func_187421_b(3553, 10242, 10496);
+         GlStateManager.func_187421_b(3553, 10243, 10496);
+         GlStateManager.func_179144_i(0);
+      }
 
-            this.setFramebufferFilter(9728);
-            GlStateManager.bindTexture(this.framebufferTexture);
-            GlStateManager.glTexImage2D(3553, 0, 32856, this.framebufferTextureWidth, this.framebufferTextureHeight, 0, 6408, 5121, (IntBuffer)null);
-            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, this.framebufferObject);
-            OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, 3553, this.framebufferTexture, 0);
+   }
 
-            if (this.useDepth)
-            {
-                OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, this.depthBuffer);
-                OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, 33190, this.framebufferTextureWidth, this.framebufferTextureHeight);
-                OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, this.depthBuffer);
-            }
+   public void func_147611_b() {
+      int i = OpenGlHelper.func_153167_i(OpenGlHelper.field_153198_e);
+      if (i != OpenGlHelper.field_153202_i) {
+         if (i == OpenGlHelper.field_153203_j) {
+            throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+         } else if (i == OpenGlHelper.field_153204_k) {
+            throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+         } else if (i == OpenGlHelper.field_153205_l) {
+            throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+         } else if (i == OpenGlHelper.field_153206_m) {
+            throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+         } else {
+            throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
+         }
+      }
+   }
 
-            this.framebufferClear();
-            this.unbindFramebufferTexture();
-        }
-    }
+   public void func_147612_c() {
+      if (OpenGlHelper.func_148822_b()) {
+         GlStateManager.func_179144_i(this.field_147617_g);
+      }
 
-    public void setFramebufferFilter(int framebufferFilterIn)
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            this.framebufferFilter = framebufferFilterIn;
-            GlStateManager.bindTexture(this.framebufferTexture);
-            GlStateManager.glTexParameteri(3553, 10241, framebufferFilterIn);
-            GlStateManager.glTexParameteri(3553, 10240, framebufferFilterIn);
-            GlStateManager.glTexParameteri(3553, 10242, 10496);
-            GlStateManager.glTexParameteri(3553, 10243, 10496);
-            GlStateManager.bindTexture(0);
-        }
-    }
+   }
 
-    public void checkFramebufferComplete()
-    {
-        int i = OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER);
+   public void func_147606_d() {
+      if (OpenGlHelper.func_148822_b()) {
+         GlStateManager.func_179144_i(0);
+      }
 
-        if (i != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE)
-        {
-            if (i == OpenGlHelper.GL_FB_INCOMPLETE_ATTACHMENT)
-            {
-                throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-            }
-            else if (i == OpenGlHelper.GL_FB_INCOMPLETE_MISS_ATTACH)
-            {
-                throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-            }
-            else if (i == OpenGlHelper.GL_FB_INCOMPLETE_DRAW_BUFFER)
-            {
-                throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
-            }
-            else if (i == OpenGlHelper.GL_FB_INCOMPLETE_READ_BUFFER)
-            {
-                throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
-            }
-            else
-            {
-                throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
-            }
-        }
-    }
+   }
 
-    public void bindFramebufferTexture()
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            GlStateManager.bindTexture(this.framebufferTexture);
-        }
-    }
+   public void func_147610_a(boolean p_147610_1_) {
+      if (OpenGlHelper.func_148822_b()) {
+         OpenGlHelper.func_153171_g(OpenGlHelper.field_153198_e, this.field_147616_f);
+         if (p_147610_1_) {
+            GlStateManager.func_179083_b(0, 0, this.field_147621_c, this.field_147618_d);
+         }
+      }
 
-    public void unbindFramebufferTexture()
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            GlStateManager.bindTexture(0);
-        }
-    }
+   }
 
-    public void bindFramebuffer(boolean p_147610_1_)
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, this.framebufferObject);
+   public void func_147609_e() {
+      if (OpenGlHelper.func_148822_b()) {
+         OpenGlHelper.func_153171_g(OpenGlHelper.field_153198_e, 0);
+      }
 
-            if (p_147610_1_)
-            {
-                GlStateManager.viewport(0, 0, this.framebufferWidth, this.framebufferHeight);
-            }
-        }
-    }
+   }
 
-    public void unbindFramebuffer()
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, 0);
-        }
-    }
+   public void func_147604_a(float p_147604_1_, float p_147604_2_, float p_147604_3_, float p_147604_4_) {
+      this.field_147625_i[0] = p_147604_1_;
+      this.field_147625_i[1] = p_147604_2_;
+      this.field_147625_i[2] = p_147604_3_;
+      this.field_147625_i[3] = p_147604_4_;
+   }
 
-    public void setFramebufferColor(float red, float green, float blue, float alpha)
-    {
-        this.framebufferColor[0] = red;
-        this.framebufferColor[1] = green;
-        this.framebufferColor[2] = blue;
-        this.framebufferColor[3] = alpha;
-    }
+   public void func_147615_c(int p_147615_1_, int p_147615_2_) {
+      this.func_178038_a(p_147615_1_, p_147615_2_, true);
+   }
 
-    public void framebufferRender(int width, int height)
-    {
-        this.framebufferRenderExt(width, height, true);
-    }
+   public void func_178038_a(int p_178038_1_, int p_178038_2_, boolean p_178038_3_) {
+      if (OpenGlHelper.func_148822_b()) {
+         GlStateManager.func_179135_a(true, true, true, false);
+         GlStateManager.func_179097_i();
+         GlStateManager.func_179132_a(false);
+         GlStateManager.func_179128_n(5889);
+         GlStateManager.func_179096_D();
+         GlStateManager.func_179130_a(0.0D, (double)p_178038_1_, (double)p_178038_2_, 0.0D, 1000.0D, 3000.0D);
+         GlStateManager.func_179128_n(5888);
+         GlStateManager.func_179096_D();
+         GlStateManager.func_179109_b(0.0F, 0.0F, -2000.0F);
+         GlStateManager.func_179083_b(0, 0, p_178038_1_, p_178038_2_);
+         GlStateManager.func_179098_w();
+         GlStateManager.func_179140_f();
+         GlStateManager.func_179118_c();
+         if (p_178038_3_) {
+            GlStateManager.func_179084_k();
+            GlStateManager.func_179142_g();
+         }
 
-    public void framebufferRenderExt(int width, int height, boolean p_178038_3_)
-    {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
-            GlStateManager.colorMask(true, true, true, false);
-            GlStateManager.disableDepth();
-            GlStateManager.depthMask(false);
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.ortho(0.0D, (double)width, (double)height, 0.0D, 1000.0D, 3000.0D);
-            GlStateManager.matrixMode(5888);
-            GlStateManager.loadIdentity();
-            GlStateManager.translate(0.0F, 0.0F, -2000.0F);
-            GlStateManager.viewport(0, 0, width, height);
-            GlStateManager.enableTexture2D();
-            GlStateManager.disableLighting();
-            GlStateManager.disableAlpha();
+         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
+         this.func_147612_c();
+         float f = (float)p_178038_1_;
+         float f1 = (float)p_178038_2_;
+         float f2 = (float)this.field_147621_c / (float)this.field_147622_a;
+         float f3 = (float)this.field_147618_d / (float)this.field_147620_b;
+         Tessellator tessellator = Tessellator.func_178181_a();
+         BufferBuilder bufferbuilder = tessellator.func_178180_c();
+         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
+         bufferbuilder.func_181662_b(0.0D, (double)f1, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
+         bufferbuilder.func_181662_b((double)f, (double)f1, 0.0D).func_187315_a((double)f2, 0.0D).func_181669_b(255, 255, 255, 255).func_181675_d();
+         bufferbuilder.func_181662_b((double)f, 0.0D, 0.0D).func_187315_a((double)f2, (double)f3).func_181669_b(255, 255, 255, 255).func_181675_d();
+         bufferbuilder.func_181662_b(0.0D, 0.0D, 0.0D).func_187315_a(0.0D, (double)f3).func_181669_b(255, 255, 255, 255).func_181675_d();
+         tessellator.func_78381_a();
+         this.func_147606_d();
+         GlStateManager.func_179132_a(true);
+         GlStateManager.func_179135_a(true, true, true, true);
+      }
+   }
 
-            if (p_178038_3_)
-            {
-                GlStateManager.disableBlend();
-                GlStateManager.enableColorMaterial();
-            }
+   public void func_147614_f() {
+      this.func_147610_a(true);
+      GlStateManager.func_179082_a(this.field_147625_i[0], this.field_147625_i[1], this.field_147625_i[2], this.field_147625_i[3]);
+      int i = 16384;
+      if (this.field_147619_e) {
+         GlStateManager.func_179151_a(1.0D);
+         i |= 256;
+      }
 
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.bindFramebufferTexture();
-            float f = (float)width;
-            float f1 = (float)height;
-            float f2 = (float)this.framebufferWidth / (float)this.framebufferTextureWidth;
-            float f3 = (float)this.framebufferHeight / (float)this.framebufferTextureHeight;
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuffer();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-            bufferbuilder.pos(0.0D, (double)f1, 0.0D).tex(0.0D, 0.0D).color(255, 255, 255, 255).endVertex();
-            bufferbuilder.pos((double)f, (double)f1, 0.0D).tex((double)f2, 0.0D).color(255, 255, 255, 255).endVertex();
-            bufferbuilder.pos((double)f, 0.0D, 0.0D).tex((double)f2, (double)f3).color(255, 255, 255, 255).endVertex();
-            bufferbuilder.pos(0.0D, 0.0D, 0.0D).tex(0.0D, (double)f3).color(255, 255, 255, 255).endVertex();
-            tessellator.draw();
-            this.unbindFramebufferTexture();
-            GlStateManager.depthMask(true);
-            GlStateManager.colorMask(true, true, true, true);
-        }
-    }
-
-    public void framebufferClear()
-    {
-        this.bindFramebuffer(true);
-        GlStateManager.clearColor(this.framebufferColor[0], this.framebufferColor[1], this.framebufferColor[2], this.framebufferColor[3]);
-        int i = 16384;
-
-        if (this.useDepth)
-        {
-            GlStateManager.clearDepth(1.0D);
-            i |= 256;
-        }
-
-        GlStateManager.clear(i);
-        this.unbindFramebuffer();
-    }
+      GlStateManager.func_179086_m(i);
+      this.func_147609_e();
+   }
 }

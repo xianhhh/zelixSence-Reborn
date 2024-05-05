@@ -5,55 +5,36 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 
-public class EntitySenses
-{
-    EntityLiving entityObj;
-    List<Entity> seenEntities = Lists.<Entity>newArrayList();
-    List<Entity> unseenEntities = Lists.<Entity>newArrayList();
+public class EntitySenses {
+   EntityLiving field_75526_a;
+   List<Entity> field_75524_b = Lists.<Entity>newArrayList();
+   List<Entity> field_75525_c = Lists.<Entity>newArrayList();
 
-    public EntitySenses(EntityLiving entityObjIn)
-    {
-        this.entityObj = entityObjIn;
-    }
+   public EntitySenses(EntityLiving p_i1672_1_) {
+      this.field_75526_a = p_i1672_1_;
+   }
 
-    /**
-     * Clears canSeeCachePositive and canSeeCacheNegative.
-     */
-    public void clearSensingCache()
-    {
-        this.seenEntities.clear();
-        this.unseenEntities.clear();
-    }
+   public void func_75523_a() {
+      this.field_75524_b.clear();
+      this.field_75525_c.clear();
+   }
 
-    /**
-     * Checks, whether 'our' entity can see the entity given as argument (true) or not (false), caching the result.
-     */
-    public boolean canSee(Entity entityIn)
-    {
-        if (this.seenEntities.contains(entityIn))
-        {
-            return true;
-        }
-        else if (this.unseenEntities.contains(entityIn))
-        {
-            return false;
-        }
-        else
-        {
-            this.entityObj.world.theProfiler.startSection("canSee");
-            boolean flag = this.entityObj.canEntityBeSeen(entityIn);
-            this.entityObj.world.theProfiler.endSection();
+   public boolean func_75522_a(Entity p_75522_1_) {
+      if (this.field_75524_b.contains(p_75522_1_)) {
+         return true;
+      } else if (this.field_75525_c.contains(p_75522_1_)) {
+         return false;
+      } else {
+         this.field_75526_a.field_70170_p.field_72984_F.func_76320_a("canSee");
+         boolean flag = this.field_75526_a.func_70685_l(p_75522_1_);
+         this.field_75526_a.field_70170_p.field_72984_F.func_76319_b();
+         if (flag) {
+            this.field_75524_b.add(p_75522_1_);
+         } else {
+            this.field_75525_c.add(p_75522_1_);
+         }
 
-            if (flag)
-            {
-                this.seenEntities.add(entityIn);
-            }
-            else
-            {
-                this.unseenEntities.add(entityIn);
-            }
-
-            return flag;
-        }
-    }
+         return flag;
+      }
+   }
 }

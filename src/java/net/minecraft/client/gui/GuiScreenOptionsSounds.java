@@ -11,170 +11,128 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiScreenOptionsSounds extends GuiScreen
-{
-    private final GuiScreen parent;
+public class GuiScreenOptionsSounds extends GuiScreen {
+   private final GuiScreen field_146505_f;
+   private final GameSettings field_146506_g;
+   protected String field_146507_a = "Options";
+   private String field_146508_h;
 
-    /** Reference to the GameSettings object. */
-    private final GameSettings game_settings_4;
-    protected String title = "Options";
-    private String offDisplayString;
+   public GuiScreenOptionsSounds(GuiScreen p_i45025_1_, GameSettings p_i45025_2_) {
+      this.field_146505_f = p_i45025_1_;
+      this.field_146506_g = p_i45025_2_;
+   }
 
-    public GuiScreenOptionsSounds(GuiScreen parentIn, GameSettings settingsIn)
-    {
-        this.parent = parentIn;
-        this.game_settings_4 = settingsIn;
-    }
+   public void func_73866_w_() {
+      this.field_146507_a = I18n.func_135052_a("options.sounds.title");
+      this.field_146508_h = I18n.func_135052_a("options.off");
+      int i = 0;
+      this.field_146292_n.add(new GuiScreenOptionsSounds.Button(SoundCategory.MASTER.ordinal(), this.field_146294_l / 2 - 155 + i % 2 * 160, this.field_146295_m / 6 - 12 + 24 * (i >> 1), SoundCategory.MASTER, true));
+      i = i + 2;
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        this.title = I18n.format("options.sounds.title");
-        this.offDisplayString = I18n.format("options.off");
-        int i = 0;
-        this.buttonList.add(new GuiScreenOptionsSounds.Button(SoundCategory.MASTER.ordinal(), this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), SoundCategory.MASTER, true));
-        i = i + 2;
+      for(SoundCategory soundcategory : SoundCategory.values()) {
+         if (soundcategory != SoundCategory.MASTER) {
+            this.field_146292_n.add(new GuiScreenOptionsSounds.Button(soundcategory.ordinal(), this.field_146294_l / 2 - 155 + i % 2 * 160, this.field_146295_m / 6 - 12 + 24 * (i >> 1), soundcategory, false));
+            ++i;
+         }
+      }
 
-        for (SoundCategory soundcategory : SoundCategory.values())
-        {
-            if (soundcategory != SoundCategory.MASTER)
-            {
-                this.buttonList.add(new GuiScreenOptionsSounds.Button(soundcategory.ordinal(), this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), soundcategory, false));
-                ++i;
-            }
-        }
+      int j = this.field_146294_l / 2 - 75;
+      int k = this.field_146295_m / 6 - 12;
+      ++i;
+      this.field_146292_n.add(new GuiOptionButton(201, j, k + 24 * (i >> 1), GameSettings.Options.SHOW_SUBTITLES, this.field_146506_g.func_74297_c(GameSettings.Options.SHOW_SUBTITLES)));
+      this.field_146292_n.add(new GuiButton(200, this.field_146294_l / 2 - 100, this.field_146295_m / 6 + 168, I18n.func_135052_a("gui.done")));
+   }
 
-        int j = this.width / 2 - 75;
-        int k = this.height / 6 - 12;
-        ++i;
-        this.buttonList.add(new GuiOptionButton(201, j, k + 24 * (i >> 1), GameSettings.Options.SHOW_SUBTITLES, this.game_settings_4.getKeyBinding(GameSettings.Options.SHOW_SUBTITLES)));
-        this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 168, I18n.format("gui.done")));
-    }
+   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
+      if (p_73869_2_ == 1) {
+         this.field_146297_k.field_71474_y.func_74303_b();
+      }
 
-    /**
-     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
-     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
-     */
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        if (keyCode == 1)
-        {
-            this.mc.gameSettings.saveOptions();
-        }
+      super.func_73869_a(p_73869_1_, p_73869_2_);
+   }
 
-        super.keyTyped(typedChar, keyCode);
-    }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      if (p_146284_1_.field_146124_l) {
+         if (p_146284_1_.field_146127_k == 200) {
+            this.field_146297_k.field_71474_y.func_74303_b();
+            this.field_146297_k.func_147108_a(this.field_146505_f);
+         } else if (p_146284_1_.field_146127_k == 201) {
+            this.field_146297_k.field_71474_y.func_74306_a(GameSettings.Options.SHOW_SUBTITLES, 1);
+            p_146284_1_.field_146126_j = this.field_146297_k.field_71474_y.func_74297_c(GameSettings.Options.SHOW_SUBTITLES);
+            this.field_146297_k.field_71474_y.func_74303_b();
+         }
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.enabled)
-        {
-            if (button.id == 200)
-            {
-                this.mc.gameSettings.saveOptions();
-                this.mc.displayGuiScreen(this.parent);
-            }
-            else if (button.id == 201)
-            {
-                this.mc.gameSettings.setOptionValue(GameSettings.Options.SHOW_SUBTITLES, 1);
-                button.displayString = this.mc.gameSettings.getKeyBinding(GameSettings.Options.SHOW_SUBTITLES);
-                this.mc.gameSettings.saveOptions();
-            }
-        }
-    }
+      }
+   }
 
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 15, 16777215);
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.func_73732_a(this.field_146289_q, this.field_146507_a, this.field_146294_l / 2, 15, 16777215);
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
 
-    protected String getDisplayString(SoundCategory category)
-    {
-        float f = this.game_settings_4.getSoundLevel(category);
-        return f == 0.0F ? this.offDisplayString : (int)(f * 100.0F) + "%";
-    }
+   protected String func_184097_a(SoundCategory p_184097_1_) {
+      float f = this.field_146506_g.func_186711_a(p_184097_1_);
+      return f == 0.0F ? this.field_146508_h : (int)(f * 100.0F) + "%";
+   }
 
-    class Button extends GuiButton
-    {
-        private final SoundCategory category;
-        private final String categoryName;
-        public float volume = 1.0F;
-        public boolean pressed;
+   class Button extends GuiButton {
+      private final SoundCategory field_184063_r;
+      private final String field_146152_s;
+      public float field_146156_o = 1.0F;
+      public boolean field_146155_p;
 
-        public Button(int p_i46744_2_, int x, int y, SoundCategory categoryIn, boolean master)
-        {
-            super(p_i46744_2_, x, y, master ? 310 : 150, 20, "");
-            this.category = categoryIn;
-            this.categoryName = I18n.format("soundCategory." + categoryIn.getName());
-            this.displayString = this.categoryName + ": " + GuiScreenOptionsSounds.this.getDisplayString(categoryIn);
-            this.volume = GuiScreenOptionsSounds.this.game_settings_4.getSoundLevel(categoryIn);
-        }
+      public Button(int p_i46744_2_, int p_i46744_3_, int p_i46744_4_, SoundCategory p_i46744_5_, boolean p_i46744_6_) {
+         super(p_i46744_2_, p_i46744_3_, p_i46744_4_, p_i46744_6_ ? 310 : 150, 20, "");
+         this.field_184063_r = p_i46744_5_;
+         this.field_146152_s = I18n.func_135052_a("soundCategory." + p_i46744_5_.func_187948_a());
+         this.field_146126_j = this.field_146152_s + ": " + GuiScreenOptionsSounds.this.func_184097_a(p_i46744_5_);
+         this.field_146156_o = GuiScreenOptionsSounds.this.field_146506_g.func_186711_a(p_i46744_5_);
+      }
 
-        protected int getHoverState(boolean mouseOver)
-        {
-            return 0;
-        }
+      protected int func_146114_a(boolean p_146114_1_) {
+         return 0;
+      }
 
-        protected void mouseDragged(Minecraft mc, int mouseX, int mouseY)
-        {
-            if (this.visible)
-            {
-                if (this.pressed)
-                {
-                    this.volume = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
-                    this.volume = MathHelper.clamp(this.volume, 0.0F, 1.0F);
-                    mc.gameSettings.setSoundLevel(this.category, this.volume);
-                    mc.gameSettings.saveOptions();
-                    this.displayString = this.categoryName + ": " + GuiScreenOptionsSounds.this.getDisplayString(this.category);
-                }
-
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                this.drawTexturedModalRect(this.xPosition + (int)(this.volume * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
-                this.drawTexturedModalRect(this.xPosition + (int)(this.volume * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
-            }
-        }
-
-        public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
-        {
-            if (super.mousePressed(mc, mouseX, mouseY))
-            {
-                this.volume = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
-                this.volume = MathHelper.clamp(this.volume, 0.0F, 1.0F);
-                mc.gameSettings.setSoundLevel(this.category, this.volume);
-                mc.gameSettings.saveOptions();
-                this.displayString = this.categoryName + ": " + GuiScreenOptionsSounds.this.getDisplayString(this.category);
-                this.pressed = true;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void playPressSound(SoundHandler soundHandlerIn)
-        {
-        }
-
-        public void mouseReleased(int mouseX, int mouseY)
-        {
-            if (this.pressed)
-            {
-                GuiScreenOptionsSounds.this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+      protected void func_146119_b(Minecraft p_146119_1_, int p_146119_2_, int p_146119_3_) {
+         if (this.field_146125_m) {
+            if (this.field_146155_p) {
+               this.field_146156_o = (float)(p_146119_2_ - (this.field_146128_h + 4)) / (float)(this.field_146120_f - 8);
+               this.field_146156_o = MathHelper.func_76131_a(this.field_146156_o, 0.0F, 1.0F);
+               p_146119_1_.field_71474_y.func_186712_a(this.field_184063_r, this.field_146156_o);
+               p_146119_1_.field_71474_y.func_74303_b();
+               this.field_146126_j = this.field_146152_s + ": " + GuiScreenOptionsSounds.this.func_184097_a(this.field_184063_r);
             }
 
-            this.pressed = false;
-        }
-    }
+            GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
+            this.func_73729_b(this.field_146128_h + (int)(this.field_146156_o * (float)(this.field_146120_f - 8)), this.field_146129_i, 0, 66, 4, 20);
+            this.func_73729_b(this.field_146128_h + (int)(this.field_146156_o * (float)(this.field_146120_f - 8)) + 4, this.field_146129_i, 196, 66, 4, 20);
+         }
+      }
+
+      public boolean func_146116_c(Minecraft p_146116_1_, int p_146116_2_, int p_146116_3_) {
+         if (super.func_146116_c(p_146116_1_, p_146116_2_, p_146116_3_)) {
+            this.field_146156_o = (float)(p_146116_2_ - (this.field_146128_h + 4)) / (float)(this.field_146120_f - 8);
+            this.field_146156_o = MathHelper.func_76131_a(this.field_146156_o, 0.0F, 1.0F);
+            p_146116_1_.field_71474_y.func_186712_a(this.field_184063_r, this.field_146156_o);
+            p_146116_1_.field_71474_y.func_74303_b();
+            this.field_146126_j = this.field_146152_s + ": " + GuiScreenOptionsSounds.this.func_184097_a(this.field_184063_r);
+            this.field_146155_p = true;
+            return true;
+         } else {
+            return false;
+         }
+      }
+
+      public void func_146113_a(SoundHandler p_146113_1_) {
+      }
+
+      public void func_146118_a(int p_146118_1_, int p_146118_2_) {
+         if (this.field_146155_p) {
+            GuiScreenOptionsSounds.this.field_146297_k.func_147118_V().func_147682_a(PositionedSoundRecord.func_184371_a(SoundEvents.field_187909_gi, 1.0F));
+         }
+
+         this.field_146155_p = false;
+      }
+   }
 }

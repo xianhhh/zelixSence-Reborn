@@ -15,194 +15,152 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
-public class SPacketChunkData implements Packet<INetHandlerPlayClient>
-{
-    private int chunkX;
-    private int chunkZ;
-    private int availableSections;
-    private byte[] buffer;
-    private List<NBTTagCompound> tileEntityTags;
-    private boolean loadChunk;
+public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
+   private int field_149284_a;
+   private int field_149282_b;
+   private int field_186948_c;
+   private byte[] field_186949_d;
+   private List<NBTTagCompound> field_189557_e;
+   private boolean field_149279_g;
 
-    public SPacketChunkData()
-    {
-    }
+   public SPacketChunkData() {
+   }
 
-    public SPacketChunkData(Chunk p_i47124_1_, int p_i47124_2_)
-    {
-        this.chunkX = p_i47124_1_.xPosition;
-        this.chunkZ = p_i47124_1_.zPosition;
-        this.loadChunk = p_i47124_2_ == 65535;
-        boolean flag = p_i47124_1_.getWorld().provider.func_191066_m();
-        this.buffer = new byte[this.calculateChunkSize(p_i47124_1_, flag, p_i47124_2_)];
-        this.availableSections = this.extractChunkData(new PacketBuffer(this.getWriteBuffer()), p_i47124_1_, flag, p_i47124_2_);
-        this.tileEntityTags = Lists.<NBTTagCompound>newArrayList();
+   public SPacketChunkData(Chunk p_i47124_1_, int p_i47124_2_) {
+      this.field_149284_a = p_i47124_1_.field_76635_g;
+      this.field_149282_b = p_i47124_1_.field_76647_h;
+      this.field_149279_g = p_i47124_2_ == 65535;
+      boolean flag = p_i47124_1_.func_177412_p().field_73011_w.func_191066_m();
+      this.field_186949_d = new byte[this.func_189556_a(p_i47124_1_, flag, p_i47124_2_)];
+      this.field_186948_c = this.func_189555_a(new PacketBuffer(this.func_186945_f()), p_i47124_1_, flag, p_i47124_2_);
+      this.field_189557_e = Lists.<NBTTagCompound>newArrayList();
 
-        for (Entry<BlockPos, TileEntity> entry : p_i47124_1_.getTileEntityMap().entrySet())
-        {
-            BlockPos blockpos = entry.getKey();
-            TileEntity tileentity = entry.getValue();
-            int i = blockpos.getY() >> 4;
+      for(Entry<BlockPos, TileEntity> entry : p_i47124_1_.func_177434_r().entrySet()) {
+         BlockPos blockpos = entry.getKey();
+         TileEntity tileentity = entry.getValue();
+         int i = blockpos.func_177956_o() >> 4;
+         if (this.func_149274_i() || (p_i47124_2_ & 1 << i) != 0) {
+            NBTTagCompound nbttagcompound = tileentity.func_189517_E_();
+            this.field_189557_e.add(nbttagcompound);
+         }
+      }
 
-            if (this.doChunkLoad() || (p_i47124_2_ & 1 << i) != 0)
-            {
-                NBTTagCompound nbttagcompound = tileentity.getUpdateTag();
-                this.tileEntityTags.add(nbttagcompound);
+   }
+
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149284_a = p_148837_1_.readInt();
+      this.field_149282_b = p_148837_1_.readInt();
+      this.field_149279_g = p_148837_1_.readBoolean();
+      this.field_186948_c = p_148837_1_.func_150792_a();
+      int i = p_148837_1_.func_150792_a();
+      if (i > 2097152) {
+         throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
+      } else {
+         this.field_186949_d = new byte[i];
+         p_148837_1_.readBytes(this.field_186949_d);
+         int j = p_148837_1_.func_150792_a();
+         this.field_189557_e = Lists.<NBTTagCompound>newArrayList();
+
+         for(int k = 0; k < j; ++k) {
+            this.field_189557_e.add(p_148837_1_.func_150793_b());
+         }
+
+      }
+   }
+
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeInt(this.field_149284_a);
+      p_148840_1_.writeInt(this.field_149282_b);
+      p_148840_1_.writeBoolean(this.field_149279_g);
+      p_148840_1_.func_150787_b(this.field_186948_c);
+      p_148840_1_.func_150787_b(this.field_186949_d.length);
+      p_148840_1_.writeBytes(this.field_186949_d);
+      p_148840_1_.func_150787_b(this.field_189557_e.size());
+
+      for(NBTTagCompound nbttagcompound : this.field_189557_e) {
+         p_148840_1_.func_150786_a(nbttagcompound);
+      }
+
+   }
+
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147263_a(this);
+   }
+
+   public PacketBuffer func_186946_a() {
+      return new PacketBuffer(Unpooled.wrappedBuffer(this.field_186949_d));
+   }
+
+   private ByteBuf func_186945_f() {
+      ByteBuf bytebuf = Unpooled.wrappedBuffer(this.field_186949_d);
+      bytebuf.writerIndex(0);
+      return bytebuf;
+   }
+
+   public int func_189555_a(PacketBuffer p_189555_1_, Chunk p_189555_2_, boolean p_189555_3_, int p_189555_4_) {
+      int i = 0;
+      ExtendedBlockStorage[] aextendedblockstorage = p_189555_2_.func_76587_i();
+      int j = 0;
+
+      for(int k = aextendedblockstorage.length; j < k; ++j) {
+         ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
+         if (extendedblockstorage != Chunk.field_186036_a && (!this.func_149274_i() || !extendedblockstorage.func_76663_a()) && (p_189555_4_ & 1 << j) != 0) {
+            i |= 1 << j;
+            extendedblockstorage.func_186049_g().func_186009_b(p_189555_1_);
+            p_189555_1_.writeBytes(extendedblockstorage.func_76661_k().func_177481_a());
+            if (p_189555_3_) {
+               p_189555_1_.writeBytes(extendedblockstorage.func_76671_l().func_177481_a());
             }
-        }
-    }
+         }
+      }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.chunkX = buf.readInt();
-        this.chunkZ = buf.readInt();
-        this.loadChunk = buf.readBoolean();
-        this.availableSections = buf.readVarIntFromBuffer();
-        int i = buf.readVarIntFromBuffer();
+      if (this.func_149274_i()) {
+         p_189555_1_.writeBytes(p_189555_2_.func_76605_m());
+      }
 
-        if (i > 2097152)
-        {
-            throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
-        }
-        else
-        {
-            this.buffer = new byte[i];
-            buf.readBytes(this.buffer);
-            int j = buf.readVarIntFromBuffer();
-            this.tileEntityTags = Lists.<NBTTagCompound>newArrayList();
+      return i;
+   }
 
-            for (int k = 0; k < j; ++k)
-            {
-                this.tileEntityTags.add(buf.readNBTTagCompoundFromBuffer());
+   protected int func_189556_a(Chunk p_189556_1_, boolean p_189556_2_, int p_189556_3_) {
+      int i = 0;
+      ExtendedBlockStorage[] aextendedblockstorage = p_189556_1_.func_76587_i();
+      int j = 0;
+
+      for(int k = aextendedblockstorage.length; j < k; ++j) {
+         ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
+         if (extendedblockstorage != Chunk.field_186036_a && (!this.func_149274_i() || !extendedblockstorage.func_76663_a()) && (p_189556_3_ & 1 << j) != 0) {
+            i = i + extendedblockstorage.func_186049_g().func_186018_a();
+            i = i + extendedblockstorage.func_76661_k().func_177481_a().length;
+            if (p_189556_2_) {
+               i += extendedblockstorage.func_76671_l().func_177481_a().length;
             }
-        }
-    }
+         }
+      }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeInt(this.chunkX);
-        buf.writeInt(this.chunkZ);
-        buf.writeBoolean(this.loadChunk);
-        buf.writeVarIntToBuffer(this.availableSections);
-        buf.writeVarIntToBuffer(this.buffer.length);
-        buf.writeBytes(this.buffer);
-        buf.writeVarIntToBuffer(this.tileEntityTags.size());
+      if (this.func_149274_i()) {
+         i += p_189556_1_.func_76605_m().length;
+      }
 
-        for (NBTTagCompound nbttagcompound : this.tileEntityTags)
-        {
-            buf.writeNBTTagCompoundToBuffer(nbttagcompound);
-        }
-    }
+      return i;
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleChunkData(this);
-    }
+   public int func_149273_e() {
+      return this.field_149284_a;
+   }
 
-    public PacketBuffer getReadBuffer()
-    {
-        return new PacketBuffer(Unpooled.wrappedBuffer(this.buffer));
-    }
+   public int func_149271_f() {
+      return this.field_149282_b;
+   }
 
-    private ByteBuf getWriteBuffer()
-    {
-        ByteBuf bytebuf = Unpooled.wrappedBuffer(this.buffer);
-        bytebuf.writerIndex(0);
-        return bytebuf;
-    }
+   public int func_149276_g() {
+      return this.field_186948_c;
+   }
 
-    public int extractChunkData(PacketBuffer p_189555_1_, Chunk p_189555_2_, boolean p_189555_3_, int p_189555_4_)
-    {
-        int i = 0;
-        ExtendedBlockStorage[] aextendedblockstorage = p_189555_2_.getBlockStorageArray();
-        int j = 0;
+   public boolean func_149274_i() {
+      return this.field_149279_g;
+   }
 
-        for (int k = aextendedblockstorage.length; j < k; ++j)
-        {
-            ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
-
-            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189555_4_ & 1 << j) != 0)
-            {
-                i |= 1 << j;
-                extendedblockstorage.getData().write(p_189555_1_);
-                p_189555_1_.writeBytes(extendedblockstorage.getBlocklightArray().getData());
-
-                if (p_189555_3_)
-                {
-                    p_189555_1_.writeBytes(extendedblockstorage.getSkylightArray().getData());
-                }
-            }
-        }
-
-        if (this.doChunkLoad())
-        {
-            p_189555_1_.writeBytes(p_189555_2_.getBiomeArray());
-        }
-
-        return i;
-    }
-
-    protected int calculateChunkSize(Chunk chunkIn, boolean p_189556_2_, int p_189556_3_)
-    {
-        int i = 0;
-        ExtendedBlockStorage[] aextendedblockstorage = chunkIn.getBlockStorageArray();
-        int j = 0;
-
-        for (int k = aextendedblockstorage.length; j < k; ++j)
-        {
-            ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
-
-            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189556_3_ & 1 << j) != 0)
-            {
-                i = i + extendedblockstorage.getData().getSerializedSize();
-                i = i + extendedblockstorage.getBlocklightArray().getData().length;
-
-                if (p_189556_2_)
-                {
-                    i += extendedblockstorage.getSkylightArray().getData().length;
-                }
-            }
-        }
-
-        if (this.doChunkLoad())
-        {
-            i += chunkIn.getBiomeArray().length;
-        }
-
-        return i;
-    }
-
-    public int getChunkX()
-    {
-        return this.chunkX;
-    }
-
-    public int getChunkZ()
-    {
-        return this.chunkZ;
-    }
-
-    public int getExtractedSize()
-    {
-        return this.availableSections;
-    }
-
-    public boolean doChunkLoad()
-    {
-        return this.loadChunk;
-    }
-
-    public List<NBTTagCompound> getTileEntityTags()
-    {
-        return this.tileEntityTags;
-    }
+   public List<NBTTagCompound> func_189554_f() {
+      return this.field_189557_e;
+   }
 }

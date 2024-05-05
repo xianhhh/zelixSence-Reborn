@@ -24,323 +24,215 @@ import net.minecraft.world.storage.loot.ILootContainer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
 
-public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer
-{
-    private NonNullList<ItemStack> minecartContainerItems = NonNullList.<ItemStack>func_191197_a(36, ItemStack.field_190927_a);
+public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer {
+   private NonNullList<ItemStack> field_94113_a = NonNullList.<ItemStack>func_191197_a(36, ItemStack.field_190927_a);
+   private boolean field_94112_b = true;
+   private ResourceLocation field_184290_c;
+   private long field_184291_d;
 
-    /**
-     * When set to true, the minecart will drop all items when setDead() is called. When false (such as when travelling
-     * dimensions) it preserves its contents.
-     */
-    private boolean dropContentsWhenDead = true;
-    private ResourceLocation lootTable;
-    private long lootTableSeed;
+   public EntityMinecartContainer(World p_i1716_1_) {
+      super(p_i1716_1_);
+   }
 
-    public EntityMinecartContainer(World worldIn)
-    {
-        super(worldIn);
-    }
+   public EntityMinecartContainer(World p_i1717_1_, double p_i1717_2_, double p_i1717_4_, double p_i1717_6_) {
+      super(p_i1717_1_, p_i1717_2_, p_i1717_4_, p_i1717_6_);
+   }
 
-    public EntityMinecartContainer(World worldIn, double x, double y, double z)
-    {
-        super(worldIn, x, y, z);
-    }
+   public void func_94095_a(DamageSource p_94095_1_) {
+      super.func_94095_a(p_94095_1_);
+      if (this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops")) {
+         InventoryHelper.func_180176_a(this.field_70170_p, this, this);
+      }
 
-    public void killMinecart(DamageSource source)
-    {
-        super.killMinecart(source);
+   }
 
-        if (this.world.getGameRules().getBoolean("doEntityDrops"))
-        {
-            InventoryHelper.dropInventoryItems(this.world, this, this);
-        }
-    }
-
-    public boolean func_191420_l()
-    {
-        for (ItemStack itemstack : this.minecartContainerItems)
-        {
-            if (!itemstack.func_190926_b())
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Returns the stack in the given slot.
-     */
-    public ItemStack getStackInSlot(int index)
-    {
-        this.addLoot((EntityPlayer)null);
-        return this.minecartContainerItems.get(index);
-    }
-
-    /**
-     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
-     */
-    public ItemStack decrStackSize(int index, int count)
-    {
-        this.addLoot((EntityPlayer)null);
-        return ItemStackHelper.getAndSplit(this.minecartContainerItems, index, count);
-    }
-
-    /**
-     * Removes a stack from the given slot and returns it.
-     */
-    public ItemStack removeStackFromSlot(int index)
-    {
-        this.addLoot((EntityPlayer)null);
-        ItemStack itemstack = this.minecartContainerItems.get(index);
-
-        if (itemstack.func_190926_b())
-        {
-            return ItemStack.field_190927_a;
-        }
-        else
-        {
-            this.minecartContainerItems.set(index, ItemStack.field_190927_a);
-            return itemstack;
-        }
-    }
-
-    /**
-     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
-     */
-    public void setInventorySlotContents(int index, ItemStack stack)
-    {
-        this.addLoot((EntityPlayer)null);
-        this.minecartContainerItems.set(index, stack);
-
-        if (!stack.func_190926_b() && stack.func_190916_E() > this.getInventoryStackLimit())
-        {
-            stack.func_190920_e(this.getInventoryStackLimit());
-        }
-    }
-
-    /**
-     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
-     * hasn't changed and skip it.
-     */
-    public void markDirty()
-    {
-    }
-
-    /**
-     * Don't rename this method to canInteractWith due to conflicts with Container
-     */
-    public boolean isUsableByPlayer(EntityPlayer player)
-    {
-        if (this.isDead)
-        {
+   public boolean func_191420_l() {
+      for(ItemStack itemstack : this.field_94113_a) {
+         if (!itemstack.func_190926_b()) {
             return false;
-        }
-        else
-        {
-            return player.getDistanceSqToEntity(this) <= 64.0D;
-        }
-    }
+         }
+      }
 
-    public void openInventory(EntityPlayer player)
-    {
-    }
+      return true;
+   }
 
-    public void closeInventory(EntityPlayer player)
-    {
-    }
+   public ItemStack func_70301_a(int p_70301_1_) {
+      this.func_184288_f((EntityPlayer)null);
+      return this.field_94113_a.get(p_70301_1_);
+   }
 
-    /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
-     * guis use Slot.isItemValid
-     */
-    public boolean isItemValidForSlot(int index, ItemStack stack)
-    {
-        return true;
-    }
+   public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_) {
+      this.func_184288_f((EntityPlayer)null);
+      return ItemStackHelper.func_188382_a(this.field_94113_a, p_70298_1_, p_70298_2_);
+   }
 
-    /**
-     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
-     */
-    public int getInventoryStackLimit()
-    {
-        return 64;
-    }
+   public ItemStack func_70304_b(int p_70304_1_) {
+      this.func_184288_f((EntityPlayer)null);
+      ItemStack itemstack = this.field_94113_a.get(p_70304_1_);
+      if (itemstack.func_190926_b()) {
+         return ItemStack.field_190927_a;
+      } else {
+         this.field_94113_a.set(p_70304_1_, ItemStack.field_190927_a);
+         return itemstack;
+      }
+   }
 
-    @Nullable
-    public Entity changeDimension(int dimensionIn)
-    {
-        this.dropContentsWhenDead = false;
-        return super.changeDimension(dimensionIn);
-    }
+   public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_) {
+      this.func_184288_f((EntityPlayer)null);
+      this.field_94113_a.set(p_70299_1_, p_70299_2_);
+      if (!p_70299_2_.func_190926_b() && p_70299_2_.func_190916_E() > this.func_70297_j_()) {
+         p_70299_2_.func_190920_e(this.func_70297_j_());
+      }
 
-    /**
-     * Will get destroyed next tick.
-     */
-    public void setDead()
-    {
-        if (this.dropContentsWhenDead)
-        {
-            InventoryHelper.dropInventoryItems(this.world, this, this);
-        }
+   }
 
-        super.setDead();
-    }
+   public void func_70296_d() {
+   }
 
-    /**
-     * Sets whether this entity should drop its items when setDead() is called. This applies to container minecarts.
-     */
-    public void setDropItemsWhenDead(boolean dropWhenDead)
-    {
-        this.dropContentsWhenDead = dropWhenDead;
-    }
+   public boolean func_70300_a(EntityPlayer p_70300_1_) {
+      if (this.field_70128_L) {
+         return false;
+      } else {
+         return p_70300_1_.func_70068_e(this) <= 64.0D;
+      }
+   }
 
-    public static void func_190574_b(DataFixer p_190574_0_, Class<?> p_190574_1_)
-    {
-        EntityMinecart.registerFixesMinecart(p_190574_0_, p_190574_1_);
-        p_190574_0_.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(p_190574_1_, new String[] {"Items"}));
-    }
+   public void func_174889_b(EntityPlayer p_174889_1_) {
+   }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    protected void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
+   public void func_174886_c(EntityPlayer p_174886_1_) {
+   }
 
-        if (this.lootTable != null)
-        {
-            compound.setString("LootTable", this.lootTable.toString());
+   public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_) {
+      return true;
+   }
 
-            if (this.lootTableSeed != 0L)
-            {
-                compound.setLong("LootTableSeed", this.lootTableSeed);
-            }
-        }
-        else
-        {
-            ItemStackHelper.func_191282_a(compound, this.minecartContainerItems);
-        }
-    }
+   public int func_70297_j_() {
+      return 64;
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    protected void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.minecartContainerItems = NonNullList.<ItemStack>func_191197_a(this.getSizeInventory(), ItemStack.field_190927_a);
+   @Nullable
+   public Entity func_184204_a(int p_184204_1_) {
+      this.field_94112_b = false;
+      return super.func_184204_a(p_184204_1_);
+   }
 
-        if (compound.hasKey("LootTable", 8))
-        {
-            this.lootTable = new ResourceLocation(compound.getString("LootTable"));
-            this.lootTableSeed = compound.getLong("LootTableSeed");
-        }
-        else
-        {
-            ItemStackHelper.func_191283_b(compound, this.minecartContainerItems);
-        }
-    }
+   public void func_70106_y() {
+      if (this.field_94112_b) {
+         InventoryHelper.func_180176_a(this.field_70170_p, this, this);
+      }
 
-    public boolean processInitialInteract(EntityPlayer player, EnumHand stack)
-    {
-        if (!this.world.isRemote)
-        {
-            player.displayGUIChest(this);
-        }
+      super.func_70106_y();
+   }
 
-        return true;
-    }
+   public void func_184174_b(boolean p_184174_1_) {
+      this.field_94112_b = p_184174_1_;
+   }
 
-    protected void applyDrag()
-    {
-        float f = 0.98F;
+   public static void func_190574_b(DataFixer p_190574_0_, Class<?> p_190574_1_) {
+      EntityMinecart.func_189669_a(p_190574_0_, p_190574_1_);
+      p_190574_0_.func_188258_a(FixTypes.ENTITY, new ItemStackDataLists(p_190574_1_, new String[]{"Items"}));
+   }
 
-        if (this.lootTable == null)
-        {
-            int i = 15 - Container.calcRedstoneFromInventory(this);
-            f += (float)i * 0.001F;
-        }
+   protected void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      if (this.field_184290_c != null) {
+         p_70014_1_.func_74778_a("LootTable", this.field_184290_c.toString());
+         if (this.field_184291_d != 0L) {
+            p_70014_1_.func_74772_a("LootTableSeed", this.field_184291_d);
+         }
+      } else {
+         ItemStackHelper.func_191282_a(p_70014_1_, this.field_94113_a);
+      }
 
-        this.motionX *= (double)f;
-        this.motionY *= 0.0D;
-        this.motionZ *= (double)f;
-    }
+   }
 
-    public int getField(int id)
-    {
-        return 0;
-    }
+   protected void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.field_94113_a = NonNullList.<ItemStack>func_191197_a(this.func_70302_i_(), ItemStack.field_190927_a);
+      if (p_70037_1_.func_150297_b("LootTable", 8)) {
+         this.field_184290_c = new ResourceLocation(p_70037_1_.func_74779_i("LootTable"));
+         this.field_184291_d = p_70037_1_.func_74763_f("LootTableSeed");
+      } else {
+         ItemStackHelper.func_191283_b(p_70037_1_, this.field_94113_a);
+      }
 
-    public void setField(int id, int value)
-    {
-    }
+   }
 
-    public int getFieldCount()
-    {
-        return 0;
-    }
+   public boolean func_184230_a(EntityPlayer p_184230_1_, EnumHand p_184230_2_) {
+      if (!this.field_70170_p.field_72995_K) {
+         p_184230_1_.func_71007_a(this);
+      }
 
-    public boolean isLocked()
-    {
-        return false;
-    }
+      return true;
+   }
 
-    public void setLockCode(LockCode code)
-    {
-    }
+   protected void func_94101_h() {
+      float f = 0.98F;
+      if (this.field_184290_c == null) {
+         int i = 15 - Container.func_94526_b(this);
+         f += (float)i * 0.001F;
+      }
 
-    public LockCode getLockCode()
-    {
-        return LockCode.EMPTY_CODE;
-    }
+      this.field_70159_w *= (double)f;
+      this.field_70181_x *= 0.0D;
+      this.field_70179_y *= (double)f;
+   }
 
-    /**
-     * Adds loot to the minecart's contents.
-     */
-    public void addLoot(@Nullable EntityPlayer player)
-    {
-        if (this.lootTable != null)
-        {
-            LootTable loottable = this.world.getLootTableManager().getLootTableFromLocation(this.lootTable);
-            this.lootTable = null;
-            Random random;
+   public int func_174887_a_(int p_174887_1_) {
+      return 0;
+   }
 
-            if (this.lootTableSeed == 0L)
-            {
-                random = new Random();
-            }
-            else
-            {
-                random = new Random(this.lootTableSeed);
-            }
+   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
+   }
 
-            LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
+   public int func_174890_g() {
+      return 0;
+   }
 
-            if (player != null)
-            {
-                lootcontext$builder.withLuck(player.getLuck());
-            }
+   public boolean func_174893_q_() {
+      return false;
+   }
 
-            loottable.fillInventory(this, random, lootcontext$builder.build());
-        }
-    }
+   public void func_174892_a(LockCode p_174892_1_) {
+   }
 
-    public void clear()
-    {
-        this.addLoot((EntityPlayer)null);
-        this.minecartContainerItems.clear();
-    }
+   public LockCode func_174891_i() {
+      return LockCode.field_180162_a;
+   }
 
-    public void setLootTable(ResourceLocation lootTableIn, long lootTableSeedIn)
-    {
-        this.lootTable = lootTableIn;
-        this.lootTableSeed = lootTableSeedIn;
-    }
+   public void func_184288_f(@Nullable EntityPlayer p_184288_1_) {
+      if (this.field_184290_c != null) {
+         LootTable loottable = this.field_70170_p.func_184146_ak().func_186521_a(this.field_184290_c);
+         this.field_184290_c = null;
+         Random random;
+         if (this.field_184291_d == 0L) {
+            random = new Random();
+         } else {
+            random = new Random(this.field_184291_d);
+         }
 
-    public ResourceLocation getLootTable()
-    {
-        return this.lootTable;
-    }
+         LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.field_70170_p);
+         if (p_184288_1_ != null) {
+            lootcontext$builder.func_186469_a(p_184288_1_.func_184817_da());
+         }
+
+         loottable.func_186460_a(this, random, lootcontext$builder.func_186471_a());
+      }
+
+   }
+
+   public void func_174888_l() {
+      this.func_184288_f((EntityPlayer)null);
+      this.field_94113_a.clear();
+   }
+
+   public void func_184289_a(ResourceLocation p_184289_1_, long p_184289_2_) {
+      this.field_184290_c = p_184289_1_;
+      this.field_184291_d = p_184289_2_;
+   }
+
+   public ResourceLocation func_184276_b() {
+      return this.field_184290_c;
+   }
 }

@@ -8,40 +8,28 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 
-public interface IWorldEventListener
-{
-    void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
+public interface IWorldEventListener {
+   void func_184376_a(World var1, BlockPos var2, IBlockState var3, IBlockState var4, int var5);
 
-    void notifyLightSet(BlockPos pos);
+   void func_174959_b(BlockPos var1);
 
-    /**
-     * On the client, re-renders all blocks in this range, inclusive. On the server, does nothing.
-     */
-    void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2);
+   void func_147585_a(int var1, int var2, int var3, int var4, int var5, int var6);
 
-    void playSoundToAllNearExcept(EntityPlayer player, SoundEvent soundIn, SoundCategory category, double x, double y, double z, float volume, float pitch);
+   void func_184375_a(@Nullable EntityPlayer var1, SoundEvent var2, SoundCategory var3, double var4, double var6, double var8, float var10, float var11);
 
-    void playRecord(SoundEvent soundIn, BlockPos pos);
+   void func_184377_a(SoundEvent var1, BlockPos var2);
 
-    void spawnParticle(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters);
+   void func_180442_a(int var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15);
 
-    void func_190570_a(int p_190570_1_, boolean p_190570_2_, boolean p_190570_3_, double p_190570_4_, double p_190570_6_, double p_190570_8_, double p_190570_10_, double p_190570_12_, double p_190570_14_, int... p_190570_16_);
+   void func_190570_a(int var1, boolean var2, boolean var3, double var4, double var6, double var8, double var10, double var12, double var14, int... var16);
 
-    /**
-     * Called on all IWorldAccesses when an entity is created or loaded. On client worlds, starts downloading any
-     * necessary textures. On server worlds, adds the entity to the entity tracker.
-     */
-    void onEntityAdded(Entity entityIn);
+   void func_72703_a(Entity var1);
 
-    /**
-     * Called on all IWorldAccesses when an entity is unloaded or destroyed. On client worlds, releases any downloaded
-     * textures. On server worlds, removes the entity from the entity tracker.
-     */
-    void onEntityRemoved(Entity entityIn);
+   void func_72709_b(Entity var1);
 
-    void broadcastSound(int soundID, BlockPos pos, int data);
+   void func_180440_a(int var1, BlockPos var2, int var3);
 
-    void playEvent(EntityPlayer player, int type, BlockPos blockPosIn, int data);
+   void func_180439_a(EntityPlayer var1, int var2, BlockPos var3, int var4);
 
-    void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress);
+   void func_180441_b(int var1, BlockPos var2, int var3);
 }

@@ -8,166 +8,106 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
-{
-    /** The base height of the tree */
-    protected final int baseHeight;
+public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
+   protected final int field_76522_a;
+   protected final IBlockState field_76520_b;
+   protected final IBlockState field_76521_c;
+   protected int field_150538_d;
 
-    /** Sets the metadata for the wood blocks used */
-    protected final IBlockState woodMetadata;
+   public WorldGenHugeTrees(boolean p_i46447_1_, int p_i46447_2_, int p_i46447_3_, IBlockState p_i46447_4_, IBlockState p_i46447_5_) {
+      super(p_i46447_1_);
+      this.field_76522_a = p_i46447_2_;
+      this.field_150538_d = p_i46447_3_;
+      this.field_76520_b = p_i46447_4_;
+      this.field_76521_c = p_i46447_5_;
+   }
 
-    /** Sets the metadata for the leaves used in huge trees */
-    protected final IBlockState leavesMetadata;
-    protected int extraRandomHeight;
+   protected int func_150533_a(Random p_150533_1_) {
+      int i = p_150533_1_.nextInt(3) + this.field_76522_a;
+      if (this.field_150538_d > 1) {
+         i += p_150533_1_.nextInt(this.field_150538_d);
+      }
 
-    public WorldGenHugeTrees(boolean notify, int baseHeightIn, int extraRandomHeightIn, IBlockState woodMetadataIn, IBlockState leavesMetadataIn)
-    {
-        super(notify);
-        this.baseHeight = baseHeightIn;
-        this.extraRandomHeight = extraRandomHeightIn;
-        this.woodMetadata = woodMetadataIn;
-        this.leavesMetadata = leavesMetadataIn;
-    }
+      return i;
+   }
 
-    /**
-     * calculates the height based on this trees base height and its extra random height
-     */
-    protected int getHeight(Random rand)
-    {
-        int i = rand.nextInt(3) + this.baseHeight;
-
-        if (this.extraRandomHeight > 1)
-        {
-            i += rand.nextInt(this.extraRandomHeight);
-        }
-
-        return i;
-    }
-
-    /**
-     * returns whether or not there is space for a tree to grow at a certain position
-     */
-    private boolean isSpaceAt(World worldIn, BlockPos leavesPos, int height)
-    {
-        boolean flag = true;
-
-        if (leavesPos.getY() >= 1 && leavesPos.getY() + height + 1 <= 256)
-        {
-            for (int i = 0; i <= 1 + height; ++i)
-            {
-                int j = 2;
-
-                if (i == 0)
-                {
-                    j = 1;
-                }
-                else if (i >= 1 + height - 2)
-                {
-                    j = 2;
-                }
-
-                for (int k = -j; k <= j && flag; ++k)
-                {
-                    for (int l = -j; l <= j && flag; ++l)
-                    {
-                        if (leavesPos.getY() + i < 0 || leavesPos.getY() + i >= 256 || !this.canGrowInto(worldIn.getBlockState(leavesPos.add(k, i, l)).getBlock()))
-                        {
-                            flag = false;
-                        }
-                    }
-                }
+   private boolean func_175926_c(World p_175926_1_, BlockPos p_175926_2_, int p_175926_3_) {
+      boolean flag = true;
+      if (p_175926_2_.func_177956_o() >= 1 && p_175926_2_.func_177956_o() + p_175926_3_ + 1 <= 256) {
+         for(int i = 0; i <= 1 + p_175926_3_; ++i) {
+            int j = 2;
+            if (i == 0) {
+               j = 1;
+            } else if (i >= 1 + p_175926_3_ - 2) {
+               j = 2;
             }
 
-            return flag;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /**
-     * returns whether or not there is dirt underneath the block where the tree will be grown.
-     * It also generates dirt around the block in a 2x2 square if there is dirt underneath the blockpos.
-     */
-    private boolean ensureDirtsUnderneath(BlockPos pos, World worldIn)
-    {
-        BlockPos blockpos = pos.down();
-        Block block = worldIn.getBlockState(blockpos).getBlock();
-
-        if ((block == Blocks.GRASS || block == Blocks.DIRT) && pos.getY() >= 2)
-        {
-            this.setDirtAt(worldIn, blockpos);
-            this.setDirtAt(worldIn, blockpos.east());
-            this.setDirtAt(worldIn, blockpos.south());
-            this.setDirtAt(worldIn, blockpos.south().east());
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /**
-     * returns whether or not a tree can grow at a specific position.
-     * If it can, it generates surrounding dirt underneath.
-     */
-    protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int p_175929_4_)
-    {
-        return this.isSpaceAt(worldIn, treePos, p_175929_4_) && this.ensureDirtsUnderneath(treePos, worldIn);
-    }
-
-    /**
-     * grow leaves in a circle with the outsides being within the circle
-     */
-    protected void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width)
-    {
-        int i = width * width;
-
-        for (int j = -width; j <= width + 1; ++j)
-        {
-            for (int k = -width; k <= width + 1; ++k)
-            {
-                int l = j - 1;
-                int i1 = k - 1;
-
-                if (j * j + k * k <= i || l * l + i1 * i1 <= i || j * j + i1 * i1 <= i || l * l + k * k <= i)
-                {
-                    BlockPos blockpos = layerCenter.add(j, 0, k);
-                    Material material = worldIn.getBlockState(blockpos).getMaterial();
-
-                    if (material == Material.AIR || material == Material.LEAVES)
-                    {
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
-                    }
-                }
+            for(int k = -j; k <= j && flag; ++k) {
+               for(int l = -j; l <= j && flag; ++l) {
+                  if (p_175926_2_.func_177956_o() + i < 0 || p_175926_2_.func_177956_o() + i >= 256 || !this.func_150523_a(p_175926_1_.func_180495_p(p_175926_2_.func_177982_a(k, i, l)).func_177230_c())) {
+                     flag = false;
+                  }
+               }
             }
-        }
-    }
+         }
 
-    /**
-     * grow leaves in a circle
-     */
-    protected void growLeavesLayer(World worldIn, BlockPos layerCenter, int width)
-    {
-        int i = width * width;
+         return flag;
+      } else {
+         return false;
+      }
+   }
 
-        for (int j = -width; j <= width; ++j)
-        {
-            for (int k = -width; k <= width; ++k)
-            {
-                if (j * j + k * k <= i)
-                {
-                    BlockPos blockpos = layerCenter.add(j, 0, k);
-                    Material material = worldIn.getBlockState(blockpos).getMaterial();
+   private boolean func_175927_a(BlockPos p_175927_1_, World p_175927_2_) {
+      BlockPos blockpos = p_175927_1_.func_177977_b();
+      Block block = p_175927_2_.func_180495_p(blockpos).func_177230_c();
+      if ((block == Blocks.field_150349_c || block == Blocks.field_150346_d) && p_175927_1_.func_177956_o() >= 2) {
+         this.func_175921_a(p_175927_2_, blockpos);
+         this.func_175921_a(p_175927_2_, blockpos.func_177974_f());
+         this.func_175921_a(p_175927_2_, blockpos.func_177968_d());
+         this.func_175921_a(p_175927_2_, blockpos.func_177968_d().func_177974_f());
+         return true;
+      } else {
+         return false;
+      }
+   }
 
-                    if (material == Material.AIR || material == Material.LEAVES)
-                    {
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
-                    }
-                }
+   protected boolean func_175929_a(World p_175929_1_, Random p_175929_2_, BlockPos p_175929_3_, int p_175929_4_) {
+      return this.func_175926_c(p_175929_1_, p_175929_3_, p_175929_4_) && this.func_175927_a(p_175929_3_, p_175929_1_);
+   }
+
+   protected void func_175925_a(World p_175925_1_, BlockPos p_175925_2_, int p_175925_3_) {
+      int i = p_175925_3_ * p_175925_3_;
+
+      for(int j = -p_175925_3_; j <= p_175925_3_ + 1; ++j) {
+         for(int k = -p_175925_3_; k <= p_175925_3_ + 1; ++k) {
+            int l = j - 1;
+            int i1 = k - 1;
+            if (j * j + k * k <= i || l * l + i1 * i1 <= i || j * j + i1 * i1 <= i || l * l + k * k <= i) {
+               BlockPos blockpos = p_175925_2_.func_177982_a(j, 0, k);
+               Material material = p_175925_1_.func_180495_p(blockpos).func_185904_a();
+               if (material == Material.field_151579_a || material == Material.field_151584_j) {
+                  this.func_175903_a(p_175925_1_, blockpos, this.field_76521_c);
+               }
             }
-        }
-    }
+         }
+      }
+
+   }
+
+   protected void func_175928_b(World p_175928_1_, BlockPos p_175928_2_, int p_175928_3_) {
+      int i = p_175928_3_ * p_175928_3_;
+
+      for(int j = -p_175928_3_; j <= p_175928_3_; ++j) {
+         for(int k = -p_175928_3_; k <= p_175928_3_; ++k) {
+            if (j * j + k * k <= i) {
+               BlockPos blockpos = p_175928_2_.func_177982_a(j, 0, k);
+               Material material = p_175928_1_.func_180495_p(blockpos).func_185904_a();
+               if (material == Material.field_151579_a || material == Material.field_151584_j) {
+                  this.func_175903_a(p_175928_1_, blockpos, this.field_76521_c);
+               }
+            }
+         }
+      }
+
+   }
 }

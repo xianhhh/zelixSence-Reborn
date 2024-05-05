@@ -6,59 +6,42 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.ResourcePackListEntry;
 import net.minecraft.util.text.TextFormatting;
 
-public abstract class GuiResourcePackList extends GuiListExtended
-{
-    protected final Minecraft mc;
-    protected final List<ResourcePackListEntry> resourcePackEntries;
+public abstract class GuiResourcePackList extends GuiListExtended {
+   protected final Minecraft field_148205_k;
+   protected final List<ResourcePackListEntry> field_148204_l;
 
-    public GuiResourcePackList(Minecraft mcIn, int p_i45055_2_, int p_i45055_3_, List<ResourcePackListEntry> p_i45055_4_)
-    {
-        super(mcIn, p_i45055_2_, p_i45055_3_, 32, p_i45055_3_ - 55 + 4, 36);
-        this.mc = mcIn;
-        this.resourcePackEntries = p_i45055_4_;
-        this.centerListVertically = false;
-        this.setHasListHeader(true, (int)((float)mcIn.fontRendererObj.FONT_HEIGHT * 1.5F));
-    }
+   public GuiResourcePackList(Minecraft p_i45055_1_, int p_i45055_2_, int p_i45055_3_, List<ResourcePackListEntry> p_i45055_4_) {
+      super(p_i45055_1_, p_i45055_2_, p_i45055_3_, 32, p_i45055_3_ - 55 + 4, 36);
+      this.field_148205_k = p_i45055_1_;
+      this.field_148204_l = p_i45055_4_;
+      this.field_148163_i = false;
+      this.func_148133_a(true, (int)((float)p_i45055_1_.field_71466_p.field_78288_b * 1.5F));
+   }
 
-    /**
-     * Handles drawing a list's header row.
-     */
-    protected void drawListHeader(int insideLeft, int insideTop, Tessellator tessellatorIn)
-    {
-        String s = TextFormatting.UNDERLINE + "" + TextFormatting.BOLD + this.getListHeader();
-        this.mc.fontRendererObj.drawString(s, insideLeft + this.width / 2 - this.mc.fontRendererObj.getStringWidth(s) / 2, Math.min(this.top + 3, insideTop), 16777215);
-    }
+   protected void func_148129_a(int p_148129_1_, int p_148129_2_, Tessellator p_148129_3_) {
+      String s = TextFormatting.UNDERLINE + "" + TextFormatting.BOLD + this.func_148202_k();
+      this.field_148205_k.field_71466_p.func_78276_b(s, p_148129_1_ + this.field_148155_a / 2 - this.field_148205_k.field_71466_p.func_78256_a(s) / 2, Math.min(this.field_148153_b + 3, p_148129_2_), 16777215);
+   }
 
-    protected abstract String getListHeader();
+   protected abstract String func_148202_k();
 
-    public List<ResourcePackListEntry> getList()
-    {
-        return this.resourcePackEntries;
-    }
+   public List<ResourcePackListEntry> func_148201_l() {
+      return this.field_148204_l;
+   }
 
-    protected int getSize()
-    {
-        return this.getList().size();
-    }
+   protected int func_148127_b() {
+      return this.func_148201_l().size();
+   }
 
-    /**
-     * Gets the IGuiListEntry object for the given index
-     */
-    public ResourcePackListEntry getListEntry(int index)
-    {
-        return (ResourcePackListEntry)this.getList().get(index);
-    }
+   public ResourcePackListEntry func_148180_b(int p_148180_1_) {
+      return (ResourcePackListEntry)this.func_148201_l().get(p_148180_1_);
+   }
 
-    /**
-     * Gets the width of the list
-     */
-    public int getListWidth()
-    {
-        return this.width;
-    }
+   public int func_148139_c() {
+      return this.field_148155_a;
+   }
 
-    protected int getScrollBarX()
-    {
-        return this.right - 6;
-    }
+   protected int func_148137_d() {
+      return this.field_148151_d - 6;
+   }
 }

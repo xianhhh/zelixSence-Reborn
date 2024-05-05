@@ -12,80 +12,65 @@ import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class BiomeHills extends Biome
-{
-    private final WorldGenerator theWorldGenerator = new WorldGenMinable(Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE), 9);
-    private final WorldGenTaiga2 spruceGenerator = new WorldGenTaiga2(false);
-    private final BiomeHills.Type type;
+public class BiomeHills extends Biome {
+   private final WorldGenerator field_82915_S = new WorldGenMinable(Blocks.field_150418_aU.func_176223_P().func_177226_a(BlockSilverfish.field_176378_a, BlockSilverfish.EnumType.STONE), 9);
+   private final WorldGenTaiga2 field_150634_aD = new WorldGenTaiga2(false);
+   private final BiomeHills.Type field_150638_aH;
 
-    protected BiomeHills(BiomeHills.Type p_i46710_1_, Biome.BiomeProperties properties)
-    {
-        super(properties);
+   protected BiomeHills(BiomeHills.Type p_i46710_1_, Biome.BiomeProperties p_i46710_2_) {
+      super(p_i46710_2_);
+      if (p_i46710_1_ == BiomeHills.Type.EXTRA_TREES) {
+         this.field_76760_I.field_76832_z = 3;
+      }
 
-        if (p_i46710_1_ == BiomeHills.Type.EXTRA_TREES)
-        {
-            this.theBiomeDecorator.treesPerChunk = 3;
-        }
+      this.field_76762_K.add(new Biome.SpawnListEntry(EntityLlama.class, 5, 4, 6));
+      this.field_150638_aH = p_i46710_1_;
+   }
 
-        this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityLlama.class, 5, 4, 6));
-        this.type = p_i46710_1_;
-    }
+   public WorldGenAbstractTree func_150567_a(Random p_150567_1_) {
+      return (WorldGenAbstractTree)(p_150567_1_.nextInt(3) > 0 ? this.field_150634_aD : super.func_150567_a(p_150567_1_));
+   }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
-    {
-        return (WorldGenAbstractTree)(rand.nextInt(3) > 0 ? this.spruceGenerator : super.genBigTreeChance(rand));
-    }
+   public void func_180624_a(World p_180624_1_, Random p_180624_2_, BlockPos p_180624_3_) {
+      super.func_180624_a(p_180624_1_, p_180624_2_, p_180624_3_);
+      int i = 3 + p_180624_2_.nextInt(6);
 
-    public void decorate(World worldIn, Random rand, BlockPos pos)
-    {
-        super.decorate(worldIn, rand, pos);
-        int i = 3 + rand.nextInt(6);
+      for(int j = 0; j < i; ++j) {
+         int k = p_180624_2_.nextInt(16);
+         int l = p_180624_2_.nextInt(28) + 4;
+         int i1 = p_180624_2_.nextInt(16);
+         BlockPos blockpos = p_180624_3_.func_177982_a(k, l, i1);
+         if (p_180624_1_.func_180495_p(blockpos).func_177230_c() == Blocks.field_150348_b) {
+            p_180624_1_.func_180501_a(blockpos, Blocks.field_150412_bA.func_176223_P(), 2);
+         }
+      }
 
-        for (int j = 0; j < i; ++j)
-        {
-            int k = rand.nextInt(16);
-            int l = rand.nextInt(28) + 4;
-            int i1 = rand.nextInt(16);
-            BlockPos blockpos = pos.add(k, l, i1);
+      for(int j1 = 0; j1 < 7; ++j1) {
+         int k1 = p_180624_2_.nextInt(16);
+         int l1 = p_180624_2_.nextInt(64);
+         int i2 = p_180624_2_.nextInt(16);
+         this.field_82915_S.func_180709_b(p_180624_1_, p_180624_2_, p_180624_3_.func_177982_a(k1, l1, i2));
+      }
 
-            if (worldIn.getBlockState(blockpos).getBlock() == Blocks.STONE)
-            {
-                worldIn.setBlockState(blockpos, Blocks.EMERALD_ORE.getDefaultState(), 2);
-            }
-        }
+   }
 
-        for (int j1 = 0; j1 < 7; ++j1)
-        {
-            int k1 = rand.nextInt(16);
-            int l1 = rand.nextInt(64);
-            int i2 = rand.nextInt(16);
-            this.theWorldGenerator.generate(worldIn, rand, pos.add(k1, l1, i2));
-        }
-    }
+   public void func_180622_a(World p_180622_1_, Random p_180622_2_, ChunkPrimer p_180622_3_, int p_180622_4_, int p_180622_5_, double p_180622_6_) {
+      this.field_76752_A = Blocks.field_150349_c.func_176223_P();
+      this.field_76753_B = Blocks.field_150346_d.func_176223_P();
+      if ((p_180622_6_ < -1.0D || p_180622_6_ > 2.0D) && this.field_150638_aH == BiomeHills.Type.MUTATED) {
+         this.field_76752_A = Blocks.field_150351_n.func_176223_P();
+         this.field_76753_B = Blocks.field_150351_n.func_176223_P();
+      } else if (p_180622_6_ > 1.0D && this.field_150638_aH != BiomeHills.Type.EXTRA_TREES) {
+         this.field_76752_A = Blocks.field_150348_b.func_176223_P();
+         this.field_76753_B = Blocks.field_150348_b.func_176223_P();
+      }
 
-    public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z, double noiseVal)
-    {
-        this.topBlock = Blocks.GRASS.getDefaultState();
-        this.fillerBlock = Blocks.DIRT.getDefaultState();
+      this.func_180628_b(p_180622_1_, p_180622_2_, p_180622_3_, p_180622_4_, p_180622_5_, p_180622_6_);
+   }
 
-        if ((noiseVal < -1.0D || noiseVal > 2.0D) && this.type == BiomeHills.Type.MUTATED)
-        {
-            this.topBlock = Blocks.GRAVEL.getDefaultState();
-            this.fillerBlock = Blocks.GRAVEL.getDefaultState();
-        }
-        else if (noiseVal > 1.0D && this.type != BiomeHills.Type.EXTRA_TREES)
-        {
-            this.topBlock = Blocks.STONE.getDefaultState();
-            this.fillerBlock = Blocks.STONE.getDefaultState();
-        }
-
-        this.generateBiomeTerrain(worldIn, rand, chunkPrimerIn, x, z, noiseVal);
-    }
-
-    public static enum Type
-    {
-        NORMAL,
-        EXTRA_TREES,
-        MUTATED;
-    }
+   public static enum Type {
+      NORMAL,
+      EXTRA_TREES,
+      MUTATED;
+   }
 }

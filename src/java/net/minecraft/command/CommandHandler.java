@@ -17,233 +17,163 @@ import net.minecraft.util.text.TextFormatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class CommandHandler implements ICommandManager
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final Map<String, ICommand> commandMap = Maps.<String, ICommand>newHashMap();
-    private final Set<ICommand> commandSet = Sets.<ICommand>newHashSet();
+public abstract class CommandHandler implements ICommandManager {
+   private static final Logger field_147175_a = LogManager.getLogger();
+   private final Map<String, ICommand> field_71562_a = Maps.<String, ICommand>newHashMap();
+   private final Set<ICommand> field_71561_b = Sets.<ICommand>newHashSet();
 
-    /**
-     * Attempt to execute a command. This method should return the number of times that the command was executed. If the
-     * command does not exist or if the player does not have permission, 0 will be returned. A number greater than 1 can
-     * be returned if a player selector is used.
-     */
-    public int executeCommand(ICommandSender sender, String rawCommand)
-    {
-        rawCommand = rawCommand.trim();
+   public int func_71556_a(ICommandSender p_71556_1_, String p_71556_2_) {
+      p_71556_2_ = p_71556_2_.trim();
+      if (p_71556_2_.startsWith("/")) {
+         p_71556_2_ = p_71556_2_.substring(1);
+      }
 
-        if (rawCommand.startsWith("/"))
-        {
-            rawCommand = rawCommand.substring(1);
-        }
+      String[] astring = p_71556_2_.split(" ");
+      String s = astring[0];
+      astring = func_71559_a(astring);
+      ICommand icommand = this.field_71562_a.get(s);
+      int i = 0;
 
-        String[] astring = rawCommand.split(" ");
-        String s = astring[0];
-        astring = dropFirstString(astring);
-        ICommand icommand = this.commandMap.get(s);
-        int i = 0;
+      try {
+         int j = this.func_82370_a(icommand, astring);
+         if (icommand == null) {
+            TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
+            textcomponenttranslation1.func_150256_b().func_150238_a(TextFormatting.RED);
+            p_71556_1_.func_145747_a(textcomponenttranslation1);
+         } else if (icommand.func_184882_a(this.func_184879_a(), p_71556_1_)) {
+            if (j > -1) {
+               List<Entity> list = EntitySelector.<Entity>func_179656_b(p_71556_1_, astring[j], Entity.class);
+               String s1 = astring[j];
+               p_71556_1_.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
+               if (list.isEmpty()) {
+                  throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[]{astring[j]});
+               }
 
-        try
-        {
-            int j = this.getUsernameIndex(icommand, astring);
+               for(Entity entity : list) {
+                  astring[j] = entity.func_189512_bd();
+                  if (this.func_175786_a(p_71556_1_, astring, icommand, p_71556_2_)) {
+                     ++i;
+                  }
+               }
 
-            if (icommand == null)
-            {
-                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
-                textcomponenttranslation1.getStyle().setColor(TextFormatting.RED);
-                sender.addChatMessage(textcomponenttranslation1);
+               astring[j] = s1;
+            } else {
+               p_71556_1_.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, 1);
+               if (this.func_175786_a(p_71556_1_, astring, icommand, p_71556_2_)) {
+                  ++i;
+               }
             }
-            else if (icommand.checkPermission(this.getServer(), sender))
-            {
-                if (j > -1)
-                {
-                    List<Entity> list = EntitySelector.<Entity>matchEntities(sender, astring[j], Entity.class);
-                    String s1 = astring[j];
-                    sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
+         } else {
+            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
+            textcomponenttranslation2.func_150256_b().func_150238_a(TextFormatting.RED);
+            p_71556_1_.func_145747_a(textcomponenttranslation2);
+         }
+      } catch (CommandException commandexception) {
+         TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(commandexception.getMessage(), commandexception.func_74844_a());
+         textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.RED);
+         p_71556_1_.func_145747_a(textcomponenttranslation);
+      }
 
-                    if (list.isEmpty())
-                    {
-                        throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[] {astring[j]});
-                    }
+      p_71556_1_.func_174794_a(CommandResultStats.Type.SUCCESS_COUNT, i);
+      return i;
+   }
 
-                    for (Entity entity : list)
-                    {
-                        astring[j] = entity.getCachedUniqueIdString();
+   protected boolean func_175786_a(ICommandSender p_175786_1_, String[] p_175786_2_, ICommand p_175786_3_, String p_175786_4_) {
+      try {
+         p_175786_3_.func_184881_a(this.func_184879_a(), p_175786_1_, p_175786_2_);
+         return true;
+      } catch (WrongUsageException wrongusageexception) {
+         TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.usage", new Object[]{new TextComponentTranslation(wrongusageexception.getMessage(), wrongusageexception.func_74844_a())});
+         textcomponenttranslation2.func_150256_b().func_150238_a(TextFormatting.RED);
+         p_175786_1_.func_145747_a(textcomponenttranslation2);
+      } catch (CommandException commandexception) {
+         TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation(commandexception.getMessage(), commandexception.func_74844_a());
+         textcomponenttranslation1.func_150256_b().func_150238_a(TextFormatting.RED);
+         p_175786_1_.func_145747_a(textcomponenttranslation1);
+      } catch (Throwable throwable) {
+         TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.exception", new Object[0]);
+         textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.RED);
+         p_175786_1_.func_145747_a(textcomponenttranslation);
+         field_147175_a.warn("Couldn't process command: " + p_175786_4_, throwable);
+      }
 
-                        if (this.tryExecute(sender, astring, icommand, rawCommand))
-                        {
-                            ++i;
-                        }
-                    }
+      return false;
+   }
 
-                    astring[j] = s1;
-                }
-                else
-                {
-                    sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, 1);
+   protected abstract MinecraftServer func_184879_a();
 
-                    if (this.tryExecute(sender, astring, icommand, rawCommand))
-                    {
-                        ++i;
-                    }
-                }
+   public ICommand func_71560_a(ICommand p_71560_1_) {
+      this.field_71562_a.put(p_71560_1_.func_71517_b(), p_71560_1_);
+      this.field_71561_b.add(p_71560_1_);
+
+      for(String s : p_71560_1_.func_71514_a()) {
+         ICommand icommand = this.field_71562_a.get(s);
+         if (icommand == null || !icommand.func_71517_b().equals(s)) {
+            this.field_71562_a.put(s, p_71560_1_);
+         }
+      }
+
+      return p_71560_1_;
+   }
+
+   private static String[] func_71559_a(String[] p_71559_0_) {
+      String[] astring = new String[p_71559_0_.length - 1];
+      System.arraycopy(p_71559_0_, 1, astring, 0, p_71559_0_.length - 1);
+      return astring;
+   }
+
+   public List<String> func_180524_a(ICommandSender p_180524_1_, String p_180524_2_, @Nullable BlockPos p_180524_3_) {
+      String[] astring = p_180524_2_.split(" ", -1);
+      String s = astring[0];
+      if (astring.length == 1) {
+         List<String> list = Lists.<String>newArrayList();
+
+         for(Entry<String, ICommand> entry : this.field_71562_a.entrySet()) {
+            if (CommandBase.func_71523_a(s, entry.getKey()) && ((ICommand)entry.getValue()).func_184882_a(this.func_184879_a(), p_180524_1_)) {
+               list.add(entry.getKey());
             }
-            else
-            {
-                TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
-                textcomponenttranslation2.getStyle().setColor(TextFormatting.RED);
-                sender.addChatMessage(textcomponenttranslation2);
+         }
+
+         return list;
+      } else {
+         if (astring.length > 1) {
+            ICommand icommand = this.field_71562_a.get(s);
+            if (icommand != null && icommand.func_184882_a(this.func_184879_a(), p_180524_1_)) {
+               return icommand.func_184883_a(this.func_184879_a(), p_180524_1_, func_71559_a(astring), p_180524_3_);
             }
-        }
-        catch (CommandException commandexception)
-        {
-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(commandexception.getMessage(), commandexception.getErrorObjects());
-            textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
-            sender.addChatMessage(textcomponenttranslation);
-        }
+         }
 
-        sender.setCommandStat(CommandResultStats.Type.SUCCESS_COUNT, i);
-        return i;
-    }
+         return Collections.<String>emptyList();
+      }
+   }
 
-    protected boolean tryExecute(ICommandSender sender, String[] args, ICommand command, String input)
-    {
-        try
-        {
-            command.execute(this.getServer(), sender, args);
-            return true;
-        }
-        catch (WrongUsageException wrongusageexception)
-        {
-            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.usage", new Object[] {new TextComponentTranslation(wrongusageexception.getMessage(), wrongusageexception.getErrorObjects())});
-            textcomponenttranslation2.getStyle().setColor(TextFormatting.RED);
-            sender.addChatMessage(textcomponenttranslation2);
-        }
-        catch (CommandException commandexception)
-        {
-            TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation(commandexception.getMessage(), commandexception.getErrorObjects());
-            textcomponenttranslation1.getStyle().setColor(TextFormatting.RED);
-            sender.addChatMessage(textcomponenttranslation1);
-        }
-        catch (Throwable throwable)
-        {
-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.exception", new Object[0]);
-            textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
-            sender.addChatMessage(textcomponenttranslation);
-            LOGGER.warn("Couldn't process command: " + input, throwable);
-        }
+   public List<ICommand> func_71557_a(ICommandSender p_71557_1_) {
+      List<ICommand> list = Lists.<ICommand>newArrayList();
 
-        return false;
-    }
+      for(ICommand icommand : this.field_71561_b) {
+         if (icommand.func_184882_a(this.func_184879_a(), p_71557_1_)) {
+            list.add(icommand);
+         }
+      }
 
-    protected abstract MinecraftServer getServer();
+      return list;
+   }
 
-    /**
-     * adds the command and any aliases it has to the internal map of available commands
-     */
-    public ICommand registerCommand(ICommand command)
-    {
-        this.commandMap.put(command.getCommandName(), command);
-        this.commandSet.add(command);
+   public Map<String, ICommand> func_71555_a() {
+      return this.field_71562_a;
+   }
 
-        for (String s : command.getCommandAliases())
-        {
-            ICommand icommand = this.commandMap.get(s);
-
-            if (icommand == null || !icommand.getCommandName().equals(s))
-            {
-                this.commandMap.put(s, command);
+   private int func_82370_a(ICommand p_82370_1_, String[] p_82370_2_) throws CommandException {
+      if (p_82370_1_ == null) {
+         return -1;
+      } else {
+         for(int i = 0; i < p_82370_2_.length; ++i) {
+            if (p_82370_1_.func_82358_a(p_82370_2_, i) && EntitySelector.func_82377_a(p_82370_2_[i])) {
+               return i;
             }
-        }
+         }
 
-        return command;
-    }
-
-    /**
-     * creates a new array and sets elements 0..n-2 to be 0..n-1 of the input (n elements)
-     */
-    private static String[] dropFirstString(String[] input)
-    {
-        String[] astring = new String[input.length - 1];
-        System.arraycopy(input, 1, astring, 0, input.length - 1);
-        return astring;
-    }
-
-    public List<String> getTabCompletionOptions(ICommandSender sender, String input, @Nullable BlockPos pos)
-    {
-        String[] astring = input.split(" ", -1);
-        String s = astring[0];
-
-        if (astring.length == 1)
-        {
-            List<String> list = Lists.<String>newArrayList();
-
-            for (Entry<String, ICommand> entry : this.commandMap.entrySet())
-            {
-                if (CommandBase.doesStringStartWith(s, entry.getKey()) && ((ICommand)entry.getValue()).checkPermission(this.getServer(), sender))
-                {
-                    list.add(entry.getKey());
-                }
-            }
-
-            return list;
-        }
-        else
-        {
-            if (astring.length > 1)
-            {
-                ICommand icommand = this.commandMap.get(s);
-
-                if (icommand != null && icommand.checkPermission(this.getServer(), sender))
-                {
-                    return icommand.getTabCompletionOptions(this.getServer(), sender, dropFirstString(astring), pos);
-                }
-            }
-
-            return Collections.<String>emptyList();
-        }
-    }
-
-    public List<ICommand> getPossibleCommands(ICommandSender sender)
-    {
-        List<ICommand> list = Lists.<ICommand>newArrayList();
-
-        for (ICommand icommand : this.commandSet)
-        {
-            if (icommand.checkPermission(this.getServer(), sender))
-            {
-                list.add(icommand);
-            }
-        }
-
-        return list;
-    }
-
-    public Map<String, ICommand> getCommands()
-    {
-        return this.commandMap;
-    }
-
-    /**
-     * Return a command's first parameter index containing a valid username.
-     */
-    private int getUsernameIndex(ICommand command, String[] args) throws CommandException
-    {
-        if (command == null)
-        {
-            return -1;
-        }
-        else
-        {
-            for (int i = 0; i < args.length; ++i)
-            {
-                if (command.isUsernameIndex(args, i) && EntitySelector.matchesMultiplePlayers(args[i]))
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-    }
+         return -1;
+      }
+   }
 }

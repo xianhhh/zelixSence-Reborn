@@ -4,116 +4,68 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import optifine.Config;
-import optifine.Reflector;
-import shadersmod.client.SVertexBuilder;
 
-public class WorldVertexBufferUploader
-{
-    public void draw(BufferBuilder vertexBufferIn)
-    {
-        if (vertexBufferIn.getVertexCount() > 0)
-        {
-            VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
-            int i = vertexformat.getNextOffset();
-            ByteBuffer bytebuffer = vertexBufferIn.getByteBuffer();
-            List<VertexFormatElement> list = vertexformat.getElements();
-            boolean flag = Reflector.ForgeVertexFormatElementEnumUseage_preDraw.exists();
-            boolean flag1 = Reflector.ForgeVertexFormatElementEnumUseage_postDraw.exists();
+public class WorldVertexBufferUploader {
+   public void func_181679_a(BufferBuilder p_181679_1_) {
+      if (p_181679_1_.func_178989_h() > 0) {
+         VertexFormat vertexformat = p_181679_1_.func_178973_g();
+         int i = vertexformat.func_177338_f();
+         ByteBuffer bytebuffer = p_181679_1_.func_178966_f();
+         List<VertexFormatElement> list = vertexformat.func_177343_g();
 
-            for (int j = 0; j < list.size(); ++j)
-            {
-                VertexFormatElement vertexformatelement = list.get(j);
-                VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.getUsage();
-
-                if (flag)
-                {
-                    Reflector.callVoid(vertexformatelement$enumusage, Reflector.ForgeVertexFormatElementEnumUseage_preDraw, vertexformat, j, i, bytebuffer);
-                }
-                else
-                {
-                    int k = vertexformatelement.getType().getGlConstant();
-                    int l = vertexformatelement.getIndex();
-                    bytebuffer.position(vertexformat.getOffset(j));
-
-                    switch (vertexformatelement$enumusage)
-                    {
-                        case POSITION:
-                            GlStateManager.glVertexPointer(vertexformatelement.getElementCount(), k, i, bytebuffer);
-                            GlStateManager.glEnableClientState(32884);
-                            break;
-
-                        case UV:
-                            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit + l);
-                            GlStateManager.glTexCoordPointer(vertexformatelement.getElementCount(), k, i, bytebuffer);
-                            GlStateManager.glEnableClientState(32888);
-                            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-                            break;
-
-                        case COLOR:
-                            GlStateManager.glColorPointer(vertexformatelement.getElementCount(), k, i, bytebuffer);
-                            GlStateManager.glEnableClientState(32886);
-                            break;
-
-                        case NORMAL:
-                            GlStateManager.glNormalPointer(k, i, bytebuffer);
-                            GlStateManager.glEnableClientState(32885);
-                    }
-                }
+         for(int j = 0; j < list.size(); ++j) {
+            VertexFormatElement vertexformatelement = list.get(j);
+            VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.func_177375_c();
+            int k = vertexformatelement.func_177367_b().func_177397_c();
+            int l = vertexformatelement.func_177369_e();
+            bytebuffer.position(vertexformat.func_181720_d(j));
+            switch(vertexformatelement$enumusage) {
+            case POSITION:
+               GlStateManager.func_187427_b(vertexformatelement.func_177370_d(), k, i, bytebuffer);
+               GlStateManager.func_187410_q(32884);
+               break;
+            case UV:
+               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a + l);
+               GlStateManager.func_187404_a(vertexformatelement.func_177370_d(), k, i, bytebuffer);
+               GlStateManager.func_187410_q(32888);
+               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a);
+               break;
+            case COLOR:
+               GlStateManager.func_187400_c(vertexformatelement.func_177370_d(), k, i, bytebuffer);
+               GlStateManager.func_187410_q(32886);
+               break;
+            case NORMAL:
+               GlStateManager.func_187446_a(k, i, bytebuffer);
+               GlStateManager.func_187410_q(32885);
             }
+         }
 
-            if (vertexBufferIn.isMultiTexture())
-            {
-                vertexBufferIn.drawMultiTexture();
+         GlStateManager.func_187439_f(p_181679_1_.func_178979_i(), 0, p_181679_1_.func_178989_h());
+         int i1 = 0;
+
+         for(int j1 = list.size(); i1 < j1; ++i1) {
+            VertexFormatElement vertexformatelement1 = list.get(i1);
+            VertexFormatElement.EnumUsage vertexformatelement$enumusage1 = vertexformatelement1.func_177375_c();
+            int k1 = vertexformatelement1.func_177369_e();
+            switch(vertexformatelement$enumusage1) {
+            case POSITION:
+               GlStateManager.func_187429_p(32884);
+               break;
+            case UV:
+               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a + k1);
+               GlStateManager.func_187429_p(32888);
+               OpenGlHelper.func_77472_b(OpenGlHelper.field_77478_a);
+               break;
+            case COLOR:
+               GlStateManager.func_187429_p(32886);
+               GlStateManager.func_179117_G();
+               break;
+            case NORMAL:
+               GlStateManager.func_187429_p(32885);
             }
-            else if (Config.isShaders())
-            {
-                SVertexBuilder.drawArrays(vertexBufferIn.getDrawMode(), 0, vertexBufferIn.getVertexCount(), vertexBufferIn);
-            }
-            else
-            {
-                GlStateManager.glDrawArrays(vertexBufferIn.getDrawMode(), 0, vertexBufferIn.getVertexCount());
-            }
+         }
+      }
 
-            int j1 = 0;
-
-            for (int k1 = list.size(); j1 < k1; ++j1)
-            {
-                VertexFormatElement vertexformatelement1 = list.get(j1);
-                VertexFormatElement.EnumUsage vertexformatelement$enumusage1 = vertexformatelement1.getUsage();
-
-                if (flag1)
-                {
-                    Reflector.callVoid(vertexformatelement$enumusage1, Reflector.ForgeVertexFormatElementEnumUseage_postDraw, vertexformat, j1, i, bytebuffer);
-                }
-                else
-                {
-                    int i1 = vertexformatelement1.getIndex();
-
-                    switch (vertexformatelement$enumusage1)
-                    {
-                        case POSITION:
-                            GlStateManager.glDisableClientState(32884);
-                            break;
-
-                        case UV:
-                            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit + i1);
-                            GlStateManager.glDisableClientState(32888);
-                            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-                            break;
-
-                        case COLOR:
-                            GlStateManager.glDisableClientState(32886);
-                            GlStateManager.resetColor();
-                            break;
-
-                        case NORMAL:
-                            GlStateManager.glDisableClientState(32885);
-                    }
-                }
-            }
-        }
-
-        vertexBufferIn.reset();
-    }
+      p_181679_1_.func_178965_a();
+   }
 }

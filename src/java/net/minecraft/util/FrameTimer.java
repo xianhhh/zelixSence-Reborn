@@ -1,81 +1,45 @@
 package net.minecraft.util;
 
-public class FrameTimer
-{
-    /** An array with the last 240 frames */
-    private final long[] frames = new long[240];
+public class FrameTimer {
+   private final long[] field_181752_a = new long[240];
+   private int field_181753_b;
+   private int field_181754_c;
+   private int field_181755_d;
 
-    /** The last index used when 240 frames have been set */
-    private int lastIndex;
+   public void func_181747_a(long p_181747_1_) {
+      this.field_181752_a[this.field_181755_d] = p_181747_1_;
+      ++this.field_181755_d;
+      if (this.field_181755_d == 240) {
+         this.field_181755_d = 0;
+      }
 
-    /** A counter */
-    private int counter;
+      if (this.field_181754_c < 240) {
+         this.field_181753_b = 0;
+         ++this.field_181754_c;
+      } else {
+         this.field_181753_b = this.func_181751_b(this.field_181755_d + 1);
+      }
 
-    /** The next index to use in the array */
-    private int index;
+   }
 
-    /**
-     * Add a frame at the next index in the array frames
-     */
-    public void addFrame(long runningTime)
-    {
-        this.frames[this.index] = runningTime;
-        ++this.index;
+   public int func_181748_a(long p_181748_1_, int p_181748_3_) {
+      double d0 = (double)p_181748_1_ / 1.6666666E7D;
+      return (int)(d0 * (double)p_181748_3_);
+   }
 
-        if (this.index == 240)
-        {
-            this.index = 0;
-        }
+   public int func_181749_a() {
+      return this.field_181753_b;
+   }
 
-        if (this.counter < 240)
-        {
-            this.lastIndex = 0;
-            ++this.counter;
-        }
-        else
-        {
-            this.lastIndex = this.parseIndex(this.index + 1);
-        }
-    }
+   public int func_181750_b() {
+      return this.field_181755_d;
+   }
 
-    /**
-     * Return a value from time and multiplier to display the lagometer
-     */
-    public int getLagometerValue(long time, int multiplier)
-    {
-        double d0 = (double)time / 1.6666666E7D;
-        return (int)(d0 * (double)multiplier);
-    }
+   public int func_181751_b(int p_181751_1_) {
+      return p_181751_1_ % 240;
+   }
 
-    /**
-     * Return the last index used when 240 frames have been set
-     */
-    public int getLastIndex()
-    {
-        return this.lastIndex;
-    }
-
-    /**
-     * Return the index of the next frame in the array
-     */
-    public int getIndex()
-    {
-        return this.index;
-    }
-
-    /**
-     * Change 240 to 0
-     */
-    public int parseIndex(int rawIndex)
-    {
-        return rawIndex % 240;
-    }
-
-    /**
-     * Return the array of frames
-     */
-    public long[] getFrames()
-    {
-        return this.frames;
-    }
+   public long[] func_181746_c() {
+      return this.field_181752_a;
+   }
 }

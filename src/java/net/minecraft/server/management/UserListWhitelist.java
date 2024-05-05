@@ -4,52 +4,37 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import java.io.File;
 
-public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEntry>
-{
-    public UserListWhitelist(File p_i1132_1_)
-    {
-        super(p_i1132_1_);
-    }
+public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEntry> {
+   public UserListWhitelist(File p_i1132_1_) {
+      super(p_i1132_1_);
+   }
 
-    protected UserListEntry<GameProfile> createEntry(JsonObject entryData)
-    {
-        return new UserListWhitelistEntry(entryData);
-    }
+   protected UserListEntry<GameProfile> func_152682_a(JsonObject p_152682_1_) {
+      return new UserListWhitelistEntry(p_152682_1_);
+   }
 
-    public String[] getKeys()
-    {
-        String[] astring = new String[this.getValues().size()];
-        int i = 0;
+   public String[] func_152685_a() {
+      String[] astring = new String[this.func_152688_e().size()];
+      int i = 0;
 
-        for (UserListWhitelistEntry userlistwhitelistentry : this.getValues().values())
-        {
-            astring[i++] = ((GameProfile)userlistwhitelistentry.getValue()).getName();
-        }
+      for(UserListWhitelistEntry userlistwhitelistentry : this.func_152688_e().values()) {
+         astring[i++] = ((GameProfile)userlistwhitelistentry.func_152640_f()).getName();
+      }
 
-        return astring;
-    }
+      return astring;
+   }
 
-    /**
-     * Gets the key value for the given object
-     */
-    protected String getObjectKey(GameProfile obj)
-    {
-        return obj.getId().toString();
-    }
+   protected String func_152681_a(GameProfile p_152681_1_) {
+      return p_152681_1_.getId().toString();
+   }
 
-    /**
-     * Get a GameProfile entry by its name
-     */
-    public GameProfile getByName(String profileName)
-    {
-        for (UserListWhitelistEntry userlistwhitelistentry : this.getValues().values())
-        {
-            if (profileName.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
-            {
-                return (GameProfile)userlistwhitelistentry.getValue();
-            }
-        }
+   public GameProfile func_152706_a(String p_152706_1_) {
+      for(UserListWhitelistEntry userlistwhitelistentry : this.func_152688_e().values()) {
+         if (p_152706_1_.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.func_152640_f()).getName())) {
+            return (GameProfile)userlistwhitelistentry.func_152640_f();
+         }
+      }
 
-        return null;
-    }
+      return null;
+   }
 }

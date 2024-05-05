@@ -6,85 +6,59 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 
-public class PropertyInteger extends PropertyHelper<Integer>
-{
-    private final ImmutableSet<Integer> allowedValues;
+public class PropertyInteger extends PropertyHelper<Integer> {
+   private final ImmutableSet<Integer> field_177720_a;
 
-    protected PropertyInteger(String name, int min, int max)
-    {
-        super(name, Integer.class);
+   protected PropertyInteger(String p_i45648_1_, int p_i45648_2_, int p_i45648_3_) {
+      super(p_i45648_1_, Integer.class);
+      if (p_i45648_2_ < 0) {
+         throw new IllegalArgumentException("Min value of " + p_i45648_1_ + " must be 0 or greater");
+      } else if (p_i45648_3_ <= p_i45648_2_) {
+         throw new IllegalArgumentException("Max value of " + p_i45648_1_ + " must be greater than min (" + p_i45648_2_ + ")");
+      } else {
+         Set<Integer> set = Sets.<Integer>newHashSet();
 
-        if (min < 0)
-        {
-            throw new IllegalArgumentException("Min value of " + name + " must be 0 or greater");
-        }
-        else if (max <= min)
-        {
-            throw new IllegalArgumentException("Max value of " + name + " must be greater than min (" + min + ")");
-        }
-        else
-        {
-            Set<Integer> set = Sets.<Integer>newHashSet();
+         for(int i = p_i45648_2_; i <= p_i45648_3_; ++i) {
+            set.add(Integer.valueOf(i));
+         }
 
-            for (int i = min; i <= max; ++i)
-            {
-                set.add(Integer.valueOf(i));
-            }
+         this.field_177720_a = ImmutableSet.copyOf(set);
+      }
+   }
 
-            this.allowedValues = ImmutableSet.copyOf(set);
-        }
-    }
+   public Collection<Integer> func_177700_c() {
+      return this.field_177720_a;
+   }
 
-    public Collection<Integer> getAllowedValues()
-    {
-        return this.allowedValues;
-    }
+   public boolean equals(Object p_equals_1_) {
+      if (this == p_equals_1_) {
+         return true;
+      } else if (p_equals_1_ instanceof PropertyInteger && super.equals(p_equals_1_)) {
+         PropertyInteger propertyinteger = (PropertyInteger)p_equals_1_;
+         return this.field_177720_a.equals(propertyinteger.field_177720_a);
+      } else {
+         return false;
+      }
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (this == p_equals_1_)
-        {
-            return true;
-        }
-        else if (p_equals_1_ instanceof PropertyInteger && super.equals(p_equals_1_))
-        {
-            PropertyInteger propertyinteger = (PropertyInteger)p_equals_1_;
-            return this.allowedValues.equals(propertyinteger.allowedValues);
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public int hashCode() {
+      return 31 * super.hashCode() + this.field_177720_a.hashCode();
+   }
 
-    public int hashCode()
-    {
-        return 31 * super.hashCode() + this.allowedValues.hashCode();
-    }
+   public static PropertyInteger func_177719_a(String p_177719_0_, int p_177719_1_, int p_177719_2_) {
+      return new PropertyInteger(p_177719_0_, p_177719_1_, p_177719_2_);
+   }
 
-    public static PropertyInteger create(String name, int min, int max)
-    {
-        return new PropertyInteger(name, min, max);
-    }
+   public Optional<Integer> func_185929_b(String p_185929_1_) {
+      try {
+         Integer integer = Integer.valueOf(p_185929_1_);
+         return this.field_177720_a.contains(integer) ? Optional.of(integer) : Optional.absent();
+      } catch (NumberFormatException var3) {
+         return Optional.<Integer>absent();
+      }
+   }
 
-    public Optional<Integer> parseValue(String value)
-    {
-        try
-        {
-            Integer integer = Integer.valueOf(value);
-            return this.allowedValues.contains(integer) ? Optional.of(integer) : Optional.absent();
-        }
-        catch (NumberFormatException var3)
-        {
-            return Optional.<Integer>absent();
-        }
-    }
-
-    /**
-     * Get the name for the given value.
-     */
-    public String getName(Integer value)
-    {
-        return value.toString();
-    }
+   public String func_177702_a(Integer p_177702_1_) {
+      return p_177702_1_.toString();
+   }
 }

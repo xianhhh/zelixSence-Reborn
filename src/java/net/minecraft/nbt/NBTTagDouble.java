@@ -5,93 +5,67 @@ import java.io.DataOutput;
 import java.io.IOException;
 import net.minecraft.util.math.MathHelper;
 
-public class NBTTagDouble extends NBTPrimitive
-{
-    /** The double value for the tag. */
-    private double data;
+public class NBTTagDouble extends NBTPrimitive {
+   private double field_74755_a;
 
-    NBTTagDouble()
-    {
-    }
+   NBTTagDouble() {
+   }
 
-    public NBTTagDouble(double data)
-    {
-        this.data = data;
-    }
+   public NBTTagDouble(double p_i45130_1_) {
+      this.field_74755_a = p_i45130_1_;
+   }
 
-    /**
-     * Write the actual data contents of the tag, implemented in NBT extension classes
-     */
-    void write(DataOutput output) throws IOException
-    {
-        output.writeDouble(this.data);
-    }
+   void func_74734_a(DataOutput p_74734_1_) throws IOException {
+      p_74734_1_.writeDouble(this.field_74755_a);
+   }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
-    {
-        sizeTracker.read(128L);
-        this.data = input.readDouble();
-    }
+   void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException {
+      p_152446_3_.func_152450_a(128L);
+      this.field_74755_a = p_152446_1_.readDouble();
+   }
 
-    /**
-     * Gets the type byte for the tag.
-     */
-    public byte getId()
-    {
-        return 6;
-    }
+   public byte func_74732_a() {
+      return 6;
+   }
 
-    public String toString()
-    {
-        return this.data + "d";
-    }
+   public String toString() {
+      return this.field_74755_a + "d";
+   }
 
-    /**
-     * Creates a clone of the tag.
-     */
-    public NBTTagDouble copy()
-    {
-        return new NBTTagDouble(this.data);
-    }
+   public NBTTagDouble func_74737_b() {
+      return new NBTTagDouble(this.field_74755_a);
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        return super.equals(p_equals_1_) && this.data == ((NBTTagDouble)p_equals_1_).data;
-    }
+   public boolean equals(Object p_equals_1_) {
+      return super.equals(p_equals_1_) && this.field_74755_a == ((NBTTagDouble)p_equals_1_).field_74755_a;
+   }
 
-    public int hashCode()
-    {
-        long i = Double.doubleToLongBits(this.data);
-        return super.hashCode() ^ (int)(i ^ i >>> 32);
-    }
+   public int hashCode() {
+      long i = Double.doubleToLongBits(this.field_74755_a);
+      return super.hashCode() ^ (int)(i ^ i >>> 32);
+   }
 
-    public long getLong()
-    {
-        return (long)Math.floor(this.data);
-    }
+   public long func_150291_c() {
+      return (long)Math.floor(this.field_74755_a);
+   }
 
-    public int getInt()
-    {
-        return MathHelper.floor(this.data);
-    }
+   public int func_150287_d() {
+      return MathHelper.func_76128_c(this.field_74755_a);
+   }
 
-    public short getShort()
-    {
-        return (short)(MathHelper.floor(this.data) & 65535);
-    }
+   public short func_150289_e() {
+      return (short)(MathHelper.func_76128_c(this.field_74755_a) & '\uffff');
+   }
 
-    public byte getByte()
-    {
-        return (byte)(MathHelper.floor(this.data) & 255);
-    }
+   public byte func_150290_f() {
+      return (byte)(MathHelper.func_76128_c(this.field_74755_a) & 255);
+   }
 
-    public double getDouble()
-    {
-        return this.data;
-    }
+   public double func_150286_g() {
+      return this.field_74755_a;
+   }
 
-    public float getFloat()
-    {
-        return (float)this.data;
-    }
+   public float func_150288_h() {
+      return (float)this.field_74755_a;
+   }
 }

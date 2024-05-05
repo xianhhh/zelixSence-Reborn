@@ -28,415 +28,310 @@ import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.util.math.AxisAlignedBB;
 
-public class TileEntityShulkerBox extends TileEntityLockableLoot implements ITickable, ISidedInventory
-{
-    private static final int[] field_190595_a = new int[27];
-    private NonNullList<ItemStack> field_190596_f;
-    private boolean field_190597_g;
-    private int field_190598_h;
-    private TileEntityShulkerBox.AnimationStatus field_190599_i;
-    private float field_190600_j;
-    private float field_190601_k;
-    private EnumDyeColor field_190602_l;
-    private boolean field_190594_p;
+public class TileEntityShulkerBox extends TileEntityLockableLoot implements ITickable, ISidedInventory {
+   private static final int[] field_190595_a = new int[27];
+   private NonNullList<ItemStack> field_190596_f;
+   private boolean field_190597_g;
+   private int field_190598_h;
+   private TileEntityShulkerBox.AnimationStatus field_190599_i;
+   private float field_190600_j;
+   private float field_190601_k;
+   private EnumDyeColor field_190602_l;
+   private boolean field_190594_p;
 
-    public TileEntityShulkerBox()
-    {
-        this((EnumDyeColor)null);
-    }
+   public TileEntityShulkerBox() {
+      this((EnumDyeColor)null);
+   }
 
-    public TileEntityShulkerBox(@Nullable EnumDyeColor p_i47242_1_)
-    {
-        this.field_190596_f = NonNullList.<ItemStack>func_191197_a(27, ItemStack.field_190927_a);
-        this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSED;
-        this.field_190602_l = p_i47242_1_;
-    }
+   public TileEntityShulkerBox(@Nullable EnumDyeColor p_i47242_1_) {
+      this.field_190596_f = NonNullList.<ItemStack>func_191197_a(27, ItemStack.field_190927_a);
+      this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSED;
+      this.field_190602_l = p_i47242_1_;
+   }
 
-    /**
-     * Like the old updateEntity(), except more generic.
-     */
-    public void update()
-    {
-        this.func_190583_o();
+   public void func_73660_a() {
+      this.func_190583_o();
+      if (this.field_190599_i == TileEntityShulkerBox.AnimationStatus.OPENING || this.field_190599_i == TileEntityShulkerBox.AnimationStatus.CLOSING) {
+         this.func_190589_G();
+      }
 
-        if (this.field_190599_i == TileEntityShulkerBox.AnimationStatus.OPENING || this.field_190599_i == TileEntityShulkerBox.AnimationStatus.CLOSING)
-        {
+   }
+
+   protected void func_190583_o() {
+      this.field_190601_k = this.field_190600_j;
+      switch(this.field_190599_i) {
+      case CLOSED:
+         this.field_190600_j = 0.0F;
+         break;
+      case OPENING:
+         this.field_190600_j += 0.1F;
+         if (this.field_190600_j >= 1.0F) {
             this.func_190589_G();
-        }
-    }
+            this.field_190599_i = TileEntityShulkerBox.AnimationStatus.OPENED;
+            this.field_190600_j = 1.0F;
+         }
+         break;
+      case CLOSING:
+         this.field_190600_j -= 0.1F;
+         if (this.field_190600_j <= 0.0F) {
+            this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSED;
+            this.field_190600_j = 0.0F;
+         }
+         break;
+      case OPENED:
+         this.field_190600_j = 1.0F;
+      }
 
-    protected void func_190583_o()
-    {
-        this.field_190601_k = this.field_190600_j;
+   }
 
-        switch (this.field_190599_i)
-        {
-            case CLOSED:
-                this.field_190600_j = 0.0F;
-                break;
+   public TileEntityShulkerBox.AnimationStatus func_190591_p() {
+      return this.field_190599_i;
+   }
 
-            case OPENING:
-                this.field_190600_j += 0.1F;
+   public AxisAlignedBB func_190584_a(IBlockState p_190584_1_) {
+      return this.func_190587_b((EnumFacing)p_190584_1_.func_177229_b(BlockShulkerBox.field_190957_a));
+   }
 
-                if (this.field_190600_j >= 1.0F)
-                {
-                    this.func_190589_G();
-                    this.field_190599_i = TileEntityShulkerBox.AnimationStatus.OPENED;
-                    this.field_190600_j = 1.0F;
-                }
+   public AxisAlignedBB func_190587_b(EnumFacing p_190587_1_) {
+      return Block.field_185505_j.func_72321_a((double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.func_82601_c()), (double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.func_96559_d()), (double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.func_82599_e()));
+   }
 
-                break;
+   private AxisAlignedBB func_190588_c(EnumFacing p_190588_1_) {
+      EnumFacing enumfacing = p_190588_1_.func_176734_d();
+      return this.func_190587_b(p_190588_1_).func_191195_a((double)enumfacing.func_82601_c(), (double)enumfacing.func_96559_d(), (double)enumfacing.func_82599_e());
+   }
 
-            case CLOSING:
-                this.field_190600_j -= 0.1F;
+   private void func_190589_G() {
+      IBlockState iblockstate = this.field_145850_b.func_180495_p(this.func_174877_v());
+      if (iblockstate.func_177230_c() instanceof BlockShulkerBox) {
+         EnumFacing enumfacing = (EnumFacing)iblockstate.func_177229_b(BlockShulkerBox.field_190957_a);
+         AxisAlignedBB axisalignedbb = this.func_190588_c(enumfacing).func_186670_a(this.field_174879_c);
+         List<Entity> list = this.field_145850_b.func_72839_b((Entity)null, axisalignedbb);
+         if (!list.isEmpty()) {
+            for(int i = 0; i < list.size(); ++i) {
+               Entity entity = list.get(i);
+               if (entity.func_184192_z() != EnumPushReaction.IGNORE) {
+                  double d0 = 0.0D;
+                  double d1 = 0.0D;
+                  double d2 = 0.0D;
+                  AxisAlignedBB axisalignedbb1 = entity.func_174813_aQ();
+                  switch(enumfacing.func_176740_k()) {
+                  case X:
+                     if (enumfacing.func_176743_c() == EnumFacing.AxisDirection.POSITIVE) {
+                        d0 = axisalignedbb.field_72336_d - axisalignedbb1.field_72340_a;
+                     } else {
+                        d0 = axisalignedbb1.field_72336_d - axisalignedbb.field_72340_a;
+                     }
 
-                if (this.field_190600_j <= 0.0F)
-                {
-                    this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSED;
-                    this.field_190600_j = 0.0F;
-                }
+                     d0 = d0 + 0.01D;
+                     break;
+                  case Y:
+                     if (enumfacing.func_176743_c() == EnumFacing.AxisDirection.POSITIVE) {
+                        d1 = axisalignedbb.field_72337_e - axisalignedbb1.field_72338_b;
+                     } else {
+                        d1 = axisalignedbb1.field_72337_e - axisalignedbb.field_72338_b;
+                     }
 
-                break;
+                     d1 = d1 + 0.01D;
+                     break;
+                  case Z:
+                     if (enumfacing.func_176743_c() == EnumFacing.AxisDirection.POSITIVE) {
+                        d2 = axisalignedbb.field_72334_f - axisalignedbb1.field_72339_c;
+                     } else {
+                        d2 = axisalignedbb1.field_72334_f - axisalignedbb.field_72339_c;
+                     }
 
-            case OPENED:
-                this.field_190600_j = 1.0F;
-        }
-    }
+                     d2 = d2 + 0.01D;
+                  }
 
-    public TileEntityShulkerBox.AnimationStatus func_190591_p()
-    {
-        return this.field_190599_i;
-    }
-
-    public AxisAlignedBB func_190584_a(IBlockState p_190584_1_)
-    {
-        return this.func_190587_b((EnumFacing)p_190584_1_.getValue(BlockShulkerBox.field_190957_a));
-    }
-
-    public AxisAlignedBB func_190587_b(EnumFacing p_190587_1_)
-    {
-        return Block.FULL_BLOCK_AABB.addCoord((double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.getFrontOffsetX()), (double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.getFrontOffsetY()), (double)(0.5F * this.func_190585_a(1.0F) * (float)p_190587_1_.getFrontOffsetZ()));
-    }
-
-    private AxisAlignedBB func_190588_c(EnumFacing p_190588_1_)
-    {
-        EnumFacing enumfacing = p_190588_1_.getOpposite();
-        return this.func_190587_b(p_190588_1_).func_191195_a((double)enumfacing.getFrontOffsetX(), (double)enumfacing.getFrontOffsetY(), (double)enumfacing.getFrontOffsetZ());
-    }
-
-    private void func_190589_G()
-    {
-        IBlockState iblockstate = this.world.getBlockState(this.getPos());
-
-        if (iblockstate.getBlock() instanceof BlockShulkerBox)
-        {
-            EnumFacing enumfacing = (EnumFacing)iblockstate.getValue(BlockShulkerBox.field_190957_a);
-            AxisAlignedBB axisalignedbb = this.func_190588_c(enumfacing).offset(this.pos);
-            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb);
-
-            if (!list.isEmpty())
-            {
-                for (int i = 0; i < list.size(); ++i)
-                {
-                    Entity entity = list.get(i);
-
-                    if (entity.getPushReaction() != EnumPushReaction.IGNORE)
-                    {
-                        double d0 = 0.0D;
-                        double d1 = 0.0D;
-                        double d2 = 0.0D;
-                        AxisAlignedBB axisalignedbb1 = entity.getEntityBoundingBox();
-
-                        switch (enumfacing.getAxis())
-                        {
-                            case X:
-                                if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE)
-                                {
-                                    d0 = axisalignedbb.maxX - axisalignedbb1.minX;
-                                }
-                                else
-                                {
-                                    d0 = axisalignedbb1.maxX - axisalignedbb.minX;
-                                }
-
-                                d0 = d0 + 0.01D;
-                                break;
-
-                            case Y:
-                                if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE)
-                                {
-                                    d1 = axisalignedbb.maxY - axisalignedbb1.minY;
-                                }
-                                else
-                                {
-                                    d1 = axisalignedbb1.maxY - axisalignedbb.minY;
-                                }
-
-                                d1 = d1 + 0.01D;
-                                break;
-
-                            case Z:
-                                if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE)
-                                {
-                                    d2 = axisalignedbb.maxZ - axisalignedbb1.minZ;
-                                }
-                                else
-                                {
-                                    d2 = axisalignedbb1.maxZ - axisalignedbb.minZ;
-                                }
-
-                                d2 = d2 + 0.01D;
-                        }
-
-                        entity.moveEntity(MoverType.SHULKER_BOX, d0 * (double)enumfacing.getFrontOffsetX(), d1 * (double)enumfacing.getFrontOffsetY(), d2 * (double)enumfacing.getFrontOffsetZ());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns the number of slots in the inventory.
-     */
-    public int getSizeInventory()
-    {
-        return this.field_190596_f.size();
-    }
-
-    /**
-     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
-     */
-    public int getInventoryStackLimit()
-    {
-        return 64;
-    }
-
-    public boolean receiveClientEvent(int id, int type)
-    {
-        if (id == 1)
-        {
-            this.field_190598_h = type;
-
-            if (type == 0)
-            {
-                this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSING;
+                  entity.func_70091_d(MoverType.SHULKER_BOX, d0 * (double)enumfacing.func_82601_c(), d1 * (double)enumfacing.func_96559_d(), d2 * (double)enumfacing.func_82599_e());
+               }
             }
 
-            if (type == 1)
-            {
-                this.field_190599_i = TileEntityShulkerBox.AnimationStatus.OPENING;
-            }
+         }
+      }
+   }
 
-            return true;
-        }
-        else
-        {
-            return super.receiveClientEvent(id, type);
-        }
-    }
+   public int func_70302_i_() {
+      return this.field_190596_f.size();
+   }
 
-    public void openInventory(EntityPlayer player)
-    {
-        if (!player.isSpectator())
-        {
-            if (this.field_190598_h < 0)
-            {
-                this.field_190598_h = 0;
-            }
+   public int func_70297_j_() {
+      return 64;
+   }
 
-            ++this.field_190598_h;
-            this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.field_190598_h);
+   public boolean func_145842_c(int p_145842_1_, int p_145842_2_) {
+      if (p_145842_1_ == 1) {
+         this.field_190598_h = p_145842_2_;
+         if (p_145842_2_ == 0) {
+            this.field_190599_i = TileEntityShulkerBox.AnimationStatus.CLOSING;
+         }
 
-            if (this.field_190598_h == 1)
-            {
-                this.world.playSound((EntityPlayer)null, this.pos, SoundEvents.field_191262_fB, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
-            }
-        }
-    }
+         if (p_145842_2_ == 1) {
+            this.field_190599_i = TileEntityShulkerBox.AnimationStatus.OPENING;
+         }
 
-    public void closeInventory(EntityPlayer player)
-    {
-        if (!player.isSpectator())
-        {
-            --this.field_190598_h;
-            this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.field_190598_h);
+         return true;
+      } else {
+         return super.func_145842_c(p_145842_1_, p_145842_2_);
+      }
+   }
 
-            if (this.field_190598_h <= 0)
-            {
-                this.world.playSound((EntityPlayer)null, this.pos, SoundEvents.field_191261_fA, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
-            }
-        }
-    }
+   public void func_174889_b(EntityPlayer p_174889_1_) {
+      if (!p_174889_1_.func_175149_v()) {
+         if (this.field_190598_h < 0) {
+            this.field_190598_h = 0;
+         }
 
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
-    {
-        return new ContainerShulkerBox(playerInventory, this, playerIn);
-    }
+         ++this.field_190598_h;
+         this.field_145850_b.func_175641_c(this.field_174879_c, this.func_145838_q(), 1, this.field_190598_h);
+         if (this.field_190598_h == 1) {
+            this.field_145850_b.func_184133_a((EntityPlayer)null, this.field_174879_c, SoundEvents.field_191262_fB, SoundCategory.BLOCKS, 0.5F, this.field_145850_b.field_73012_v.nextFloat() * 0.1F + 0.9F);
+         }
+      }
 
-    public String getGuiID()
-    {
-        return "minecraft:shulker_box";
-    }
+   }
 
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.hasCustomName() ? this.field_190577_o : "container.shulkerBox";
-    }
+   public void func_174886_c(EntityPlayer p_174886_1_) {
+      if (!p_174886_1_.func_175149_v()) {
+         --this.field_190598_h;
+         this.field_145850_b.func_175641_c(this.field_174879_c, this.func_145838_q(), 1, this.field_190598_h);
+         if (this.field_190598_h <= 0) {
+            this.field_145850_b.func_184133_a((EntityPlayer)null, this.field_174879_c, SoundEvents.field_191261_fA, SoundCategory.BLOCKS, 0.5F, this.field_145850_b.field_73012_v.nextFloat() * 0.1F + 0.9F);
+         }
+      }
 
-    public static void func_190593_a(DataFixer p_190593_0_)
-    {
-        p_190593_0_.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityShulkerBox.class, new String[] {"Items"}));
-    }
+   }
 
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        this.func_190586_e(compound);
-    }
+   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
+      return new ContainerShulkerBox(p_174876_1_, this, p_174876_2_);
+   }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        return this.func_190580_f(compound);
-    }
+   public String func_174875_k() {
+      return "minecraft:shulker_box";
+   }
 
-    public void func_190586_e(NBTTagCompound p_190586_1_)
-    {
-        this.field_190596_f = NonNullList.<ItemStack>func_191197_a(this.getSizeInventory(), ItemStack.field_190927_a);
+   public String func_70005_c_() {
+      return this.func_145818_k_() ? this.field_190577_o : "container.shulkerBox";
+   }
 
-        if (!this.checkLootAndRead(p_190586_1_) && p_190586_1_.hasKey("Items", 9))
-        {
-            ItemStackHelper.func_191283_b(p_190586_1_, this.field_190596_f);
-        }
+   public static void func_190593_a(DataFixer p_190593_0_) {
+      p_190593_0_.func_188258_a(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityShulkerBox.class, new String[]{"Items"}));
+   }
 
-        if (p_190586_1_.hasKey("CustomName", 8))
-        {
-            this.field_190577_o = p_190586_1_.getString("CustomName");
-        }
-    }
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      this.func_190586_e(p_145839_1_);
+   }
 
-    public NBTTagCompound func_190580_f(NBTTagCompound p_190580_1_)
-    {
-        if (!this.checkLootAndWrite(p_190580_1_))
-        {
-            ItemStackHelper.func_191281_a(p_190580_1_, this.field_190596_f, false);
-        }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      return this.func_190580_f(p_189515_1_);
+   }
 
-        if (this.hasCustomName())
-        {
-            p_190580_1_.setString("CustomName", this.field_190577_o);
-        }
+   public void func_190586_e(NBTTagCompound p_190586_1_) {
+      this.field_190596_f = NonNullList.<ItemStack>func_191197_a(this.func_70302_i_(), ItemStack.field_190927_a);
+      if (!this.func_184283_b(p_190586_1_) && p_190586_1_.func_150297_b("Items", 9)) {
+         ItemStackHelper.func_191283_b(p_190586_1_, this.field_190596_f);
+      }
 
-        if (!p_190580_1_.hasKey("Lock") && this.isLocked())
-        {
-            this.getLockCode().toNBT(p_190580_1_);
-        }
+      if (p_190586_1_.func_150297_b("CustomName", 8)) {
+         this.field_190577_o = p_190586_1_.func_74779_i("CustomName");
+      }
 
-        return p_190580_1_;
-    }
+   }
 
-    protected NonNullList<ItemStack> func_190576_q()
-    {
-        return this.field_190596_f;
-    }
+   public NBTTagCompound func_190580_f(NBTTagCompound p_190580_1_) {
+      if (!this.func_184282_c(p_190580_1_)) {
+         ItemStackHelper.func_191281_a(p_190580_1_, this.field_190596_f, false);
+      }
 
-    public boolean func_191420_l()
-    {
-        for (ItemStack itemstack : this.field_190596_f)
-        {
-            if (!itemstack.func_190926_b())
-            {
-                return false;
-            }
-        }
+      if (this.func_145818_k_()) {
+         p_190580_1_.func_74778_a("CustomName", this.field_190577_o);
+      }
 
-        return true;
-    }
+      if (!p_190580_1_.func_74764_b("Lock") && this.func_174893_q_()) {
+         this.func_174891_i().func_180157_a(p_190580_1_);
+      }
 
-    public int[] getSlotsForFace(EnumFacing side)
-    {
-        return field_190595_a;
-    }
+      return p_190580_1_;
+   }
 
-    /**
-     * Returns true if automation can insert the given item in the given slot from the given side.
-     */
-    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction)
-    {
-        return !(Block.getBlockFromItem(itemStackIn.getItem()) instanceof BlockShulkerBox);
-    }
+   protected NonNullList<ItemStack> func_190576_q() {
+      return this.field_190596_f;
+   }
 
-    /**
-     * Returns true if automation can extract the given item in the given slot from the given side.
-     */
-    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction)
-    {
-        return true;
-    }
+   public boolean func_191420_l() {
+      for(ItemStack itemstack : this.field_190596_f) {
+         if (!itemstack.func_190926_b()) {
+            return false;
+         }
+      }
 
-    public void clear()
-    {
-        this.field_190597_g = true;
-        super.clear();
-    }
+      return true;
+   }
 
-    public boolean func_190590_r()
-    {
-        return this.field_190597_g;
-    }
+   public int[] func_180463_a(EnumFacing p_180463_1_) {
+      return field_190595_a;
+   }
 
-    public float func_190585_a(float p_190585_1_)
-    {
-        return this.field_190601_k + (this.field_190600_j - this.field_190601_k) * p_190585_1_;
-    }
+   public boolean func_180462_a(int p_180462_1_, ItemStack p_180462_2_, EnumFacing p_180462_3_) {
+      return !(Block.func_149634_a(p_180462_2_.func_77973_b()) instanceof BlockShulkerBox);
+   }
 
-    public EnumDyeColor func_190592_s()
-    {
-        if (this.field_190602_l == null)
-        {
-            this.field_190602_l = BlockShulkerBox.func_190954_c(this.getBlockType());
-        }
+   public boolean func_180461_b(int p_180461_1_, ItemStack p_180461_2_, EnumFacing p_180461_3_) {
+      return true;
+   }
 
-        return this.field_190602_l;
-    }
+   public void func_174888_l() {
+      this.field_190597_g = true;
+      super.func_174888_l();
+   }
 
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        return new SPacketUpdateTileEntity(this.pos, 10, this.getUpdateTag());
-    }
+   public boolean func_190590_r() {
+      return this.field_190597_g;
+   }
 
-    public boolean func_190581_E()
-    {
-        return this.field_190594_p;
-    }
+   public float func_190585_a(float p_190585_1_) {
+      return this.field_190601_k + (this.field_190600_j - this.field_190601_k) * p_190585_1_;
+   }
 
-    public void func_190579_a(boolean p_190579_1_)
-    {
-        this.field_190594_p = p_190579_1_;
-    }
+   public EnumDyeColor func_190592_s() {
+      if (this.field_190602_l == null) {
+         this.field_190602_l = BlockShulkerBox.func_190954_c(this.func_145838_q());
+      }
 
-    public boolean func_190582_F()
-    {
-        return !this.func_190581_E() || !this.func_191420_l() || this.hasCustomName() || this.lootTable != null;
-    }
+      return this.field_190602_l;
+   }
 
-    static
-    {
-        for (int i = 0; i < field_190595_a.length; field_190595_a[i] = i++)
-        {
-            ;
-        }
-    }
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      return new SPacketUpdateTileEntity(this.field_174879_c, 10, this.func_189517_E_());
+   }
 
-    public static enum AnimationStatus
-    {
-        CLOSED,
-        OPENING,
-        OPENED,
-        CLOSING;
-    }
+   public boolean func_190581_E() {
+      return this.field_190594_p;
+   }
+
+   public void func_190579_a(boolean p_190579_1_) {
+      this.field_190594_p = p_190579_1_;
+   }
+
+   public boolean func_190582_F() {
+      return !this.func_190581_E() || !this.func_191420_l() || this.func_145818_k_() || this.field_184284_m != null;
+   }
+
+   static {
+      for(int i = 0; i < field_190595_a.length; field_190595_a[i] = i++) {
+         ;
+      }
+
+   }
+
+   public static enum AnimationStatus {
+      CLOSED,
+      OPENING,
+      OPENED,
+      CLOSING;
+   }
 }

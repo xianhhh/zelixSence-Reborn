@@ -18,87 +18,59 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
 
-public abstract class BlockContainer extends Block implements ITileEntityProvider
-{
-    protected BlockContainer(Material materialIn)
-    {
-        this(materialIn, materialIn.getMaterialMapColor());
-    }
+public abstract class BlockContainer extends Block implements ITileEntityProvider {
+   protected BlockContainer(Material p_i45386_1_) {
+      this(p_i45386_1_, p_i45386_1_.func_151565_r());
+   }
 
-    protected BlockContainer(Material materialIn, MapColor color)
-    {
-        super(materialIn, color);
-        this.isBlockContainer = true;
-    }
+   protected BlockContainer(Material p_i46402_1_, MapColor p_i46402_2_) {
+      super(p_i46402_1_, p_i46402_2_);
+      this.field_149758_A = true;
+   }
 
-    protected boolean isInvalidNeighbor(World worldIn, BlockPos pos, EnumFacing facing)
-    {
-        return worldIn.getBlockState(pos.offset(facing)).getMaterial() == Material.CACTUS;
-    }
+   protected boolean func_181086_a(World p_181086_1_, BlockPos p_181086_2_, EnumFacing p_181086_3_) {
+      return p_181086_1_.func_180495_p(p_181086_2_.func_177972_a(p_181086_3_)).func_185904_a() == Material.field_151570_A;
+   }
 
-    protected boolean hasInvalidNeighbor(World worldIn, BlockPos pos)
-    {
-        return this.isInvalidNeighbor(worldIn, pos, EnumFacing.NORTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.SOUTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.WEST) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.EAST);
-    }
+   protected boolean func_181087_e(World p_181087_1_, BlockPos p_181087_2_) {
+      return this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.NORTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.SOUTH) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.WEST) || this.func_181086_a(p_181087_1_, p_181087_2_, EnumFacing.EAST);
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.INVISIBLE;
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.INVISIBLE;
+   }
 
-    /**
-     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
-     */
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        super.breakBlock(worldIn, pos, state);
-        worldIn.removeTileEntity(pos);
-    }
+   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
+      super.func_180663_b(p_180663_1_, p_180663_2_, p_180663_3_);
+      p_180663_1_.func_175713_t(p_180663_2_);
+   }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
-    {
-        if (te instanceof IWorldNameable && ((IWorldNameable)te).hasCustomName())
-        {
-            player.addStat(StatList.getBlockStats(this));
-            player.addExhaustion(0.005F);
+   public void func_180657_a(World p_180657_1_, EntityPlayer p_180657_2_, BlockPos p_180657_3_, IBlockState p_180657_4_, @Nullable TileEntity p_180657_5_, ItemStack p_180657_6_) {
+      if (p_180657_5_ instanceof IWorldNameable && ((IWorldNameable)p_180657_5_).func_145818_k_()) {
+         p_180657_2_.func_71029_a(StatList.func_188055_a(this));
+         p_180657_2_.func_71020_j(0.005F);
+         if (p_180657_1_.field_72995_K) {
+            return;
+         }
 
-            if (worldIn.isRemote)
-            {
-                return;
-            }
+         int i = EnchantmentHelper.func_77506_a(Enchantments.field_185308_t, p_180657_6_);
+         Item item = this.func_180660_a(p_180657_4_, p_180657_1_.field_73012_v, i);
+         if (item == Items.field_190931_a) {
+            return;
+         }
 
-            int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
-            Item item = this.getItemDropped(state, worldIn.rand, i);
+         ItemStack itemstack = new ItemStack(item, this.func_149745_a(p_180657_1_.field_73012_v));
+         itemstack.func_151001_c(((IWorldNameable)p_180657_5_).func_70005_c_());
+         func_180635_a(p_180657_1_, p_180657_3_, itemstack);
+      } else {
+         super.func_180657_a(p_180657_1_, p_180657_2_, p_180657_3_, p_180657_4_, (TileEntity)null, p_180657_6_);
+      }
 
-            if (item == Items.field_190931_a)
-            {
-                return;
-            }
+   }
 
-            ItemStack itemstack = new ItemStack(item, this.quantityDropped(worldIn.rand));
-            itemstack.setStackDisplayName(((IWorldNameable)te).getName());
-            spawnAsEntity(worldIn, pos, itemstack);
-        }
-        else
-        {
-            super.harvestBlock(worldIn, player, pos, state, (TileEntity)null, stack);
-        }
-    }
-
-    /**
-     * Called on both Client and Server when World#addBlockEvent is called. On the Server, this may perform additional
-     * changes to the world, like pistons replacing the block with an extended base. On the client, the update may
-     * involve replacing tile entities, playing sounds, or performing other visual actions to reflect the server side
-     * changes.
-     */
-    public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
-    {
-        super.eventReceived(state, worldIn, pos, id, param);
-        TileEntity tileentity = worldIn.getTileEntity(pos);
-        return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
-    }
+   public boolean func_189539_a(IBlockState p_189539_1_, World p_189539_2_, BlockPos p_189539_3_, int p_189539_4_, int p_189539_5_) {
+      super.func_189539_a(p_189539_1_, p_189539_2_, p_189539_3_, p_189539_4_, p_189539_5_);
+      TileEntity tileentity = p_189539_2_.func_175625_s(p_189539_3_);
+      return tileentity == null ? false : tileentity.func_145842_c(p_189539_4_, p_189539_5_);
+   }
 }

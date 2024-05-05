@@ -13,63 +13,39 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class BlockColored extends Block
-{
-    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+public class BlockColored extends Block {
+   public static final PropertyEnum<EnumDyeColor> field_176581_a = PropertyEnum.<EnumDyeColor>func_177709_a("color", EnumDyeColor.class);
 
-    public BlockColored(Material materialIn)
-    {
-        super(materialIn);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+   public BlockColored(Material p_i45398_1_) {
+      super(p_i45398_1_);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176581_a, EnumDyeColor.WHITE));
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-    /**
-     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
-     * returns the metadata of the dropped item based on the old metadata of the block.
-     */
-    public int damageDropped(IBlockState state)
-    {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
-    }
+   public int func_180651_a(IBlockState p_180651_1_) {
+      return ((EnumDyeColor)p_180651_1_.func_177229_b(field_176581_a)).func_176765_a();
+   }
 
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
-        {
-            tab.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
-        }
-    }
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      for(EnumDyeColor enumdyecolor : EnumDyeColor.values()) {
+         p_149666_2_.add(new ItemStack(this, 1, enumdyecolor.func_176765_a()));
+      }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
-    }
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return MapColor.func_193558_a((EnumDyeColor)p_180659_1_.func_177229_b(field_176581_a));
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176581_a, EnumDyeColor.func_176764_b(p_176203_1_));
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {COLOR});
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((EnumDyeColor)p_176201_1_.func_177229_b(field_176581_a)).func_176765_a();
+   }
+
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176581_a});
+   }
 }

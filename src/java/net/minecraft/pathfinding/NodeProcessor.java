@@ -5,96 +5,73 @@ import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 
-public abstract class NodeProcessor
-{
-    protected IBlockAccess blockaccess;
-    protected EntityLiving entity;
-    protected final IntHashMap<PathPoint> pointMap = new IntHashMap<PathPoint>();
-    protected int entitySizeX;
-    protected int entitySizeY;
-    protected int entitySizeZ;
-    protected boolean canEnterDoors;
-    protected boolean canBreakDoors;
-    protected boolean canSwim;
+public abstract class NodeProcessor {
+   protected IBlockAccess field_176169_a;
+   protected EntityLiving field_186326_b;
+   protected final IntHashMap<PathPoint> field_176167_b = new IntHashMap<PathPoint>();
+   protected int field_176168_c;
+   protected int field_176165_d;
+   protected int field_176166_e;
+   protected boolean field_176180_f;
+   protected boolean field_176181_g;
+   protected boolean field_176184_i;
 
-    public void initProcessor(IBlockAccess sourceIn, EntityLiving mob)
-    {
-        this.blockaccess = sourceIn;
-        this.entity = mob;
-        this.pointMap.clearMap();
-        this.entitySizeX = MathHelper.floor(mob.width + 1.0F);
-        this.entitySizeY = MathHelper.floor(mob.height + 1.0F);
-        this.entitySizeZ = MathHelper.floor(mob.width + 1.0F);
-    }
+   public void func_186315_a(IBlockAccess p_186315_1_, EntityLiving p_186315_2_) {
+      this.field_176169_a = p_186315_1_;
+      this.field_186326_b = p_186315_2_;
+      this.field_176167_b.func_76046_c();
+      this.field_176168_c = MathHelper.func_76141_d(p_186315_2_.field_70130_N + 1.0F);
+      this.field_176165_d = MathHelper.func_76141_d(p_186315_2_.field_70131_O + 1.0F);
+      this.field_176166_e = MathHelper.func_76141_d(p_186315_2_.field_70130_N + 1.0F);
+   }
 
-    /**
-     * This method is called when all nodes have been processed and PathEntity is created.
-     *  {@link net.minecraft.world.pathfinder.WalkNodeProcessor WalkNodeProcessor} uses this to change its field {@link
-     * net.minecraft.world.pathfinder.WalkNodeProcessor#avoidsWater avoidsWater}
-     */
-    public void postProcess()
-    {
-        this.blockaccess = null;
-        this.entity = null;
-    }
+   public void func_176163_a() {
+      this.field_176169_a = null;
+      this.field_186326_b = null;
+   }
 
-    /**
-     * Returns a mapped point or creates and adds one
-     */
-    protected PathPoint openPoint(int x, int y, int z)
-    {
-        int i = PathPoint.makeHash(x, y, z);
-        PathPoint pathpoint = this.pointMap.lookup(i);
+   protected PathPoint func_176159_a(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
+      int i = PathPoint.func_75830_a(p_176159_1_, p_176159_2_, p_176159_3_);
+      PathPoint pathpoint = this.field_176167_b.func_76041_a(i);
+      if (pathpoint == null) {
+         pathpoint = new PathPoint(p_176159_1_, p_176159_2_, p_176159_3_);
+         this.field_176167_b.func_76038_a(i, pathpoint);
+      }
 
-        if (pathpoint == null)
-        {
-            pathpoint = new PathPoint(x, y, z);
-            this.pointMap.addKey(i, pathpoint);
-        }
+      return pathpoint;
+   }
 
-        return pathpoint;
-    }
+   public abstract PathPoint func_186318_b();
 
-    public abstract PathPoint getStart();
+   public abstract PathPoint func_186325_a(double var1, double var3, double var5);
 
-    /**
-     * Returns PathPoint for given coordinates
-     */
-    public abstract PathPoint getPathPointToCoords(double x, double y, double z);
+   public abstract int func_186320_a(PathPoint[] var1, PathPoint var2, PathPoint var3, float var4);
 
-    public abstract int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
+   public abstract PathNodeType func_186319_a(IBlockAccess var1, int var2, int var3, int var4, EntityLiving var5, int var6, int var7, int var8, boolean var9, boolean var10);
 
-    public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
+   public abstract PathNodeType func_186330_a(IBlockAccess var1, int var2, int var3, int var4);
 
-    public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z);
+   public void func_186317_a(boolean p_186317_1_) {
+      this.field_176180_f = p_186317_1_;
+   }
 
-    public void setCanEnterDoors(boolean canEnterDoorsIn)
-    {
-        this.canEnterDoors = canEnterDoorsIn;
-    }
+   public void func_186321_b(boolean p_186321_1_) {
+      this.field_176181_g = p_186321_1_;
+   }
 
-    public void setCanBreakDoors(boolean canBreakDoorsIn)
-    {
-        this.canBreakDoors = canBreakDoorsIn;
-    }
+   public void func_186316_c(boolean p_186316_1_) {
+      this.field_176184_i = p_186316_1_;
+   }
 
-    public void setCanSwim(boolean canSwimIn)
-    {
-        this.canSwim = canSwimIn;
-    }
+   public boolean func_186323_c() {
+      return this.field_176180_f;
+   }
 
-    public boolean getCanEnterDoors()
-    {
-        return this.canEnterDoors;
-    }
+   public boolean func_186324_d() {
+      return this.field_176181_g;
+   }
 
-    public boolean getCanBreakDoors()
-    {
-        return this.canBreakDoors;
-    }
-
-    public boolean getCanSwim()
-    {
-        return this.canSwim;
-    }
+   public boolean func_186322_e() {
+      return this.field_176184_i;
+   }
 }

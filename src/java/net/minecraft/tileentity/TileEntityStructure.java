@@ -32,606 +32,472 @@ import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 
-public class TileEntityStructure extends TileEntity
-{
-    private String name = "";
-    private String author = "";
-    private String metadata = "";
-    private BlockPos position = new BlockPos(0, 1, 0);
-    private BlockPos size = BlockPos.ORIGIN;
-    private Mirror mirror = Mirror.NONE;
-    private Rotation rotation = Rotation.NONE;
-    private TileEntityStructure.Mode mode = TileEntityStructure.Mode.DATA;
-    private boolean ignoreEntities = true;
-    private boolean powered;
-    private boolean showAir;
-    private boolean showBoundingBox = true;
-    private float integrity = 1.0F;
-    private long seed;
+public class TileEntityStructure extends TileEntity {
+   private String field_184420_a = "";
+   private String field_184421_f = "";
+   private String field_184422_g = "";
+   private BlockPos field_184423_h = new BlockPos(0, 1, 0);
+   private BlockPos field_184424_i = BlockPos.field_177992_a;
+   private Mirror field_184425_j = Mirror.NONE;
+   private Rotation field_184426_k = Rotation.NONE;
+   private TileEntityStructure.Mode field_184427_l = TileEntityStructure.Mode.DATA;
+   private boolean field_184428_m = true;
+   private boolean field_189727_n;
+   private boolean field_189728_o;
+   private boolean field_189729_p = true;
+   private float field_189730_q = 1.0F;
+   private long field_189731_r;
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        compound.setString("name", this.name);
-        compound.setString("author", this.author);
-        compound.setString("metadata", this.metadata);
-        compound.setInteger("posX", this.position.getX());
-        compound.setInteger("posY", this.position.getY());
-        compound.setInteger("posZ", this.position.getZ());
-        compound.setInteger("sizeX", this.size.getX());
-        compound.setInteger("sizeY", this.size.getY());
-        compound.setInteger("sizeZ", this.size.getZ());
-        compound.setString("rotation", this.rotation.toString());
-        compound.setString("mirror", this.mirror.toString());
-        compound.setString("mode", this.mode.toString());
-        compound.setBoolean("ignoreEntities", this.ignoreEntities);
-        compound.setBoolean("powered", this.powered);
-        compound.setBoolean("showair", this.showAir);
-        compound.setBoolean("showboundingbox", this.showBoundingBox);
-        compound.setFloat("integrity", this.integrity);
-        compound.setLong("seed", this.seed);
-        return compound;
-    }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      p_189515_1_.func_74778_a("name", this.field_184420_a);
+      p_189515_1_.func_74778_a("author", this.field_184421_f);
+      p_189515_1_.func_74778_a("metadata", this.field_184422_g);
+      p_189515_1_.func_74768_a("posX", this.field_184423_h.func_177958_n());
+      p_189515_1_.func_74768_a("posY", this.field_184423_h.func_177956_o());
+      p_189515_1_.func_74768_a("posZ", this.field_184423_h.func_177952_p());
+      p_189515_1_.func_74768_a("sizeX", this.field_184424_i.func_177958_n());
+      p_189515_1_.func_74768_a("sizeY", this.field_184424_i.func_177956_o());
+      p_189515_1_.func_74768_a("sizeZ", this.field_184424_i.func_177952_p());
+      p_189515_1_.func_74778_a("rotation", this.field_184426_k.toString());
+      p_189515_1_.func_74778_a("mirror", this.field_184425_j.toString());
+      p_189515_1_.func_74778_a("mode", this.field_184427_l.toString());
+      p_189515_1_.func_74757_a("ignoreEntities", this.field_184428_m);
+      p_189515_1_.func_74757_a("powered", this.field_189727_n);
+      p_189515_1_.func_74757_a("showair", this.field_189728_o);
+      p_189515_1_.func_74757_a("showboundingbox", this.field_189729_p);
+      p_189515_1_.func_74776_a("integrity", this.field_189730_q);
+      p_189515_1_.func_74772_a("seed", this.field_189731_r);
+      return p_189515_1_;
+   }
 
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        this.setName(compound.getString("name"));
-        this.author = compound.getString("author");
-        this.metadata = compound.getString("metadata");
-        int i = MathHelper.clamp(compound.getInteger("posX"), -32, 32);
-        int j = MathHelper.clamp(compound.getInteger("posY"), -32, 32);
-        int k = MathHelper.clamp(compound.getInteger("posZ"), -32, 32);
-        this.position = new BlockPos(i, j, k);
-        int l = MathHelper.clamp(compound.getInteger("sizeX"), 0, 32);
-        int i1 = MathHelper.clamp(compound.getInteger("sizeY"), 0, 32);
-        int j1 = MathHelper.clamp(compound.getInteger("sizeZ"), 0, 32);
-        this.size = new BlockPos(l, i1, j1);
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      this.func_184404_a(p_145839_1_.func_74779_i("name"));
+      this.field_184421_f = p_145839_1_.func_74779_i("author");
+      this.field_184422_g = p_145839_1_.func_74779_i("metadata");
+      int i = MathHelper.func_76125_a(p_145839_1_.func_74762_e("posX"), -32, 32);
+      int j = MathHelper.func_76125_a(p_145839_1_.func_74762_e("posY"), -32, 32);
+      int k = MathHelper.func_76125_a(p_145839_1_.func_74762_e("posZ"), -32, 32);
+      this.field_184423_h = new BlockPos(i, j, k);
+      int l = MathHelper.func_76125_a(p_145839_1_.func_74762_e("sizeX"), 0, 32);
+      int i1 = MathHelper.func_76125_a(p_145839_1_.func_74762_e("sizeY"), 0, 32);
+      int j1 = MathHelper.func_76125_a(p_145839_1_.func_74762_e("sizeZ"), 0, 32);
+      this.field_184424_i = new BlockPos(l, i1, j1);
 
-        try
-        {
-            this.rotation = Rotation.valueOf(compound.getString("rotation"));
-        }
-        catch (IllegalArgumentException var11)
-        {
-            this.rotation = Rotation.NONE;
-        }
+      try {
+         this.field_184426_k = Rotation.valueOf(p_145839_1_.func_74779_i("rotation"));
+      } catch (IllegalArgumentException var11) {
+         this.field_184426_k = Rotation.NONE;
+      }
 
-        try
-        {
-            this.mirror = Mirror.valueOf(compound.getString("mirror"));
-        }
-        catch (IllegalArgumentException var10)
-        {
-            this.mirror = Mirror.NONE;
-        }
+      try {
+         this.field_184425_j = Mirror.valueOf(p_145839_1_.func_74779_i("mirror"));
+      } catch (IllegalArgumentException var10) {
+         this.field_184425_j = Mirror.NONE;
+      }
 
-        try
-        {
-            this.mode = TileEntityStructure.Mode.valueOf(compound.getString("mode"));
-        }
-        catch (IllegalArgumentException var9)
-        {
-            this.mode = TileEntityStructure.Mode.DATA;
-        }
+      try {
+         this.field_184427_l = TileEntityStructure.Mode.valueOf(p_145839_1_.func_74779_i("mode"));
+      } catch (IllegalArgumentException var9) {
+         this.field_184427_l = TileEntityStructure.Mode.DATA;
+      }
 
-        this.ignoreEntities = compound.getBoolean("ignoreEntities");
-        this.powered = compound.getBoolean("powered");
-        this.showAir = compound.getBoolean("showair");
-        this.showBoundingBox = compound.getBoolean("showboundingbox");
+      this.field_184428_m = p_145839_1_.func_74767_n("ignoreEntities");
+      this.field_189727_n = p_145839_1_.func_74767_n("powered");
+      this.field_189728_o = p_145839_1_.func_74767_n("showair");
+      this.field_189729_p = p_145839_1_.func_74767_n("showboundingbox");
+      if (p_145839_1_.func_74764_b("integrity")) {
+         this.field_189730_q = p_145839_1_.func_74760_g("integrity");
+      } else {
+         this.field_189730_q = 1.0F;
+      }
 
-        if (compound.hasKey("integrity"))
-        {
-            this.integrity = compound.getFloat("integrity");
-        }
-        else
-        {
-            this.integrity = 1.0F;
-        }
+      this.field_189731_r = p_145839_1_.func_74763_f("seed");
+      this.func_189704_J();
+   }
 
-        this.seed = compound.getLong("seed");
-        this.updateBlockState();
-    }
+   private void func_189704_J() {
+      if (this.field_145850_b != null) {
+         BlockPos blockpos = this.func_174877_v();
+         IBlockState iblockstate = this.field_145850_b.func_180495_p(blockpos);
+         if (iblockstate.func_177230_c() == Blocks.field_185779_df) {
+            this.field_145850_b.func_180501_a(blockpos, iblockstate.func_177226_a(BlockStructure.field_185587_a, this.field_184427_l), 2);
+         }
 
-    private void updateBlockState()
-    {
-        if (this.world != null)
-        {
-            BlockPos blockpos = this.getPos();
-            IBlockState iblockstate = this.world.getBlockState(blockpos);
+      }
+   }
 
-            if (iblockstate.getBlock() == Blocks.STRUCTURE_BLOCK)
-            {
-                this.world.setBlockState(blockpos, iblockstate.withProperty(BlockStructure.MODE, this.mode), 2);
-            }
-        }
-    }
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      return new SPacketUpdateTileEntity(this.field_174879_c, 7, this.func_189517_E_());
+   }
 
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        return new SPacketUpdateTileEntity(this.pos, 7, this.getUpdateTag());
-    }
+   public NBTTagCompound func_189517_E_() {
+      return this.func_189515_b(new NBTTagCompound());
+   }
 
-    public NBTTagCompound getUpdateTag()
-    {
-        return this.writeToNBT(new NBTTagCompound());
-    }
+   public boolean func_189701_a(EntityPlayer p_189701_1_) {
+      if (!p_189701_1_.func_189808_dh()) {
+         return false;
+      } else {
+         if (p_189701_1_.func_130014_f_().field_72995_K) {
+            p_189701_1_.func_189807_a(this);
+         }
 
-    public boolean usedBy(EntityPlayer player)
-    {
-        if (!player.canUseCommandBlock())
-        {
+         return true;
+      }
+   }
+
+   public String func_189715_d() {
+      return this.field_184420_a;
+   }
+
+   public void func_184404_a(String p_184404_1_) {
+      String s = p_184404_1_;
+
+      for(char c0 : ChatAllowedCharacters.field_189861_b) {
+         s = s.replace(c0, '_');
+      }
+
+      this.field_184420_a = s;
+   }
+
+   public void func_189720_a(EntityLivingBase p_189720_1_) {
+      if (!StringUtils.func_151246_b(p_189720_1_.func_70005_c_())) {
+         this.field_184421_f = p_189720_1_.func_70005_c_();
+      }
+
+   }
+
+   public BlockPos func_189711_e() {
+      return this.field_184423_h;
+   }
+
+   public void func_184414_b(BlockPos p_184414_1_) {
+      this.field_184423_h = p_184414_1_;
+   }
+
+   public BlockPos func_189717_g() {
+      return this.field_184424_i;
+   }
+
+   public void func_184409_c(BlockPos p_184409_1_) {
+      this.field_184424_i = p_184409_1_;
+   }
+
+   public Mirror func_189716_h() {
+      return this.field_184425_j;
+   }
+
+   public void func_184411_a(Mirror p_184411_1_) {
+      this.field_184425_j = p_184411_1_;
+   }
+
+   public Rotation func_189726_i() {
+      return this.field_184426_k;
+   }
+
+   public void func_184408_a(Rotation p_184408_1_) {
+      this.field_184426_k = p_184408_1_;
+   }
+
+   public String func_189708_j() {
+      return this.field_184422_g;
+   }
+
+   public void func_184410_b(String p_184410_1_) {
+      this.field_184422_g = p_184410_1_;
+   }
+
+   public TileEntityStructure.Mode func_189700_k() {
+      return this.field_184427_l;
+   }
+
+   public void func_184405_a(TileEntityStructure.Mode p_184405_1_) {
+      this.field_184427_l = p_184405_1_;
+      IBlockState iblockstate = this.field_145850_b.func_180495_p(this.func_174877_v());
+      if (iblockstate.func_177230_c() == Blocks.field_185779_df) {
+         this.field_145850_b.func_180501_a(this.func_174877_v(), iblockstate.func_177226_a(BlockStructure.field_185587_a, p_184405_1_), 2);
+      }
+
+   }
+
+   public void func_189724_l() {
+      switch(this.func_189700_k()) {
+      case SAVE:
+         this.func_184405_a(TileEntityStructure.Mode.LOAD);
+         break;
+      case LOAD:
+         this.func_184405_a(TileEntityStructure.Mode.CORNER);
+         break;
+      case CORNER:
+         this.func_184405_a(TileEntityStructure.Mode.DATA);
+         break;
+      case DATA:
+         this.func_184405_a(TileEntityStructure.Mode.SAVE);
+      }
+
+   }
+
+   public boolean func_189713_m() {
+      return this.field_184428_m;
+   }
+
+   public void func_184406_a(boolean p_184406_1_) {
+      this.field_184428_m = p_184406_1_;
+   }
+
+   public float func_189702_n() {
+      return this.field_189730_q;
+   }
+
+   public void func_189718_a(float p_189718_1_) {
+      this.field_189730_q = p_189718_1_;
+   }
+
+   public long func_189719_o() {
+      return this.field_189731_r;
+   }
+
+   public void func_189725_a(long p_189725_1_) {
+      this.field_189731_r = p_189725_1_;
+   }
+
+   public boolean func_184417_l() {
+      if (this.field_184427_l != TileEntityStructure.Mode.SAVE) {
+         return false;
+      } else {
+         BlockPos blockpos = this.func_174877_v();
+         int i = 80;
+         BlockPos blockpos1 = new BlockPos(blockpos.func_177958_n() - 80, 0, blockpos.func_177952_p() - 80);
+         BlockPos blockpos2 = new BlockPos(blockpos.func_177958_n() + 80, 255, blockpos.func_177952_p() + 80);
+         List<TileEntityStructure> list = this.func_184418_a(blockpos1, blockpos2);
+         List<TileEntityStructure> list1 = this.func_184415_a(list);
+         if (list1.size() < 1) {
             return false;
-        }
-        else
-        {
-            if (player.getEntityWorld().isRemote)
-            {
-                player.openEditStructure(this);
+         } else {
+            StructureBoundingBox structureboundingbox = this.func_184416_a(blockpos, list1);
+            if (structureboundingbox.field_78893_d - structureboundingbox.field_78897_a > 1 && structureboundingbox.field_78894_e - structureboundingbox.field_78895_b > 1 && structureboundingbox.field_78892_f - structureboundingbox.field_78896_c > 1) {
+               this.field_184423_h = new BlockPos(structureboundingbox.field_78897_a - blockpos.func_177958_n() + 1, structureboundingbox.field_78895_b - blockpos.func_177956_o() + 1, structureboundingbox.field_78896_c - blockpos.func_177952_p() + 1);
+               this.field_184424_i = new BlockPos(structureboundingbox.field_78893_d - structureboundingbox.field_78897_a - 1, structureboundingbox.field_78894_e - structureboundingbox.field_78895_b - 1, structureboundingbox.field_78892_f - structureboundingbox.field_78896_c - 1);
+               this.func_70296_d();
+               IBlockState iblockstate = this.field_145850_b.func_180495_p(blockpos);
+               this.field_145850_b.func_184138_a(blockpos, iblockstate, iblockstate, 3);
+               return true;
+            } else {
+               return false;
             }
+         }
+      }
+   }
 
-            return true;
-        }
-    }
+   private List<TileEntityStructure> func_184415_a(List<TileEntityStructure> p_184415_1_) {
+      Iterable<TileEntityStructure> iterable = Iterables.filter(p_184415_1_, new Predicate<TileEntityStructure>() {
+         public boolean apply(@Nullable TileEntityStructure p_apply_1_) {
+            return p_apply_1_.field_184427_l == TileEntityStructure.Mode.CORNER && TileEntityStructure.this.field_184420_a.equals(p_apply_1_.field_184420_a);
+         }
+      });
+      return Lists.newArrayList(iterable);
+   }
 
-    public String getName()
-    {
-        return this.name;
-    }
+   private List<TileEntityStructure> func_184418_a(BlockPos p_184418_1_, BlockPos p_184418_2_) {
+      List<TileEntityStructure> list = Lists.<TileEntityStructure>newArrayList();
 
-    public void setName(String nameIn)
-    {
-        String s = nameIn;
+      for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.func_177975_b(p_184418_1_, p_184418_2_)) {
+         IBlockState iblockstate = this.field_145850_b.func_180495_p(blockpos$mutableblockpos);
+         if (iblockstate.func_177230_c() == Blocks.field_185779_df) {
+            TileEntity tileentity = this.field_145850_b.func_175625_s(blockpos$mutableblockpos);
+            if (tileentity != null && tileentity instanceof TileEntityStructure) {
+               list.add((TileEntityStructure)tileentity);
+            }
+         }
+      }
 
-        for (char c0 : ChatAllowedCharacters.ILLEGAL_STRUCTURE_CHARACTERS)
-        {
-            s = s.replace(c0, '_');
-        }
+      return list;
+   }
 
-        this.name = s;
-    }
+   private StructureBoundingBox func_184416_a(BlockPos p_184416_1_, List<TileEntityStructure> p_184416_2_) {
+      StructureBoundingBox structureboundingbox;
+      if (p_184416_2_.size() > 1) {
+         BlockPos blockpos = ((TileEntityStructure)p_184416_2_.get(0)).func_174877_v();
+         structureboundingbox = new StructureBoundingBox(blockpos, blockpos);
+      } else {
+         structureboundingbox = new StructureBoundingBox(p_184416_1_, p_184416_1_);
+      }
 
-    public void createdBy(EntityLivingBase p_189720_1_)
-    {
-        if (!StringUtils.isNullOrEmpty(p_189720_1_.getName()))
-        {
-            this.author = p_189720_1_.getName();
-        }
-    }
+      for(TileEntityStructure tileentitystructure : p_184416_2_) {
+         BlockPos blockpos1 = tileentitystructure.func_174877_v();
+         if (blockpos1.func_177958_n() < structureboundingbox.field_78897_a) {
+            structureboundingbox.field_78897_a = blockpos1.func_177958_n();
+         } else if (blockpos1.func_177958_n() > structureboundingbox.field_78893_d) {
+            structureboundingbox.field_78893_d = blockpos1.func_177958_n();
+         }
 
-    public BlockPos getPosition()
-    {
-        return this.position;
-    }
+         if (blockpos1.func_177956_o() < structureboundingbox.field_78895_b) {
+            structureboundingbox.field_78895_b = blockpos1.func_177956_o();
+         } else if (blockpos1.func_177956_o() > structureboundingbox.field_78894_e) {
+            structureboundingbox.field_78894_e = blockpos1.func_177956_o();
+         }
 
-    public void setPosition(BlockPos posIn)
-    {
-        this.position = posIn;
-    }
+         if (blockpos1.func_177952_p() < structureboundingbox.field_78896_c) {
+            structureboundingbox.field_78896_c = blockpos1.func_177952_p();
+         } else if (blockpos1.func_177952_p() > structureboundingbox.field_78892_f) {
+            structureboundingbox.field_78892_f = blockpos1.func_177952_p();
+         }
+      }
 
-    public BlockPos getStructureSize()
-    {
-        return this.size;
-    }
+      return structureboundingbox;
+   }
 
-    public void setSize(BlockPos sizeIn)
-    {
-        this.size = sizeIn;
-    }
+   public void func_189705_a(ByteBuf p_189705_1_) {
+      p_189705_1_.writeInt(this.field_174879_c.func_177958_n());
+      p_189705_1_.writeInt(this.field_174879_c.func_177956_o());
+      p_189705_1_.writeInt(this.field_174879_c.func_177952_p());
+   }
 
-    public Mirror getMirror()
-    {
-        return this.mirror;
-    }
+   public boolean func_184419_m() {
+      return this.func_189712_b(true);
+   }
 
-    public void setMirror(Mirror mirrorIn)
-    {
-        this.mirror = mirrorIn;
-    }
+   public boolean func_189712_b(boolean p_189712_1_) {
+      if (this.field_184427_l == TileEntityStructure.Mode.SAVE && !this.field_145850_b.field_72995_K && !StringUtils.func_151246_b(this.field_184420_a)) {
+         BlockPos blockpos = this.func_174877_v().func_177971_a(this.field_184423_h);
+         WorldServer worldserver = (WorldServer)this.field_145850_b;
+         MinecraftServer minecraftserver = this.field_145850_b.func_73046_m();
+         TemplateManager templatemanager = worldserver.func_184163_y();
+         Template template = templatemanager.func_186237_a(minecraftserver, new ResourceLocation(this.field_184420_a));
+         template.func_186254_a(this.field_145850_b, blockpos, this.field_184424_i, !this.field_184428_m, Blocks.field_189881_dj);
+         template.func_186252_a(this.field_184421_f);
+         return !p_189712_1_ || templatemanager.func_186238_c(minecraftserver, new ResourceLocation(this.field_184420_a));
+      } else {
+         return false;
+      }
+   }
 
-    public Rotation getRotation()
-    {
-        return this.rotation;
-    }
+   public boolean func_184412_n() {
+      return this.func_189714_c(true);
+   }
 
-    public void setRotation(Rotation rotationIn)
-    {
-        this.rotation = rotationIn;
-    }
-
-    public String getMetadata()
-    {
-        return this.metadata;
-    }
-
-    public void setMetadata(String metadataIn)
-    {
-        this.metadata = metadataIn;
-    }
-
-    public TileEntityStructure.Mode getMode()
-    {
-        return this.mode;
-    }
-
-    public void setMode(TileEntityStructure.Mode modeIn)
-    {
-        this.mode = modeIn;
-        IBlockState iblockstate = this.world.getBlockState(this.getPos());
-
-        if (iblockstate.getBlock() == Blocks.STRUCTURE_BLOCK)
-        {
-            this.world.setBlockState(this.getPos(), iblockstate.withProperty(BlockStructure.MODE, modeIn), 2);
-        }
-    }
-
-    public void nextMode()
-    {
-        switch (this.getMode())
-        {
-            case SAVE:
-                this.setMode(TileEntityStructure.Mode.LOAD);
-                break;
-
-            case LOAD:
-                this.setMode(TileEntityStructure.Mode.CORNER);
-                break;
-
-            case CORNER:
-                this.setMode(TileEntityStructure.Mode.DATA);
-                break;
-
-            case DATA:
-                this.setMode(TileEntityStructure.Mode.SAVE);
-        }
-    }
-
-    public boolean ignoresEntities()
-    {
-        return this.ignoreEntities;
-    }
-
-    public void setIgnoresEntities(boolean ignoreEntitiesIn)
-    {
-        this.ignoreEntities = ignoreEntitiesIn;
-    }
-
-    public float getIntegrity()
-    {
-        return this.integrity;
-    }
-
-    public void setIntegrity(float integrityIn)
-    {
-        this.integrity = integrityIn;
-    }
-
-    public long getSeed()
-    {
-        return this.seed;
-    }
-
-    public void setSeed(long seedIn)
-    {
-        this.seed = seedIn;
-    }
-
-    public boolean detectSize()
-    {
-        if (this.mode != TileEntityStructure.Mode.SAVE)
-        {
+   public boolean func_189714_c(boolean p_189714_1_) {
+      if (this.field_184427_l == TileEntityStructure.Mode.LOAD && !this.field_145850_b.field_72995_K && !StringUtils.func_151246_b(this.field_184420_a)) {
+         BlockPos blockpos = this.func_174877_v();
+         BlockPos blockpos1 = blockpos.func_177971_a(this.field_184423_h);
+         WorldServer worldserver = (WorldServer)this.field_145850_b;
+         MinecraftServer minecraftserver = this.field_145850_b.func_73046_m();
+         TemplateManager templatemanager = worldserver.func_184163_y();
+         Template template = templatemanager.func_189942_b(minecraftserver, new ResourceLocation(this.field_184420_a));
+         if (template == null) {
             return false;
-        }
-        else
-        {
-            BlockPos blockpos = this.getPos();
-            int i = 80;
-            BlockPos blockpos1 = new BlockPos(blockpos.getX() - 80, 0, blockpos.getZ() - 80);
-            BlockPos blockpos2 = new BlockPos(blockpos.getX() + 80, 255, blockpos.getZ() + 80);
-            List<TileEntityStructure> list = this.getNearbyCornerBlocks(blockpos1, blockpos2);
-            List<TileEntityStructure> list1 = this.filterRelatedCornerBlocks(list);
-
-            if (list1.size() < 1)
-            {
-                return false;
-            }
-            else
-            {
-                StructureBoundingBox structureboundingbox = this.calculateEnclosingBoundingBox(blockpos, list1);
-
-                if (structureboundingbox.maxX - structureboundingbox.minX > 1 && structureboundingbox.maxY - structureboundingbox.minY > 1 && structureboundingbox.maxZ - structureboundingbox.minZ > 1)
-                {
-                    this.position = new BlockPos(structureboundingbox.minX - blockpos.getX() + 1, structureboundingbox.minY - blockpos.getY() + 1, structureboundingbox.minZ - blockpos.getZ() + 1);
-                    this.size = new BlockPos(structureboundingbox.maxX - structureboundingbox.minX - 1, structureboundingbox.maxY - structureboundingbox.minY - 1, structureboundingbox.maxZ - structureboundingbox.minZ - 1);
-                    this.markDirty();
-                    IBlockState iblockstate = this.world.getBlockState(blockpos);
-                    this.world.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 3);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-    }
-
-    private List<TileEntityStructure> filterRelatedCornerBlocks(List<TileEntityStructure> p_184415_1_)
-    {
-        Iterable<TileEntityStructure> iterable = Iterables.filter(p_184415_1_, new Predicate<TileEntityStructure>()
-        {
-            public boolean apply(@Nullable TileEntityStructure p_apply_1_)
-            {
-                return p_apply_1_.mode == TileEntityStructure.Mode.CORNER && TileEntityStructure.this.name.equals(p_apply_1_.name);
-            }
-        });
-        return Lists.newArrayList(iterable);
-    }
-
-    private List<TileEntityStructure> getNearbyCornerBlocks(BlockPos p_184418_1_, BlockPos p_184418_2_)
-    {
-        List<TileEntityStructure> list = Lists.<TileEntityStructure>newArrayList();
-
-        for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(p_184418_1_, p_184418_2_))
-        {
-            IBlockState iblockstate = this.world.getBlockState(blockpos$mutableblockpos);
-
-            if (iblockstate.getBlock() == Blocks.STRUCTURE_BLOCK)
-            {
-                TileEntity tileentity = this.world.getTileEntity(blockpos$mutableblockpos);
-
-                if (tileentity != null && tileentity instanceof TileEntityStructure)
-                {
-                    list.add((TileEntityStructure)tileentity);
-                }
-            }
-        }
-
-        return list;
-    }
-
-    private StructureBoundingBox calculateEnclosingBoundingBox(BlockPos p_184416_1_, List<TileEntityStructure> p_184416_2_)
-    {
-        StructureBoundingBox structureboundingbox;
-
-        if (p_184416_2_.size() > 1)
-        {
-            BlockPos blockpos = ((TileEntityStructure)p_184416_2_.get(0)).getPos();
-            structureboundingbox = new StructureBoundingBox(blockpos, blockpos);
-        }
-        else
-        {
-            structureboundingbox = new StructureBoundingBox(p_184416_1_, p_184416_1_);
-        }
-
-        for (TileEntityStructure tileentitystructure : p_184416_2_)
-        {
-            BlockPos blockpos1 = tileentitystructure.getPos();
-
-            if (blockpos1.getX() < structureboundingbox.minX)
-            {
-                structureboundingbox.minX = blockpos1.getX();
-            }
-            else if (blockpos1.getX() > structureboundingbox.maxX)
-            {
-                structureboundingbox.maxX = blockpos1.getX();
+         } else {
+            if (!StringUtils.func_151246_b(template.func_186261_b())) {
+               this.field_184421_f = template.func_186261_b();
             }
 
-            if (blockpos1.getY() < structureboundingbox.minY)
-            {
-                structureboundingbox.minY = blockpos1.getY();
+            BlockPos blockpos2 = template.func_186259_a();
+            boolean flag = this.field_184424_i.equals(blockpos2);
+            if (!flag) {
+               this.field_184424_i = blockpos2;
+               this.func_70296_d();
+               IBlockState iblockstate = this.field_145850_b.func_180495_p(blockpos);
+               this.field_145850_b.func_184138_a(blockpos, iblockstate, iblockstate, 3);
             }
-            else if (blockpos1.getY() > structureboundingbox.maxY)
-            {
-                structureboundingbox.maxY = blockpos1.getY();
+
+            if (p_189714_1_ && !flag) {
+               return false;
+            } else {
+               PlacementSettings placementsettings = (new PlacementSettings()).func_186214_a(this.field_184425_j).func_186220_a(this.field_184426_k).func_186222_a(this.field_184428_m).func_186218_a((ChunkPos)null).func_186225_a((Block)null).func_186226_b(false);
+               if (this.field_189730_q < 1.0F) {
+                  placementsettings.func_189946_a(MathHelper.func_76131_a(this.field_189730_q, 0.0F, 1.0F)).func_189949_a(Long.valueOf(this.field_189731_r));
+               }
+
+               template.func_186260_a(this.field_145850_b, blockpos1, placementsettings);
+               return true;
             }
+         }
+      } else {
+         return false;
+      }
+   }
 
-            if (blockpos1.getZ() < structureboundingbox.minZ)
-            {
-                structureboundingbox.minZ = blockpos1.getZ();
-            }
-            else if (blockpos1.getZ() > structureboundingbox.maxZ)
-            {
-                structureboundingbox.maxZ = blockpos1.getZ();
-            }
-        }
+   public void func_189706_E() {
+      WorldServer worldserver = (WorldServer)this.field_145850_b;
+      TemplateManager templatemanager = worldserver.func_184163_y();
+      templatemanager.func_189941_a(new ResourceLocation(this.field_184420_a));
+   }
 
-        return structureboundingbox;
-    }
+   public boolean func_189709_F() {
+      if (this.field_184427_l == TileEntityStructure.Mode.LOAD && !this.field_145850_b.field_72995_K) {
+         WorldServer worldserver = (WorldServer)this.field_145850_b;
+         MinecraftServer minecraftserver = this.field_145850_b.func_73046_m();
+         TemplateManager templatemanager = worldserver.func_184163_y();
+         return templatemanager.func_189942_b(minecraftserver, new ResourceLocation(this.field_184420_a)) != null;
+      } else {
+         return false;
+      }
+   }
 
-    public void writeCoordinates(ByteBuf buf)
-    {
-        buf.writeInt(this.pos.getX());
-        buf.writeInt(this.pos.getY());
-        buf.writeInt(this.pos.getZ());
-    }
+   public boolean func_189722_G() {
+      return this.field_189727_n;
+   }
 
-    public boolean save()
-    {
-        return this.save(true);
-    }
+   public void func_189723_d(boolean p_189723_1_) {
+      this.field_189727_n = p_189723_1_;
+   }
 
-    public boolean save(boolean p_189712_1_)
-    {
-        if (this.mode == TileEntityStructure.Mode.SAVE && !this.world.isRemote && !StringUtils.isNullOrEmpty(this.name))
-        {
-            BlockPos blockpos = this.getPos().add(this.position);
-            WorldServer worldserver = (WorldServer)this.world;
-            MinecraftServer minecraftserver = this.world.getMinecraftServer();
-            TemplateManager templatemanager = worldserver.getStructureTemplateManager();
-            Template template = templatemanager.getTemplate(minecraftserver, new ResourceLocation(this.name));
-            template.takeBlocksFromWorld(this.world, blockpos, this.size, !this.ignoreEntities, Blocks.STRUCTURE_VOID);
-            template.setAuthor(this.author);
-            return !p_189712_1_ || templatemanager.writeTemplate(minecraftserver, new ResourceLocation(this.name));
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public boolean func_189707_H() {
+      return this.field_189728_o;
+   }
 
-    public boolean load()
-    {
-        return this.load(true);
-    }
+   public void func_189703_e(boolean p_189703_1_) {
+      this.field_189728_o = p_189703_1_;
+   }
 
-    public boolean load(boolean p_189714_1_)
-    {
-        if (this.mode == TileEntityStructure.Mode.LOAD && !this.world.isRemote && !StringUtils.isNullOrEmpty(this.name))
-        {
-            BlockPos blockpos = this.getPos();
-            BlockPos blockpos1 = blockpos.add(this.position);
-            WorldServer worldserver = (WorldServer)this.world;
-            MinecraftServer minecraftserver = this.world.getMinecraftServer();
-            TemplateManager templatemanager = worldserver.getStructureTemplateManager();
-            Template template = templatemanager.get(minecraftserver, new ResourceLocation(this.name));
+   public boolean func_189721_I() {
+      return this.field_189729_p;
+   }
 
-            if (template == null)
-            {
-                return false;
-            }
-            else
-            {
-                if (!StringUtils.isNullOrEmpty(template.getAuthor()))
-                {
-                    this.author = template.getAuthor();
-                }
+   public void func_189710_f(boolean p_189710_1_) {
+      this.field_189729_p = p_189710_1_;
+   }
 
-                BlockPos blockpos2 = template.getSize();
-                boolean flag = this.size.equals(blockpos2);
+   @Nullable
+   public ITextComponent func_145748_c_() {
+      return new TextComponentTranslation("structure_block.hover." + this.field_184427_l.field_185116_f, new Object[]{this.field_184427_l == TileEntityStructure.Mode.DATA ? this.field_184422_g : this.field_184420_a});
+   }
 
-                if (!flag)
-                {
-                    this.size = blockpos2;
-                    this.markDirty();
-                    IBlockState iblockstate = this.world.getBlockState(blockpos);
-                    this.world.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 3);
-                }
+   public static enum Mode implements IStringSerializable {
+      SAVE("save", 0),
+      LOAD("load", 1),
+      CORNER("corner", 2),
+      DATA("data", 3);
 
-                if (p_189714_1_ && !flag)
-                {
-                    return false;
-                }
-                else
-                {
-                    PlacementSettings placementsettings = (new PlacementSettings()).setMirror(this.mirror).setRotation(this.rotation).setIgnoreEntities(this.ignoreEntities).setChunk((ChunkPos)null).setReplacedBlock((Block)null).setIgnoreStructureBlock(false);
+      private static final TileEntityStructure.Mode[] field_185115_e = new TileEntityStructure.Mode[values().length];
+      private final String field_185116_f;
+      private final int field_185117_g;
 
-                    if (this.integrity < 1.0F)
-                    {
-                        placementsettings.setIntegrity(MathHelper.clamp(this.integrity, 0.0F, 1.0F)).setSeed(Long.valueOf(this.seed));
-                    }
+      private Mode(String p_i47027_3_, int p_i47027_4_) {
+         this.field_185116_f = p_i47027_3_;
+         this.field_185117_g = p_i47027_4_;
+      }
 
-                    template.addBlocksToWorldChunk(this.world, blockpos1, placementsettings);
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
+      public String func_176610_l() {
+         return this.field_185116_f;
+      }
 
-    public void unloadStructure()
-    {
-        WorldServer worldserver = (WorldServer)this.world;
-        TemplateManager templatemanager = worldserver.getStructureTemplateManager();
-        templatemanager.remove(new ResourceLocation(this.name));
-    }
+      public int func_185110_a() {
+         return this.field_185117_g;
+      }
 
-    public boolean isStructureLoadable()
-    {
-        if (this.mode == TileEntityStructure.Mode.LOAD && !this.world.isRemote)
-        {
-            WorldServer worldserver = (WorldServer)this.world;
-            MinecraftServer minecraftserver = this.world.getMinecraftServer();
-            TemplateManager templatemanager = worldserver.getStructureTemplateManager();
-            return templatemanager.get(minecraftserver, new ResourceLocation(this.name)) != null;
-        }
-        else
-        {
-            return false;
-        }
-    }
+      public static TileEntityStructure.Mode func_185108_a(int p_185108_0_) {
+         return p_185108_0_ >= 0 && p_185108_0_ < field_185115_e.length ? field_185115_e[p_185108_0_] : field_185115_e[0];
+      }
 
-    public boolean isPowered()
-    {
-        return this.powered;
-    }
+      static {
+         for(TileEntityStructure.Mode tileentitystructure$mode : values()) {
+            field_185115_e[tileentitystructure$mode.func_185110_a()] = tileentitystructure$mode;
+         }
 
-    public void setPowered(boolean poweredIn)
-    {
-        this.powered = poweredIn;
-    }
-
-    public boolean showsAir()
-    {
-        return this.showAir;
-    }
-
-    public void setShowAir(boolean showAirIn)
-    {
-        this.showAir = showAirIn;
-    }
-
-    public boolean showsBoundingBox()
-    {
-        return this.showBoundingBox;
-    }
-
-    public void setShowBoundingBox(boolean showBoundingBoxIn)
-    {
-        this.showBoundingBox = showBoundingBoxIn;
-    }
-
-    @Nullable
-
-    /**
-     * Get the formatted ChatComponent that will be used for the sender's username in chat
-     */
-    public ITextComponent getDisplayName()
-    {
-        return new TextComponentTranslation("structure_block.hover." + this.mode.modeName, new Object[] {this.mode == TileEntityStructure.Mode.DATA ? this.metadata : this.name});
-    }
-
-    public static enum Mode implements IStringSerializable
-    {
-        SAVE("save", 0),
-        LOAD("load", 1),
-        CORNER("corner", 2),
-        DATA("data", 3);
-
-        private static final TileEntityStructure.Mode[] MODES = new TileEntityStructure.Mode[values().length];
-        private final String modeName;
-        private final int modeId;
-
-        private Mode(String modeNameIn, int modeIdIn)
-        {
-            this.modeName = modeNameIn;
-            this.modeId = modeIdIn;
-        }
-
-        public String getName()
-        {
-            return this.modeName;
-        }
-
-        public int getModeId()
-        {
-            return this.modeId;
-        }
-
-        public static TileEntityStructure.Mode getById(int id)
-        {
-            return id >= 0 && id < MODES.length ? MODES[id] : MODES[0];
-        }
-
-        static {
-            for (TileEntityStructure.Mode tileentitystructure$mode : values())
-            {
-                MODES[tileentitystructure$mode.getModeId()] = tileentitystructure$mode;
-            }
-        }
-    }
+      }
+   }
 }

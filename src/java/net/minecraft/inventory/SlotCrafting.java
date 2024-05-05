@@ -7,118 +7,77 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 
-public class SlotCrafting extends Slot
-{
-    /** The craft matrix inventory linked to this result slot. */
-    private final InventoryCrafting craftMatrix;
+public class SlotCrafting extends Slot {
+   private final InventoryCrafting field_75239_a;
+   private final EntityPlayer field_75238_b;
+   private int field_75237_g;
 
-    /** The player that is using the GUI where this slot resides. */
-    private final EntityPlayer thePlayer;
+   public SlotCrafting(EntityPlayer p_i45790_1_, InventoryCrafting p_i45790_2_, IInventory p_i45790_3_, int p_i45790_4_, int p_i45790_5_, int p_i45790_6_) {
+      super(p_i45790_3_, p_i45790_4_, p_i45790_5_, p_i45790_6_);
+      this.field_75238_b = p_i45790_1_;
+      this.field_75239_a = p_i45790_2_;
+   }
 
-    /**
-     * The number of items that have been crafted so far. Gets passed to ItemStack.onCrafting before being reset.
-     */
-    private int amountCrafted;
+   public boolean func_75214_a(ItemStack p_75214_1_) {
+      return false;
+   }
 
-    public SlotCrafting(EntityPlayer player, InventoryCrafting craftingInventory, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition)
-    {
-        super(inventoryIn, slotIndex, xPosition, yPosition);
-        this.thePlayer = player;
-        this.craftMatrix = craftingInventory;
-    }
+   public ItemStack func_75209_a(int p_75209_1_) {
+      if (this.func_75216_d()) {
+         this.field_75237_g += Math.min(p_75209_1_, this.func_75211_c().func_190916_E());
+      }
 
-    /**
-     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
-     */
-    public boolean isItemValid(ItemStack stack)
-    {
-        return false;
-    }
+      return super.func_75209_a(p_75209_1_);
+   }
 
-    /**
-     * Decrease the size of the stack in slot (first int arg) by the amount of the second int arg. Returns the new
-     * stack.
-     */
-    public ItemStack decrStackSize(int amount)
-    {
-        if (this.getHasStack())
-        {
-            this.amountCrafted += Math.min(amount, this.getStack().func_190916_E());
-        }
+   protected void func_75210_a(ItemStack p_75210_1_, int p_75210_2_) {
+      this.field_75237_g += p_75210_2_;
+      this.func_75208_c(p_75210_1_);
+   }
 
-        return super.decrStackSize(amount);
-    }
+   protected void func_190900_b(int p_190900_1_) {
+      this.field_75237_g += p_190900_1_;
+   }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood. Typically increases an
-     * internal count then calls onCrafting(item).
-     */
-    protected void onCrafting(ItemStack stack, int amount)
-    {
-        this.amountCrafted += amount;
-        this.onCrafting(stack);
-    }
+   protected void func_75208_c(ItemStack p_75208_1_) {
+      if (this.field_75237_g > 0) {
+         p_75208_1_.func_77980_a(this.field_75238_b.field_70170_p, this.field_75238_b, this.field_75237_g);
+      }
 
-    protected void func_190900_b(int p_190900_1_)
-    {
-        this.amountCrafted += p_190900_1_;
-    }
+      this.field_75237_g = 0;
+      InventoryCraftResult inventorycraftresult = (InventoryCraftResult)this.field_75224_c;
+      IRecipe irecipe = inventorycraftresult.func_193055_i();
+      if (irecipe != null && !irecipe.func_192399_d()) {
+         this.field_75238_b.func_192021_a(Lists.newArrayList(irecipe));
+         inventorycraftresult.func_193056_a((IRecipe)null);
+      }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
-     */
-    protected void onCrafting(ItemStack stack)
-    {
-        if (this.amountCrafted > 0)
-        {
-            stack.onCrafting(this.thePlayer.world, this.thePlayer, this.amountCrafted);
-        }
+   }
 
-        this.amountCrafted = 0;
-        InventoryCraftResult inventorycraftresult = (InventoryCraftResult)this.inventory;
-        IRecipe irecipe = inventorycraftresult.func_193055_i();
+   public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_) {
+      this.func_75208_c(p_190901_2_);
+      NonNullList<ItemStack> nonnulllist = CraftingManager.func_180303_b(this.field_75239_a, p_190901_1_.field_70170_p);
 
-        if (irecipe != null && !irecipe.func_192399_d())
-        {
-            this.thePlayer.func_192021_a(Lists.newArrayList(irecipe));
-            inventorycraftresult.func_193056_a((IRecipe)null);
-        }
-    }
+      for(int i = 0; i < nonnulllist.size(); ++i) {
+         ItemStack itemstack = this.field_75239_a.func_70301_a(i);
+         ItemStack itemstack1 = nonnulllist.get(i);
+         if (!itemstack.func_190926_b()) {
+            this.field_75239_a.func_70298_a(i, 1);
+            itemstack = this.field_75239_a.func_70301_a(i);
+         }
 
-    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
-    {
-        this.onCrafting(p_190901_2_);
-        NonNullList<ItemStack> nonnulllist = CraftingManager.getRemainingItems(this.craftMatrix, p_190901_1_.world);
-
-        for (int i = 0; i < nonnulllist.size(); ++i)
-        {
-            ItemStack itemstack = this.craftMatrix.getStackInSlot(i);
-            ItemStack itemstack1 = nonnulllist.get(i);
-
-            if (!itemstack.func_190926_b())
-            {
-                this.craftMatrix.decrStackSize(i, 1);
-                itemstack = this.craftMatrix.getStackInSlot(i);
+         if (!itemstack1.func_190926_b()) {
+            if (itemstack.func_190926_b()) {
+               this.field_75239_a.func_70299_a(i, itemstack1);
+            } else if (ItemStack.func_179545_c(itemstack, itemstack1) && ItemStack.func_77970_a(itemstack, itemstack1)) {
+               itemstack1.func_190917_f(itemstack.func_190916_E());
+               this.field_75239_a.func_70299_a(i, itemstack1);
+            } else if (!this.field_75238_b.field_71071_by.func_70441_a(itemstack1)) {
+               this.field_75238_b.func_71019_a(itemstack1, false);
             }
+         }
+      }
 
-            if (!itemstack1.func_190926_b())
-            {
-                if (itemstack.func_190926_b())
-                {
-                    this.craftMatrix.setInventorySlotContents(i, itemstack1);
-                }
-                else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
-                {
-                    itemstack1.func_190917_f(itemstack.func_190916_E());
-                    this.craftMatrix.setInventorySlotContents(i, itemstack1);
-                }
-                else if (!this.thePlayer.inventory.addItemStackToInventory(itemstack1))
-                {
-                    this.thePlayer.dropItem(itemstack1, false);
-                }
-            }
-        }
-
-        return p_190901_2_;
-    }
+      return p_190901_2_;
+   }
 }

@@ -20,188 +20,124 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-public class BlockSponge extends Block
-{
-    public static final PropertyBool WET = PropertyBool.create("wet");
+public class BlockSponge extends Block {
+   public static final PropertyBool field_176313_a = PropertyBool.func_177716_a("wet");
 
-    protected BlockSponge()
-    {
-        super(Material.SPONGE);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(WET, Boolean.valueOf(false)));
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+   protected BlockSponge() {
+      super(Material.field_151583_m);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176313_a, Boolean.valueOf(false)));
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-    /**
-     * Gets the localized name of this block. Used for the statistics page.
-     */
-    public String getLocalizedName()
-    {
-        return I18n.translateToLocal(this.getUnlocalizedName() + ".dry.name");
-    }
+   public String func_149732_F() {
+      return I18n.func_74838_a(this.func_149739_a() + ".dry.name");
+   }
 
-    /**
-     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
-     * returns the metadata of the dropped item based on the old metadata of the block.
-     */
-    public int damageDropped(IBlockState state)
-    {
-        return ((Boolean)state.getValue(WET)).booleanValue() ? 1 : 0;
-    }
+   public int func_180651_a(IBlockState p_180651_1_) {
+      return ((Boolean)p_180651_1_.func_177229_b(field_176313_a)).booleanValue() ? 1 : 0;
+   }
 
-    /**
-     * Called after the block is set in the Chunk data, but before the Tile Entity is set
-     */
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        this.tryAbsorb(worldIn, pos, state);
-    }
+   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
+      this.func_176311_e(p_176213_1_, p_176213_2_, p_176213_3_);
+   }
 
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        this.tryAbsorb(worldIn, pos, state);
-        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
-    }
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      this.func_176311_e(p_189540_2_, p_189540_3_, p_189540_1_);
+      super.func_189540_a(p_189540_1_, p_189540_2_, p_189540_3_, p_189540_4_, p_189540_5_);
+   }
 
-    protected void tryAbsorb(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (!((Boolean)state.getValue(WET)).booleanValue() && this.absorb(worldIn, pos))
-        {
-            worldIn.setBlockState(pos, state.withProperty(WET, Boolean.valueOf(true)), 2);
-            worldIn.playEvent(2001, pos, Block.getIdFromBlock(Blocks.WATER));
-        }
-    }
+   protected void func_176311_e(World p_176311_1_, BlockPos p_176311_2_, IBlockState p_176311_3_) {
+      if (!((Boolean)p_176311_3_.func_177229_b(field_176313_a)).booleanValue() && this.func_176312_d(p_176311_1_, p_176311_2_)) {
+         p_176311_1_.func_180501_a(p_176311_2_, p_176311_3_.func_177226_a(field_176313_a, Boolean.valueOf(true)), 2);
+         p_176311_1_.func_175718_b(2001, p_176311_2_, Block.func_149682_b(Blocks.field_150355_j));
+      }
 
-    private boolean absorb(World worldIn, BlockPos pos)
-    {
-        Queue<Tuple<BlockPos, Integer>> queue = Lists.<Tuple<BlockPos, Integer>>newLinkedList();
-        List<BlockPos> list = Lists.<BlockPos>newArrayList();
-        queue.add(new Tuple(pos, Integer.valueOf(0)));
-        int i = 0;
+   }
 
-        while (!queue.isEmpty())
-        {
-            Tuple<BlockPos, Integer> tuple = (Tuple)queue.poll();
-            BlockPos blockpos = tuple.getFirst();
-            int j = ((Integer)tuple.getSecond()).intValue();
+   private boolean func_176312_d(World p_176312_1_, BlockPos p_176312_2_) {
+      Queue<Tuple<BlockPos, Integer>> queue = Lists.<Tuple<BlockPos, Integer>>newLinkedList();
+      List<BlockPos> list = Lists.<BlockPos>newArrayList();
+      queue.add(new Tuple(p_176312_2_, Integer.valueOf(0)));
+      int i = 0;
 
-            for (EnumFacing enumfacing : EnumFacing.values())
-            {
-                BlockPos blockpos1 = blockpos.offset(enumfacing);
+      while(!queue.isEmpty()) {
+         Tuple<BlockPos, Integer> tuple = (Tuple)queue.poll();
+         BlockPos blockpos = tuple.func_76341_a();
+         int j = ((Integer)tuple.func_76340_b()).intValue();
 
-                if (worldIn.getBlockState(blockpos1).getMaterial() == Material.WATER)
-                {
-                    worldIn.setBlockState(blockpos1, Blocks.AIR.getDefaultState(), 2);
-                    list.add(blockpos1);
-                    ++i;
+         for(EnumFacing enumfacing : EnumFacing.values()) {
+            BlockPos blockpos1 = blockpos.func_177972_a(enumfacing);
+            if (p_176312_1_.func_180495_p(blockpos1).func_185904_a() == Material.field_151586_h) {
+               p_176312_1_.func_180501_a(blockpos1, Blocks.field_150350_a.func_176223_P(), 2);
+               list.add(blockpos1);
+               ++i;
+               if (j < 6) {
+                  queue.add(new Tuple(blockpos1, j + 1));
+               }
+            }
+         }
 
-                    if (j < 6)
-                    {
-                        queue.add(new Tuple(blockpos1, j + 1));
-                    }
-                }
+         if (i > 64) {
+            break;
+         }
+      }
+
+      for(BlockPos blockpos2 : list) {
+         p_176312_1_.func_175685_c(blockpos2, Blocks.field_150350_a, false);
+      }
+
+      return i > 0;
+   }
+
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      p_149666_2_.add(new ItemStack(this, 1, 0));
+      p_149666_2_.add(new ItemStack(this, 1, 1));
+   }
+
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176313_a, Boolean.valueOf((p_176203_1_ & 1) == 1));
+   }
+
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Boolean)p_176201_1_.func_177229_b(field_176313_a)).booleanValue() ? 1 : 0;
+   }
+
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176313_a});
+   }
+
+   public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_) {
+      if (((Boolean)p_180655_1_.func_177229_b(field_176313_a)).booleanValue()) {
+         EnumFacing enumfacing = EnumFacing.func_176741_a(p_180655_4_);
+         if (enumfacing != EnumFacing.UP && !p_180655_2_.func_180495_p(p_180655_3_.func_177972_a(enumfacing)).func_185896_q()) {
+            double d0 = (double)p_180655_3_.func_177958_n();
+            double d1 = (double)p_180655_3_.func_177956_o();
+            double d2 = (double)p_180655_3_.func_177952_p();
+            if (enumfacing == EnumFacing.DOWN) {
+               d1 = d1 - 0.05D;
+               d0 += p_180655_4_.nextDouble();
+               d2 += p_180655_4_.nextDouble();
+            } else {
+               d1 = d1 + p_180655_4_.nextDouble() * 0.8D;
+               if (enumfacing.func_176740_k() == EnumFacing.Axis.X) {
+                  d2 += p_180655_4_.nextDouble();
+                  if (enumfacing == EnumFacing.EAST) {
+                     ++d0;
+                  } else {
+                     d0 += 0.05D;
+                  }
+               } else {
+                  d0 += p_180655_4_.nextDouble();
+                  if (enumfacing == EnumFacing.SOUTH) {
+                     ++d2;
+                  } else {
+                     d2 += 0.05D;
+                  }
+               }
             }
 
-            if (i > 64)
-            {
-                break;
-            }
-        }
-
-        for (BlockPos blockpos2 : list)
-        {
-            worldIn.notifyNeighborsOfStateChange(blockpos2, Blocks.AIR, false);
-        }
-
-        return i > 0;
-    }
-
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        tab.add(new ItemStack(this, 1, 0));
-        tab.add(new ItemStack(this, 1, 1));
-    }
-
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(WET, Boolean.valueOf((meta & 1) == 1));
-    }
-
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Boolean)state.getValue(WET)).booleanValue() ? 1 : 0;
-    }
-
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {WET});
-    }
-
-    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
-    {
-        if (((Boolean)stateIn.getValue(WET)).booleanValue())
-        {
-            EnumFacing enumfacing = EnumFacing.random(rand);
-
-            if (enumfacing != EnumFacing.UP && !worldIn.getBlockState(pos.offset(enumfacing)).isFullyOpaque())
-            {
-                double d0 = (double)pos.getX();
-                double d1 = (double)pos.getY();
-                double d2 = (double)pos.getZ();
-
-                if (enumfacing == EnumFacing.DOWN)
-                {
-                    d1 = d1 - 0.05D;
-                    d0 += rand.nextDouble();
-                    d2 += rand.nextDouble();
-                }
-                else
-                {
-                    d1 = d1 + rand.nextDouble() * 0.8D;
-
-                    if (enumfacing.getAxis() == EnumFacing.Axis.X)
-                    {
-                        d2 += rand.nextDouble();
-
-                        if (enumfacing == EnumFacing.EAST)
-                        {
-                            ++d0;
-                        }
-                        else
-                        {
-                            d0 += 0.05D;
-                        }
-                    }
-                    else
-                    {
-                        d0 += rand.nextDouble();
-
-                        if (enumfacing == EnumFacing.SOUTH)
-                        {
-                            ++d2;
-                        }
-                        else
-                        {
-                            d2 += 0.05D;
-                        }
-                    }
-                }
-
-                worldIn.spawnParticle(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D);
-            }
-        }
-    }
+            p_180655_2_.func_175688_a(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+         }
+      }
+   }
 }

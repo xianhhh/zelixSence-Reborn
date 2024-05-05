@@ -3,25 +3,21 @@ package net.minecraft.util.datafix.fixes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.IFixableData;
 
-public class HorseSaddle implements IFixableData
-{
-    public int getFixVersion()
-    {
-        return 110;
-    }
+public class HorseSaddle implements IFixableData {
+   public int func_188216_a() {
+      return 110;
+   }
 
-    public NBTTagCompound fixTagCompound(NBTTagCompound compound)
-    {
-        if ("EntityHorse".equals(compound.getString("id")) && !compound.hasKey("SaddleItem", 10) && compound.getBoolean("Saddle"))
-        {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setString("id", "minecraft:saddle");
-            nbttagcompound.setByte("Count", (byte)1);
-            nbttagcompound.setShort("Damage", (short)0);
-            compound.setTag("SaddleItem", nbttagcompound);
-            compound.removeTag("Saddle");
-        }
+   public NBTTagCompound func_188217_a(NBTTagCompound p_188217_1_) {
+      if ("EntityHorse".equals(p_188217_1_.func_74779_i("id")) && !p_188217_1_.func_150297_b("SaddleItem", 10) && p_188217_1_.func_74767_n("Saddle")) {
+         NBTTagCompound nbttagcompound = new NBTTagCompound();
+         nbttagcompound.func_74778_a("id", "minecraft:saddle");
+         nbttagcompound.func_74774_a("Count", (byte)1);
+         nbttagcompound.func_74777_a("Damage", (short)0);
+         p_188217_1_.func_74782_a("SaddleItem", nbttagcompound);
+         p_188217_1_.func_82580_o("Saddle");
+      }
 
-        return compound;
-    }
+      return p_188217_1_;
+   }
 }

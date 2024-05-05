@@ -16,116 +16,75 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public abstract class BlockWoodSlab extends BlockSlab
-{
-    public static final PropertyEnum<BlockPlanks.EnumType> VARIANT = PropertyEnum.<BlockPlanks.EnumType>create("variant", BlockPlanks.EnumType.class);
+public abstract class BlockWoodSlab extends BlockSlab {
+   public static final PropertyEnum<BlockPlanks.EnumType> field_176557_b = PropertyEnum.<BlockPlanks.EnumType>func_177709_a("variant", BlockPlanks.EnumType.class);
 
-    public BlockWoodSlab()
-    {
-        super(Material.WOOD);
-        IBlockState iblockstate = this.blockState.getBaseState();
+   public BlockWoodSlab() {
+      super(Material.field_151575_d);
+      IBlockState iblockstate = this.field_176227_L.func_177621_b();
+      if (!this.func_176552_j()) {
+         iblockstate = iblockstate.func_177226_a(field_176554_a, BlockSlab.EnumBlockHalf.BOTTOM);
+      }
 
-        if (!this.isDouble())
-        {
-            iblockstate = iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
-        }
+      this.func_180632_j(iblockstate.func_177226_a(field_176557_b, BlockPlanks.EnumType.OAK));
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-        this.setDefaultState(iblockstate.withProperty(VARIANT, BlockPlanks.EnumType.OAK));
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return ((BlockPlanks.EnumType)p_180659_1_.func_177229_b(field_176557_b)).func_181070_c();
+   }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMapColor();
-    }
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Item.func_150898_a(Blocks.field_150376_bx);
+   }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Item.getItemFromBlock(Blocks.WOODEN_SLAB);
-    }
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      return new ItemStack(Blocks.field_150376_bx, 1, ((BlockPlanks.EnumType)p_185473_3_.func_177229_b(field_176557_b)).func_176839_a());
+   }
 
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return new ItemStack(Blocks.WOODEN_SLAB, 1, ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata());
-    }
+   public String func_150002_b(int p_150002_1_) {
+      return super.func_149739_a() + "." + BlockPlanks.EnumType.func_176837_a(p_150002_1_).func_176840_c();
+   }
 
-    /**
-     * Returns the slab block name with the type associated with it
-     */
-    public String getUnlocalizedName(int meta)
-    {
-        return super.getUnlocalizedName() + "." + BlockPlanks.EnumType.byMetadata(meta).getUnlocalizedName();
-    }
+   public IProperty<?> func_176551_l() {
+      return field_176557_b;
+   }
 
-    public IProperty<?> getVariantProperty()
-    {
-        return VARIANT;
-    }
+   public Comparable<?> func_185674_a(ItemStack p_185674_1_) {
+      return BlockPlanks.EnumType.func_176837_a(p_185674_1_.func_77960_j() & 7);
+   }
 
-    public Comparable<?> getTypeForItem(ItemStack stack)
-    {
-        return BlockPlanks.EnumType.byMetadata(stack.getMetadata() & 7);
-    }
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      for(BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values()) {
+         p_149666_2_.add(new ItemStack(this, 1, blockplanks$enumtype.func_176839_a()));
+      }
 
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values())
-        {
-            tab.add(new ItemStack(this, 1, blockplanks$enumtype.getMetadata()));
-        }
-    }
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        IBlockState iblockstate = this.getDefaultState().withProperty(VARIANT, BlockPlanks.EnumType.byMetadata(meta & 7));
+   public IBlockState func_176203_a(int p_176203_1_) {
+      IBlockState iblockstate = this.func_176223_P().func_177226_a(field_176557_b, BlockPlanks.EnumType.func_176837_a(p_176203_1_ & 7));
+      if (!this.func_176552_j()) {
+         iblockstate = iblockstate.func_177226_a(field_176554_a, (p_176203_1_ & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
+      }
 
-        if (!this.isDouble())
-        {
-            iblockstate = iblockstate.withProperty(HALF, (meta & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
-        }
+      return iblockstate;
+   }
 
-        return iblockstate;
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      int i = 0;
+      i = i | ((BlockPlanks.EnumType)p_176201_1_.func_177229_b(field_176557_b)).func_176839_a();
+      if (!this.func_176552_j() && p_176201_1_.func_177229_b(field_176554_a) == BlockSlab.EnumBlockHalf.TOP) {
+         i |= 8;
+      }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        int i = 0;
-        i = i | ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
+      return i;
+   }
 
-        if (!this.isDouble() && state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP)
-        {
-            i |= 8;
-        }
+   protected BlockStateContainer func_180661_e() {
+      return this.func_176552_j() ? new BlockStateContainer(this, new IProperty[]{field_176557_b}) : new BlockStateContainer(this, new IProperty[]{field_176554_a, field_176557_b});
+   }
 
-        return i;
-    }
-
-    protected BlockStateContainer createBlockState()
-    {
-        return this.isDouble() ? new BlockStateContainer(this, new IProperty[] {VARIANT}) : new BlockStateContainer(this, new IProperty[] {HALF, VARIANT});
-    }
-
-    /**
-     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
-     * returns the metadata of the dropped item based on the old metadata of the block.
-     */
-    public int damageDropped(IBlockState state)
-    {
-        return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
-    }
+   public int func_180651_a(IBlockState p_180651_1_) {
+      return ((BlockPlanks.EnumType)p_180651_1_.func_177229_b(field_176557_b)).func_176839_a();
+   }
 }

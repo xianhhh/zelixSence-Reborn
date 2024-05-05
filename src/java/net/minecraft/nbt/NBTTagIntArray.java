@@ -6,111 +6,85 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class NBTTagIntArray extends NBTBase
-{
-    /** The array of saved integers */
-    private int[] intArray;
+public class NBTTagIntArray extends NBTBase {
+   private int[] field_74749_a;
 
-    NBTTagIntArray()
-    {
-    }
+   NBTTagIntArray() {
+   }
 
-    public NBTTagIntArray(int[] p_i45132_1_)
-    {
-        this.intArray = p_i45132_1_;
-    }
+   public NBTTagIntArray(int[] p_i45132_1_) {
+      this.field_74749_a = p_i45132_1_;
+   }
 
-    public NBTTagIntArray(List<Integer> p_i47528_1_)
-    {
-        this(func_193584_a(p_i47528_1_));
-    }
+   public NBTTagIntArray(List<Integer> p_i47528_1_) {
+      this(func_193584_a(p_i47528_1_));
+   }
 
-    private static int[] func_193584_a(List<Integer> p_193584_0_)
-    {
-        int[] aint = new int[p_193584_0_.size()];
+   private static int[] func_193584_a(List<Integer> p_193584_0_) {
+      int[] aint = new int[p_193584_0_.size()];
 
-        for (int i = 0; i < p_193584_0_.size(); ++i)
-        {
-            Integer integer = p_193584_0_.get(i);
-            aint[i] = integer == null ? 0 : integer.intValue();
-        }
+      for(int i = 0; i < p_193584_0_.size(); ++i) {
+         Integer integer = p_193584_0_.get(i);
+         aint[i] = integer == null ? 0 : integer.intValue();
+      }
 
-        return aint;
-    }
+      return aint;
+   }
 
-    /**
-     * Write the actual data contents of the tag, implemented in NBT extension classes
-     */
-    void write(DataOutput output) throws IOException
-    {
-        output.writeInt(this.intArray.length);
+   void func_74734_a(DataOutput p_74734_1_) throws IOException {
+      p_74734_1_.writeInt(this.field_74749_a.length);
 
-        for (int i : this.intArray)
-        {
-            output.writeInt(i);
-        }
-    }
+      for(int i : this.field_74749_a) {
+         p_74734_1_.writeInt(i);
+      }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
-    {
-        sizeTracker.read(192L);
-        int i = input.readInt();
-        sizeTracker.read((long)(32 * i));
-        this.intArray = new int[i];
+   }
 
-        for (int j = 0; j < i; ++j)
-        {
-            this.intArray[j] = input.readInt();
-        }
-    }
+   void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException {
+      p_152446_3_.func_152450_a(192L);
+      int i = p_152446_1_.readInt();
+      p_152446_3_.func_152450_a((long)(32 * i));
+      this.field_74749_a = new int[i];
 
-    /**
-     * Gets the type byte for the tag.
-     */
-    public byte getId()
-    {
-        return 11;
-    }
+      for(int j = 0; j < i; ++j) {
+         this.field_74749_a[j] = p_152446_1_.readInt();
+      }
 
-    public String toString()
-    {
-        StringBuilder stringbuilder = new StringBuilder("[I;");
+   }
 
-        for (int i = 0; i < this.intArray.length; ++i)
-        {
-            if (i != 0)
-            {
-                stringbuilder.append(',');
-            }
+   public byte func_74732_a() {
+      return 11;
+   }
 
-            stringbuilder.append(this.intArray[i]);
-        }
+   public String toString() {
+      StringBuilder stringbuilder = new StringBuilder("[I;");
 
-        return stringbuilder.append(']').toString();
-    }
+      for(int i = 0; i < this.field_74749_a.length; ++i) {
+         if (i != 0) {
+            stringbuilder.append(',');
+         }
 
-    /**
-     * Creates a clone of the tag.
-     */
-    public NBTTagIntArray copy()
-    {
-        int[] aint = new int[this.intArray.length];
-        System.arraycopy(this.intArray, 0, aint, 0, this.intArray.length);
-        return new NBTTagIntArray(aint);
-    }
+         stringbuilder.append(this.field_74749_a[i]);
+      }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        return super.equals(p_equals_1_) && Arrays.equals(this.intArray, ((NBTTagIntArray)p_equals_1_).intArray);
-    }
+      return stringbuilder.append(']').toString();
+   }
 
-    public int hashCode()
-    {
-        return super.hashCode() ^ Arrays.hashCode(this.intArray);
-    }
+   public NBTTagIntArray func_74737_b() {
+      int[] aint = new int[this.field_74749_a.length];
+      System.arraycopy(this.field_74749_a, 0, aint, 0, this.field_74749_a.length);
+      return new NBTTagIntArray(aint);
+   }
 
-    public int[] getIntArray()
-    {
-        return this.intArray;
-    }
+   public boolean equals(Object p_equals_1_) {
+      return super.equals(p_equals_1_) && Arrays.equals(this.field_74749_a, ((NBTTagIntArray)p_equals_1_).field_74749_a);
+   }
+
+   public int hashCode() {
+      return super.hashCode() ^ Arrays.hashCode(this.field_74749_a);
+   }
+
+   public int[] func_150302_c() {
+      return this.field_74749_a;
+   }
 }

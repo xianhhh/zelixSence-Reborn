@@ -3,25 +3,12 @@ package net.minecraft.tileentity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 
-public interface IHopper extends IInventory
-{
-    /**
-     * Returns the worldObj for this tileEntity.
-     */
-    World getWorld();
+public interface IHopper extends IInventory {
+   World func_145831_w();
 
-    /**
-     * Gets the world X position for this hopper entity.
-     */
-    double getXPos();
+   double func_96107_aA();
 
-    /**
-     * Gets the world Y position for this hopper entity.
-     */
-    double getYPos();
+   double func_96109_aB();
 
-    /**
-     * Gets the world Z position for this hopper entity.
-     */
-    double getZPos();
+   double func_96108_aC();
 }

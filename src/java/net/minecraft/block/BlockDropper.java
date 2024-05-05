@@ -12,69 +12,46 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockDropper extends BlockDispenser
-{
-    private final IBehaviorDispenseItem dropBehavior = new BehaviorDefaultDispenseItem();
+public class BlockDropper extends BlockDispenser {
+   private final IBehaviorDispenseItem field_149947_P = new BehaviorDefaultDispenseItem();
 
-    protected IBehaviorDispenseItem getBehavior(ItemStack stack)
-    {
-        return this.dropBehavior;
-    }
+   protected IBehaviorDispenseItem func_149940_a(ItemStack p_149940_1_) {
+      return this.field_149947_P;
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        return new TileEntityDropper();
-    }
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      return new TileEntityDropper();
+   }
 
-    protected void dispense(World worldIn, BlockPos pos)
-    {
-        BlockSourceImpl blocksourceimpl = new BlockSourceImpl(worldIn, pos);
-        TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();
+   protected void func_176439_d(World p_176439_1_, BlockPos p_176439_2_) {
+      BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_176439_1_, p_176439_2_);
+      TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();
+      if (tileentitydispenser != null) {
+         int i = tileentitydispenser.func_146017_i();
+         if (i < 0) {
+            p_176439_1_.func_175718_b(1001, p_176439_2_, 0);
+         } else {
+            ItemStack itemstack = tileentitydispenser.func_70301_a(i);
+            if (!itemstack.func_190926_b()) {
+               EnumFacing enumfacing = (EnumFacing)p_176439_1_.func_180495_p(p_176439_2_).func_177229_b(field_176441_a);
+               BlockPos blockpos = p_176439_2_.func_177972_a(enumfacing);
+               IInventory iinventory = TileEntityHopper.func_145893_b(p_176439_1_, (double)blockpos.func_177958_n(), (double)blockpos.func_177956_o(), (double)blockpos.func_177952_p());
+               ItemStack itemstack1;
+               if (iinventory == null) {
+                  itemstack1 = this.field_149947_P.func_82482_a(blocksourceimpl, itemstack);
+               } else {
+                  itemstack1 = TileEntityHopper.func_174918_a(tileentitydispenser, iinventory, itemstack.func_77946_l().func_77979_a(1), enumfacing.func_176734_d());
+                  if (itemstack1.func_190926_b()) {
+                     itemstack1 = itemstack.func_77946_l();
+                     itemstack1.func_190918_g(1);
+                  } else {
+                     itemstack1 = itemstack.func_77946_l();
+                  }
+               }
 
-        if (tileentitydispenser != null)
-        {
-            int i = tileentitydispenser.getDispenseSlot();
-
-            if (i < 0)
-            {
-                worldIn.playEvent(1001, pos, 0);
+               tileentitydispenser.func_70299_a(i, itemstack1);
             }
-            else
-            {
-                ItemStack itemstack = tileentitydispenser.getStackInSlot(i);
-
-                if (!itemstack.func_190926_b())
-                {
-                    EnumFacing enumfacing = (EnumFacing)worldIn.getBlockState(pos).getValue(FACING);
-                    BlockPos blockpos = pos.offset(enumfacing);
-                    IInventory iinventory = TileEntityHopper.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-                    ItemStack itemstack1;
-
-                    if (iinventory == null)
-                    {
-                        itemstack1 = this.dropBehavior.dispense(blocksourceimpl, itemstack);
-                    }
-                    else
-                    {
-                        itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(tileentitydispenser, iinventory, itemstack.copy().splitStack(1), enumfacing.getOpposite());
-
-                        if (itemstack1.func_190926_b())
-                        {
-                            itemstack1 = itemstack.copy();
-                            itemstack1.func_190918_g(1);
-                        }
-                        else
-                        {
-                            itemstack1 = itemstack.copy();
-                        }
-                    }
-
-                    tileentitydispenser.setInventorySlotContents(i, itemstack1);
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }

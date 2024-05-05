@@ -6,54 +6,37 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketCreativeInventoryAction implements Packet<INetHandlerPlayServer>
-{
-    private int slotId;
-    private ItemStack stack = ItemStack.field_190927_a;
+public class CPacketCreativeInventoryAction implements Packet<INetHandlerPlayServer> {
+   private int field_149629_a;
+   private ItemStack field_149628_b = ItemStack.field_190927_a;
 
-    public CPacketCreativeInventoryAction()
-    {
-    }
+   public CPacketCreativeInventoryAction() {
+   }
 
-    public CPacketCreativeInventoryAction(int slotIdIn, ItemStack stackIn)
-    {
-        this.slotId = slotIdIn;
-        this.stack = stackIn.copy();
-    }
+   public CPacketCreativeInventoryAction(int p_i46862_1_, ItemStack p_i46862_2_) {
+      this.field_149629_a = p_i46862_1_;
+      this.field_149628_b = p_i46862_2_.func_77946_l();
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.processCreativeInventoryAction(this);
-    }
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_147344_a(this);
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.slotId = buf.readShort();
-        this.stack = buf.readItemStackFromBuffer();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149629_a = p_148837_1_.readShort();
+      this.field_149628_b = p_148837_1_.func_150791_c();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeShort(this.slotId);
-        buf.writeItemStackToBuffer(this.stack);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeShort(this.field_149629_a);
+      p_148840_1_.func_150788_a(this.field_149628_b);
+   }
 
-    public int getSlotId()
-    {
-        return this.slotId;
-    }
+   public int func_149627_c() {
+      return this.field_149629_a;
+   }
 
-    public ItemStack getStack()
-    {
-        return this.stack;
-    }
+   public ItemStack func_149625_d() {
+      return this.field_149628_b;
+   }
 }

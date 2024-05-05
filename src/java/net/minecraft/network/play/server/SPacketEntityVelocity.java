@@ -6,109 +6,82 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketEntityVelocity implements Packet<INetHandlerPlayClient>
-{
-    private int entityID;
-    private int motionX;
-    private int motionY;
-    private int motionZ;
+public class SPacketEntityVelocity implements Packet<INetHandlerPlayClient> {
+   private int field_149417_a;
+   private int field_149415_b;
+   private int field_149416_c;
+   private int field_149414_d;
 
-    public SPacketEntityVelocity()
-    {
-    }
+   public SPacketEntityVelocity() {
+   }
 
-    public SPacketEntityVelocity(Entity entityIn)
-    {
-        this(entityIn.getEntityId(), entityIn.motionX, entityIn.motionY, entityIn.motionZ);
-    }
+   public SPacketEntityVelocity(Entity p_i46914_1_) {
+      this(p_i46914_1_.func_145782_y(), p_i46914_1_.field_70159_w, p_i46914_1_.field_70181_x, p_i46914_1_.field_70179_y);
+   }
 
-    public SPacketEntityVelocity(int entityIdIn, double motionXIn, double motionYIn, double motionZIn)
-    {
-        this.entityID = entityIdIn;
-        double d0 = 3.9D;
+   public SPacketEntityVelocity(int p_i46915_1_, double p_i46915_2_, double p_i46915_4_, double p_i46915_6_) {
+      this.field_149417_a = p_i46915_1_;
+      double d0 = 3.9D;
+      if (p_i46915_2_ < -3.9D) {
+         p_i46915_2_ = -3.9D;
+      }
 
-        if (motionXIn < -3.9D)
-        {
-            motionXIn = -3.9D;
-        }
+      if (p_i46915_4_ < -3.9D) {
+         p_i46915_4_ = -3.9D;
+      }
 
-        if (motionYIn < -3.9D)
-        {
-            motionYIn = -3.9D;
-        }
+      if (p_i46915_6_ < -3.9D) {
+         p_i46915_6_ = -3.9D;
+      }
 
-        if (motionZIn < -3.9D)
-        {
-            motionZIn = -3.9D;
-        }
+      if (p_i46915_2_ > 3.9D) {
+         p_i46915_2_ = 3.9D;
+      }
 
-        if (motionXIn > 3.9D)
-        {
-            motionXIn = 3.9D;
-        }
+      if (p_i46915_4_ > 3.9D) {
+         p_i46915_4_ = 3.9D;
+      }
 
-        if (motionYIn > 3.9D)
-        {
-            motionYIn = 3.9D;
-        }
+      if (p_i46915_6_ > 3.9D) {
+         p_i46915_6_ = 3.9D;
+      }
 
-        if (motionZIn > 3.9D)
-        {
-            motionZIn = 3.9D;
-        }
+      this.field_149415_b = (int)(p_i46915_2_ * 8000.0D);
+      this.field_149416_c = (int)(p_i46915_4_ * 8000.0D);
+      this.field_149414_d = (int)(p_i46915_6_ * 8000.0D);
+   }
 
-        this.motionX = (int)(motionXIn * 8000.0D);
-        this.motionY = (int)(motionYIn * 8000.0D);
-        this.motionZ = (int)(motionZIn * 8000.0D);
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149417_a = p_148837_1_.func_150792_a();
+      this.field_149415_b = p_148837_1_.readShort();
+      this.field_149416_c = p_148837_1_.readShort();
+      this.field_149414_d = p_148837_1_.readShort();
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityID = buf.readVarIntFromBuffer();
-        this.motionX = buf.readShort();
-        this.motionY = buf.readShort();
-        this.motionZ = buf.readShort();
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149417_a);
+      p_148840_1_.writeShort(this.field_149415_b);
+      p_148840_1_.writeShort(this.field_149416_c);
+      p_148840_1_.writeShort(this.field_149414_d);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityID);
-        buf.writeShort(this.motionX);
-        buf.writeShort(this.motionY);
-        buf.writeShort(this.motionZ);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147244_a(this);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleEntityVelocity(this);
-    }
+   public int func_149412_c() {
+      return this.field_149417_a;
+   }
 
-    public int getEntityID()
-    {
-        return this.entityID;
-    }
+   public int func_149411_d() {
+      return this.field_149415_b;
+   }
 
-    public int getMotionX()
-    {
-        return this.motionX;
-    }
+   public int func_149410_e() {
+      return this.field_149416_c;
+   }
 
-    public int getMotionY()
-    {
-        return this.motionY;
-    }
-
-    public int getMotionZ()
-    {
-        return this.motionZ;
-    }
+   public int func_149409_f() {
+      return this.field_149414_d;
+   }
 }

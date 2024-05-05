@@ -4,44 +4,35 @@ import com.google.gson.JsonObject;
 import java.io.File;
 import java.net.SocketAddress;
 
-public class UserListIPBans extends UserList<String, UserListIPBansEntry>
-{
-    public UserListIPBans(File bansFile)
-    {
-        super(bansFile);
-    }
+public class UserListIPBans extends UserList<String, UserListIPBansEntry> {
+   public UserListIPBans(File p_i1490_1_) {
+      super(p_i1490_1_);
+   }
 
-    protected UserListEntry<String> createEntry(JsonObject entryData)
-    {
-        return new UserListIPBansEntry(entryData);
-    }
+   protected UserListEntry<String> func_152682_a(JsonObject p_152682_1_) {
+      return new UserListIPBansEntry(p_152682_1_);
+   }
 
-    public boolean isBanned(SocketAddress address)
-    {
-        String s = this.addressToString(address);
-        return this.hasEntry(s);
-    }
+   public boolean func_152708_a(SocketAddress p_152708_1_) {
+      String s = this.func_152707_c(p_152708_1_);
+      return this.func_152692_d(s);
+   }
 
-    public UserListIPBansEntry getBanEntry(SocketAddress address)
-    {
-        String s = this.addressToString(address);
-        return (UserListIPBansEntry)this.getEntry(s);
-    }
+   public UserListIPBansEntry func_152709_b(SocketAddress p_152709_1_) {
+      String s = this.func_152707_c(p_152709_1_);
+      return (UserListIPBansEntry)this.func_152683_b(s);
+   }
 
-    private String addressToString(SocketAddress address)
-    {
-        String s = address.toString();
+   private String func_152707_c(SocketAddress p_152707_1_) {
+      String s = p_152707_1_.toString();
+      if (s.contains("/")) {
+         s = s.substring(s.indexOf(47) + 1);
+      }
 
-        if (s.contains("/"))
-        {
-            s = s.substring(s.indexOf(47) + 1);
-        }
+      if (s.contains(":")) {
+         s = s.substring(0, s.indexOf(58));
+      }
 
-        if (s.contains(":"))
-        {
-            s = s.substring(0, s.indexOf(58));
-        }
-
-        return s;
-    }
+      return s;
+   }
 }

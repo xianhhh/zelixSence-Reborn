@@ -35,942 +35,636 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public abstract class CommandBase implements ICommand
-{
-    private static ICommandListener commandListener;
-    private static final Splitter field_190796_b = Splitter.on(',');
-    private static final Splitter field_190797_c = Splitter.on('=').limit(2);
+public abstract class CommandBase implements ICommand {
+   private static ICommandListener field_71533_a;
+   private static final Splitter field_190796_b = Splitter.on(',');
+   private static final Splitter field_190797_c = Splitter.on('=').limit(2);
 
-    /**
-     * Convert a JsonParseException into a user-friendly exception
-     */
-    protected static SyntaxErrorException toSyntaxException(JsonParseException e)
-    {
-        Throwable throwable = ExceptionUtils.getRootCause(e);
-        String s = "";
+   protected static SyntaxErrorException func_184889_a(JsonParseException p_184889_0_) {
+      Throwable throwable = ExceptionUtils.getRootCause(p_184889_0_);
+      String s = "";
+      if (throwable != null) {
+         s = throwable.getMessage();
+         if (s.contains("setLenient")) {
+            s = s.substring(s.indexOf("to accept ") + 10);
+         }
+      }
 
-        if (throwable != null)
-        {
-            s = throwable.getMessage();
+      return new SyntaxErrorException("commands.tellraw.jsonException", new Object[]{s});
+   }
 
-            if (s.contains("setLenient"))
-            {
-                s = s.substring(s.indexOf("to accept ") + 10);
-            }
-        }
+   public static NBTTagCompound func_184887_a(Entity p_184887_0_) {
+      NBTTagCompound nbttagcompound = p_184887_0_.func_189511_e(new NBTTagCompound());
+      if (p_184887_0_ instanceof EntityPlayer) {
+         ItemStack itemstack = ((EntityPlayer)p_184887_0_).field_71071_by.func_70448_g();
+         if (!itemstack.func_190926_b()) {
+            nbttagcompound.func_74782_a("SelectedItem", itemstack.func_77955_b(new NBTTagCompound()));
+         }
+      }
 
-        return new SyntaxErrorException("commands.tellraw.jsonException", new Object[] {s});
-    }
+      return nbttagcompound;
+   }
 
-    public static NBTTagCompound entityToNBT(Entity theEntity)
-    {
-        NBTTagCompound nbttagcompound = theEntity.writeToNBT(new NBTTagCompound());
+   public int func_82362_a() {
+      return 4;
+   }
 
-        if (theEntity instanceof EntityPlayer)
-        {
-            ItemStack itemstack = ((EntityPlayer)theEntity).inventory.getCurrentItem();
+   public List<String> func_71514_a() {
+      return Collections.<String>emptyList();
+   }
 
-            if (!itemstack.func_190926_b())
-            {
-                nbttagcompound.setTag("SelectedItem", itemstack.writeToNBT(new NBTTagCompound()));
-            }
-        }
+   public boolean func_184882_a(MinecraftServer p_184882_1_, ICommandSender p_184882_2_) {
+      return p_184882_2_.func_70003_b(this.func_82362_a(), this.func_71517_b());
+   }
 
-        return nbttagcompound;
-    }
+   public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_) {
+      return Collections.<String>emptyList();
+   }
 
-    /**
-     * Return the required permission level for this command.
-     */
-    public int getRequiredPermissionLevel()
-    {
-        return 4;
-    }
+   public static int func_175755_a(String p_175755_0_) throws NumberInvalidException {
+      try {
+         return Integer.parseInt(p_175755_0_);
+      } catch (NumberFormatException var2) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175755_0_});
+      }
+   }
 
-    public List<String> getCommandAliases()
-    {
-        return Collections.<String>emptyList();
-    }
+   public static int func_180528_a(String p_180528_0_, int p_180528_1_) throws NumberInvalidException {
+      return func_175764_a(p_180528_0_, p_180528_1_, Integer.MAX_VALUE);
+   }
 
-    /**
-     * Check if the given ICommandSender has permission to execute this command
-     */
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
-    {
-        return sender.canCommandSenderUseCommand(this.getRequiredPermissionLevel(), this.getCommandName());
-    }
+   public static int func_175764_a(String p_175764_0_, int p_175764_1_, int p_175764_2_) throws NumberInvalidException {
+      int i = func_175755_a(p_175764_0_);
+      if (i < p_175764_1_) {
+         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{i, p_175764_1_});
+      } else if (i > p_175764_2_) {
+         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{i, p_175764_2_});
+      } else {
+         return i;
+      }
+   }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
-    {
-        return Collections.<String>emptyList();
-    }
+   public static long func_175766_b(String p_175766_0_) throws NumberInvalidException {
+      try {
+         return Long.parseLong(p_175766_0_);
+      } catch (NumberFormatException var2) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175766_0_});
+      }
+   }
 
-    public static int parseInt(String input) throws NumberInvalidException
-    {
-        try
-        {
-            return Integer.parseInt(input);
-        }
-        catch (NumberFormatException var2)
-        {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {input});
-        }
-    }
+   public static long func_175760_a(String p_175760_0_, long p_175760_1_, long p_175760_3_) throws NumberInvalidException {
+      long i = func_175766_b(p_175760_0_);
+      if (i < p_175760_1_) {
+         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{i, p_175760_1_});
+      } else if (i > p_175760_3_) {
+         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{i, p_175760_3_});
+      } else {
+         return i;
+      }
+   }
 
-    public static int parseInt(String input, int min) throws NumberInvalidException
-    {
-        return parseInt(input, min, Integer.MAX_VALUE);
-    }
+   public static BlockPos func_175757_a(ICommandSender p_175757_0_, String[] p_175757_1_, int p_175757_2_, boolean p_175757_3_) throws NumberInvalidException {
+      BlockPos blockpos = p_175757_0_.func_180425_c();
+      return new BlockPos(func_175769_b((double)blockpos.func_177958_n(), p_175757_1_[p_175757_2_], -30000000, 30000000, p_175757_3_), func_175769_b((double)blockpos.func_177956_o(), p_175757_1_[p_175757_2_ + 1], 0, 256, false), func_175769_b((double)blockpos.func_177952_p(), p_175757_1_[p_175757_2_ + 2], -30000000, 30000000, p_175757_3_));
+   }
 
-    public static int parseInt(String input, int min, int max) throws NumberInvalidException
-    {
-        int i = parseInt(input);
-
-        if (i < min)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {i, min});
-        }
-        else if (i > max)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {i, max});
-        }
-        else
-        {
-            return i;
-        }
-    }
-
-    public static long parseLong(String input) throws NumberInvalidException
-    {
-        try
-        {
-            return Long.parseLong(input);
-        }
-        catch (NumberFormatException var2)
-        {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {input});
-        }
-    }
-
-    public static long parseLong(String input, long min, long max) throws NumberInvalidException
-    {
-        long i = parseLong(input);
-
-        if (i < min)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {i, min});
-        }
-        else if (i > max)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {i, max});
-        }
-        else
-        {
-            return i;
-        }
-    }
-
-    public static BlockPos parseBlockPos(ICommandSender sender, String[] args, int startIndex, boolean centerBlock) throws NumberInvalidException
-    {
-        BlockPos blockpos = sender.getPosition();
-        return new BlockPos(parseDouble((double)blockpos.getX(), args[startIndex], -30000000, 30000000, centerBlock), parseDouble((double)blockpos.getY(), args[startIndex + 1], 0, 256, false), parseDouble((double)blockpos.getZ(), args[startIndex + 2], -30000000, 30000000, centerBlock));
-    }
-
-    public static double parseDouble(String input) throws NumberInvalidException
-    {
-        try
-        {
-            double d0 = Double.parseDouble(input);
-
-            if (!Doubles.isFinite(d0))
-            {
-                throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {input});
-            }
-            else
-            {
-                return d0;
-            }
-        }
-        catch (NumberFormatException var3)
-        {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {input});
-        }
-    }
-
-    public static double parseDouble(String input, double min) throws NumberInvalidException
-    {
-        return parseDouble(input, min, Double.MAX_VALUE);
-    }
-
-    public static double parseDouble(String input, double min, double max) throws NumberInvalidException
-    {
-        double d0 = parseDouble(input);
-
-        if (d0 < min)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {String.format("%.2f", d0), String.format("%.2f", min)});
-        }
-        else if (d0 > max)
-        {
-            throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {String.format("%.2f", d0), String.format("%.2f", max)});
-        }
-        else
-        {
+   public static double func_175765_c(String p_175765_0_) throws NumberInvalidException {
+      try {
+         double d0 = Double.parseDouble(p_175765_0_);
+         if (!Doubles.isFinite(d0)) {
+            throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175765_0_});
+         } else {
             return d0;
-        }
-    }
+         }
+      } catch (NumberFormatException var3) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175765_0_});
+      }
+   }
 
-    public static boolean parseBoolean(String input) throws CommandException
-    {
-        if (!"true".equals(input) && !"1".equals(input))
-        {
-            if (!"false".equals(input) && !"0".equals(input))
-            {
-                throw new CommandException("commands.generic.boolean.invalid", new Object[] {input});
+   public static double func_180526_a(String p_180526_0_, double p_180526_1_) throws NumberInvalidException {
+      return func_175756_a(p_180526_0_, p_180526_1_, Double.MAX_VALUE);
+   }
+
+   public static double func_175756_a(String p_175756_0_, double p_175756_1_, double p_175756_3_) throws NumberInvalidException {
+      double d0 = func_175765_c(p_175756_0_);
+      if (d0 < p_175756_1_) {
+         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{String.format("%.2f", d0), String.format("%.2f", p_175756_1_)});
+      } else if (d0 > p_175756_3_) {
+         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{String.format("%.2f", d0), String.format("%.2f", p_175756_3_)});
+      } else {
+         return d0;
+      }
+   }
+
+   public static boolean func_180527_d(String p_180527_0_) throws CommandException {
+      if (!"true".equals(p_180527_0_) && !"1".equals(p_180527_0_)) {
+         if (!"false".equals(p_180527_0_) && !"0".equals(p_180527_0_)) {
+            throw new CommandException("commands.generic.boolean.invalid", new Object[]{p_180527_0_});
+         } else {
+            return false;
+         }
+      } else {
+         return true;
+      }
+   }
+
+   public static EntityPlayerMP func_71521_c(ICommandSender p_71521_0_) throws PlayerNotFoundException {
+      if (p_71521_0_ instanceof EntityPlayerMP) {
+         return (EntityPlayerMP)p_71521_0_;
+      } else {
+         throw new PlayerNotFoundException("commands.generic.player.unspecified");
+      }
+   }
+
+   public static List<EntityPlayerMP> func_193513_a(MinecraftServer p_193513_0_, ICommandSender p_193513_1_, String p_193513_2_) throws CommandException {
+      List<EntityPlayerMP> list = EntitySelector.func_193531_b(p_193513_1_, p_193513_2_);
+      return (List<EntityPlayerMP>)(list.isEmpty() ? Lists.newArrayList(func_193512_a(p_193513_0_, (EntityPlayerMP)null, p_193513_2_)) : list);
+   }
+
+   public static EntityPlayerMP func_184888_a(MinecraftServer p_184888_0_, ICommandSender p_184888_1_, String p_184888_2_) throws PlayerNotFoundException, CommandException {
+      return func_193512_a(p_184888_0_, EntitySelector.func_82386_a(p_184888_1_, p_184888_2_), p_184888_2_);
+   }
+
+   private static EntityPlayerMP func_193512_a(MinecraftServer p_193512_0_, @Nullable EntityPlayerMP p_193512_1_, String p_193512_2_) throws CommandException {
+      if (p_193512_1_ == null) {
+         try {
+            p_193512_1_ = p_193512_0_.func_184103_al().func_177451_a(UUID.fromString(p_193512_2_));
+         } catch (IllegalArgumentException var4) {
+            ;
+         }
+      }
+
+      if (p_193512_1_ == null) {
+         p_193512_1_ = p_193512_0_.func_184103_al().func_152612_a(p_193512_2_);
+      }
+
+      if (p_193512_1_ == null) {
+         throw new PlayerNotFoundException("commands.generic.player.notFound", new Object[]{p_193512_2_});
+      } else {
+         return p_193512_1_;
+      }
+   }
+
+   public static Entity func_184885_b(MinecraftServer p_184885_0_, ICommandSender p_184885_1_, String p_184885_2_) throws EntityNotFoundException, CommandException {
+      return func_184884_a(p_184885_0_, p_184885_1_, p_184885_2_, Entity.class);
+   }
+
+   public static <T extends Entity> T func_184884_a(MinecraftServer p_184884_0_, ICommandSender p_184884_1_, String p_184884_2_, Class<? extends T> p_184884_3_) throws EntityNotFoundException, CommandException {
+      Entity entity = EntitySelector.func_179652_a(p_184884_1_, p_184884_2_, p_184884_3_);
+      if (entity == null) {
+         entity = p_184884_0_.func_184103_al().func_152612_a(p_184884_2_);
+      }
+
+      if (entity == null) {
+         try {
+            UUID uuid = UUID.fromString(p_184884_2_);
+            entity = p_184884_0_.func_175576_a(uuid);
+            if (entity == null) {
+               entity = p_184884_0_.func_184103_al().func_177451_a(uuid);
             }
-            else
-            {
-                return false;
+         } catch (IllegalArgumentException var6) {
+            if (p_184884_2_.split("-").length == 5) {
+               throw new EntityNotFoundException("commands.generic.entity.invalidUuid", new Object[]{p_184884_2_});
             }
-        }
-        else
-        {
-            return true;
-        }
-    }
+         }
+      }
 
-    /**
-     * Returns the given ICommandSender as a EntityPlayer or throw an exception.
-     */
-    public static EntityPlayerMP getCommandSenderAsPlayer(ICommandSender sender) throws PlayerNotFoundException
-    {
-        if (sender instanceof EntityPlayerMP)
-        {
-            return (EntityPlayerMP)sender;
-        }
-        else
-        {
-            throw new PlayerNotFoundException("commands.generic.player.unspecified");
-        }
-    }
+      if (entity != null && p_184884_3_.isAssignableFrom(entity.getClass())) {
+         return (T)entity;
+      } else {
+         throw new EntityNotFoundException(p_184884_2_);
+      }
+   }
 
-    public static List<EntityPlayerMP> func_193513_a(MinecraftServer p_193513_0_, ICommandSender p_193513_1_, String p_193513_2_) throws CommandException
-    {
-        List<EntityPlayerMP> list = EntitySelector.func_193531_b(p_193513_1_, p_193513_2_);
-        return (List<EntityPlayerMP>)(list.isEmpty() ? Lists.newArrayList(func_193512_a(p_193513_0_, (EntityPlayerMP)null, p_193513_2_)) : list);
-    }
+   public static List<Entity> func_184890_c(MinecraftServer p_184890_0_, ICommandSender p_184890_1_, String p_184890_2_) throws EntityNotFoundException, CommandException {
+      return (List<Entity>)(EntitySelector.func_82378_b(p_184890_2_) ? EntitySelector.func_179656_b(p_184890_1_, p_184890_2_, Entity.class) : Lists.newArrayList(func_184885_b(p_184890_0_, p_184890_1_, p_184890_2_)));
+   }
 
-    public static EntityPlayerMP getPlayer(MinecraftServer server, ICommandSender sender, String target) throws PlayerNotFoundException, CommandException
-    {
-        return func_193512_a(server, EntitySelector.matchOnePlayer(sender, target), target);
-    }
+   public static String func_184886_d(MinecraftServer p_184886_0_, ICommandSender p_184886_1_, String p_184886_2_) throws PlayerNotFoundException, CommandException {
+      try {
+         return func_184888_a(p_184886_0_, p_184886_1_, p_184886_2_).func_70005_c_();
+      } catch (CommandException commandexception) {
+         if (EntitySelector.func_82378_b(p_184886_2_)) {
+            throw commandexception;
+         } else {
+            return p_184886_2_;
+         }
+      }
+   }
 
-    private static EntityPlayerMP func_193512_a(MinecraftServer p_193512_0_, @Nullable EntityPlayerMP p_193512_1_, String p_193512_2_) throws CommandException
-    {
-        if (p_193512_1_ == null)
-        {
-            try
-            {
-                p_193512_1_ = p_193512_0_.getPlayerList().getPlayerByUUID(UUID.fromString(p_193512_2_));
+   public static String func_184891_e(MinecraftServer p_184891_0_, ICommandSender p_184891_1_, String p_184891_2_) throws EntityNotFoundException, CommandException {
+      try {
+         return func_184888_a(p_184891_0_, p_184891_1_, p_184891_2_).func_70005_c_();
+      } catch (PlayerNotFoundException var6) {
+         try {
+            return func_184885_b(p_184891_0_, p_184891_1_, p_184891_2_).func_189512_bd();
+         } catch (EntityNotFoundException entitynotfoundexception) {
+            if (EntitySelector.func_82378_b(p_184891_2_)) {
+               throw entitynotfoundexception;
+            } else {
+               return p_184891_2_;
             }
-            catch (IllegalArgumentException var4)
-            {
-                ;
+         }
+      }
+   }
+
+   public static ITextComponent func_147178_a(ICommandSender p_147178_0_, String[] p_147178_1_, int p_147178_2_) throws CommandException, PlayerNotFoundException {
+      return func_147176_a(p_147178_0_, p_147178_1_, p_147178_2_, false);
+   }
+
+   public static ITextComponent func_147176_a(ICommandSender p_147176_0_, String[] p_147176_1_, int p_147176_2_, boolean p_147176_3_) throws PlayerNotFoundException, CommandException {
+      ITextComponent itextcomponent = new TextComponentString("");
+
+      for(int i = p_147176_2_; i < p_147176_1_.length; ++i) {
+         if (i > p_147176_2_) {
+            itextcomponent.func_150258_a(" ");
+         }
+
+         ITextComponent itextcomponent1 = new TextComponentString(p_147176_1_[i]);
+         if (p_147176_3_) {
+            ITextComponent itextcomponent2 = EntitySelector.func_150869_b(p_147176_0_, p_147176_1_[i]);
+            if (itextcomponent2 == null) {
+               if (EntitySelector.func_82378_b(p_147176_1_[i])) {
+                  throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[]{p_147176_1_[i]});
+               }
+            } else {
+               itextcomponent1 = itextcomponent2;
             }
-        }
+         }
 
-        if (p_193512_1_ == null)
-        {
-            p_193512_1_ = p_193512_0_.getPlayerList().getPlayerByUsername(p_193512_2_);
-        }
+         itextcomponent.func_150257_a(itextcomponent1);
+      }
 
-        if (p_193512_1_ == null)
-        {
-            throw new PlayerNotFoundException("commands.generic.player.notFound", new Object[] {p_193512_2_});
-        }
-        else
-        {
-            return p_193512_1_;
-        }
-    }
+      return itextcomponent;
+   }
 
-    public static Entity getEntity(MinecraftServer server, ICommandSender sender, String target) throws EntityNotFoundException, CommandException
-    {
-        return getEntity(server, sender, target, Entity.class);
-    }
+   public static String func_180529_a(String[] p_180529_0_, int p_180529_1_) {
+      StringBuilder stringbuilder = new StringBuilder();
 
-    public static <T extends Entity> T getEntity(MinecraftServer server, ICommandSender sender, String target, Class <? extends T > targetClass) throws EntityNotFoundException, CommandException
-    {
-        Entity entity = EntitySelector.matchOneEntity(sender, target, targetClass);
+      for(int i = p_180529_1_; i < p_180529_0_.length; ++i) {
+         if (i > p_180529_1_) {
+            stringbuilder.append(" ");
+         }
 
-        if (entity == null)
-        {
-            entity = server.getPlayerList().getPlayerByUsername(target);
-        }
+         String s = p_180529_0_[i];
+         stringbuilder.append(s);
+      }
 
-        if (entity == null)
-        {
-            try
-            {
-                UUID uuid = UUID.fromString(target);
-                entity = server.getEntityFromUuid(uuid);
+      return stringbuilder.toString();
+   }
 
-                if (entity == null)
-                {
-                    entity = server.getPlayerList().getPlayerByUUID(uuid);
-                }
-            }
-            catch (IllegalArgumentException var6)
-            {
-                if (target.split("-").length == 5)
-                {
-                    throw new EntityNotFoundException("commands.generic.entity.invalidUuid", new Object[] {target});
-                }
-            }
-        }
+   public static CommandBase.CoordinateArg func_175770_a(double p_175770_0_, String p_175770_2_, boolean p_175770_3_) throws NumberInvalidException {
+      return func_175767_a(p_175770_0_, p_175770_2_, -30000000, 30000000, p_175770_3_);
+   }
 
-        if (entity != null && targetClass.isAssignableFrom(entity.getClass()))
-        {
-            return (T)entity;
-        }
-        else
-        {
-            throw new EntityNotFoundException(target);
-        }
-    }
-
-    public static List<Entity> getEntityList(MinecraftServer server, ICommandSender sender, String target) throws EntityNotFoundException, CommandException
-    {
-        return (List<Entity>)(EntitySelector.hasArguments(target) ? EntitySelector.matchEntities(sender, target, Entity.class) : Lists.newArrayList(getEntity(server, sender, target)));
-    }
-
-    public static String getPlayerName(MinecraftServer server, ICommandSender sender, String target) throws PlayerNotFoundException, CommandException
-    {
-        try
-        {
-            return getPlayer(server, sender, target).getName();
-        }
-        catch (CommandException commandexception)
-        {
-            if (EntitySelector.hasArguments(target))
-            {
-                throw commandexception;
-            }
-            else
-            {
-                return target;
-            }
-        }
-    }
-
-    public static String getEntityName(MinecraftServer server, ICommandSender sender, String target) throws EntityNotFoundException, CommandException
-    {
-        try
-        {
-            return getPlayer(server, sender, target).getName();
-        }
-        catch (PlayerNotFoundException var6)
-        {
-            try
-            {
-                return getEntity(server, sender, target).getCachedUniqueIdString();
-            }
-            catch (EntityNotFoundException entitynotfoundexception)
-            {
-                if (EntitySelector.hasArguments(target))
-                {
-                    throw entitynotfoundexception;
-                }
-                else
-                {
-                    return target;
-                }
-            }
-        }
-    }
-
-    public static ITextComponent getChatComponentFromNthArg(ICommandSender sender, String[] args, int index) throws CommandException, PlayerNotFoundException
-    {
-        return getChatComponentFromNthArg(sender, args, index, false);
-    }
-
-    public static ITextComponent getChatComponentFromNthArg(ICommandSender sender, String[] args, int index, boolean p_147176_3_) throws PlayerNotFoundException, CommandException
-    {
-        ITextComponent itextcomponent = new TextComponentString("");
-
-        for (int i = index; i < args.length; ++i)
-        {
-            if (i > index)
-            {
-                itextcomponent.appendText(" ");
-            }
-
-            ITextComponent itextcomponent1 = new TextComponentString(args[i]);
-
-            if (p_147176_3_)
-            {
-                ITextComponent itextcomponent2 = EntitySelector.matchEntitiesToTextComponent(sender, args[i]);
-
-                if (itextcomponent2 == null)
-                {
-                    if (EntitySelector.hasArguments(args[i]))
-                    {
-                        throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[] {args[i]});
-                    }
-                }
-                else
-                {
-                    itextcomponent1 = itextcomponent2;
-                }
+   public static CommandBase.CoordinateArg func_175767_a(double p_175767_0_, String p_175767_2_, int p_175767_3_, int p_175767_4_, boolean p_175767_5_) throws NumberInvalidException {
+      boolean flag = p_175767_2_.startsWith("~");
+      if (flag && Double.isNaN(p_175767_0_)) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175767_0_});
+      } else {
+         double d0 = 0.0D;
+         if (!flag || p_175767_2_.length() > 1) {
+            boolean flag1 = p_175767_2_.contains(".");
+            if (flag) {
+               p_175767_2_ = p_175767_2_.substring(1);
             }
 
-            itextcomponent.appendSibling(itextcomponent1);
-        }
+            d0 += func_175765_c(p_175767_2_);
+            if (!flag1 && !flag && p_175767_5_) {
+               d0 += 0.5D;
+            }
+         }
 
-        return itextcomponent;
-    }
-
-    /**
-     * Builds a string starting at startPos
-     */
-    public static String buildString(String[] args, int startPos)
-    {
-        StringBuilder stringbuilder = new StringBuilder();
-
-        for (int i = startPos; i < args.length; ++i)
-        {
-            if (i > startPos)
-            {
-                stringbuilder.append(" ");
+         double d1 = d0 + (flag ? p_175767_0_ : 0.0D);
+         if (p_175767_3_ != 0 || p_175767_4_ != 0) {
+            if (d1 < (double)p_175767_3_) {
+               throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{String.format("%.2f", d1), p_175767_3_});
             }
 
-            String s = args[i];
-            stringbuilder.append(s);
-        }
+            if (d1 > (double)p_175767_4_) {
+               throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{String.format("%.2f", d1), p_175767_4_});
+            }
+         }
 
-        return stringbuilder.toString();
-    }
+         return new CommandBase.CoordinateArg(d1, d0, flag);
+      }
+   }
 
-    public static CommandBase.CoordinateArg parseCoordinate(double base, String selectorArg, boolean centerBlock) throws NumberInvalidException
-    {
-        return parseCoordinate(base, selectorArg, -30000000, 30000000, centerBlock);
-    }
+   public static double func_175761_b(double p_175761_0_, String p_175761_2_, boolean p_175761_3_) throws NumberInvalidException {
+      return func_175769_b(p_175761_0_, p_175761_2_, -30000000, 30000000, p_175761_3_);
+   }
 
-    public static CommandBase.CoordinateArg parseCoordinate(double base, String selectorArg, int min, int max, boolean centerBlock) throws NumberInvalidException
-    {
-        boolean flag = selectorArg.startsWith("~");
-
-        if (flag && Double.isNaN(base))
-        {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {base});
-        }
-        else
-        {
-            double d0 = 0.0D;
-
-            if (!flag || selectorArg.length() > 1)
-            {
-                boolean flag1 = selectorArg.contains(".");
-
-                if (flag)
-                {
-                    selectorArg = selectorArg.substring(1);
-                }
-
-                d0 += parseDouble(selectorArg);
-
-                if (!flag1 && !flag && centerBlock)
-                {
-                    d0 += 0.5D;
-                }
+   public static double func_175769_b(double p_175769_0_, String p_175769_2_, int p_175769_3_, int p_175769_4_, boolean p_175769_5_) throws NumberInvalidException {
+      boolean flag = p_175769_2_.startsWith("~");
+      if (flag && Double.isNaN(p_175769_0_)) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{p_175769_0_});
+      } else {
+         double d0 = flag ? p_175769_0_ : 0.0D;
+         if (!flag || p_175769_2_.length() > 1) {
+            boolean flag1 = p_175769_2_.contains(".");
+            if (flag) {
+               p_175769_2_ = p_175769_2_.substring(1);
             }
 
-            double d1 = d0 + (flag ? base : 0.0D);
+            d0 += func_175765_c(p_175769_2_);
+            if (!flag1 && !flag && p_175769_5_) {
+               d0 += 0.5D;
+            }
+         }
 
-            if (min != 0 || max != 0)
-            {
-                if (d1 < (double)min)
-                {
-                    throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {String.format("%.2f", d1), min});
-                }
-
-                if (d1 > (double)max)
-                {
-                    throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {String.format("%.2f", d1), max});
-                }
+         if (p_175769_3_ != 0 || p_175769_4_ != 0) {
+            if (d0 < (double)p_175769_3_) {
+               throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{String.format("%.2f", d0), p_175769_3_});
             }
 
-            return new CommandBase.CoordinateArg(d1, d0, flag);
-        }
-    }
+            if (d0 > (double)p_175769_4_) {
+               throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{String.format("%.2f", d0), p_175769_4_});
+            }
+         }
 
-    public static double parseDouble(double base, String input, boolean centerBlock) throws NumberInvalidException
-    {
-        return parseDouble(base, input, -30000000, 30000000, centerBlock);
-    }
+         return d0;
+      }
+   }
 
-    public static double parseDouble(double base, String input, int min, int max, boolean centerBlock) throws NumberInvalidException
-    {
-        boolean flag = input.startsWith("~");
+   public static Item func_147179_f(ICommandSender p_147179_0_, String p_147179_1_) throws NumberInvalidException {
+      ResourceLocation resourcelocation = new ResourceLocation(p_147179_1_);
+      Item item = Item.field_150901_e.func_82594_a(resourcelocation);
+      if (item == null) {
+         throw new NumberInvalidException("commands.give.item.notFound", new Object[]{resourcelocation});
+      } else {
+         return item;
+      }
+   }
 
-        if (flag && Double.isNaN(base))
-        {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[] {base});
-        }
-        else
-        {
-            double d0 = flag ? base : 0.0D;
+   public static Block func_147180_g(ICommandSender p_147180_0_, String p_147180_1_) throws NumberInvalidException {
+      ResourceLocation resourcelocation = new ResourceLocation(p_147180_1_);
+      if (!Block.field_149771_c.func_148741_d(resourcelocation)) {
+         throw new NumberInvalidException("commands.give.block.notFound", new Object[]{resourcelocation});
+      } else {
+         return Block.field_149771_c.func_82594_a(resourcelocation);
+      }
+   }
 
-            if (!flag || input.length() > 1)
-            {
-                boolean flag1 = input.contains(".");
+   public static IBlockState func_190794_a(Block p_190794_0_, String p_190794_1_) throws NumberInvalidException, InvalidBlockStateException {
+      try {
+         int i = Integer.parseInt(p_190794_1_);
+         if (i < 0) {
+            throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{i, Integer.valueOf(0)});
+         } else if (i > 15) {
+            throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{i, Integer.valueOf(15)});
+         } else {
+            return p_190794_0_.func_176203_a(Integer.parseInt(p_190794_1_));
+         }
+      } catch (RuntimeException var7) {
+         try {
+            Map<IProperty<?>, Comparable<?>> map = func_190795_c(p_190794_0_, p_190794_1_);
+            IBlockState iblockstate = p_190794_0_.func_176223_P();
 
-                if (flag)
-                {
-                    input = input.substring(1);
-                }
-
-                d0 += parseDouble(input);
-
-                if (!flag1 && !flag && centerBlock)
-                {
-                    d0 += 0.5D;
-                }
+            for(Entry<IProperty<?>, Comparable<?>> entry : map.entrySet()) {
+               iblockstate = func_190793_a(iblockstate, entry.getKey(), entry.getValue());
             }
 
-            if (min != 0 || max != 0)
-            {
-                if (d0 < (double)min)
-                {
-                    throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {String.format("%.2f", d0), min});
-                }
+            return iblockstate;
+         } catch (RuntimeException var6) {
+            throw new InvalidBlockStateException("commands.generic.blockstate.invalid", new Object[]{p_190794_1_, Block.field_149771_c.func_177774_c(p_190794_0_)});
+         }
+      }
+   }
 
-                if (d0 > (double)max)
-                {
-                    throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {String.format("%.2f", d0), max});
-                }
-            }
+   private static <T extends Comparable<T>> IBlockState func_190793_a(IBlockState p_190793_0_, IProperty<T> p_190793_1_, Comparable<?> p_190793_2_) {
+      return p_190793_0_.func_177226_a(p_190793_1_, p_190793_2_);
+   }
 
-            return d0;
-        }
-    }
-
-    /**
-     * Gets the Item specified by the given text string.  First checks the item registry, then tries by parsing the
-     * string as an integer ID (deprecated).  Warns the sender if we matched by parsing the ID.  Throws if the item
-     * wasn't found.  Returns the item if it was found.
-     */
-    public static Item getItemByText(ICommandSender sender, String id) throws NumberInvalidException
-    {
-        ResourceLocation resourcelocation = new ResourceLocation(id);
-        Item item = Item.REGISTRY.getObject(resourcelocation);
-
-        if (item == null)
-        {
-            throw new NumberInvalidException("commands.give.item.notFound", new Object[] {resourcelocation});
-        }
-        else
-        {
-            return item;
-        }
-    }
-
-    /**
-     * Gets the Block specified by the given text string.  First checks the block registry, then tries by parsing the
-     * string as an integer ID (deprecated).  Warns the sender if we matched by parsing the ID.  Throws if the block
-     * wasn't found.  Returns the block if it was found.
-     */
-    public static Block getBlockByText(ICommandSender sender, String id) throws NumberInvalidException
-    {
-        ResourceLocation resourcelocation = new ResourceLocation(id);
-
-        if (!Block.REGISTRY.containsKey(resourcelocation))
-        {
-            throw new NumberInvalidException("commands.give.block.notFound", new Object[] {resourcelocation});
-        }
-        else
-        {
-            return Block.REGISTRY.getObject(resourcelocation);
-        }
-    }
-
-    public static IBlockState func_190794_a(Block p_190794_0_, String p_190794_1_) throws NumberInvalidException, InvalidBlockStateException
-    {
-        try
-        {
-            int i = Integer.parseInt(p_190794_1_);
-
-            if (i < 0)
-            {
-                throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[] {i, Integer.valueOf(0)});
-            }
-            else if (i > 15)
-            {
-                throw new NumberInvalidException("commands.generic.num.tooBig", new Object[] {i, Integer.valueOf(15)});
-            }
-            else
-            {
-                return p_190794_0_.getStateFromMeta(Integer.parseInt(p_190794_1_));
-            }
-        }
-        catch (RuntimeException var7)
-        {
-            try
-            {
-                Map < IProperty<?>, Comparable<? >> map = func_190795_c(p_190794_0_, p_190794_1_);
-                IBlockState iblockstate = p_190794_0_.getDefaultState();
-
-                for (Entry < IProperty<?>, Comparable<? >> entry : map.entrySet())
-                {
-                    iblockstate = func_190793_a(iblockstate, entry.getKey(), entry.getValue());
-                }
-
-                return iblockstate;
-            }
-            catch (RuntimeException var6)
-            {
-                throw new InvalidBlockStateException("commands.generic.blockstate.invalid", new Object[] {p_190794_1_, Block.REGISTRY.getNameForObject(p_190794_0_)});
-            }
-        }
-    }
-
-    private static <T extends Comparable<T>> IBlockState func_190793_a(IBlockState p_190793_0_, IProperty<T> p_190793_1_, Comparable<?> p_190793_2_)
-    {
-        return p_190793_0_.withProperty(p_190793_1_, (T)p_190793_2_);
-    }
-
-    public static Predicate<IBlockState> func_190791_b(final Block p_190791_0_, String p_190791_1_) throws InvalidBlockStateException
-    {
-        if (!"*".equals(p_190791_1_) && !"-1".equals(p_190791_1_))
-        {
-            try
-            {
-                final int i = Integer.parseInt(p_190791_1_);
-                return new Predicate<IBlockState>()
-                {
-                    public boolean apply(@Nullable IBlockState p_apply_1_)
-                    {
-                        return i == p_apply_1_.getBlock().getMetaFromState(p_apply_1_);
-                    }
-                };
-            }
-            catch (RuntimeException var3)
-            {
-                final Map < IProperty<?>, Comparable<? >> map = func_190795_c(p_190791_0_, p_190791_1_);
-                return new Predicate<IBlockState>()
-                {
-                    public boolean apply(@Nullable IBlockState p_apply_1_)
-                    {
-                        if (p_apply_1_ != null && p_190791_0_ == p_apply_1_.getBlock())
-                        {
-                            for (Entry < IProperty<?>, Comparable<? >> entry : map.entrySet())
-                            {
-                                if (!p_apply_1_.getValue(entry.getKey()).equals(entry.getValue()))
-                                {
-                                    return false;
-                                }
-                            }
-
-                            return true;
+   public static Predicate<IBlockState> func_190791_b(final Block p_190791_0_, String p_190791_1_) throws InvalidBlockStateException {
+      if (!"*".equals(p_190791_1_) && !"-1".equals(p_190791_1_)) {
+         try {
+            final int i = Integer.parseInt(p_190791_1_);
+            return new Predicate<IBlockState>() {
+               public boolean apply(@Nullable IBlockState p_apply_1_) {
+                  return i == p_apply_1_.func_177230_c().func_176201_c(p_apply_1_);
+               }
+            };
+         } catch (RuntimeException var3) {
+            final Map<IProperty<?>, Comparable<?>> map = func_190795_c(p_190791_0_, p_190791_1_);
+            return new Predicate<IBlockState>() {
+               public boolean apply(@Nullable IBlockState p_apply_1_) {
+                  if (p_apply_1_ != null && p_190791_0_ == p_apply_1_.func_177230_c()) {
+                     for(Entry<IProperty<?>, Comparable<?>> entry : map.entrySet()) {
+                        if (!p_apply_1_.func_177229_b(entry.getKey()).equals(entry.getValue())) {
+                           return false;
                         }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                };
-            }
-        }
-        else
-        {
-            return Predicates.alwaysTrue();
-        }
-    }
+                     }
 
-    private static Map < IProperty<?>, Comparable<? >> func_190795_c(Block p_190795_0_, String p_190795_1_) throws InvalidBlockStateException
-    {
-        Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newHashMap();
+                     return true;
+                  } else {
+                     return false;
+                  }
+               }
+            };
+         }
+      } else {
+         return Predicates.alwaysTrue();
+      }
+   }
 
-        if ("default".equals(p_190795_1_))
-        {
-            return p_190795_0_.getDefaultState().getProperties();
-        }
-        else
-        {
-            BlockStateContainer blockstatecontainer = p_190795_0_.getBlockState();
-            Iterator iterator = field_190796_b.split(p_190795_1_).iterator();
+   private static Map<IProperty<?>, Comparable<?>> func_190795_c(Block p_190795_0_, String p_190795_1_) throws InvalidBlockStateException {
+      Map<IProperty<?>, Comparable<?>> map = Maps.<IProperty<?>, Comparable<?>>newHashMap();
+      if ("default".equals(p_190795_1_)) {
+         return p_190795_0_.func_176223_P().func_177228_b();
+      } else {
+         BlockStateContainer blockstatecontainer = p_190795_0_.func_176194_O();
+         Iterator iterator = field_190796_b.split(p_190795_1_).iterator();
 
-            while (true)
-            {
-                if (!iterator.hasNext())
-                {
-                    return map;
-                }
-
-                String s = (String)iterator.next();
-                Iterator<String> iterator1 = field_190797_c.split(s).iterator();
-
-                if (!iterator1.hasNext())
-                {
-                    break;
-                }
-
-                IProperty<?> iproperty = blockstatecontainer.getProperty(iterator1.next());
-
-                if (iproperty == null || !iterator1.hasNext())
-                {
-                    break;
-                }
-
-                Comparable<?> comparable = func_190792_a(iproperty, iterator1.next());
-
-                if (comparable == null)
-                {
-                    break;
-                }
-
-                map.put(iproperty, comparable);
+         while(true) {
+            if (!iterator.hasNext()) {
+               return map;
             }
 
-            throw new InvalidBlockStateException("commands.generic.blockstate.invalid", new Object[] {p_190795_1_, Block.REGISTRY.getNameForObject(p_190795_0_)});
-        }
-    }
-
-    @Nullable
-    private static <T extends Comparable<T>> T func_190792_a(IProperty<T> p_190792_0_, String p_190792_1_)
-    {
-        return (T)(p_190792_0_.parseValue(p_190792_1_).orNull());
-    }
-
-    /**
-     * Creates a linguistic series joining the input objects together.  Examples: 1) {} --> "",  2) {"Steve"} -->
-     * "Steve",  3) {"Steve", "Phil"} --> "Steve and Phil",  4) {"Steve", "Phil", "Mark"} --> "Steve, Phil and Mark"
-     */
-    public static String joinNiceString(Object[] elements)
-    {
-        StringBuilder stringbuilder = new StringBuilder();
-
-        for (int i = 0; i < elements.length; ++i)
-        {
-            String s = elements[i].toString();
-
-            if (i > 0)
-            {
-                if (i == elements.length - 1)
-                {
-                    stringbuilder.append(" and ");
-                }
-                else
-                {
-                    stringbuilder.append(", ");
-                }
+            String s = (String)iterator.next();
+            Iterator<String> iterator1 = field_190797_c.split(s).iterator();
+            if (!iterator1.hasNext()) {
+               break;
             }
 
-            stringbuilder.append(s);
-        }
-
-        return stringbuilder.toString();
-    }
-
-    public static ITextComponent join(List<ITextComponent> components)
-    {
-        ITextComponent itextcomponent = new TextComponentString("");
-
-        for (int i = 0; i < components.size(); ++i)
-        {
-            if (i > 0)
-            {
-                if (i == components.size() - 1)
-                {
-                    itextcomponent.appendText(" and ");
-                }
-                else if (i > 0)
-                {
-                    itextcomponent.appendText(", ");
-                }
+            IProperty<?> iproperty = blockstatecontainer.func_185920_a(iterator1.next());
+            if (iproperty == null || !iterator1.hasNext()) {
+               break;
             }
 
-            itextcomponent.appendSibling(components.get(i));
-        }
-
-        return itextcomponent;
-    }
-
-    /**
-     * Creates a linguistic series joining together the elements of the given collection.  Examples: 1) {} --> "",  2)
-     * {"Steve"} --> "Steve",  3) {"Steve", "Phil"} --> "Steve and Phil",  4) {"Steve", "Phil", "Mark"} --> "Steve, Phil
-     * and Mark"
-     */
-    public static String joinNiceStringFromCollection(Collection<String> strings)
-    {
-        return joinNiceString(strings.toArray(new String[strings.size()]));
-    }
-
-    public static List<String> getTabCompletionCoordinate(String[] inputArgs, int index, @Nullable BlockPos pos)
-    {
-        if (pos == null)
-        {
-            return Lists.newArrayList("~");
-        }
-        else
-        {
-            int i = inputArgs.length - 1;
-            String s;
-
-            if (i == index)
-            {
-                s = Integer.toString(pos.getX());
-            }
-            else if (i == index + 1)
-            {
-                s = Integer.toString(pos.getY());
-            }
-            else
-            {
-                if (i != index + 2)
-                {
-                    return Collections.<String>emptyList();
-                }
-
-                s = Integer.toString(pos.getZ());
+            Comparable<?> comparable = func_190792_a(iproperty, iterator1.next());
+            if (comparable == null) {
+               break;
             }
 
-            return Lists.newArrayList(s);
-        }
-    }
+            map.put(iproperty, comparable);
+         }
 
-    public static List<String> getTabCompletionCoordinateXZ(String[] inputArgs, int index, @Nullable BlockPos lookedPos)
-    {
-        if (lookedPos == null)
-        {
-            return Lists.newArrayList("~");
-        }
-        else
-        {
-            int i = inputArgs.length - 1;
-            String s;
+         throw new InvalidBlockStateException("commands.generic.blockstate.invalid", new Object[]{p_190795_1_, Block.field_149771_c.func_177774_c(p_190795_0_)});
+      }
+   }
 
-            if (i == index)
-            {
-                s = Integer.toString(lookedPos.getX());
+   @Nullable
+   private static <T extends Comparable<T>> T func_190792_a(IProperty<T> p_190792_0_, String p_190792_1_) {
+      return (T)(p_190792_0_.func_185929_b(p_190792_1_).orNull());
+   }
+
+   public static String func_71527_a(Object[] p_71527_0_) {
+      StringBuilder stringbuilder = new StringBuilder();
+
+      for(int i = 0; i < p_71527_0_.length; ++i) {
+         String s = p_71527_0_[i].toString();
+         if (i > 0) {
+            if (i == p_71527_0_.length - 1) {
+               stringbuilder.append(" and ");
+            } else {
+               stringbuilder.append(", ");
             }
-            else
-            {
-                if (i != index + 1)
-                {
-                    return Collections.<String>emptyList();
-                }
+         }
 
-                s = Integer.toString(lookedPos.getZ());
+         stringbuilder.append(s);
+      }
+
+      return stringbuilder.toString();
+   }
+
+   public static ITextComponent func_180530_a(List<ITextComponent> p_180530_0_) {
+      ITextComponent itextcomponent = new TextComponentString("");
+
+      for(int i = 0; i < p_180530_0_.size(); ++i) {
+         if (i > 0) {
+            if (i == p_180530_0_.size() - 1) {
+               itextcomponent.func_150258_a(" and ");
+            } else if (i > 0) {
+               itextcomponent.func_150258_a(", ");
+            }
+         }
+
+         itextcomponent.func_150257_a(p_180530_0_.get(i));
+      }
+
+      return itextcomponent;
+   }
+
+   public static String func_96333_a(Collection<String> p_96333_0_) {
+      return func_71527_a(p_96333_0_.toArray(new String[p_96333_0_.size()]));
+   }
+
+   public static List<String> func_175771_a(String[] p_175771_0_, int p_175771_1_, @Nullable BlockPos p_175771_2_) {
+      if (p_175771_2_ == null) {
+         return Lists.newArrayList("~");
+      } else {
+         int i = p_175771_0_.length - 1;
+         String s;
+         if (i == p_175771_1_) {
+            s = Integer.toString(p_175771_2_.func_177958_n());
+         } else if (i == p_175771_1_ + 1) {
+            s = Integer.toString(p_175771_2_.func_177956_o());
+         } else {
+            if (i != p_175771_1_ + 2) {
+               return Collections.<String>emptyList();
             }
 
-            return Lists.newArrayList(s);
-        }
-    }
+            s = Integer.toString(p_175771_2_.func_177952_p());
+         }
 
-    /**
-     * Returns true if the given substring is exactly equal to the start of the given string (case insensitive).
-     */
-    public static boolean doesStringStartWith(String original, String region)
-    {
-        return region.regionMatches(true, 0, original, 0, original.length());
-    }
+         return Lists.newArrayList(s);
+      }
+   }
 
-    public static List<String> getListOfStringsMatchingLastWord(String[] args, String... possibilities)
-    {
-        return getListOfStringsMatchingLastWord(args, Arrays.asList(possibilities));
-    }
-
-    public static List<String> getListOfStringsMatchingLastWord(String[] inputArgs, Collection<?> possibleCompletions)
-    {
-        String s = inputArgs[inputArgs.length - 1];
-        List<String> list = Lists.<String>newArrayList();
-
-        if (!possibleCompletions.isEmpty())
-        {
-            for (String s1 : Iterables.transform(possibleCompletions, Functions.toStringFunction()))
-            {
-                if (doesStringStartWith(s, s1))
-                {
-                    list.add(s1);
-                }
+   public static List<String> func_181043_b(String[] p_181043_0_, int p_181043_1_, @Nullable BlockPos p_181043_2_) {
+      if (p_181043_2_ == null) {
+         return Lists.newArrayList("~");
+      } else {
+         int i = p_181043_0_.length - 1;
+         String s;
+         if (i == p_181043_1_) {
+            s = Integer.toString(p_181043_2_.func_177958_n());
+         } else {
+            if (i != p_181043_1_ + 1) {
+               return Collections.<String>emptyList();
             }
 
-            if (list.isEmpty())
-            {
-                for (Object object : possibleCompletions)
-                {
-                    if (object instanceof ResourceLocation && doesStringStartWith(s, ((ResourceLocation)object).getResourcePath()))
-                    {
-                        list.add(String.valueOf(object));
-                    }
-                }
+            s = Integer.toString(p_181043_2_.func_177952_p());
+         }
+
+         return Lists.newArrayList(s);
+      }
+   }
+
+   public static boolean func_71523_a(String p_71523_0_, String p_71523_1_) {
+      return p_71523_1_.regionMatches(true, 0, p_71523_0_, 0, p_71523_0_.length());
+   }
+
+   public static List<String> func_71530_a(String[] p_71530_0_, String... p_71530_1_) {
+      return func_175762_a(p_71530_0_, Arrays.asList(p_71530_1_));
+   }
+
+   public static List<String> func_175762_a(String[] p_175762_0_, Collection<?> p_175762_1_) {
+      String s = p_175762_0_[p_175762_0_.length - 1];
+      List<String> list = Lists.<String>newArrayList();
+      if (!p_175762_1_.isEmpty()) {
+         for(String s1 : Iterables.transform(p_175762_1_, Functions.toStringFunction())) {
+            if (func_71523_a(s, s1)) {
+               list.add(s1);
             }
-        }
+         }
 
-        return list;
-    }
+         if (list.isEmpty()) {
+            for(Object object : p_175762_1_) {
+               if (object instanceof ResourceLocation && func_71523_a(s, ((ResourceLocation)object).func_110623_a())) {
+                  list.add(String.valueOf(object));
+               }
+            }
+         }
+      }
 
-    /**
-     * Return whether the specified command parameter index is a username parameter.
-     */
-    public boolean isUsernameIndex(String[] args, int index)
-    {
-        return false;
-    }
+      return list;
+   }
 
-    public static void notifyCommandListener(ICommandSender sender, ICommand command, String translationKey, Object... translationArgs)
-    {
-        notifyCommandListener(sender, command, 0, translationKey, translationArgs);
-    }
+   public boolean func_82358_a(String[] p_82358_1_, int p_82358_2_) {
+      return false;
+   }
 
-    public static void notifyCommandListener(ICommandSender sender, ICommand command, int flags, String translationKey, Object... translationArgs)
-    {
-        if (commandListener != null)
-        {
-            commandListener.notifyListener(sender, command, flags, translationKey, translationArgs);
-        }
-    }
+   public static void func_152373_a(ICommandSender p_152373_0_, ICommand p_152373_1_, String p_152373_2_, Object... p_152373_3_) {
+      func_152374_a(p_152373_0_, p_152373_1_, 0, p_152373_2_, p_152373_3_);
+   }
 
-    /**
-     * Sets the command listener responsable for notifying server operators when asked to by commands
-     */
-    public static void setCommandListener(ICommandListener listener)
-    {
-        commandListener = listener;
-    }
+   public static void func_152374_a(ICommandSender p_152374_0_, ICommand p_152374_1_, int p_152374_2_, String p_152374_3_, Object... p_152374_4_) {
+      if (field_71533_a != null) {
+         field_71533_a.func_152372_a(p_152374_0_, p_152374_1_, p_152374_2_, p_152374_3_, p_152374_4_);
+      }
 
-    public int compareTo(ICommand p_compareTo_1_)
-    {
-        return this.getCommandName().compareTo(p_compareTo_1_.getCommandName());
-    }
+   }
 
-    public static class CoordinateArg
-    {
-        private final double result;
-        private final double amount;
-        private final boolean isRelative;
+   public static void func_71529_a(ICommandListener p_71529_0_) {
+      field_71533_a = p_71529_0_;
+   }
 
-        protected CoordinateArg(double resultIn, double amountIn, boolean relative)
-        {
-            this.result = resultIn;
-            this.amount = amountIn;
-            this.isRelative = relative;
-        }
+   public int compareTo(ICommand p_compareTo_1_) {
+      return this.func_71517_b().compareTo(p_compareTo_1_.func_71517_b());
+   }
 
-        public double getResult()
-        {
-            return this.result;
-        }
+   public static class CoordinateArg {
+      private final double field_179633_a;
+      private final double field_179631_b;
+      private final boolean field_179632_c;
 
-        public double getAmount()
-        {
-            return this.amount;
-        }
+      protected CoordinateArg(double p_i46051_1_, double p_i46051_3_, boolean p_i46051_5_) {
+         this.field_179633_a = p_i46051_1_;
+         this.field_179631_b = p_i46051_3_;
+         this.field_179632_c = p_i46051_5_;
+      }
 
-        public boolean isRelative()
-        {
-            return this.isRelative;
-        }
-    }
+      public double func_179628_a() {
+         return this.field_179633_a;
+      }
+
+      public double func_179629_b() {
+         return this.field_179631_b;
+      }
+
+      public boolean func_179630_c() {
+         return this.field_179632_c;
+      }
+   }
 }

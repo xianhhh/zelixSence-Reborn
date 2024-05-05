@@ -25,511 +25,345 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntityItem extends Entity
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItem.class, DataSerializers.OPTIONAL_ITEM_STACK);
+public class EntityItem extends Entity {
+   private static final Logger field_145803_d = LogManager.getLogger();
+   private static final DataParameter<ItemStack> field_184533_c = EntityDataManager.<ItemStack>func_187226_a(EntityItem.class, DataSerializers.field_187196_f);
+   private int field_70292_b;
+   private int field_145804_b;
+   private int field_70291_e;
+   private String field_145801_f;
+   private String field_145802_g;
+   public float field_70290_d;
 
-    /**
-     * The age of this EntityItem (used to animate it up and down as well as expire it)
-     */
-    private int age;
-    private int delayBeforeCanPickup;
+   public EntityItem(World p_i1709_1_, double p_i1709_2_, double p_i1709_4_, double p_i1709_6_) {
+      super(p_i1709_1_);
+      this.field_70291_e = 5;
+      this.field_70290_d = (float)(Math.random() * 3.141592653589793D * 2.0D);
+      this.func_70105_a(0.25F, 0.25F);
+      this.func_70107_b(p_i1709_2_, p_i1709_4_, p_i1709_6_);
+      this.field_70177_z = (float)(Math.random() * 360.0D);
+      this.field_70159_w = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
+      this.field_70181_x = 0.20000000298023224D;
+      this.field_70179_y = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
+   }
 
-    /** The health of this EntityItem. (For example, damage for tools) */
-    private int health;
-    private String thrower;
-    private String owner;
+   public EntityItem(World p_i1710_1_, double p_i1710_2_, double p_i1710_4_, double p_i1710_6_, ItemStack p_i1710_8_) {
+      this(p_i1710_1_, p_i1710_2_, p_i1710_4_, p_i1710_6_);
+      this.func_92058_a(p_i1710_8_);
+   }
 
-    /** The EntityItem's random initial float height. */
-    public float hoverStart;
+   protected boolean func_70041_e_() {
+      return false;
+   }
 
-    public EntityItem(World worldIn, double x, double y, double z)
-    {
-        super(worldIn);
-        this.health = 5;
-        this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
-        this.setSize(0.25F, 0.25F);
-        this.setPosition(x, y, z);
-        this.rotationYaw = (float)(Math.random() * 360.0D);
-        this.motionX = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
-        this.motionY = 0.20000000298023224D;
-        this.motionZ = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
-    }
+   public EntityItem(World p_i1711_1_) {
+      super(p_i1711_1_);
+      this.field_70291_e = 5;
+      this.field_70290_d = (float)(Math.random() * 3.141592653589793D * 2.0D);
+      this.func_70105_a(0.25F, 0.25F);
+      this.func_92058_a(ItemStack.field_190927_a);
+   }
 
-    public EntityItem(World worldIn, double x, double y, double z, ItemStack stack)
-    {
-        this(worldIn, x, y, z);
-        this.setEntityItemStack(stack);
-    }
+   protected void func_70088_a() {
+      this.func_184212_Q().func_187214_a(field_184533_c, ItemStack.field_190927_a);
+   }
 
-    /**
-     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
-     * prevent them from trampling crops
-     */
-    protected boolean canTriggerWalking()
-    {
-        return false;
-    }
+   public void func_70071_h_() {
+      if (this.func_92059_d().func_190926_b()) {
+         this.func_70106_y();
+      } else {
+         super.func_70071_h_();
+         if (this.field_145804_b > 0 && this.field_145804_b != 32767) {
+            --this.field_145804_b;
+         }
 
-    public EntityItem(World worldIn)
-    {
-        super(worldIn);
-        this.health = 5;
-        this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
-        this.setSize(0.25F, 0.25F);
-        this.setEntityItemStack(ItemStack.field_190927_a);
-    }
+         this.field_70169_q = this.field_70165_t;
+         this.field_70167_r = this.field_70163_u;
+         this.field_70166_s = this.field_70161_v;
+         double d0 = this.field_70159_w;
+         double d1 = this.field_70181_x;
+         double d2 = this.field_70179_y;
+         if (!this.func_189652_ae()) {
+            this.field_70181_x -= 0.03999999910593033D;
+         }
 
-    protected void entityInit()
-    {
-        this.getDataManager().register(ITEM, ItemStack.field_190927_a);
-    }
+         if (this.field_70170_p.field_72995_K) {
+            this.field_70145_X = false;
+         } else {
+            this.field_70145_X = this.func_145771_j(this.field_70165_t, (this.func_174813_aQ().field_72338_b + this.func_174813_aQ().field_72337_e) / 2.0D, this.field_70161_v);
+         }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        if (this.getEntityItem().func_190926_b())
-        {
-            this.setDead();
-        }
-        else
-        {
-            super.onUpdate();
-
-            if (this.delayBeforeCanPickup > 0 && this.delayBeforeCanPickup != 32767)
-            {
-                --this.delayBeforeCanPickup;
+         this.func_70091_d(MoverType.SELF, this.field_70159_w, this.field_70181_x, this.field_70179_y);
+         boolean flag = (int)this.field_70169_q != (int)this.field_70165_t || (int)this.field_70167_r != (int)this.field_70163_u || (int)this.field_70166_s != (int)this.field_70161_v;
+         if (flag || this.field_70173_aa % 25 == 0) {
+            if (this.field_70170_p.func_180495_p(new BlockPos(this)).func_185904_a() == Material.field_151587_i) {
+               this.field_70181_x = 0.20000000298023224D;
+               this.field_70159_w = (double)((this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F);
+               this.field_70179_y = (double)((this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F);
+               this.func_184185_a(SoundEvents.field_187658_bx, 0.4F, 2.0F + this.field_70146_Z.nextFloat() * 0.4F);
             }
 
-            this.prevPosX = this.posX;
-            this.prevPosY = this.posY;
-            this.prevPosZ = this.posZ;
-            double d0 = this.motionX;
-            double d1 = this.motionY;
-            double d2 = this.motionZ;
-
-            if (!this.hasNoGravity())
-            {
-                this.motionY -= 0.03999999910593033D;
+            if (!this.field_70170_p.field_72995_K) {
+               this.func_85054_d();
             }
+         }
 
-            if (this.world.isRemote)
-            {
-                this.noClip = false;
+         float f = 0.98F;
+         if (this.field_70122_E) {
+            f = this.field_70170_p.func_180495_p(new BlockPos(MathHelper.func_76128_c(this.field_70165_t), MathHelper.func_76128_c(this.func_174813_aQ().field_72338_b) - 1, MathHelper.func_76128_c(this.field_70161_v))).func_177230_c().field_149765_K * 0.98F;
+         }
+
+         this.field_70159_w *= (double)f;
+         this.field_70181_x *= 0.9800000190734863D;
+         this.field_70179_y *= (double)f;
+         if (this.field_70122_E) {
+            this.field_70181_x *= -0.5D;
+         }
+
+         if (this.field_70292_b != -32768) {
+            ++this.field_70292_b;
+         }
+
+         this.func_70072_I();
+         if (!this.field_70170_p.field_72995_K) {
+            double d3 = this.field_70159_w - d0;
+            double d4 = this.field_70181_x - d1;
+            double d5 = this.field_70179_y - d2;
+            double d6 = d3 * d3 + d4 * d4 + d5 * d5;
+            if (d6 > 0.01D) {
+               this.field_70160_al = true;
             }
-            else
-            {
-                this.noClip = this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
+         }
+
+         if (!this.field_70170_p.field_72995_K && this.field_70292_b >= 6000) {
+            this.func_70106_y();
+         }
+
+      }
+   }
+
+   private void func_85054_d() {
+      for(EntityItem entityitem : this.field_70170_p.func_72872_a(EntityItem.class, this.func_174813_aQ().func_72314_b(0.5D, 0.0D, 0.5D))) {
+         this.func_70289_a(entityitem);
+      }
+
+   }
+
+   private boolean func_70289_a(EntityItem p_70289_1_) {
+      if (p_70289_1_ == this) {
+         return false;
+      } else if (p_70289_1_.func_70089_S() && this.func_70089_S()) {
+         ItemStack itemstack = this.func_92059_d();
+         ItemStack itemstack1 = p_70289_1_.func_92059_d();
+         if (this.field_145804_b != 32767 && p_70289_1_.field_145804_b != 32767) {
+            if (this.field_70292_b != -32768 && p_70289_1_.field_70292_b != -32768) {
+               if (itemstack1.func_77973_b() != itemstack.func_77973_b()) {
+                  return false;
+               } else if (itemstack1.func_77942_o() ^ itemstack.func_77942_o()) {
+                  return false;
+               } else if (itemstack1.func_77942_o() && !itemstack1.func_77978_p().equals(itemstack.func_77978_p())) {
+                  return false;
+               } else if (itemstack1.func_77973_b() == null) {
+                  return false;
+               } else if (itemstack1.func_77973_b().func_77614_k() && itemstack1.func_77960_j() != itemstack.func_77960_j()) {
+                  return false;
+               } else if (itemstack1.func_190916_E() < itemstack.func_190916_E()) {
+                  return p_70289_1_.func_70289_a(this);
+               } else if (itemstack1.func_190916_E() + itemstack.func_190916_E() > itemstack1.func_77976_d()) {
+                  return false;
+               } else {
+                  itemstack1.func_190917_f(itemstack.func_190916_E());
+                  p_70289_1_.field_145804_b = Math.max(p_70289_1_.field_145804_b, this.field_145804_b);
+                  p_70289_1_.field_70292_b = Math.min(p_70289_1_.field_70292_b, this.field_70292_b);
+                  p_70289_1_.func_92058_a(itemstack1);
+                  this.func_70106_y();
+                  return true;
+               }
+            } else {
+               return false;
             }
-
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-            boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
-
-            if (flag || this.ticksExisted % 25 == 0)
-            {
-                if (this.world.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA)
-                {
-                    this.motionY = 0.20000000298023224D;
-                    this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
-                    this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
-                    this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
-                }
-
-                if (!this.world.isRemote)
-                {
-                    this.searchForOtherItemsNearby();
-                }
-            }
-
-            float f = 0.98F;
-
-            if (this.onGround)
-            {
-                f = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.98F;
-            }
-
-            this.motionX *= (double)f;
-            this.motionY *= 0.9800000190734863D;
-            this.motionZ *= (double)f;
-
-            if (this.onGround)
-            {
-                this.motionY *= -0.5D;
-            }
-
-            if (this.age != -32768)
-            {
-                ++this.age;
-            }
-
-            this.handleWaterMovement();
-
-            if (!this.world.isRemote)
-            {
-                double d3 = this.motionX - d0;
-                double d4 = this.motionY - d1;
-                double d5 = this.motionZ - d2;
-                double d6 = d3 * d3 + d4 * d4 + d5 * d5;
-
-                if (d6 > 0.01D)
-                {
-                    this.isAirBorne = true;
-                }
-            }
-
-            if (!this.world.isRemote && this.age >= 6000)
-            {
-                this.setDead();
-            }
-        }
-    }
-
-    /**
-     * Looks for other itemstacks nearby and tries to stack them together
-     */
-    private void searchForOtherItemsNearby()
-    {
-        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().expand(0.5D, 0.0D, 0.5D)))
-        {
-            this.combineItems(entityitem);
-        }
-    }
-
-    /**
-     * Tries to merge this item with the item passed as the parameter. Returns true if successful. Either this item or
-     * the other item will  be removed from the world.
-     */
-    private boolean combineItems(EntityItem other)
-    {
-        if (other == this)
-        {
+         } else {
             return false;
-        }
-        else if (other.isEntityAlive() && this.isEntityAlive())
-        {
-            ItemStack itemstack = this.getEntityItem();
-            ItemStack itemstack1 = other.getEntityItem();
+         }
+      } else {
+         return false;
+      }
+   }
 
-            if (this.delayBeforeCanPickup != 32767 && other.delayBeforeCanPickup != 32767)
-            {
-                if (this.age != -32768 && other.age != -32768)
-                {
-                    if (itemstack1.getItem() != itemstack.getItem())
-                    {
-                        return false;
-                    }
-                    else if (itemstack1.hasTagCompound() ^ itemstack.hasTagCompound())
-                    {
-                        return false;
-                    }
-                    else if (itemstack1.hasTagCompound() && !itemstack1.getTagCompound().equals(itemstack.getTagCompound()))
-                    {
-                        return false;
-                    }
-                    else if (itemstack1.getItem() == null)
-                    {
-                        return false;
-                    }
-                    else if (itemstack1.getItem().getHasSubtypes() && itemstack1.getMetadata() != itemstack.getMetadata())
-                    {
-                        return false;
-                    }
-                    else if (itemstack1.func_190916_E() < itemstack.func_190916_E())
-                    {
-                        return other.combineItems(this);
-                    }
-                    else if (itemstack1.func_190916_E() + itemstack.func_190916_E() > itemstack1.getMaxStackSize())
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        itemstack1.func_190917_f(itemstack.func_190916_E());
-                        other.delayBeforeCanPickup = Math.max(other.delayBeforeCanPickup, this.delayBeforeCanPickup);
-                        other.age = Math.min(other.age, this.age);
-                        other.setEntityItemStack(itemstack1);
-                        this.setDead();
-                        return true;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public void func_70288_d() {
+      this.field_70292_b = 4800;
+   }
 
-    /**
-     * sets the age of the item so that it'll despawn one minute after it has been dropped (instead of five). Used when
-     * items are dropped from players in creative mode
-     */
-    public void setAgeToCreativeDespawnTime()
-    {
-        this.age = 4800;
-    }
+   public boolean func_70072_I() {
+      if (this.field_70170_p.func_72918_a(this.func_174813_aQ(), Material.field_151586_h, this)) {
+         if (!this.field_70171_ac && !this.field_70148_d) {
+            this.func_71061_d_();
+         }
 
-    /**
-     * Returns if this entity is in water and will end up adding the waters velocity to the entity
-     */
-    public boolean handleWaterMovement()
-    {
-        if (this.world.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.WATER, this))
-        {
-            if (!this.inWater && !this.firstUpdate)
-            {
-                this.resetHeight();
-            }
+         this.field_70171_ac = true;
+      } else {
+         this.field_70171_ac = false;
+      }
 
-            this.inWater = true;
-        }
-        else
-        {
-            this.inWater = false;
-        }
+      return this.field_70171_ac;
+   }
 
-        return this.inWater;
-    }
+   protected void func_70081_e(int p_70081_1_) {
+      this.func_70097_a(DamageSource.field_76372_a, (float)p_70081_1_);
+   }
 
-    /**
-     * Will deal the specified amount of fire damage to the entity if the entity isn't immune to fire damage.
-     */
-    protected void dealFireDamage(int amount)
-    {
-        this.attackEntityFrom(DamageSource.inFire, (float)amount);
-    }
+   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
+      if (this.func_180431_b(p_70097_1_)) {
+         return false;
+      } else if (!this.func_92059_d().func_190926_b() && this.func_92059_d().func_77973_b() == Items.field_151156_bN && p_70097_1_.func_94541_c()) {
+         return false;
+      } else {
+         this.func_70018_K();
+         this.field_70291_e = (int)((float)this.field_70291_e - p_70097_2_);
+         if (this.field_70291_e <= 0) {
+            this.func_70106_y();
+         }
 
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
-        if (this.isEntityInvulnerable(source))
-        {
-            return false;
-        }
-        else if (!this.getEntityItem().func_190926_b() && this.getEntityItem().getItem() == Items.NETHER_STAR && source.isExplosion())
-        {
-            return false;
-        }
-        else
-        {
-            this.setBeenAttacked();
-            this.health = (int)((float)this.health - amount);
+         return false;
+      }
+   }
 
-            if (this.health <= 0)
-            {
-                this.setDead();
+   public static void func_189742_a(DataFixer p_189742_0_) {
+      p_189742_0_.func_188258_a(FixTypes.ENTITY, new ItemStackData(EntityItem.class, new String[]{"Item"}));
+   }
+
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      p_70014_1_.func_74777_a("Health", (short)this.field_70291_e);
+      p_70014_1_.func_74777_a("Age", (short)this.field_70292_b);
+      p_70014_1_.func_74777_a("PickupDelay", (short)this.field_145804_b);
+      if (this.func_145800_j() != null) {
+         p_70014_1_.func_74778_a("Thrower", this.field_145801_f);
+      }
+
+      if (this.func_145798_i() != null) {
+         p_70014_1_.func_74778_a("Owner", this.field_145802_g);
+      }
+
+      if (!this.func_92059_d().func_190926_b()) {
+         p_70014_1_.func_74782_a("Item", this.func_92059_d().func_77955_b(new NBTTagCompound()));
+      }
+
+   }
+
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      this.field_70291_e = p_70037_1_.func_74765_d("Health");
+      this.field_70292_b = p_70037_1_.func_74765_d("Age");
+      if (p_70037_1_.func_74764_b("PickupDelay")) {
+         this.field_145804_b = p_70037_1_.func_74765_d("PickupDelay");
+      }
+
+      if (p_70037_1_.func_74764_b("Owner")) {
+         this.field_145802_g = p_70037_1_.func_74779_i("Owner");
+      }
+
+      if (p_70037_1_.func_74764_b("Thrower")) {
+         this.field_145801_f = p_70037_1_.func_74779_i("Thrower");
+      }
+
+      NBTTagCompound nbttagcompound = p_70037_1_.func_74775_l("Item");
+      this.func_92058_a(new ItemStack(nbttagcompound));
+      if (this.func_92059_d().func_190926_b()) {
+         this.func_70106_y();
+      }
+
+   }
+
+   public void func_70100_b_(EntityPlayer p_70100_1_) {
+      if (!this.field_70170_p.field_72995_K) {
+         ItemStack itemstack = this.func_92059_d();
+         Item item = itemstack.func_77973_b();
+         int i = itemstack.func_190916_E();
+         if (this.field_145804_b == 0 && (this.field_145802_g == null || 6000 - this.field_70292_b <= 200 || this.field_145802_g.equals(p_70100_1_.func_70005_c_())) && p_70100_1_.field_71071_by.func_70441_a(itemstack)) {
+            p_70100_1_.func_71001_a(this, i);
+            if (itemstack.func_190926_b()) {
+               this.func_70106_y();
+               itemstack.func_190920_e(i);
             }
 
-            return false;
-        }
-    }
+            p_70100_1_.func_71064_a(StatList.func_188056_d(item), i);
+         }
 
-    public static void registerFixesItem(DataFixer fixer)
-    {
-        fixer.registerWalker(FixTypes.ENTITY, new ItemStackData(EntityItem.class, new String[] {"Item"}));
-    }
+      }
+   }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        compound.setShort("Health", (short)this.health);
-        compound.setShort("Age", (short)this.age);
-        compound.setShort("PickupDelay", (short)this.delayBeforeCanPickup);
+   public String func_70005_c_() {
+      return this.func_145818_k_() ? this.func_95999_t() : I18n.func_74838_a("item." + this.func_92059_d().func_77977_a());
+   }
 
-        if (this.getThrower() != null)
-        {
-            compound.setString("Thrower", this.thrower);
-        }
+   public boolean func_70075_an() {
+      return false;
+   }
 
-        if (this.getOwner() != null)
-        {
-            compound.setString("Owner", this.owner);
-        }
+   @Nullable
+   public Entity func_184204_a(int p_184204_1_) {
+      Entity entity = super.func_184204_a(p_184204_1_);
+      if (!this.field_70170_p.field_72995_K && entity instanceof EntityItem) {
+         ((EntityItem)entity).func_85054_d();
+      }
 
-        if (!this.getEntityItem().func_190926_b())
-        {
-            compound.setTag("Item", this.getEntityItem().writeToNBT(new NBTTagCompound()));
-        }
-    }
+      return entity;
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        this.health = compound.getShort("Health");
-        this.age = compound.getShort("Age");
+   public ItemStack func_92059_d() {
+      return (ItemStack)this.func_184212_Q().func_187225_a(field_184533_c);
+   }
 
-        if (compound.hasKey("PickupDelay"))
-        {
-            this.delayBeforeCanPickup = compound.getShort("PickupDelay");
-        }
+   public void func_92058_a(ItemStack p_92058_1_) {
+      this.func_184212_Q().func_187227_b(field_184533_c, p_92058_1_);
+      this.func_184212_Q().func_187217_b(field_184533_c);
+   }
 
-        if (compound.hasKey("Owner"))
-        {
-            this.owner = compound.getString("Owner");
-        }
+   public String func_145798_i() {
+      return this.field_145802_g;
+   }
 
-        if (compound.hasKey("Thrower"))
-        {
-            this.thrower = compound.getString("Thrower");
-        }
+   public void func_145797_a(String p_145797_1_) {
+      this.field_145802_g = p_145797_1_;
+   }
 
-        NBTTagCompound nbttagcompound = compound.getCompoundTag("Item");
-        this.setEntityItemStack(new ItemStack(nbttagcompound));
+   public String func_145800_j() {
+      return this.field_145801_f;
+   }
 
-        if (this.getEntityItem().func_190926_b())
-        {
-            this.setDead();
-        }
-    }
+   public void func_145799_b(String p_145799_1_) {
+      this.field_145801_f = p_145799_1_;
+   }
 
-    /**
-     * Called by a player entity when they collide with an entity
-     */
-    public void onCollideWithPlayer(EntityPlayer entityIn)
-    {
-        if (!this.world.isRemote)
-        {
-            ItemStack itemstack = this.getEntityItem();
-            Item item = itemstack.getItem();
-            int i = itemstack.func_190916_E();
+   public int func_174872_o() {
+      return this.field_70292_b;
+   }
 
-            if (this.delayBeforeCanPickup == 0 && (this.owner == null || 6000 - this.age <= 200 || this.owner.equals(entityIn.getName())) && entityIn.inventory.addItemStackToInventory(itemstack))
-            {
-                entityIn.onItemPickup(this, i);
+   public void func_174869_p() {
+      this.field_145804_b = 10;
+   }
 
-                if (itemstack.func_190926_b())
-                {
-                    this.setDead();
-                    itemstack.func_190920_e(i);
-                }
+   public void func_174868_q() {
+      this.field_145804_b = 0;
+   }
 
-                entityIn.addStat(StatList.getObjectsPickedUpStats(item), i);
-            }
-        }
-    }
+   public void func_174871_r() {
+      this.field_145804_b = 32767;
+   }
 
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.hasCustomName() ? this.getCustomNameTag() : I18n.translateToLocal("item." + this.getEntityItem().getUnlocalizedName());
-    }
+   public void func_174867_a(int p_174867_1_) {
+      this.field_145804_b = p_174867_1_;
+   }
 
-    /**
-     * Returns true if it's possible to attack this entity with an item.
-     */
-    public boolean canBeAttackedWithItem()
-    {
-        return false;
-    }
+   public boolean func_174874_s() {
+      return this.field_145804_b > 0;
+   }
 
-    @Nullable
-    public Entity changeDimension(int dimensionIn)
-    {
-        Entity entity = super.changeDimension(dimensionIn);
+   public void func_174873_u() {
+      this.field_70292_b = -6000;
+   }
 
-        if (!this.world.isRemote && entity instanceof EntityItem)
-        {
-            ((EntityItem)entity).searchForOtherItemsNearby();
-        }
-
-        return entity;
-    }
-
-    /**
-     * Returns the ItemStack corresponding to the Entity (Note: if no item exists, will log an error but still return an
-     * ItemStack containing Block.stone)
-     */
-    public ItemStack getEntityItem()
-    {
-        return (ItemStack)this.getDataManager().get(ITEM);
-    }
-
-    /**
-     * Sets the ItemStack for this entity
-     */
-    public void setEntityItemStack(ItemStack stack)
-    {
-        this.getDataManager().set(ITEM, stack);
-        this.getDataManager().setDirty(ITEM);
-    }
-
-    public String getOwner()
-    {
-        return this.owner;
-    }
-
-    public void setOwner(String owner)
-    {
-        this.owner = owner;
-    }
-
-    public String getThrower()
-    {
-        return this.thrower;
-    }
-
-    public void setThrower(String thrower)
-    {
-        this.thrower = thrower;
-    }
-
-    public int getAge()
-    {
-        return this.age;
-    }
-
-    public void setDefaultPickupDelay()
-    {
-        this.delayBeforeCanPickup = 10;
-    }
-
-    public void setNoPickupDelay()
-    {
-        this.delayBeforeCanPickup = 0;
-    }
-
-    public void setInfinitePickupDelay()
-    {
-        this.delayBeforeCanPickup = 32767;
-    }
-
-    public void setPickupDelay(int ticks)
-    {
-        this.delayBeforeCanPickup = ticks;
-    }
-
-    public boolean cannotPickup()
-    {
-        return this.delayBeforeCanPickup > 0;
-    }
-
-    public void setNoDespawn()
-    {
-        this.age = -6000;
-    }
-
-    public void makeFakeItem()
-    {
-        this.setInfinitePickupDelay();
-        this.age = 5999;
-    }
+   public void func_174870_v() {
+      this.func_174871_r();
+      this.field_70292_b = 5999;
+   }
 }

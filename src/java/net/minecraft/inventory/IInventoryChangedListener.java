@@ -1,9 +1,5 @@
 package net.minecraft.inventory;
 
-public interface IInventoryChangedListener
-{
-    /**
-     * Called by InventoryBasic.onInventoryChanged() on a array that is never filled.
-     */
-    void onInventoryChanged(IInventory invBasic);
+public interface IInventoryChangedListener {
+   void func_76316_a(IInventory var1);
 }

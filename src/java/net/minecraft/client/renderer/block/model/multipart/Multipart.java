@@ -13,92 +13,72 @@ import java.util.Set;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.client.renderer.block.model.VariantList;
 
-public class Multipart
-{
-    private final List<Selector> selectors;
-    private BlockStateContainer stateContainer;
+public class Multipart {
+   private final List<Selector> field_188139_a;
+   private BlockStateContainer field_188140_b;
 
-    public Multipart(List<Selector> selectorsIn)
-    {
-        this.selectors = selectorsIn;
-    }
+   public Multipart(List<Selector> p_i46564_1_) {
+      this.field_188139_a = p_i46564_1_;
+   }
 
-    public List<Selector> getSelectors()
-    {
-        return this.selectors;
-    }
+   public List<Selector> func_188136_a() {
+      return this.field_188139_a;
+   }
 
-    public Set<VariantList> getVariants()
-    {
-        Set<VariantList> set = Sets.<VariantList>newHashSet();
+   public Set<VariantList> func_188137_b() {
+      Set<VariantList> set = Sets.<VariantList>newHashSet();
 
-        for (Selector selector : this.selectors)
-        {
-            set.add(selector.getVariantList());
-        }
+      for(Selector selector : this.field_188139_a) {
+         set.add(selector.func_188165_a());
+      }
 
-        return set;
-    }
+      return set;
+   }
 
-    public void setStateContainer(BlockStateContainer stateContainerIn)
-    {
-        this.stateContainer = stateContainerIn;
-    }
+   public void func_188138_a(BlockStateContainer p_188138_1_) {
+      this.field_188140_b = p_188138_1_;
+   }
 
-    public BlockStateContainer getStateContainer()
-    {
-        return this.stateContainer;
-    }
+   public BlockStateContainer func_188135_c() {
+      return this.field_188140_b;
+   }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (this == p_equals_1_)
-        {
-            return true;
-        }
-        else
-        {
-            if (p_equals_1_ instanceof Multipart)
-            {
-                Multipart multipart = (Multipart)p_equals_1_;
+   public boolean equals(Object p_equals_1_) {
+      if (this == p_equals_1_) {
+         return true;
+      } else {
+         if (p_equals_1_ instanceof Multipart) {
+            Multipart multipart = (Multipart)p_equals_1_;
+            if (this.field_188139_a.equals(multipart.field_188139_a)) {
+               if (this.field_188140_b == null) {
+                  return multipart.field_188140_b == null;
+               }
 
-                if (this.selectors.equals(multipart.selectors))
-                {
-                    if (this.stateContainer == null)
-                    {
-                        return multipart.stateContainer == null;
-                    }
-
-                    return this.stateContainer.equals(multipart.stateContainer);
-                }
+               return this.field_188140_b.equals(multipart.field_188140_b);
             }
+         }
 
-            return false;
-        }
-    }
+         return false;
+      }
+   }
 
-    public int hashCode()
-    {
-        return 31 * this.selectors.hashCode() + (this.stateContainer == null ? 0 : this.stateContainer.hashCode());
-    }
+   public int hashCode() {
+      return 31 * this.field_188139_a.hashCode() + (this.field_188140_b == null ? 0 : this.field_188140_b.hashCode());
+   }
 
-    public static class Deserializer implements JsonDeserializer<Multipart>
-    {
-        public Multipart deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
-        {
-            return new Multipart(this.getSelectors(p_deserialize_3_, p_deserialize_1_.getAsJsonArray()));
-        }
+   public static class Deserializer implements JsonDeserializer<Multipart> {
+      public Multipart deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+         return new Multipart(this.func_188133_a(p_deserialize_3_, p_deserialize_1_.getAsJsonArray()));
+      }
 
-        private List<Selector> getSelectors(JsonDeserializationContext context, JsonArray elements)
-        {
-            List<Selector> list = Lists.<Selector>newArrayList();
+      private List<Selector> func_188133_a(JsonDeserializationContext p_188133_1_, JsonArray p_188133_2_) {
+         List<Selector> list = Lists.<Selector>newArrayList();
 
-            for (JsonElement jsonelement : elements)
-            {
-                list.add((Selector)context.deserialize(jsonelement, Selector.class));
-            }
+         for(JsonElement jsonelement : p_188133_2_) {
+            list.add((Selector)p_188133_1_.deserialize(jsonelement, Selector.class));
+         }
 
-            return list;
-        }
-    }
+         return list;
+      }
+   }
 }

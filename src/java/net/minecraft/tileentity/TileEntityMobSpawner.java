@@ -16,107 +16,86 @@ import net.minecraft.util.datafix.IDataWalker;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TileEntityMobSpawner extends TileEntity implements ITickable
-{
-    private final MobSpawnerBaseLogic spawnerLogic = new MobSpawnerBaseLogic()
-    {
-        public void broadcastEvent(int id)
-        {
-            TileEntityMobSpawner.this.world.addBlockEvent(TileEntityMobSpawner.this.pos, Blocks.MOB_SPAWNER, id, 0);
-        }
-        public World getSpawnerWorld()
-        {
-            return TileEntityMobSpawner.this.world;
-        }
-        public BlockPos getSpawnerPosition()
-        {
-            return TileEntityMobSpawner.this.pos;
-        }
-        public void setNextSpawnData(WeightedSpawnerEntity p_184993_1_)
-        {
-            super.setNextSpawnData(p_184993_1_);
+public class TileEntityMobSpawner extends TileEntity implements ITickable {
+   private final MobSpawnerBaseLogic field_145882_a = new MobSpawnerBaseLogic() {
+      public void func_98267_a(int p_98267_1_) {
+         TileEntityMobSpawner.this.field_145850_b.func_175641_c(TileEntityMobSpawner.this.field_174879_c, Blocks.field_150474_ac, p_98267_1_, 0);
+      }
 
-            if (this.getSpawnerWorld() != null)
-            {
-                IBlockState iblockstate = this.getSpawnerWorld().getBlockState(this.getSpawnerPosition());
-                this.getSpawnerWorld().notifyBlockUpdate(TileEntityMobSpawner.this.pos, iblockstate, iblockstate, 4);
+      public World func_98271_a() {
+         return TileEntityMobSpawner.this.field_145850_b;
+      }
+
+      public BlockPos func_177221_b() {
+         return TileEntityMobSpawner.this.field_174879_c;
+      }
+
+      public void func_184993_a(WeightedSpawnerEntity p_184993_1_) {
+         super.func_184993_a(p_184993_1_);
+         if (this.func_98271_a() != null) {
+            IBlockState iblockstate = this.func_98271_a().func_180495_p(this.func_177221_b());
+            this.func_98271_a().func_184138_a(TileEntityMobSpawner.this.field_174879_c, iblockstate, iblockstate, 4);
+         }
+
+      }
+   };
+
+   public static void func_189684_a(DataFixer p_189684_0_) {
+      p_189684_0_.func_188258_a(FixTypes.BLOCK_ENTITY, new IDataWalker() {
+         public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_) {
+            if (TileEntity.func_190559_a(TileEntityMobSpawner.class).equals(new ResourceLocation(p_188266_2_.func_74779_i("id")))) {
+               if (p_188266_2_.func_150297_b("SpawnPotentials", 9)) {
+                  NBTTagList nbttaglist = p_188266_2_.func_150295_c("SpawnPotentials", 10);
+
+                  for(int i = 0; i < nbttaglist.func_74745_c(); ++i) {
+                     NBTTagCompound nbttagcompound = nbttaglist.func_150305_b(i);
+                     nbttagcompound.func_74782_a("Entity", p_188266_1_.func_188251_a(FixTypes.ENTITY, nbttagcompound.func_74775_l("Entity"), p_188266_3_));
+                  }
+               }
+
+               p_188266_2_.func_74782_a("SpawnData", p_188266_1_.func_188251_a(FixTypes.ENTITY, p_188266_2_.func_74775_l("SpawnData"), p_188266_3_));
             }
-        }
-    };
 
-    public static void registerFixesMobSpawner(DataFixer fixer)
-    {
-        fixer.registerWalker(FixTypes.BLOCK_ENTITY, new IDataWalker()
-        {
-            public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn)
-            {
-                if (TileEntity.func_190559_a(TileEntityMobSpawner.class).equals(new ResourceLocation(compound.getString("id"))))
-                {
-                    if (compound.hasKey("SpawnPotentials", 9))
-                    {
-                        NBTTagList nbttaglist = compound.getTagList("SpawnPotentials", 10);
+            return p_188266_2_;
+         }
+      });
+   }
 
-                        for (int i = 0; i < nbttaglist.tagCount(); ++i)
-                        {
-                            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-                            nbttagcompound.setTag("Entity", fixer.process(FixTypes.ENTITY, nbttagcompound.getCompoundTag("Entity"), versionIn));
-                        }
-                    }
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      this.field_145882_a.func_98270_a(p_145839_1_);
+   }
 
-                    compound.setTag("SpawnData", fixer.process(FixTypes.ENTITY, compound.getCompoundTag("SpawnData"), versionIn));
-                }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      this.field_145882_a.func_189530_b(p_189515_1_);
+      return p_189515_1_;
+   }
 
-                return compound;
-            }
-        });
-    }
+   public void func_73660_a() {
+      this.field_145882_a.func_98278_g();
+   }
 
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        this.spawnerLogic.readFromNBT(compound);
-    }
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      return new SPacketUpdateTileEntity(this.field_174879_c, 1, this.func_189517_E_());
+   }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        this.spawnerLogic.writeToNBT(compound);
-        return compound;
-    }
+   public NBTTagCompound func_189517_E_() {
+      NBTTagCompound nbttagcompound = this.func_189515_b(new NBTTagCompound());
+      nbttagcompound.func_82580_o("SpawnPotentials");
+      return nbttagcompound;
+   }
 
-    /**
-     * Like the old updateEntity(), except more generic.
-     */
-    public void update()
-    {
-        this.spawnerLogic.updateSpawner();
-    }
+   public boolean func_145842_c(int p_145842_1_, int p_145842_2_) {
+      return this.field_145882_a.func_98268_b(p_145842_1_) ? true : super.func_145842_c(p_145842_1_, p_145842_2_);
+   }
 
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        return new SPacketUpdateTileEntity(this.pos, 1, this.getUpdateTag());
-    }
+   public boolean func_183000_F() {
+      return true;
+   }
 
-    public NBTTagCompound getUpdateTag()
-    {
-        NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
-        nbttagcompound.removeTag("SpawnPotentials");
-        return nbttagcompound;
-    }
-
-    public boolean receiveClientEvent(int id, int type)
-    {
-        return this.spawnerLogic.setDelayToMin(id) ? true : super.receiveClientEvent(id, type);
-    }
-
-    public boolean onlyOpsCanSetNbt()
-    {
-        return true;
-    }
-
-    public MobSpawnerBaseLogic getSpawnerBaseLogic()
-    {
-        return this.spawnerLogic;
-    }
+   public MobSpawnerBaseLogic func_145881_a() {
+      return this.field_145882_a;
+   }
 }

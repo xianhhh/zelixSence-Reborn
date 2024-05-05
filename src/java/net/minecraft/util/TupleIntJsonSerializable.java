@@ -1,36 +1,22 @@
 package net.minecraft.util;
 
-public class TupleIntJsonSerializable
-{
-    private int integerValue;
-    private IJsonSerializable jsonSerializableValue;
+public class TupleIntJsonSerializable {
+   private int field_151192_a;
+   private IJsonSerializable field_151191_b;
 
-    /**
-     * Gets the integer value stored in this tuple.
-     */
-    public int getIntegerValue()
-    {
-        return this.integerValue;
-    }
+   public int func_151189_a() {
+      return this.field_151192_a;
+   }
 
-    /**
-     * Sets this tuple's integer value to the given value.
-     */
-    public void setIntegerValue(int integerValueIn)
-    {
-        this.integerValue = integerValueIn;
-    }
+   public void func_151188_a(int p_151188_1_) {
+      this.field_151192_a = p_151188_1_;
+   }
 
-    public <T extends IJsonSerializable> T getJsonSerializableValue()
-    {
-        return (T)this.jsonSerializableValue;
-    }
+   public <T extends IJsonSerializable> T func_151187_b() {
+      return (T)this.field_151191_b;
+   }
 
-    /**
-     * Sets this tuple's JsonSerializable value to the given value.
-     */
-    public void setJsonSerializableValue(IJsonSerializable jsonSerializableValueIn)
-    {
-        this.jsonSerializableValue = jsonSerializableValueIn;
-    }
+   public void func_151190_a(IJsonSerializable p_151190_1_) {
+      this.field_151191_b = p_151190_1_;
+   }
 }

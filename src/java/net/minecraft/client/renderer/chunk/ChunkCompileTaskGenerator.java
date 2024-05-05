@@ -6,149 +6,121 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.client.renderer.RegionRenderCacheBuilder;
 
-public class ChunkCompileTaskGenerator implements Comparable<ChunkCompileTaskGenerator>
-{
-    private final RenderChunk renderChunk;
-    private final ReentrantLock lock = new ReentrantLock();
-    private final List<Runnable> listFinishRunnables = Lists.<Runnable>newArrayList();
-    private final ChunkCompileTaskGenerator.Type type;
-    private final double distanceSq;
-    private RegionRenderCacheBuilder regionRenderCacheBuilder;
-    private CompiledChunk compiledChunk;
-    private ChunkCompileTaskGenerator.Status status = ChunkCompileTaskGenerator.Status.PENDING;
-    private boolean finished;
+public class ChunkCompileTaskGenerator implements Comparable<ChunkCompileTaskGenerator> {
+   private final RenderChunk field_178553_a;
+   private final ReentrantLock field_178551_b = new ReentrantLock();
+   private final List<Runnable> field_178552_c = Lists.<Runnable>newArrayList();
+   private final ChunkCompileTaskGenerator.Type field_178549_d;
+   private final double field_188229_e;
+   private RegionRenderCacheBuilder field_178550_e;
+   private CompiledChunk field_178547_f;
+   private ChunkCompileTaskGenerator.Status field_178548_g = ChunkCompileTaskGenerator.Status.PENDING;
+   private boolean field_178554_h;
 
-    public ChunkCompileTaskGenerator(RenderChunk p_i46560_1_, ChunkCompileTaskGenerator.Type p_i46560_2_, double p_i46560_3_)
-    {
-        this.renderChunk = p_i46560_1_;
-        this.type = p_i46560_2_;
-        this.distanceSq = p_i46560_3_;
-    }
+   public ChunkCompileTaskGenerator(RenderChunk p_i46560_1_, ChunkCompileTaskGenerator.Type p_i46560_2_, double p_i46560_3_) {
+      this.field_178553_a = p_i46560_1_;
+      this.field_178549_d = p_i46560_2_;
+      this.field_188229_e = p_i46560_3_;
+   }
 
-    public ChunkCompileTaskGenerator.Status getStatus()
-    {
-        return this.status;
-    }
+   public ChunkCompileTaskGenerator.Status func_178546_a() {
+      return this.field_178548_g;
+   }
 
-    public RenderChunk getRenderChunk()
-    {
-        return this.renderChunk;
-    }
+   public RenderChunk func_178536_b() {
+      return this.field_178553_a;
+   }
 
-    public CompiledChunk getCompiledChunk()
-    {
-        return this.compiledChunk;
-    }
+   public CompiledChunk func_178544_c() {
+      return this.field_178547_f;
+   }
 
-    public void setCompiledChunk(CompiledChunk compiledChunkIn)
-    {
-        this.compiledChunk = compiledChunkIn;
-    }
+   public void func_178543_a(CompiledChunk p_178543_1_) {
+      this.field_178547_f = p_178543_1_;
+   }
 
-    public RegionRenderCacheBuilder getRegionRenderCacheBuilder()
-    {
-        return this.regionRenderCacheBuilder;
-    }
+   public RegionRenderCacheBuilder func_178545_d() {
+      return this.field_178550_e;
+   }
 
-    public void setRegionRenderCacheBuilder(RegionRenderCacheBuilder regionRenderCacheBuilderIn)
-    {
-        this.regionRenderCacheBuilder = regionRenderCacheBuilderIn;
-    }
+   public void func_178541_a(RegionRenderCacheBuilder p_178541_1_) {
+      this.field_178550_e = p_178541_1_;
+   }
 
-    public void setStatus(ChunkCompileTaskGenerator.Status statusIn)
-    {
-        this.lock.lock();
+   public void func_178535_a(ChunkCompileTaskGenerator.Status p_178535_1_) {
+      this.field_178551_b.lock();
 
-        try
-        {
-            this.status = statusIn;
-        }
-        finally
-        {
-            this.lock.unlock();
-        }
-    }
+      try {
+         this.field_178548_g = p_178535_1_;
+      } finally {
+         this.field_178551_b.unlock();
+      }
 
-    public void finish()
-    {
-        this.lock.lock();
+   }
 
-        try
-        {
-            if (this.type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK && this.status != ChunkCompileTaskGenerator.Status.DONE)
-            {
-                this.renderChunk.setNeedsUpdate(false);
-            }
+   public void func_178542_e() {
+      this.field_178551_b.lock();
 
-            this.finished = true;
-            this.status = ChunkCompileTaskGenerator.Status.DONE;
+      try {
+         if (this.field_178549_d == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK && this.field_178548_g != ChunkCompileTaskGenerator.Status.DONE) {
+            this.field_178553_a.func_178575_a(false);
+         }
 
-            for (Runnable runnable : this.listFinishRunnables)
-            {
-                runnable.run();
-            }
-        }
-        finally
-        {
-            this.lock.unlock();
-        }
-    }
+         this.field_178554_h = true;
+         this.field_178548_g = ChunkCompileTaskGenerator.Status.DONE;
 
-    public void addFinishRunnable(Runnable runnable)
-    {
-        this.lock.lock();
+         for(Runnable runnable : this.field_178552_c) {
+            runnable.run();
+         }
+      } finally {
+         this.field_178551_b.unlock();
+      }
 
-        try
-        {
-            this.listFinishRunnables.add(runnable);
+   }
 
-            if (this.finished)
-            {
-                runnable.run();
-            }
-        }
-        finally
-        {
-            this.lock.unlock();
-        }
-    }
+   public void func_178539_a(Runnable p_178539_1_) {
+      this.field_178551_b.lock();
 
-    public ReentrantLock getLock()
-    {
-        return this.lock;
-    }
+      try {
+         this.field_178552_c.add(p_178539_1_);
+         if (this.field_178554_h) {
+            p_178539_1_.run();
+         }
+      } finally {
+         this.field_178551_b.unlock();
+      }
 
-    public ChunkCompileTaskGenerator.Type getType()
-    {
-        return this.type;
-    }
+   }
 
-    public boolean isFinished()
-    {
-        return this.finished;
-    }
+   public ReentrantLock func_178540_f() {
+      return this.field_178551_b;
+   }
 
-    public int compareTo(ChunkCompileTaskGenerator p_compareTo_1_)
-    {
-        return Doubles.compare(this.distanceSq, p_compareTo_1_.distanceSq);
-    }
+   public ChunkCompileTaskGenerator.Type func_178538_g() {
+      return this.field_178549_d;
+   }
 
-    public double getDistanceSq()
-    {
-        return this.distanceSq;
-    }
+   public boolean func_178537_h() {
+      return this.field_178554_h;
+   }
 
-    public static enum Status
-    {
-        PENDING,
-        COMPILING,
-        UPLOADING,
-        DONE;
-    }
+   public int compareTo(ChunkCompileTaskGenerator p_compareTo_1_) {
+      return Doubles.compare(this.field_188229_e, p_compareTo_1_.field_188229_e);
+   }
 
-    public static enum Type
-    {
-        REBUILD_CHUNK,
-        RESORT_TRANSPARENCY;
-    }
+   public double func_188228_i() {
+      return this.field_188229_e;
+   }
+
+   public static enum Status {
+      PENDING,
+      COMPILING,
+      UPLOADING,
+      DONE;
+   }
+
+   public static enum Type {
+      REBUILD_CHUNK,
+      RESORT_TRANSPARENCY;
+   }
 }

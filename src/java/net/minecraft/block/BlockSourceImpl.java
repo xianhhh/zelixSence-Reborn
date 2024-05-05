@@ -6,53 +6,40 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockSourceImpl implements IBlockSource
-{
-    private final World worldObj;
-    private final BlockPos pos;
+public class BlockSourceImpl implements IBlockSource {
+   private final World field_82627_a;
+   private final BlockPos field_179317_b;
 
-    public BlockSourceImpl(World worldIn, BlockPos posIn)
-    {
-        this.worldObj = worldIn;
-        this.pos = posIn;
-    }
+   public BlockSourceImpl(World p_i46023_1_, BlockPos p_i46023_2_) {
+      this.field_82627_a = p_i46023_1_;
+      this.field_179317_b = p_i46023_2_;
+   }
 
-    public World getWorld()
-    {
-        return this.worldObj;
-    }
+   public World func_82618_k() {
+      return this.field_82627_a;
+   }
 
-    public double getX()
-    {
-        return (double)this.pos.getX() + 0.5D;
-    }
+   public double func_82615_a() {
+      return (double)this.field_179317_b.func_177958_n() + 0.5D;
+   }
 
-    public double getY()
-    {
-        return (double)this.pos.getY() + 0.5D;
-    }
+   public double func_82617_b() {
+      return (double)this.field_179317_b.func_177956_o() + 0.5D;
+   }
 
-    public double getZ()
-    {
-        return (double)this.pos.getZ() + 0.5D;
-    }
+   public double func_82616_c() {
+      return (double)this.field_179317_b.func_177952_p() + 0.5D;
+   }
 
-    public BlockPos getBlockPos()
-    {
-        return this.pos;
-    }
+   public BlockPos func_180699_d() {
+      return this.field_179317_b;
+   }
 
-    /**
-     * Gets the block state of this position and returns it.
-     *  @return Block state in this position
-     */
-    public IBlockState getBlockState()
-    {
-        return this.worldObj.getBlockState(this.pos);
-    }
+   public IBlockState func_189992_e() {
+      return this.field_82627_a.func_180495_p(this.field_179317_b);
+   }
 
-    public <T extends TileEntity> T getBlockTileEntity()
-    {
-        return (T)this.worldObj.getTileEntity(this.pos);
-    }
+   public <T extends TileEntity> T func_150835_j() {
+      return (T)this.field_82627_a.func_175625_s(this.field_179317_b);
+   }
 }

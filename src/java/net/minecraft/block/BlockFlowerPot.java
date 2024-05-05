@@ -31,470 +31,332 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-public class BlockFlowerPot extends BlockContainer
-{
-    public static final PropertyInteger LEGACY_DATA = PropertyInteger.create("legacy_data", 0, 15);
-    public static final PropertyEnum<BlockFlowerPot.EnumFlowerType> CONTENTS = PropertyEnum.<BlockFlowerPot.EnumFlowerType>create("contents", BlockFlowerPot.EnumFlowerType.class);
-    protected static final AxisAlignedBB FLOWER_POT_AABB = new AxisAlignedBB(0.3125D, 0.0D, 0.3125D, 0.6875D, 0.375D, 0.6875D);
+public class BlockFlowerPot extends BlockContainer {
+   public static final PropertyInteger field_176444_a = PropertyInteger.func_177719_a("legacy_data", 0, 15);
+   public static final PropertyEnum<BlockFlowerPot.EnumFlowerType> field_176443_b = PropertyEnum.<BlockFlowerPot.EnumFlowerType>func_177709_a("contents", BlockFlowerPot.EnumFlowerType.class);
+   protected static final AxisAlignedBB field_185570_c = new AxisAlignedBB(0.3125D, 0.0D, 0.3125D, 0.6875D, 0.375D, 0.6875D);
 
-    public BlockFlowerPot()
-    {
-        super(Material.CIRCUITS);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(CONTENTS, BlockFlowerPot.EnumFlowerType.EMPTY).withProperty(LEGACY_DATA, Integer.valueOf(0)));
-    }
+   public BlockFlowerPot() {
+      super(Material.field_151594_q);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176443_b, BlockFlowerPot.EnumFlowerType.EMPTY).func_177226_a(field_176444_a, Integer.valueOf(0)));
+   }
 
-    /**
-     * Gets the localized name of this block. Used for the statistics page.
-     */
-    public String getLocalizedName()
-    {
-        return I18n.translateToLocal("item.flowerPot.name");
-    }
+   public String func_149732_F() {
+      return I18n.func_74838_a("item.flowerPot.name");
+   }
 
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return FLOWER_POT_AABB;
-    }
+   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
+      return field_185570_c;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    /**
-     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
-     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
-     */
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
+   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
+      return EnumBlockRenderType.MODEL;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
-    {
-        ItemStack itemstack = playerIn.getHeldItem(hand);
-        TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-
-        if (tileentityflowerpot == null)
-        {
-            return false;
-        }
-        else
-        {
-            ItemStack itemstack1 = tileentityflowerpot.getFlowerItemStack();
-
-            if (itemstack1.func_190926_b())
-            {
-                if (!this.func_190951_a(itemstack))
-                {
-                    return false;
-                }
-
-                tileentityflowerpot.func_190614_a(itemstack);
-                playerIn.addStat(StatList.FLOWER_POTTED);
-
-                if (!playerIn.capabilities.isCreativeMode)
-                {
-                    itemstack.func_190918_g(1);
-                }
-            }
-            else
-            {
-                if (itemstack.func_190926_b())
-                {
-                    playerIn.setHeldItem(hand, itemstack1);
-                }
-                else if (!playerIn.func_191521_c(itemstack1))
-                {
-                    playerIn.dropItem(itemstack1, false);
-                }
-
-                tileentityflowerpot.func_190614_a(ItemStack.field_190927_a);
+   public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_) {
+      ItemStack itemstack = p_180639_4_.func_184586_b(p_180639_5_);
+      TileEntityFlowerPot tileentityflowerpot = this.func_176442_d(p_180639_1_, p_180639_2_);
+      if (tileentityflowerpot == null) {
+         return false;
+      } else {
+         ItemStack itemstack1 = tileentityflowerpot.func_184403_b();
+         if (itemstack1.func_190926_b()) {
+            if (!this.func_190951_a(itemstack)) {
+               return false;
             }
 
-            tileentityflowerpot.markDirty();
-            worldIn.notifyBlockUpdate(pos, state, state, 3);
-            return true;
-        }
-    }
-
-    private boolean func_190951_a(ItemStack p_190951_1_)
-    {
-        Block block = Block.getBlockFromItem(p_190951_1_.getItem());
-
-        if (block != Blocks.YELLOW_FLOWER && block != Blocks.RED_FLOWER && block != Blocks.CACTUS && block != Blocks.BROWN_MUSHROOM && block != Blocks.RED_MUSHROOM && block != Blocks.SAPLING && block != Blocks.DEADBUSH)
-        {
-            int i = p_190951_1_.getMetadata();
-            return block == Blocks.TALLGRASS && i == BlockTallGrass.EnumType.FERN.getMeta();
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-
-        if (tileentityflowerpot != null)
-        {
-            ItemStack itemstack = tileentityflowerpot.getFlowerItemStack();
-
-            if (!itemstack.func_190926_b())
-            {
-                return itemstack;
+            tileentityflowerpot.func_190614_a(itemstack);
+            p_180639_4_.func_71029_a(StatList.field_188088_V);
+            if (!p_180639_4_.field_71075_bZ.field_75098_d) {
+               itemstack.func_190918_g(1);
             }
-        }
-
-        return new ItemStack(Items.FLOWER_POT);
-    }
-
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
-    {
-        return super.canPlaceBlockAt(worldIn, pos) && worldIn.getBlockState(pos.down()).isFullyOpaque();
-    }
-
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        if (!worldIn.getBlockState(pos.down()).isFullyOpaque())
-        {
-            this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockToAir(pos);
-        }
-    }
-
-    /**
-     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
-     */
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-
-        if (tileentityflowerpot != null && tileentityflowerpot.getFlowerPotItem() != null)
-        {
-            spawnAsEntity(worldIn, pos, new ItemStack(tileentityflowerpot.getFlowerPotItem(), 1, tileentityflowerpot.getFlowerPotData()));
-        }
-
-        super.breakBlock(worldIn, pos, state);
-    }
-
-    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
-    {
-        super.onBlockHarvested(worldIn, pos, state, player);
-
-        if (player.capabilities.isCreativeMode)
-        {
-            TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-
-            if (tileentityflowerpot != null)
-            {
-                tileentityflowerpot.func_190614_a(ItemStack.field_190927_a);
+         } else {
+            if (itemstack.func_190926_b()) {
+               p_180639_4_.func_184611_a(p_180639_5_, itemstack1);
+            } else if (!p_180639_4_.func_191521_c(itemstack1)) {
+               p_180639_4_.func_71019_a(itemstack1, false);
             }
-        }
-    }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Items.FLOWER_POT;
-    }
+            tileentityflowerpot.func_190614_a(ItemStack.field_190927_a);
+         }
 
-    @Nullable
-    private TileEntityFlowerPot getTileEntity(World worldIn, BlockPos pos)
-    {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
-        return tileentity instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)tileentity : null;
-    }
+         tileentityflowerpot.func_70296_d();
+         p_180639_1_.func_184138_a(p_180639_2_, p_180639_3_, p_180639_3_, 3);
+         return true;
+      }
+   }
 
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     */
-    public TileEntity createNewTileEntity(World worldIn, int meta)
-    {
-        Block block = null;
-        int i = 0;
+   private boolean func_190951_a(ItemStack p_190951_1_) {
+      Block block = Block.func_149634_a(p_190951_1_.func_77973_b());
+      if (block != Blocks.field_150327_N && block != Blocks.field_150328_O && block != Blocks.field_150434_aF && block != Blocks.field_150338_P && block != Blocks.field_150337_Q && block != Blocks.field_150345_g && block != Blocks.field_150330_I) {
+         int i = p_190951_1_.func_77960_j();
+         return block == Blocks.field_150329_H && i == BlockTallGrass.EnumType.FERN.func_177044_a();
+      } else {
+         return true;
+      }
+   }
 
-        switch (meta)
-        {
-            case 1:
-                block = Blocks.RED_FLOWER;
-                i = BlockFlower.EnumFlowerType.POPPY.getMeta();
-                break;
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      TileEntityFlowerPot tileentityflowerpot = this.func_176442_d(p_185473_1_, p_185473_2_);
+      if (tileentityflowerpot != null) {
+         ItemStack itemstack = tileentityflowerpot.func_184403_b();
+         if (!itemstack.func_190926_b()) {
+            return itemstack;
+         }
+      }
 
-            case 2:
-                block = Blocks.YELLOW_FLOWER;
-                break;
+      return new ItemStack(Items.field_151162_bE);
+   }
 
-            case 3:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.OAK.getMetadata();
-                break;
+   public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_) {
+      return super.func_176196_c(p_176196_1_, p_176196_2_) && p_176196_1_.func_180495_p(p_176196_2_.func_177977_b()).func_185896_q();
+   }
 
-            case 4:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.SPRUCE.getMetadata();
-                break;
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      if (!p_189540_2_.func_180495_p(p_189540_3_.func_177977_b()).func_185896_q()) {
+         this.func_176226_b(p_189540_2_, p_189540_3_, p_189540_1_, 0);
+         p_189540_2_.func_175698_g(p_189540_3_);
+      }
 
-            case 5:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.BIRCH.getMetadata();
-                break;
+   }
 
-            case 6:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.JUNGLE.getMetadata();
-                break;
+   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
+      TileEntityFlowerPot tileentityflowerpot = this.func_176442_d(p_180663_1_, p_180663_2_);
+      if (tileentityflowerpot != null && tileentityflowerpot.func_145965_a() != null) {
+         func_180635_a(p_180663_1_, p_180663_2_, new ItemStack(tileentityflowerpot.func_145965_a(), 1, tileentityflowerpot.func_145966_b()));
+      }
 
-            case 7:
-                block = Blocks.RED_MUSHROOM;
-                break;
+      super.func_180663_b(p_180663_1_, p_180663_2_, p_180663_3_);
+   }
 
-            case 8:
-                block = Blocks.BROWN_MUSHROOM;
-                break;
+   public void func_176208_a(World p_176208_1_, BlockPos p_176208_2_, IBlockState p_176208_3_, EntityPlayer p_176208_4_) {
+      super.func_176208_a(p_176208_1_, p_176208_2_, p_176208_3_, p_176208_4_);
+      if (p_176208_4_.field_71075_bZ.field_75098_d) {
+         TileEntityFlowerPot tileentityflowerpot = this.func_176442_d(p_176208_1_, p_176208_2_);
+         if (tileentityflowerpot != null) {
+            tileentityflowerpot.func_190614_a(ItemStack.field_190927_a);
+         }
+      }
 
-            case 9:
-                block = Blocks.CACTUS;
-                break;
+   }
 
-            case 10:
-                block = Blocks.DEADBUSH;
-                break;
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Items.field_151162_bE;
+   }
 
-            case 11:
-                block = Blocks.TALLGRASS;
-                i = BlockTallGrass.EnumType.FERN.getMeta();
-                break;
+   @Nullable
+   private TileEntityFlowerPot func_176442_d(World p_176442_1_, BlockPos p_176442_2_) {
+      TileEntity tileentity = p_176442_1_.func_175625_s(p_176442_2_);
+      return tileentity instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)tileentity : null;
+   }
 
-            case 12:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.ACACIA.getMetadata();
-                break;
+   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
+      Block block = null;
+      int i = 0;
+      switch(p_149915_2_) {
+      case 1:
+         block = Blocks.field_150328_O;
+         i = BlockFlower.EnumFlowerType.POPPY.func_176968_b();
+         break;
+      case 2:
+         block = Blocks.field_150327_N;
+         break;
+      case 3:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.OAK.func_176839_a();
+         break;
+      case 4:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.SPRUCE.func_176839_a();
+         break;
+      case 5:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.BIRCH.func_176839_a();
+         break;
+      case 6:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.JUNGLE.func_176839_a();
+         break;
+      case 7:
+         block = Blocks.field_150337_Q;
+         break;
+      case 8:
+         block = Blocks.field_150338_P;
+         break;
+      case 9:
+         block = Blocks.field_150434_aF;
+         break;
+      case 10:
+         block = Blocks.field_150330_I;
+         break;
+      case 11:
+         block = Blocks.field_150329_H;
+         i = BlockTallGrass.EnumType.FERN.func_177044_a();
+         break;
+      case 12:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.ACACIA.func_176839_a();
+         break;
+      case 13:
+         block = Blocks.field_150345_g;
+         i = BlockPlanks.EnumType.DARK_OAK.func_176839_a();
+      }
 
-            case 13:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.DARK_OAK.getMetadata();
-        }
+      return new TileEntityFlowerPot(Item.func_150898_a(block), i);
+   }
 
-        return new TileEntityFlowerPot(Item.getItemFromBlock(block), i);
-    }
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176443_b, field_176444_a});
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {CONTENTS, LEGACY_DATA});
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Integer)p_176201_1_.func_177229_b(field_176444_a)).intValue();
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(LEGACY_DATA)).intValue();
-    }
-
-    /**
-     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
-     * metadata, such as fence connections.
-     */
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        BlockFlowerPot.EnumFlowerType blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
-        TileEntity tileentity = worldIn instanceof ChunkCache ? ((ChunkCache)worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
-
-        if (tileentity instanceof TileEntityFlowerPot)
-        {
-            TileEntityFlowerPot tileentityflowerpot = (TileEntityFlowerPot)tileentity;
-            Item item = tileentityflowerpot.getFlowerPotItem();
-
-            if (item instanceof ItemBlock)
-            {
-                int i = tileentityflowerpot.getFlowerPotData();
-                Block block = Block.getBlockFromItem(item);
-
-                if (block == Blocks.SAPLING)
-                {
-                    switch (BlockPlanks.EnumType.byMetadata(i))
-                    {
-                        case OAK:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OAK_SAPLING;
-                            break;
-
-                        case SPRUCE:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.SPRUCE_SAPLING;
-                            break;
-
-                        case BIRCH:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BIRCH_SAPLING;
-                            break;
-
-                        case JUNGLE:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.JUNGLE_SAPLING;
-                            break;
-
-                        case ACACIA:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ACACIA_SAPLING;
-                            break;
-
-                        case DARK_OAK:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DARK_OAK_SAPLING;
-                            break;
-
-                        default:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
-                    }
-                }
-                else if (block == Blocks.TALLGRASS)
-                {
-                    switch (i)
-                    {
-                        case 0:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
-                            break;
-
-                        case 2:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.FERN;
-                            break;
-
-                        default:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
-                    }
-                }
-                else if (block == Blocks.YELLOW_FLOWER)
-                {
-                    blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DANDELION;
-                }
-                else if (block == Blocks.RED_FLOWER)
-                {
-                    switch (BlockFlower.EnumFlowerType.getType(BlockFlower.EnumFlowerColor.RED, i))
-                    {
-                        case POPPY:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.POPPY;
-                            break;
-
-                        case BLUE_ORCHID:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BLUE_ORCHID;
-                            break;
-
-                        case ALLIUM:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ALLIUM;
-                            break;
-
-                        case HOUSTONIA:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.HOUSTONIA;
-                            break;
-
-                        case RED_TULIP:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.RED_TULIP;
-                            break;
-
-                        case ORANGE_TULIP:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ORANGE_TULIP;
-                            break;
-
-                        case WHITE_TULIP:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.WHITE_TULIP;
-                            break;
-
-                        case PINK_TULIP:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.PINK_TULIP;
-                            break;
-
-                        case OXEYE_DAISY:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OXEYE_DAISY;
-                            break;
-
-                        default:
-                            blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
-                    }
-                }
-                else if (block == Blocks.RED_MUSHROOM)
-                {
-                    blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_RED;
-                }
-                else if (block == Blocks.BROWN_MUSHROOM)
-                {
-                    blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_BROWN;
-                }
-                else if (block == Blocks.DEADBUSH)
-                {
-                    blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
-                }
-                else if (block == Blocks.CACTUS)
-                {
-                    blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.CACTUS;
-                }
+   public IBlockState func_176221_a(IBlockState p_176221_1_, IBlockAccess p_176221_2_, BlockPos p_176221_3_) {
+      BlockFlowerPot.EnumFlowerType blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+      TileEntity tileentity = p_176221_2_ instanceof ChunkCache ? ((ChunkCache)p_176221_2_).func_190300_a(p_176221_3_, Chunk.EnumCreateEntityType.CHECK) : p_176221_2_.func_175625_s(p_176221_3_);
+      if (tileentity instanceof TileEntityFlowerPot) {
+         TileEntityFlowerPot tileentityflowerpot = (TileEntityFlowerPot)tileentity;
+         Item item = tileentityflowerpot.func_145965_a();
+         if (item instanceof ItemBlock) {
+            int i = tileentityflowerpot.func_145966_b();
+            Block block = Block.func_149634_a(item);
+            if (block == Blocks.field_150345_g) {
+               switch(BlockPlanks.EnumType.func_176837_a(i)) {
+               case OAK:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OAK_SAPLING;
+                  break;
+               case SPRUCE:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.SPRUCE_SAPLING;
+                  break;
+               case BIRCH:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BIRCH_SAPLING;
+                  break;
+               case JUNGLE:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.JUNGLE_SAPLING;
+                  break;
+               case ACACIA:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ACACIA_SAPLING;
+                  break;
+               case DARK_OAK:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DARK_OAK_SAPLING;
+                  break;
+               default:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+               }
+            } else if (block == Blocks.field_150329_H) {
+               switch(i) {
+               case 0:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
+                  break;
+               case 2:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.FERN;
+                  break;
+               default:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+               }
+            } else if (block == Blocks.field_150327_N) {
+               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DANDELION;
+            } else if (block == Blocks.field_150328_O) {
+               switch(BlockFlower.EnumFlowerType.func_176967_a(BlockFlower.EnumFlowerColor.RED, i)) {
+               case POPPY:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.POPPY;
+                  break;
+               case BLUE_ORCHID:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BLUE_ORCHID;
+                  break;
+               case ALLIUM:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ALLIUM;
+                  break;
+               case HOUSTONIA:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.HOUSTONIA;
+                  break;
+               case RED_TULIP:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.RED_TULIP;
+                  break;
+               case ORANGE_TULIP:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ORANGE_TULIP;
+                  break;
+               case WHITE_TULIP:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.WHITE_TULIP;
+                  break;
+               case PINK_TULIP:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.PINK_TULIP;
+                  break;
+               case OXEYE_DAISY:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OXEYE_DAISY;
+                  break;
+               default:
+                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+               }
+            } else if (block == Blocks.field_150337_Q) {
+               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_RED;
+            } else if (block == Blocks.field_150338_P) {
+               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_BROWN;
+            } else if (block == Blocks.field_150330_I) {
+               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
+            } else if (block == Blocks.field_150434_aF) {
+               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.CACTUS;
             }
-        }
+         }
+      }
 
-        return state.withProperty(CONTENTS, blockflowerpot$enumflowertype);
-    }
+      return p_176221_1_.func_177226_a(field_176443_b, blockflowerpot$enumflowertype);
+   }
 
-    public BlockRenderLayer getBlockLayer()
-    {
-        return BlockRenderLayer.CUTOUT;
-    }
+   public BlockRenderLayer func_180664_k() {
+      return BlockRenderLayer.CUTOUT;
+   }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        return BlockFaceShape.UNDEFINED;
-    }
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      return BlockFaceShape.UNDEFINED;
+   }
 
-    public static enum EnumFlowerType implements IStringSerializable
-    {
-        EMPTY("empty"),
-        POPPY("rose"),
-        BLUE_ORCHID("blue_orchid"),
-        ALLIUM("allium"),
-        HOUSTONIA("houstonia"),
-        RED_TULIP("red_tulip"),
-        ORANGE_TULIP("orange_tulip"),
-        WHITE_TULIP("white_tulip"),
-        PINK_TULIP("pink_tulip"),
-        OXEYE_DAISY("oxeye_daisy"),
-        DANDELION("dandelion"),
-        OAK_SAPLING("oak_sapling"),
-        SPRUCE_SAPLING("spruce_sapling"),
-        BIRCH_SAPLING("birch_sapling"),
-        JUNGLE_SAPLING("jungle_sapling"),
-        ACACIA_SAPLING("acacia_sapling"),
-        DARK_OAK_SAPLING("dark_oak_sapling"),
-        MUSHROOM_RED("mushroom_red"),
-        MUSHROOM_BROWN("mushroom_brown"),
-        DEAD_BUSH("dead_bush"),
-        FERN("fern"),
-        CACTUS("cactus");
+   public static enum EnumFlowerType implements IStringSerializable {
+      EMPTY("empty"),
+      POPPY("rose"),
+      BLUE_ORCHID("blue_orchid"),
+      ALLIUM("allium"),
+      HOUSTONIA("houstonia"),
+      RED_TULIP("red_tulip"),
+      ORANGE_TULIP("orange_tulip"),
+      WHITE_TULIP("white_tulip"),
+      PINK_TULIP("pink_tulip"),
+      OXEYE_DAISY("oxeye_daisy"),
+      DANDELION("dandelion"),
+      OAK_SAPLING("oak_sapling"),
+      SPRUCE_SAPLING("spruce_sapling"),
+      BIRCH_SAPLING("birch_sapling"),
+      JUNGLE_SAPLING("jungle_sapling"),
+      ACACIA_SAPLING("acacia_sapling"),
+      DARK_OAK_SAPLING("dark_oak_sapling"),
+      MUSHROOM_RED("mushroom_red"),
+      MUSHROOM_BROWN("mushroom_brown"),
+      DEAD_BUSH("dead_bush"),
+      FERN("fern"),
+      CACTUS("cactus");
 
-        private final String name;
+      private final String field_177006_w;
 
-        private EnumFlowerType(String name)
-        {
-            this.name = name;
-        }
+      private EnumFlowerType(String p_i45715_3_) {
+         this.field_177006_w = p_i45715_3_;
+      }
 
-        public String toString()
-        {
-            return this.name;
-        }
+      public String toString() {
+         return this.field_177006_w;
+      }
 
-        public String getName()
-        {
-            return this.name;
-        }
-    }
+      public String func_176610_l() {
+         return this.field_177006_w;
+      }
+   }
 }

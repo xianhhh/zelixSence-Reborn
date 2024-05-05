@@ -7,85 +7,64 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketSpawnGlobalEntity implements Packet<INetHandlerPlayClient>
-{
-    private int entityId;
-    private double x;
-    private double y;
-    private double z;
-    private int type;
+public class SPacketSpawnGlobalEntity implements Packet<INetHandlerPlayClient> {
+   private int field_149059_a;
+   private double field_149057_b;
+   private double field_149058_c;
+   private double field_149055_d;
+   private int field_149056_e;
 
-    public SPacketSpawnGlobalEntity()
-    {
-    }
+   public SPacketSpawnGlobalEntity() {
+   }
 
-    public SPacketSpawnGlobalEntity(Entity entityIn)
-    {
-        this.entityId = entityIn.getEntityId();
-        this.x = entityIn.posX;
-        this.y = entityIn.posY;
-        this.z = entityIn.posZ;
+   public SPacketSpawnGlobalEntity(Entity p_i46974_1_) {
+      this.field_149059_a = p_i46974_1_.func_145782_y();
+      this.field_149057_b = p_i46974_1_.field_70165_t;
+      this.field_149058_c = p_i46974_1_.field_70163_u;
+      this.field_149055_d = p_i46974_1_.field_70161_v;
+      if (p_i46974_1_ instanceof EntityLightningBolt) {
+         this.field_149056_e = 1;
+      }
 
-        if (entityIn instanceof EntityLightningBolt)
-        {
-            this.type = 1;
-        }
-    }
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityId = buf.readVarIntFromBuffer();
-        this.type = buf.readByte();
-        this.x = buf.readDouble();
-        this.y = buf.readDouble();
-        this.z = buf.readDouble();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149059_a = p_148837_1_.func_150792_a();
+      this.field_149056_e = p_148837_1_.readByte();
+      this.field_149057_b = p_148837_1_.readDouble();
+      this.field_149058_c = p_148837_1_.readDouble();
+      this.field_149055_d = p_148837_1_.readDouble();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityId);
-        buf.writeByte(this.type);
-        buf.writeDouble(this.x);
-        buf.writeDouble(this.y);
-        buf.writeDouble(this.z);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149059_a);
+      p_148840_1_.writeByte(this.field_149056_e);
+      p_148840_1_.writeDouble(this.field_149057_b);
+      p_148840_1_.writeDouble(this.field_149058_c);
+      p_148840_1_.writeDouble(this.field_149055_d);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleSpawnGlobalEntity(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147292_a(this);
+   }
 
-    public int getEntityId()
-    {
-        return this.entityId;
-    }
+   public int func_149052_c() {
+      return this.field_149059_a;
+   }
 
-    public double getX()
-    {
-        return this.x;
-    }
+   public double func_186888_b() {
+      return this.field_149057_b;
+   }
 
-    public double getY()
-    {
-        return this.y;
-    }
+   public double func_186889_c() {
+      return this.field_149058_c;
+   }
 
-    public double getZ()
-    {
-        return this.z;
-    }
+   public double func_186887_d() {
+      return this.field_149055_d;
+   }
 
-    public int getType()
-    {
-        return this.type;
-    }
+   public int func_149053_g() {
+      return this.field_149056_e;
+   }
 }

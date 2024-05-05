@@ -15,207 +15,165 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class TileEntityCommandBlock extends TileEntity
-{
-    private boolean powered;
-    private boolean auto;
-    private boolean conditionMet;
-    private boolean sendToClient;
-    private final CommandBlockBaseLogic commandBlockLogic = new CommandBlockBaseLogic()
-    {
-        public BlockPos getPosition()
-        {
-            return TileEntityCommandBlock.this.pos;
-        }
-        public Vec3d getPositionVector()
-        {
-            return new Vec3d((double)TileEntityCommandBlock.this.pos.getX() + 0.5D, (double)TileEntityCommandBlock.this.pos.getY() + 0.5D, (double)TileEntityCommandBlock.this.pos.getZ() + 0.5D);
-        }
-        public World getEntityWorld()
-        {
-            return TileEntityCommandBlock.this.getWorld();
-        }
-        public void setCommand(String command)
-        {
-            super.setCommand(command);
-            TileEntityCommandBlock.this.markDirty();
-        }
-        public void updateCommand()
-        {
-            IBlockState iblockstate = TileEntityCommandBlock.this.world.getBlockState(TileEntityCommandBlock.this.pos);
-            TileEntityCommandBlock.this.getWorld().notifyBlockUpdate(TileEntityCommandBlock.this.pos, iblockstate, iblockstate, 3);
-        }
-        public int getCommandBlockType()
-        {
-            return 0;
-        }
-        public void fillInInfo(ByteBuf buf)
-        {
-            buf.writeInt(TileEntityCommandBlock.this.pos.getX());
-            buf.writeInt(TileEntityCommandBlock.this.pos.getY());
-            buf.writeInt(TileEntityCommandBlock.this.pos.getZ());
-        }
-        public MinecraftServer getServer()
-        {
-            return TileEntityCommandBlock.this.world.getMinecraftServer();
-        }
-    };
+public class TileEntityCommandBlock extends TileEntity {
+   private boolean field_184259_a;
+   private boolean field_184260_f;
+   private boolean field_184261_g;
+   private boolean field_184262_h;
+   private final CommandBlockBaseLogic field_145994_a = new CommandBlockBaseLogic() {
+      public BlockPos func_180425_c() {
+         return TileEntityCommandBlock.this.field_174879_c;
+      }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-    {
-        super.writeToNBT(compound);
-        this.commandBlockLogic.writeToNBT(compound);
-        compound.setBoolean("powered", this.isPowered());
-        compound.setBoolean("conditionMet", this.isConditionMet());
-        compound.setBoolean("auto", this.isAuto());
-        return compound;
-    }
+      public Vec3d func_174791_d() {
+         return new Vec3d((double)TileEntityCommandBlock.this.field_174879_c.func_177958_n() + 0.5D, (double)TileEntityCommandBlock.this.field_174879_c.func_177956_o() + 0.5D, (double)TileEntityCommandBlock.this.field_174879_c.func_177952_p() + 0.5D);
+      }
 
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        this.commandBlockLogic.readDataFromNBT(compound);
-        this.powered = compound.getBoolean("powered");
-        this.conditionMet = compound.getBoolean("conditionMet");
-        this.setAuto(compound.getBoolean("auto"));
-    }
+      public World func_130014_f_() {
+         return TileEntityCommandBlock.this.func_145831_w();
+      }
 
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket()
-    {
-        if (this.isSendToClient())
-        {
-            this.setSendToClient(false);
-            NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
-            return new SPacketUpdateTileEntity(this.pos, 2, nbttagcompound);
-        }
-        else
-        {
-            return null;
-        }
-    }
+      public void func_145752_a(String p_145752_1_) {
+         super.func_145752_a(p_145752_1_);
+         TileEntityCommandBlock.this.func_70296_d();
+      }
 
-    public boolean onlyOpsCanSetNbt()
-    {
-        return true;
-    }
+      public void func_145756_e() {
+         IBlockState iblockstate = TileEntityCommandBlock.this.field_145850_b.func_180495_p(TileEntityCommandBlock.this.field_174879_c);
+         TileEntityCommandBlock.this.func_145831_w().func_184138_a(TileEntityCommandBlock.this.field_174879_c, iblockstate, iblockstate, 3);
+      }
 
-    public CommandBlockBaseLogic getCommandBlockLogic()
-    {
-        return this.commandBlockLogic;
-    }
+      public int func_145751_f() {
+         return 0;
+      }
 
-    public CommandResultStats getCommandResultStats()
-    {
-        return this.commandBlockLogic.getCommandResultStats();
-    }
+      public void func_145757_a(ByteBuf p_145757_1_) {
+         p_145757_1_.writeInt(TileEntityCommandBlock.this.field_174879_c.func_177958_n());
+         p_145757_1_.writeInt(TileEntityCommandBlock.this.field_174879_c.func_177956_o());
+         p_145757_1_.writeInt(TileEntityCommandBlock.this.field_174879_c.func_177952_p());
+      }
 
-    public void setPowered(boolean poweredIn)
-    {
-        this.powered = poweredIn;
-    }
+      public MinecraftServer func_184102_h() {
+         return TileEntityCommandBlock.this.field_145850_b.func_73046_m();
+      }
+   };
 
-    public boolean isPowered()
-    {
-        return this.powered;
-    }
+   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
+      super.func_189515_b(p_189515_1_);
+      this.field_145994_a.func_189510_a(p_189515_1_);
+      p_189515_1_.func_74757_a("powered", this.func_184255_d());
+      p_189515_1_.func_74757_a("conditionMet", this.func_184256_g());
+      p_189515_1_.func_74757_a("auto", this.func_184254_e());
+      return p_189515_1_;
+   }
 
-    public boolean isAuto()
-    {
-        return this.auto;
-    }
+   public void func_145839_a(NBTTagCompound p_145839_1_) {
+      super.func_145839_a(p_145839_1_);
+      this.field_145994_a.func_145759_b(p_145839_1_);
+      this.field_184259_a = p_145839_1_.func_74767_n("powered");
+      this.field_184261_g = p_145839_1_.func_74767_n("conditionMet");
+      this.func_184253_b(p_145839_1_.func_74767_n("auto"));
+   }
 
-    public void setAuto(boolean autoIn)
-    {
-        boolean flag = this.auto;
-        this.auto = autoIn;
+   @Nullable
+   public SPacketUpdateTileEntity func_189518_D_() {
+      if (this.func_184257_h()) {
+         this.func_184252_d(false);
+         NBTTagCompound nbttagcompound = this.func_189515_b(new NBTTagCompound());
+         return new SPacketUpdateTileEntity(this.field_174879_c, 2, nbttagcompound);
+      } else {
+         return null;
+      }
+   }
 
-        if (!flag && autoIn && !this.powered && this.world != null && this.getMode() != TileEntityCommandBlock.Mode.SEQUENCE)
-        {
-            Block block = this.getBlockType();
+   public boolean func_183000_F() {
+      return true;
+   }
 
-            if (block instanceof BlockCommandBlock)
-            {
-                this.setConditionMet();
-                this.world.scheduleUpdate(this.pos, block, block.tickRate(this.world));
-            }
-        }
-    }
+   public CommandBlockBaseLogic func_145993_a() {
+      return this.field_145994_a;
+   }
 
-    public boolean isConditionMet()
-    {
-        return this.conditionMet;
-    }
+   public CommandResultStats func_175124_c() {
+      return this.field_145994_a.func_175572_n();
+   }
 
-    public boolean setConditionMet()
-    {
-        this.conditionMet = true;
+   public void func_184250_a(boolean p_184250_1_) {
+      this.field_184259_a = p_184250_1_;
+   }
 
-        if (this.isConditional())
-        {
-            BlockPos blockpos = this.pos.offset(((EnumFacing)this.world.getBlockState(this.pos).getValue(BlockCommandBlock.FACING)).getOpposite());
+   public boolean func_184255_d() {
+      return this.field_184259_a;
+   }
 
-            if (this.world.getBlockState(blockpos).getBlock() instanceof BlockCommandBlock)
-            {
-                TileEntity tileentity = this.world.getTileEntity(blockpos);
-                this.conditionMet = tileentity instanceof TileEntityCommandBlock && ((TileEntityCommandBlock)tileentity).getCommandBlockLogic().getSuccessCount() > 0;
-            }
-            else
-            {
-                this.conditionMet = false;
-            }
-        }
+   public boolean func_184254_e() {
+      return this.field_184260_f;
+   }
 
-        return this.conditionMet;
-    }
+   public void func_184253_b(boolean p_184253_1_) {
+      boolean flag = this.field_184260_f;
+      this.field_184260_f = p_184253_1_;
+      if (!flag && p_184253_1_ && !this.field_184259_a && this.field_145850_b != null && this.func_184251_i() != TileEntityCommandBlock.Mode.SEQUENCE) {
+         Block block = this.func_145838_q();
+         if (block instanceof BlockCommandBlock) {
+            this.func_184249_c();
+            this.field_145850_b.func_175684_a(this.field_174879_c, block, block.func_149738_a(this.field_145850_b));
+         }
+      }
 
-    public boolean isSendToClient()
-    {
-        return this.sendToClient;
-    }
+   }
 
-    public void setSendToClient(boolean p_184252_1_)
-    {
-        this.sendToClient = p_184252_1_;
-    }
+   public boolean func_184256_g() {
+      return this.field_184261_g;
+   }
 
-    public TileEntityCommandBlock.Mode getMode()
-    {
-        Block block = this.getBlockType();
+   public boolean func_184249_c() {
+      this.field_184261_g = true;
+      if (this.func_184258_j()) {
+         BlockPos blockpos = this.field_174879_c.func_177972_a(((EnumFacing)this.field_145850_b.func_180495_p(this.field_174879_c).func_177229_b(BlockCommandBlock.field_185564_a)).func_176734_d());
+         if (this.field_145850_b.func_180495_p(blockpos).func_177230_c() instanceof BlockCommandBlock) {
+            TileEntity tileentity = this.field_145850_b.func_175625_s(blockpos);
+            this.field_184261_g = tileentity instanceof TileEntityCommandBlock && ((TileEntityCommandBlock)tileentity).func_145993_a().func_145760_g() > 0;
+         } else {
+            this.field_184261_g = false;
+         }
+      }
 
-        if (block == Blocks.COMMAND_BLOCK)
-        {
-            return TileEntityCommandBlock.Mode.REDSTONE;
-        }
-        else if (block == Blocks.REPEATING_COMMAND_BLOCK)
-        {
-            return TileEntityCommandBlock.Mode.AUTO;
-        }
-        else
-        {
-            return block == Blocks.CHAIN_COMMAND_BLOCK ? TileEntityCommandBlock.Mode.SEQUENCE : TileEntityCommandBlock.Mode.REDSTONE;
-        }
-    }
+      return this.field_184261_g;
+   }
 
-    public boolean isConditional()
-    {
-        IBlockState iblockstate = this.world.getBlockState(this.getPos());
-        return iblockstate.getBlock() instanceof BlockCommandBlock ? ((Boolean)iblockstate.getValue(BlockCommandBlock.CONDITIONAL)).booleanValue() : false;
-    }
+   public boolean func_184257_h() {
+      return this.field_184262_h;
+   }
 
-    /**
-     * validates a tile entity
-     */
-    public void validate()
-    {
-        this.blockType = null;
-        super.validate();
-    }
+   public void func_184252_d(boolean p_184252_1_) {
+      this.field_184262_h = p_184252_1_;
+   }
 
-    public static enum Mode
-    {
-        SEQUENCE,
-        AUTO,
-        REDSTONE;
-    }
+   public TileEntityCommandBlock.Mode func_184251_i() {
+      Block block = this.func_145838_q();
+      if (block == Blocks.field_150483_bI) {
+         return TileEntityCommandBlock.Mode.REDSTONE;
+      } else if (block == Blocks.field_185776_dc) {
+         return TileEntityCommandBlock.Mode.AUTO;
+      } else {
+         return block == Blocks.field_185777_dd ? TileEntityCommandBlock.Mode.SEQUENCE : TileEntityCommandBlock.Mode.REDSTONE;
+      }
+   }
+
+   public boolean func_184258_j() {
+      IBlockState iblockstate = this.field_145850_b.func_180495_p(this.func_174877_v());
+      return iblockstate.func_177230_c() instanceof BlockCommandBlock ? ((Boolean)iblockstate.func_177229_b(BlockCommandBlock.field_185565_b)).booleanValue() : false;
+   }
+
+   public void func_145829_t() {
+      this.field_145854_h = null;
+      super.func_145829_t();
+   }
+
+   public static enum Mode {
+      SEQUENCE,
+      AUTO,
+      REDSTONE;
+   }
 }

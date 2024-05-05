@@ -12,545 +12,367 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 
-public class GuiCreateWorld extends GuiScreen
-{
-    private final GuiScreen parentScreen;
-    private GuiTextField worldNameField;
-    private GuiTextField worldSeedField;
-    private String saveDirName;
-    private String gameMode = "survival";
+public class GuiCreateWorld extends GuiScreen {
+   private final GuiScreen field_146332_f;
+   private GuiTextField field_146333_g;
+   private GuiTextField field_146335_h;
+   private String field_146336_i;
+   private String field_146342_r = "survival";
+   private String field_175300_s;
+   private boolean field_146341_s = true;
+   private boolean field_146340_t;
+   private boolean field_146339_u;
+   private boolean field_146338_v;
+   private boolean field_146337_w;
+   private boolean field_146345_x;
+   private boolean field_146344_y;
+   private GuiButton field_146343_z;
+   private GuiButton field_146324_A;
+   private GuiButton field_146325_B;
+   private GuiButton field_146326_C;
+   private GuiButton field_146320_D;
+   private GuiButton field_146321_E;
+   private GuiButton field_146322_F;
+   private String field_146323_G;
+   private String field_146328_H;
+   private String field_146329_I;
+   private String field_146330_J;
+   private int field_146331_K;
+   public String field_146334_a = "";
+   private static final String[] field_146327_L = new String[]{"CON", "COM", "PRN", "AUX", "CLOCK$", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
 
-    /**
-     * Used to save away the game mode when the current "debug" world type is chosen (forcing it to spectator mode)
-     */
-    private String savedGameMode;
-    private boolean generateStructuresEnabled = true;
+   public GuiCreateWorld(GuiScreen p_i46320_1_) {
+      this.field_146332_f = p_i46320_1_;
+      this.field_146329_I = "";
+      this.field_146330_J = I18n.func_135052_a("selectWorld.newWorld");
+   }
 
-    /** If cheats are allowed */
-    private boolean allowCheats;
+   public void func_73876_c() {
+      this.field_146333_g.func_146178_a();
+      this.field_146335_h.func_146178_a();
+   }
 
-    /**
-     * User explicitly clicked "Allow Cheats" at some point
-     * Prevents value changes due to changing game mode
-     */
-    private boolean allowCheatsWasSetByUser;
-    private boolean bonusChestEnabled;
+   public void func_73866_w_() {
+      Keyboard.enableRepeatEvents(true);
+      this.field_146292_n.clear();
+      this.field_146292_n.add(new GuiButton(0, this.field_146294_l / 2 - 155, this.field_146295_m - 28, 150, 20, I18n.func_135052_a("selectWorld.create")));
+      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 + 5, this.field_146295_m - 28, 150, 20, I18n.func_135052_a("gui.cancel")));
+      this.field_146343_z = this.func_189646_b(new GuiButton(2, this.field_146294_l / 2 - 75, 115, 150, 20, I18n.func_135052_a("selectWorld.gameMode")));
+      this.field_146324_A = this.func_189646_b(new GuiButton(3, this.field_146294_l / 2 - 75, 187, 150, 20, I18n.func_135052_a("selectWorld.moreWorldOptions")));
+      this.field_146325_B = this.func_189646_b(new GuiButton(4, this.field_146294_l / 2 - 155, 100, 150, 20, I18n.func_135052_a("selectWorld.mapFeatures")));
+      this.field_146325_B.field_146125_m = false;
+      this.field_146326_C = this.func_189646_b(new GuiButton(7, this.field_146294_l / 2 + 5, 151, 150, 20, I18n.func_135052_a("selectWorld.bonusItems")));
+      this.field_146326_C.field_146125_m = false;
+      this.field_146320_D = this.func_189646_b(new GuiButton(5, this.field_146294_l / 2 + 5, 100, 150, 20, I18n.func_135052_a("selectWorld.mapType")));
+      this.field_146320_D.field_146125_m = false;
+      this.field_146321_E = this.func_189646_b(new GuiButton(6, this.field_146294_l / 2 - 155, 151, 150, 20, I18n.func_135052_a("selectWorld.allowCommands")));
+      this.field_146321_E.field_146125_m = false;
+      this.field_146322_F = this.func_189646_b(new GuiButton(8, this.field_146294_l / 2 + 5, 120, 150, 20, I18n.func_135052_a("selectWorld.customizeType")));
+      this.field_146322_F.field_146125_m = false;
+      this.field_146333_g = new GuiTextField(9, this.field_146289_q, this.field_146294_l / 2 - 100, 60, 200, 20);
+      this.field_146333_g.func_146195_b(true);
+      this.field_146333_g.func_146180_a(this.field_146330_J);
+      this.field_146335_h = new GuiTextField(10, this.field_146289_q, this.field_146294_l / 2 - 100, 60, 200, 20);
+      this.field_146335_h.func_146180_a(this.field_146329_I);
+      this.func_146316_a(this.field_146344_y);
+      this.func_146314_g();
+      this.func_146319_h();
+   }
 
-    /** Set to true when "hardcore" is the currently-selected gamemode */
-    private boolean hardCoreMode;
-    private boolean alreadyGenerated;
-    private boolean inMoreWorldOptionsDisplay;
-    private GuiButton btnGameMode;
-    private GuiButton btnMoreOptions;
-    private GuiButton btnMapFeatures;
-    private GuiButton btnBonusItems;
-    private GuiButton btnMapType;
-    private GuiButton btnAllowCommands;
-    private GuiButton btnCustomizeType;
-    private String gameModeDesc1;
-    private String gameModeDesc2;
-    private String worldSeed;
-    private String worldName;
-    private int selectedIndex;
-    public String chunkProviderSettingsJson = "";
+   private void func_146314_g() {
+      this.field_146336_i = this.field_146333_g.func_146179_b().trim();
 
-    /** These filenames are known to be restricted on one or more OS's. */
-    private static final String[] DISALLOWED_FILENAMES = new String[] {"CON", "COM", "PRN", "AUX", "CLOCK$", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
+      for(char c0 : ChatAllowedCharacters.field_71567_b) {
+         this.field_146336_i = this.field_146336_i.replace(c0, '_');
+      }
 
-    public GuiCreateWorld(GuiScreen p_i46320_1_)
-    {
-        this.parentScreen = p_i46320_1_;
-        this.worldSeed = "";
-        this.worldName = I18n.format("selectWorld.newWorld");
-    }
+      if (StringUtils.isEmpty(this.field_146336_i)) {
+         this.field_146336_i = "World";
+      }
 
-    /**
-     * Called from the main game loop to update the screen.
-     */
-    public void updateScreen()
-    {
-        this.worldNameField.updateCursorCounter();
-        this.worldSeedField.updateCursorCounter();
-    }
+      this.field_146336_i = func_146317_a(this.field_146297_k.func_71359_d(), this.field_146336_i);
+   }
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        Keyboard.enableRepeatEvents(true);
-        this.buttonList.clear();
-        this.buttonList.add(new GuiButton(0, this.width / 2 - 155, this.height - 28, 150, 20, I18n.format("selectWorld.create")));
-        this.buttonList.add(new GuiButton(1, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.cancel")));
-        this.btnGameMode = this.addButton(new GuiButton(2, this.width / 2 - 75, 115, 150, 20, I18n.format("selectWorld.gameMode")));
-        this.btnMoreOptions = this.addButton(new GuiButton(3, this.width / 2 - 75, 187, 150, 20, I18n.format("selectWorld.moreWorldOptions")));
-        this.btnMapFeatures = this.addButton(new GuiButton(4, this.width / 2 - 155, 100, 150, 20, I18n.format("selectWorld.mapFeatures")));
-        this.btnMapFeatures.visible = false;
-        this.btnBonusItems = this.addButton(new GuiButton(7, this.width / 2 + 5, 151, 150, 20, I18n.format("selectWorld.bonusItems")));
-        this.btnBonusItems.visible = false;
-        this.btnMapType = this.addButton(new GuiButton(5, this.width / 2 + 5, 100, 150, 20, I18n.format("selectWorld.mapType")));
-        this.btnMapType.visible = false;
-        this.btnAllowCommands = this.addButton(new GuiButton(6, this.width / 2 - 155, 151, 150, 20, I18n.format("selectWorld.allowCommands")));
-        this.btnAllowCommands.visible = false;
-        this.btnCustomizeType = this.addButton(new GuiButton(8, this.width / 2 + 5, 120, 150, 20, I18n.format("selectWorld.customizeType")));
-        this.btnCustomizeType.visible = false;
-        this.worldNameField = new GuiTextField(9, this.fontRendererObj, this.width / 2 - 100, 60, 200, 20);
-        this.worldNameField.setFocused(true);
-        this.worldNameField.setText(this.worldName);
-        this.worldSeedField = new GuiTextField(10, this.fontRendererObj, this.width / 2 - 100, 60, 200, 20);
-        this.worldSeedField.setText(this.worldSeed);
-        this.showMoreWorldOptions(this.inMoreWorldOptionsDisplay);
-        this.calcSaveDirName();
-        this.updateDisplayState();
-    }
+   private void func_146319_h() {
+      this.field_146343_z.field_146126_j = I18n.func_135052_a("selectWorld.gameMode") + ": " + I18n.func_135052_a("selectWorld.gameMode." + this.field_146342_r);
+      this.field_146323_G = I18n.func_135052_a("selectWorld.gameMode." + this.field_146342_r + ".line1");
+      this.field_146328_H = I18n.func_135052_a("selectWorld.gameMode." + this.field_146342_r + ".line2");
+      this.field_146325_B.field_146126_j = I18n.func_135052_a("selectWorld.mapFeatures") + " ";
+      if (this.field_146341_s) {
+         this.field_146325_B.field_146126_j = this.field_146325_B.field_146126_j + I18n.func_135052_a("options.on");
+      } else {
+         this.field_146325_B.field_146126_j = this.field_146325_B.field_146126_j + I18n.func_135052_a("options.off");
+      }
 
-    /**
-     * Determine a save-directory name from the world name
-     */
-    private void calcSaveDirName()
-    {
-        this.saveDirName = this.worldNameField.getText().trim();
+      this.field_146326_C.field_146126_j = I18n.func_135052_a("selectWorld.bonusItems") + " ";
+      if (this.field_146338_v && !this.field_146337_w) {
+         this.field_146326_C.field_146126_j = this.field_146326_C.field_146126_j + I18n.func_135052_a("options.on");
+      } else {
+         this.field_146326_C.field_146126_j = this.field_146326_C.field_146126_j + I18n.func_135052_a("options.off");
+      }
 
-        for (char c0 : ChatAllowedCharacters.ILLEGAL_FILE_CHARACTERS)
-        {
-            this.saveDirName = this.saveDirName.replace(c0, '_');
-        }
+      this.field_146320_D.field_146126_j = I18n.func_135052_a("selectWorld.mapType") + " " + I18n.func_135052_a(WorldType.field_77139_a[this.field_146331_K].func_77128_b());
+      this.field_146321_E.field_146126_j = I18n.func_135052_a("selectWorld.allowCommands") + " ";
+      if (this.field_146340_t && !this.field_146337_w) {
+         this.field_146321_E.field_146126_j = this.field_146321_E.field_146126_j + I18n.func_135052_a("options.on");
+      } else {
+         this.field_146321_E.field_146126_j = this.field_146321_E.field_146126_j + I18n.func_135052_a("options.off");
+      }
 
-        if (StringUtils.isEmpty(this.saveDirName))
-        {
-            this.saveDirName = "World";
-        }
+   }
 
-        this.saveDirName = getUncollidingSaveDirName(this.mc.getSaveLoader(), this.saveDirName);
-    }
+   public static String func_146317_a(ISaveFormat p_146317_0_, String p_146317_1_) {
+      p_146317_1_ = p_146317_1_.replaceAll("[\\./\"]", "_");
 
-    /**
-     * Sets displayed GUI elements according to the current settings state
-     */
-    private void updateDisplayState()
-    {
-        this.btnGameMode.displayString = I18n.format("selectWorld.gameMode") + ": " + I18n.format("selectWorld.gameMode." + this.gameMode);
-        this.gameModeDesc1 = I18n.format("selectWorld.gameMode." + this.gameMode + ".line1");
-        this.gameModeDesc2 = I18n.format("selectWorld.gameMode." + this.gameMode + ".line2");
-        this.btnMapFeatures.displayString = I18n.format("selectWorld.mapFeatures") + " ";
+      for(String s : field_146327_L) {
+         if (p_146317_1_.equalsIgnoreCase(s)) {
+            p_146317_1_ = "_" + p_146317_1_ + "_";
+         }
+      }
 
-        if (this.generateStructuresEnabled)
-        {
-            this.btnMapFeatures.displayString = this.btnMapFeatures.displayString + I18n.format("options.on");
-        }
-        else
-        {
-            this.btnMapFeatures.displayString = this.btnMapFeatures.displayString + I18n.format("options.off");
-        }
+      while(p_146317_0_.func_75803_c(p_146317_1_) != null) {
+         p_146317_1_ = p_146317_1_ + "-";
+      }
 
-        this.btnBonusItems.displayString = I18n.format("selectWorld.bonusItems") + " ";
+      return p_146317_1_;
+   }
 
-        if (this.bonusChestEnabled && !this.hardCoreMode)
-        {
-            this.btnBonusItems.displayString = this.btnBonusItems.displayString + I18n.format("options.on");
-        }
-        else
-        {
-            this.btnBonusItems.displayString = this.btnBonusItems.displayString + I18n.format("options.off");
-        }
+   public void func_146281_b() {
+      Keyboard.enableRepeatEvents(false);
+   }
 
-        this.btnMapType.displayString = I18n.format("selectWorld.mapType") + " " + I18n.format(WorldType.WORLD_TYPES[this.selectedIndex].getTranslateName());
-        this.btnAllowCommands.displayString = I18n.format("selectWorld.allowCommands") + " ";
-
-        if (this.allowCheats && !this.hardCoreMode)
-        {
-            this.btnAllowCommands.displayString = this.btnAllowCommands.displayString + I18n.format("options.on");
-        }
-        else
-        {
-            this.btnAllowCommands.displayString = this.btnAllowCommands.displayString + I18n.format("options.off");
-        }
-    }
-
-    /**
-     * Ensures that a proposed directory name doesn't collide with existing names.
-     * Returns the name, possibly modified to avoid collisions.
-     */
-    public static String getUncollidingSaveDirName(ISaveFormat saveLoader, String name)
-    {
-        name = name.replaceAll("[\\./\"]", "_");
-
-        for (String s : DISALLOWED_FILENAMES)
-        {
-            if (name.equalsIgnoreCase(s))
-            {
-                name = "_" + name + "_";
-            }
-        }
-
-        while (saveLoader.getWorldInfo(name) != null)
-        {
-            name = name + "-";
-        }
-
-        return name;
-    }
-
-    /**
-     * Called when the screen is unloaded. Used to disable keyboard repeat events
-     */
-    public void onGuiClosed()
-    {
-        Keyboard.enableRepeatEvents(false);
-    }
-
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.enabled)
-        {
-            if (button.id == 1)
-            {
-                this.mc.displayGuiScreen(this.parentScreen);
-            }
-            else if (button.id == 0)
-            {
-                this.mc.displayGuiScreen((GuiScreen)null);
-
-                if (this.alreadyGenerated)
-                {
-                    return;
-                }
-
-                this.alreadyGenerated = true;
-                long i = (new Random()).nextLong();
-                String s = this.worldSeedField.getText();
-
-                if (!StringUtils.isEmpty(s))
-                {
-                    try
-                    {
-                        long j = Long.parseLong(s);
-
-                        if (j != 0L)
-                        {
-                            i = j;
-                        }
-                    }
-                    catch (NumberFormatException var7)
-                    {
-                        i = (long)s.hashCode();
-                    }
-                }
-
-                WorldSettings worldsettings = new WorldSettings(i, GameType.getByName(this.gameMode), this.generateStructuresEnabled, this.hardCoreMode, WorldType.WORLD_TYPES[this.selectedIndex]);
-                worldsettings.setGeneratorOptions(this.chunkProviderSettingsJson);
-
-                if (this.bonusChestEnabled && !this.hardCoreMode)
-                {
-                    worldsettings.enableBonusChest();
-                }
-
-                if (this.allowCheats && !this.hardCoreMode)
-                {
-                    worldsettings.enableCommands();
-                }
-
-                this.mc.launchIntegratedServer(this.saveDirName, this.worldNameField.getText().trim(), worldsettings);
-            }
-            else if (button.id == 3)
-            {
-                this.toggleMoreWorldOptions();
-            }
-            else if (button.id == 2)
-            {
-                if ("survival".equals(this.gameMode))
-                {
-                    if (!this.allowCheatsWasSetByUser)
-                    {
-                        this.allowCheats = false;
-                    }
-
-                    this.hardCoreMode = false;
-                    this.gameMode = "hardcore";
-                    this.hardCoreMode = true;
-                    this.btnAllowCommands.enabled = false;
-                    this.btnBonusItems.enabled = false;
-                    this.updateDisplayState();
-                }
-                else if ("hardcore".equals(this.gameMode))
-                {
-                    if (!this.allowCheatsWasSetByUser)
-                    {
-                        this.allowCheats = true;
-                    }
-
-                    this.hardCoreMode = false;
-                    this.gameMode = "creative";
-                    this.updateDisplayState();
-                    this.hardCoreMode = false;
-                    this.btnAllowCommands.enabled = true;
-                    this.btnBonusItems.enabled = true;
-                }
-                else
-                {
-                    if (!this.allowCheatsWasSetByUser)
-                    {
-                        this.allowCheats = false;
-                    }
-
-                    this.gameMode = "survival";
-                    this.updateDisplayState();
-                    this.btnAllowCommands.enabled = true;
-                    this.btnBonusItems.enabled = true;
-                    this.hardCoreMode = false;
-                }
-
-                this.updateDisplayState();
-            }
-            else if (button.id == 4)
-            {
-                this.generateStructuresEnabled = !this.generateStructuresEnabled;
-                this.updateDisplayState();
-            }
-            else if (button.id == 7)
-            {
-                this.bonusChestEnabled = !this.bonusChestEnabled;
-                this.updateDisplayState();
-            }
-            else if (button.id == 5)
-            {
-                ++this.selectedIndex;
-
-                if (this.selectedIndex >= WorldType.WORLD_TYPES.length)
-                {
-                    this.selectedIndex = 0;
-                }
-
-                while (!this.canSelectCurWorldType())
-                {
-                    ++this.selectedIndex;
-
-                    if (this.selectedIndex >= WorldType.WORLD_TYPES.length)
-                    {
-                        this.selectedIndex = 0;
-                    }
-                }
-
-                this.chunkProviderSettingsJson = "";
-                this.updateDisplayState();
-                this.showMoreWorldOptions(this.inMoreWorldOptionsDisplay);
-            }
-            else if (button.id == 6)
-            {
-                this.allowCheatsWasSetByUser = true;
-                this.allowCheats = !this.allowCheats;
-                this.updateDisplayState();
-            }
-            else if (button.id == 8)
-            {
-                if (WorldType.WORLD_TYPES[this.selectedIndex] == WorldType.FLAT)
-                {
-                    this.mc.displayGuiScreen(new GuiCreateFlatWorld(this, this.chunkProviderSettingsJson));
-                }
-                else
-                {
-                    this.mc.displayGuiScreen(new GuiCustomizeWorldScreen(this, this.chunkProviderSettingsJson));
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns whether the currently-selected world type is actually acceptable for selection
-     * Used to hide the "debug" world type unless the shift key is depressed.
-     */
-    private boolean canSelectCurWorldType()
-    {
-        WorldType worldtype = WorldType.WORLD_TYPES[this.selectedIndex];
-
-        if (worldtype != null && worldtype.getCanBeCreated())
-        {
-            return worldtype == WorldType.DEBUG_WORLD ? isShiftKeyDown() : true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /**
-     * Toggles between initial world-creation display, and "more options" display.
-     * Called when user clicks "More World Options..." or "Done" (same button, different labels depending on current
-     * display).
-     */
-    private void toggleMoreWorldOptions()
-    {
-        this.showMoreWorldOptions(!this.inMoreWorldOptionsDisplay);
-    }
-
-    /**
-     * Shows additional world-creation options if toggle is true, otherwise shows main world-creation elements
-     */
-    private void showMoreWorldOptions(boolean toggle)
-    {
-        this.inMoreWorldOptionsDisplay = toggle;
-
-        if (WorldType.WORLD_TYPES[this.selectedIndex] == WorldType.DEBUG_WORLD)
-        {
-            this.btnGameMode.visible = !this.inMoreWorldOptionsDisplay;
-            this.btnGameMode.enabled = false;
-
-            if (this.savedGameMode == null)
-            {
-                this.savedGameMode = this.gameMode;
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      if (p_146284_1_.field_146124_l) {
+         if (p_146284_1_.field_146127_k == 1) {
+            this.field_146297_k.func_147108_a(this.field_146332_f);
+         } else if (p_146284_1_.field_146127_k == 0) {
+            this.field_146297_k.func_147108_a((GuiScreen)null);
+            if (this.field_146345_x) {
+               return;
             }
 
-            this.gameMode = "spectator";
-            this.btnMapFeatures.visible = false;
-            this.btnBonusItems.visible = false;
-            this.btnMapType.visible = this.inMoreWorldOptionsDisplay;
-            this.btnAllowCommands.visible = false;
-            this.btnCustomizeType.visible = false;
-        }
-        else
-        {
-            this.btnGameMode.visible = !this.inMoreWorldOptionsDisplay;
-            this.btnGameMode.enabled = true;
-
-            if (this.savedGameMode != null)
-            {
-                this.gameMode = this.savedGameMode;
-                this.savedGameMode = null;
+            this.field_146345_x = true;
+            long i = (new Random()).nextLong();
+            String s = this.field_146335_h.func_146179_b();
+            if (!StringUtils.isEmpty(s)) {
+               try {
+                  long j = Long.parseLong(s);
+                  if (j != 0L) {
+                     i = j;
+                  }
+               } catch (NumberFormatException var7) {
+                  i = (long)s.hashCode();
+               }
             }
 
-            this.btnMapFeatures.visible = this.inMoreWorldOptionsDisplay && WorldType.WORLD_TYPES[this.selectedIndex] != WorldType.CUSTOMIZED;
-            this.btnBonusItems.visible = this.inMoreWorldOptionsDisplay;
-            this.btnMapType.visible = this.inMoreWorldOptionsDisplay;
-            this.btnAllowCommands.visible = this.inMoreWorldOptionsDisplay;
-            this.btnCustomizeType.visible = this.inMoreWorldOptionsDisplay && (WorldType.WORLD_TYPES[this.selectedIndex] == WorldType.FLAT || WorldType.WORLD_TYPES[this.selectedIndex] == WorldType.CUSTOMIZED);
-        }
-
-        this.updateDisplayState();
-
-        if (this.inMoreWorldOptionsDisplay)
-        {
-            this.btnMoreOptions.displayString = I18n.format("gui.done");
-        }
-        else
-        {
-            this.btnMoreOptions.displayString = I18n.format("selectWorld.moreWorldOptions");
-        }
-    }
-
-    /**
-     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
-     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
-     */
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        if (this.worldNameField.isFocused() && !this.inMoreWorldOptionsDisplay)
-        {
-            this.worldNameField.textboxKeyTyped(typedChar, keyCode);
-            this.worldName = this.worldNameField.getText();
-        }
-        else if (this.worldSeedField.isFocused() && this.inMoreWorldOptionsDisplay)
-        {
-            this.worldSeedField.textboxKeyTyped(typedChar, keyCode);
-            this.worldSeed = this.worldSeedField.getText();
-        }
-
-        if (keyCode == 28 || keyCode == 156)
-        {
-            this.actionPerformed(this.buttonList.get(0));
-        }
-
-        (this.buttonList.get(0)).enabled = !this.worldNameField.getText().isEmpty();
-        this.calcSaveDirName();
-    }
-
-    /**
-     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
-     */
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
-    {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        if (this.inMoreWorldOptionsDisplay)
-        {
-            this.worldSeedField.mouseClicked(mouseX, mouseY, mouseButton);
-        }
-        else
-        {
-            this.worldNameField.mouseClicked(mouseX, mouseY, mouseButton);
-        }
-    }
-
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, I18n.format("selectWorld.create"), this.width / 2, 20, -1);
-
-        if (this.inMoreWorldOptionsDisplay)
-        {
-            this.drawString(this.fontRendererObj, I18n.format("selectWorld.enterSeed"), this.width / 2 - 100, 47, -6250336);
-            this.drawString(this.fontRendererObj, I18n.format("selectWorld.seedInfo"), this.width / 2 - 100, 85, -6250336);
-
-            if (this.btnMapFeatures.visible)
-            {
-                this.drawString(this.fontRendererObj, I18n.format("selectWorld.mapFeatures.info"), this.width / 2 - 150, 122, -6250336);
+            WorldSettings worldsettings = new WorldSettings(i, GameType.func_77142_a(this.field_146342_r), this.field_146341_s, this.field_146337_w, WorldType.field_77139_a[this.field_146331_K]);
+            worldsettings.func_82750_a(this.field_146334_a);
+            if (this.field_146338_v && !this.field_146337_w) {
+               worldsettings.func_77159_a();
             }
 
-            if (this.btnAllowCommands.visible)
-            {
-                this.drawString(this.fontRendererObj, I18n.format("selectWorld.allowCommands.info"), this.width / 2 - 150, 172, -6250336);
+            if (this.field_146340_t && !this.field_146337_w) {
+               worldsettings.func_77166_b();
             }
 
-            this.worldSeedField.drawTextBox();
+            this.field_146297_k.func_71371_a(this.field_146336_i, this.field_146333_g.func_146179_b().trim(), worldsettings);
+         } else if (p_146284_1_.field_146127_k == 3) {
+            this.func_146315_i();
+         } else if (p_146284_1_.field_146127_k == 2) {
+            if ("survival".equals(this.field_146342_r)) {
+               if (!this.field_146339_u) {
+                  this.field_146340_t = false;
+               }
 
-            if (WorldType.WORLD_TYPES[this.selectedIndex].showWorldInfoNotice())
-            {
-                this.fontRendererObj.drawSplitString(I18n.format(WorldType.WORLD_TYPES[this.selectedIndex].getTranslatedInfo()), this.btnMapType.xPosition + 2, this.btnMapType.yPosition + 22, this.btnMapType.getButtonWidth(), 10526880);
+               this.field_146337_w = false;
+               this.field_146342_r = "hardcore";
+               this.field_146337_w = true;
+               this.field_146321_E.field_146124_l = false;
+               this.field_146326_C.field_146124_l = false;
+               this.func_146319_h();
+            } else if ("hardcore".equals(this.field_146342_r)) {
+               if (!this.field_146339_u) {
+                  this.field_146340_t = true;
+               }
+
+               this.field_146337_w = false;
+               this.field_146342_r = "creative";
+               this.func_146319_h();
+               this.field_146337_w = false;
+               this.field_146321_E.field_146124_l = true;
+               this.field_146326_C.field_146124_l = true;
+            } else {
+               if (!this.field_146339_u) {
+                  this.field_146340_t = false;
+               }
+
+               this.field_146342_r = "survival";
+               this.func_146319_h();
+               this.field_146321_E.field_146124_l = true;
+               this.field_146326_C.field_146124_l = true;
+               this.field_146337_w = false;
             }
-        }
-        else
-        {
-            this.drawString(this.fontRendererObj, I18n.format("selectWorld.enterName"), this.width / 2 - 100, 47, -6250336);
-            this.drawString(this.fontRendererObj, I18n.format("selectWorld.resultFolder") + " " + this.saveDirName, this.width / 2 - 100, 85, -6250336);
-            this.worldNameField.drawTextBox();
-            this.drawString(this.fontRendererObj, this.gameModeDesc1, this.width / 2 - 100, 137, -6250336);
-            this.drawString(this.fontRendererObj, this.gameModeDesc2, this.width / 2 - 100, 149, -6250336);
-        }
 
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+            this.func_146319_h();
+         } else if (p_146284_1_.field_146127_k == 4) {
+            this.field_146341_s = !this.field_146341_s;
+            this.func_146319_h();
+         } else if (p_146284_1_.field_146127_k == 7) {
+            this.field_146338_v = !this.field_146338_v;
+            this.func_146319_h();
+         } else if (p_146284_1_.field_146127_k == 5) {
+            ++this.field_146331_K;
+            if (this.field_146331_K >= WorldType.field_77139_a.length) {
+               this.field_146331_K = 0;
+            }
 
-    /**
-     * Set the initial values of a new world to create, from the values from an existing world.
-     *  
-     * Called after construction when a user selects the "Recreate" button.
-     */
-    public void recreateFromExistingWorld(WorldInfo original)
-    {
-        this.worldName = I18n.format("selectWorld.newWorld.copyOf", original.getWorldName());
-        this.worldSeed = original.getSeed() + "";
-        this.selectedIndex = original.getTerrainType().getWorldTypeID();
-        this.chunkProviderSettingsJson = original.getGeneratorOptions();
-        this.generateStructuresEnabled = original.isMapFeaturesEnabled();
-        this.allowCheats = original.areCommandsAllowed();
+            while(!this.func_175299_g()) {
+               ++this.field_146331_K;
+               if (this.field_146331_K >= WorldType.field_77139_a.length) {
+                  this.field_146331_K = 0;
+               }
+            }
 
-        if (original.isHardcoreModeEnabled())
-        {
-            this.gameMode = "hardcore";
-        }
-        else if (original.getGameType().isSurvivalOrAdventure())
-        {
-            this.gameMode = "survival";
-        }
-        else if (original.getGameType().isCreative())
-        {
-            this.gameMode = "creative";
-        }
-    }
+            this.field_146334_a = "";
+            this.func_146319_h();
+            this.func_146316_a(this.field_146344_y);
+         } else if (p_146284_1_.field_146127_k == 6) {
+            this.field_146339_u = true;
+            this.field_146340_t = !this.field_146340_t;
+            this.func_146319_h();
+         } else if (p_146284_1_.field_146127_k == 8) {
+            if (WorldType.field_77139_a[this.field_146331_K] == WorldType.field_77138_c) {
+               this.field_146297_k.func_147108_a(new GuiCreateFlatWorld(this, this.field_146334_a));
+            } else {
+               this.field_146297_k.func_147108_a(new GuiCustomizeWorldScreen(this, this.field_146334_a));
+            }
+         }
+
+      }
+   }
+
+   private boolean func_175299_g() {
+      WorldType worldtype = WorldType.field_77139_a[this.field_146331_K];
+      if (worldtype != null && worldtype.func_77126_d()) {
+         return worldtype == WorldType.field_180272_g ? func_146272_n() : true;
+      } else {
+         return false;
+      }
+   }
+
+   private void func_146315_i() {
+      this.func_146316_a(!this.field_146344_y);
+   }
+
+   private void func_146316_a(boolean p_146316_1_) {
+      this.field_146344_y = p_146316_1_;
+      if (WorldType.field_77139_a[this.field_146331_K] == WorldType.field_180272_g) {
+         this.field_146343_z.field_146125_m = !this.field_146344_y;
+         this.field_146343_z.field_146124_l = false;
+         if (this.field_175300_s == null) {
+            this.field_175300_s = this.field_146342_r;
+         }
+
+         this.field_146342_r = "spectator";
+         this.field_146325_B.field_146125_m = false;
+         this.field_146326_C.field_146125_m = false;
+         this.field_146320_D.field_146125_m = this.field_146344_y;
+         this.field_146321_E.field_146125_m = false;
+         this.field_146322_F.field_146125_m = false;
+      } else {
+         this.field_146343_z.field_146125_m = !this.field_146344_y;
+         this.field_146343_z.field_146124_l = true;
+         if (this.field_175300_s != null) {
+            this.field_146342_r = this.field_175300_s;
+            this.field_175300_s = null;
+         }
+
+         this.field_146325_B.field_146125_m = this.field_146344_y && WorldType.field_77139_a[this.field_146331_K] != WorldType.field_180271_f;
+         this.field_146326_C.field_146125_m = this.field_146344_y;
+         this.field_146320_D.field_146125_m = this.field_146344_y;
+         this.field_146321_E.field_146125_m = this.field_146344_y;
+         this.field_146322_F.field_146125_m = this.field_146344_y && (WorldType.field_77139_a[this.field_146331_K] == WorldType.field_77138_c || WorldType.field_77139_a[this.field_146331_K] == WorldType.field_180271_f);
+      }
+
+      this.func_146319_h();
+      if (this.field_146344_y) {
+         this.field_146324_A.field_146126_j = I18n.func_135052_a("gui.done");
+      } else {
+         this.field_146324_A.field_146126_j = I18n.func_135052_a("selectWorld.moreWorldOptions");
+      }
+
+   }
+
+   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
+      if (this.field_146333_g.func_146206_l() && !this.field_146344_y) {
+         this.field_146333_g.func_146201_a(p_73869_1_, p_73869_2_);
+         this.field_146330_J = this.field_146333_g.func_146179_b();
+      } else if (this.field_146335_h.func_146206_l() && this.field_146344_y) {
+         this.field_146335_h.func_146201_a(p_73869_1_, p_73869_2_);
+         this.field_146329_I = this.field_146335_h.func_146179_b();
+      }
+
+      if (p_73869_2_ == 28 || p_73869_2_ == 156) {
+         this.func_146284_a(this.field_146292_n.get(0));
+      }
+
+      (this.field_146292_n.get(0)).field_146124_l = !this.field_146333_g.func_146179_b().isEmpty();
+      this.func_146314_g();
+   }
+
+   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
+      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
+      if (this.field_146344_y) {
+         this.field_146335_h.func_146192_a(p_73864_1_, p_73864_2_, p_73864_3_);
+      } else {
+         this.field_146333_g.func_146192_a(p_73864_1_, p_73864_2_, p_73864_3_);
+      }
+
+   }
+
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("selectWorld.create"), this.field_146294_l / 2, 20, -1);
+      if (this.field_146344_y) {
+         this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.enterSeed"), this.field_146294_l / 2 - 100, 47, -6250336);
+         this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.seedInfo"), this.field_146294_l / 2 - 100, 85, -6250336);
+         if (this.field_146325_B.field_146125_m) {
+            this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.mapFeatures.info"), this.field_146294_l / 2 - 150, 122, -6250336);
+         }
+
+         if (this.field_146321_E.field_146125_m) {
+            this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.allowCommands.info"), this.field_146294_l / 2 - 150, 172, -6250336);
+         }
+
+         this.field_146335_h.func_146194_f();
+         if (WorldType.field_77139_a[this.field_146331_K].func_151357_h()) {
+            this.field_146289_q.func_78279_b(I18n.func_135052_a(WorldType.field_77139_a[this.field_146331_K].func_151359_c()), this.field_146320_D.field_146128_h + 2, this.field_146320_D.field_146129_i + 22, this.field_146320_D.func_146117_b(), 10526880);
+         }
+      } else {
+         this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.enterName"), this.field_146294_l / 2 - 100, 47, -6250336);
+         this.func_73731_b(this.field_146289_q, I18n.func_135052_a("selectWorld.resultFolder") + " " + this.field_146336_i, this.field_146294_l / 2 - 100, 85, -6250336);
+         this.field_146333_g.func_146194_f();
+         this.func_73731_b(this.field_146289_q, this.field_146323_G, this.field_146294_l / 2 - 100, 137, -6250336);
+         this.func_73731_b(this.field_146289_q, this.field_146328_H, this.field_146294_l / 2 - 100, 149, -6250336);
+      }
+
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
+
+   public void func_146318_a(WorldInfo p_146318_1_) {
+      this.field_146330_J = I18n.func_135052_a("selectWorld.newWorld.copyOf", p_146318_1_.func_76065_j());
+      this.field_146329_I = p_146318_1_.func_76063_b() + "";
+      this.field_146331_K = p_146318_1_.func_76067_t().func_82747_f();
+      this.field_146334_a = p_146318_1_.func_82571_y();
+      this.field_146341_s = p_146318_1_.func_76089_r();
+      this.field_146340_t = p_146318_1_.func_76086_u();
+      if (p_146318_1_.func_76093_s()) {
+         this.field_146342_r = "hardcore";
+      } else if (p_146318_1_.func_76077_q().func_77144_e()) {
+         this.field_146342_r = "survival";
+      } else if (p_146318_1_.func_76077_q().func_77145_d()) {
+         this.field_146342_r = "creative";
+      }
+
+   }
 }

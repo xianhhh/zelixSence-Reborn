@@ -15,983 +15,793 @@ import net.minecraft.init.Biomes;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.world.biome.Biome;
 
-public class ChunkGeneratorSettings
-{
-    public final float coordinateScale;
-    public final float heightScale;
-    public final float upperLimitScale;
-    public final float lowerLimitScale;
-    public final float depthNoiseScaleX;
-    public final float depthNoiseScaleZ;
-    public final float depthNoiseScaleExponent;
-    public final float mainNoiseScaleX;
-    public final float mainNoiseScaleY;
-    public final float mainNoiseScaleZ;
-    public final float baseSize;
-    public final float stretchY;
-    public final float biomeDepthWeight;
-    public final float biomeDepthOffSet;
-    public final float biomeScaleWeight;
-    public final float biomeScaleOffset;
-    public final int seaLevel;
-    public final boolean useCaves;
-    public final boolean useDungeons;
-    public final int dungeonChance;
-    public final boolean useStrongholds;
-    public final boolean useVillages;
-    public final boolean useMineShafts;
-    public final boolean useTemples;
-    public final boolean useMonuments;
-    public final boolean field_191077_z;
-    public final boolean useRavines;
-    public final boolean useWaterLakes;
-    public final int waterLakeChance;
-    public final boolean useLavaLakes;
-    public final int lavaLakeChance;
-    public final boolean useLavaOceans;
-    public final int fixedBiome;
-    public final int biomeSize;
-    public final int riverSize;
-    public final int dirtSize;
-    public final int dirtCount;
-    public final int dirtMinHeight;
-    public final int dirtMaxHeight;
-    public final int gravelSize;
-    public final int gravelCount;
-    public final int gravelMinHeight;
-    public final int gravelMaxHeight;
-    public final int graniteSize;
-    public final int graniteCount;
-    public final int graniteMinHeight;
-    public final int graniteMaxHeight;
-    public final int dioriteSize;
-    public final int dioriteCount;
-    public final int dioriteMinHeight;
-    public final int dioriteMaxHeight;
-    public final int andesiteSize;
-    public final int andesiteCount;
-    public final int andesiteMinHeight;
-    public final int andesiteMaxHeight;
-    public final int coalSize;
-    public final int coalCount;
-    public final int coalMinHeight;
-    public final int coalMaxHeight;
-    public final int ironSize;
-    public final int ironCount;
-    public final int ironMinHeight;
-    public final int ironMaxHeight;
-    public final int goldSize;
-    public final int goldCount;
-    public final int goldMinHeight;
-    public final int goldMaxHeight;
-    public final int redstoneSize;
-    public final int redstoneCount;
-    public final int redstoneMinHeight;
-    public final int redstoneMaxHeight;
-    public final int diamondSize;
-    public final int diamondCount;
-    public final int diamondMinHeight;
-    public final int diamondMaxHeight;
-    public final int lapisSize;
-    public final int lapisCount;
-    public final int lapisCenterHeight;
-    public final int lapisSpread;
+public class ChunkGeneratorSettings {
+   public final float field_177811_a;
+   public final float field_177809_b;
+   public final float field_177810_c;
+   public final float field_177806_d;
+   public final float field_177808_e;
+   public final float field_177803_f;
+   public final float field_177804_g;
+   public final float field_177825_h;
+   public final float field_177827_i;
+   public final float field_177821_j;
+   public final float field_177823_k;
+   public final float field_177817_l;
+   public final float field_177819_m;
+   public final float field_177813_n;
+   public final float field_177815_o;
+   public final float field_177843_p;
+   public final int field_177841_q;
+   public final boolean field_177839_r;
+   public final boolean field_177837_s;
+   public final int field_177835_t;
+   public final boolean field_177833_u;
+   public final boolean field_177831_v;
+   public final boolean field_177829_w;
+   public final boolean field_177854_x;
+   public final boolean field_177852_y;
+   public final boolean field_191077_z;
+   public final boolean field_177850_z;
+   public final boolean field_177781_A;
+   public final int field_177782_B;
+   public final boolean field_177783_C;
+   public final int field_177777_D;
+   public final boolean field_177778_E;
+   public final int field_177779_F;
+   public final int field_177780_G;
+   public final int field_177788_H;
+   public final int field_177789_I;
+   public final int field_177790_J;
+   public final int field_177791_K;
+   public final int field_177784_L;
+   public final int field_177785_M;
+   public final int field_177786_N;
+   public final int field_177787_O;
+   public final int field_177797_P;
+   public final int field_177796_Q;
+   public final int field_177799_R;
+   public final int field_177798_S;
+   public final int field_177793_T;
+   public final int field_177792_U;
+   public final int field_177795_V;
+   public final int field_177794_W;
+   public final int field_177801_X;
+   public final int field_177800_Y;
+   public final int field_177802_Z;
+   public final int field_177846_aa;
+   public final int field_177847_ab;
+   public final int field_177844_ac;
+   public final int field_177845_ad;
+   public final int field_177851_ae;
+   public final int field_177853_af;
+   public final int field_177848_ag;
+   public final int field_177849_ah;
+   public final int field_177832_ai;
+   public final int field_177834_aj;
+   public final int field_177828_ak;
+   public final int field_177830_al;
+   public final int field_177840_am;
+   public final int field_177842_an;
+   public final int field_177836_ao;
+   public final int field_177838_ap;
+   public final int field_177818_aq;
+   public final int field_177816_ar;
+   public final int field_177814_as;
+   public final int field_177812_at;
+   public final int field_177826_au;
+   public final int field_177824_av;
+   public final int field_177822_aw;
+   public final int field_177820_ax;
+   public final int field_177807_ay;
+   public final int field_177805_az;
 
-    private ChunkGeneratorSettings(ChunkGeneratorSettings.Factory settingsFactory)
-    {
-        this.coordinateScale = settingsFactory.coordinateScale;
-        this.heightScale = settingsFactory.heightScale;
-        this.upperLimitScale = settingsFactory.upperLimitScale;
-        this.lowerLimitScale = settingsFactory.lowerLimitScale;
-        this.depthNoiseScaleX = settingsFactory.depthNoiseScaleX;
-        this.depthNoiseScaleZ = settingsFactory.depthNoiseScaleZ;
-        this.depthNoiseScaleExponent = settingsFactory.depthNoiseScaleExponent;
-        this.mainNoiseScaleX = settingsFactory.mainNoiseScaleX;
-        this.mainNoiseScaleY = settingsFactory.mainNoiseScaleY;
-        this.mainNoiseScaleZ = settingsFactory.mainNoiseScaleZ;
-        this.baseSize = settingsFactory.baseSize;
-        this.stretchY = settingsFactory.stretchY;
-        this.biomeDepthWeight = settingsFactory.biomeDepthWeight;
-        this.biomeDepthOffSet = settingsFactory.biomeDepthOffset;
-        this.biomeScaleWeight = settingsFactory.biomeScaleWeight;
-        this.biomeScaleOffset = settingsFactory.biomeScaleOffset;
-        this.seaLevel = settingsFactory.seaLevel;
-        this.useCaves = settingsFactory.useCaves;
-        this.useDungeons = settingsFactory.useDungeons;
-        this.dungeonChance = settingsFactory.dungeonChance;
-        this.useStrongholds = settingsFactory.useStrongholds;
-        this.useVillages = settingsFactory.useVillages;
-        this.useMineShafts = settingsFactory.useMineShafts;
-        this.useTemples = settingsFactory.useTemples;
-        this.useMonuments = settingsFactory.useMonuments;
-        this.field_191077_z = settingsFactory.field_191076_A;
-        this.useRavines = settingsFactory.useRavines;
-        this.useWaterLakes = settingsFactory.useWaterLakes;
-        this.waterLakeChance = settingsFactory.waterLakeChance;
-        this.useLavaLakes = settingsFactory.useLavaLakes;
-        this.lavaLakeChance = settingsFactory.lavaLakeChance;
-        this.useLavaOceans = settingsFactory.useLavaOceans;
-        this.fixedBiome = settingsFactory.fixedBiome;
-        this.biomeSize = settingsFactory.biomeSize;
-        this.riverSize = settingsFactory.riverSize;
-        this.dirtSize = settingsFactory.dirtSize;
-        this.dirtCount = settingsFactory.dirtCount;
-        this.dirtMinHeight = settingsFactory.dirtMinHeight;
-        this.dirtMaxHeight = settingsFactory.dirtMaxHeight;
-        this.gravelSize = settingsFactory.gravelSize;
-        this.gravelCount = settingsFactory.gravelCount;
-        this.gravelMinHeight = settingsFactory.gravelMinHeight;
-        this.gravelMaxHeight = settingsFactory.gravelMaxHeight;
-        this.graniteSize = settingsFactory.graniteSize;
-        this.graniteCount = settingsFactory.graniteCount;
-        this.graniteMinHeight = settingsFactory.graniteMinHeight;
-        this.graniteMaxHeight = settingsFactory.graniteMaxHeight;
-        this.dioriteSize = settingsFactory.dioriteSize;
-        this.dioriteCount = settingsFactory.dioriteCount;
-        this.dioriteMinHeight = settingsFactory.dioriteMinHeight;
-        this.dioriteMaxHeight = settingsFactory.dioriteMaxHeight;
-        this.andesiteSize = settingsFactory.andesiteSize;
-        this.andesiteCount = settingsFactory.andesiteCount;
-        this.andesiteMinHeight = settingsFactory.andesiteMinHeight;
-        this.andesiteMaxHeight = settingsFactory.andesiteMaxHeight;
-        this.coalSize = settingsFactory.coalSize;
-        this.coalCount = settingsFactory.coalCount;
-        this.coalMinHeight = settingsFactory.coalMinHeight;
-        this.coalMaxHeight = settingsFactory.coalMaxHeight;
-        this.ironSize = settingsFactory.ironSize;
-        this.ironCount = settingsFactory.ironCount;
-        this.ironMinHeight = settingsFactory.ironMinHeight;
-        this.ironMaxHeight = settingsFactory.ironMaxHeight;
-        this.goldSize = settingsFactory.goldSize;
-        this.goldCount = settingsFactory.goldCount;
-        this.goldMinHeight = settingsFactory.goldMinHeight;
-        this.goldMaxHeight = settingsFactory.goldMaxHeight;
-        this.redstoneSize = settingsFactory.redstoneSize;
-        this.redstoneCount = settingsFactory.redstoneCount;
-        this.redstoneMinHeight = settingsFactory.redstoneMinHeight;
-        this.redstoneMaxHeight = settingsFactory.redstoneMaxHeight;
-        this.diamondSize = settingsFactory.diamondSize;
-        this.diamondCount = settingsFactory.diamondCount;
-        this.diamondMinHeight = settingsFactory.diamondMinHeight;
-        this.diamondMaxHeight = settingsFactory.diamondMaxHeight;
-        this.lapisSize = settingsFactory.lapisSize;
-        this.lapisCount = settingsFactory.lapisCount;
-        this.lapisCenterHeight = settingsFactory.lapisCenterHeight;
-        this.lapisSpread = settingsFactory.lapisSpread;
-    }
+   private ChunkGeneratorSettings(ChunkGeneratorSettings.Factory p_i45639_1_) {
+      this.field_177811_a = p_i45639_1_.field_177899_b;
+      this.field_177809_b = p_i45639_1_.field_177900_c;
+      this.field_177810_c = p_i45639_1_.field_177896_d;
+      this.field_177806_d = p_i45639_1_.field_177898_e;
+      this.field_177808_e = p_i45639_1_.field_177893_f;
+      this.field_177803_f = p_i45639_1_.field_177894_g;
+      this.field_177804_g = p_i45639_1_.field_177915_h;
+      this.field_177825_h = p_i45639_1_.field_177917_i;
+      this.field_177827_i = p_i45639_1_.field_177911_j;
+      this.field_177821_j = p_i45639_1_.field_177913_k;
+      this.field_177823_k = p_i45639_1_.field_177907_l;
+      this.field_177817_l = p_i45639_1_.field_177909_m;
+      this.field_177819_m = p_i45639_1_.field_177903_n;
+      this.field_177813_n = p_i45639_1_.field_177905_o;
+      this.field_177815_o = p_i45639_1_.field_177933_p;
+      this.field_177843_p = p_i45639_1_.field_177931_q;
+      this.field_177841_q = p_i45639_1_.field_177929_r;
+      this.field_177839_r = p_i45639_1_.field_177927_s;
+      this.field_177837_s = p_i45639_1_.field_177925_t;
+      this.field_177835_t = p_i45639_1_.field_177923_u;
+      this.field_177833_u = p_i45639_1_.field_177921_v;
+      this.field_177831_v = p_i45639_1_.field_177919_w;
+      this.field_177829_w = p_i45639_1_.field_177944_x;
+      this.field_177854_x = p_i45639_1_.field_177942_y;
+      this.field_177852_y = p_i45639_1_.field_177940_z;
+      this.field_191077_z = p_i45639_1_.field_191076_A;
+      this.field_177850_z = p_i45639_1_.field_177870_A;
+      this.field_177781_A = p_i45639_1_.field_177871_B;
+      this.field_177782_B = p_i45639_1_.field_177872_C;
+      this.field_177783_C = p_i45639_1_.field_177866_D;
+      this.field_177777_D = p_i45639_1_.field_177867_E;
+      this.field_177778_E = p_i45639_1_.field_177868_F;
+      this.field_177779_F = p_i45639_1_.field_177869_G;
+      this.field_177780_G = p_i45639_1_.field_177877_H;
+      this.field_177788_H = p_i45639_1_.field_177878_I;
+      this.field_177789_I = p_i45639_1_.field_177879_J;
+      this.field_177790_J = p_i45639_1_.field_177880_K;
+      this.field_177791_K = p_i45639_1_.field_177873_L;
+      this.field_177784_L = p_i45639_1_.field_177874_M;
+      this.field_177785_M = p_i45639_1_.field_177875_N;
+      this.field_177786_N = p_i45639_1_.field_177876_O;
+      this.field_177787_O = p_i45639_1_.field_177886_P;
+      this.field_177797_P = p_i45639_1_.field_177885_Q;
+      this.field_177796_Q = p_i45639_1_.field_177888_R;
+      this.field_177799_R = p_i45639_1_.field_177887_S;
+      this.field_177798_S = p_i45639_1_.field_177882_T;
+      this.field_177793_T = p_i45639_1_.field_177881_U;
+      this.field_177792_U = p_i45639_1_.field_177884_V;
+      this.field_177795_V = p_i45639_1_.field_177883_W;
+      this.field_177794_W = p_i45639_1_.field_177891_X;
+      this.field_177801_X = p_i45639_1_.field_177890_Y;
+      this.field_177800_Y = p_i45639_1_.field_177892_Z;
+      this.field_177802_Z = p_i45639_1_.field_177936_aa;
+      this.field_177846_aa = p_i45639_1_.field_177937_ab;
+      this.field_177847_ab = p_i45639_1_.field_177934_ac;
+      this.field_177844_ac = p_i45639_1_.field_177935_ad;
+      this.field_177845_ad = p_i45639_1_.field_177941_ae;
+      this.field_177851_ae = p_i45639_1_.field_177943_af;
+      this.field_177853_af = p_i45639_1_.field_177938_ag;
+      this.field_177848_ag = p_i45639_1_.field_177939_ah;
+      this.field_177849_ah = p_i45639_1_.field_177922_ai;
+      this.field_177832_ai = p_i45639_1_.field_177924_aj;
+      this.field_177834_aj = p_i45639_1_.field_177918_ak;
+      this.field_177828_ak = p_i45639_1_.field_177920_al;
+      this.field_177830_al = p_i45639_1_.field_177930_am;
+      this.field_177840_am = p_i45639_1_.field_177932_an;
+      this.field_177842_an = p_i45639_1_.field_177926_ao;
+      this.field_177836_ao = p_i45639_1_.field_177928_ap;
+      this.field_177838_ap = p_i45639_1_.field_177908_aq;
+      this.field_177818_aq = p_i45639_1_.field_177906_ar;
+      this.field_177816_ar = p_i45639_1_.field_177904_as;
+      this.field_177814_as = p_i45639_1_.field_177902_at;
+      this.field_177812_at = p_i45639_1_.field_177916_au;
+      this.field_177826_au = p_i45639_1_.field_177914_av;
+      this.field_177824_av = p_i45639_1_.field_177912_aw;
+      this.field_177822_aw = p_i45639_1_.field_177910_ax;
+      this.field_177820_ax = p_i45639_1_.field_177897_ay;
+      this.field_177807_ay = p_i45639_1_.field_177895_az;
+      this.field_177805_az = p_i45639_1_.field_177889_aA;
+   }
 
-    public static class Factory
-    {
-        @VisibleForTesting
-        static final Gson JSON_ADAPTER = (new GsonBuilder()).registerTypeAdapter(ChunkGeneratorSettings.Factory.class, new ChunkGeneratorSettings.Serializer()).create();
-        public float coordinateScale = 684.412F;
-        public float heightScale = 684.412F;
-        public float upperLimitScale = 512.0F;
-        public float lowerLimitScale = 512.0F;
-        public float depthNoiseScaleX = 200.0F;
-        public float depthNoiseScaleZ = 200.0F;
-        public float depthNoiseScaleExponent = 0.5F;
-        public float mainNoiseScaleX = 80.0F;
-        public float mainNoiseScaleY = 160.0F;
-        public float mainNoiseScaleZ = 80.0F;
-        public float baseSize = 8.5F;
-        public float stretchY = 12.0F;
-        public float biomeDepthWeight = 1.0F;
-        public float biomeDepthOffset;
-        public float biomeScaleWeight = 1.0F;
-        public float biomeScaleOffset;
-        public int seaLevel = 63;
-        public boolean useCaves = true;
-        public boolean useDungeons = true;
-        public int dungeonChance = 8;
-        public boolean useStrongholds = true;
-        public boolean useVillages = true;
-        public boolean useMineShafts = true;
-        public boolean useTemples = true;
-        public boolean useMonuments = true;
-        public boolean field_191076_A = true;
-        public boolean useRavines = true;
-        public boolean useWaterLakes = true;
-        public int waterLakeChance = 4;
-        public boolean useLavaLakes = true;
-        public int lavaLakeChance = 80;
-        public boolean useLavaOceans;
-        public int fixedBiome = -1;
-        public int biomeSize = 4;
-        public int riverSize = 4;
-        public int dirtSize = 33;
-        public int dirtCount = 10;
-        public int dirtMinHeight;
-        public int dirtMaxHeight = 256;
-        public int gravelSize = 33;
-        public int gravelCount = 8;
-        public int gravelMinHeight;
-        public int gravelMaxHeight = 256;
-        public int graniteSize = 33;
-        public int graniteCount = 10;
-        public int graniteMinHeight;
-        public int graniteMaxHeight = 80;
-        public int dioriteSize = 33;
-        public int dioriteCount = 10;
-        public int dioriteMinHeight;
-        public int dioriteMaxHeight = 80;
-        public int andesiteSize = 33;
-        public int andesiteCount = 10;
-        public int andesiteMinHeight;
-        public int andesiteMaxHeight = 80;
-        public int coalSize = 17;
-        public int coalCount = 20;
-        public int coalMinHeight;
-        public int coalMaxHeight = 128;
-        public int ironSize = 9;
-        public int ironCount = 20;
-        public int ironMinHeight;
-        public int ironMaxHeight = 64;
-        public int goldSize = 9;
-        public int goldCount = 2;
-        public int goldMinHeight;
-        public int goldMaxHeight = 32;
-        public int redstoneSize = 8;
-        public int redstoneCount = 8;
-        public int redstoneMinHeight;
-        public int redstoneMaxHeight = 16;
-        public int diamondSize = 8;
-        public int diamondCount = 1;
-        public int diamondMinHeight;
-        public int diamondMaxHeight = 16;
-        public int lapisSize = 7;
-        public int lapisCount = 1;
-        public int lapisCenterHeight = 16;
-        public int lapisSpread = 16;
+   public static class Factory {
+      @VisibleForTesting
+      static final Gson field_177901_a = (new GsonBuilder()).registerTypeAdapter(ChunkGeneratorSettings.Factory.class, new ChunkGeneratorSettings.Serializer()).create();
+      public float field_177899_b = 684.412F;
+      public float field_177900_c = 684.412F;
+      public float field_177896_d = 512.0F;
+      public float field_177898_e = 512.0F;
+      public float field_177893_f = 200.0F;
+      public float field_177894_g = 200.0F;
+      public float field_177915_h = 0.5F;
+      public float field_177917_i = 80.0F;
+      public float field_177911_j = 160.0F;
+      public float field_177913_k = 80.0F;
+      public float field_177907_l = 8.5F;
+      public float field_177909_m = 12.0F;
+      public float field_177903_n = 1.0F;
+      public float field_177905_o;
+      public float field_177933_p = 1.0F;
+      public float field_177931_q;
+      public int field_177929_r = 63;
+      public boolean field_177927_s = true;
+      public boolean field_177925_t = true;
+      public int field_177923_u = 8;
+      public boolean field_177921_v = true;
+      public boolean field_177919_w = true;
+      public boolean field_177944_x = true;
+      public boolean field_177942_y = true;
+      public boolean field_177940_z = true;
+      public boolean field_191076_A = true;
+      public boolean field_177870_A = true;
+      public boolean field_177871_B = true;
+      public int field_177872_C = 4;
+      public boolean field_177866_D = true;
+      public int field_177867_E = 80;
+      public boolean field_177868_F;
+      public int field_177869_G = -1;
+      public int field_177877_H = 4;
+      public int field_177878_I = 4;
+      public int field_177879_J = 33;
+      public int field_177880_K = 10;
+      public int field_177873_L;
+      public int field_177874_M = 256;
+      public int field_177875_N = 33;
+      public int field_177876_O = 8;
+      public int field_177886_P;
+      public int field_177885_Q = 256;
+      public int field_177888_R = 33;
+      public int field_177887_S = 10;
+      public int field_177882_T;
+      public int field_177881_U = 80;
+      public int field_177884_V = 33;
+      public int field_177883_W = 10;
+      public int field_177891_X;
+      public int field_177890_Y = 80;
+      public int field_177892_Z = 33;
+      public int field_177936_aa = 10;
+      public int field_177937_ab;
+      public int field_177934_ac = 80;
+      public int field_177935_ad = 17;
+      public int field_177941_ae = 20;
+      public int field_177943_af;
+      public int field_177938_ag = 128;
+      public int field_177939_ah = 9;
+      public int field_177922_ai = 20;
+      public int field_177924_aj;
+      public int field_177918_ak = 64;
+      public int field_177920_al = 9;
+      public int field_177930_am = 2;
+      public int field_177932_an;
+      public int field_177926_ao = 32;
+      public int field_177928_ap = 8;
+      public int field_177908_aq = 8;
+      public int field_177906_ar;
+      public int field_177904_as = 16;
+      public int field_177902_at = 8;
+      public int field_177916_au = 1;
+      public int field_177914_av;
+      public int field_177912_aw = 16;
+      public int field_177910_ax = 7;
+      public int field_177897_ay = 1;
+      public int field_177895_az = 16;
+      public int field_177889_aA = 16;
 
-        public static ChunkGeneratorSettings.Factory jsonToFactory(String p_177865_0_)
-        {
-            if (p_177865_0_.isEmpty())
-            {
-                return new ChunkGeneratorSettings.Factory();
+      public static ChunkGeneratorSettings.Factory func_177865_a(String p_177865_0_) {
+         if (p_177865_0_.isEmpty()) {
+            return new ChunkGeneratorSettings.Factory();
+         } else {
+            try {
+               return (ChunkGeneratorSettings.Factory)JsonUtils.func_188178_a(field_177901_a, p_177865_0_, ChunkGeneratorSettings.Factory.class);
+            } catch (Exception var2) {
+               return new ChunkGeneratorSettings.Factory();
             }
-            else
-            {
-                try
-                {
-                    return (ChunkGeneratorSettings.Factory)JsonUtils.gsonDeserialize(JSON_ADAPTER, p_177865_0_, ChunkGeneratorSettings.Factory.class);
-                }
-                catch (Exception var2)
-                {
-                    return new ChunkGeneratorSettings.Factory();
-                }
+         }
+      }
+
+      public String toString() {
+         return field_177901_a.toJson(this);
+      }
+
+      public Factory() {
+         this.func_177863_a();
+      }
+
+      public void func_177863_a() {
+         this.field_177899_b = 684.412F;
+         this.field_177900_c = 684.412F;
+         this.field_177896_d = 512.0F;
+         this.field_177898_e = 512.0F;
+         this.field_177893_f = 200.0F;
+         this.field_177894_g = 200.0F;
+         this.field_177915_h = 0.5F;
+         this.field_177917_i = 80.0F;
+         this.field_177911_j = 160.0F;
+         this.field_177913_k = 80.0F;
+         this.field_177907_l = 8.5F;
+         this.field_177909_m = 12.0F;
+         this.field_177903_n = 1.0F;
+         this.field_177905_o = 0.0F;
+         this.field_177933_p = 1.0F;
+         this.field_177931_q = 0.0F;
+         this.field_177929_r = 63;
+         this.field_177927_s = true;
+         this.field_177925_t = true;
+         this.field_177923_u = 8;
+         this.field_177921_v = true;
+         this.field_177919_w = true;
+         this.field_177944_x = true;
+         this.field_177942_y = true;
+         this.field_177940_z = true;
+         this.field_191076_A = true;
+         this.field_177870_A = true;
+         this.field_177871_B = true;
+         this.field_177872_C = 4;
+         this.field_177866_D = true;
+         this.field_177867_E = 80;
+         this.field_177868_F = false;
+         this.field_177869_G = -1;
+         this.field_177877_H = 4;
+         this.field_177878_I = 4;
+         this.field_177879_J = 33;
+         this.field_177880_K = 10;
+         this.field_177873_L = 0;
+         this.field_177874_M = 256;
+         this.field_177875_N = 33;
+         this.field_177876_O = 8;
+         this.field_177886_P = 0;
+         this.field_177885_Q = 256;
+         this.field_177888_R = 33;
+         this.field_177887_S = 10;
+         this.field_177882_T = 0;
+         this.field_177881_U = 80;
+         this.field_177884_V = 33;
+         this.field_177883_W = 10;
+         this.field_177891_X = 0;
+         this.field_177890_Y = 80;
+         this.field_177892_Z = 33;
+         this.field_177936_aa = 10;
+         this.field_177937_ab = 0;
+         this.field_177934_ac = 80;
+         this.field_177935_ad = 17;
+         this.field_177941_ae = 20;
+         this.field_177943_af = 0;
+         this.field_177938_ag = 128;
+         this.field_177939_ah = 9;
+         this.field_177922_ai = 20;
+         this.field_177924_aj = 0;
+         this.field_177918_ak = 64;
+         this.field_177920_al = 9;
+         this.field_177930_am = 2;
+         this.field_177932_an = 0;
+         this.field_177926_ao = 32;
+         this.field_177928_ap = 8;
+         this.field_177908_aq = 8;
+         this.field_177906_ar = 0;
+         this.field_177904_as = 16;
+         this.field_177902_at = 8;
+         this.field_177916_au = 1;
+         this.field_177914_av = 0;
+         this.field_177912_aw = 16;
+         this.field_177910_ax = 7;
+         this.field_177897_ay = 1;
+         this.field_177895_az = 16;
+         this.field_177889_aA = 16;
+      }
+
+      public boolean equals(Object p_equals_1_) {
+         if (this == p_equals_1_) {
+            return true;
+         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
+            ChunkGeneratorSettings.Factory chunkgeneratorsettings$factory = (ChunkGeneratorSettings.Factory)p_equals_1_;
+            if (this.field_177936_aa != chunkgeneratorsettings$factory.field_177936_aa) {
+               return false;
+            } else if (this.field_177934_ac != chunkgeneratorsettings$factory.field_177934_ac) {
+               return false;
+            } else if (this.field_177937_ab != chunkgeneratorsettings$factory.field_177937_ab) {
+               return false;
+            } else if (this.field_177892_Z != chunkgeneratorsettings$factory.field_177892_Z) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177907_l, this.field_177907_l) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177905_o, this.field_177905_o) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177903_n, this.field_177903_n) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177931_q, this.field_177931_q) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177933_p, this.field_177933_p) != 0) {
+               return false;
+            } else if (this.field_177877_H != chunkgeneratorsettings$factory.field_177877_H) {
+               return false;
+            } else if (this.field_177941_ae != chunkgeneratorsettings$factory.field_177941_ae) {
+               return false;
+            } else if (this.field_177938_ag != chunkgeneratorsettings$factory.field_177938_ag) {
+               return false;
+            } else if (this.field_177943_af != chunkgeneratorsettings$factory.field_177943_af) {
+               return false;
+            } else if (this.field_177935_ad != chunkgeneratorsettings$factory.field_177935_ad) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177899_b, this.field_177899_b) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177915_h, this.field_177915_h) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177893_f, this.field_177893_f) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177894_g, this.field_177894_g) != 0) {
+               return false;
+            } else if (this.field_177916_au != chunkgeneratorsettings$factory.field_177916_au) {
+               return false;
+            } else if (this.field_177912_aw != chunkgeneratorsettings$factory.field_177912_aw) {
+               return false;
+            } else if (this.field_177914_av != chunkgeneratorsettings$factory.field_177914_av) {
+               return false;
+            } else if (this.field_177902_at != chunkgeneratorsettings$factory.field_177902_at) {
+               return false;
+            } else if (this.field_177883_W != chunkgeneratorsettings$factory.field_177883_W) {
+               return false;
+            } else if (this.field_177890_Y != chunkgeneratorsettings$factory.field_177890_Y) {
+               return false;
+            } else if (this.field_177891_X != chunkgeneratorsettings$factory.field_177891_X) {
+               return false;
+            } else if (this.field_177884_V != chunkgeneratorsettings$factory.field_177884_V) {
+               return false;
+            } else if (this.field_177880_K != chunkgeneratorsettings$factory.field_177880_K) {
+               return false;
+            } else if (this.field_177874_M != chunkgeneratorsettings$factory.field_177874_M) {
+               return false;
+            } else if (this.field_177873_L != chunkgeneratorsettings$factory.field_177873_L) {
+               return false;
+            } else if (this.field_177879_J != chunkgeneratorsettings$factory.field_177879_J) {
+               return false;
+            } else if (this.field_177923_u != chunkgeneratorsettings$factory.field_177923_u) {
+               return false;
+            } else if (this.field_177869_G != chunkgeneratorsettings$factory.field_177869_G) {
+               return false;
+            } else if (this.field_177930_am != chunkgeneratorsettings$factory.field_177930_am) {
+               return false;
+            } else if (this.field_177926_ao != chunkgeneratorsettings$factory.field_177926_ao) {
+               return false;
+            } else if (this.field_177932_an != chunkgeneratorsettings$factory.field_177932_an) {
+               return false;
+            } else if (this.field_177920_al != chunkgeneratorsettings$factory.field_177920_al) {
+               return false;
+            } else if (this.field_177887_S != chunkgeneratorsettings$factory.field_177887_S) {
+               return false;
+            } else if (this.field_177881_U != chunkgeneratorsettings$factory.field_177881_U) {
+               return false;
+            } else if (this.field_177882_T != chunkgeneratorsettings$factory.field_177882_T) {
+               return false;
+            } else if (this.field_177888_R != chunkgeneratorsettings$factory.field_177888_R) {
+               return false;
+            } else if (this.field_177876_O != chunkgeneratorsettings$factory.field_177876_O) {
+               return false;
+            } else if (this.field_177885_Q != chunkgeneratorsettings$factory.field_177885_Q) {
+               return false;
+            } else if (this.field_177886_P != chunkgeneratorsettings$factory.field_177886_P) {
+               return false;
+            } else if (this.field_177875_N != chunkgeneratorsettings$factory.field_177875_N) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177900_c, this.field_177900_c) != 0) {
+               return false;
+            } else if (this.field_177922_ai != chunkgeneratorsettings$factory.field_177922_ai) {
+               return false;
+            } else if (this.field_177918_ak != chunkgeneratorsettings$factory.field_177918_ak) {
+               return false;
+            } else if (this.field_177924_aj != chunkgeneratorsettings$factory.field_177924_aj) {
+               return false;
+            } else if (this.field_177939_ah != chunkgeneratorsettings$factory.field_177939_ah) {
+               return false;
+            } else if (this.field_177895_az != chunkgeneratorsettings$factory.field_177895_az) {
+               return false;
+            } else if (this.field_177897_ay != chunkgeneratorsettings$factory.field_177897_ay) {
+               return false;
+            } else if (this.field_177910_ax != chunkgeneratorsettings$factory.field_177910_ax) {
+               return false;
+            } else if (this.field_177889_aA != chunkgeneratorsettings$factory.field_177889_aA) {
+               return false;
+            } else if (this.field_177867_E != chunkgeneratorsettings$factory.field_177867_E) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177898_e, this.field_177898_e) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177917_i, this.field_177917_i) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177911_j, this.field_177911_j) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177913_k, this.field_177913_k) != 0) {
+               return false;
+            } else if (this.field_177908_aq != chunkgeneratorsettings$factory.field_177908_aq) {
+               return false;
+            } else if (this.field_177904_as != chunkgeneratorsettings$factory.field_177904_as) {
+               return false;
+            } else if (this.field_177906_ar != chunkgeneratorsettings$factory.field_177906_ar) {
+               return false;
+            } else if (this.field_177928_ap != chunkgeneratorsettings$factory.field_177928_ap) {
+               return false;
+            } else if (this.field_177878_I != chunkgeneratorsettings$factory.field_177878_I) {
+               return false;
+            } else if (this.field_177929_r != chunkgeneratorsettings$factory.field_177929_r) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177909_m, this.field_177909_m) != 0) {
+               return false;
+            } else if (Float.compare(chunkgeneratorsettings$factory.field_177896_d, this.field_177896_d) != 0) {
+               return false;
+            } else if (this.field_177927_s != chunkgeneratorsettings$factory.field_177927_s) {
+               return false;
+            } else if (this.field_177925_t != chunkgeneratorsettings$factory.field_177925_t) {
+               return false;
+            } else if (this.field_177866_D != chunkgeneratorsettings$factory.field_177866_D) {
+               return false;
+            } else if (this.field_177868_F != chunkgeneratorsettings$factory.field_177868_F) {
+               return false;
+            } else if (this.field_177944_x != chunkgeneratorsettings$factory.field_177944_x) {
+               return false;
+            } else if (this.field_177870_A != chunkgeneratorsettings$factory.field_177870_A) {
+               return false;
+            } else if (this.field_177921_v != chunkgeneratorsettings$factory.field_177921_v) {
+               return false;
+            } else if (this.field_177942_y != chunkgeneratorsettings$factory.field_177942_y) {
+               return false;
+            } else if (this.field_177940_z != chunkgeneratorsettings$factory.field_177940_z) {
+               return false;
+            } else if (this.field_191076_A != chunkgeneratorsettings$factory.field_191076_A) {
+               return false;
+            } else if (this.field_177919_w != chunkgeneratorsettings$factory.field_177919_w) {
+               return false;
+            } else if (this.field_177871_B != chunkgeneratorsettings$factory.field_177871_B) {
+               return false;
+            } else {
+               return this.field_177872_C == chunkgeneratorsettings$factory.field_177872_C;
             }
-        }
+         } else {
+            return false;
+         }
+      }
 
-        public String toString()
-        {
-            return JSON_ADAPTER.toJson(this);
-        }
+      public int hashCode() {
+         int i = this.field_177899_b == 0.0F ? 0 : Float.floatToIntBits(this.field_177899_b);
+         i = 31 * i + (this.field_177900_c == 0.0F ? 0 : Float.floatToIntBits(this.field_177900_c));
+         i = 31 * i + (this.field_177896_d == 0.0F ? 0 : Float.floatToIntBits(this.field_177896_d));
+         i = 31 * i + (this.field_177898_e == 0.0F ? 0 : Float.floatToIntBits(this.field_177898_e));
+         i = 31 * i + (this.field_177893_f == 0.0F ? 0 : Float.floatToIntBits(this.field_177893_f));
+         i = 31 * i + (this.field_177894_g == 0.0F ? 0 : Float.floatToIntBits(this.field_177894_g));
+         i = 31 * i + (this.field_177915_h == 0.0F ? 0 : Float.floatToIntBits(this.field_177915_h));
+         i = 31 * i + (this.field_177917_i == 0.0F ? 0 : Float.floatToIntBits(this.field_177917_i));
+         i = 31 * i + (this.field_177911_j == 0.0F ? 0 : Float.floatToIntBits(this.field_177911_j));
+         i = 31 * i + (this.field_177913_k == 0.0F ? 0 : Float.floatToIntBits(this.field_177913_k));
+         i = 31 * i + (this.field_177907_l == 0.0F ? 0 : Float.floatToIntBits(this.field_177907_l));
+         i = 31 * i + (this.field_177909_m == 0.0F ? 0 : Float.floatToIntBits(this.field_177909_m));
+         i = 31 * i + (this.field_177903_n == 0.0F ? 0 : Float.floatToIntBits(this.field_177903_n));
+         i = 31 * i + (this.field_177905_o == 0.0F ? 0 : Float.floatToIntBits(this.field_177905_o));
+         i = 31 * i + (this.field_177933_p == 0.0F ? 0 : Float.floatToIntBits(this.field_177933_p));
+         i = 31 * i + (this.field_177931_q == 0.0F ? 0 : Float.floatToIntBits(this.field_177931_q));
+         i = 31 * i + this.field_177929_r;
+         i = 31 * i + (this.field_177927_s ? 1 : 0);
+         i = 31 * i + (this.field_177925_t ? 1 : 0);
+         i = 31 * i + this.field_177923_u;
+         i = 31 * i + (this.field_177921_v ? 1 : 0);
+         i = 31 * i + (this.field_177919_w ? 1 : 0);
+         i = 31 * i + (this.field_177944_x ? 1 : 0);
+         i = 31 * i + (this.field_177942_y ? 1 : 0);
+         i = 31 * i + (this.field_177940_z ? 1 : 0);
+         i = 31 * i + (this.field_191076_A ? 1 : 0);
+         i = 31 * i + (this.field_177870_A ? 1 : 0);
+         i = 31 * i + (this.field_177871_B ? 1 : 0);
+         i = 31 * i + this.field_177872_C;
+         i = 31 * i + (this.field_177866_D ? 1 : 0);
+         i = 31 * i + this.field_177867_E;
+         i = 31 * i + (this.field_177868_F ? 1 : 0);
+         i = 31 * i + this.field_177869_G;
+         i = 31 * i + this.field_177877_H;
+         i = 31 * i + this.field_177878_I;
+         i = 31 * i + this.field_177879_J;
+         i = 31 * i + this.field_177880_K;
+         i = 31 * i + this.field_177873_L;
+         i = 31 * i + this.field_177874_M;
+         i = 31 * i + this.field_177875_N;
+         i = 31 * i + this.field_177876_O;
+         i = 31 * i + this.field_177886_P;
+         i = 31 * i + this.field_177885_Q;
+         i = 31 * i + this.field_177888_R;
+         i = 31 * i + this.field_177887_S;
+         i = 31 * i + this.field_177882_T;
+         i = 31 * i + this.field_177881_U;
+         i = 31 * i + this.field_177884_V;
+         i = 31 * i + this.field_177883_W;
+         i = 31 * i + this.field_177891_X;
+         i = 31 * i + this.field_177890_Y;
+         i = 31 * i + this.field_177892_Z;
+         i = 31 * i + this.field_177936_aa;
+         i = 31 * i + this.field_177937_ab;
+         i = 31 * i + this.field_177934_ac;
+         i = 31 * i + this.field_177935_ad;
+         i = 31 * i + this.field_177941_ae;
+         i = 31 * i + this.field_177943_af;
+         i = 31 * i + this.field_177938_ag;
+         i = 31 * i + this.field_177939_ah;
+         i = 31 * i + this.field_177922_ai;
+         i = 31 * i + this.field_177924_aj;
+         i = 31 * i + this.field_177918_ak;
+         i = 31 * i + this.field_177920_al;
+         i = 31 * i + this.field_177930_am;
+         i = 31 * i + this.field_177932_an;
+         i = 31 * i + this.field_177926_ao;
+         i = 31 * i + this.field_177928_ap;
+         i = 31 * i + this.field_177908_aq;
+         i = 31 * i + this.field_177906_ar;
+         i = 31 * i + this.field_177904_as;
+         i = 31 * i + this.field_177902_at;
+         i = 31 * i + this.field_177916_au;
+         i = 31 * i + this.field_177914_av;
+         i = 31 * i + this.field_177912_aw;
+         i = 31 * i + this.field_177910_ax;
+         i = 31 * i + this.field_177897_ay;
+         i = 31 * i + this.field_177895_az;
+         i = 31 * i + this.field_177889_aA;
+         return i;
+      }
 
-        public Factory()
-        {
-            this.setDefaults();
-        }
+      public ChunkGeneratorSettings func_177864_b() {
+         return new ChunkGeneratorSettings(this);
+      }
+   }
 
-        public void setDefaults()
-        {
-            this.coordinateScale = 684.412F;
-            this.heightScale = 684.412F;
-            this.upperLimitScale = 512.0F;
-            this.lowerLimitScale = 512.0F;
-            this.depthNoiseScaleX = 200.0F;
-            this.depthNoiseScaleZ = 200.0F;
-            this.depthNoiseScaleExponent = 0.5F;
-            this.mainNoiseScaleX = 80.0F;
-            this.mainNoiseScaleY = 160.0F;
-            this.mainNoiseScaleZ = 80.0F;
-            this.baseSize = 8.5F;
-            this.stretchY = 12.0F;
-            this.biomeDepthWeight = 1.0F;
-            this.biomeDepthOffset = 0.0F;
-            this.biomeScaleWeight = 1.0F;
-            this.biomeScaleOffset = 0.0F;
-            this.seaLevel = 63;
-            this.useCaves = true;
-            this.useDungeons = true;
-            this.dungeonChance = 8;
-            this.useStrongholds = true;
-            this.useVillages = true;
-            this.useMineShafts = true;
-            this.useTemples = true;
-            this.useMonuments = true;
-            this.field_191076_A = true;
-            this.useRavines = true;
-            this.useWaterLakes = true;
-            this.waterLakeChance = 4;
-            this.useLavaLakes = true;
-            this.lavaLakeChance = 80;
-            this.useLavaOceans = false;
-            this.fixedBiome = -1;
-            this.biomeSize = 4;
-            this.riverSize = 4;
-            this.dirtSize = 33;
-            this.dirtCount = 10;
-            this.dirtMinHeight = 0;
-            this.dirtMaxHeight = 256;
-            this.gravelSize = 33;
-            this.gravelCount = 8;
-            this.gravelMinHeight = 0;
-            this.gravelMaxHeight = 256;
-            this.graniteSize = 33;
-            this.graniteCount = 10;
-            this.graniteMinHeight = 0;
-            this.graniteMaxHeight = 80;
-            this.dioriteSize = 33;
-            this.dioriteCount = 10;
-            this.dioriteMinHeight = 0;
-            this.dioriteMaxHeight = 80;
-            this.andesiteSize = 33;
-            this.andesiteCount = 10;
-            this.andesiteMinHeight = 0;
-            this.andesiteMaxHeight = 80;
-            this.coalSize = 17;
-            this.coalCount = 20;
-            this.coalMinHeight = 0;
-            this.coalMaxHeight = 128;
-            this.ironSize = 9;
-            this.ironCount = 20;
-            this.ironMinHeight = 0;
-            this.ironMaxHeight = 64;
-            this.goldSize = 9;
-            this.goldCount = 2;
-            this.goldMinHeight = 0;
-            this.goldMaxHeight = 32;
-            this.redstoneSize = 8;
-            this.redstoneCount = 8;
-            this.redstoneMinHeight = 0;
-            this.redstoneMaxHeight = 16;
-            this.diamondSize = 8;
-            this.diamondCount = 1;
-            this.diamondMinHeight = 0;
-            this.diamondMaxHeight = 16;
-            this.lapisSize = 7;
-            this.lapisCount = 1;
-            this.lapisCenterHeight = 16;
-            this.lapisSpread = 16;
-        }
+   public static class Serializer implements JsonDeserializer<ChunkGeneratorSettings.Factory>, JsonSerializer<ChunkGeneratorSettings.Factory> {
+      public ChunkGeneratorSettings.Factory deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+         JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
+         ChunkGeneratorSettings.Factory chunkgeneratorsettings$factory = new ChunkGeneratorSettings.Factory();
 
-        public boolean equals(Object p_equals_1_)
-        {
-            if (this == p_equals_1_)
-            {
-                return true;
-            }
-            else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass())
-            {
-                ChunkGeneratorSettings.Factory chunkgeneratorsettings$factory = (ChunkGeneratorSettings.Factory)p_equals_1_;
-
-                if (this.andesiteCount != chunkgeneratorsettings$factory.andesiteCount)
-                {
-                    return false;
-                }
-                else if (this.andesiteMaxHeight != chunkgeneratorsettings$factory.andesiteMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.andesiteMinHeight != chunkgeneratorsettings$factory.andesiteMinHeight)
-                {
-                    return false;
-                }
-                else if (this.andesiteSize != chunkgeneratorsettings$factory.andesiteSize)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.baseSize, this.baseSize) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.biomeDepthOffset, this.biomeDepthOffset) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.biomeDepthWeight, this.biomeDepthWeight) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.biomeScaleOffset, this.biomeScaleOffset) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.biomeScaleWeight, this.biomeScaleWeight) != 0)
-                {
-                    return false;
-                }
-                else if (this.biomeSize != chunkgeneratorsettings$factory.biomeSize)
-                {
-                    return false;
-                }
-                else if (this.coalCount != chunkgeneratorsettings$factory.coalCount)
-                {
-                    return false;
-                }
-                else if (this.coalMaxHeight != chunkgeneratorsettings$factory.coalMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.coalMinHeight != chunkgeneratorsettings$factory.coalMinHeight)
-                {
-                    return false;
-                }
-                else if (this.coalSize != chunkgeneratorsettings$factory.coalSize)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.coordinateScale, this.coordinateScale) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.depthNoiseScaleExponent, this.depthNoiseScaleExponent) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.depthNoiseScaleX, this.depthNoiseScaleX) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.depthNoiseScaleZ, this.depthNoiseScaleZ) != 0)
-                {
-                    return false;
-                }
-                else if (this.diamondCount != chunkgeneratorsettings$factory.diamondCount)
-                {
-                    return false;
-                }
-                else if (this.diamondMaxHeight != chunkgeneratorsettings$factory.diamondMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.diamondMinHeight != chunkgeneratorsettings$factory.diamondMinHeight)
-                {
-                    return false;
-                }
-                else if (this.diamondSize != chunkgeneratorsettings$factory.diamondSize)
-                {
-                    return false;
-                }
-                else if (this.dioriteCount != chunkgeneratorsettings$factory.dioriteCount)
-                {
-                    return false;
-                }
-                else if (this.dioriteMaxHeight != chunkgeneratorsettings$factory.dioriteMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.dioriteMinHeight != chunkgeneratorsettings$factory.dioriteMinHeight)
-                {
-                    return false;
-                }
-                else if (this.dioriteSize != chunkgeneratorsettings$factory.dioriteSize)
-                {
-                    return false;
-                }
-                else if (this.dirtCount != chunkgeneratorsettings$factory.dirtCount)
-                {
-                    return false;
-                }
-                else if (this.dirtMaxHeight != chunkgeneratorsettings$factory.dirtMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.dirtMinHeight != chunkgeneratorsettings$factory.dirtMinHeight)
-                {
-                    return false;
-                }
-                else if (this.dirtSize != chunkgeneratorsettings$factory.dirtSize)
-                {
-                    return false;
-                }
-                else if (this.dungeonChance != chunkgeneratorsettings$factory.dungeonChance)
-                {
-                    return false;
-                }
-                else if (this.fixedBiome != chunkgeneratorsettings$factory.fixedBiome)
-                {
-                    return false;
-                }
-                else if (this.goldCount != chunkgeneratorsettings$factory.goldCount)
-                {
-                    return false;
-                }
-                else if (this.goldMaxHeight != chunkgeneratorsettings$factory.goldMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.goldMinHeight != chunkgeneratorsettings$factory.goldMinHeight)
-                {
-                    return false;
-                }
-                else if (this.goldSize != chunkgeneratorsettings$factory.goldSize)
-                {
-                    return false;
-                }
-                else if (this.graniteCount != chunkgeneratorsettings$factory.graniteCount)
-                {
-                    return false;
-                }
-                else if (this.graniteMaxHeight != chunkgeneratorsettings$factory.graniteMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.graniteMinHeight != chunkgeneratorsettings$factory.graniteMinHeight)
-                {
-                    return false;
-                }
-                else if (this.graniteSize != chunkgeneratorsettings$factory.graniteSize)
-                {
-                    return false;
-                }
-                else if (this.gravelCount != chunkgeneratorsettings$factory.gravelCount)
-                {
-                    return false;
-                }
-                else if (this.gravelMaxHeight != chunkgeneratorsettings$factory.gravelMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.gravelMinHeight != chunkgeneratorsettings$factory.gravelMinHeight)
-                {
-                    return false;
-                }
-                else if (this.gravelSize != chunkgeneratorsettings$factory.gravelSize)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.heightScale, this.heightScale) != 0)
-                {
-                    return false;
-                }
-                else if (this.ironCount != chunkgeneratorsettings$factory.ironCount)
-                {
-                    return false;
-                }
-                else if (this.ironMaxHeight != chunkgeneratorsettings$factory.ironMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.ironMinHeight != chunkgeneratorsettings$factory.ironMinHeight)
-                {
-                    return false;
-                }
-                else if (this.ironSize != chunkgeneratorsettings$factory.ironSize)
-                {
-                    return false;
-                }
-                else if (this.lapisCenterHeight != chunkgeneratorsettings$factory.lapisCenterHeight)
-                {
-                    return false;
-                }
-                else if (this.lapisCount != chunkgeneratorsettings$factory.lapisCount)
-                {
-                    return false;
-                }
-                else if (this.lapisSize != chunkgeneratorsettings$factory.lapisSize)
-                {
-                    return false;
-                }
-                else if (this.lapisSpread != chunkgeneratorsettings$factory.lapisSpread)
-                {
-                    return false;
-                }
-                else if (this.lavaLakeChance != chunkgeneratorsettings$factory.lavaLakeChance)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.lowerLimitScale, this.lowerLimitScale) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.mainNoiseScaleX, this.mainNoiseScaleX) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.mainNoiseScaleY, this.mainNoiseScaleY) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.mainNoiseScaleZ, this.mainNoiseScaleZ) != 0)
-                {
-                    return false;
-                }
-                else if (this.redstoneCount != chunkgeneratorsettings$factory.redstoneCount)
-                {
-                    return false;
-                }
-                else if (this.redstoneMaxHeight != chunkgeneratorsettings$factory.redstoneMaxHeight)
-                {
-                    return false;
-                }
-                else if (this.redstoneMinHeight != chunkgeneratorsettings$factory.redstoneMinHeight)
-                {
-                    return false;
-                }
-                else if (this.redstoneSize != chunkgeneratorsettings$factory.redstoneSize)
-                {
-                    return false;
-                }
-                else if (this.riverSize != chunkgeneratorsettings$factory.riverSize)
-                {
-                    return false;
-                }
-                else if (this.seaLevel != chunkgeneratorsettings$factory.seaLevel)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.stretchY, this.stretchY) != 0)
-                {
-                    return false;
-                }
-                else if (Float.compare(chunkgeneratorsettings$factory.upperLimitScale, this.upperLimitScale) != 0)
-                {
-                    return false;
-                }
-                else if (this.useCaves != chunkgeneratorsettings$factory.useCaves)
-                {
-                    return false;
-                }
-                else if (this.useDungeons != chunkgeneratorsettings$factory.useDungeons)
-                {
-                    return false;
-                }
-                else if (this.useLavaLakes != chunkgeneratorsettings$factory.useLavaLakes)
-                {
-                    return false;
-                }
-                else if (this.useLavaOceans != chunkgeneratorsettings$factory.useLavaOceans)
-                {
-                    return false;
-                }
-                else if (this.useMineShafts != chunkgeneratorsettings$factory.useMineShafts)
-                {
-                    return false;
-                }
-                else if (this.useRavines != chunkgeneratorsettings$factory.useRavines)
-                {
-                    return false;
-                }
-                else if (this.useStrongholds != chunkgeneratorsettings$factory.useStrongholds)
-                {
-                    return false;
-                }
-                else if (this.useTemples != chunkgeneratorsettings$factory.useTemples)
-                {
-                    return false;
-                }
-                else if (this.useMonuments != chunkgeneratorsettings$factory.useMonuments)
-                {
-                    return false;
-                }
-                else if (this.field_191076_A != chunkgeneratorsettings$factory.field_191076_A)
-                {
-                    return false;
-                }
-                else if (this.useVillages != chunkgeneratorsettings$factory.useVillages)
-                {
-                    return false;
-                }
-                else if (this.useWaterLakes != chunkgeneratorsettings$factory.useWaterLakes)
-                {
-                    return false;
-                }
-                else
-                {
-                    return this.waterLakeChance == chunkgeneratorsettings$factory.waterLakeChance;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public int hashCode()
-        {
-            int i = this.coordinateScale == 0.0F ? 0 : Float.floatToIntBits(this.coordinateScale);
-            i = 31 * i + (this.heightScale == 0.0F ? 0 : Float.floatToIntBits(this.heightScale));
-            i = 31 * i + (this.upperLimitScale == 0.0F ? 0 : Float.floatToIntBits(this.upperLimitScale));
-            i = 31 * i + (this.lowerLimitScale == 0.0F ? 0 : Float.floatToIntBits(this.lowerLimitScale));
-            i = 31 * i + (this.depthNoiseScaleX == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleX));
-            i = 31 * i + (this.depthNoiseScaleZ == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleZ));
-            i = 31 * i + (this.depthNoiseScaleExponent == 0.0F ? 0 : Float.floatToIntBits(this.depthNoiseScaleExponent));
-            i = 31 * i + (this.mainNoiseScaleX == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleX));
-            i = 31 * i + (this.mainNoiseScaleY == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleY));
-            i = 31 * i + (this.mainNoiseScaleZ == 0.0F ? 0 : Float.floatToIntBits(this.mainNoiseScaleZ));
-            i = 31 * i + (this.baseSize == 0.0F ? 0 : Float.floatToIntBits(this.baseSize));
-            i = 31 * i + (this.stretchY == 0.0F ? 0 : Float.floatToIntBits(this.stretchY));
-            i = 31 * i + (this.biomeDepthWeight == 0.0F ? 0 : Float.floatToIntBits(this.biomeDepthWeight));
-            i = 31 * i + (this.biomeDepthOffset == 0.0F ? 0 : Float.floatToIntBits(this.biomeDepthOffset));
-            i = 31 * i + (this.biomeScaleWeight == 0.0F ? 0 : Float.floatToIntBits(this.biomeScaleWeight));
-            i = 31 * i + (this.biomeScaleOffset == 0.0F ? 0 : Float.floatToIntBits(this.biomeScaleOffset));
-            i = 31 * i + this.seaLevel;
-            i = 31 * i + (this.useCaves ? 1 : 0);
-            i = 31 * i + (this.useDungeons ? 1 : 0);
-            i = 31 * i + this.dungeonChance;
-            i = 31 * i + (this.useStrongholds ? 1 : 0);
-            i = 31 * i + (this.useVillages ? 1 : 0);
-            i = 31 * i + (this.useMineShafts ? 1 : 0);
-            i = 31 * i + (this.useTemples ? 1 : 0);
-            i = 31 * i + (this.useMonuments ? 1 : 0);
-            i = 31 * i + (this.field_191076_A ? 1 : 0);
-            i = 31 * i + (this.useRavines ? 1 : 0);
-            i = 31 * i + (this.useWaterLakes ? 1 : 0);
-            i = 31 * i + this.waterLakeChance;
-            i = 31 * i + (this.useLavaLakes ? 1 : 0);
-            i = 31 * i + this.lavaLakeChance;
-            i = 31 * i + (this.useLavaOceans ? 1 : 0);
-            i = 31 * i + this.fixedBiome;
-            i = 31 * i + this.biomeSize;
-            i = 31 * i + this.riverSize;
-            i = 31 * i + this.dirtSize;
-            i = 31 * i + this.dirtCount;
-            i = 31 * i + this.dirtMinHeight;
-            i = 31 * i + this.dirtMaxHeight;
-            i = 31 * i + this.gravelSize;
-            i = 31 * i + this.gravelCount;
-            i = 31 * i + this.gravelMinHeight;
-            i = 31 * i + this.gravelMaxHeight;
-            i = 31 * i + this.graniteSize;
-            i = 31 * i + this.graniteCount;
-            i = 31 * i + this.graniteMinHeight;
-            i = 31 * i + this.graniteMaxHeight;
-            i = 31 * i + this.dioriteSize;
-            i = 31 * i + this.dioriteCount;
-            i = 31 * i + this.dioriteMinHeight;
-            i = 31 * i + this.dioriteMaxHeight;
-            i = 31 * i + this.andesiteSize;
-            i = 31 * i + this.andesiteCount;
-            i = 31 * i + this.andesiteMinHeight;
-            i = 31 * i + this.andesiteMaxHeight;
-            i = 31 * i + this.coalSize;
-            i = 31 * i + this.coalCount;
-            i = 31 * i + this.coalMinHeight;
-            i = 31 * i + this.coalMaxHeight;
-            i = 31 * i + this.ironSize;
-            i = 31 * i + this.ironCount;
-            i = 31 * i + this.ironMinHeight;
-            i = 31 * i + this.ironMaxHeight;
-            i = 31 * i + this.goldSize;
-            i = 31 * i + this.goldCount;
-            i = 31 * i + this.goldMinHeight;
-            i = 31 * i + this.goldMaxHeight;
-            i = 31 * i + this.redstoneSize;
-            i = 31 * i + this.redstoneCount;
-            i = 31 * i + this.redstoneMinHeight;
-            i = 31 * i + this.redstoneMaxHeight;
-            i = 31 * i + this.diamondSize;
-            i = 31 * i + this.diamondCount;
-            i = 31 * i + this.diamondMinHeight;
-            i = 31 * i + this.diamondMaxHeight;
-            i = 31 * i + this.lapisSize;
-            i = 31 * i + this.lapisCount;
-            i = 31 * i + this.lapisCenterHeight;
-            i = 31 * i + this.lapisSpread;
-            return i;
-        }
-
-        public ChunkGeneratorSettings build()
-        {
-            return new ChunkGeneratorSettings(this);
-        }
-    }
-
-    public static class Serializer implements JsonDeserializer<ChunkGeneratorSettings.Factory>, JsonSerializer<ChunkGeneratorSettings.Factory>
-    {
-        public ChunkGeneratorSettings.Factory deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
-        {
-            JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-            ChunkGeneratorSettings.Factory chunkgeneratorsettings$factory = new ChunkGeneratorSettings.Factory();
-
-            try
-            {
-                chunkgeneratorsettings$factory.coordinateScale = JsonUtils.getFloat(jsonobject, "coordinateScale", chunkgeneratorsettings$factory.coordinateScale);
-                chunkgeneratorsettings$factory.heightScale = JsonUtils.getFloat(jsonobject, "heightScale", chunkgeneratorsettings$factory.heightScale);
-                chunkgeneratorsettings$factory.lowerLimitScale = JsonUtils.getFloat(jsonobject, "lowerLimitScale", chunkgeneratorsettings$factory.lowerLimitScale);
-                chunkgeneratorsettings$factory.upperLimitScale = JsonUtils.getFloat(jsonobject, "upperLimitScale", chunkgeneratorsettings$factory.upperLimitScale);
-                chunkgeneratorsettings$factory.depthNoiseScaleX = JsonUtils.getFloat(jsonobject, "depthNoiseScaleX", chunkgeneratorsettings$factory.depthNoiseScaleX);
-                chunkgeneratorsettings$factory.depthNoiseScaleZ = JsonUtils.getFloat(jsonobject, "depthNoiseScaleZ", chunkgeneratorsettings$factory.depthNoiseScaleZ);
-                chunkgeneratorsettings$factory.depthNoiseScaleExponent = JsonUtils.getFloat(jsonobject, "depthNoiseScaleExponent", chunkgeneratorsettings$factory.depthNoiseScaleExponent);
-                chunkgeneratorsettings$factory.mainNoiseScaleX = JsonUtils.getFloat(jsonobject, "mainNoiseScaleX", chunkgeneratorsettings$factory.mainNoiseScaleX);
-                chunkgeneratorsettings$factory.mainNoiseScaleY = JsonUtils.getFloat(jsonobject, "mainNoiseScaleY", chunkgeneratorsettings$factory.mainNoiseScaleY);
-                chunkgeneratorsettings$factory.mainNoiseScaleZ = JsonUtils.getFloat(jsonobject, "mainNoiseScaleZ", chunkgeneratorsettings$factory.mainNoiseScaleZ);
-                chunkgeneratorsettings$factory.baseSize = JsonUtils.getFloat(jsonobject, "baseSize", chunkgeneratorsettings$factory.baseSize);
-                chunkgeneratorsettings$factory.stretchY = JsonUtils.getFloat(jsonobject, "stretchY", chunkgeneratorsettings$factory.stretchY);
-                chunkgeneratorsettings$factory.biomeDepthWeight = JsonUtils.getFloat(jsonobject, "biomeDepthWeight", chunkgeneratorsettings$factory.biomeDepthWeight);
-                chunkgeneratorsettings$factory.biomeDepthOffset = JsonUtils.getFloat(jsonobject, "biomeDepthOffset", chunkgeneratorsettings$factory.biomeDepthOffset);
-                chunkgeneratorsettings$factory.biomeScaleWeight = JsonUtils.getFloat(jsonobject, "biomeScaleWeight", chunkgeneratorsettings$factory.biomeScaleWeight);
-                chunkgeneratorsettings$factory.biomeScaleOffset = JsonUtils.getFloat(jsonobject, "biomeScaleOffset", chunkgeneratorsettings$factory.biomeScaleOffset);
-                chunkgeneratorsettings$factory.seaLevel = JsonUtils.getInt(jsonobject, "seaLevel", chunkgeneratorsettings$factory.seaLevel);
-                chunkgeneratorsettings$factory.useCaves = JsonUtils.getBoolean(jsonobject, "useCaves", chunkgeneratorsettings$factory.useCaves);
-                chunkgeneratorsettings$factory.useDungeons = JsonUtils.getBoolean(jsonobject, "useDungeons", chunkgeneratorsettings$factory.useDungeons);
-                chunkgeneratorsettings$factory.dungeonChance = JsonUtils.getInt(jsonobject, "dungeonChance", chunkgeneratorsettings$factory.dungeonChance);
-                chunkgeneratorsettings$factory.useStrongholds = JsonUtils.getBoolean(jsonobject, "useStrongholds", chunkgeneratorsettings$factory.useStrongholds);
-                chunkgeneratorsettings$factory.useVillages = JsonUtils.getBoolean(jsonobject, "useVillages", chunkgeneratorsettings$factory.useVillages);
-                chunkgeneratorsettings$factory.useMineShafts = JsonUtils.getBoolean(jsonobject, "useMineShafts", chunkgeneratorsettings$factory.useMineShafts);
-                chunkgeneratorsettings$factory.useTemples = JsonUtils.getBoolean(jsonobject, "useTemples", chunkgeneratorsettings$factory.useTemples);
-                chunkgeneratorsettings$factory.useMonuments = JsonUtils.getBoolean(jsonobject, "useMonuments", chunkgeneratorsettings$factory.useMonuments);
-                chunkgeneratorsettings$factory.field_191076_A = JsonUtils.getBoolean(jsonobject, "useMansions", chunkgeneratorsettings$factory.field_191076_A);
-                chunkgeneratorsettings$factory.useRavines = JsonUtils.getBoolean(jsonobject, "useRavines", chunkgeneratorsettings$factory.useRavines);
-                chunkgeneratorsettings$factory.useWaterLakes = JsonUtils.getBoolean(jsonobject, "useWaterLakes", chunkgeneratorsettings$factory.useWaterLakes);
-                chunkgeneratorsettings$factory.waterLakeChance = JsonUtils.getInt(jsonobject, "waterLakeChance", chunkgeneratorsettings$factory.waterLakeChance);
-                chunkgeneratorsettings$factory.useLavaLakes = JsonUtils.getBoolean(jsonobject, "useLavaLakes", chunkgeneratorsettings$factory.useLavaLakes);
-                chunkgeneratorsettings$factory.lavaLakeChance = JsonUtils.getInt(jsonobject, "lavaLakeChance", chunkgeneratorsettings$factory.lavaLakeChance);
-                chunkgeneratorsettings$factory.useLavaOceans = JsonUtils.getBoolean(jsonobject, "useLavaOceans", chunkgeneratorsettings$factory.useLavaOceans);
-                chunkgeneratorsettings$factory.fixedBiome = JsonUtils.getInt(jsonobject, "fixedBiome", chunkgeneratorsettings$factory.fixedBiome);
-
-                if (chunkgeneratorsettings$factory.fixedBiome < 38 && chunkgeneratorsettings$factory.fixedBiome >= -1)
-                {
-                    if (chunkgeneratorsettings$factory.fixedBiome >= Biome.getIdForBiome(Biomes.HELL))
-                    {
-                        chunkgeneratorsettings$factory.fixedBiome += 2;
-                    }
-                }
-                else
-                {
-                    chunkgeneratorsettings$factory.fixedBiome = -1;
-                }
-
-                chunkgeneratorsettings$factory.biomeSize = JsonUtils.getInt(jsonobject, "biomeSize", chunkgeneratorsettings$factory.biomeSize);
-                chunkgeneratorsettings$factory.riverSize = JsonUtils.getInt(jsonobject, "riverSize", chunkgeneratorsettings$factory.riverSize);
-                chunkgeneratorsettings$factory.dirtSize = JsonUtils.getInt(jsonobject, "dirtSize", chunkgeneratorsettings$factory.dirtSize);
-                chunkgeneratorsettings$factory.dirtCount = JsonUtils.getInt(jsonobject, "dirtCount", chunkgeneratorsettings$factory.dirtCount);
-                chunkgeneratorsettings$factory.dirtMinHeight = JsonUtils.getInt(jsonobject, "dirtMinHeight", chunkgeneratorsettings$factory.dirtMinHeight);
-                chunkgeneratorsettings$factory.dirtMaxHeight = JsonUtils.getInt(jsonobject, "dirtMaxHeight", chunkgeneratorsettings$factory.dirtMaxHeight);
-                chunkgeneratorsettings$factory.gravelSize = JsonUtils.getInt(jsonobject, "gravelSize", chunkgeneratorsettings$factory.gravelSize);
-                chunkgeneratorsettings$factory.gravelCount = JsonUtils.getInt(jsonobject, "gravelCount", chunkgeneratorsettings$factory.gravelCount);
-                chunkgeneratorsettings$factory.gravelMinHeight = JsonUtils.getInt(jsonobject, "gravelMinHeight", chunkgeneratorsettings$factory.gravelMinHeight);
-                chunkgeneratorsettings$factory.gravelMaxHeight = JsonUtils.getInt(jsonobject, "gravelMaxHeight", chunkgeneratorsettings$factory.gravelMaxHeight);
-                chunkgeneratorsettings$factory.graniteSize = JsonUtils.getInt(jsonobject, "graniteSize", chunkgeneratorsettings$factory.graniteSize);
-                chunkgeneratorsettings$factory.graniteCount = JsonUtils.getInt(jsonobject, "graniteCount", chunkgeneratorsettings$factory.graniteCount);
-                chunkgeneratorsettings$factory.graniteMinHeight = JsonUtils.getInt(jsonobject, "graniteMinHeight", chunkgeneratorsettings$factory.graniteMinHeight);
-                chunkgeneratorsettings$factory.graniteMaxHeight = JsonUtils.getInt(jsonobject, "graniteMaxHeight", chunkgeneratorsettings$factory.graniteMaxHeight);
-                chunkgeneratorsettings$factory.dioriteSize = JsonUtils.getInt(jsonobject, "dioriteSize", chunkgeneratorsettings$factory.dioriteSize);
-                chunkgeneratorsettings$factory.dioriteCount = JsonUtils.getInt(jsonobject, "dioriteCount", chunkgeneratorsettings$factory.dioriteCount);
-                chunkgeneratorsettings$factory.dioriteMinHeight = JsonUtils.getInt(jsonobject, "dioriteMinHeight", chunkgeneratorsettings$factory.dioriteMinHeight);
-                chunkgeneratorsettings$factory.dioriteMaxHeight = JsonUtils.getInt(jsonobject, "dioriteMaxHeight", chunkgeneratorsettings$factory.dioriteMaxHeight);
-                chunkgeneratorsettings$factory.andesiteSize = JsonUtils.getInt(jsonobject, "andesiteSize", chunkgeneratorsettings$factory.andesiteSize);
-                chunkgeneratorsettings$factory.andesiteCount = JsonUtils.getInt(jsonobject, "andesiteCount", chunkgeneratorsettings$factory.andesiteCount);
-                chunkgeneratorsettings$factory.andesiteMinHeight = JsonUtils.getInt(jsonobject, "andesiteMinHeight", chunkgeneratorsettings$factory.andesiteMinHeight);
-                chunkgeneratorsettings$factory.andesiteMaxHeight = JsonUtils.getInt(jsonobject, "andesiteMaxHeight", chunkgeneratorsettings$factory.andesiteMaxHeight);
-                chunkgeneratorsettings$factory.coalSize = JsonUtils.getInt(jsonobject, "coalSize", chunkgeneratorsettings$factory.coalSize);
-                chunkgeneratorsettings$factory.coalCount = JsonUtils.getInt(jsonobject, "coalCount", chunkgeneratorsettings$factory.coalCount);
-                chunkgeneratorsettings$factory.coalMinHeight = JsonUtils.getInt(jsonobject, "coalMinHeight", chunkgeneratorsettings$factory.coalMinHeight);
-                chunkgeneratorsettings$factory.coalMaxHeight = JsonUtils.getInt(jsonobject, "coalMaxHeight", chunkgeneratorsettings$factory.coalMaxHeight);
-                chunkgeneratorsettings$factory.ironSize = JsonUtils.getInt(jsonobject, "ironSize", chunkgeneratorsettings$factory.ironSize);
-                chunkgeneratorsettings$factory.ironCount = JsonUtils.getInt(jsonobject, "ironCount", chunkgeneratorsettings$factory.ironCount);
-                chunkgeneratorsettings$factory.ironMinHeight = JsonUtils.getInt(jsonobject, "ironMinHeight", chunkgeneratorsettings$factory.ironMinHeight);
-                chunkgeneratorsettings$factory.ironMaxHeight = JsonUtils.getInt(jsonobject, "ironMaxHeight", chunkgeneratorsettings$factory.ironMaxHeight);
-                chunkgeneratorsettings$factory.goldSize = JsonUtils.getInt(jsonobject, "goldSize", chunkgeneratorsettings$factory.goldSize);
-                chunkgeneratorsettings$factory.goldCount = JsonUtils.getInt(jsonobject, "goldCount", chunkgeneratorsettings$factory.goldCount);
-                chunkgeneratorsettings$factory.goldMinHeight = JsonUtils.getInt(jsonobject, "goldMinHeight", chunkgeneratorsettings$factory.goldMinHeight);
-                chunkgeneratorsettings$factory.goldMaxHeight = JsonUtils.getInt(jsonobject, "goldMaxHeight", chunkgeneratorsettings$factory.goldMaxHeight);
-                chunkgeneratorsettings$factory.redstoneSize = JsonUtils.getInt(jsonobject, "redstoneSize", chunkgeneratorsettings$factory.redstoneSize);
-                chunkgeneratorsettings$factory.redstoneCount = JsonUtils.getInt(jsonobject, "redstoneCount", chunkgeneratorsettings$factory.redstoneCount);
-                chunkgeneratorsettings$factory.redstoneMinHeight = JsonUtils.getInt(jsonobject, "redstoneMinHeight", chunkgeneratorsettings$factory.redstoneMinHeight);
-                chunkgeneratorsettings$factory.redstoneMaxHeight = JsonUtils.getInt(jsonobject, "redstoneMaxHeight", chunkgeneratorsettings$factory.redstoneMaxHeight);
-                chunkgeneratorsettings$factory.diamondSize = JsonUtils.getInt(jsonobject, "diamondSize", chunkgeneratorsettings$factory.diamondSize);
-                chunkgeneratorsettings$factory.diamondCount = JsonUtils.getInt(jsonobject, "diamondCount", chunkgeneratorsettings$factory.diamondCount);
-                chunkgeneratorsettings$factory.diamondMinHeight = JsonUtils.getInt(jsonobject, "diamondMinHeight", chunkgeneratorsettings$factory.diamondMinHeight);
-                chunkgeneratorsettings$factory.diamondMaxHeight = JsonUtils.getInt(jsonobject, "diamondMaxHeight", chunkgeneratorsettings$factory.diamondMaxHeight);
-                chunkgeneratorsettings$factory.lapisSize = JsonUtils.getInt(jsonobject, "lapisSize", chunkgeneratorsettings$factory.lapisSize);
-                chunkgeneratorsettings$factory.lapisCount = JsonUtils.getInt(jsonobject, "lapisCount", chunkgeneratorsettings$factory.lapisCount);
-                chunkgeneratorsettings$factory.lapisCenterHeight = JsonUtils.getInt(jsonobject, "lapisCenterHeight", chunkgeneratorsettings$factory.lapisCenterHeight);
-                chunkgeneratorsettings$factory.lapisSpread = JsonUtils.getInt(jsonobject, "lapisSpread", chunkgeneratorsettings$factory.lapisSpread);
-            }
-            catch (Exception var7)
-            {
-                ;
+         try {
+            chunkgeneratorsettings$factory.field_177899_b = JsonUtils.func_151221_a(jsonobject, "coordinateScale", chunkgeneratorsettings$factory.field_177899_b);
+            chunkgeneratorsettings$factory.field_177900_c = JsonUtils.func_151221_a(jsonobject, "heightScale", chunkgeneratorsettings$factory.field_177900_c);
+            chunkgeneratorsettings$factory.field_177898_e = JsonUtils.func_151221_a(jsonobject, "lowerLimitScale", chunkgeneratorsettings$factory.field_177898_e);
+            chunkgeneratorsettings$factory.field_177896_d = JsonUtils.func_151221_a(jsonobject, "upperLimitScale", chunkgeneratorsettings$factory.field_177896_d);
+            chunkgeneratorsettings$factory.field_177893_f = JsonUtils.func_151221_a(jsonobject, "depthNoiseScaleX", chunkgeneratorsettings$factory.field_177893_f);
+            chunkgeneratorsettings$factory.field_177894_g = JsonUtils.func_151221_a(jsonobject, "depthNoiseScaleZ", chunkgeneratorsettings$factory.field_177894_g);
+            chunkgeneratorsettings$factory.field_177915_h = JsonUtils.func_151221_a(jsonobject, "depthNoiseScaleExponent", chunkgeneratorsettings$factory.field_177915_h);
+            chunkgeneratorsettings$factory.field_177917_i = JsonUtils.func_151221_a(jsonobject, "mainNoiseScaleX", chunkgeneratorsettings$factory.field_177917_i);
+            chunkgeneratorsettings$factory.field_177911_j = JsonUtils.func_151221_a(jsonobject, "mainNoiseScaleY", chunkgeneratorsettings$factory.field_177911_j);
+            chunkgeneratorsettings$factory.field_177913_k = JsonUtils.func_151221_a(jsonobject, "mainNoiseScaleZ", chunkgeneratorsettings$factory.field_177913_k);
+            chunkgeneratorsettings$factory.field_177907_l = JsonUtils.func_151221_a(jsonobject, "baseSize", chunkgeneratorsettings$factory.field_177907_l);
+            chunkgeneratorsettings$factory.field_177909_m = JsonUtils.func_151221_a(jsonobject, "stretchY", chunkgeneratorsettings$factory.field_177909_m);
+            chunkgeneratorsettings$factory.field_177903_n = JsonUtils.func_151221_a(jsonobject, "biomeDepthWeight", chunkgeneratorsettings$factory.field_177903_n);
+            chunkgeneratorsettings$factory.field_177905_o = JsonUtils.func_151221_a(jsonobject, "biomeDepthOffset", chunkgeneratorsettings$factory.field_177905_o);
+            chunkgeneratorsettings$factory.field_177933_p = JsonUtils.func_151221_a(jsonobject, "biomeScaleWeight", chunkgeneratorsettings$factory.field_177933_p);
+            chunkgeneratorsettings$factory.field_177931_q = JsonUtils.func_151221_a(jsonobject, "biomeScaleOffset", chunkgeneratorsettings$factory.field_177931_q);
+            chunkgeneratorsettings$factory.field_177929_r = JsonUtils.func_151208_a(jsonobject, "seaLevel", chunkgeneratorsettings$factory.field_177929_r);
+            chunkgeneratorsettings$factory.field_177927_s = JsonUtils.func_151209_a(jsonobject, "useCaves", chunkgeneratorsettings$factory.field_177927_s);
+            chunkgeneratorsettings$factory.field_177925_t = JsonUtils.func_151209_a(jsonobject, "useDungeons", chunkgeneratorsettings$factory.field_177925_t);
+            chunkgeneratorsettings$factory.field_177923_u = JsonUtils.func_151208_a(jsonobject, "dungeonChance", chunkgeneratorsettings$factory.field_177923_u);
+            chunkgeneratorsettings$factory.field_177921_v = JsonUtils.func_151209_a(jsonobject, "useStrongholds", chunkgeneratorsettings$factory.field_177921_v);
+            chunkgeneratorsettings$factory.field_177919_w = JsonUtils.func_151209_a(jsonobject, "useVillages", chunkgeneratorsettings$factory.field_177919_w);
+            chunkgeneratorsettings$factory.field_177944_x = JsonUtils.func_151209_a(jsonobject, "useMineShafts", chunkgeneratorsettings$factory.field_177944_x);
+            chunkgeneratorsettings$factory.field_177942_y = JsonUtils.func_151209_a(jsonobject, "useTemples", chunkgeneratorsettings$factory.field_177942_y);
+            chunkgeneratorsettings$factory.field_177940_z = JsonUtils.func_151209_a(jsonobject, "useMonuments", chunkgeneratorsettings$factory.field_177940_z);
+            chunkgeneratorsettings$factory.field_191076_A = JsonUtils.func_151209_a(jsonobject, "useMansions", chunkgeneratorsettings$factory.field_191076_A);
+            chunkgeneratorsettings$factory.field_177870_A = JsonUtils.func_151209_a(jsonobject, "useRavines", chunkgeneratorsettings$factory.field_177870_A);
+            chunkgeneratorsettings$factory.field_177871_B = JsonUtils.func_151209_a(jsonobject, "useWaterLakes", chunkgeneratorsettings$factory.field_177871_B);
+            chunkgeneratorsettings$factory.field_177872_C = JsonUtils.func_151208_a(jsonobject, "waterLakeChance", chunkgeneratorsettings$factory.field_177872_C);
+            chunkgeneratorsettings$factory.field_177866_D = JsonUtils.func_151209_a(jsonobject, "useLavaLakes", chunkgeneratorsettings$factory.field_177866_D);
+            chunkgeneratorsettings$factory.field_177867_E = JsonUtils.func_151208_a(jsonobject, "lavaLakeChance", chunkgeneratorsettings$factory.field_177867_E);
+            chunkgeneratorsettings$factory.field_177868_F = JsonUtils.func_151209_a(jsonobject, "useLavaOceans", chunkgeneratorsettings$factory.field_177868_F);
+            chunkgeneratorsettings$factory.field_177869_G = JsonUtils.func_151208_a(jsonobject, "fixedBiome", chunkgeneratorsettings$factory.field_177869_G);
+            if (chunkgeneratorsettings$factory.field_177869_G < 38 && chunkgeneratorsettings$factory.field_177869_G >= -1) {
+               if (chunkgeneratorsettings$factory.field_177869_G >= Biome.func_185362_a(Biomes.field_76778_j)) {
+                  chunkgeneratorsettings$factory.field_177869_G += 2;
+               }
+            } else {
+               chunkgeneratorsettings$factory.field_177869_G = -1;
             }
 
-            return chunkgeneratorsettings$factory;
-        }
+            chunkgeneratorsettings$factory.field_177877_H = JsonUtils.func_151208_a(jsonobject, "biomeSize", chunkgeneratorsettings$factory.field_177877_H);
+            chunkgeneratorsettings$factory.field_177878_I = JsonUtils.func_151208_a(jsonobject, "riverSize", chunkgeneratorsettings$factory.field_177878_I);
+            chunkgeneratorsettings$factory.field_177879_J = JsonUtils.func_151208_a(jsonobject, "dirtSize", chunkgeneratorsettings$factory.field_177879_J);
+            chunkgeneratorsettings$factory.field_177880_K = JsonUtils.func_151208_a(jsonobject, "dirtCount", chunkgeneratorsettings$factory.field_177880_K);
+            chunkgeneratorsettings$factory.field_177873_L = JsonUtils.func_151208_a(jsonobject, "dirtMinHeight", chunkgeneratorsettings$factory.field_177873_L);
+            chunkgeneratorsettings$factory.field_177874_M = JsonUtils.func_151208_a(jsonobject, "dirtMaxHeight", chunkgeneratorsettings$factory.field_177874_M);
+            chunkgeneratorsettings$factory.field_177875_N = JsonUtils.func_151208_a(jsonobject, "gravelSize", chunkgeneratorsettings$factory.field_177875_N);
+            chunkgeneratorsettings$factory.field_177876_O = JsonUtils.func_151208_a(jsonobject, "gravelCount", chunkgeneratorsettings$factory.field_177876_O);
+            chunkgeneratorsettings$factory.field_177886_P = JsonUtils.func_151208_a(jsonobject, "gravelMinHeight", chunkgeneratorsettings$factory.field_177886_P);
+            chunkgeneratorsettings$factory.field_177885_Q = JsonUtils.func_151208_a(jsonobject, "gravelMaxHeight", chunkgeneratorsettings$factory.field_177885_Q);
+            chunkgeneratorsettings$factory.field_177888_R = JsonUtils.func_151208_a(jsonobject, "graniteSize", chunkgeneratorsettings$factory.field_177888_R);
+            chunkgeneratorsettings$factory.field_177887_S = JsonUtils.func_151208_a(jsonobject, "graniteCount", chunkgeneratorsettings$factory.field_177887_S);
+            chunkgeneratorsettings$factory.field_177882_T = JsonUtils.func_151208_a(jsonobject, "graniteMinHeight", chunkgeneratorsettings$factory.field_177882_T);
+            chunkgeneratorsettings$factory.field_177881_U = JsonUtils.func_151208_a(jsonobject, "graniteMaxHeight", chunkgeneratorsettings$factory.field_177881_U);
+            chunkgeneratorsettings$factory.field_177884_V = JsonUtils.func_151208_a(jsonobject, "dioriteSize", chunkgeneratorsettings$factory.field_177884_V);
+            chunkgeneratorsettings$factory.field_177883_W = JsonUtils.func_151208_a(jsonobject, "dioriteCount", chunkgeneratorsettings$factory.field_177883_W);
+            chunkgeneratorsettings$factory.field_177891_X = JsonUtils.func_151208_a(jsonobject, "dioriteMinHeight", chunkgeneratorsettings$factory.field_177891_X);
+            chunkgeneratorsettings$factory.field_177890_Y = JsonUtils.func_151208_a(jsonobject, "dioriteMaxHeight", chunkgeneratorsettings$factory.field_177890_Y);
+            chunkgeneratorsettings$factory.field_177892_Z = JsonUtils.func_151208_a(jsonobject, "andesiteSize", chunkgeneratorsettings$factory.field_177892_Z);
+            chunkgeneratorsettings$factory.field_177936_aa = JsonUtils.func_151208_a(jsonobject, "andesiteCount", chunkgeneratorsettings$factory.field_177936_aa);
+            chunkgeneratorsettings$factory.field_177937_ab = JsonUtils.func_151208_a(jsonobject, "andesiteMinHeight", chunkgeneratorsettings$factory.field_177937_ab);
+            chunkgeneratorsettings$factory.field_177934_ac = JsonUtils.func_151208_a(jsonobject, "andesiteMaxHeight", chunkgeneratorsettings$factory.field_177934_ac);
+            chunkgeneratorsettings$factory.field_177935_ad = JsonUtils.func_151208_a(jsonobject, "coalSize", chunkgeneratorsettings$factory.field_177935_ad);
+            chunkgeneratorsettings$factory.field_177941_ae = JsonUtils.func_151208_a(jsonobject, "coalCount", chunkgeneratorsettings$factory.field_177941_ae);
+            chunkgeneratorsettings$factory.field_177943_af = JsonUtils.func_151208_a(jsonobject, "coalMinHeight", chunkgeneratorsettings$factory.field_177943_af);
+            chunkgeneratorsettings$factory.field_177938_ag = JsonUtils.func_151208_a(jsonobject, "coalMaxHeight", chunkgeneratorsettings$factory.field_177938_ag);
+            chunkgeneratorsettings$factory.field_177939_ah = JsonUtils.func_151208_a(jsonobject, "ironSize", chunkgeneratorsettings$factory.field_177939_ah);
+            chunkgeneratorsettings$factory.field_177922_ai = JsonUtils.func_151208_a(jsonobject, "ironCount", chunkgeneratorsettings$factory.field_177922_ai);
+            chunkgeneratorsettings$factory.field_177924_aj = JsonUtils.func_151208_a(jsonobject, "ironMinHeight", chunkgeneratorsettings$factory.field_177924_aj);
+            chunkgeneratorsettings$factory.field_177918_ak = JsonUtils.func_151208_a(jsonobject, "ironMaxHeight", chunkgeneratorsettings$factory.field_177918_ak);
+            chunkgeneratorsettings$factory.field_177920_al = JsonUtils.func_151208_a(jsonobject, "goldSize", chunkgeneratorsettings$factory.field_177920_al);
+            chunkgeneratorsettings$factory.field_177930_am = JsonUtils.func_151208_a(jsonobject, "goldCount", chunkgeneratorsettings$factory.field_177930_am);
+            chunkgeneratorsettings$factory.field_177932_an = JsonUtils.func_151208_a(jsonobject, "goldMinHeight", chunkgeneratorsettings$factory.field_177932_an);
+            chunkgeneratorsettings$factory.field_177926_ao = JsonUtils.func_151208_a(jsonobject, "goldMaxHeight", chunkgeneratorsettings$factory.field_177926_ao);
+            chunkgeneratorsettings$factory.field_177928_ap = JsonUtils.func_151208_a(jsonobject, "redstoneSize", chunkgeneratorsettings$factory.field_177928_ap);
+            chunkgeneratorsettings$factory.field_177908_aq = JsonUtils.func_151208_a(jsonobject, "redstoneCount", chunkgeneratorsettings$factory.field_177908_aq);
+            chunkgeneratorsettings$factory.field_177906_ar = JsonUtils.func_151208_a(jsonobject, "redstoneMinHeight", chunkgeneratorsettings$factory.field_177906_ar);
+            chunkgeneratorsettings$factory.field_177904_as = JsonUtils.func_151208_a(jsonobject, "redstoneMaxHeight", chunkgeneratorsettings$factory.field_177904_as);
+            chunkgeneratorsettings$factory.field_177902_at = JsonUtils.func_151208_a(jsonobject, "diamondSize", chunkgeneratorsettings$factory.field_177902_at);
+            chunkgeneratorsettings$factory.field_177916_au = JsonUtils.func_151208_a(jsonobject, "diamondCount", chunkgeneratorsettings$factory.field_177916_au);
+            chunkgeneratorsettings$factory.field_177914_av = JsonUtils.func_151208_a(jsonobject, "diamondMinHeight", chunkgeneratorsettings$factory.field_177914_av);
+            chunkgeneratorsettings$factory.field_177912_aw = JsonUtils.func_151208_a(jsonobject, "diamondMaxHeight", chunkgeneratorsettings$factory.field_177912_aw);
+            chunkgeneratorsettings$factory.field_177910_ax = JsonUtils.func_151208_a(jsonobject, "lapisSize", chunkgeneratorsettings$factory.field_177910_ax);
+            chunkgeneratorsettings$factory.field_177897_ay = JsonUtils.func_151208_a(jsonobject, "lapisCount", chunkgeneratorsettings$factory.field_177897_ay);
+            chunkgeneratorsettings$factory.field_177895_az = JsonUtils.func_151208_a(jsonobject, "lapisCenterHeight", chunkgeneratorsettings$factory.field_177895_az);
+            chunkgeneratorsettings$factory.field_177889_aA = JsonUtils.func_151208_a(jsonobject, "lapisSpread", chunkgeneratorsettings$factory.field_177889_aA);
+         } catch (Exception var7) {
+            ;
+         }
 
-        public JsonElement serialize(ChunkGeneratorSettings.Factory p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)
-        {
-            JsonObject jsonobject = new JsonObject();
-            jsonobject.addProperty("coordinateScale", Float.valueOf(p_serialize_1_.coordinateScale));
-            jsonobject.addProperty("heightScale", Float.valueOf(p_serialize_1_.heightScale));
-            jsonobject.addProperty("lowerLimitScale", Float.valueOf(p_serialize_1_.lowerLimitScale));
-            jsonobject.addProperty("upperLimitScale", Float.valueOf(p_serialize_1_.upperLimitScale));
-            jsonobject.addProperty("depthNoiseScaleX", Float.valueOf(p_serialize_1_.depthNoiseScaleX));
-            jsonobject.addProperty("depthNoiseScaleZ", Float.valueOf(p_serialize_1_.depthNoiseScaleZ));
-            jsonobject.addProperty("depthNoiseScaleExponent", Float.valueOf(p_serialize_1_.depthNoiseScaleExponent));
-            jsonobject.addProperty("mainNoiseScaleX", Float.valueOf(p_serialize_1_.mainNoiseScaleX));
-            jsonobject.addProperty("mainNoiseScaleY", Float.valueOf(p_serialize_1_.mainNoiseScaleY));
-            jsonobject.addProperty("mainNoiseScaleZ", Float.valueOf(p_serialize_1_.mainNoiseScaleZ));
-            jsonobject.addProperty("baseSize", Float.valueOf(p_serialize_1_.baseSize));
-            jsonobject.addProperty("stretchY", Float.valueOf(p_serialize_1_.stretchY));
-            jsonobject.addProperty("biomeDepthWeight", Float.valueOf(p_serialize_1_.biomeDepthWeight));
-            jsonobject.addProperty("biomeDepthOffset", Float.valueOf(p_serialize_1_.biomeDepthOffset));
-            jsonobject.addProperty("biomeScaleWeight", Float.valueOf(p_serialize_1_.biomeScaleWeight));
-            jsonobject.addProperty("biomeScaleOffset", Float.valueOf(p_serialize_1_.biomeScaleOffset));
-            jsonobject.addProperty("seaLevel", Integer.valueOf(p_serialize_1_.seaLevel));
-            jsonobject.addProperty("useCaves", Boolean.valueOf(p_serialize_1_.useCaves));
-            jsonobject.addProperty("useDungeons", Boolean.valueOf(p_serialize_1_.useDungeons));
-            jsonobject.addProperty("dungeonChance", Integer.valueOf(p_serialize_1_.dungeonChance));
-            jsonobject.addProperty("useStrongholds", Boolean.valueOf(p_serialize_1_.useStrongholds));
-            jsonobject.addProperty("useVillages", Boolean.valueOf(p_serialize_1_.useVillages));
-            jsonobject.addProperty("useMineShafts", Boolean.valueOf(p_serialize_1_.useMineShafts));
-            jsonobject.addProperty("useTemples", Boolean.valueOf(p_serialize_1_.useTemples));
-            jsonobject.addProperty("useMonuments", Boolean.valueOf(p_serialize_1_.useMonuments));
-            jsonobject.addProperty("useMansions", Boolean.valueOf(p_serialize_1_.field_191076_A));
-            jsonobject.addProperty("useRavines", Boolean.valueOf(p_serialize_1_.useRavines));
-            jsonobject.addProperty("useWaterLakes", Boolean.valueOf(p_serialize_1_.useWaterLakes));
-            jsonobject.addProperty("waterLakeChance", Integer.valueOf(p_serialize_1_.waterLakeChance));
-            jsonobject.addProperty("useLavaLakes", Boolean.valueOf(p_serialize_1_.useLavaLakes));
-            jsonobject.addProperty("lavaLakeChance", Integer.valueOf(p_serialize_1_.lavaLakeChance));
-            jsonobject.addProperty("useLavaOceans", Boolean.valueOf(p_serialize_1_.useLavaOceans));
-            jsonobject.addProperty("fixedBiome", Integer.valueOf(p_serialize_1_.fixedBiome));
-            jsonobject.addProperty("biomeSize", Integer.valueOf(p_serialize_1_.biomeSize));
-            jsonobject.addProperty("riverSize", Integer.valueOf(p_serialize_1_.riverSize));
-            jsonobject.addProperty("dirtSize", Integer.valueOf(p_serialize_1_.dirtSize));
-            jsonobject.addProperty("dirtCount", Integer.valueOf(p_serialize_1_.dirtCount));
-            jsonobject.addProperty("dirtMinHeight", Integer.valueOf(p_serialize_1_.dirtMinHeight));
-            jsonobject.addProperty("dirtMaxHeight", Integer.valueOf(p_serialize_1_.dirtMaxHeight));
-            jsonobject.addProperty("gravelSize", Integer.valueOf(p_serialize_1_.gravelSize));
-            jsonobject.addProperty("gravelCount", Integer.valueOf(p_serialize_1_.gravelCount));
-            jsonobject.addProperty("gravelMinHeight", Integer.valueOf(p_serialize_1_.gravelMinHeight));
-            jsonobject.addProperty("gravelMaxHeight", Integer.valueOf(p_serialize_1_.gravelMaxHeight));
-            jsonobject.addProperty("graniteSize", Integer.valueOf(p_serialize_1_.graniteSize));
-            jsonobject.addProperty("graniteCount", Integer.valueOf(p_serialize_1_.graniteCount));
-            jsonobject.addProperty("graniteMinHeight", Integer.valueOf(p_serialize_1_.graniteMinHeight));
-            jsonobject.addProperty("graniteMaxHeight", Integer.valueOf(p_serialize_1_.graniteMaxHeight));
-            jsonobject.addProperty("dioriteSize", Integer.valueOf(p_serialize_1_.dioriteSize));
-            jsonobject.addProperty("dioriteCount", Integer.valueOf(p_serialize_1_.dioriteCount));
-            jsonobject.addProperty("dioriteMinHeight", Integer.valueOf(p_serialize_1_.dioriteMinHeight));
-            jsonobject.addProperty("dioriteMaxHeight", Integer.valueOf(p_serialize_1_.dioriteMaxHeight));
-            jsonobject.addProperty("andesiteSize", Integer.valueOf(p_serialize_1_.andesiteSize));
-            jsonobject.addProperty("andesiteCount", Integer.valueOf(p_serialize_1_.andesiteCount));
-            jsonobject.addProperty("andesiteMinHeight", Integer.valueOf(p_serialize_1_.andesiteMinHeight));
-            jsonobject.addProperty("andesiteMaxHeight", Integer.valueOf(p_serialize_1_.andesiteMaxHeight));
-            jsonobject.addProperty("coalSize", Integer.valueOf(p_serialize_1_.coalSize));
-            jsonobject.addProperty("coalCount", Integer.valueOf(p_serialize_1_.coalCount));
-            jsonobject.addProperty("coalMinHeight", Integer.valueOf(p_serialize_1_.coalMinHeight));
-            jsonobject.addProperty("coalMaxHeight", Integer.valueOf(p_serialize_1_.coalMaxHeight));
-            jsonobject.addProperty("ironSize", Integer.valueOf(p_serialize_1_.ironSize));
-            jsonobject.addProperty("ironCount", Integer.valueOf(p_serialize_1_.ironCount));
-            jsonobject.addProperty("ironMinHeight", Integer.valueOf(p_serialize_1_.ironMinHeight));
-            jsonobject.addProperty("ironMaxHeight", Integer.valueOf(p_serialize_1_.ironMaxHeight));
-            jsonobject.addProperty("goldSize", Integer.valueOf(p_serialize_1_.goldSize));
-            jsonobject.addProperty("goldCount", Integer.valueOf(p_serialize_1_.goldCount));
-            jsonobject.addProperty("goldMinHeight", Integer.valueOf(p_serialize_1_.goldMinHeight));
-            jsonobject.addProperty("goldMaxHeight", Integer.valueOf(p_serialize_1_.goldMaxHeight));
-            jsonobject.addProperty("redstoneSize", Integer.valueOf(p_serialize_1_.redstoneSize));
-            jsonobject.addProperty("redstoneCount", Integer.valueOf(p_serialize_1_.redstoneCount));
-            jsonobject.addProperty("redstoneMinHeight", Integer.valueOf(p_serialize_1_.redstoneMinHeight));
-            jsonobject.addProperty("redstoneMaxHeight", Integer.valueOf(p_serialize_1_.redstoneMaxHeight));
-            jsonobject.addProperty("diamondSize", Integer.valueOf(p_serialize_1_.diamondSize));
-            jsonobject.addProperty("diamondCount", Integer.valueOf(p_serialize_1_.diamondCount));
-            jsonobject.addProperty("diamondMinHeight", Integer.valueOf(p_serialize_1_.diamondMinHeight));
-            jsonobject.addProperty("diamondMaxHeight", Integer.valueOf(p_serialize_1_.diamondMaxHeight));
-            jsonobject.addProperty("lapisSize", Integer.valueOf(p_serialize_1_.lapisSize));
-            jsonobject.addProperty("lapisCount", Integer.valueOf(p_serialize_1_.lapisCount));
-            jsonobject.addProperty("lapisCenterHeight", Integer.valueOf(p_serialize_1_.lapisCenterHeight));
-            jsonobject.addProperty("lapisSpread", Integer.valueOf(p_serialize_1_.lapisSpread));
-            return jsonobject;
-        }
-    }
+         return chunkgeneratorsettings$factory;
+      }
+
+      public JsonElement serialize(ChunkGeneratorSettings.Factory p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
+         JsonObject jsonobject = new JsonObject();
+         jsonobject.addProperty("coordinateScale", Float.valueOf(p_serialize_1_.field_177899_b));
+         jsonobject.addProperty("heightScale", Float.valueOf(p_serialize_1_.field_177900_c));
+         jsonobject.addProperty("lowerLimitScale", Float.valueOf(p_serialize_1_.field_177898_e));
+         jsonobject.addProperty("upperLimitScale", Float.valueOf(p_serialize_1_.field_177896_d));
+         jsonobject.addProperty("depthNoiseScaleX", Float.valueOf(p_serialize_1_.field_177893_f));
+         jsonobject.addProperty("depthNoiseScaleZ", Float.valueOf(p_serialize_1_.field_177894_g));
+         jsonobject.addProperty("depthNoiseScaleExponent", Float.valueOf(p_serialize_1_.field_177915_h));
+         jsonobject.addProperty("mainNoiseScaleX", Float.valueOf(p_serialize_1_.field_177917_i));
+         jsonobject.addProperty("mainNoiseScaleY", Float.valueOf(p_serialize_1_.field_177911_j));
+         jsonobject.addProperty("mainNoiseScaleZ", Float.valueOf(p_serialize_1_.field_177913_k));
+         jsonobject.addProperty("baseSize", Float.valueOf(p_serialize_1_.field_177907_l));
+         jsonobject.addProperty("stretchY", Float.valueOf(p_serialize_1_.field_177909_m));
+         jsonobject.addProperty("biomeDepthWeight", Float.valueOf(p_serialize_1_.field_177903_n));
+         jsonobject.addProperty("biomeDepthOffset", Float.valueOf(p_serialize_1_.field_177905_o));
+         jsonobject.addProperty("biomeScaleWeight", Float.valueOf(p_serialize_1_.field_177933_p));
+         jsonobject.addProperty("biomeScaleOffset", Float.valueOf(p_serialize_1_.field_177931_q));
+         jsonobject.addProperty("seaLevel", Integer.valueOf(p_serialize_1_.field_177929_r));
+         jsonobject.addProperty("useCaves", Boolean.valueOf(p_serialize_1_.field_177927_s));
+         jsonobject.addProperty("useDungeons", Boolean.valueOf(p_serialize_1_.field_177925_t));
+         jsonobject.addProperty("dungeonChance", Integer.valueOf(p_serialize_1_.field_177923_u));
+         jsonobject.addProperty("useStrongholds", Boolean.valueOf(p_serialize_1_.field_177921_v));
+         jsonobject.addProperty("useVillages", Boolean.valueOf(p_serialize_1_.field_177919_w));
+         jsonobject.addProperty("useMineShafts", Boolean.valueOf(p_serialize_1_.field_177944_x));
+         jsonobject.addProperty("useTemples", Boolean.valueOf(p_serialize_1_.field_177942_y));
+         jsonobject.addProperty("useMonuments", Boolean.valueOf(p_serialize_1_.field_177940_z));
+         jsonobject.addProperty("useMansions", Boolean.valueOf(p_serialize_1_.field_191076_A));
+         jsonobject.addProperty("useRavines", Boolean.valueOf(p_serialize_1_.field_177870_A));
+         jsonobject.addProperty("useWaterLakes", Boolean.valueOf(p_serialize_1_.field_177871_B));
+         jsonobject.addProperty("waterLakeChance", Integer.valueOf(p_serialize_1_.field_177872_C));
+         jsonobject.addProperty("useLavaLakes", Boolean.valueOf(p_serialize_1_.field_177866_D));
+         jsonobject.addProperty("lavaLakeChance", Integer.valueOf(p_serialize_1_.field_177867_E));
+         jsonobject.addProperty("useLavaOceans", Boolean.valueOf(p_serialize_1_.field_177868_F));
+         jsonobject.addProperty("fixedBiome", Integer.valueOf(p_serialize_1_.field_177869_G));
+         jsonobject.addProperty("biomeSize", Integer.valueOf(p_serialize_1_.field_177877_H));
+         jsonobject.addProperty("riverSize", Integer.valueOf(p_serialize_1_.field_177878_I));
+         jsonobject.addProperty("dirtSize", Integer.valueOf(p_serialize_1_.field_177879_J));
+         jsonobject.addProperty("dirtCount", Integer.valueOf(p_serialize_1_.field_177880_K));
+         jsonobject.addProperty("dirtMinHeight", Integer.valueOf(p_serialize_1_.field_177873_L));
+         jsonobject.addProperty("dirtMaxHeight", Integer.valueOf(p_serialize_1_.field_177874_M));
+         jsonobject.addProperty("gravelSize", Integer.valueOf(p_serialize_1_.field_177875_N));
+         jsonobject.addProperty("gravelCount", Integer.valueOf(p_serialize_1_.field_177876_O));
+         jsonobject.addProperty("gravelMinHeight", Integer.valueOf(p_serialize_1_.field_177886_P));
+         jsonobject.addProperty("gravelMaxHeight", Integer.valueOf(p_serialize_1_.field_177885_Q));
+         jsonobject.addProperty("graniteSize", Integer.valueOf(p_serialize_1_.field_177888_R));
+         jsonobject.addProperty("graniteCount", Integer.valueOf(p_serialize_1_.field_177887_S));
+         jsonobject.addProperty("graniteMinHeight", Integer.valueOf(p_serialize_1_.field_177882_T));
+         jsonobject.addProperty("graniteMaxHeight", Integer.valueOf(p_serialize_1_.field_177881_U));
+         jsonobject.addProperty("dioriteSize", Integer.valueOf(p_serialize_1_.field_177884_V));
+         jsonobject.addProperty("dioriteCount", Integer.valueOf(p_serialize_1_.field_177883_W));
+         jsonobject.addProperty("dioriteMinHeight", Integer.valueOf(p_serialize_1_.field_177891_X));
+         jsonobject.addProperty("dioriteMaxHeight", Integer.valueOf(p_serialize_1_.field_177890_Y));
+         jsonobject.addProperty("andesiteSize", Integer.valueOf(p_serialize_1_.field_177892_Z));
+         jsonobject.addProperty("andesiteCount", Integer.valueOf(p_serialize_1_.field_177936_aa));
+         jsonobject.addProperty("andesiteMinHeight", Integer.valueOf(p_serialize_1_.field_177937_ab));
+         jsonobject.addProperty("andesiteMaxHeight", Integer.valueOf(p_serialize_1_.field_177934_ac));
+         jsonobject.addProperty("coalSize", Integer.valueOf(p_serialize_1_.field_177935_ad));
+         jsonobject.addProperty("coalCount", Integer.valueOf(p_serialize_1_.field_177941_ae));
+         jsonobject.addProperty("coalMinHeight", Integer.valueOf(p_serialize_1_.field_177943_af));
+         jsonobject.addProperty("coalMaxHeight", Integer.valueOf(p_serialize_1_.field_177938_ag));
+         jsonobject.addProperty("ironSize", Integer.valueOf(p_serialize_1_.field_177939_ah));
+         jsonobject.addProperty("ironCount", Integer.valueOf(p_serialize_1_.field_177922_ai));
+         jsonobject.addProperty("ironMinHeight", Integer.valueOf(p_serialize_1_.field_177924_aj));
+         jsonobject.addProperty("ironMaxHeight", Integer.valueOf(p_serialize_1_.field_177918_ak));
+         jsonobject.addProperty("goldSize", Integer.valueOf(p_serialize_1_.field_177920_al));
+         jsonobject.addProperty("goldCount", Integer.valueOf(p_serialize_1_.field_177930_am));
+         jsonobject.addProperty("goldMinHeight", Integer.valueOf(p_serialize_1_.field_177932_an));
+         jsonobject.addProperty("goldMaxHeight", Integer.valueOf(p_serialize_1_.field_177926_ao));
+         jsonobject.addProperty("redstoneSize", Integer.valueOf(p_serialize_1_.field_177928_ap));
+         jsonobject.addProperty("redstoneCount", Integer.valueOf(p_serialize_1_.field_177908_aq));
+         jsonobject.addProperty("redstoneMinHeight", Integer.valueOf(p_serialize_1_.field_177906_ar));
+         jsonobject.addProperty("redstoneMaxHeight", Integer.valueOf(p_serialize_1_.field_177904_as));
+         jsonobject.addProperty("diamondSize", Integer.valueOf(p_serialize_1_.field_177902_at));
+         jsonobject.addProperty("diamondCount", Integer.valueOf(p_serialize_1_.field_177916_au));
+         jsonobject.addProperty("diamondMinHeight", Integer.valueOf(p_serialize_1_.field_177914_av));
+         jsonobject.addProperty("diamondMaxHeight", Integer.valueOf(p_serialize_1_.field_177912_aw));
+         jsonobject.addProperty("lapisSize", Integer.valueOf(p_serialize_1_.field_177910_ax));
+         jsonobject.addProperty("lapisCount", Integer.valueOf(p_serialize_1_.field_177897_ay));
+         jsonobject.addProperty("lapisCenterHeight", Integer.valueOf(p_serialize_1_.field_177895_az));
+         jsonobject.addProperty("lapisSpread", Integer.valueOf(p_serialize_1_.field_177889_aA));
+         return jsonobject;
+      }
+   }
 }

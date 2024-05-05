@@ -2,61 +2,34 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
 
-public class EntityAILookIdle extends EntityAIBase
-{
-    /** The entity that is looking idle. */
-    private final EntityLiving idleEntity;
+public class EntityAILookIdle extends EntityAIBase {
+   private final EntityLiving field_75258_a;
+   private double field_75256_b;
+   private double field_75257_c;
+   private int field_75255_d;
 
-    /** X offset to look at */
-    private double lookX;
+   public EntityAILookIdle(EntityLiving p_i1647_1_) {
+      this.field_75258_a = p_i1647_1_;
+      this.func_75248_a(3);
+   }
 
-    /** Z offset to look at */
-    private double lookZ;
+   public boolean func_75250_a() {
+      return this.field_75258_a.func_70681_au().nextFloat() < 0.02F;
+   }
 
-    /**
-     * A decrementing tick that stops the entity from being idle once it reaches 0.
-     */
-    private int idleTime;
+   public boolean func_75253_b() {
+      return this.field_75255_d >= 0;
+   }
 
-    public EntityAILookIdle(EntityLiving entitylivingIn)
-    {
-        this.idleEntity = entitylivingIn;
-        this.setMutexBits(3);
-    }
+   public void func_75249_e() {
+      double d0 = 6.283185307179586D * this.field_75258_a.func_70681_au().nextDouble();
+      this.field_75256_b = Math.cos(d0);
+      this.field_75257_c = Math.sin(d0);
+      this.field_75255_d = 20 + this.field_75258_a.func_70681_au().nextInt(20);
+   }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
-    public boolean shouldExecute()
-    {
-        return this.idleEntity.getRNG().nextFloat() < 0.02F;
-    }
-
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        return this.idleTime >= 0;
-    }
-
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
-    public void startExecuting()
-    {
-        double d0 = (Math.PI * 2D) * this.idleEntity.getRNG().nextDouble();
-        this.lookX = Math.cos(d0);
-        this.lookZ = Math.sin(d0);
-        this.idleTime = 20 + this.idleEntity.getRNG().nextInt(20);
-    }
-
-    /**
-     * Updates the task
-     */
-    public void updateTask()
-    {
-        --this.idleTime;
-        this.idleEntity.getLookHelper().setLookPosition(this.idleEntity.posX + this.lookX, this.idleEntity.posY + (double)this.idleEntity.getEyeHeight(), this.idleEntity.posZ + this.lookZ, (float)this.idleEntity.getHorizontalFaceSpeed(), (float)this.idleEntity.getVerticalFaceSpeed());
-    }
+   public void func_75246_d() {
+      --this.field_75255_d;
+      this.field_75258_a.func_70671_ap().func_75650_a(this.field_75258_a.field_70165_t + this.field_75256_b, this.field_75258_a.field_70163_u + (double)this.field_75258_a.func_70047_e(), this.field_75258_a.field_70161_v + this.field_75257_c, (float)this.field_75258_a.func_184649_cE(), (float)this.field_75258_a.func_70646_bf());
+   }
 }

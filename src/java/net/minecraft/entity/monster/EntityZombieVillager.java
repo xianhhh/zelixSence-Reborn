@@ -29,277 +29,196 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityZombieVillager extends EntityZombie
-{
-    private static final DataParameter<Boolean> CONVERTING = EntityDataManager.<Boolean>createKey(EntityZombieVillager.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> field_190739_c = EntityDataManager.<Integer>createKey(EntityZombieVillager.class, DataSerializers.VARINT);
+public class EntityZombieVillager extends EntityZombie {
+   private static final DataParameter<Boolean> field_184739_bx = EntityDataManager.<Boolean>func_187226_a(EntityZombieVillager.class, DataSerializers.field_187198_h);
+   private static final DataParameter<Integer> field_190739_c = EntityDataManager.<Integer>func_187226_a(EntityZombieVillager.class, DataSerializers.field_187192_b);
+   private int field_82234_d;
+   private UUID field_191992_by;
 
-    /**
-     * Ticker used to determine the time remaining for this zombie to convert into a villager when cured.
-     */
-    private int conversionTime;
-    private UUID field_191992_by;
+   public EntityZombieVillager(World p_i47277_1_) {
+      super(p_i47277_1_);
+   }
 
-    public EntityZombieVillager(World p_i47277_1_)
-    {
-        super(p_i47277_1_);
-    }
+   protected void func_70088_a() {
+      super.func_70088_a();
+      this.field_70180_af.func_187214_a(field_184739_bx, Boolean.valueOf(false));
+      this.field_70180_af.func_187214_a(field_190739_c, Integer.valueOf(0));
+   }
 
-    protected void entityInit()
-    {
-        super.entityInit();
-        this.dataManager.register(CONVERTING, Boolean.valueOf(false));
-        this.dataManager.register(field_190739_c, Integer.valueOf(0));
-    }
+   public void func_190733_a(int p_190733_1_) {
+      this.field_70180_af.func_187227_b(field_190739_c, Integer.valueOf(p_190733_1_));
+   }
 
-    public void func_190733_a(int p_190733_1_)
-    {
-        this.dataManager.set(field_190739_c, Integer.valueOf(p_190733_1_));
-    }
+   public int func_190736_dl() {
+      return Math.max(((Integer)this.field_70180_af.func_187225_a(field_190739_c)).intValue() % 6, 0);
+   }
 
-    public int func_190736_dl()
-    {
-        return Math.max(((Integer)this.dataManager.get(field_190739_c)).intValue() % 6, 0);
-    }
+   public static void func_190737_b(DataFixer p_190737_0_) {
+      EntityLiving.func_189752_a(p_190737_0_, EntityZombieVillager.class);
+   }
 
-    public static void func_190737_b(DataFixer p_190737_0_)
-    {
-        EntityLiving.registerFixesMob(p_190737_0_, EntityZombieVillager.class);
-    }
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      p_70014_1_.func_74768_a("Profession", this.func_190736_dl());
+      p_70014_1_.func_74768_a("ConversionTime", this.func_82230_o() ? this.field_82234_d : -1);
+      if (this.field_191992_by != null) {
+         p_70014_1_.func_186854_a("ConversionPlayer", this.field_191992_by);
+      }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("Profession", this.func_190736_dl());
-        compound.setInteger("ConversionTime", this.isConverting() ? this.conversionTime : -1);
+   }
 
-        if (this.field_191992_by != null)
-        {
-            compound.setUniqueId("ConversionPlayer", this.field_191992_by);
-        }
-    }
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.func_190733_a(p_70037_1_.func_74762_e("Profession"));
+      if (p_70037_1_.func_150297_b("ConversionTime", 99) && p_70037_1_.func_74762_e("ConversionTime") > -1) {
+         this.func_191991_a(p_70037_1_.func_186855_b("ConversionPlayer") ? p_70037_1_.func_186857_a("ConversionPlayer") : null, p_70037_1_.func_74762_e("ConversionTime"));
+      }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.func_190733_a(compound.getInteger("Profession"));
+   }
 
-        if (compound.hasKey("ConversionTime", 99) && compound.getInteger("ConversionTime") > -1)
-        {
-            this.func_191991_a(compound.hasUniqueId("ConversionPlayer") ? compound.getUniqueId("ConversionPlayer") : null, compound.getInteger("ConversionTime"));
-        }
-    }
+   @Nullable
+   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_) {
+      this.func_190733_a(this.field_70170_p.field_73012_v.nextInt(6));
+      return super.func_180482_a(p_180482_1_, p_180482_2_);
+   }
 
-    @Nullable
+   public void func_70071_h_() {
+      if (!this.field_70170_p.field_72995_K && this.func_82230_o()) {
+         int i = this.func_190735_dq();
+         this.field_82234_d -= i;
+         if (this.field_82234_d <= 0) {
+            this.func_190738_dp();
+         }
+      }
 
-    /**
-     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
-     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
-     */
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
-    {
-        this.func_190733_a(this.world.rand.nextInt(6));
-        return super.onInitialSpawn(difficulty, livingdata);
-    }
+      super.func_70071_h_();
+   }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        if (!this.world.isRemote && this.isConverting())
-        {
-            int i = this.func_190735_dq();
-            this.conversionTime -= i;
+   public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_) {
+      ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
+      if (itemstack.func_77973_b() == Items.field_151153_ao && itemstack.func_77960_j() == 0 && this.func_70644_a(MobEffects.field_76437_t)) {
+         if (!p_184645_1_.field_71075_bZ.field_75098_d) {
+            itemstack.func_190918_g(1);
+         }
 
-            if (this.conversionTime <= 0)
-            {
-                this.func_190738_dp();
+         if (!this.field_70170_p.field_72995_K) {
+            this.func_191991_a(p_184645_1_.func_110124_au(), this.field_70146_Z.nextInt(2401) + 3600);
+         }
+
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   protected boolean func_70692_ba() {
+      return !this.func_82230_o();
+   }
+
+   public boolean func_82230_o() {
+      return ((Boolean)this.func_184212_Q().func_187225_a(field_184739_bx)).booleanValue();
+   }
+
+   protected void func_191991_a(@Nullable UUID p_191991_1_, int p_191991_2_) {
+      this.field_191992_by = p_191991_1_;
+      this.field_82234_d = p_191991_2_;
+      this.func_184212_Q().func_187227_b(field_184739_bx, Boolean.valueOf(true));
+      this.func_184589_d(MobEffects.field_76437_t);
+      this.func_70690_d(new PotionEffect(MobEffects.field_76420_g, p_191991_2_, Math.min(this.field_70170_p.func_175659_aa().func_151525_a() - 1, 0)));
+      this.field_70170_p.func_72960_a(this, (byte)16);
+   }
+
+   public void func_70103_a(byte p_70103_1_) {
+      if (p_70103_1_ == 16) {
+         if (!this.func_174814_R()) {
+            this.field_70170_p.func_184134_a(this.field_70165_t + 0.5D, this.field_70163_u + 0.5D, this.field_70161_v + 0.5D, SoundEvents.field_187942_hp, this.func_184176_by(), 1.0F + this.field_70146_Z.nextFloat(), this.field_70146_Z.nextFloat() * 0.7F + 0.3F, false);
+         }
+      } else {
+         super.func_70103_a(p_70103_1_);
+      }
+
+   }
+
+   protected void func_190738_dp() {
+      EntityVillager entityvillager = new EntityVillager(this.field_70170_p);
+      entityvillager.func_82149_j(this);
+      entityvillager.func_70938_b(this.func_190736_dl());
+      entityvillager.func_190672_a(this.field_70170_p.func_175649_E(new BlockPos(entityvillager)), (IEntityLivingData)null, false);
+      entityvillager.func_82187_q();
+      if (this.func_70631_g_()) {
+         entityvillager.func_70873_a(-24000);
+      }
+
+      this.field_70170_p.func_72900_e(this);
+      entityvillager.func_94061_f(this.func_175446_cd());
+      if (this.func_145818_k_()) {
+         entityvillager.func_96094_a(this.func_95999_t());
+         entityvillager.func_174805_g(this.func_174833_aM());
+      }
+
+      this.field_70170_p.func_72838_d(entityvillager);
+      if (this.field_191992_by != null) {
+         EntityPlayer entityplayer = this.field_70170_p.func_152378_a(this.field_191992_by);
+         if (entityplayer instanceof EntityPlayerMP) {
+            CriteriaTriggers.field_192137_q.func_192183_a((EntityPlayerMP)entityplayer, this, entityvillager);
+         }
+      }
+
+      entityvillager.func_70690_d(new PotionEffect(MobEffects.field_76431_k, 200, 0));
+      this.field_70170_p.func_180498_a((EntityPlayer)null, 1027, new BlockPos((int)this.field_70165_t, (int)this.field_70163_u, (int)this.field_70161_v), 0);
+   }
+
+   protected int func_190735_dq() {
+      int i = 1;
+      if (this.field_70146_Z.nextFloat() < 0.01F) {
+         int j = 0;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+         for(int k = (int)this.field_70165_t - 4; k < (int)this.field_70165_t + 4 && j < 14; ++k) {
+            for(int l = (int)this.field_70163_u - 4; l < (int)this.field_70163_u + 4 && j < 14; ++l) {
+               for(int i1 = (int)this.field_70161_v - 4; i1 < (int)this.field_70161_v + 4 && j < 14; ++i1) {
+                  Block block = this.field_70170_p.func_180495_p(blockpos$mutableblockpos.func_181079_c(k, l, i1)).func_177230_c();
+                  if (block == Blocks.field_150411_aY || block == Blocks.field_150324_C) {
+                     if (this.field_70146_Z.nextFloat() < 0.3F) {
+                        ++i;
+                     }
+
+                     ++j;
+                  }
+               }
             }
-        }
+         }
+      }
 
-        super.onUpdate();
-    }
+      return i;
+   }
 
-    public boolean processInteract(EntityPlayer player, EnumHand hand)
-    {
-        ItemStack itemstack = player.getHeldItem(hand);
+   protected float func_70647_i() {
+      return this.func_70631_g_() ? (this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F + 2.0F : (this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F + 1.0F;
+   }
 
-        if (itemstack.getItem() == Items.GOLDEN_APPLE && itemstack.getMetadata() == 0 && this.isPotionActive(MobEffects.WEAKNESS))
-        {
-            if (!player.capabilities.isCreativeMode)
-            {
-                itemstack.func_190918_g(1);
-            }
+   public SoundEvent func_184639_G() {
+      return SoundEvents.field_187940_hn;
+   }
 
-            if (!this.world.isRemote)
-            {
-                this.func_191991_a(player.getUniqueID(), this.rand.nextInt(2401) + 3600);
-            }
+   public SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_187944_hr;
+   }
 
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+   public SoundEvent func_184615_bR() {
+      return SoundEvents.field_187943_hq;
+   }
 
-    /**
-     * Determines if an entity can be despawned, used on idle far away entities
-     */
-    protected boolean canDespawn()
-    {
-        return !this.isConverting();
-    }
+   public SoundEvent func_190731_di() {
+      return SoundEvents.field_187946_ht;
+   }
 
-    /**
-     * Returns whether this zombie is in the process of converting to a villager
-     */
-    public boolean isConverting()
-    {
-        return ((Boolean)this.getDataManager().get(CONVERTING)).booleanValue();
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_191183_as;
+   }
 
-    protected void func_191991_a(@Nullable UUID p_191991_1_, int p_191991_2_)
-    {
-        this.field_191992_by = p_191991_1_;
-        this.conversionTime = p_191991_2_;
-        this.getDataManager().set(CONVERTING, Boolean.valueOf(true));
-        this.removePotionEffect(MobEffects.WEAKNESS);
-        this.addPotionEffect(new PotionEffect(MobEffects.STRENGTH, p_191991_2_, Math.min(this.world.getDifficulty().getDifficultyId() - 1, 0)));
-        this.world.setEntityState(this, (byte)16);
-    }
-
-    public void handleStatusUpdate(byte id)
-    {
-        if (id == 16)
-        {
-            if (!this.isSilent())
-            {
-                this.world.playSound(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D, SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, this.getSoundCategory(), 1.0F + this.rand.nextFloat(), this.rand.nextFloat() * 0.7F + 0.3F, false);
-            }
-        }
-        else
-        {
-            super.handleStatusUpdate(id);
-        }
-    }
-
-    protected void func_190738_dp()
-    {
-        EntityVillager entityvillager = new EntityVillager(this.world);
-        entityvillager.copyLocationAndAnglesFrom(this);
-        entityvillager.setProfession(this.func_190736_dl());
-        entityvillager.func_190672_a(this.world.getDifficultyForLocation(new BlockPos(entityvillager)), (IEntityLivingData)null, false);
-        entityvillager.setLookingForHome();
-
-        if (this.isChild())
-        {
-            entityvillager.setGrowingAge(-24000);
-        }
-
-        this.world.removeEntity(this);
-        entityvillager.setNoAI(this.isAIDisabled());
-
-        if (this.hasCustomName())
-        {
-            entityvillager.setCustomNameTag(this.getCustomNameTag());
-            entityvillager.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
-        }
-
-        this.world.spawnEntityInWorld(entityvillager);
-
-        if (this.field_191992_by != null)
-        {
-            EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.field_191992_by);
-
-            if (entityplayer instanceof EntityPlayerMP)
-            {
-                CriteriaTriggers.field_192137_q.func_192183_a((EntityPlayerMP)entityplayer, this, entityvillager);
-            }
-        }
-
-        entityvillager.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 200, 0));
-        this.world.playEvent((EntityPlayer)null, 1027, new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ), 0);
-    }
-
-    protected int func_190735_dq()
-    {
-        int i = 1;
-
-        if (this.rand.nextFloat() < 0.01F)
-        {
-            int j = 0;
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-
-            for (int k = (int)this.posX - 4; k < (int)this.posX + 4 && j < 14; ++k)
-            {
-                for (int l = (int)this.posY - 4; l < (int)this.posY + 4 && j < 14; ++l)
-                {
-                    for (int i1 = (int)this.posZ - 4; i1 < (int)this.posZ + 4 && j < 14; ++i1)
-                    {
-                        Block block = this.world.getBlockState(blockpos$mutableblockpos.setPos(k, l, i1)).getBlock();
-
-                        if (block == Blocks.IRON_BARS || block == Blocks.BED)
-                        {
-                            if (this.rand.nextFloat() < 0.3F)
-                            {
-                                ++i;
-                            }
-
-                            ++j;
-                        }
-                    }
-                }
-            }
-        }
-
-        return i;
-    }
-
-    /**
-     * Gets the pitch of living sounds in living entities.
-     */
-    protected float getSoundPitch()
-    {
-        return this.isChild() ? (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 2.0F : (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F;
-    }
-
-    public SoundEvent getAmbientSound()
-    {
-        return SoundEvents.ENTITY_ZOMBIE_VILLAGER_AMBIENT;
-    }
-
-    public SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_ZOMBIE_VILLAGER_HURT;
-    }
-
-    public SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_ZOMBIE_VILLAGER_DEATH;
-    }
-
-    public SoundEvent func_190731_di()
-    {
-        return SoundEvents.ENTITY_ZOMBIE_VILLAGER_STEP;
-    }
-
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.field_191183_as;
-    }
-
-    protected ItemStack func_190732_dj()
-    {
-        return ItemStack.field_190927_a;
-    }
+   protected ItemStack func_190732_dj() {
+      return ItemStack.field_190927_a;
+   }
 }

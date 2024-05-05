@@ -6,180 +6,142 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.border.WorldBorder;
 
-public class SPacketWorldBorder implements Packet<INetHandlerPlayClient>
-{
-    private SPacketWorldBorder.Action action;
-    private int size;
-    private double centerX;
-    private double centerZ;
-    private double targetSize;
-    private double diameter;
-    private long timeUntilTarget;
-    private int warningTime;
-    private int warningDistance;
+public class SPacketWorldBorder implements Packet<INetHandlerPlayClient> {
+   private SPacketWorldBorder.Action field_179795_a;
+   private int field_179793_b;
+   private double field_179794_c;
+   private double field_179791_d;
+   private double field_179792_e;
+   private double field_179789_f;
+   private long field_179790_g;
+   private int field_179796_h;
+   private int field_179797_i;
 
-    public SPacketWorldBorder()
-    {
-    }
+   public SPacketWorldBorder() {
+   }
 
-    public SPacketWorldBorder(WorldBorder border, SPacketWorldBorder.Action actionIn)
-    {
-        this.action = actionIn;
-        this.centerX = border.getCenterX();
-        this.centerZ = border.getCenterZ();
-        this.diameter = border.getDiameter();
-        this.targetSize = border.getTargetSize();
-        this.timeUntilTarget = border.getTimeUntilTarget();
-        this.size = border.getSize();
-        this.warningDistance = border.getWarningDistance();
-        this.warningTime = border.getWarningTime();
-    }
+   public SPacketWorldBorder(WorldBorder p_i46921_1_, SPacketWorldBorder.Action p_i46921_2_) {
+      this.field_179795_a = p_i46921_2_;
+      this.field_179794_c = p_i46921_1_.func_177731_f();
+      this.field_179791_d = p_i46921_1_.func_177721_g();
+      this.field_179789_f = p_i46921_1_.func_177741_h();
+      this.field_179792_e = p_i46921_1_.func_177751_j();
+      this.field_179790_g = p_i46921_1_.func_177732_i();
+      this.field_179793_b = p_i46921_1_.func_177722_l();
+      this.field_179797_i = p_i46921_1_.func_177748_q();
+      this.field_179796_h = p_i46921_1_.func_177740_p();
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.action = (SPacketWorldBorder.Action)buf.readEnumValue(SPacketWorldBorder.Action.class);
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_179795_a = (SPacketWorldBorder.Action)p_148837_1_.func_179257_a(SPacketWorldBorder.Action.class);
+      switch(this.field_179795_a) {
+      case SET_SIZE:
+         this.field_179792_e = p_148837_1_.readDouble();
+         break;
+      case LERP_SIZE:
+         this.field_179789_f = p_148837_1_.readDouble();
+         this.field_179792_e = p_148837_1_.readDouble();
+         this.field_179790_g = p_148837_1_.func_179260_f();
+         break;
+      case SET_CENTER:
+         this.field_179794_c = p_148837_1_.readDouble();
+         this.field_179791_d = p_148837_1_.readDouble();
+         break;
+      case SET_WARNING_BLOCKS:
+         this.field_179797_i = p_148837_1_.func_150792_a();
+         break;
+      case SET_WARNING_TIME:
+         this.field_179796_h = p_148837_1_.func_150792_a();
+         break;
+      case INITIALIZE:
+         this.field_179794_c = p_148837_1_.readDouble();
+         this.field_179791_d = p_148837_1_.readDouble();
+         this.field_179789_f = p_148837_1_.readDouble();
+         this.field_179792_e = p_148837_1_.readDouble();
+         this.field_179790_g = p_148837_1_.func_179260_f();
+         this.field_179793_b = p_148837_1_.func_150792_a();
+         this.field_179797_i = p_148837_1_.func_150792_a();
+         this.field_179796_h = p_148837_1_.func_150792_a();
+      }
 
-        switch (this.action)
-        {
-            case SET_SIZE:
-                this.targetSize = buf.readDouble();
-                break;
+   }
 
-            case LERP_SIZE:
-                this.diameter = buf.readDouble();
-                this.targetSize = buf.readDouble();
-                this.timeUntilTarget = buf.readVarLong();
-                break;
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_179249_a(this.field_179795_a);
+      switch(this.field_179795_a) {
+      case SET_SIZE:
+         p_148840_1_.writeDouble(this.field_179792_e);
+         break;
+      case LERP_SIZE:
+         p_148840_1_.writeDouble(this.field_179789_f);
+         p_148840_1_.writeDouble(this.field_179792_e);
+         p_148840_1_.func_179254_b(this.field_179790_g);
+         break;
+      case SET_CENTER:
+         p_148840_1_.writeDouble(this.field_179794_c);
+         p_148840_1_.writeDouble(this.field_179791_d);
+         break;
+      case SET_WARNING_BLOCKS:
+         p_148840_1_.func_150787_b(this.field_179797_i);
+         break;
+      case SET_WARNING_TIME:
+         p_148840_1_.func_150787_b(this.field_179796_h);
+         break;
+      case INITIALIZE:
+         p_148840_1_.writeDouble(this.field_179794_c);
+         p_148840_1_.writeDouble(this.field_179791_d);
+         p_148840_1_.writeDouble(this.field_179789_f);
+         p_148840_1_.writeDouble(this.field_179792_e);
+         p_148840_1_.func_179254_b(this.field_179790_g);
+         p_148840_1_.func_150787_b(this.field_179793_b);
+         p_148840_1_.func_150787_b(this.field_179797_i);
+         p_148840_1_.func_150787_b(this.field_179796_h);
+      }
 
-            case SET_CENTER:
-                this.centerX = buf.readDouble();
-                this.centerZ = buf.readDouble();
-                break;
+   }
 
-            case SET_WARNING_BLOCKS:
-                this.warningDistance = buf.readVarIntFromBuffer();
-                break;
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_175093_a(this);
+   }
 
-            case SET_WARNING_TIME:
-                this.warningTime = buf.readVarIntFromBuffer();
-                break;
+   public void func_179788_a(WorldBorder p_179788_1_) {
+      switch(this.field_179795_a) {
+      case SET_SIZE:
+         p_179788_1_.func_177750_a(this.field_179792_e);
+         break;
+      case LERP_SIZE:
+         p_179788_1_.func_177738_a(this.field_179789_f, this.field_179792_e, this.field_179790_g);
+         break;
+      case SET_CENTER:
+         p_179788_1_.func_177739_c(this.field_179794_c, this.field_179791_d);
+         break;
+      case SET_WARNING_BLOCKS:
+         p_179788_1_.func_177747_c(this.field_179797_i);
+         break;
+      case SET_WARNING_TIME:
+         p_179788_1_.func_177723_b(this.field_179796_h);
+         break;
+      case INITIALIZE:
+         p_179788_1_.func_177739_c(this.field_179794_c, this.field_179791_d);
+         if (this.field_179790_g > 0L) {
+            p_179788_1_.func_177738_a(this.field_179789_f, this.field_179792_e, this.field_179790_g);
+         } else {
+            p_179788_1_.func_177750_a(this.field_179792_e);
+         }
 
-            case INITIALIZE:
-                this.centerX = buf.readDouble();
-                this.centerZ = buf.readDouble();
-                this.diameter = buf.readDouble();
-                this.targetSize = buf.readDouble();
-                this.timeUntilTarget = buf.readVarLong();
-                this.size = buf.readVarIntFromBuffer();
-                this.warningDistance = buf.readVarIntFromBuffer();
-                this.warningTime = buf.readVarIntFromBuffer();
-        }
-    }
+         p_179788_1_.func_177725_a(this.field_179793_b);
+         p_179788_1_.func_177747_c(this.field_179797_i);
+         p_179788_1_.func_177723_b(this.field_179796_h);
+      }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeEnumValue(this.action);
+   }
 
-        switch (this.action)
-        {
-            case SET_SIZE:
-                buf.writeDouble(this.targetSize);
-                break;
-
-            case LERP_SIZE:
-                buf.writeDouble(this.diameter);
-                buf.writeDouble(this.targetSize);
-                buf.writeVarLong(this.timeUntilTarget);
-                break;
-
-            case SET_CENTER:
-                buf.writeDouble(this.centerX);
-                buf.writeDouble(this.centerZ);
-                break;
-
-            case SET_WARNING_BLOCKS:
-                buf.writeVarIntToBuffer(this.warningDistance);
-                break;
-
-            case SET_WARNING_TIME:
-                buf.writeVarIntToBuffer(this.warningTime);
-                break;
-
-            case INITIALIZE:
-                buf.writeDouble(this.centerX);
-                buf.writeDouble(this.centerZ);
-                buf.writeDouble(this.diameter);
-                buf.writeDouble(this.targetSize);
-                buf.writeVarLong(this.timeUntilTarget);
-                buf.writeVarIntToBuffer(this.size);
-                buf.writeVarIntToBuffer(this.warningDistance);
-                buf.writeVarIntToBuffer(this.warningTime);
-        }
-    }
-
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleWorldBorder(this);
-    }
-
-    public void apply(WorldBorder border)
-    {
-        switch (this.action)
-        {
-            case SET_SIZE:
-                border.setTransition(this.targetSize);
-                break;
-
-            case LERP_SIZE:
-                border.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-                break;
-
-            case SET_CENTER:
-                border.setCenter(this.centerX, this.centerZ);
-                break;
-
-            case SET_WARNING_BLOCKS:
-                border.setWarningDistance(this.warningDistance);
-                break;
-
-            case SET_WARNING_TIME:
-                border.setWarningTime(this.warningTime);
-                break;
-
-            case INITIALIZE:
-                border.setCenter(this.centerX, this.centerZ);
-
-                if (this.timeUntilTarget > 0L)
-                {
-                    border.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-                }
-                else
-                {
-                    border.setTransition(this.targetSize);
-                }
-
-                border.setSize(this.size);
-                border.setWarningDistance(this.warningDistance);
-                border.setWarningTime(this.warningTime);
-        }
-    }
-
-    public static enum Action
-    {
-        SET_SIZE,
-        LERP_SIZE,
-        SET_CENTER,
-        INITIALIZE,
-        SET_WARNING_TIME,
-        SET_WARNING_BLOCKS;
-    }
+   public static enum Action {
+      SET_SIZE,
+      LERP_SIZE,
+      SET_CENTER,
+      INITIALIZE,
+      SET_WARNING_TIME,
+      SET_WARNING_BLOCKS;
+   }
 }

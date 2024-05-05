@@ -5,36 +5,26 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
-public interface IRecipe
-{
-    /**
-     * Used to check if a recipe matches current crafting inventory
-     */
-    boolean matches(InventoryCrafting inv, World worldIn);
+public interface IRecipe {
+   boolean func_77569_a(InventoryCrafting var1, World var2);
 
-    /**
-     * Returns an Item that is the result of this recipe
-     */
-    ItemStack getCraftingResult(InventoryCrafting inv);
+   ItemStack func_77572_b(InventoryCrafting var1);
 
-    boolean func_194133_a(int p_194133_1_, int p_194133_2_);
+   boolean func_194133_a(int var1, int var2);
 
-    ItemStack getRecipeOutput();
+   ItemStack func_77571_b();
 
-    NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv);
+   NonNullList<ItemStack> func_179532_b(InventoryCrafting var1);
 
-default NonNullList<Ingredient> func_192400_c()
-    {
-        return NonNullList.<Ingredient>func_191196_a();
-    }
+   default NonNullList<Ingredient> func_192400_c() {
+      return NonNullList.<Ingredient>func_191196_a();
+   }
 
-default boolean func_192399_d()
-    {
-        return false;
-    }
+   default boolean func_192399_d() {
+      return false;
+   }
 
-default String func_193358_e()
-    {
-        return "";
-    }
+   default String func_193358_e() {
+      return "";
+   }
 }

@@ -4,43 +4,25 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 
-public class EnchantmentDigging extends Enchantment
-{
-    protected EnchantmentDigging(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
-    {
-        super(rarityIn, EnumEnchantmentType.DIGGER, slots);
-        this.setName("digging");
-    }
+public class EnchantmentDigging extends Enchantment {
+   protected EnchantmentDigging(Enchantment.Rarity p_i46732_1_, EntityEquipmentSlot... p_i46732_2_) {
+      super(p_i46732_1_, EnumEnchantmentType.DIGGER, p_i46732_2_);
+      this.func_77322_b("digging");
+   }
 
-    /**
-     * Returns the minimal value of enchantability needed on the enchantment level passed.
-     */
-    public int getMinEnchantability(int enchantmentLevel)
-    {
-        return 1 + 10 * (enchantmentLevel - 1);
-    }
+   public int func_77321_a(int p_77321_1_) {
+      return 1 + 10 * (p_77321_1_ - 1);
+   }
 
-    /**
-     * Returns the maximum value of enchantability nedded on the enchantment level passed.
-     */
-    public int getMaxEnchantability(int enchantmentLevel)
-    {
-        return super.getMinEnchantability(enchantmentLevel) + 50;
-    }
+   public int func_77317_b(int p_77317_1_) {
+      return super.func_77321_a(p_77317_1_) + 50;
+   }
 
-    /**
-     * Returns the maximum level that the enchantment can have.
-     */
-    public int getMaxLevel()
-    {
-        return 5;
-    }
+   public int func_77325_b() {
+      return 5;
+   }
 
-    /**
-     * Determines if this enchantment can be applied to a specific ItemStack.
-     */
-    public boolean canApply(ItemStack stack)
-    {
-        return stack.getItem() == Items.SHEARS ? true : super.canApply(stack);
-    }
+   public boolean func_92089_a(ItemStack p_92089_1_) {
+      return p_92089_1_.func_77973_b() == Items.field_151097_aZ ? true : super.func_92089_a(p_92089_1_);
+   }
 }

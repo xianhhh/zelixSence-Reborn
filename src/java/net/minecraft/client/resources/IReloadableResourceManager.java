@@ -2,9 +2,8 @@ package net.minecraft.client.resources;
 
 import java.util.List;
 
-public interface IReloadableResourceManager extends IResourceManager
-{
-    void reloadResources(List<IResourcePack> resourcesPacksList);
+public interface IReloadableResourceManager extends IResourceManager {
+   void func_110541_a(List<IResourcePack> var1);
 
-    void registerReloadListener(IResourceManagerReloadListener reloadListener);
+   void func_110542_a(IResourceManagerReloadListener var1);
 }

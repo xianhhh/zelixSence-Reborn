@@ -5,108 +5,74 @@ import java.io.IOException;
 import java.util.List;
 import net.minecraft.client.resources.I18n;
 
-public class GuiYesNo extends GuiScreen
-{
-    /**
-     * A reference to the screen object that created this. Used for navigating between screens.
-     */
-    protected GuiYesNoCallback parentScreen;
-    protected String messageLine1;
-    private final String messageLine2;
-    private final List<String> listLines = Lists.<String>newArrayList();
+public class GuiYesNo extends GuiScreen {
+   protected GuiYesNoCallback field_146355_a;
+   protected String field_146351_f;
+   private final String field_146354_r;
+   private final List<String> field_175298_s = Lists.<String>newArrayList();
+   protected String field_146352_g;
+   protected String field_146356_h;
+   protected int field_146357_i;
+   private int field_146353_s;
 
-    /** The text shown for the first button in GuiYesNo */
-    protected String confirmButtonText;
+   public GuiYesNo(GuiYesNoCallback p_i1082_1_, String p_i1082_2_, String p_i1082_3_, int p_i1082_4_) {
+      this.field_146355_a = p_i1082_1_;
+      this.field_146351_f = p_i1082_2_;
+      this.field_146354_r = p_i1082_3_;
+      this.field_146357_i = p_i1082_4_;
+      this.field_146352_g = I18n.func_135052_a("gui.yes");
+      this.field_146356_h = I18n.func_135052_a("gui.no");
+   }
 
-    /** The text shown for the second button in GuiYesNo */
-    protected String cancelButtonText;
-    protected int parentButtonClickedId;
-    private int ticksUntilEnable;
+   public GuiYesNo(GuiYesNoCallback p_i1083_1_, String p_i1083_2_, String p_i1083_3_, String p_i1083_4_, String p_i1083_5_, int p_i1083_6_) {
+      this.field_146355_a = p_i1083_1_;
+      this.field_146351_f = p_i1083_2_;
+      this.field_146354_r = p_i1083_3_;
+      this.field_146352_g = p_i1083_4_;
+      this.field_146356_h = p_i1083_5_;
+      this.field_146357_i = p_i1083_6_;
+   }
 
-    public GuiYesNo(GuiYesNoCallback p_i1082_1_, String p_i1082_2_, String p_i1082_3_, int p_i1082_4_)
-    {
-        this.parentScreen = p_i1082_1_;
-        this.messageLine1 = p_i1082_2_;
-        this.messageLine2 = p_i1082_3_;
-        this.parentButtonClickedId = p_i1082_4_;
-        this.confirmButtonText = I18n.format("gui.yes");
-        this.cancelButtonText = I18n.format("gui.no");
-    }
+   public void func_73866_w_() {
+      this.field_146292_n.add(new GuiOptionButton(0, this.field_146294_l / 2 - 155, this.field_146295_m / 6 + 96, this.field_146352_g));
+      this.field_146292_n.add(new GuiOptionButton(1, this.field_146294_l / 2 - 155 + 160, this.field_146295_m / 6 + 96, this.field_146356_h));
+      this.field_175298_s.clear();
+      this.field_175298_s.addAll(this.field_146289_q.func_78271_c(this.field_146354_r, this.field_146294_l - 50));
+   }
 
-    public GuiYesNo(GuiYesNoCallback p_i1083_1_, String p_i1083_2_, String p_i1083_3_, String p_i1083_4_, String p_i1083_5_, int p_i1083_6_)
-    {
-        this.parentScreen = p_i1083_1_;
-        this.messageLine1 = p_i1083_2_;
-        this.messageLine2 = p_i1083_3_;
-        this.confirmButtonText = p_i1083_4_;
-        this.cancelButtonText = p_i1083_5_;
-        this.parentButtonClickedId = p_i1083_6_;
-    }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      this.field_146355_a.func_73878_a(p_146284_1_.field_146127_k == 0, this.field_146357_i);
+   }
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        this.buttonList.add(new GuiOptionButton(0, this.width / 2 - 155, this.height / 6 + 96, this.confirmButtonText));
-        this.buttonList.add(new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height / 6 + 96, this.cancelButtonText));
-        this.listLines.clear();
-        this.listLines.addAll(this.fontRendererObj.listFormattedStringToWidth(this.messageLine2, this.width - 50));
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.func_73732_a(this.field_146289_q, this.field_146351_f, this.field_146294_l / 2, 70, 16777215);
+      int i = 90;
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        this.parentScreen.confirmClicked(button.id == 0, this.parentButtonClickedId);
-    }
+      for(String s : this.field_175298_s) {
+         this.func_73732_a(this.field_146289_q, s, this.field_146294_l / 2, i, 16777215);
+         i += this.field_146289_q.field_78288_b;
+      }
 
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, this.messageLine1, this.width / 2, 70, 16777215);
-        int i = 90;
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
 
-        for (String s : this.listLines)
-        {
-            this.drawCenteredString(this.fontRendererObj, s, this.width / 2, i, 16777215);
-            i += this.fontRendererObj.FONT_HEIGHT;
-        }
+   public void func_146350_a(int p_146350_1_) {
+      this.field_146353_s = p_146350_1_;
 
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+      for(GuiButton guibutton : this.field_146292_n) {
+         guibutton.field_146124_l = false;
+      }
 
-    /**
-     * Sets the number of ticks to wait before enabling the buttons.
-     */
-    public void setButtonDelay(int p_146350_1_)
-    {
-        this.ticksUntilEnable = p_146350_1_;
+   }
 
-        for (GuiButton guibutton : this.buttonList)
-        {
-            guibutton.enabled = false;
-        }
-    }
+   public void func_73876_c() {
+      super.func_73876_c();
+      if (--this.field_146353_s == 0) {
+         for(GuiButton guibutton : this.field_146292_n) {
+            guibutton.field_146124_l = true;
+         }
+      }
 
-    /**
-     * Called from the main game loop to update the screen.
-     */
-    public void updateScreen()
-    {
-        super.updateScreen();
-
-        if (--this.ticksUntilEnable == 0)
-        {
-            for (GuiButton guibutton : this.buttonList)
-            {
-                guibutton.enabled = true;
-            }
-        }
-    }
+   }
 }

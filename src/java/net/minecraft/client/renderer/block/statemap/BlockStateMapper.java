@@ -11,63 +11,48 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
 
-public class BlockStateMapper
-{
-    private final Map<Block, IStateMapper> blockStateMap = Maps.<Block, IStateMapper>newIdentityHashMap();
-    private final Set<Block> setBuiltInBlocks = Sets.<Block>newIdentityHashSet();
+public class BlockStateMapper {
+   private final Map<Block, IStateMapper> field_178450_a = Maps.<Block, IStateMapper>newIdentityHashMap();
+   private final Set<Block> field_178449_b = Sets.<Block>newIdentityHashSet();
 
-    public void registerBlockStateMapper(Block blockIn, IStateMapper stateMapper)
-    {
-        this.blockStateMap.put(blockIn, stateMapper);
-    }
+   public void func_178447_a(Block p_178447_1_, IStateMapper p_178447_2_) {
+      this.field_178450_a.put(p_178447_1_, p_178447_2_);
+   }
 
-    public void registerBuiltInBlocks(Block... blockIn)
-    {
-        Collections.addAll(this.setBuiltInBlocks, blockIn);
-    }
+   public void func_178448_a(Block... p_178448_1_) {
+      Collections.addAll(this.field_178449_b, p_178448_1_);
+   }
 
-    public Map<IBlockState, ModelResourceLocation> putAllStateModelLocations()
-    {
-        Map<IBlockState, ModelResourceLocation> map = Maps.<IBlockState, ModelResourceLocation>newIdentityHashMap();
+   public Map<IBlockState, ModelResourceLocation> func_178446_a() {
+      Map<IBlockState, ModelResourceLocation> map = Maps.<IBlockState, ModelResourceLocation>newIdentityHashMap();
 
-        for (Block block : Block.REGISTRY)
-        {
-            map.putAll(this.getVariants(block));
-        }
+      for(Block block : Block.field_149771_c) {
+         map.putAll(this.func_188181_b(block));
+      }
 
-        return map;
-    }
+      return map;
+   }
 
-    public Set<ResourceLocation> getBlockstateLocations(Block blockIn)
-    {
-        if (this.setBuiltInBlocks.contains(blockIn))
-        {
-            return Collections.<ResourceLocation>emptySet();
-        }
-        else
-        {
-            IStateMapper istatemapper = this.blockStateMap.get(blockIn);
+   public Set<ResourceLocation> func_188182_a(Block p_188182_1_) {
+      if (this.field_178449_b.contains(p_188182_1_)) {
+         return Collections.<ResourceLocation>emptySet();
+      } else {
+         IStateMapper istatemapper = this.field_178450_a.get(p_188182_1_);
+         if (istatemapper == null) {
+            return Collections.<ResourceLocation>singleton(Block.field_149771_c.func_177774_c(p_188182_1_));
+         } else {
+            Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 
-            if (istatemapper == null)
-            {
-                return Collections.<ResourceLocation>singleton(Block.REGISTRY.getNameForObject(blockIn));
+            for(ModelResourceLocation modelresourcelocation : istatemapper.func_178130_a(p_188182_1_).values()) {
+               set.add(new ResourceLocation(modelresourcelocation.func_110624_b(), modelresourcelocation.func_110623_a()));
             }
-            else
-            {
-                Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 
-                for (ModelResourceLocation modelresourcelocation : istatemapper.putStateModelLocations(blockIn).values())
-                {
-                    set.add(new ResourceLocation(modelresourcelocation.getResourceDomain(), modelresourcelocation.getResourcePath()));
-                }
+            return set;
+         }
+      }
+   }
 
-                return set;
-            }
-        }
-    }
-
-    public Map<IBlockState, ModelResourceLocation> getVariants(Block blockIn)
-    {
-        return this.setBuiltInBlocks.contains(blockIn) ? Collections.emptyMap() : ((IStateMapper)MoreObjects.firstNonNull(this.blockStateMap.get(blockIn), new DefaultStateMapper())).putStateModelLocations(blockIn);
-    }
+   public Map<IBlockState, ModelResourceLocation> func_188181_b(Block p_188181_1_) {
+      return this.field_178449_b.contains(p_188181_1_) ? Collections.emptyMap() : ((IStateMapper)MoreObjects.firstNonNull(this.field_178450_a.get(p_188181_1_), new DefaultStateMapper())).func_178130_a(p_188181_1_);
+   }
 }

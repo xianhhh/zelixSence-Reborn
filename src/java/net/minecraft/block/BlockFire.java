@@ -24,479 +24,352 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
 
-public class BlockFire extends Block
-{
-    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 15);
-    public static final PropertyBool NORTH = PropertyBool.create("north");
-    public static final PropertyBool EAST = PropertyBool.create("east");
-    public static final PropertyBool SOUTH = PropertyBool.create("south");
-    public static final PropertyBool WEST = PropertyBool.create("west");
-    public static final PropertyBool UPPER = PropertyBool.create("up");
-    private final Map<Block, Integer> encouragements = Maps.<Block, Integer>newIdentityHashMap();
-    private final Map<Block, Integer> flammabilities = Maps.<Block, Integer>newIdentityHashMap();
+public class BlockFire extends Block {
+   public static final PropertyInteger field_176543_a = PropertyInteger.func_177719_a("age", 0, 15);
+   public static final PropertyBool field_176545_N = PropertyBool.func_177716_a("north");
+   public static final PropertyBool field_176546_O = PropertyBool.func_177716_a("east");
+   public static final PropertyBool field_176541_P = PropertyBool.func_177716_a("south");
+   public static final PropertyBool field_176539_Q = PropertyBool.func_177716_a("west");
+   public static final PropertyBool field_176542_R = PropertyBool.func_177716_a("up");
+   private final Map<Block, Integer> field_149849_a = Maps.<Block, Integer>newIdentityHashMap();
+   private final Map<Block, Integer> field_149848_b = Maps.<Block, Integer>newIdentityHashMap();
 
-    /**
-     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
-     * metadata, such as fence connections.
-     */
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        return !worldIn.getBlockState(pos.down()).isFullyOpaque() && !Blocks.FIRE.canCatchFire(worldIn, pos.down()) ? state.withProperty(NORTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.north()))).withProperty(EAST, Boolean.valueOf(this.canCatchFire(worldIn, pos.east()))).withProperty(SOUTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.south()))).withProperty(WEST, Boolean.valueOf(this.canCatchFire(worldIn, pos.west()))).withProperty(UPPER, Boolean.valueOf(this.canCatchFire(worldIn, pos.up()))) : this.getDefaultState();
-    }
+   public IBlockState func_176221_a(IBlockState p_176221_1_, IBlockAccess p_176221_2_, BlockPos p_176221_3_) {
+      return !p_176221_2_.func_180495_p(p_176221_3_.func_177977_b()).func_185896_q() && !Blocks.field_150480_ab.func_176535_e(p_176221_2_, p_176221_3_.func_177977_b()) ? p_176221_1_.func_177226_a(field_176545_N, Boolean.valueOf(this.func_176535_e(p_176221_2_, p_176221_3_.func_177978_c()))).func_177226_a(field_176546_O, Boolean.valueOf(this.func_176535_e(p_176221_2_, p_176221_3_.func_177974_f()))).func_177226_a(field_176541_P, Boolean.valueOf(this.func_176535_e(p_176221_2_, p_176221_3_.func_177968_d()))).func_177226_a(field_176539_Q, Boolean.valueOf(this.func_176535_e(p_176221_2_, p_176221_3_.func_177976_e()))).func_177226_a(field_176542_R, Boolean.valueOf(this.func_176535_e(p_176221_2_, p_176221_3_.func_177984_a()))) : this.func_176223_P();
+   }
 
-    protected BlockFire()
-    {
-        super(Material.FIRE);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, Integer.valueOf(0)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)).withProperty(UPPER, Boolean.valueOf(false)));
-        this.setTickRandomly(true);
-    }
+   protected BlockFire() {
+      super(Material.field_151581_o);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176543_a, Integer.valueOf(0)).func_177226_a(field_176545_N, Boolean.valueOf(false)).func_177226_a(field_176546_O, Boolean.valueOf(false)).func_177226_a(field_176541_P, Boolean.valueOf(false)).func_177226_a(field_176539_Q, Boolean.valueOf(false)).func_177226_a(field_176542_R, Boolean.valueOf(false)));
+      this.func_149675_a(true);
+   }
 
-    public static void init()
-    {
-        Blocks.FIRE.setFireInfo(Blocks.PLANKS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.DOUBLE_WOODEN_SLAB, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.WOODEN_SLAB, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.OAK_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.BIRCH_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.ACACIA_FENCE_GATE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.OAK_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.BIRCH_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.ACACIA_FENCE, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.OAK_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.BIRCH_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.ACACIA_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_STAIRS, 5, 20);
-        Blocks.FIRE.setFireInfo(Blocks.LOG, 5, 5);
-        Blocks.FIRE.setFireInfo(Blocks.LOG2, 5, 5);
-        Blocks.FIRE.setFireInfo(Blocks.LEAVES, 30, 60);
-        Blocks.FIRE.setFireInfo(Blocks.LEAVES2, 30, 60);
-        Blocks.FIRE.setFireInfo(Blocks.BOOKSHELF, 30, 20);
-        Blocks.FIRE.setFireInfo(Blocks.TNT, 15, 100);
-        Blocks.FIRE.setFireInfo(Blocks.TALLGRASS, 60, 100);
-        Blocks.FIRE.setFireInfo(Blocks.DOUBLE_PLANT, 60, 100);
-        Blocks.FIRE.setFireInfo(Blocks.YELLOW_FLOWER, 60, 100);
-        Blocks.FIRE.setFireInfo(Blocks.RED_FLOWER, 60, 100);
-        Blocks.FIRE.setFireInfo(Blocks.DEADBUSH, 60, 100);
-        Blocks.FIRE.setFireInfo(Blocks.WOOL, 30, 60);
-        Blocks.FIRE.setFireInfo(Blocks.VINE, 15, 100);
-        Blocks.FIRE.setFireInfo(Blocks.COAL_BLOCK, 5, 5);
-        Blocks.FIRE.setFireInfo(Blocks.HAY_BLOCK, 60, 20);
-        Blocks.FIRE.setFireInfo(Blocks.CARPET, 60, 20);
-    }
+   public static void func_149843_e() {
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150344_f, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150373_bw, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150376_bx, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180390_bo, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180391_bp, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180392_bq, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180386_br, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180385_bs, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180387_bt, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180407_aO, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180408_aP, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180404_aQ, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180403_aR, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180406_aS, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_180405_aT, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150476_ad, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150487_bG, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150485_bF, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150481_bH, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150400_ck, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150401_cl, 5, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150364_r, 5, 5);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150363_s, 5, 5);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150362_t, 30, 60);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150361_u, 30, 60);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150342_X, 30, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150335_W, 15, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150329_H, 60, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150398_cm, 60, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150327_N, 60, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150328_O, 60, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150330_I, 60, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150325_L, 30, 60);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150395_bd, 15, 100);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150402_ci, 5, 5);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150407_cf, 60, 20);
+      Blocks.field_150480_ab.func_180686_a(Blocks.field_150404_cg, 60, 20);
+   }
 
-    public void setFireInfo(Block blockIn, int encouragement, int flammability)
-    {
-        this.encouragements.put(blockIn, Integer.valueOf(encouragement));
-        this.flammabilities.put(blockIn, Integer.valueOf(flammability));
-    }
+   public void func_180686_a(Block p_180686_1_, int p_180686_2_, int p_180686_3_) {
+      this.field_149849_a.put(p_180686_1_, Integer.valueOf(p_180686_2_));
+      this.field_149848_b.put(p_180686_1_, Integer.valueOf(p_180686_3_));
+   }
 
-    @Nullable
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
-    {
-        return NULL_AABB;
-    }
+   @Nullable
+   public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_) {
+      return field_185506_k;
+   }
 
-    /**
-     * Used to determine ambient occlusion and culling when rebuilding chunks for render
-     */
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149662_c(IBlockState p_149662_1_) {
+      return false;
+   }
 
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
+   public boolean func_149686_d(IBlockState p_149686_1_) {
+      return false;
+   }
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    public int quantityDropped(Random random)
-    {
-        return 0;
-    }
+   public int func_149745_a(Random p_149745_1_) {
+      return 0;
+   }
 
-    /**
-     * How many world ticks before ticking
-     */
-    public int tickRate(World worldIn)
-    {
-        return 30;
-    }
+   public int func_149738_a(World p_149738_1_) {
+      return 30;
+   }
 
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-        if (worldIn.getGameRules().getBoolean("doFireTick"))
-        {
-            if (!this.canPlaceBlockAt(worldIn, pos))
-            {
-                worldIn.setBlockToAir(pos);
+   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
+      if (p_180650_1_.func_82736_K().func_82766_b("doFireTick")) {
+         if (!this.func_176196_c(p_180650_1_, p_180650_2_)) {
+            p_180650_1_.func_175698_g(p_180650_2_);
+         }
+
+         Block block = p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_177230_c();
+         boolean flag = block == Blocks.field_150424_aL || block == Blocks.field_189877_df;
+         if (p_180650_1_.field_73011_w instanceof WorldProviderEnd && block == Blocks.field_150357_h) {
+            flag = true;
+         }
+
+         int i = ((Integer)p_180650_3_.func_177229_b(field_176543_a)).intValue();
+         if (!flag && p_180650_1_.func_72896_J() && this.func_176537_d(p_180650_1_, p_180650_2_) && p_180650_4_.nextFloat() < 0.2F + (float)i * 0.03F) {
+            p_180650_1_.func_175698_g(p_180650_2_);
+         } else {
+            if (i < 15) {
+               p_180650_3_ = p_180650_3_.func_177226_a(field_176543_a, Integer.valueOf(i + p_180650_4_.nextInt(3) / 2));
+               p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_, 4);
             }
 
-            Block block = worldIn.getBlockState(pos.down()).getBlock();
-            boolean flag = block == Blocks.NETHERRACK || block == Blocks.MAGMA;
+            p_180650_1_.func_175684_a(p_180650_2_, this, this.func_149738_a(p_180650_1_) + p_180650_4_.nextInt(10));
+            if (!flag) {
+               if (!this.func_176533_e(p_180650_1_, p_180650_2_)) {
+                  if (!p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_185896_q() || i > 3) {
+                     p_180650_1_.func_175698_g(p_180650_2_);
+                  }
 
-            if (worldIn.provider instanceof WorldProviderEnd && block == Blocks.BEDROCK)
-            {
-                flag = true;
+                  return;
+               }
+
+               if (!this.func_176535_e(p_180650_1_, p_180650_2_.func_177977_b()) && i == 15 && p_180650_4_.nextInt(4) == 0) {
+                  p_180650_1_.func_175698_g(p_180650_2_);
+                  return;
+               }
             }
 
-            int i = ((Integer)state.getValue(AGE)).intValue();
-
-            if (!flag && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float)i * 0.03F)
-            {
-                worldIn.setBlockToAir(pos);
+            boolean flag1 = p_180650_1_.func_180502_D(p_180650_2_);
+            int j = 0;
+            if (flag1) {
+               j = -50;
             }
-            else
-            {
-                if (i < 15)
-                {
-                    state = state.withProperty(AGE, Integer.valueOf(i + rand.nextInt(3) / 2));
-                    worldIn.setBlockState(pos, state, 4);
-                }
 
-                worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn) + rand.nextInt(10));
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177974_f(), 300 + j, p_180650_4_, i);
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177976_e(), 300 + j, p_180650_4_, i);
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177977_b(), 250 + j, p_180650_4_, i);
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177984_a(), 250 + j, p_180650_4_, i);
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177978_c(), 300 + j, p_180650_4_, i);
+            this.func_176536_a(p_180650_1_, p_180650_2_.func_177968_d(), 300 + j, p_180650_4_, i);
 
-                if (!flag)
-                {
-                    if (!this.canNeighborCatchFire(worldIn, pos))
-                    {
-                        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() || i > 3)
-                        {
-                            worldIn.setBlockToAir(pos);
+            for(int k = -1; k <= 1; ++k) {
+               for(int l = -1; l <= 1; ++l) {
+                  for(int i1 = -1; i1 <= 4; ++i1) {
+                     if (k != 0 || i1 != 0 || l != 0) {
+                        int j1 = 100;
+                        if (i1 > 1) {
+                           j1 += (i1 - 1) * 100;
                         }
 
-                        return;
-                    }
+                        BlockPos blockpos = p_180650_2_.func_177982_a(k, i1, l);
+                        int k1 = this.func_176538_m(p_180650_1_, blockpos);
+                        if (k1 > 0) {
+                           int l1 = (k1 + 40 + p_180650_1_.func_175659_aa().func_151525_a() * 7) / (i + 30);
+                           if (flag1) {
+                              l1 /= 2;
+                           }
 
-                    if (!this.canCatchFire(worldIn, pos.down()) && i == 15 && rand.nextInt(4) == 0)
-                    {
-                        worldIn.setBlockToAir(pos);
-                        return;
-                    }
-                }
+                           if (l1 > 0 && p_180650_4_.nextInt(j1) <= l1 && (!p_180650_1_.func_72896_J() || !this.func_176537_d(p_180650_1_, blockpos))) {
+                              int i2 = i + p_180650_4_.nextInt(5) / 4;
+                              if (i2 > 15) {
+                                 i2 = 15;
+                              }
 
-                boolean flag1 = worldIn.isBlockinHighHumidity(pos);
-                int j = 0;
-
-                if (flag1)
-                {
-                    j = -50;
-                }
-
-                this.catchOnFire(worldIn, pos.east(), 300 + j, rand, i);
-                this.catchOnFire(worldIn, pos.west(), 300 + j, rand, i);
-                this.catchOnFire(worldIn, pos.down(), 250 + j, rand, i);
-                this.catchOnFire(worldIn, pos.up(), 250 + j, rand, i);
-                this.catchOnFire(worldIn, pos.north(), 300 + j, rand, i);
-                this.catchOnFire(worldIn, pos.south(), 300 + j, rand, i);
-
-                for (int k = -1; k <= 1; ++k)
-                {
-                    for (int l = -1; l <= 1; ++l)
-                    {
-                        for (int i1 = -1; i1 <= 4; ++i1)
-                        {
-                            if (k != 0 || i1 != 0 || l != 0)
-                            {
-                                int j1 = 100;
-
-                                if (i1 > 1)
-                                {
-                                    j1 += (i1 - 1) * 100;
-                                }
-
-                                BlockPos blockpos = pos.add(k, i1, l);
-                                int k1 = this.getNeighborEncouragement(worldIn, blockpos);
-
-                                if (k1 > 0)
-                                {
-                                    int l1 = (k1 + 40 + worldIn.getDifficulty().getDifficultyId() * 7) / (i + 30);
-
-                                    if (flag1)
-                                    {
-                                        l1 /= 2;
-                                    }
-
-                                    if (l1 > 0 && rand.nextInt(j1) <= l1 && (!worldIn.isRaining() || !this.canDie(worldIn, blockpos)))
-                                    {
-                                        int i2 = i + rand.nextInt(5) / 4;
-
-                                        if (i2 > 15)
-                                        {
-                                            i2 = 15;
-                                        }
-
-                                        worldIn.setBlockState(blockpos, state.withProperty(AGE, Integer.valueOf(i2)), 3);
-                                    }
-                                }
-                            }
+                              p_180650_1_.func_180501_a(blockpos, p_180650_3_.func_177226_a(field_176543_a, Integer.valueOf(i2)), 3);
+                           }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    protected boolean canDie(World worldIn, BlockPos pos)
-    {
-        return worldIn.isRainingAt(pos) || worldIn.isRainingAt(pos.west()) || worldIn.isRainingAt(pos.east()) || worldIn.isRainingAt(pos.north()) || worldIn.isRainingAt(pos.south());
-    }
-
-    public boolean requiresUpdates()
-    {
-        return false;
-    }
-
-    private int getFlammability(Block blockIn)
-    {
-        Integer integer = this.flammabilities.get(blockIn);
-        return integer == null ? 0 : integer.intValue();
-    }
-
-    private int getEncouragement(Block blockIn)
-    {
-        Integer integer = this.encouragements.get(blockIn);
-        return integer == null ? 0 : integer.intValue();
-    }
-
-    private void catchOnFire(World worldIn, BlockPos pos, int chance, Random random, int age)
-    {
-        int i = this.getFlammability(worldIn.getBlockState(pos).getBlock());
-
-        if (random.nextInt(chance) < i)
-        {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-
-            if (random.nextInt(age + 10) < 5 && !worldIn.isRainingAt(pos))
-            {
-                int j = age + random.nextInt(5) / 4;
-
-                if (j > 15)
-                {
-                    j = 15;
-                }
-
-                worldIn.setBlockState(pos, this.getDefaultState().withProperty(AGE, Integer.valueOf(j)), 3);
-            }
-            else
-            {
-                worldIn.setBlockToAir(pos);
+                     }
+                  }
+               }
             }
 
-            if (iblockstate.getBlock() == Blocks.TNT)
-            {
-                Blocks.TNT.onBlockDestroyedByPlayer(worldIn, pos, iblockstate.withProperty(BlockTNT.EXPLODE, Boolean.valueOf(true)));
-            }
-        }
-    }
+         }
+      }
+   }
 
-    private boolean canNeighborCatchFire(World worldIn, BlockPos pos)
-    {
-        for (EnumFacing enumfacing : EnumFacing.values())
-        {
-            if (this.canCatchFire(worldIn, pos.offset(enumfacing)))
-            {
-                return true;
-            }
-        }
+   protected boolean func_176537_d(World p_176537_1_, BlockPos p_176537_2_) {
+      return p_176537_1_.func_175727_C(p_176537_2_) || p_176537_1_.func_175727_C(p_176537_2_.func_177976_e()) || p_176537_1_.func_175727_C(p_176537_2_.func_177974_f()) || p_176537_1_.func_175727_C(p_176537_2_.func_177978_c()) || p_176537_1_.func_175727_C(p_176537_2_.func_177968_d());
+   }
 
-        return false;
-    }
+   public boolean func_149698_L() {
+      return false;
+   }
 
-    private int getNeighborEncouragement(World worldIn, BlockPos pos)
-    {
-        if (!worldIn.isAirBlock(pos))
-        {
-            return 0;
-        }
-        else
-        {
-            int i = 0;
+   private int func_176532_c(Block p_176532_1_) {
+      Integer integer = this.field_149848_b.get(p_176532_1_);
+      return integer == null ? 0 : integer.intValue();
+   }
 
-            for (EnumFacing enumfacing : EnumFacing.values())
-            {
-                i = Math.max(this.getEncouragement(worldIn.getBlockState(pos.offset(enumfacing)).getBlock()), i);
+   private int func_176534_d(Block p_176534_1_) {
+      Integer integer = this.field_149849_a.get(p_176534_1_);
+      return integer == null ? 0 : integer.intValue();
+   }
+
+   private void func_176536_a(World p_176536_1_, BlockPos p_176536_2_, int p_176536_3_, Random p_176536_4_, int p_176536_5_) {
+      int i = this.func_176532_c(p_176536_1_.func_180495_p(p_176536_2_).func_177230_c());
+      if (p_176536_4_.nextInt(p_176536_3_) < i) {
+         IBlockState iblockstate = p_176536_1_.func_180495_p(p_176536_2_);
+         if (p_176536_4_.nextInt(p_176536_5_ + 10) < 5 && !p_176536_1_.func_175727_C(p_176536_2_)) {
+            int j = p_176536_5_ + p_176536_4_.nextInt(5) / 4;
+            if (j > 15) {
+               j = 15;
             }
 
-            return i;
-        }
-    }
+            p_176536_1_.func_180501_a(p_176536_2_, this.func_176223_P().func_177226_a(field_176543_a, Integer.valueOf(j)), 3);
+         } else {
+            p_176536_1_.func_175698_g(p_176536_2_);
+         }
 
-    /**
-     * Returns if this block is collidable. Only used by fire, although stairs return that of the block that the stair
-     * is made of (though nobody's going to make fire stairs, right?)
-     */
-    public boolean isCollidable()
-    {
-        return false;
-    }
+         if (iblockstate.func_177230_c() == Blocks.field_150335_W) {
+            Blocks.field_150335_W.func_176206_d(p_176536_1_, p_176536_2_, iblockstate.func_177226_a(BlockTNT.field_176246_a, Boolean.valueOf(true)));
+         }
+      }
 
-    /**
-     * Checks if the block can be caught on fire
-     */
-    public boolean canCatchFire(IBlockAccess worldIn, BlockPos pos)
-    {
-        return this.getEncouragement(worldIn.getBlockState(pos).getBlock()) > 0;
-    }
+   }
 
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
-    {
-        return worldIn.getBlockState(pos.down()).isFullyOpaque() || this.canNeighborCatchFire(worldIn, pos);
-    }
+   private boolean func_176533_e(World p_176533_1_, BlockPos p_176533_2_) {
+      for(EnumFacing enumfacing : EnumFacing.values()) {
+         if (this.func_176535_e(p_176533_1_, p_176533_2_.func_177972_a(enumfacing))) {
+            return true;
+         }
+      }
 
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !this.canNeighborCatchFire(worldIn, pos))
-        {
-            worldIn.setBlockToAir(pos);
-        }
-    }
+      return false;
+   }
 
-    /**
-     * Called after the block is set in the Chunk data, but before the Tile Entity is set
-     */
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (worldIn.provider.getDimensionType().getId() > 0 || !Blocks.PORTAL.trySpawnPortal(worldIn, pos))
-        {
-            if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !this.canNeighborCatchFire(worldIn, pos))
-            {
-                worldIn.setBlockToAir(pos);
+   private int func_176538_m(World p_176538_1_, BlockPos p_176538_2_) {
+      if (!p_176538_1_.func_175623_d(p_176538_2_)) {
+         return 0;
+      } else {
+         int i = 0;
+
+         for(EnumFacing enumfacing : EnumFacing.values()) {
+            i = Math.max(this.func_176534_d(p_176538_1_.func_180495_p(p_176538_2_.func_177972_a(enumfacing)).func_177230_c()), i);
+         }
+
+         return i;
+      }
+   }
+
+   public boolean func_149703_v() {
+      return false;
+   }
+
+   public boolean func_176535_e(IBlockAccess p_176535_1_, BlockPos p_176535_2_) {
+      return this.func_176534_d(p_176535_1_.func_180495_p(p_176535_2_).func_177230_c()) > 0;
+   }
+
+   public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_) {
+      return p_176196_1_.func_180495_p(p_176196_2_.func_177977_b()).func_185896_q() || this.func_176533_e(p_176196_1_, p_176196_2_);
+   }
+
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      if (!p_189540_2_.func_180495_p(p_189540_3_.func_177977_b()).func_185896_q() && !this.func_176533_e(p_189540_2_, p_189540_3_)) {
+         p_189540_2_.func_175698_g(p_189540_3_);
+      }
+
+   }
+
+   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
+      if (p_176213_1_.field_73011_w.func_186058_p().func_186068_a() > 0 || !Blocks.field_150427_aO.func_176548_d(p_176213_1_, p_176213_2_)) {
+         if (!p_176213_1_.func_180495_p(p_176213_2_.func_177977_b()).func_185896_q() && !this.func_176533_e(p_176213_1_, p_176213_2_)) {
+            p_176213_1_.func_175698_g(p_176213_2_);
+         } else {
+            p_176213_1_.func_175684_a(p_176213_2_, this, this.func_149738_a(p_176213_1_) + p_176213_1_.field_73012_v.nextInt(10));
+         }
+      }
+   }
+
+   public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_) {
+      if (p_180655_4_.nextInt(24) == 0) {
+         p_180655_2_.func_184134_a((double)((float)p_180655_3_.func_177958_n() + 0.5F), (double)((float)p_180655_3_.func_177956_o() + 0.5F), (double)((float)p_180655_3_.func_177952_p() + 0.5F), SoundEvents.field_187643_bs, SoundCategory.BLOCKS, 1.0F + p_180655_4_.nextFloat(), p_180655_4_.nextFloat() * 0.7F + 0.3F, false);
+      }
+
+      if (!p_180655_2_.func_180495_p(p_180655_3_.func_177977_b()).func_185896_q() && !Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177977_b())) {
+         if (Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177976_e())) {
+            for(int j = 0; j < 2; ++j) {
+               double d3 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble() * 0.10000000149011612D;
+               double d8 = (double)p_180655_3_.func_177956_o() + p_180655_4_.nextDouble();
+               double d13 = (double)p_180655_3_.func_177952_p() + p_180655_4_.nextDouble();
+               p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d3, d8, d13, 0.0D, 0.0D, 0.0D);
             }
-            else
-            {
-                worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn) + worldIn.rand.nextInt(10));
+         }
+
+         if (Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177974_f())) {
+            for(int k = 0; k < 2; ++k) {
+               double d4 = (double)(p_180655_3_.func_177958_n() + 1) - p_180655_4_.nextDouble() * 0.10000000149011612D;
+               double d9 = (double)p_180655_3_.func_177956_o() + p_180655_4_.nextDouble();
+               double d14 = (double)p_180655_3_.func_177952_p() + p_180655_4_.nextDouble();
+               p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d4, d9, d14, 0.0D, 0.0D, 0.0D);
             }
-        }
-    }
+         }
 
-    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
-    {
-        if (rand.nextInt(24) == 0)
-        {
-            worldIn.playSound((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 1.0F + rand.nextFloat(), rand.nextFloat() * 0.7F + 0.3F, false);
-        }
-
-        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !Blocks.FIRE.canCatchFire(worldIn, pos.down()))
-        {
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.west()))
-            {
-                for (int j = 0; j < 2; ++j)
-                {
-                    double d3 = (double)pos.getX() + rand.nextDouble() * 0.10000000149011612D;
-                    double d8 = (double)pos.getY() + rand.nextDouble();
-                    double d13 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d3, d8, d13, 0.0D, 0.0D, 0.0D);
-                }
+         if (Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177978_c())) {
+            for(int l = 0; l < 2; ++l) {
+               double d5 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble();
+               double d10 = (double)p_180655_3_.func_177956_o() + p_180655_4_.nextDouble();
+               double d15 = (double)p_180655_3_.func_177952_p() + p_180655_4_.nextDouble() * 0.10000000149011612D;
+               p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d5, d10, d15, 0.0D, 0.0D, 0.0D);
             }
+         }
 
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.east()))
-            {
-                for (int k = 0; k < 2; ++k)
-                {
-                    double d4 = (double)(pos.getX() + 1) - rand.nextDouble() * 0.10000000149011612D;
-                    double d9 = (double)pos.getY() + rand.nextDouble();
-                    double d14 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d4, d9, d14, 0.0D, 0.0D, 0.0D);
-                }
+         if (Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177968_d())) {
+            for(int i1 = 0; i1 < 2; ++i1) {
+               double d6 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble();
+               double d11 = (double)p_180655_3_.func_177956_o() + p_180655_4_.nextDouble();
+               double d16 = (double)(p_180655_3_.func_177952_p() + 1) - p_180655_4_.nextDouble() * 0.10000000149011612D;
+               p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d6, d11, d16, 0.0D, 0.0D, 0.0D);
             }
+         }
 
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.north()))
-            {
-                for (int l = 0; l < 2; ++l)
-                {
-                    double d5 = (double)pos.getX() + rand.nextDouble();
-                    double d10 = (double)pos.getY() + rand.nextDouble();
-                    double d15 = (double)pos.getZ() + rand.nextDouble() * 0.10000000149011612D;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d5, d10, d15, 0.0D, 0.0D, 0.0D);
-                }
+         if (Blocks.field_150480_ab.func_176535_e(p_180655_2_, p_180655_3_.func_177984_a())) {
+            for(int j1 = 0; j1 < 2; ++j1) {
+               double d7 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble();
+               double d12 = (double)(p_180655_3_.func_177956_o() + 1) - p_180655_4_.nextDouble() * 0.10000000149011612D;
+               double d17 = (double)p_180655_3_.func_177952_p() + p_180655_4_.nextDouble();
+               p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d7, d12, d17, 0.0D, 0.0D, 0.0D);
             }
+         }
+      } else {
+         for(int i = 0; i < 3; ++i) {
+            double d0 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble();
+            double d1 = (double)p_180655_3_.func_177956_o() + p_180655_4_.nextDouble() * 0.5D + 0.5D;
+            double d2 = (double)p_180655_3_.func_177952_p() + p_180655_4_.nextDouble();
+            p_180655_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+         }
+      }
 
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.south()))
-            {
-                for (int i1 = 0; i1 < 2; ++i1)
-                {
-                    double d6 = (double)pos.getX() + rand.nextDouble();
-                    double d11 = (double)pos.getY() + rand.nextDouble();
-                    double d16 = (double)(pos.getZ() + 1) - rand.nextDouble() * 0.10000000149011612D;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d6, d11, d16, 0.0D, 0.0D, 0.0D);
-                }
-            }
+   }
 
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.up()))
-            {
-                for (int j1 = 0; j1 < 2; ++j1)
-                {
-                    double d7 = (double)pos.getX() + rand.nextDouble();
-                    double d12 = (double)(pos.getY() + 1) - rand.nextDouble() * 0.10000000149011612D;
-                    double d17 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d7, d12, d17, 0.0D, 0.0D, 0.0D);
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                double d0 = (double)pos.getX() + rand.nextDouble();
-                double d1 = (double)pos.getY() + rand.nextDouble() * 0.5D + 0.5D;
-                double d2 = (double)pos.getZ() + rand.nextDouble();
-                worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d0, d1, d2, 0.0D, 0.0D, 0.0D);
-            }
-        }
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return MapColor.field_151656_f;
+   }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return MapColor.TNT;
-    }
+   public BlockRenderLayer func_180664_k() {
+      return BlockRenderLayer.CUTOUT;
+   }
 
-    public BlockRenderLayer getBlockLayer()
-    {
-        return BlockRenderLayer.CUTOUT;
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176543_a, Integer.valueOf(p_176203_1_));
+   }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(AGE, Integer.valueOf(meta));
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((Integer)p_176201_1_.func_177229_b(field_176543_a)).intValue();
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(AGE)).intValue();
-    }
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176543_a, field_176545_N, field_176546_O, field_176541_P, field_176539_Q, field_176542_R});
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {AGE, NORTH, EAST, SOUTH, WEST, UPPER});
-    }
-
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
-    {
-        return BlockFaceShape.UNDEFINED;
-    }
+   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
+      return BlockFaceShape.UNDEFINED;
+   }
 }

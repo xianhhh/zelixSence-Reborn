@@ -18,63 +18,51 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameType;
 
-public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObject
-{
-    private static final Ordering<NetworkPlayerInfo> PROFILE_ORDER = Ordering.from(new Comparator<NetworkPlayerInfo>()
-    {
-        public int compare(NetworkPlayerInfo p_compare_1_, NetworkPlayerInfo p_compare_2_)
-        {
-            return ComparisonChain.start().compare(p_compare_1_.getGameProfile().getId(), p_compare_2_.getGameProfile().getId()).result();
-        }
-    });
-    private final List<ISpectatorMenuObject> items;
+public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObject {
+   private static final Ordering<NetworkPlayerInfo> field_178674_a = Ordering.from(new Comparator<NetworkPlayerInfo>() {
+      public int compare(NetworkPlayerInfo p_compare_1_, NetworkPlayerInfo p_compare_2_) {
+         return ComparisonChain.start().compare(p_compare_1_.func_178845_a().getId(), p_compare_2_.func_178845_a().getId()).result();
+      }
+   });
+   private final List<ISpectatorMenuObject> field_178673_b;
 
-    public TeleportToPlayer()
-    {
-        this(PROFILE_ORDER.sortedCopy(Minecraft.getMinecraft().getConnection().getPlayerInfoMap()));
-    }
+   public TeleportToPlayer() {
+      this(field_178674_a.sortedCopy(Minecraft.func_71410_x().func_147114_u().func_175106_d()));
+   }
 
-    public TeleportToPlayer(Collection<NetworkPlayerInfo> p_i45493_1_)
-    {
-        this.items = Lists.<ISpectatorMenuObject>newArrayList();
+   public TeleportToPlayer(Collection<NetworkPlayerInfo> p_i45493_1_) {
+      this.field_178673_b = Lists.<ISpectatorMenuObject>newArrayList();
 
-        for (NetworkPlayerInfo networkplayerinfo : PROFILE_ORDER.sortedCopy(p_i45493_1_))
-        {
-            if (networkplayerinfo.getGameType() != GameType.SPECTATOR)
-            {
-                this.items.add(new PlayerMenuObject(networkplayerinfo.getGameProfile()));
-            }
-        }
-    }
+      for(NetworkPlayerInfo networkplayerinfo : field_178674_a.sortedCopy(p_i45493_1_)) {
+         if (networkplayerinfo.func_178848_b() != GameType.SPECTATOR) {
+            this.field_178673_b.add(new PlayerMenuObject(networkplayerinfo.func_178845_a()));
+         }
+      }
 
-    public List<ISpectatorMenuObject> getItems()
-    {
-        return this.items;
-    }
+   }
 
-    public ITextComponent getPrompt()
-    {
-        return new TextComponentTranslation("spectatorMenu.teleport.prompt", new Object[0]);
-    }
+   public List<ISpectatorMenuObject> func_178669_a() {
+      return this.field_178673_b;
+   }
 
-    public void selectItem(SpectatorMenu menu)
-    {
-        menu.selectCategory(this);
-    }
+   public ITextComponent func_178670_b() {
+      return new TextComponentTranslation("spectatorMenu.teleport.prompt", new Object[0]);
+   }
 
-    public ITextComponent getSpectatorName()
-    {
-        return new TextComponentTranslation("spectatorMenu.teleport", new Object[0]);
-    }
+   public void func_178661_a(SpectatorMenu p_178661_1_) {
+      p_178661_1_.func_178647_a(this);
+   }
 
-    public void renderIcon(float p_178663_1_, int alpha)
-    {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, 16, 16, 256.0F, 256.0F);
-    }
+   public ITextComponent func_178664_z_() {
+      return new TextComponentTranslation("spectatorMenu.teleport", new Object[0]);
+   }
 
-    public boolean isEnabled()
-    {
-        return !this.items.isEmpty();
-    }
+   public void func_178663_a(float p_178663_1_, int p_178663_2_) {
+      Minecraft.func_71410_x().func_110434_K().func_110577_a(GuiSpectator.field_175269_a);
+      Gui.func_146110_a(0, 0, 0.0F, 0.0F, 16, 16, 256.0F, 256.0F);
+   }
+
+   public boolean func_178662_A_() {
+      return !this.field_178673_b.isEmpty();
+   }
 }

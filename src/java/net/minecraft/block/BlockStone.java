@@ -17,158 +17,115 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 
-public class BlockStone extends Block
-{
-    public static final PropertyEnum<BlockStone.EnumType> VARIANT = PropertyEnum.<BlockStone.EnumType>create("variant", BlockStone.EnumType.class);
+public class BlockStone extends Block {
+   public static final PropertyEnum<BlockStone.EnumType> field_176247_a = PropertyEnum.<BlockStone.EnumType>func_177709_a("variant", BlockStone.EnumType.class);
 
-    public BlockStone()
-    {
-        super(Material.ROCK);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockStone.EnumType.STONE));
-        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
-    }
+   public BlockStone() {
+      super(Material.field_151576_e);
+      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176247_a, BlockStone.EnumType.STONE));
+      this.func_149647_a(CreativeTabs.field_78030_b);
+   }
 
-    /**
-     * Gets the localized name of this block. Used for the statistics page.
-     */
-    public String getLocalizedName()
-    {
-        return I18n.translateToLocal(this.getUnlocalizedName() + "." + BlockStone.EnumType.STONE.getUnlocalizedName() + ".name");
-    }
+   public String func_149732_F() {
+      return I18n.func_74838_a(this.func_149739_a() + "." + BlockStone.EnumType.STONE.func_176644_c() + ".name");
+   }
 
-    /**
-     * Get the MapColor for this Block and the given BlockState
-     */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
-    {
-        return ((BlockStone.EnumType)state.getValue(VARIANT)).getMapColor();
-    }
+   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
+      return ((BlockStone.EnumType)p_180659_1_.func_177229_b(field_176247_a)).func_181072_c();
+   }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return state.getValue(VARIANT) == BlockStone.EnumType.STONE ? Item.getItemFromBlock(Blocks.COBBLESTONE) : Item.getItemFromBlock(Blocks.STONE);
-    }
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return p_180660_1_.func_177229_b(field_176247_a) == BlockStone.EnumType.STONE ? Item.func_150898_a(Blocks.field_150347_e) : Item.func_150898_a(Blocks.field_150348_b);
+   }
 
-    /**
-     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
-     * returns the metadata of the dropped item based on the old metadata of the block.
-     */
-    public int damageDropped(IBlockState state)
-    {
-        return ((BlockStone.EnumType)state.getValue(VARIANT)).getMetadata();
-    }
+   public int func_180651_a(IBlockState p_180651_1_) {
+      return ((BlockStone.EnumType)p_180651_1_.func_177229_b(field_176247_a)).func_176642_a();
+   }
 
-    /**
-     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
-     */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
-    {
-        for (BlockStone.EnumType blockstone$enumtype : BlockStone.EnumType.values())
-        {
-            tab.add(new ItemStack(this, 1, blockstone$enumtype.getMetadata()));
-        }
-    }
+   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
+      for(BlockStone.EnumType blockstone$enumtype : BlockStone.EnumType.values()) {
+         p_149666_2_.add(new ItemStack(this, 1, blockstone$enumtype.func_176642_a()));
+      }
 
-    /**
-     * Convert the given metadata into a BlockState for this Block
-     */
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState().withProperty(VARIANT, BlockStone.EnumType.byMetadata(meta));
-    }
+   }
 
-    /**
-     * Convert the BlockState into the correct metadata value
-     */
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((BlockStone.EnumType)state.getValue(VARIANT)).getMetadata();
-    }
+   public IBlockState func_176203_a(int p_176203_1_) {
+      return this.func_176223_P().func_177226_a(field_176247_a, BlockStone.EnumType.func_176643_a(p_176203_1_));
+   }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[] {VARIANT});
-    }
+   public int func_176201_c(IBlockState p_176201_1_) {
+      return ((BlockStone.EnumType)p_176201_1_.func_177229_b(field_176247_a)).func_176642_a();
+   }
 
-    public static enum EnumType implements IStringSerializable
-    {
-        STONE(0, MapColor.STONE, "stone", true),
-        GRANITE(1, MapColor.DIRT, "granite", true),
-        GRANITE_SMOOTH(2, MapColor.DIRT, "smooth_granite", "graniteSmooth", false),
-        DIORITE(3, MapColor.QUARTZ, "diorite", true),
-        DIORITE_SMOOTH(4, MapColor.QUARTZ, "smooth_diorite", "dioriteSmooth", false),
-        ANDESITE(5, MapColor.STONE, "andesite", true),
-        ANDESITE_SMOOTH(6, MapColor.STONE, "smooth_andesite", "andesiteSmooth", false);
+   protected BlockStateContainer func_180661_e() {
+      return new BlockStateContainer(this, new IProperty[]{field_176247_a});
+   }
 
-        private static final BlockStone.EnumType[] META_LOOKUP = new BlockStone.EnumType[values().length];
-        private final int meta;
-        private final String name;
-        private final String unlocalizedName;
-        private final MapColor mapColor;
-        private final boolean field_190913_m;
+   public static enum EnumType implements IStringSerializable {
+      STONE(0, MapColor.field_151665_m, "stone", true),
+      GRANITE(1, MapColor.field_151664_l, "granite", true),
+      GRANITE_SMOOTH(2, MapColor.field_151664_l, "smooth_granite", "graniteSmooth", false),
+      DIORITE(3, MapColor.field_151677_p, "diorite", true),
+      DIORITE_SMOOTH(4, MapColor.field_151677_p, "smooth_diorite", "dioriteSmooth", false),
+      ANDESITE(5, MapColor.field_151665_m, "andesite", true),
+      ANDESITE_SMOOTH(6, MapColor.field_151665_m, "smooth_andesite", "andesiteSmooth", false);
 
-        private EnumType(int p_i46383_3_, MapColor p_i46383_4_, String p_i46383_5_, boolean p_i46383_6_)
-        {
-            this(p_i46383_3_, p_i46383_4_, p_i46383_5_, p_i46383_5_, p_i46383_6_);
-        }
+      private static final BlockStone.EnumType[] field_176655_h = new BlockStone.EnumType[values().length];
+      private final int field_176656_i;
+      private final String field_176653_j;
+      private final String field_176654_k;
+      private final MapColor field_181073_l;
+      private final boolean field_190913_m;
 
-        private EnumType(int p_i46384_3_, MapColor p_i46384_4_, String p_i46384_5_, String p_i46384_6_, boolean p_i46384_7_)
-        {
-            this.meta = p_i46384_3_;
-            this.name = p_i46384_5_;
-            this.unlocalizedName = p_i46384_6_;
-            this.mapColor = p_i46384_4_;
-            this.field_190913_m = p_i46384_7_;
-        }
+      private EnumType(int p_i46383_3_, MapColor p_i46383_4_, String p_i46383_5_, boolean p_i46383_6_) {
+         this(p_i46383_3_, p_i46383_4_, p_i46383_5_, p_i46383_5_, p_i46383_6_);
+      }
 
-        public int getMetadata()
-        {
-            return this.meta;
-        }
+      private EnumType(int p_i46384_3_, MapColor p_i46384_4_, String p_i46384_5_, String p_i46384_6_, boolean p_i46384_7_) {
+         this.field_176656_i = p_i46384_3_;
+         this.field_176653_j = p_i46384_5_;
+         this.field_176654_k = p_i46384_6_;
+         this.field_181073_l = p_i46384_4_;
+         this.field_190913_m = p_i46384_7_;
+      }
 
-        public MapColor getMapColor()
-        {
-            return this.mapColor;
-        }
+      public int func_176642_a() {
+         return this.field_176656_i;
+      }
 
-        public String toString()
-        {
-            return this.name;
-        }
+      public MapColor func_181072_c() {
+         return this.field_181073_l;
+      }
 
-        public static BlockStone.EnumType byMetadata(int meta)
-        {
-            if (meta < 0 || meta >= META_LOOKUP.length)
-            {
-                meta = 0;
-            }
+      public String toString() {
+         return this.field_176653_j;
+      }
 
-            return META_LOOKUP[meta];
-        }
+      public static BlockStone.EnumType func_176643_a(int p_176643_0_) {
+         if (p_176643_0_ < 0 || p_176643_0_ >= field_176655_h.length) {
+            p_176643_0_ = 0;
+         }
 
-        public String getName()
-        {
-            return this.name;
-        }
+         return field_176655_h[p_176643_0_];
+      }
 
-        public String getUnlocalizedName()
-        {
-            return this.unlocalizedName;
-        }
+      public String func_176610_l() {
+         return this.field_176653_j;
+      }
 
-        public boolean func_190912_e()
-        {
-            return this.field_190913_m;
-        }
+      public String func_176644_c() {
+         return this.field_176654_k;
+      }
 
-        static {
-            for (BlockStone.EnumType blockstone$enumtype : values())
-            {
-                META_LOOKUP[blockstone$enumtype.getMetadata()] = blockstone$enumtype;
-            }
-        }
-    }
+      public boolean func_190912_e() {
+         return this.field_190913_m;
+      }
+
+      static {
+         for(BlockStone.EnumType blockstone$enumtype : values()) {
+            field_176655_h[blockstone$enumtype.func_176642_a()] = blockstone$enumtype;
+         }
+
+      }
+   }
 }

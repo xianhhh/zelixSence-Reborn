@@ -15,75 +15,53 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityCaveSpider extends EntitySpider
-{
-    public EntityCaveSpider(World worldIn)
-    {
-        super(worldIn);
-        this.setSize(0.7F, 0.5F);
-    }
+public class EntityCaveSpider extends EntitySpider {
+   public EntityCaveSpider(World p_i1732_1_) {
+      super(p_i1732_1_);
+      this.func_70105_a(0.7F, 0.5F);
+   }
 
-    public static void registerFixesCaveSpider(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntityCaveSpider.class);
-    }
+   public static void func_189775_b(DataFixer p_189775_0_) {
+      EntityLiving.func_189752_a(p_189775_0_, EntityCaveSpider.class);
+   }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(12.0D);
-    }
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(12.0D);
+   }
 
-    public boolean attackEntityAsMob(Entity entityIn)
-    {
-        if (super.attackEntityAsMob(entityIn))
-        {
-            if (entityIn instanceof EntityLivingBase)
-            {
-                int i = 0;
-
-                if (this.world.getDifficulty() == EnumDifficulty.NORMAL)
-                {
-                    i = 7;
-                }
-                else if (this.world.getDifficulty() == EnumDifficulty.HARD)
-                {
-                    i = 15;
-                }
-
-                if (i > 0)
-                {
-                    ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, i * 20, 0));
-                }
+   public boolean func_70652_k(Entity p_70652_1_) {
+      if (super.func_70652_k(p_70652_1_)) {
+         if (p_70652_1_ instanceof EntityLivingBase) {
+            int i = 0;
+            if (this.field_70170_p.func_175659_aa() == EnumDifficulty.NORMAL) {
+               i = 7;
+            } else if (this.field_70170_p.func_175659_aa() == EnumDifficulty.HARD) {
+               i = 15;
             }
 
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+            if (i > 0) {
+               ((EntityLivingBase)p_70652_1_).func_70690_d(new PotionEffect(MobEffects.field_76436_u, i * 20, 0));
+            }
+         }
 
-    @Nullable
+         return true;
+      } else {
+         return false;
+      }
+   }
 
-    /**
-     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
-     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
-     */
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
-    {
-        return livingdata;
-    }
+   @Nullable
+   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_) {
+      return p_180482_2_;
+   }
 
-    public float getEyeHeight()
-    {
-        return 0.45F;
-    }
+   public float func_70047_e() {
+      return 0.45F;
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_CAVE_SPIDER;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186436_r;
+   }
 }

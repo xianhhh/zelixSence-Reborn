@@ -9,306 +9,169 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 
-public class DerivedWorldInfo extends WorldInfo
-{
-    /** Instance of WorldInfo. */
-    private final WorldInfo theWorldInfo;
+public class DerivedWorldInfo extends WorldInfo {
+   private final WorldInfo field_76115_a;
 
-    public DerivedWorldInfo(WorldInfo worldInfoIn)
-    {
-        this.theWorldInfo = worldInfoIn;
-    }
+   public DerivedWorldInfo(WorldInfo p_i2145_1_) {
+      this.field_76115_a = p_i2145_1_;
+   }
 
-    /**
-     * Creates a new NBTTagCompound for the world, with the given NBTTag as the "Player"
-     */
-    public NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt)
-    {
-        return this.theWorldInfo.cloneNBTCompound(nbt);
-    }
+   public NBTTagCompound func_76082_a(@Nullable NBTTagCompound p_76082_1_) {
+      return this.field_76115_a.func_76082_a(p_76082_1_);
+   }
 
-    /**
-     * Returns the seed of current world.
-     */
-    public long getSeed()
-    {
-        return this.theWorldInfo.getSeed();
-    }
+   public long func_76063_b() {
+      return this.field_76115_a.func_76063_b();
+   }
 
-    /**
-     * Returns the x spawn position
-     */
-    public int getSpawnX()
-    {
-        return this.theWorldInfo.getSpawnX();
-    }
+   public int func_76079_c() {
+      return this.field_76115_a.func_76079_c();
+   }
 
-    /**
-     * Return the Y axis spawning point of the player.
-     */
-    public int getSpawnY()
-    {
-        return this.theWorldInfo.getSpawnY();
-    }
+   public int func_76075_d() {
+      return this.field_76115_a.func_76075_d();
+   }
 
-    /**
-     * Returns the z spawn position
-     */
-    public int getSpawnZ()
-    {
-        return this.theWorldInfo.getSpawnZ();
-    }
+   public int func_76074_e() {
+      return this.field_76115_a.func_76074_e();
+   }
 
-    public long getWorldTotalTime()
-    {
-        return this.theWorldInfo.getWorldTotalTime();
-    }
+   public long func_82573_f() {
+      return this.field_76115_a.func_82573_f();
+   }
 
-    /**
-     * Get current world time
-     */
-    public long getWorldTime()
-    {
-        return this.theWorldInfo.getWorldTime();
-    }
+   public long func_76073_f() {
+      return this.field_76115_a.func_76073_f();
+   }
 
-    public long getSizeOnDisk()
-    {
-        return this.theWorldInfo.getSizeOnDisk();
-    }
+   public long func_76092_g() {
+      return this.field_76115_a.func_76092_g();
+   }
 
-    /**
-     * Returns the player's NBTTagCompound to be loaded
-     */
-    public NBTTagCompound getPlayerNBTTagCompound()
-    {
-        return this.theWorldInfo.getPlayerNBTTagCompound();
-    }
+   public NBTTagCompound func_76072_h() {
+      return this.field_76115_a.func_76072_h();
+   }
 
-    /**
-     * Get current world name
-     */
-    public String getWorldName()
-    {
-        return this.theWorldInfo.getWorldName();
-    }
+   public String func_76065_j() {
+      return this.field_76115_a.func_76065_j();
+   }
 
-    /**
-     * Returns the save version of this world
-     */
-    public int getSaveVersion()
-    {
-        return this.theWorldInfo.getSaveVersion();
-    }
+   public int func_76088_k() {
+      return this.field_76115_a.func_76088_k();
+   }
 
-    /**
-     * Return the last time the player was in this world.
-     */
-    public long getLastTimePlayed()
-    {
-        return this.theWorldInfo.getLastTimePlayed();
-    }
+   public long func_76057_l() {
+      return this.field_76115_a.func_76057_l();
+   }
 
-    /**
-     * Returns true if it is thundering, false otherwise.
-     */
-    public boolean isThundering()
-    {
-        return this.theWorldInfo.isThundering();
-    }
+   public boolean func_76061_m() {
+      return this.field_76115_a.func_76061_m();
+   }
 
-    /**
-     * Returns the number of ticks until next thunderbolt.
-     */
-    public int getThunderTime()
-    {
-        return this.theWorldInfo.getThunderTime();
-    }
+   public int func_76071_n() {
+      return this.field_76115_a.func_76071_n();
+   }
 
-    /**
-     * Returns true if it is raining, false otherwise.
-     */
-    public boolean isRaining()
-    {
-        return this.theWorldInfo.isRaining();
-    }
+   public boolean func_76059_o() {
+      return this.field_76115_a.func_76059_o();
+   }
 
-    /**
-     * Return the number of ticks until rain.
-     */
-    public int getRainTime()
-    {
-        return this.theWorldInfo.getRainTime();
-    }
+   public int func_76083_p() {
+      return this.field_76115_a.func_76083_p();
+   }
 
-    /**
-     * Gets the GameType.
-     */
-    public GameType getGameType()
-    {
-        return this.theWorldInfo.getGameType();
-    }
+   public GameType func_76077_q() {
+      return this.field_76115_a.func_76077_q();
+   }
 
-    /**
-     * Set the x spawn position to the passed in value
-     */
-    public void setSpawnX(int x)
-    {
-    }
+   public void func_76058_a(int p_76058_1_) {
+   }
 
-    /**
-     * Sets the y spawn position
-     */
-    public void setSpawnY(int y)
-    {
-    }
+   public void func_76056_b(int p_76056_1_) {
+   }
 
-    /**
-     * Set the z spawn position to the passed in value
-     */
-    public void setSpawnZ(int z)
-    {
-    }
+   public void func_76087_c(int p_76087_1_) {
+   }
 
-    public void setWorldTotalTime(long time)
-    {
-    }
+   public void func_82572_b(long p_82572_1_) {
+   }
 
-    /**
-     * Set current world time
-     */
-    public void setWorldTime(long time)
-    {
-    }
+   public void func_76068_b(long p_76068_1_) {
+   }
 
-    public void setSpawn(BlockPos spawnPoint)
-    {
-    }
+   public void func_176143_a(BlockPos p_176143_1_) {
+   }
 
-    public void setWorldName(String worldName)
-    {
-    }
+   public void func_76062_a(String p_76062_1_) {
+   }
 
-    /**
-     * Sets the save version of the world
-     */
-    public void setSaveVersion(int version)
-    {
-    }
+   public void func_76078_e(int p_76078_1_) {
+   }
 
-    /**
-     * Sets whether it is thundering or not.
-     */
-    public void setThundering(boolean thunderingIn)
-    {
-    }
+   public void func_76069_a(boolean p_76069_1_) {
+   }
 
-    /**
-     * Defines the number of ticks until next thunderbolt.
-     */
-    public void setThunderTime(int time)
-    {
-    }
+   public void func_76090_f(int p_76090_1_) {
+   }
 
-    /**
-     * Sets whether it is raining or not.
-     */
-    public void setRaining(boolean isRaining)
-    {
-    }
+   public void func_76084_b(boolean p_76084_1_) {
+   }
 
-    /**
-     * Sets the number of ticks until rain.
-     */
-    public void setRainTime(int time)
-    {
-    }
+   public void func_76080_g(int p_76080_1_) {
+   }
 
-    /**
-     * Get whether the map features (e.g. strongholds) generation is enabled or disabled.
-     */
-    public boolean isMapFeaturesEnabled()
-    {
-        return this.theWorldInfo.isMapFeaturesEnabled();
-    }
+   public boolean func_76089_r() {
+      return this.field_76115_a.func_76089_r();
+   }
 
-    /**
-     * Returns true if hardcore mode is enabled, otherwise false
-     */
-    public boolean isHardcoreModeEnabled()
-    {
-        return this.theWorldInfo.isHardcoreModeEnabled();
-    }
+   public boolean func_76093_s() {
+      return this.field_76115_a.func_76093_s();
+   }
 
-    public WorldType getTerrainType()
-    {
-        return this.theWorldInfo.getTerrainType();
-    }
+   public WorldType func_76067_t() {
+      return this.field_76115_a.func_76067_t();
+   }
 
-    public void setTerrainType(WorldType type)
-    {
-    }
+   public void func_76085_a(WorldType p_76085_1_) {
+   }
 
-    /**
-     * Returns true if commands are allowed on this World.
-     */
-    public boolean areCommandsAllowed()
-    {
-        return this.theWorldInfo.areCommandsAllowed();
-    }
+   public boolean func_76086_u() {
+      return this.field_76115_a.func_76086_u();
+   }
 
-    public void setAllowCommands(boolean allow)
-    {
-    }
+   public void func_176121_c(boolean p_176121_1_) {
+   }
 
-    /**
-     * Returns true if the World is initialized.
-     */
-    public boolean isInitialized()
-    {
-        return this.theWorldInfo.isInitialized();
-    }
+   public boolean func_76070_v() {
+      return this.field_76115_a.func_76070_v();
+   }
 
-    /**
-     * Sets the initialization status of the World.
-     */
-    public void setServerInitialized(boolean initializedIn)
-    {
-    }
+   public void func_76091_d(boolean p_76091_1_) {
+   }
 
-    /**
-     * Gets the GameRules class Instance.
-     */
-    public GameRules getGameRulesInstance()
-    {
-        return this.theWorldInfo.getGameRulesInstance();
-    }
+   public GameRules func_82574_x() {
+      return this.field_76115_a.func_82574_x();
+   }
 
-    public EnumDifficulty getDifficulty()
-    {
-        return this.theWorldInfo.getDifficulty();
-    }
+   public EnumDifficulty func_176130_y() {
+      return this.field_76115_a.func_176130_y();
+   }
 
-    public void setDifficulty(EnumDifficulty newDifficulty)
-    {
-    }
+   public void func_176144_a(EnumDifficulty p_176144_1_) {
+   }
 
-    public boolean isDifficultyLocked()
-    {
-        return this.theWorldInfo.isDifficultyLocked();
-    }
+   public boolean func_176123_z() {
+      return this.field_76115_a.func_176123_z();
+   }
 
-    public void setDifficultyLocked(boolean locked)
-    {
-    }
+   public void func_180783_e(boolean p_180783_1_) {
+   }
 
-    public void setDimensionData(DimensionType dimensionIn, NBTTagCompound compound)
-    {
-        this.theWorldInfo.setDimensionData(dimensionIn, compound);
-    }
+   public void func_186345_a(DimensionType p_186345_1_, NBTTagCompound p_186345_2_) {
+      this.field_76115_a.func_186345_a(p_186345_1_, p_186345_2_);
+   }
 
-    public NBTTagCompound getDimensionData(DimensionType dimensionIn)
-    {
-        return this.theWorldInfo.getDimensionData(dimensionIn);
-    }
+   public NBTTagCompound func_186347_a(DimensionType p_186347_1_) {
+      return this.field_76115_a.func_186347_a(p_186347_1_);
+   }
 }

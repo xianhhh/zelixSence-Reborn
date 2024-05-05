@@ -2,22 +2,15 @@ package net.minecraft.world.chunk;
 
 import javax.annotation.Nullable;
 
-public interface IChunkProvider
-{
-    @Nullable
-    Chunk getLoadedChunk(int x, int z);
+public interface IChunkProvider {
+   @Nullable
+   Chunk func_186026_b(int var1, int var2);
 
-    Chunk provideChunk(int x, int z);
+   Chunk func_186025_d(int var1, int var2);
 
-    /**
-     * Unloads chunks that are marked to be unloaded. This is not guaranteed to unload every such chunk.
-     */
-    boolean unloadQueuedChunks();
+   boolean func_73156_b();
 
-    /**
-     * Converts the instance data to a readable string.
-     */
-    String makeString();
+   String func_73148_d();
 
-    boolean func_191062_e(int p_191062_1_, int p_191062_2_);
+   boolean func_191062_e(int var1, int var2);
 }

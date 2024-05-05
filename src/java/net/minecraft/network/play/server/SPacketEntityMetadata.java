@@ -7,63 +7,43 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketEntityMetadata implements Packet<INetHandlerPlayClient>
-{
-    private int entityId;
-    private List < EntityDataManager.DataEntry<? >> dataManagerEntries;
+public class SPacketEntityMetadata implements Packet<INetHandlerPlayClient> {
+   private int field_149379_a;
+   private List<EntityDataManager.DataEntry<?>> field_149378_b;
 
-    public SPacketEntityMetadata()
-    {
-    }
+   public SPacketEntityMetadata() {
+   }
 
-    public SPacketEntityMetadata(int entityIdIn, EntityDataManager dataManagerIn, boolean sendAll)
-    {
-        this.entityId = entityIdIn;
+   public SPacketEntityMetadata(int p_i46917_1_, EntityDataManager p_i46917_2_, boolean p_i46917_3_) {
+      this.field_149379_a = p_i46917_1_;
+      if (p_i46917_3_) {
+         this.field_149378_b = p_i46917_2_.func_187231_c();
+         p_i46917_2_.func_187230_e();
+      } else {
+         this.field_149378_b = p_i46917_2_.func_187221_b();
+      }
 
-        if (sendAll)
-        {
-            this.dataManagerEntries = dataManagerIn.getAll();
-            dataManagerIn.setClean();
-        }
-        else
-        {
-            this.dataManagerEntries = dataManagerIn.getDirty();
-        }
-    }
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.entityId = buf.readVarIntFromBuffer();
-        this.dataManagerEntries = EntityDataManager.readEntries(buf);
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149379_a = p_148837_1_.func_150792_a();
+      this.field_149378_b = EntityDataManager.func_187215_b(p_148837_1_);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.entityId);
-        EntityDataManager.writeEntries(this.dataManagerEntries, buf);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149379_a);
+      EntityDataManager.func_187229_a(this.field_149378_b, p_148840_1_);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleEntityMetadata(this);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147284_a(this);
+   }
 
-    public List < EntityDataManager.DataEntry<? >> getDataManagerEntries()
-    {
-        return this.dataManagerEntries;
-    }
+   public List<EntityDataManager.DataEntry<?>> func_149376_c() {
+      return this.field_149378_b;
+   }
 
-    public int getEntityId()
-    {
-        return this.entityId;
-    }
+   public int func_149375_d() {
+      return this.field_149379_a;
+   }
 }

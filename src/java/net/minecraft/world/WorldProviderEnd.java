@@ -11,151 +11,95 @@ import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.IChunkGenerator;
 
-public class WorldProviderEnd extends WorldProvider
-{
-    private DragonFightManager dragonFightManager;
+public class WorldProviderEnd extends WorldProvider {
+   private DragonFightManager field_186064_g;
 
-    /**
-     * creates a new world chunk manager for WorldProvider
-     */
-    public void createBiomeProvider()
-    {
-        this.biomeProvider = new BiomeProviderSingle(Biomes.SKY);
-        NBTTagCompound nbttagcompound = this.worldObj.getWorldInfo().getDimensionData(DimensionType.THE_END);
-        this.dragonFightManager = this.worldObj instanceof WorldServer ? new DragonFightManager((WorldServer)this.worldObj, nbttagcompound.getCompoundTag("DragonFight")) : null;
-    }
+   public void func_76572_b() {
+      this.field_76578_c = new BiomeProviderSingle(Biomes.field_76779_k);
+      NBTTagCompound nbttagcompound = this.field_76579_a.func_72912_H().func_186347_a(DimensionType.THE_END);
+      this.field_186064_g = this.field_76579_a instanceof WorldServer ? new DragonFightManager((WorldServer)this.field_76579_a, nbttagcompound.func_74775_l("DragonFight")) : null;
+   }
 
-    public IChunkGenerator createChunkGenerator()
-    {
-        return new ChunkGeneratorEnd(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed(), this.getSpawnCoordinate());
-    }
+   public IChunkGenerator func_186060_c() {
+      return new ChunkGeneratorEnd(this.field_76579_a, this.field_76579_a.func_72912_H().func_76089_r(), this.field_76579_a.func_72905_C(), this.func_177496_h());
+   }
 
-    /**
-     * Calculates the angle of sun and moon in the sky relative to a specified time (usually worldTime)
-     */
-    public float calculateCelestialAngle(long worldTime, float partialTicks)
-    {
-        return 0.0F;
-    }
+   public float func_76563_a(long p_76563_1_, float p_76563_3_) {
+      return 0.0F;
+   }
 
-    @Nullable
+   @Nullable
+   public float[] func_76560_a(float p_76560_1_, float p_76560_2_) {
+      return null;
+   }
 
-    /**
-     * Returns array with sunrise/sunset colors
-     */
-    public float[] calcSunriseSunsetColors(float celestialAngle, float partialTicks)
-    {
-        return null;
-    }
+   public Vec3d func_76562_b(float p_76562_1_, float p_76562_2_) {
+      int i = 10518688;
+      float f = MathHelper.func_76134_b(p_76562_1_ * 6.2831855F) * 2.0F + 0.5F;
+      f = MathHelper.func_76131_a(f, 0.0F, 1.0F);
+      float f1 = 0.627451F;
+      float f2 = 0.5019608F;
+      float f3 = 0.627451F;
+      f1 = f1 * (f * 0.0F + 0.15F);
+      f2 = f2 * (f * 0.0F + 0.15F);
+      f3 = f3 * (f * 0.0F + 0.15F);
+      return new Vec3d((double)f1, (double)f2, (double)f3);
+   }
 
-    /**
-     * Return Vec3D with biome specific fog color
-     */
-    public Vec3d getFogColor(float p_76562_1_, float p_76562_2_)
-    {
-        int i = 10518688;
-        float f = MathHelper.cos(p_76562_1_ * ((float)Math.PI * 2F)) * 2.0F + 0.5F;
-        f = MathHelper.clamp(f, 0.0F, 1.0F);
-        float f1 = 0.627451F;
-        float f2 = 0.5019608F;
-        float f3 = 0.627451F;
-        f1 = f1 * (f * 0.0F + 0.15F);
-        f2 = f2 * (f * 0.0F + 0.15F);
-        f3 = f3 * (f * 0.0F + 0.15F);
-        return new Vec3d((double)f1, (double)f2, (double)f3);
-    }
+   public boolean func_76561_g() {
+      return false;
+   }
 
-    public boolean isSkyColored()
-    {
-        return false;
-    }
+   public boolean func_76567_e() {
+      return false;
+   }
 
-    /**
-     * True if the player can respawn in this dimension (true = overworld, false = nether).
-     */
-    public boolean canRespawnHere()
-    {
-        return false;
-    }
+   public boolean func_76569_d() {
+      return false;
+   }
 
-    /**
-     * Returns 'true' if in the "main surface world", but 'false' if in the Nether or End dimensions.
-     */
-    public boolean isSurfaceWorld()
-    {
-        return false;
-    }
+   public float func_76571_f() {
+      return 8.0F;
+   }
 
-    /**
-     * the y level at which clouds are rendered.
-     */
-    public float getCloudHeight()
-    {
-        return 8.0F;
-    }
+   public boolean func_76566_a(int p_76566_1_, int p_76566_2_) {
+      return this.field_76579_a.func_184141_c(new BlockPos(p_76566_1_, 0, p_76566_2_)).func_185904_a().func_76230_c();
+   }
 
-    /**
-     * Will check if the x, z position specified is alright to be set as the map spawn point
-     */
-    public boolean canCoordinateBeSpawn(int x, int z)
-    {
-        return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
-    }
+   public BlockPos func_177496_h() {
+      return new BlockPos(100, 50, 0);
+   }
 
-    public BlockPos getSpawnCoordinate()
-    {
-        return new BlockPos(100, 50, 0);
-    }
+   public int func_76557_i() {
+      return 50;
+   }
 
-    public int getAverageGroundLevel()
-    {
-        return 50;
-    }
+   public boolean func_76568_b(int p_76568_1_, int p_76568_2_) {
+      return false;
+   }
 
-    /**
-     * Returns true if the given X,Z coordinate should show environmental fog.
-     */
-    public boolean doesXZShowFog(int x, int z)
-    {
-        return false;
-    }
+   public DimensionType func_186058_p() {
+      return DimensionType.THE_END;
+   }
 
-    public DimensionType getDimensionType()
-    {
-        return DimensionType.THE_END;
-    }
+   public void func_186057_q() {
+      NBTTagCompound nbttagcompound = new NBTTagCompound();
+      if (this.field_186064_g != null) {
+         nbttagcompound.func_74782_a("DragonFight", this.field_186064_g.func_186088_a());
+      }
 
-    /**
-     * Called when the world is performing a save. Only used to save the state of the Dragon Boss fight in
-     * WorldProviderEnd in Vanilla.
-     */
-    public void onWorldSave()
-    {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+      this.field_76579_a.func_72912_H().func_186345_a(DimensionType.THE_END, nbttagcompound);
+   }
 
-        if (this.dragonFightManager != null)
-        {
-            nbttagcompound.setTag("DragonFight", this.dragonFightManager.getCompound());
-        }
+   public void func_186059_r() {
+      if (this.field_186064_g != null) {
+         this.field_186064_g.func_186105_b();
+      }
 
-        this.worldObj.getWorldInfo().setDimensionData(DimensionType.THE_END, nbttagcompound);
-    }
+   }
 
-    /**
-     * Called when the world is updating entities. Only used in WorldProviderEnd to update the DragonFightManager in
-     * Vanilla.
-     */
-    public void onWorldUpdateEntities()
-    {
-        if (this.dragonFightManager != null)
-        {
-            this.dragonFightManager.tick();
-        }
-    }
-
-    @Nullable
-    public DragonFightManager getDragonFightManager()
-    {
-        return this.dragonFightManager;
-    }
+   @Nullable
+   public DragonFightManager func_186063_s() {
+      return this.field_186064_g;
+   }
 }

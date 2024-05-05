@@ -8,156 +8,101 @@ import net.minecraft.client.resources.I18n;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GuiWorldSelection extends GuiScreen
-{
-    private static final Logger LOGGER = LogManager.getLogger();
+public class GuiWorldSelection extends GuiScreen {
+   private static final Logger field_184868_g = LogManager.getLogger();
+   protected GuiScreen field_184864_a;
+   protected String field_184867_f = "Select world";
+   private String field_184869_h;
+   private GuiButton field_146642_y;
+   private GuiButton field_146641_z;
+   private GuiButton field_146630_A;
+   private GuiButton field_184865_t;
+   private GuiListWorldSelection field_184866_u;
 
-    /** The screen to return to when this closes (always Main Menu). */
-    protected GuiScreen prevScreen;
-    protected String title = "Select world";
+   public GuiWorldSelection(GuiScreen p_i46592_1_) {
+      this.field_184864_a = p_i46592_1_;
+   }
 
-    /**
-     * Tooltip displayed a world whose version is different from this client's
-     */
-    private String worldVersTooltip;
-    private GuiButton deleteButton;
-    private GuiButton selectButton;
-    private GuiButton renameButton;
-    private GuiButton copyButton;
-    private GuiListWorldSelection selectionList;
+   public void func_73866_w_() {
+      this.field_184867_f = I18n.func_135052_a("selectWorld.title");
+      this.field_184866_u = new GuiListWorldSelection(this, this.field_146297_k, this.field_146294_l, this.field_146295_m, 32, this.field_146295_m - 64, 36);
+      this.func_184862_a();
+   }
 
-    public GuiWorldSelection(GuiScreen screenIn)
-    {
-        this.prevScreen = screenIn;
-    }
+   public void func_146274_d() throws IOException {
+      super.func_146274_d();
+      this.field_184866_u.func_178039_p();
+   }
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        this.title = I18n.format("selectWorld.title");
-        this.selectionList = new GuiListWorldSelection(this, this.mc, this.width, this.height, 32, this.height - 64, 36);
-        this.postInit();
-    }
+   public void func_184862_a() {
+      this.field_146641_z = this.func_189646_b(new GuiButton(1, this.field_146294_l / 2 - 154, this.field_146295_m - 52, 150, 20, I18n.func_135052_a("selectWorld.select")));
+      this.func_189646_b(new GuiButton(3, this.field_146294_l / 2 + 4, this.field_146295_m - 52, 150, 20, I18n.func_135052_a("selectWorld.create")));
+      this.field_146630_A = this.func_189646_b(new GuiButton(4, this.field_146294_l / 2 - 154, this.field_146295_m - 28, 72, 20, I18n.func_135052_a("selectWorld.edit")));
+      this.field_146642_y = this.func_189646_b(new GuiButton(2, this.field_146294_l / 2 - 76, this.field_146295_m - 28, 72, 20, I18n.func_135052_a("selectWorld.delete")));
+      this.field_184865_t = this.func_189646_b(new GuiButton(5, this.field_146294_l / 2 + 4, this.field_146295_m - 28, 72, 20, I18n.func_135052_a("selectWorld.recreate")));
+      this.func_189646_b(new GuiButton(0, this.field_146294_l / 2 + 82, this.field_146295_m - 28, 72, 20, I18n.func_135052_a("gui.cancel")));
+      this.field_146641_z.field_146124_l = false;
+      this.field_146642_y.field_146124_l = false;
+      this.field_146630_A.field_146124_l = false;
+      this.field_184865_t.field_146124_l = false;
+   }
 
-    /**
-     * Handles mouse input.
-     */
-    public void handleMouseInput() throws IOException
-    {
-        super.handleMouseInput();
-        this.selectionList.handleMouseInput();
-    }
-
-    public void postInit()
-    {
-        this.selectButton = this.addButton(new GuiButton(1, this.width / 2 - 154, this.height - 52, 150, 20, I18n.format("selectWorld.select")));
-        this.addButton(new GuiButton(3, this.width / 2 + 4, this.height - 52, 150, 20, I18n.format("selectWorld.create")));
-        this.renameButton = this.addButton(new GuiButton(4, this.width / 2 - 154, this.height - 28, 72, 20, I18n.format("selectWorld.edit")));
-        this.deleteButton = this.addButton(new GuiButton(2, this.width / 2 - 76, this.height - 28, 72, 20, I18n.format("selectWorld.delete")));
-        this.copyButton = this.addButton(new GuiButton(5, this.width / 2 + 4, this.height - 28, 72, 20, I18n.format("selectWorld.recreate")));
-        this.addButton(new GuiButton(0, this.width / 2 + 82, this.height - 28, 72, 20, I18n.format("gui.cancel")));
-        this.selectButton.enabled = false;
-        this.deleteButton.enabled = false;
-        this.renameButton.enabled = false;
-        this.copyButton.enabled = false;
-    }
-
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.enabled)
-        {
-            GuiListWorldSelectionEntry guilistworldselectionentry = this.selectionList.getSelectedWorld();
-
-            if (button.id == 2)
-            {
-                if (guilistworldselectionentry != null)
-                {
-                    guilistworldselectionentry.deleteWorld();
-                }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      if (p_146284_1_.field_146124_l) {
+         GuiListWorldSelectionEntry guilistworldselectionentry = this.field_184866_u.func_186794_f();
+         if (p_146284_1_.field_146127_k == 2) {
+            if (guilistworldselectionentry != null) {
+               guilistworldselectionentry.func_186776_b();
             }
-            else if (button.id == 1)
-            {
-                if (guilistworldselectionentry != null)
-                {
-                    guilistworldselectionentry.joinWorld();
-                }
+         } else if (p_146284_1_.field_146127_k == 1) {
+            if (guilistworldselectionentry != null) {
+               guilistworldselectionentry.func_186774_a();
             }
-            else if (button.id == 3)
-            {
-                this.mc.displayGuiScreen(new GuiCreateWorld(this));
+         } else if (p_146284_1_.field_146127_k == 3) {
+            this.field_146297_k.func_147108_a(new GuiCreateWorld(this));
+         } else if (p_146284_1_.field_146127_k == 4) {
+            if (guilistworldselectionentry != null) {
+               guilistworldselectionentry.func_186778_c();
             }
-            else if (button.id == 4)
-            {
-                if (guilistworldselectionentry != null)
-                {
-                    guilistworldselectionentry.editWorld();
-                }
-            }
-            else if (button.id == 0)
-            {
-                this.mc.displayGuiScreen(this.prevScreen);
-            }
-            else if (button.id == 5 && guilistworldselectionentry != null)
-            {
-                guilistworldselectionentry.recreateWorld();
-            }
-        }
-    }
+         } else if (p_146284_1_.field_146127_k == 0) {
+            this.field_146297_k.func_147108_a(this.field_184864_a);
+         } else if (p_146284_1_.field_146127_k == 5 && guilistworldselectionentry != null) {
+            guilistworldselectionentry.func_186779_d();
+         }
 
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.worldVersTooltip = null;
-        this.selectionList.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 20, 16777215);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+      }
+   }
 
-        if (this.worldVersTooltip != null)
-        {
-            this.drawHoveringText(Lists.newArrayList(Splitter.on("\n").split(this.worldVersTooltip)), mouseX, mouseY);
-        }
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.field_184869_h = null;
+      this.field_184866_u.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
+      this.func_73732_a(this.field_146289_q, this.field_184867_f, this.field_146294_l / 2, 20, 16777215);
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+      if (this.field_184869_h != null) {
+         this.func_146283_a(Lists.newArrayList(Splitter.on("\n").split(this.field_184869_h)), p_73863_1_, p_73863_2_);
+      }
 
-    /**
-     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
-     */
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
-    {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.selectionList.mouseClicked(mouseX, mouseY, mouseButton);
-    }
+   }
 
-    /**
-     * Called when a mouse button is released.
-     */
-    protected void mouseReleased(int mouseX, int mouseY, int state)
-    {
-        super.mouseReleased(mouseX, mouseY, state);
-        this.selectionList.mouseReleased(mouseX, mouseY, state);
-    }
+   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
+      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
+      this.field_184866_u.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
+   }
 
-    /**
-     * Called back by selectionList when we call its drawScreen method, from ours.
-     */
-    public void setVersionTooltip(String p_184861_1_)
-    {
-        this.worldVersTooltip = p_184861_1_;
-    }
+   protected void func_146286_b(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
+      super.func_146286_b(p_146286_1_, p_146286_2_, p_146286_3_);
+      this.field_184866_u.func_148181_b(p_146286_1_, p_146286_2_, p_146286_3_);
+   }
 
-    public void selectWorld(@Nullable GuiListWorldSelectionEntry entry)
-    {
-        boolean flag = entry != null;
-        this.selectButton.enabled = flag;
-        this.deleteButton.enabled = flag;
-        this.renameButton.enabled = flag;
-        this.copyButton.enabled = flag;
-    }
+   public void func_184861_a(String p_184861_1_) {
+      this.field_184869_h = p_184861_1_;
+   }
+
+   public void func_184863_a(@Nullable GuiListWorldSelectionEntry p_184863_1_) {
+      boolean flag = p_184863_1_ != null;
+      this.field_146641_z.field_146124_l = flag;
+      this.field_146642_y.field_146124_l = flag;
+      this.field_146630_A.field_146124_l = flag;
+      this.field_184865_t.field_146124_l = flag;
+   }
 }

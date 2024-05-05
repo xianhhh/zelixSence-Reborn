@@ -3,43 +3,23 @@ package net.minecraft.client.resources;
 import java.util.UUID;
 import net.minecraft.util.ResourceLocation;
 
-public class DefaultPlayerSkin
-{
-    /** The default skin for the Steve model. */
-    private static final ResourceLocation TEXTURE_STEVE = new ResourceLocation("textures/entity/steve.png");
+public class DefaultPlayerSkin {
+   private static final ResourceLocation field_177337_a = new ResourceLocation("textures/entity/steve.png");
+   private static final ResourceLocation field_177336_b = new ResourceLocation("textures/entity/alex.png");
 
-    /** The default skin for the Alex model. */
-    private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation("textures/entity/alex.png");
+   public static ResourceLocation func_177335_a() {
+      return field_177337_a;
+   }
 
-    /**
-     * Returns the default skind for versions prior to 1.8, which is always the Steve texture.
-     */
-    public static ResourceLocation getDefaultSkinLegacy()
-    {
-        return TEXTURE_STEVE;
-    }
+   public static ResourceLocation func_177334_a(UUID p_177334_0_) {
+      return func_177333_c(p_177334_0_) ? field_177336_b : field_177337_a;
+   }
 
-    /**
-     * Retrieves the default skin for this player. Depending on the model used this will be Alex or Steve.
-     */
-    public static ResourceLocation getDefaultSkin(UUID playerUUID)
-    {
-        return isSlimSkin(playerUUID) ? TEXTURE_ALEX : TEXTURE_STEVE;
-    }
+   public static String func_177332_b(UUID p_177332_0_) {
+      return func_177333_c(p_177332_0_) ? "slim" : "default";
+   }
 
-    /**
-     * Retrieves the type of skin that a player is using. The Alex model is slim while the Steve model is default.
-     */
-    public static String getSkinType(UUID playerUUID)
-    {
-        return isSlimSkin(playerUUID) ? "slim" : "default";
-    }
-
-    /**
-     * Checks if a players skin model is slim or the default. The Alex model is slime while the Steve model is default.
-     */
-    private static boolean isSlimSkin(UUID playerUUID)
-    {
-        return (playerUUID.hashCode() & 1) == 1;
-    }
+   private static boolean func_177333_c(UUID p_177333_0_) {
+      return (p_177333_0_.hashCode() & 1) == 1;
+   }
 }

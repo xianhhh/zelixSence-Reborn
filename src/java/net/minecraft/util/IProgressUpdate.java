@@ -1,27 +1,13 @@
 package net.minecraft.util;
 
-public interface IProgressUpdate
-{
-    /**
-     * Shows the 'Saving level' string.
-     */
-    void displaySavingString(String message);
+public interface IProgressUpdate {
+   void func_73720_a(String var1);
 
-    /**
-     * this string, followed by "working..." and then the "% complete" are the 3 lines shown. This resets progress to 0,
-     * and the WorkingString to "working...".
-     */
-    void resetProgressAndMessage(String message);
+   void func_73721_b(String var1);
 
-    /**
-     * Displays a string on the loading screen supposed to indicate what is being done currently.
-     */
-    void displayLoadingString(String message);
+   void func_73719_c(String var1);
 
-    /**
-     * Updates the progress bar on the loading screen to the specified amount.
-     */
-    void setLoadingProgress(int progress);
+   void func_73718_a(int var1);
 
-    void setDoneWorking();
+   void func_146586_a();
 }

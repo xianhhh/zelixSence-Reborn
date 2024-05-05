@@ -7,278 +7,231 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
-public class WorldBorder
-{
-    private final List<IBorderListener> listeners = Lists.<IBorderListener>newArrayList();
-    private double centerX;
-    private double centerZ;
-    private double startDiameter = 6.0E7D;
-    private double endDiameter;
-    private long endTime;
-    private long startTime;
-    private int worldSize;
-    private double damageAmount;
-    private double damageBuffer;
-    private int warningTime;
-    private int warningDistance;
+public class WorldBorder {
+   private final List<IBorderListener> field_177758_a = Lists.<IBorderListener>newArrayList();
+   private double field_177756_b;
+   private double field_177757_c;
+   private double field_177754_d = 6.0E7D;
+   private double field_177755_e;
+   private long field_177752_f;
+   private long field_177753_g;
+   private int field_177762_h;
+   private double field_177763_i;
+   private double field_177760_j;
+   private int field_177761_k;
+   private int field_177759_l;
 
-    public WorldBorder()
-    {
-        this.endDiameter = this.startDiameter;
-        this.worldSize = 29999984;
-        this.damageAmount = 0.2D;
-        this.damageBuffer = 5.0D;
-        this.warningTime = 15;
-        this.warningDistance = 5;
-    }
+   public WorldBorder() {
+      this.field_177755_e = this.field_177754_d;
+      this.field_177762_h = 29999984;
+      this.field_177763_i = 0.2D;
+      this.field_177760_j = 5.0D;
+      this.field_177761_k = 15;
+      this.field_177759_l = 5;
+   }
 
-    public boolean contains(BlockPos pos)
-    {
-        return (double)(pos.getX() + 1) > this.minX() && (double)pos.getX() < this.maxX() && (double)(pos.getZ() + 1) > this.minZ() && (double)pos.getZ() < this.maxZ();
-    }
+   public boolean func_177746_a(BlockPos p_177746_1_) {
+      return (double)(p_177746_1_.func_177958_n() + 1) > this.func_177726_b() && (double)p_177746_1_.func_177958_n() < this.func_177728_d() && (double)(p_177746_1_.func_177952_p() + 1) > this.func_177736_c() && (double)p_177746_1_.func_177952_p() < this.func_177733_e();
+   }
 
-    public boolean contains(ChunkPos range)
-    {
-        return (double)range.getXEnd() > this.minX() && (double)range.getXStart() < this.maxX() && (double)range.getZEnd() > this.minZ() && (double)range.getZStart() < this.maxZ();
-    }
+   public boolean func_177730_a(ChunkPos p_177730_1_) {
+      return (double)p_177730_1_.func_180332_e() > this.func_177726_b() && (double)p_177730_1_.func_180334_c() < this.func_177728_d() && (double)p_177730_1_.func_180330_f() > this.func_177736_c() && (double)p_177730_1_.func_180333_d() < this.func_177733_e();
+   }
 
-    public boolean contains(AxisAlignedBB bb)
-    {
-        return bb.maxX > this.minX() && bb.minX < this.maxX() && bb.maxZ > this.minZ() && bb.minZ < this.maxZ();
-    }
+   public boolean func_177743_a(AxisAlignedBB p_177743_1_) {
+      return p_177743_1_.field_72336_d > this.func_177726_b() && p_177743_1_.field_72340_a < this.func_177728_d() && p_177743_1_.field_72334_f > this.func_177736_c() && p_177743_1_.field_72339_c < this.func_177733_e();
+   }
 
-    public double getClosestDistance(Entity entityIn)
-    {
-        return this.getClosestDistance(entityIn.posX, entityIn.posZ);
-    }
+   public double func_177745_a(Entity p_177745_1_) {
+      return this.func_177729_b(p_177745_1_.field_70165_t, p_177745_1_.field_70161_v);
+   }
 
-    public double getClosestDistance(double x, double z)
-    {
-        double d0 = z - this.minZ();
-        double d1 = this.maxZ() - z;
-        double d2 = x - this.minX();
-        double d3 = this.maxX() - x;
-        double d4 = Math.min(d2, d3);
-        d4 = Math.min(d4, d0);
-        return Math.min(d4, d1);
-    }
+   public double func_177729_b(double p_177729_1_, double p_177729_3_) {
+      double d0 = p_177729_3_ - this.func_177736_c();
+      double d1 = this.func_177733_e() - p_177729_3_;
+      double d2 = p_177729_1_ - this.func_177726_b();
+      double d3 = this.func_177728_d() - p_177729_1_;
+      double d4 = Math.min(d2, d3);
+      d4 = Math.min(d4, d0);
+      return Math.min(d4, d1);
+   }
 
-    public EnumBorderStatus getStatus()
-    {
-        if (this.endDiameter < this.startDiameter)
-        {
-            return EnumBorderStatus.SHRINKING;
-        }
-        else
-        {
-            return this.endDiameter > this.startDiameter ? EnumBorderStatus.GROWING : EnumBorderStatus.STATIONARY;
-        }
-    }
+   public EnumBorderStatus func_177734_a() {
+      if (this.field_177755_e < this.field_177754_d) {
+         return EnumBorderStatus.SHRINKING;
+      } else {
+         return this.field_177755_e > this.field_177754_d ? EnumBorderStatus.GROWING : EnumBorderStatus.STATIONARY;
+      }
+   }
 
-    public double minX()
-    {
-        double d0 = this.getCenterX() - this.getDiameter() / 2.0D;
+   public double func_177726_b() {
+      double d0 = this.func_177731_f() - this.func_177741_h() / 2.0D;
+      if (d0 < (double)(-this.field_177762_h)) {
+         d0 = (double)(-this.field_177762_h);
+      }
 
-        if (d0 < (double)(-this.worldSize))
-        {
-            d0 = (double)(-this.worldSize);
-        }
+      return d0;
+   }
 
-        return d0;
-    }
+   public double func_177736_c() {
+      double d0 = this.func_177721_g() - this.func_177741_h() / 2.0D;
+      if (d0 < (double)(-this.field_177762_h)) {
+         d0 = (double)(-this.field_177762_h);
+      }
 
-    public double minZ()
-    {
-        double d0 = this.getCenterZ() - this.getDiameter() / 2.0D;
+      return d0;
+   }
 
-        if (d0 < (double)(-this.worldSize))
-        {
-            d0 = (double)(-this.worldSize);
-        }
+   public double func_177728_d() {
+      double d0 = this.func_177731_f() + this.func_177741_h() / 2.0D;
+      if (d0 > (double)this.field_177762_h) {
+         d0 = (double)this.field_177762_h;
+      }
 
-        return d0;
-    }
+      return d0;
+   }
 
-    public double maxX()
-    {
-        double d0 = this.getCenterX() + this.getDiameter() / 2.0D;
+   public double func_177733_e() {
+      double d0 = this.func_177721_g() + this.func_177741_h() / 2.0D;
+      if (d0 > (double)this.field_177762_h) {
+         d0 = (double)this.field_177762_h;
+      }
 
-        if (d0 > (double)this.worldSize)
-        {
-            d0 = (double)this.worldSize;
-        }
+      return d0;
+   }
 
-        return d0;
-    }
+   public double func_177731_f() {
+      return this.field_177756_b;
+   }
 
-    public double maxZ()
-    {
-        double d0 = this.getCenterZ() + this.getDiameter() / 2.0D;
+   public double func_177721_g() {
+      return this.field_177757_c;
+   }
 
-        if (d0 > (double)this.worldSize)
-        {
-            d0 = (double)this.worldSize;
-        }
+   public void func_177739_c(double p_177739_1_, double p_177739_3_) {
+      this.field_177756_b = p_177739_1_;
+      this.field_177757_c = p_177739_3_;
 
-        return d0;
-    }
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177693_a(this, p_177739_1_, p_177739_3_);
+      }
 
-    public double getCenterX()
-    {
-        return this.centerX;
-    }
+   }
 
-    public double getCenterZ()
-    {
-        return this.centerZ;
-    }
+   public double func_177741_h() {
+      if (this.func_177734_a() != EnumBorderStatus.STATIONARY) {
+         double d0 = (double)((float)(System.currentTimeMillis() - this.field_177753_g) / (float)(this.field_177752_f - this.field_177753_g));
+         if (d0 < 1.0D) {
+            return this.field_177754_d + (this.field_177755_e - this.field_177754_d) * d0;
+         }
 
-    public void setCenter(double x, double z)
-    {
-        this.centerX = x;
-        this.centerZ = z;
+         this.func_177750_a(this.field_177755_e);
+      }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onCenterChanged(this, x, z);
-        }
-    }
+      return this.field_177754_d;
+   }
 
-    public double getDiameter()
-    {
-        if (this.getStatus() != EnumBorderStatus.STATIONARY)
-        {
-            double d0 = (double)((float)(System.currentTimeMillis() - this.startTime) / (float)(this.endTime - this.startTime));
+   public long func_177732_i() {
+      return this.func_177734_a() == EnumBorderStatus.STATIONARY ? 0L : this.field_177752_f - System.currentTimeMillis();
+   }
 
-            if (d0 < 1.0D)
-            {
-                return this.startDiameter + (this.endDiameter - this.startDiameter) * d0;
-            }
+   public double func_177751_j() {
+      return this.field_177755_e;
+   }
 
-            this.setTransition(this.endDiameter);
-        }
+   public void func_177750_a(double p_177750_1_) {
+      this.field_177754_d = p_177750_1_;
+      this.field_177755_e = p_177750_1_;
+      this.field_177752_f = System.currentTimeMillis();
+      this.field_177753_g = this.field_177752_f;
 
-        return this.startDiameter;
-    }
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177694_a(this, p_177750_1_);
+      }
 
-    public long getTimeUntilTarget()
-    {
-        return this.getStatus() == EnumBorderStatus.STATIONARY ? 0L : this.endTime - System.currentTimeMillis();
-    }
+   }
 
-    public double getTargetSize()
-    {
-        return this.endDiameter;
-    }
+   public void func_177738_a(double p_177738_1_, double p_177738_3_, long p_177738_5_) {
+      this.field_177754_d = p_177738_1_;
+      this.field_177755_e = p_177738_3_;
+      this.field_177753_g = System.currentTimeMillis();
+      this.field_177752_f = this.field_177753_g + p_177738_5_;
 
-    public void setTransition(double newSize)
-    {
-        this.startDiameter = newSize;
-        this.endDiameter = newSize;
-        this.endTime = System.currentTimeMillis();
-        this.startTime = this.endTime;
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177692_a(this, p_177738_1_, p_177738_3_, p_177738_5_);
+      }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onSizeChanged(this, newSize);
-        }
-    }
+   }
 
-    public void setTransition(double oldSize, double newSize, long time)
-    {
-        this.startDiameter = oldSize;
-        this.endDiameter = newSize;
-        this.startTime = System.currentTimeMillis();
-        this.endTime = this.startTime + time;
+   protected List<IBorderListener> func_177735_k() {
+      return Lists.newArrayList(this.field_177758_a);
+   }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onTransitionStarted(this, oldSize, newSize, time);
-        }
-    }
+   public void func_177737_a(IBorderListener p_177737_1_) {
+      this.field_177758_a.add(p_177737_1_);
+   }
 
-    protected List<IBorderListener> getListeners()
-    {
-        return Lists.newArrayList(this.listeners);
-    }
+   public void func_177725_a(int p_177725_1_) {
+      this.field_177762_h = p_177725_1_;
+   }
 
-    public void addListener(IBorderListener listener)
-    {
-        this.listeners.add(listener);
-    }
+   public int func_177722_l() {
+      return this.field_177762_h;
+   }
 
-    public void setSize(int size)
-    {
-        this.worldSize = size;
-    }
+   public double func_177742_m() {
+      return this.field_177760_j;
+   }
 
-    public int getSize()
-    {
-        return this.worldSize;
-    }
+   public void func_177724_b(double p_177724_1_) {
+      this.field_177760_j = p_177724_1_;
 
-    public double getDamageBuffer()
-    {
-        return this.damageBuffer;
-    }
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177695_c(this, p_177724_1_);
+      }
 
-    public void setDamageBuffer(double bufferSize)
-    {
-        this.damageBuffer = bufferSize;
+   }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onDamageBufferChanged(this, bufferSize);
-        }
-    }
+   public double func_177727_n() {
+      return this.field_177763_i;
+   }
 
-    public double getDamageAmount()
-    {
-        return this.damageAmount;
-    }
+   public void func_177744_c(double p_177744_1_) {
+      this.field_177763_i = p_177744_1_;
 
-    public void setDamageAmount(double newAmount)
-    {
-        this.damageAmount = newAmount;
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177696_b(this, p_177744_1_);
+      }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onDamageAmountChanged(this, newAmount);
-        }
-    }
+   }
 
-    public double getResizeSpeed()
-    {
-        return this.endTime == this.startTime ? 0.0D : Math.abs(this.startDiameter - this.endDiameter) / (double)(this.endTime - this.startTime);
-    }
+   public double func_177749_o() {
+      return this.field_177752_f == this.field_177753_g ? 0.0D : Math.abs(this.field_177754_d - this.field_177755_e) / (double)(this.field_177752_f - this.field_177753_g);
+   }
 
-    public int getWarningTime()
-    {
-        return this.warningTime;
-    }
+   public int func_177740_p() {
+      return this.field_177761_k;
+   }
 
-    public void setWarningTime(int warningTime)
-    {
-        this.warningTime = warningTime;
+   public void func_177723_b(int p_177723_1_) {
+      this.field_177761_k = p_177723_1_;
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onWarningTimeChanged(this, warningTime);
-        }
-    }
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177691_a(this, p_177723_1_);
+      }
 
-    public int getWarningDistance()
-    {
-        return this.warningDistance;
-    }
+   }
 
-    public void setWarningDistance(int warningDistance)
-    {
-        this.warningDistance = warningDistance;
+   public int func_177748_q() {
+      return this.field_177759_l;
+   }
 
-        for (IBorderListener iborderlistener : this.getListeners())
-        {
-            iborderlistener.onWarningDistanceChanged(this, warningDistance);
-        }
-    }
+   public void func_177747_c(int p_177747_1_) {
+      this.field_177759_l = p_177747_1_;
+
+      for(IBorderListener iborderlistener : this.func_177735_k()) {
+         iborderlistener.func_177690_b(this, p_177747_1_);
+      }
+
+   }
 }

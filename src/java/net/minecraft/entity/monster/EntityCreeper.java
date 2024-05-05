@@ -35,328 +35,229 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityCreeper extends EntityMob
-{
-    private static final DataParameter<Integer> STATE = EntityDataManager.<Integer>createKey(EntityCreeper.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> POWERED = EntityDataManager.<Boolean>createKey(EntityCreeper.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> IGNITED = EntityDataManager.<Boolean>createKey(EntityCreeper.class, DataSerializers.BOOLEAN);
+public class EntityCreeper extends EntityMob {
+   private static final DataParameter<Integer> field_184713_a = EntityDataManager.<Integer>func_187226_a(EntityCreeper.class, DataSerializers.field_187192_b);
+   private static final DataParameter<Boolean> field_184714_b = EntityDataManager.<Boolean>func_187226_a(EntityCreeper.class, DataSerializers.field_187198_h);
+   private static final DataParameter<Boolean> field_184715_c = EntityDataManager.<Boolean>func_187226_a(EntityCreeper.class, DataSerializers.field_187198_h);
+   private int field_70834_e;
+   private int field_70833_d;
+   private int field_82225_f = 30;
+   private int field_82226_g = 3;
+   private int field_175494_bm;
 
-    /**
-     * Time when this creeper was last in an active state (Messed up code here, probably causes creeper animation to go
-     * weird)
-     */
-    private int lastActiveTime;
+   public EntityCreeper(World p_i1733_1_) {
+      super(p_i1733_1_);
+      this.func_70105_a(0.6F, 1.7F);
+   }
 
-    /**
-     * The amount of time since the creeper was close enough to the player to ignite
-     */
-    private int timeSinceIgnited;
-    private int fuseTime = 30;
+   protected void func_184651_r() {
+      this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
+      this.field_70714_bg.func_75776_a(2, new EntityAICreeperSwell(this));
+      this.field_70714_bg.func_75776_a(3, new EntityAIAvoidEntity(this, EntityOcelot.class, 6.0F, 1.0D, 1.2D));
+      this.field_70714_bg.func_75776_a(4, new EntityAIAttackMelee(this, 1.0D, false));
+      this.field_70714_bg.func_75776_a(5, new EntityAIWanderAvoidWater(this, 0.8D));
+      this.field_70714_bg.func_75776_a(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+      this.field_70714_bg.func_75776_a(6, new EntityAILookIdle(this));
+      this.field_70715_bh.func_75776_a(1, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+      this.field_70715_bh.func_75776_a(2, new EntityAIHurtByTarget(this, false, new Class[0]));
+   }
 
-    /** Explosion radius for this creeper. */
-    private int explosionRadius = 3;
-    private int droppedSkulls;
+   protected void func_110147_ax() {
+      super.func_110147_ax();
+      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.25D);
+   }
 
-    public EntityCreeper(World worldIn)
-    {
-        super(worldIn);
-        this.setSize(0.6F, 1.7F);
-    }
+   public int func_82143_as() {
+      return this.func_70638_az() == null ? 3 : 3 + (int)(this.func_110143_aJ() - 1.0F);
+   }
 
-    protected void initEntityAI()
-    {
-        this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAICreeperSwell(this));
-        this.tasks.addTask(3, new EntityAIAvoidEntity(this, EntityOcelot.class, 6.0F, 1.0D, 1.2D));
-        this.tasks.addTask(4, new EntityAIAttackMelee(this, 1.0D, false));
-        this.tasks.addTask(5, new EntityAIWanderAvoidWater(this, 0.8D));
-        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(6, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-        this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
-    }
+   public void func_180430_e(float p_180430_1_, float p_180430_2_) {
+      super.func_180430_e(p_180430_1_, p_180430_2_);
+      this.field_70833_d = (int)((float)this.field_70833_d + p_180430_1_ * 1.5F);
+      if (this.field_70833_d > this.field_82225_f - 5) {
+         this.field_70833_d = this.field_82225_f - 5;
+      }
 
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
-    }
+   }
 
-    /**
-     * The maximum height from where the entity is alowed to jump (used in pathfinder)
-     */
-    public int getMaxFallHeight()
-    {
-        return this.getAttackTarget() == null ? 3 : 3 + (int)(this.getHealth() - 1.0F);
-    }
+   protected void func_70088_a() {
+      super.func_70088_a();
+      this.field_70180_af.func_187214_a(field_184713_a, Integer.valueOf(-1));
+      this.field_70180_af.func_187214_a(field_184714_b, Boolean.valueOf(false));
+      this.field_70180_af.func_187214_a(field_184715_c, Boolean.valueOf(false));
+   }
 
-    public void fall(float distance, float damageMultiplier)
-    {
-        super.fall(distance, damageMultiplier);
-        this.timeSinceIgnited = (int)((float)this.timeSinceIgnited + distance * 1.5F);
+   public static void func_189762_b(DataFixer p_189762_0_) {
+      EntityLiving.func_189752_a(p_189762_0_, EntityCreeper.class);
+   }
 
-        if (this.timeSinceIgnited > this.fuseTime - 5)
-        {
-            this.timeSinceIgnited = this.fuseTime - 5;
-        }
-    }
+   public void func_70014_b(NBTTagCompound p_70014_1_) {
+      super.func_70014_b(p_70014_1_);
+      if (((Boolean)this.field_70180_af.func_187225_a(field_184714_b)).booleanValue()) {
+         p_70014_1_.func_74757_a("powered", true);
+      }
 
-    protected void entityInit()
-    {
-        super.entityInit();
-        this.dataManager.register(STATE, Integer.valueOf(-1));
-        this.dataManager.register(POWERED, Boolean.valueOf(false));
-        this.dataManager.register(IGNITED, Boolean.valueOf(false));
-    }
+      p_70014_1_.func_74777_a("Fuse", (short)this.field_82225_f);
+      p_70014_1_.func_74774_a("ExplosionRadius", (byte)this.field_82226_g);
+      p_70014_1_.func_74757_a("ignited", this.func_146078_ca());
+   }
 
-    public static void registerFixesCreeper(DataFixer fixer)
-    {
-        EntityLiving.registerFixesMob(fixer, EntityCreeper.class);
-    }
+   public void func_70037_a(NBTTagCompound p_70037_1_) {
+      super.func_70037_a(p_70037_1_);
+      this.field_70180_af.func_187227_b(field_184714_b, Boolean.valueOf(p_70037_1_.func_74767_n("powered")));
+      if (p_70037_1_.func_150297_b("Fuse", 99)) {
+         this.field_82225_f = p_70037_1_.func_74765_d("Fuse");
+      }
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
+      if (p_70037_1_.func_150297_b("ExplosionRadius", 99)) {
+         this.field_82226_g = p_70037_1_.func_74771_c("ExplosionRadius");
+      }
 
-        if (((Boolean)this.dataManager.get(POWERED)).booleanValue())
-        {
-            compound.setBoolean("powered", true);
-        }
+      if (p_70037_1_.func_74767_n("ignited")) {
+         this.func_146079_cb();
+      }
 
-        compound.setShort("Fuse", (short)this.fuseTime);
-        compound.setByte("ExplosionRadius", (byte)this.explosionRadius);
-        compound.setBoolean("ignited", this.hasIgnited());
-    }
+   }
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.dataManager.set(POWERED, Boolean.valueOf(compound.getBoolean("powered")));
+   public void func_70071_h_() {
+      if (this.func_70089_S()) {
+         this.field_70834_e = this.field_70833_d;
+         if (this.func_146078_ca()) {
+            this.func_70829_a(1);
+         }
 
-        if (compound.hasKey("Fuse", 99))
-        {
-            this.fuseTime = compound.getShort("Fuse");
-        }
+         int i = this.func_70832_p();
+         if (i > 0 && this.field_70833_d == 0) {
+            this.func_184185_a(SoundEvents.field_187572_ar, 1.0F, 0.5F);
+         }
 
-        if (compound.hasKey("ExplosionRadius", 99))
-        {
-            this.explosionRadius = compound.getByte("ExplosionRadius");
-        }
+         this.field_70833_d += i;
+         if (this.field_70833_d < 0) {
+            this.field_70833_d = 0;
+         }
 
-        if (compound.getBoolean("ignited"))
-        {
-            this.ignite();
-        }
-    }
+         if (this.field_70833_d >= this.field_82225_f) {
+            this.field_70833_d = this.field_82225_f;
+            this.func_146077_cc();
+         }
+      }
 
-    /**
-     * Called to update the entity's position/logic.
-     */
-    public void onUpdate()
-    {
-        if (this.isEntityAlive())
-        {
-            this.lastActiveTime = this.timeSinceIgnited;
+      super.func_70071_h_();
+   }
 
-            if (this.hasIgnited())
-            {
-                this.setCreeperState(1);
-            }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_187570_aq;
+   }
 
-            int i = this.getCreeperState();
+   protected SoundEvent func_184615_bR() {
+      return SoundEvents.field_187568_ap;
+   }
 
-            if (i > 0 && this.timeSinceIgnited == 0)
-            {
-                this.playSound(SoundEvents.ENTITY_CREEPER_PRIMED, 1.0F, 0.5F);
-            }
+   public void func_70645_a(DamageSource p_70645_1_) {
+      super.func_70645_a(p_70645_1_);
+      if (this.field_70170_p.func_82736_K().func_82766_b("doMobLoot")) {
+         if (p_70645_1_.func_76346_g() instanceof EntitySkeleton) {
+            int i = Item.func_150891_b(Items.field_151096_cd);
+            int j = Item.func_150891_b(Items.field_151084_co);
+            int k = i + this.field_70146_Z.nextInt(j - i + 1);
+            this.func_145779_a(Item.func_150899_d(k), 1);
+         } else if (p_70645_1_.func_76346_g() instanceof EntityCreeper && p_70645_1_.func_76346_g() != this && ((EntityCreeper)p_70645_1_.func_76346_g()).func_70830_n() && ((EntityCreeper)p_70645_1_.func_76346_g()).func_70650_aV()) {
+            ((EntityCreeper)p_70645_1_.func_76346_g()).func_175493_co();
+            this.func_70099_a(new ItemStack(Items.field_151144_bL, 1, 4), 0.0F);
+         }
+      }
 
-            this.timeSinceIgnited += i;
+   }
 
-            if (this.timeSinceIgnited < 0)
-            {
-                this.timeSinceIgnited = 0;
-            }
+   public boolean func_70652_k(Entity p_70652_1_) {
+      return true;
+   }
 
-            if (this.timeSinceIgnited >= this.fuseTime)
-            {
-                this.timeSinceIgnited = this.fuseTime;
-                this.explode();
-            }
-        }
+   public boolean func_70830_n() {
+      return ((Boolean)this.field_70180_af.func_187225_a(field_184714_b)).booleanValue();
+   }
 
-        super.onUpdate();
-    }
+   public float func_70831_j(float p_70831_1_) {
+      return ((float)this.field_70834_e + (float)(this.field_70833_d - this.field_70834_e) * p_70831_1_) / (float)(this.field_82225_f - 2);
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_CREEPER_HURT;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186434_p;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_CREEPER_DEATH;
-    }
+   public int func_70832_p() {
+      return ((Integer)this.field_70180_af.func_187225_a(field_184713_a)).intValue();
+   }
 
-    /**
-     * Called when the mob's health reaches 0.
-     */
-    public void onDeath(DamageSource cause)
-    {
-        super.onDeath(cause);
+   public void func_70829_a(int p_70829_1_) {
+      this.field_70180_af.func_187227_b(field_184713_a, Integer.valueOf(p_70829_1_));
+   }
 
-        if (this.world.getGameRules().getBoolean("doMobLoot"))
-        {
-            if (cause.getEntity() instanceof EntitySkeleton)
-            {
-                int i = Item.getIdFromItem(Items.RECORD_13);
-                int j = Item.getIdFromItem(Items.RECORD_WAIT);
-                int k = i + this.rand.nextInt(j - i + 1);
-                this.dropItem(Item.getItemById(k), 1);
-            }
-            else if (cause.getEntity() instanceof EntityCreeper && cause.getEntity() != this && ((EntityCreeper)cause.getEntity()).getPowered() && ((EntityCreeper)cause.getEntity()).isAIEnabled())
-            {
-                ((EntityCreeper)cause.getEntity()).incrementDroppedSkulls();
-                this.entityDropItem(new ItemStack(Items.SKULL, 1, 4), 0.0F);
-            }
-        }
-    }
+   public void func_70077_a(EntityLightningBolt p_70077_1_) {
+      super.func_70077_a(p_70077_1_);
+      this.field_70180_af.func_187227_b(field_184714_b, Boolean.valueOf(true));
+   }
 
-    public boolean attackEntityAsMob(Entity entityIn)
-    {
-        return true;
-    }
+   protected boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_) {
+      ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
+      if (itemstack.func_77973_b() == Items.field_151033_d) {
+         this.field_70170_p.func_184148_a(p_184645_1_, this.field_70165_t, this.field_70163_u, this.field_70161_v, SoundEvents.field_187649_bu, this.func_184176_by(), 1.0F, this.field_70146_Z.nextFloat() * 0.4F + 0.8F);
+         p_184645_1_.func_184609_a(p_184645_2_);
+         if (!this.field_70170_p.field_72995_K) {
+            this.func_146079_cb();
+            itemstack.func_77972_a(1, p_184645_1_);
+            return true;
+         }
+      }
 
-    /**
-     * Returns true if the creeper is powered by a lightning bolt.
-     */
-    public boolean getPowered()
-    {
-        return ((Boolean)this.dataManager.get(POWERED)).booleanValue();
-    }
+      return super.func_184645_a(p_184645_1_, p_184645_2_);
+   }
 
-    /**
-     * Params: (Float)Render tick. Returns the intensity of the creeper's flash when it is ignited.
-     */
-    public float getCreeperFlashIntensity(float p_70831_1_)
-    {
-        return ((float)this.lastActiveTime + (float)(this.timeSinceIgnited - this.lastActiveTime) * p_70831_1_) / (float)(this.fuseTime - 2);
-    }
+   private void func_146077_cc() {
+      if (!this.field_70170_p.field_72995_K) {
+         boolean flag = this.field_70170_p.func_82736_K().func_82766_b("mobGriefing");
+         float f = this.func_70830_n() ? 2.0F : 1.0F;
+         this.field_70729_aU = true;
+         this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, (float)this.field_82226_g * f, flag);
+         this.func_70106_y();
+         this.func_190741_do();
+      }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_CREEPER;
-    }
+   }
 
-    /**
-     * Returns the current state of creeper, -1 is idle, 1 is 'in fuse'
-     */
-    public int getCreeperState()
-    {
-        return ((Integer)this.dataManager.get(STATE)).intValue();
-    }
+   private void func_190741_do() {
+      Collection<PotionEffect> collection = this.func_70651_bq();
+      if (!collection.isEmpty()) {
+         EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v);
+         entityareaeffectcloud.func_184483_a(2.5F);
+         entityareaeffectcloud.func_184495_b(-0.5F);
+         entityareaeffectcloud.func_184485_d(10);
+         entityareaeffectcloud.func_184486_b(entityareaeffectcloud.func_184489_o() / 2);
+         entityareaeffectcloud.func_184487_c(-entityareaeffectcloud.func_184490_j() / (float)entityareaeffectcloud.func_184489_o());
 
-    /**
-     * Sets the state of creeper, -1 to idle and 1 to be 'in fuse'
-     */
-    public void setCreeperState(int state)
-    {
-        this.dataManager.set(STATE, Integer.valueOf(state));
-    }
+         for(PotionEffect potioneffect : collection) {
+            entityareaeffectcloud.func_184496_a(new PotionEffect(potioneffect));
+         }
 
-    /**
-     * Called when a lightning bolt hits the entity.
-     */
-    public void onStruckByLightning(EntityLightningBolt lightningBolt)
-    {
-        super.onStruckByLightning(lightningBolt);
-        this.dataManager.set(POWERED, Boolean.valueOf(true));
-    }
+         this.field_70170_p.func_72838_d(entityareaeffectcloud);
+      }
 
-    protected boolean processInteract(EntityPlayer player, EnumHand hand)
-    {
-        ItemStack itemstack = player.getHeldItem(hand);
+   }
 
-        if (itemstack.getItem() == Items.FLINT_AND_STEEL)
-        {
-            this.world.playSound(player, this.posX, this.posY, this.posZ, SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.rand.nextFloat() * 0.4F + 0.8F);
-            player.swingArm(hand);
+   public boolean func_146078_ca() {
+      return ((Boolean)this.field_70180_af.func_187225_a(field_184715_c)).booleanValue();
+   }
 
-            if (!this.world.isRemote)
-            {
-                this.ignite();
-                itemstack.damageItem(1, player);
-                return true;
-            }
-        }
+   public void func_146079_cb() {
+      this.field_70180_af.func_187227_b(field_184715_c, Boolean.valueOf(true));
+   }
 
-        return super.processInteract(player, hand);
-    }
+   public boolean func_70650_aV() {
+      return this.field_175494_bm < 1 && this.field_70170_p.func_82736_K().func_82766_b("doMobLoot");
+   }
 
-    /**
-     * Creates an explosion as determined by this creeper's power and explosion radius.
-     */
-    private void explode()
-    {
-        if (!this.world.isRemote)
-        {
-            boolean flag = this.world.getGameRules().getBoolean("mobGriefing");
-            float f = this.getPowered() ? 2.0F : 1.0F;
-            this.dead = true;
-            this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
-            this.setDead();
-            this.func_190741_do();
-        }
-    }
-
-    private void func_190741_do()
-    {
-        Collection<PotionEffect> collection = this.getActivePotionEffects();
-
-        if (!collection.isEmpty())
-        {
-            EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
-            entityareaeffectcloud.setRadius(2.5F);
-            entityareaeffectcloud.setRadiusOnUse(-0.5F);
-            entityareaeffectcloud.setWaitTime(10);
-            entityareaeffectcloud.setDuration(entityareaeffectcloud.getDuration() / 2);
-            entityareaeffectcloud.setRadiusPerTick(-entityareaeffectcloud.getRadius() / (float)entityareaeffectcloud.getDuration());
-
-            for (PotionEffect potioneffect : collection)
-            {
-                entityareaeffectcloud.addEffect(new PotionEffect(potioneffect));
-            }
-
-            this.world.spawnEntityInWorld(entityareaeffectcloud);
-        }
-    }
-
-    public boolean hasIgnited()
-    {
-        return ((Boolean)this.dataManager.get(IGNITED)).booleanValue();
-    }
-
-    public void ignite()
-    {
-        this.dataManager.set(IGNITED, Boolean.valueOf(true));
-    }
-
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return this.droppedSkulls < 1 && this.world.getGameRules().getBoolean("doMobLoot");
-    }
-
-    public void incrementDroppedSkulls()
-    {
-        ++this.droppedSkulls;
-    }
+   public void func_175493_co() {
+      ++this.field_175494_bm;
+   }
 }

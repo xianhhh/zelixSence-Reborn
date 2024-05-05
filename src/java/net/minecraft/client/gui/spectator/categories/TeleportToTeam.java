@@ -21,129 +21,105 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
-public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
-{
-    private final List<ISpectatorMenuObject> items = Lists.<ISpectatorMenuObject>newArrayList();
+public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject {
+   private final List<ISpectatorMenuObject> field_178672_a = Lists.<ISpectatorMenuObject>newArrayList();
 
-    public TeleportToTeam()
-    {
-        Minecraft minecraft = Minecraft.getMinecraft();
+   public TeleportToTeam() {
+      Minecraft minecraft = Minecraft.func_71410_x();
 
-        for (ScorePlayerTeam scoreplayerteam : minecraft.world.getScoreboard().getTeams())
-        {
-            this.items.add(new TeleportToTeam.TeamSelectionObject(scoreplayerteam));
-        }
-    }
+      for(ScorePlayerTeam scoreplayerteam : minecraft.field_71441_e.func_96441_U().func_96525_g()) {
+         this.field_178672_a.add(new TeleportToTeam.TeamSelectionObject(scoreplayerteam));
+      }
 
-    public List<ISpectatorMenuObject> getItems()
-    {
-        return this.items;
-    }
+   }
 
-    public ITextComponent getPrompt()
-    {
-        return new TextComponentTranslation("spectatorMenu.team_teleport.prompt", new Object[0]);
-    }
+   public List<ISpectatorMenuObject> func_178669_a() {
+      return this.field_178672_a;
+   }
 
-    public void selectItem(SpectatorMenu menu)
-    {
-        menu.selectCategory(this);
-    }
+   public ITextComponent func_178670_b() {
+      return new TextComponentTranslation("spectatorMenu.team_teleport.prompt", new Object[0]);
+   }
 
-    public ITextComponent getSpectatorName()
-    {
-        return new TextComponentTranslation("spectatorMenu.team_teleport", new Object[0]);
-    }
+   public void func_178661_a(SpectatorMenu p_178661_1_) {
+      p_178661_1_.func_178647_a(this);
+   }
 
-    public void renderIcon(float p_178663_1_, int alpha)
-    {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, 16.0F, 0.0F, 16, 16, 256.0F, 256.0F);
-    }
+   public ITextComponent func_178664_z_() {
+      return new TextComponentTranslation("spectatorMenu.team_teleport", new Object[0]);
+   }
 
-    public boolean isEnabled()
-    {
-        for (ISpectatorMenuObject ispectatormenuobject : this.items)
-        {
-            if (ispectatormenuobject.isEnabled())
-            {
-                return true;
+   public void func_178663_a(float p_178663_1_, int p_178663_2_) {
+      Minecraft.func_71410_x().func_110434_K().func_110577_a(GuiSpectator.field_175269_a);
+      Gui.func_146110_a(0, 0, 16.0F, 0.0F, 16, 16, 256.0F, 256.0F);
+   }
+
+   public boolean func_178662_A_() {
+      for(ISpectatorMenuObject ispectatormenuobject : this.field_178672_a) {
+         if (ispectatormenuobject.func_178662_A_()) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   class TeamSelectionObject implements ISpectatorMenuObject {
+      private final ScorePlayerTeam field_178676_b;
+      private final ResourceLocation field_178677_c;
+      private final List<NetworkPlayerInfo> field_178675_d;
+
+      public TeamSelectionObject(ScorePlayerTeam p_i45492_2_) {
+         this.field_178676_b = p_i45492_2_;
+         this.field_178675_d = Lists.<NetworkPlayerInfo>newArrayList();
+
+         for(String s : p_i45492_2_.func_96670_d()) {
+            NetworkPlayerInfo networkplayerinfo = Minecraft.func_71410_x().func_147114_u().func_175104_a(s);
+            if (networkplayerinfo != null) {
+               this.field_178675_d.add(networkplayerinfo);
             }
-        }
+         }
 
-        return false;
-    }
+         if (this.field_178675_d.isEmpty()) {
+            this.field_178677_c = DefaultPlayerSkin.func_177335_a();
+         } else {
+            String s1 = ((NetworkPlayerInfo)this.field_178675_d.get((new Random()).nextInt(this.field_178675_d.size()))).func_178845_a().getName();
+            this.field_178677_c = AbstractClientPlayer.func_110311_f(s1);
+            AbstractClientPlayer.func_110304_a(this.field_178677_c, s1);
+         }
 
-    class TeamSelectionObject implements ISpectatorMenuObject
-    {
-        private final ScorePlayerTeam team;
-        private final ResourceLocation location;
-        private final List<NetworkPlayerInfo> players;
+      }
 
-        public TeamSelectionObject(ScorePlayerTeam p_i45492_2_)
-        {
-            this.team = p_i45492_2_;
-            this.players = Lists.<NetworkPlayerInfo>newArrayList();
+      public void func_178661_a(SpectatorMenu p_178661_1_) {
+         p_178661_1_.func_178647_a(new TeleportToPlayer(this.field_178675_d));
+      }
 
-            for (String s : p_i45492_2_.getMembershipCollection())
-            {
-                NetworkPlayerInfo networkplayerinfo = Minecraft.getMinecraft().getConnection().getPlayerInfo(s);
+      public ITextComponent func_178664_z_() {
+         return new TextComponentString(this.field_178676_b.func_96669_c());
+      }
 
-                if (networkplayerinfo != null)
-                {
-                    this.players.add(networkplayerinfo);
-                }
-            }
+      public void func_178663_a(float p_178663_1_, int p_178663_2_) {
+         int i = -1;
+         String s = FontRenderer.func_78282_e(this.field_178676_b.func_96668_e());
+         if (s.length() >= 2) {
+            i = Minecraft.func_71410_x().field_71466_p.func_175064_b(s.charAt(1));
+         }
 
-            if (this.players.isEmpty())
-            {
-                this.location = DefaultPlayerSkin.getDefaultSkinLegacy();
-            }
-            else
-            {
-                String s1 = ((NetworkPlayerInfo)this.players.get((new Random()).nextInt(this.players.size()))).getGameProfile().getName();
-                this.location = AbstractClientPlayer.getLocationSkin(s1);
-                AbstractClientPlayer.getDownloadImageSkin(this.location, s1);
-            }
-        }
+         if (i >= 0) {
+            float f = (float)(i >> 16 & 255) / 255.0F;
+            float f1 = (float)(i >> 8 & 255) / 255.0F;
+            float f2 = (float)(i & 255) / 255.0F;
+            Gui.func_73734_a(1, 1, 15, 15, MathHelper.func_180183_b(f * p_178663_1_, f1 * p_178663_1_, f2 * p_178663_1_) | p_178663_2_ << 24);
+         }
 
-        public void selectItem(SpectatorMenu menu)
-        {
-            menu.selectCategory(new TeleportToPlayer(this.players));
-        }
+         Minecraft.func_71410_x().func_110434_K().func_110577_a(this.field_178677_c);
+         GlStateManager.func_179131_c(p_178663_1_, p_178663_1_, p_178663_1_, (float)p_178663_2_ / 255.0F);
+         Gui.func_152125_a(2, 2, 8.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
+         Gui.func_152125_a(2, 2, 40.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
+      }
 
-        public ITextComponent getSpectatorName()
-        {
-            return new TextComponentString(this.team.getTeamName());
-        }
-
-        public void renderIcon(float p_178663_1_, int alpha)
-        {
-            int i = -1;
-            String s = FontRenderer.getFormatFromString(this.team.getColorPrefix());
-
-            if (s.length() >= 2)
-            {
-                i = Minecraft.getMinecraft().fontRendererObj.getColorCode(s.charAt(1));
-            }
-
-            if (i >= 0)
-            {
-                float f = (float)(i >> 16 & 255) / 255.0F;
-                float f1 = (float)(i >> 8 & 255) / 255.0F;
-                float f2 = (float)(i & 255) / 255.0F;
-                Gui.drawRect(1, 1, 15, 15, MathHelper.rgb(f * p_178663_1_, f1 * p_178663_1_, f2 * p_178663_1_) | alpha << 24);
-            }
-
-            Minecraft.getMinecraft().getTextureManager().bindTexture(this.location);
-            GlStateManager.color(p_178663_1_, p_178663_1_, p_178663_1_, (float)alpha / 255.0F);
-            Gui.drawScaledCustomSizeModalRect(2, 2, 8.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
-            Gui.drawScaledCustomSizeModalRect(2, 2, 40.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
-        }
-
-        public boolean isEnabled()
-        {
-            return !this.players.isEmpty();
-        }
-    }
+      public boolean func_178662_A_() {
+         return !this.field_178675_d.isEmpty();
+      }
+   }
 }

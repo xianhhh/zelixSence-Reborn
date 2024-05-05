@@ -19,366 +19,285 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntityDataManager
-{
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final Map < Class <? extends Entity > , Integer > NEXT_ID_MAP = Maps. < Class <? extends Entity > , Integer > newHashMap();
+public class EntityDataManager {
+   private static final Logger field_190303_a = LogManager.getLogger();
+   private static final Map<Class<? extends Entity>, Integer> field_187232_a = Maps.<Class<? extends Entity>, Integer>newHashMap();
+   private final Entity field_187233_b;
+   private final Map<Integer, EntityDataManager.DataEntry<?>> field_187234_c = Maps.<Integer, EntityDataManager.DataEntry<?>>newHashMap();
+   private final ReadWriteLock field_187235_d = new ReentrantReadWriteLock();
+   private boolean field_187236_e = true;
+   private boolean field_187237_f;
 
-    /** The entity that this data manager is for. */
-    private final Entity entity;
-    private final Map < Integer, EntityDataManager.DataEntry<? >> entries = Maps. < Integer, EntityDataManager.DataEntry<? >> newHashMap();
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private boolean empty = true;
-    private boolean dirty;
+   public EntityDataManager(Entity p_i46840_1_) {
+      this.field_187233_b = p_i46840_1_;
+   }
 
-    public EntityDataManager(Entity entityIn)
-    {
-        this.entity = entityIn;
-    }
-
-    public static <T> DataParameter<T> createKey(Class <? extends Entity > clazz, DataSerializer<T> serializer)
-    {
-        if (LOGGER.isDebugEnabled())
-        {
-            try
-            {
-                Class<?> oclass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
-
-                if (!oclass.equals(clazz))
-                {
-                    LOGGER.debug("defineId called for: {} from {}", clazz, oclass, new RuntimeException());
-                }
+   public static <T> DataParameter<T> func_187226_a(Class<? extends Entity> p_187226_0_, DataSerializer<T> p_187226_1_) {
+      if (field_190303_a.isDebugEnabled()) {
+         try {
+            Class<?> oclass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
+            if (!oclass.equals(p_187226_0_)) {
+               field_190303_a.debug("defineId called for: {} from {}", p_187226_0_, oclass, new RuntimeException());
             }
-            catch (ClassNotFoundException var5)
-            {
-                ;
+         } catch (ClassNotFoundException var5) {
+            ;
+         }
+      }
+
+      int j;
+      if (field_187232_a.containsKey(p_187226_0_)) {
+         j = ((Integer)field_187232_a.get(p_187226_0_)).intValue() + 1;
+      } else {
+         int i = 0;
+         Class<?> oclass1 = p_187226_0_;
+
+         while(oclass1 != Entity.class) {
+            oclass1 = oclass1.getSuperclass();
+            if (field_187232_a.containsKey(oclass1)) {
+               i = ((Integer)field_187232_a.get(oclass1)).intValue() + 1;
+               break;
             }
-        }
+         }
 
-        int j;
+         j = i;
+      }
 
-        if (NEXT_ID_MAP.containsKey(clazz))
-        {
-            j = ((Integer)NEXT_ID_MAP.get(clazz)).intValue() + 1;
-        }
-        else
-        {
-            int i = 0;
-            Class<?> oclass1 = clazz;
+      if (j > 254) {
+         throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
+      } else {
+         field_187232_a.put(p_187226_0_, Integer.valueOf(j));
+         return p_187226_1_.func_187161_a(j);
+      }
+   }
 
-            while (oclass1 != Entity.class)
-            {
-                oclass1 = oclass1.getSuperclass();
+   public <T> void func_187214_a(DataParameter<T> p_187214_1_, T p_187214_2_) {
+      int i = p_187214_1_.func_187155_a();
+      if (i > 254) {
+         throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+      } else if (this.field_187234_c.containsKey(Integer.valueOf(i))) {
+         throw new IllegalArgumentException("Duplicate id value for " + i + "!");
+      } else if (DataSerializers.func_187188_b(p_187214_1_.func_187156_b()) < 0) {
+         throw new IllegalArgumentException("Unregistered serializer " + p_187214_1_.func_187156_b() + " for " + i + "!");
+      } else {
+         this.func_187222_c(p_187214_1_, p_187214_2_);
+      }
+   }
 
-                if (NEXT_ID_MAP.containsKey(oclass1))
-                {
-                    i = ((Integer)NEXT_ID_MAP.get(oclass1)).intValue() + 1;
-                    break;
-                }
+   private <T> void func_187222_c(DataParameter<T> p_187222_1_, T p_187222_2_) {
+      EntityDataManager.DataEntry<T> dataentry = new EntityDataManager.DataEntry<T>(p_187222_1_, p_187222_2_);
+      this.field_187235_d.writeLock().lock();
+      this.field_187234_c.put(Integer.valueOf(p_187222_1_.func_187155_a()), dataentry);
+      this.field_187236_e = false;
+      this.field_187235_d.writeLock().unlock();
+   }
+
+   private <T> EntityDataManager.DataEntry<T> func_187219_c(DataParameter<T> p_187219_1_) {
+      this.field_187235_d.readLock().lock();
+
+      EntityDataManager.DataEntry<T> dataentry;
+      try {
+         dataentry = (EntityDataManager.DataEntry)this.field_187234_c.get(Integer.valueOf(p_187219_1_.func_187155_a()));
+      } catch (Throwable throwable) {
+         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Getting synched entity data");
+         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Synched entity data");
+         crashreportcategory.func_71507_a("Data ID", p_187219_1_);
+         throw new ReportedException(crashreport);
+      }
+
+      this.field_187235_d.readLock().unlock();
+      return dataentry;
+   }
+
+   public <T> T func_187225_a(DataParameter<T> p_187225_1_) {
+      return (T)this.func_187219_c(p_187225_1_).func_187206_b();
+   }
+
+   public <T> void func_187227_b(DataParameter<T> p_187227_1_, T p_187227_2_) {
+      EntityDataManager.DataEntry<T> dataentry = this.<T>func_187219_c(p_187227_1_);
+      if (ObjectUtils.notEqual(p_187227_2_, dataentry.func_187206_b())) {
+         dataentry.func_187210_a(p_187227_2_);
+         this.field_187233_b.func_184206_a(p_187227_1_);
+         dataentry.func_187208_a(true);
+         this.field_187237_f = true;
+      }
+
+   }
+
+   public <T> void func_187217_b(DataParameter<T> p_187217_1_) {
+      this.func_187219_c(p_187217_1_).field_187213_c = true;
+      this.field_187237_f = true;
+   }
+
+   public boolean func_187223_a() {
+      return this.field_187237_f;
+   }
+
+   public static void func_187229_a(List<EntityDataManager.DataEntry<?>> p_187229_0_, PacketBuffer p_187229_1_) throws IOException {
+      if (p_187229_0_ != null) {
+         int i = 0;
+
+         for(int j = p_187229_0_.size(); i < j; ++i) {
+            EntityDataManager.DataEntry<?> dataentry = (EntityDataManager.DataEntry)p_187229_0_.get(i);
+            func_187220_a(p_187229_1_, dataentry);
+         }
+      }
+
+      p_187229_1_.writeByte(255);
+   }
+
+   @Nullable
+   public List<EntityDataManager.DataEntry<?>> func_187221_b() {
+      List<EntityDataManager.DataEntry<?>> list = null;
+      if (this.field_187237_f) {
+         this.field_187235_d.readLock().lock();
+
+         for(EntityDataManager.DataEntry<?> dataentry : this.field_187234_c.values()) {
+            if (dataentry.func_187209_c()) {
+               dataentry.func_187208_a(false);
+               if (list == null) {
+                  list = Lists.<EntityDataManager.DataEntry<?>>newArrayList();
+               }
+
+               list.add(dataentry.func_192735_d());
             }
+         }
 
-            j = i;
-        }
+         this.field_187235_d.readLock().unlock();
+      }
 
-        if (j > 254)
-        {
-            throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
-        }
-        else
-        {
-            NEXT_ID_MAP.put(clazz, Integer.valueOf(j));
-            return serializer.createKey(j);
-        }
-    }
+      this.field_187237_f = false;
+      return list;
+   }
 
-    public <T> void register(DataParameter<T> key, T value)
-    {
-        int i = key.getId();
+   public void func_187216_a(PacketBuffer p_187216_1_) throws IOException {
+      this.field_187235_d.readLock().lock();
 
-        if (i > 254)
-        {
-            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
-        }
-        else if (this.entries.containsKey(Integer.valueOf(i)))
-        {
-            throw new IllegalArgumentException("Duplicate id value for " + i + "!");
-        }
-        else if (DataSerializers.getSerializerId(key.getSerializer()) < 0)
-        {
-            throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
-        }
-        else
-        {
-            this.setEntry(key, value);
-        }
-    }
+      for(EntityDataManager.DataEntry<?> dataentry : this.field_187234_c.values()) {
+         func_187220_a(p_187216_1_, dataentry);
+      }
 
-    private <T> void setEntry(DataParameter<T> key, T value)
-    {
-        EntityDataManager.DataEntry<T> dataentry = new EntityDataManager.DataEntry<T>(key, value);
-        this.lock.writeLock().lock();
-        this.entries.put(Integer.valueOf(key.getId()), dataentry);
-        this.empty = false;
-        this.lock.writeLock().unlock();
-    }
+      this.field_187235_d.readLock().unlock();
+      p_187216_1_.writeByte(255);
+   }
 
-    private <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key)
-    {
-        this.lock.readLock().lock();
-        EntityDataManager.DataEntry<T> dataentry;
+   @Nullable
+   public List<EntityDataManager.DataEntry<?>> func_187231_c() {
+      List<EntityDataManager.DataEntry<?>> list = null;
+      this.field_187235_d.readLock().lock();
 
-        try
-        {
-            dataentry = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(key.getId()));
-        }
-        catch (Throwable throwable)
-        {
-            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting synched entity data");
-            CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
-            crashreportcategory.addCrashSection("Data ID", key);
-            throw new ReportedException(crashreport);
-        }
+      for(EntityDataManager.DataEntry<?> dataentry : this.field_187234_c.values()) {
+         if (list == null) {
+            list = Lists.<EntityDataManager.DataEntry<?>>newArrayList();
+         }
 
-        this.lock.readLock().unlock();
-        return dataentry;
-    }
+         list.add(dataentry.func_192735_d());
+      }
 
-    public <T> T get(DataParameter<T> key)
-    {
-        return (T)this.getEntry(key).getValue();
-    }
+      this.field_187235_d.readLock().unlock();
+      return list;
+   }
 
-    public <T> void set(DataParameter<T> key, T value)
-    {
-        EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);
+   private static <T> void func_187220_a(PacketBuffer p_187220_0_, EntityDataManager.DataEntry<T> p_187220_1_) throws IOException {
+      DataParameter<T> dataparameter = p_187220_1_.func_187205_a();
+      int i = DataSerializers.func_187188_b(dataparameter.func_187156_b());
+      if (i < 0) {
+         throw new EncoderException("Unknown serializer type " + dataparameter.func_187156_b());
+      } else {
+         p_187220_0_.writeByte(dataparameter.func_187155_a());
+         p_187220_0_.func_150787_b(i);
+         dataparameter.func_187156_b().func_187160_a(p_187220_0_, p_187220_1_.func_187206_b());
+      }
+   }
 
-        if (ObjectUtils.notEqual(value, dataentry.getValue()))
-        {
-            dataentry.setValue(value);
-            this.entity.notifyDataManagerChange(key);
-            dataentry.setDirty(true);
-            this.dirty = true;
-        }
-    }
+   @Nullable
+   public static List<EntityDataManager.DataEntry<?>> func_187215_b(PacketBuffer p_187215_0_) throws IOException {
+      List<EntityDataManager.DataEntry<?>> list = null;
 
-    public <T> void setDirty(DataParameter<T> key)
-    {
-        this.getEntry(key).dirty = true;
-        this.dirty = true;
-    }
+      int i;
+      while((i = p_187215_0_.readUnsignedByte()) != 255) {
+         if (list == null) {
+            list = Lists.<EntityDataManager.DataEntry<?>>newArrayList();
+         }
 
-    public boolean isDirty()
-    {
-        return this.dirty;
-    }
+         int j = p_187215_0_.func_150792_a();
+         DataSerializer<?> dataserializer = DataSerializers.func_187190_a(j);
+         if (dataserializer == null) {
+            throw new DecoderException("Unknown serializer type " + j);
+         }
 
-    public static void writeEntries(List < EntityDataManager.DataEntry<? >> entriesIn, PacketBuffer buf) throws IOException
-    {
-        if (entriesIn != null)
-        {
-            int i = 0;
+         list.add(new EntityDataManager.DataEntry(dataserializer.func_187161_a(i), dataserializer.func_187159_a(p_187215_0_)));
+      }
 
-            for (int j = entriesIn.size(); i < j; ++i)
-            {
-                EntityDataManager.DataEntry<?> dataentry = (EntityDataManager.DataEntry)entriesIn.get(i);
-                writeEntry(buf, dataentry);
-            }
-        }
+      return list;
+   }
 
-        buf.writeByte(255);
-    }
+   public void func_187218_a(List<EntityDataManager.DataEntry<?>> p_187218_1_) {
+      this.field_187235_d.writeLock().lock();
 
-    @Nullable
-    public List < EntityDataManager.DataEntry<? >> getDirty()
-    {
-        List < EntityDataManager.DataEntry<? >> list = null;
+      for(EntityDataManager.DataEntry<?> dataentry : p_187218_1_) {
+         EntityDataManager.DataEntry<?> dataentry1 = (EntityDataManager.DataEntry)this.field_187234_c.get(Integer.valueOf(dataentry.func_187205_a().func_187155_a()));
+         if (dataentry1 != null) {
+            this.func_187224_a(dataentry1, dataentry);
+            this.field_187233_b.func_184206_a(dataentry.func_187205_a());
+         }
+      }
 
-        if (this.dirty)
-        {
-            this.lock.readLock().lock();
+      this.field_187235_d.writeLock().unlock();
+      this.field_187237_f = true;
+   }
 
-            for (EntityDataManager.DataEntry<?> dataentry : this.entries.values())
-            {
-                if (dataentry.isDirty())
-                {
-                    dataentry.setDirty(false);
+   protected <T> void func_187224_a(EntityDataManager.DataEntry<T> p_187224_1_, EntityDataManager.DataEntry<?> p_187224_2_) {
+      p_187224_1_.func_187210_a(p_187224_2_.func_187206_b());
+   }
 
-                    if (list == null)
-                    {
-                        list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
-                    }
+   public boolean func_187228_d() {
+      return this.field_187236_e;
+   }
 
-                    list.add(dataentry.func_192735_d());
-                }
-            }
+   public void func_187230_e() {
+      this.field_187237_f = false;
+      this.field_187235_d.readLock().lock();
 
-            this.lock.readLock().unlock();
-        }
+      for(EntityDataManager.DataEntry<?> dataentry : this.field_187234_c.values()) {
+         dataentry.func_187208_a(false);
+      }
 
-        this.dirty = false;
-        return list;
-    }
+      this.field_187235_d.readLock().unlock();
+   }
 
-    public void writeEntries(PacketBuffer buf) throws IOException
-    {
-        this.lock.readLock().lock();
+   public static class DataEntry<T> {
+      private final DataParameter<T> field_187211_a;
+      private T field_187212_b;
+      private boolean field_187213_c;
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values())
-        {
-            writeEntry(buf, dataentry);
-        }
+      public DataEntry(DataParameter<T> p_i47010_1_, T p_i47010_2_) {
+         this.field_187211_a = p_i47010_1_;
+         this.field_187212_b = p_i47010_2_;
+         this.field_187213_c = true;
+      }
 
-        this.lock.readLock().unlock();
-        buf.writeByte(255);
-    }
+      public DataParameter<T> func_187205_a() {
+         return this.field_187211_a;
+      }
 
-    @Nullable
-    public List < EntityDataManager.DataEntry<? >> getAll()
-    {
-        List < EntityDataManager.DataEntry<? >> list = null;
-        this.lock.readLock().lock();
+      public void func_187210_a(T p_187210_1_) {
+         this.field_187212_b = p_187210_1_;
+      }
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values())
-        {
-            if (list == null)
-            {
-                list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
-            }
+      public T func_187206_b() {
+         return this.field_187212_b;
+      }
 
-            list.add(dataentry.func_192735_d());
-        }
+      public boolean func_187209_c() {
+         return this.field_187213_c;
+      }
 
-        this.lock.readLock().unlock();
-        return list;
-    }
+      public void func_187208_a(boolean p_187208_1_) {
+         this.field_187213_c = p_187208_1_;
+      }
 
-    private static <T> void writeEntry(PacketBuffer buf, EntityDataManager.DataEntry<T> entry) throws IOException
-    {
-        DataParameter<T> dataparameter = entry.getKey();
-        int i = DataSerializers.getSerializerId(dataparameter.getSerializer());
-
-        if (i < 0)
-        {
-            throw new EncoderException("Unknown serializer type " + dataparameter.getSerializer());
-        }
-        else
-        {
-            buf.writeByte(dataparameter.getId());
-            buf.writeVarIntToBuffer(i);
-            dataparameter.getSerializer().write(buf, entry.getValue());
-        }
-    }
-
-    @Nullable
-    public static List < EntityDataManager.DataEntry<? >> readEntries(PacketBuffer buf) throws IOException
-    {
-        List < EntityDataManager.DataEntry<? >> list = null;
-        int i;
-
-        while ((i = buf.readUnsignedByte()) != 255)
-        {
-            if (list == null)
-            {
-                list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
-            }
-
-            int j = buf.readVarIntFromBuffer();
-            DataSerializer<?> dataserializer = DataSerializers.getSerializer(j);
-
-            if (dataserializer == null)
-            {
-                throw new DecoderException("Unknown serializer type " + j);
-            }
-
-            list.add(new EntityDataManager.DataEntry(dataserializer.createKey(i), dataserializer.read(buf)));
-        }
-
-        return list;
-    }
-
-    public void setEntryValues(List < EntityDataManager.DataEntry<? >> entriesIn)
-    {
-        this.lock.writeLock().lock();
-
-        for (EntityDataManager.DataEntry<?> dataentry : entriesIn)
-        {
-            EntityDataManager.DataEntry<?> dataentry1 = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(dataentry.getKey().getId()));
-
-            if (dataentry1 != null)
-            {
-                this.setEntryValue(dataentry1, dataentry);
-                this.entity.notifyDataManagerChange(dataentry.getKey());
-            }
-        }
-
-        this.lock.writeLock().unlock();
-        this.dirty = true;
-    }
-
-    protected <T> void setEntryValue(EntityDataManager.DataEntry<T> target, EntityDataManager.DataEntry<?> source)
-    {
-        target.setValue((T)source.getValue());
-    }
-
-    public boolean isEmpty()
-    {
-        return this.empty;
-    }
-
-    public void setClean()
-    {
-        this.dirty = false;
-        this.lock.readLock().lock();
-
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values())
-        {
-            dataentry.setDirty(false);
-        }
-
-        this.lock.readLock().unlock();
-    }
-
-    public static class DataEntry<T>
-    {
-        private final DataParameter<T> key;
-        private T value;
-        private boolean dirty;
-
-        public DataEntry(DataParameter<T> keyIn, T valueIn)
-        {
-            this.key = keyIn;
-            this.value = valueIn;
-            this.dirty = true;
-        }
-
-        public DataParameter<T> getKey()
-        {
-            return this.key;
-        }
-
-        public void setValue(T valueIn)
-        {
-            this.value = valueIn;
-        }
-
-        public T getValue()
-        {
-            return this.value;
-        }
-
-        public boolean isDirty()
-        {
-            return this.dirty;
-        }
-
-        public void setDirty(boolean dirtyIn)
-        {
-            this.dirty = dirtyIn;
-        }
-
-        public EntityDataManager.DataEntry<T> func_192735_d()
-        {
-            return new EntityDataManager.DataEntry<T>(this.key, this.key.getSerializer().func_192717_a(this.value));
-        }
-    }
+      public EntityDataManager.DataEntry<T> func_192735_d() {
+         return new EntityDataManager.DataEntry<T>(this.field_187211_a, this.field_187211_a.func_187156_b().func_192717_a(this.field_187212_b));
+      }
+   }
 }

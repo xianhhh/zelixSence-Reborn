@@ -5,45 +5,29 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketHeldItemChange implements Packet<INetHandlerPlayServer>
-{
-    private int slotId;
+public class CPacketHeldItemChange implements Packet<INetHandlerPlayServer> {
+   private int field_149615_a;
 
-    public CPacketHeldItemChange()
-    {
-    }
+   public CPacketHeldItemChange() {
+   }
 
-    public CPacketHeldItemChange(int slotIdIn)
-    {
-        this.slotId = slotIdIn;
-    }
+   public CPacketHeldItemChange(int p_i46864_1_) {
+      this.field_149615_a = p_i46864_1_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.slotId = buf.readShort();
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149615_a = p_148837_1_.readShort();
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeShort(this.slotId);
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.writeShort(this.field_149615_a);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayServer handler)
-    {
-        handler.processHeldItemChange(this);
-    }
+   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
+      p_148833_1_.func_147355_a(this);
+   }
 
-    public int getSlotId()
-    {
-        return this.slotId;
-    }
+   public int func_149614_c() {
+      return this.field_149615_a;
+   }
 }

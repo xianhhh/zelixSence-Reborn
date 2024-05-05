@@ -15,267 +15,172 @@ import net.minecraft.util.datafix.FixTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SaveFormatOld implements ISaveFormat
-{
-    private static final Logger LOGGER = LogManager.getLogger();
+public class SaveFormatOld implements ISaveFormat {
+   private static final Logger field_151479_b = LogManager.getLogger();
+   protected final File field_75808_a;
+   protected final DataFixer field_186354_b;
 
-    /**
-     * Reference to the File object representing the directory for the world saves
-     */
-    protected final File savesDirectory;
-    protected final DataFixer dataFixer;
+   public SaveFormatOld(File p_i46647_1_, DataFixer p_i46647_2_) {
+      this.field_186354_b = p_i46647_2_;
+      if (!p_i46647_1_.exists()) {
+         p_i46647_1_.mkdirs();
+      }
 
-    public SaveFormatOld(File savesDirectoryIn, DataFixer dataFixerIn)
-    {
-        this.dataFixer = dataFixerIn;
+      this.field_75808_a = p_i46647_1_;
+   }
 
-        if (!savesDirectoryIn.exists())
-        {
-            savesDirectoryIn.mkdirs();
-        }
+   public String func_154333_a() {
+      return "Old Format";
+   }
 
-        this.savesDirectory = savesDirectoryIn;
-    }
+   public List<WorldSummary> func_75799_b() throws AnvilConverterException {
+      List<WorldSummary> list = Lists.<WorldSummary>newArrayList();
 
-    /**
-     * Returns the name of the save format.
-     */
-    public String getName()
-    {
-        return "Old Format";
-    }
+      for(int i = 0; i < 5; ++i) {
+         String s = "World" + (i + 1);
+         WorldInfo worldinfo = this.func_75803_c(s);
+         if (worldinfo != null) {
+            list.add(new WorldSummary(worldinfo, s, "", worldinfo.func_76092_g(), false));
+         }
+      }
 
-    public List<WorldSummary> getSaveList() throws AnvilConverterException
-    {
-        List<WorldSummary> list = Lists.<WorldSummary>newArrayList();
+      return list;
+   }
 
-        for (int i = 0; i < 5; ++i)
-        {
-            String s = "World" + (i + 1);
-            WorldInfo worldinfo = this.getWorldInfo(s);
+   public void func_75800_d() {
+   }
 
-            if (worldinfo != null)
-            {
-                list.add(new WorldSummary(worldinfo, s, "", worldinfo.getSizeOnDisk(), false));
+   @Nullable
+   public WorldInfo func_75803_c(String p_75803_1_) {
+      File file1 = new File(this.field_75808_a, p_75803_1_);
+      if (!file1.exists()) {
+         return null;
+      } else {
+         File file2 = new File(file1, "level.dat");
+         if (file2.exists()) {
+            WorldInfo worldinfo = func_186353_a(file2, this.field_186354_b);
+            if (worldinfo != null) {
+               return worldinfo;
             }
-        }
+         }
 
-        return list;
-    }
+         file2 = new File(file1, "level.dat_old");
+         return file2.exists() ? func_186353_a(file2, this.field_186354_b) : null;
+      }
+   }
 
-    public void flushCache()
-    {
-    }
+   @Nullable
+   public static WorldInfo func_186353_a(File p_186353_0_, DataFixer p_186353_1_) {
+      try {
+         NBTTagCompound nbttagcompound = CompressedStreamTools.func_74796_a(new FileInputStream(p_186353_0_));
+         NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("Data");
+         return new WorldInfo(p_186353_1_.func_188257_a(FixTypes.LEVEL, nbttagcompound1));
+      } catch (Exception exception) {
+         field_151479_b.error("Exception reading {}", p_186353_0_, exception);
+         return null;
+      }
+   }
 
-    @Nullable
-
-    /**
-     * Returns the world's WorldInfo object
-     */
-    public WorldInfo getWorldInfo(String saveName)
-    {
-        File file1 = new File(this.savesDirectory, saveName);
-
-        if (!file1.exists())
-        {
-            return null;
-        }
-        else
-        {
-            File file2 = new File(file1, "level.dat");
-
-            if (file2.exists())
-            {
-                WorldInfo worldinfo = getWorldData(file2, this.dataFixer);
-
-                if (worldinfo != null)
-                {
-                    return worldinfo;
-                }
+   public void func_75806_a(String p_75806_1_, String p_75806_2_) {
+      File file1 = new File(this.field_75808_a, p_75806_1_);
+      if (file1.exists()) {
+         File file2 = new File(file1, "level.dat");
+         if (file2.exists()) {
+            try {
+               NBTTagCompound nbttagcompound = CompressedStreamTools.func_74796_a(new FileInputStream(file2));
+               NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("Data");
+               nbttagcompound1.func_74778_a("LevelName", p_75806_2_);
+               CompressedStreamTools.func_74799_a(nbttagcompound, new FileOutputStream(file2));
+            } catch (Exception exception) {
+               exception.printStackTrace();
             }
+         }
 
-            file2 = new File(file1, "level.dat_old");
-            return file2.exists() ? getWorldData(file2, this.dataFixer) : null;
-        }
-    }
+      }
+   }
 
-    @Nullable
-    public static WorldInfo getWorldData(File p_186353_0_, DataFixer dataFixerIn)
-    {
-        try
-        {
-            NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(new FileInputStream(p_186353_0_));
-            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
-            return new WorldInfo(dataFixerIn.process(FixTypes.LEVEL, nbttagcompound1));
-        }
-        catch (Exception exception)
-        {
-            LOGGER.error("Exception reading {}", p_186353_0_, exception);
-            return null;
-        }
-    }
-
-    /**
-     * Renames the world by storing the new name in level.dat. It does *not* rename the directory containing the world
-     * data.
-     */
-    public void renameWorld(String dirName, String newName)
-    {
-        File file1 = new File(this.savesDirectory, dirName);
-
-        if (file1.exists())
-        {
-            File file2 = new File(file1, "level.dat");
-
-            if (file2.exists())
-            {
-                try
-                {
-                    NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(new FileInputStream(file2));
-                    NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
-                    nbttagcompound1.setString("LevelName", newName);
-                    CompressedStreamTools.writeCompressed(nbttagcompound, new FileOutputStream(file2));
-                }
-                catch (Exception exception)
-                {
-                    exception.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public boolean isNewLevelIdAcceptable(String saveName)
-    {
-        File file1 = new File(this.savesDirectory, saveName);
-
-        if (file1.exists())
-        {
-            return false;
-        }
-        else
-        {
-            try
-            {
-                file1.mkdir();
-                file1.delete();
-                return true;
-            }
-            catch (Throwable throwable)
-            {
-                LOGGER.warn("Couldn't make new level", throwable);
-                return false;
-            }
-        }
-    }
-
-    /**
-     * Deletes a world directory.
-     */
-    public boolean deleteWorldDirectory(String saveName)
-    {
-        File file1 = new File(this.savesDirectory, saveName);
-
-        if (!file1.exists())
-        {
+   public boolean func_154335_d(String p_154335_1_) {
+      File file1 = new File(this.field_75808_a, p_154335_1_);
+      if (file1.exists()) {
+         return false;
+      } else {
+         try {
+            file1.mkdir();
+            file1.delete();
             return true;
-        }
-        else
-        {
-            LOGGER.info("Deleting level {}", (Object)saveName);
+         } catch (Throwable throwable) {
+            field_151479_b.warn("Couldn't make new level", throwable);
+            return false;
+         }
+      }
+   }
 
-            for (int i = 1; i <= 5; ++i)
-            {
-                LOGGER.info("Attempt {}...", (int)i);
+   public boolean func_75802_e(String p_75802_1_) {
+      File file1 = new File(this.field_75808_a, p_75802_1_);
+      if (!file1.exists()) {
+         return true;
+      } else {
+         field_151479_b.info("Deleting level {}", (Object)p_75802_1_);
 
-                if (deleteFiles(file1.listFiles()))
-                {
-                    break;
-                }
-
-                LOGGER.warn("Unsuccessful in deleting contents.");
-
-                if (i < 5)
-                {
-                    try
-                    {
-                        Thread.sleep(500L);
-                    }
-                    catch (InterruptedException var5)
-                    {
-                        ;
-                    }
-                }
+         for(int i = 1; i <= 5; ++i) {
+            field_151479_b.info("Attempt {}...", (int)i);
+            if (func_75807_a(file1.listFiles())) {
+               break;
             }
 
-            return file1.delete();
-        }
-    }
-
-    /**
-     * Deletes a list of files and directories.
-     */
-    protected static boolean deleteFiles(File[] files)
-    {
-        for (File file1 : files)
-        {
-            LOGGER.debug("Deleting {}", (Object)file1);
-
-            if (file1.isDirectory() && !deleteFiles(file1.listFiles()))
-            {
-                LOGGER.warn("Couldn't delete directory {}", (Object)file1);
-                return false;
+            field_151479_b.warn("Unsuccessful in deleting contents.");
+            if (i < 5) {
+               try {
+                  Thread.sleep(500L);
+               } catch (InterruptedException var5) {
+                  ;
+               }
             }
+         }
 
-            if (!file1.delete())
-            {
-                LOGGER.warn("Couldn't delete file {}", (Object)file1);
-                return false;
-            }
-        }
+         return file1.delete();
+      }
+   }
 
-        return true;
-    }
+   protected static boolean func_75807_a(File[] p_75807_0_) {
+      for(File file1 : p_75807_0_) {
+         field_151479_b.debug("Deleting {}", (Object)file1);
+         if (file1.isDirectory() && !func_75807_a(file1.listFiles())) {
+            field_151479_b.warn("Couldn't delete directory {}", (Object)file1);
+            return false;
+         }
 
-    /**
-     * Returns back a loader for the specified save directory
-     */
-    public ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata)
-    {
-        return new SaveHandler(this.savesDirectory, saveName, storePlayerdata, this.dataFixer);
-    }
+         if (!file1.delete()) {
+            field_151479_b.warn("Couldn't delete file {}", (Object)file1);
+            return false;
+         }
+      }
 
-    public boolean isConvertible(String saveName)
-    {
-        return false;
-    }
+      return true;
+   }
 
-    /**
-     * gets if the map is old chunk saving (true) or McRegion (false)
-     */
-    public boolean isOldMapFormat(String saveName)
-    {
-        return false;
-    }
+   public ISaveHandler func_75804_a(String p_75804_1_, boolean p_75804_2_) {
+      return new SaveHandler(this.field_75808_a, p_75804_1_, p_75804_2_, this.field_186354_b);
+   }
 
-    /**
-     * converts the map to mcRegion
-     */
-    public boolean convertMapFormat(String filename, IProgressUpdate progressCallback)
-    {
-        return false;
-    }
+   public boolean func_154334_a(String p_154334_1_) {
+      return false;
+   }
 
-    /**
-     * Return whether the given world can be loaded.
-     */
-    public boolean canLoadWorld(String saveName)
-    {
-        File file1 = new File(this.savesDirectory, saveName);
-        return file1.isDirectory();
-    }
+   public boolean func_75801_b(String p_75801_1_) {
+      return false;
+   }
 
-    public File getFile(String p_186352_1_, String p_186352_2_)
-    {
-        return new File(new File(this.savesDirectory, p_186352_1_), p_186352_2_);
-    }
+   public boolean func_75805_a(String p_75805_1_, IProgressUpdate p_75805_2_) {
+      return false;
+   }
+
+   public boolean func_90033_f(String p_90033_1_) {
+      File file1 = new File(this.field_75808_a, p_90033_1_);
+      return file1.isDirectory();
+   }
+
+   public File func_186352_b(String p_186352_1_, String p_186352_2_) {
+      return new File(new File(this.field_75808_a, p_186352_1_), p_186352_2_);
+   }
 }

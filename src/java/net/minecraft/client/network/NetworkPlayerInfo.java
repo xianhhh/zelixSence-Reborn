@@ -16,206 +16,155 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 
-public class NetworkPlayerInfo
-{
-    /**
-     * The GameProfile for the player represented by this NetworkPlayerInfo instance
-     */
-    private final GameProfile gameProfile;
-    Map<Type, ResourceLocation> playerTextures = Maps.newEnumMap(Type.class);
-    private GameType gameType;
+public class NetworkPlayerInfo {
+   private final GameProfile field_178867_a;
+   Map<Type, ResourceLocation> field_187107_a = Maps.newEnumMap(Type.class);
+   private GameType field_178866_b;
+   private int field_78829_b;
+   private boolean field_178864_d;
+   private String field_178863_g;
+   private ITextComponent field_178872_h;
+   private int field_178873_i;
+   private int field_178870_j;
+   private long field_178871_k;
+   private long field_178868_l;
+   private long field_178869_m;
 
-    /** Player response time to server in milliseconds */
-    private int responseTime;
-    private boolean playerTexturesLoaded;
-    private String skinType;
+   public NetworkPlayerInfo(GameProfile p_i46294_1_) {
+      this.field_178867_a = p_i46294_1_;
+   }
 
-    /**
-     * When this is non-null, it is displayed instead of the player's real name
-     */
-    private ITextComponent displayName;
-    private int lastHealth;
-    private int displayHealth;
-    private long lastHealthTime;
-    private long healthBlinkTime;
-    private long renderVisibilityId;
+   public NetworkPlayerInfo(SPacketPlayerListItem.AddPlayerData p_i46583_1_) {
+      this.field_178867_a = p_i46583_1_.func_179962_a();
+      this.field_178866_b = p_i46583_1_.func_179960_c();
+      this.field_78829_b = p_i46583_1_.func_179963_b();
+      this.field_178872_h = p_i46583_1_.func_179961_d();
+   }
 
-    public NetworkPlayerInfo(GameProfile profile)
-    {
-        this.gameProfile = profile;
-    }
+   public GameProfile func_178845_a() {
+      return this.field_178867_a;
+   }
 
-    public NetworkPlayerInfo(SPacketPlayerListItem.AddPlayerData entry)
-    {
-        this.gameProfile = entry.getProfile();
-        this.gameType = entry.getGameMode();
-        this.responseTime = entry.getPing();
-        this.displayName = entry.getDisplayName();
-    }
+   public GameType func_178848_b() {
+      return this.field_178866_b;
+   }
 
-    /**
-     * Returns the GameProfile for the player represented by this NetworkPlayerInfo instance
-     */
-    public GameProfile getGameProfile()
-    {
-        return this.gameProfile;
-    }
+   protected void func_178839_a(GameType p_178839_1_) {
+      this.field_178866_b = p_178839_1_;
+   }
 
-    public GameType getGameType()
-    {
-        return this.gameType;
-    }
+   public int func_178853_c() {
+      return this.field_78829_b;
+   }
 
-    protected void setGameType(GameType gameMode)
-    {
-        this.gameType = gameMode;
-    }
+   protected void func_178838_a(int p_178838_1_) {
+      this.field_78829_b = p_178838_1_;
+   }
 
-    public int getResponseTime()
-    {
-        return this.responseTime;
-    }
+   public boolean func_178856_e() {
+      return this.func_178837_g() != null;
+   }
 
-    protected void setResponseTime(int latency)
-    {
-        this.responseTime = latency;
-    }
+   public String func_178851_f() {
+      return this.field_178863_g == null ? DefaultPlayerSkin.func_177332_b(this.field_178867_a.getId()) : this.field_178863_g;
+   }
 
-    public boolean hasLocationSkin()
-    {
-        return this.getLocationSkin() != null;
-    }
+   public ResourceLocation func_178837_g() {
+      this.func_178841_j();
+      return (ResourceLocation)MoreObjects.firstNonNull(this.field_187107_a.get(Type.SKIN), DefaultPlayerSkin.func_177334_a(this.field_178867_a.getId()));
+   }
 
-    public String getSkinType()
-    {
-        return this.skinType == null ? DefaultPlayerSkin.getSkinType(this.gameProfile.getId()) : this.skinType;
-    }
+   @Nullable
+   public ResourceLocation func_178861_h() {
+      this.func_178841_j();
+      return this.field_187107_a.get(Type.CAPE);
+   }
 
-    public ResourceLocation getLocationSkin()
-    {
-        this.loadPlayerTextures();
-        return (ResourceLocation)MoreObjects.firstNonNull(this.playerTextures.get(Type.SKIN), DefaultPlayerSkin.getDefaultSkin(this.gameProfile.getId()));
-    }
+   @Nullable
+   public ResourceLocation func_187106_i() {
+      this.func_178841_j();
+      return this.field_187107_a.get(Type.ELYTRA);
+   }
 
-    @Nullable
-    public ResourceLocation getLocationCape()
-    {
-        this.loadPlayerTextures();
-        return this.playerTextures.get(Type.CAPE);
-    }
+   @Nullable
+   public ScorePlayerTeam func_178850_i() {
+      return Minecraft.func_71410_x().field_71441_e.func_96441_U().func_96509_i(this.func_178845_a().getName());
+   }
 
-    @Nullable
+   protected void func_178841_j() {
+      synchronized(this) {
+         if (!this.field_178864_d) {
+            this.field_178864_d = true;
+            Minecraft.func_71410_x().func_152342_ad().func_152790_a(this.field_178867_a, new SkinManager.SkinAvailableCallback() {
+               public void func_180521_a(Type p_180521_1_, ResourceLocation p_180521_2_, MinecraftProfileTexture p_180521_3_) {
+                  switch(p_180521_1_) {
+                  case SKIN:
+                     NetworkPlayerInfo.this.field_187107_a.put(Type.SKIN, p_180521_2_);
+                     NetworkPlayerInfo.this.field_178863_g = p_180521_3_.getMetadata("model");
+                     if (NetworkPlayerInfo.this.field_178863_g == null) {
+                        NetworkPlayerInfo.this.field_178863_g = "default";
+                     }
+                     break;
+                  case CAPE:
+                     NetworkPlayerInfo.this.field_187107_a.put(Type.CAPE, p_180521_2_);
+                     break;
+                  case ELYTRA:
+                     NetworkPlayerInfo.this.field_187107_a.put(Type.ELYTRA, p_180521_2_);
+                  }
 
-    /**
-     * Gets the special Elytra texture for the player.
-     */
-    public ResourceLocation getLocationElytra()
-    {
-        this.loadPlayerTextures();
-        return this.playerTextures.get(Type.ELYTRA);
-    }
+               }
+            }, true);
+         }
 
-    @Nullable
-    public ScorePlayerTeam getPlayerTeam()
-    {
-        return Minecraft.getMinecraft().world.getScoreboard().getPlayersTeam(this.getGameProfile().getName());
-    }
+      }
+   }
 
-    protected void loadPlayerTextures()
-    {
-        synchronized (this)
-        {
-            if (!this.playerTexturesLoaded)
-            {
-                this.playerTexturesLoaded = true;
-                Minecraft.getMinecraft().getSkinManager().loadProfileTextures(this.gameProfile, new SkinManager.SkinAvailableCallback()
-                {
-                    public void skinAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture)
-                    {
-                        switch (typeIn)
-                        {
-                            case SKIN:
-                                NetworkPlayerInfo.this.playerTextures.put(Type.SKIN, location);
-                                NetworkPlayerInfo.this.skinType = profileTexture.getMetadata("model");
+   public void func_178859_a(@Nullable ITextComponent p_178859_1_) {
+      this.field_178872_h = p_178859_1_;
+   }
 
-                                if (NetworkPlayerInfo.this.skinType == null)
-                                {
-                                    NetworkPlayerInfo.this.skinType = "default";
-                                }
+   @Nullable
+   public ITextComponent func_178854_k() {
+      return this.field_178872_h;
+   }
 
-                                break;
+   public int func_178835_l() {
+      return this.field_178873_i;
+   }
 
-                            case CAPE:
-                                NetworkPlayerInfo.this.playerTextures.put(Type.CAPE, location);
-                                break;
+   public void func_178836_b(int p_178836_1_) {
+      this.field_178873_i = p_178836_1_;
+   }
 
-                            case ELYTRA:
-                                NetworkPlayerInfo.this.playerTextures.put(Type.ELYTRA, location);
-                        }
-                    }
-                }, true);
-            }
-        }
-    }
+   public int func_178860_m() {
+      return this.field_178870_j;
+   }
 
-    public void setDisplayName(@Nullable ITextComponent displayNameIn)
-    {
-        this.displayName = displayNameIn;
-    }
+   public void func_178857_c(int p_178857_1_) {
+      this.field_178870_j = p_178857_1_;
+   }
 
-    @Nullable
-    public ITextComponent getDisplayName()
-    {
-        return this.displayName;
-    }
+   public long func_178847_n() {
+      return this.field_178871_k;
+   }
 
-    public int getLastHealth()
-    {
-        return this.lastHealth;
-    }
+   public void func_178846_a(long p_178846_1_) {
+      this.field_178871_k = p_178846_1_;
+   }
 
-    public void setLastHealth(int p_178836_1_)
-    {
-        this.lastHealth = p_178836_1_;
-    }
+   public long func_178858_o() {
+      return this.field_178868_l;
+   }
 
-    public int getDisplayHealth()
-    {
-        return this.displayHealth;
-    }
+   public void func_178844_b(long p_178844_1_) {
+      this.field_178868_l = p_178844_1_;
+   }
 
-    public void setDisplayHealth(int p_178857_1_)
-    {
-        this.displayHealth = p_178857_1_;
-    }
+   public long func_178855_p() {
+      return this.field_178869_m;
+   }
 
-    public long getLastHealthTime()
-    {
-        return this.lastHealthTime;
-    }
-
-    public void setLastHealthTime(long p_178846_1_)
-    {
-        this.lastHealthTime = p_178846_1_;
-    }
-
-    public long getHealthBlinkTime()
-    {
-        return this.healthBlinkTime;
-    }
-
-    public void setHealthBlinkTime(long p_178844_1_)
-    {
-        this.healthBlinkTime = p_178844_1_;
-    }
-
-    public long getRenderVisibilityId()
-    {
-        return this.renderVisibilityId;
-    }
-
-    public void setRenderVisibilityId(long p_178843_1_)
-    {
-        this.renderVisibilityId = p_178843_1_;
-    }
+   public void func_178843_c(long p_178843_1_) {
+      this.field_178869_m = p_178843_1_;
+   }
 }

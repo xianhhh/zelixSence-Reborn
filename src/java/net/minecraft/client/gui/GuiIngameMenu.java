@@ -7,107 +7,75 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.realms.RealmsBridge;
 
-public class GuiIngameMenu extends GuiScreen
-{
-    private int saveStep;
-    private int visibleTime;
+public class GuiIngameMenu extends GuiScreen {
+   private int field_146445_a;
+   private int field_146444_f;
 
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    public void initGui()
-    {
-        this.saveStep = 0;
-        this.buttonList.clear();
-        int i = -16;
-        int j = 98;
-        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 120 + -16, I18n.format("menu.returnToMenu")));
+   public void func_73866_w_() {
+      this.field_146445_a = 0;
+      this.field_146292_n.clear();
+      int i = -16;
+      int j = 98;
+      this.field_146292_n.add(new GuiButton(1, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 120 + -16, I18n.func_135052_a("menu.returnToMenu")));
+      if (!this.field_146297_k.func_71387_A()) {
+         (this.field_146292_n.get(0)).field_146126_j = I18n.func_135052_a("menu.disconnect");
+      }
 
-        if (!this.mc.isIntegratedServerRunning())
-        {
-            (this.buttonList.get(0)).displayString = I18n.format("menu.disconnect");
-        }
+      this.field_146292_n.add(new GuiButton(4, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 24 + -16, I18n.func_135052_a("menu.returnToGame")));
+      this.field_146292_n.add(new GuiButton(0, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 96 + -16, 98, 20, I18n.func_135052_a("menu.options")));
+      GuiButton guibutton = this.func_189646_b(new GuiButton(7, this.field_146294_l / 2 + 2, this.field_146295_m / 4 + 96 + -16, 98, 20, I18n.func_135052_a("menu.shareToLan")));
+      guibutton.field_146124_l = this.field_146297_k.func_71356_B() && !this.field_146297_k.func_71401_C().func_71344_c();
+      this.field_146292_n.add(new GuiButton(5, this.field_146294_l / 2 - 100, this.field_146295_m / 4 + 48 + -16, 98, 20, I18n.func_135052_a("gui.advancements")));
+      this.field_146292_n.add(new GuiButton(6, this.field_146294_l / 2 + 2, this.field_146295_m / 4 + 48 + -16, 98, 20, I18n.func_135052_a("gui.stats")));
+   }
 
-        this.buttonList.add(new GuiButton(4, this.width / 2 - 100, this.height / 4 + 24 + -16, I18n.format("menu.returnToGame")));
-        this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 96 + -16, 98, 20, I18n.format("menu.options")));
-        GuiButton guibutton = this.addButton(new GuiButton(7, this.width / 2 + 2, this.height / 4 + 96 + -16, 98, 20, I18n.format("menu.shareToLan")));
-        guibutton.enabled = this.mc.isSingleplayer() && !this.mc.getIntegratedServer().getPublic();
-        this.buttonList.add(new GuiButton(5, this.width / 2 - 100, this.height / 4 + 48 + -16, 98, 20, I18n.format("gui.advancements")));
-        this.buttonList.add(new GuiButton(6, this.width / 2 + 2, this.height / 4 + 48 + -16, 98, 20, I18n.format("gui.stats")));
-    }
+   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
+      switch(p_146284_1_.field_146127_k) {
+      case 0:
+         this.field_146297_k.func_147108_a(new GuiOptions(this, this.field_146297_k.field_71474_y));
+         break;
+      case 1:
+         boolean flag = this.field_146297_k.func_71387_A();
+         boolean flag1 = this.field_146297_k.func_181540_al();
+         p_146284_1_.field_146124_l = false;
+         this.field_146297_k.field_71441_e.func_72882_A();
+         this.field_146297_k.func_71403_a((WorldClient)null);
+         if (flag) {
+            this.field_146297_k.func_147108_a(new GuiMainMenu());
+         } else if (flag1) {
+            RealmsBridge realmsbridge = new RealmsBridge();
+            realmsbridge.switchToRealms(new GuiMainMenu());
+         } else {
+            this.field_146297_k.func_147108_a(new GuiMultiplayer(new GuiMainMenu()));
+         }
+      case 2:
+      case 3:
+      default:
+         break;
+      case 4:
+         this.field_146297_k.func_147108_a((GuiScreen)null);
+         this.field_146297_k.func_71381_h();
+         break;
+      case 5:
+         this.field_146297_k.func_147108_a(new GuiScreenAdvancements(this.field_146297_k.field_71439_g.field_71174_a.func_191982_f()));
+         break;
+      case 6:
+         this.field_146297_k.func_147108_a(new GuiStats(this, this.field_146297_k.field_71439_g.func_146107_m()));
+         break;
+      case 7:
+         this.field_146297_k.func_147108_a(new GuiShareToLan(this));
+      }
 
-    /**
-     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
-     */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        switch (button.id)
-        {
-            case 0:
-                this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
-                break;
+   }
 
-            case 1:
-                boolean flag = this.mc.isIntegratedServerRunning();
-                boolean flag1 = this.mc.isConnectedToRealms();
-                button.enabled = false;
-                this.mc.world.sendQuittingDisconnectingPacket();
-                this.mc.loadWorld((WorldClient)null);
+   public void func_73876_c() {
+      super.func_73876_c();
+      ++this.field_146444_f;
+   }
 
-                if (flag)
-                {
-                    this.mc.displayGuiScreen(new GuiMainMenu());
-                }
-                else if (flag1)
-                {
-                    RealmsBridge realmsbridge = new RealmsBridge();
-                    realmsbridge.switchToRealms(new GuiMainMenu());
-                }
-                else
-                {
-                    this.mc.displayGuiScreen(new GuiMultiplayer(new GuiMainMenu()));
-                }
-
-            case 2:
-            case 3:
-            default:
-                break;
-
-            case 4:
-                this.mc.displayGuiScreen((GuiScreen)null);
-                this.mc.setIngameFocus();
-                break;
-
-            case 5:
-                this.mc.displayGuiScreen(new GuiScreenAdvancements(this.mc.player.connection.func_191982_f()));
-                break;
-
-            case 6:
-                this.mc.displayGuiScreen(new GuiStats(this, this.mc.player.getStatFileWriter()));
-                break;
-
-            case 7:
-                this.mc.displayGuiScreen(new GuiShareToLan(this));
-        }
-    }
-
-    /**
-     * Called from the main game loop to update the screen.
-     */
-    public void updateScreen()
-    {
-        super.updateScreen();
-        ++this.visibleTime;
-    }
-
-    /**
-     * Draws the screen and all the components in it.
-     */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, I18n.format("menu.game"), this.width / 2, 40, 16777215);
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
+   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
+      this.func_146276_q_();
+      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("menu.game"), this.field_146294_l / 2, 40, 16777215);
+      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
+   }
 }

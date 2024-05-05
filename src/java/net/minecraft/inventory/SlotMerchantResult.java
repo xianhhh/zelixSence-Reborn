@@ -6,110 +6,74 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.village.MerchantRecipe;
 
-public class SlotMerchantResult extends Slot
-{
-    /** Merchant's inventory. */
-    private final InventoryMerchant theMerchantInventory;
+public class SlotMerchantResult extends Slot {
+   private final InventoryMerchant field_75233_a;
+   private final EntityPlayer field_75232_b;
+   private int field_75231_g;
+   private final IMerchant field_75234_h;
 
-    /** The Player whos trying to buy/sell stuff. */
-    private final EntityPlayer thePlayer;
-    private int removeCount;
+   public SlotMerchantResult(EntityPlayer p_i1822_1_, IMerchant p_i1822_2_, InventoryMerchant p_i1822_3_, int p_i1822_4_, int p_i1822_5_, int p_i1822_6_) {
+      super(p_i1822_3_, p_i1822_4_, p_i1822_5_, p_i1822_6_);
+      this.field_75232_b = p_i1822_1_;
+      this.field_75234_h = p_i1822_2_;
+      this.field_75233_a = p_i1822_3_;
+   }
 
-    /** "Instance" of the Merchant. */
-    private final IMerchant theMerchant;
+   public boolean func_75214_a(ItemStack p_75214_1_) {
+      return false;
+   }
 
-    public SlotMerchantResult(EntityPlayer player, IMerchant merchant, InventoryMerchant merchantInventory, int slotIndex, int xPosition, int yPosition)
-    {
-        super(merchantInventory, slotIndex, xPosition, yPosition);
-        this.thePlayer = player;
-        this.theMerchant = merchant;
-        this.theMerchantInventory = merchantInventory;
-    }
+   public ItemStack func_75209_a(int p_75209_1_) {
+      if (this.func_75216_d()) {
+         this.field_75231_g += Math.min(p_75209_1_, this.func_75211_c().func_190916_E());
+      }
 
-    /**
-     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
-     */
-    public boolean isItemValid(ItemStack stack)
-    {
-        return false;
-    }
+      return super.func_75209_a(p_75209_1_);
+   }
 
-    /**
-     * Decrease the size of the stack in slot (first int arg) by the amount of the second int arg. Returns the new
-     * stack.
-     */
-    public ItemStack decrStackSize(int amount)
-    {
-        if (this.getHasStack())
-        {
-            this.removeCount += Math.min(amount, this.getStack().func_190916_E());
-        }
+   protected void func_75210_a(ItemStack p_75210_1_, int p_75210_2_) {
+      this.field_75231_g += p_75210_2_;
+      this.func_75208_c(p_75210_1_);
+   }
 
-        return super.decrStackSize(amount);
-    }
+   protected void func_75208_c(ItemStack p_75208_1_) {
+      p_75208_1_.func_77980_a(this.field_75232_b.field_70170_p, this.field_75232_b, this.field_75231_g);
+      this.field_75231_g = 0;
+   }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood. Typically increases an
-     * internal count then calls onCrafting(item).
-     */
-    protected void onCrafting(ItemStack stack, int amount)
-    {
-        this.removeCount += amount;
-        this.onCrafting(stack);
-    }
+   public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_) {
+      this.func_75208_c(p_190901_2_);
+      MerchantRecipe merchantrecipe = this.field_75233_a.func_70468_h();
+      if (merchantrecipe != null) {
+         ItemStack itemstack = this.field_75233_a.func_70301_a(0);
+         ItemStack itemstack1 = this.field_75233_a.func_70301_a(1);
+         if (this.func_75230_a(merchantrecipe, itemstack, itemstack1) || this.func_75230_a(merchantrecipe, itemstack1, itemstack)) {
+            this.field_75234_h.func_70933_a(merchantrecipe);
+            p_190901_1_.func_71029_a(StatList.field_188075_I);
+            this.field_75233_a.func_70299_a(0, itemstack);
+            this.field_75233_a.func_70299_a(1, itemstack1);
+         }
+      }
 
-    /**
-     * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
-     */
-    protected void onCrafting(ItemStack stack)
-    {
-        stack.onCrafting(this.thePlayer.world, this.thePlayer, this.removeCount);
-        this.removeCount = 0;
-    }
+      return p_190901_2_;
+   }
 
-    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
-    {
-        this.onCrafting(p_190901_2_);
-        MerchantRecipe merchantrecipe = this.theMerchantInventory.getCurrentRecipe();
+   private boolean func_75230_a(MerchantRecipe p_75230_1_, ItemStack p_75230_2_, ItemStack p_75230_3_) {
+      ItemStack itemstack = p_75230_1_.func_77394_a();
+      ItemStack itemstack1 = p_75230_1_.func_77396_b();
+      if (p_75230_2_.func_77973_b() == itemstack.func_77973_b() && p_75230_2_.func_190916_E() >= itemstack.func_190916_E()) {
+         if (!itemstack1.func_190926_b() && !p_75230_3_.func_190926_b() && itemstack1.func_77973_b() == p_75230_3_.func_77973_b() && p_75230_3_.func_190916_E() >= itemstack1.func_190916_E()) {
+            p_75230_2_.func_190918_g(itemstack.func_190916_E());
+            p_75230_3_.func_190918_g(itemstack1.func_190916_E());
+            return true;
+         }
 
-        if (merchantrecipe != null)
-        {
-            ItemStack itemstack = this.theMerchantInventory.getStackInSlot(0);
-            ItemStack itemstack1 = this.theMerchantInventory.getStackInSlot(1);
+         if (itemstack1.func_190926_b() && p_75230_3_.func_190926_b()) {
+            p_75230_2_.func_190918_g(itemstack.func_190916_E());
+            return true;
+         }
+      }
 
-            if (this.doTrade(merchantrecipe, itemstack, itemstack1) || this.doTrade(merchantrecipe, itemstack1, itemstack))
-            {
-                this.theMerchant.useRecipe(merchantrecipe);
-                p_190901_1_.addStat(StatList.TRADED_WITH_VILLAGER);
-                this.theMerchantInventory.setInventorySlotContents(0, itemstack);
-                this.theMerchantInventory.setInventorySlotContents(1, itemstack1);
-            }
-        }
-
-        return p_190901_2_;
-    }
-
-    private boolean doTrade(MerchantRecipe trade, ItemStack firstItem, ItemStack secondItem)
-    {
-        ItemStack itemstack = trade.getItemToBuy();
-        ItemStack itemstack1 = trade.getSecondItemToBuy();
-
-        if (firstItem.getItem() == itemstack.getItem() && firstItem.func_190916_E() >= itemstack.func_190916_E())
-        {
-            if (!itemstack1.func_190926_b() && !secondItem.func_190926_b() && itemstack1.getItem() == secondItem.getItem() && secondItem.func_190916_E() >= itemstack1.func_190916_E())
-            {
-                firstItem.func_190918_g(itemstack.func_190916_E());
-                secondItem.func_190918_g(itemstack1.func_190916_E());
-                return true;
-            }
-
-            if (itemstack1.func_190926_b() && secondItem.func_190926_b())
-            {
-                firstItem.func_190918_g(itemstack.func_190916_E());
-                return true;
-            }
-        }
-
-        return false;
-    }
+      return false;
+   }
 }

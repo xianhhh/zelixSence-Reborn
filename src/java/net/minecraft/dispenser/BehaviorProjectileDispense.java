@@ -7,43 +7,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
-public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispenseItem
-{
-    /**
-     * Dispense the specified stack, play the dispense sound and spawn particles.
-     */
-    public ItemStack dispenseStack(IBlockSource source, ItemStack stack)
-    {
-        World world = source.getWorld();
-        IPosition iposition = BlockDispenser.getDispensePosition(source);
-        EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
-        IProjectile iprojectile = this.getProjectileEntity(world, iposition, stack);
-        iprojectile.setThrowableHeading((double)enumfacing.getFrontOffsetX(), (double)((float)enumfacing.getFrontOffsetY() + 0.1F), (double)enumfacing.getFrontOffsetZ(), this.getProjectileVelocity(), this.getProjectileInaccuracy());
-        world.spawnEntityInWorld((Entity)iprojectile);
-        stack.func_190918_g(1);
-        return stack;
-    }
+public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispenseItem {
+   public ItemStack func_82487_b(IBlockSource p_82487_1_, ItemStack p_82487_2_) {
+      World world = p_82487_1_.func_82618_k();
+      IPosition iposition = BlockDispenser.func_149939_a(p_82487_1_);
+      EnumFacing enumfacing = (EnumFacing)p_82487_1_.func_189992_e().func_177229_b(BlockDispenser.field_176441_a);
+      IProjectile iprojectile = this.func_82499_a(world, iposition, p_82487_2_);
+      iprojectile.func_70186_c((double)enumfacing.func_82601_c(), (double)((float)enumfacing.func_96559_d() + 0.1F), (double)enumfacing.func_82599_e(), this.func_82500_b(), this.func_82498_a());
+      world.func_72838_d((Entity)iprojectile);
+      p_82487_2_.func_190918_g(1);
+      return p_82487_2_;
+   }
 
-    /**
-     * Play the dispense sound from the specified block.
-     */
-    protected void playDispenseSound(IBlockSource source)
-    {
-        source.getWorld().playEvent(1002, source.getBlockPos(), 0);
-    }
+   protected void func_82485_a(IBlockSource p_82485_1_) {
+      p_82485_1_.func_82618_k().func_175718_b(1002, p_82485_1_.func_180699_d(), 0);
+   }
 
-    /**
-     * Return the projectile entity spawned by this dispense behavior.
-     */
-    protected abstract IProjectile getProjectileEntity(World worldIn, IPosition position, ItemStack stackIn);
+   protected abstract IProjectile func_82499_a(World var1, IPosition var2, ItemStack var3);
 
-    protected float getProjectileInaccuracy()
-    {
-        return 6.0F;
-    }
+   protected float func_82498_a() {
+      return 6.0F;
+   }
 
-    protected float getProjectileVelocity()
-    {
-        return 1.1F;
-    }
+   protected float func_82500_b() {
+      return 1.1F;
+   }
 }

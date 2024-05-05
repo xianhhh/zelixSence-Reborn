@@ -6,13 +6,12 @@ import net.minecraft.network.login.server.SPacketEnableCompression;
 import net.minecraft.network.login.server.SPacketEncryptionRequest;
 import net.minecraft.network.login.server.SPacketLoginSuccess;
 
-public interface INetHandlerLoginClient extends INetHandler
-{
-    void handleEncryptionRequest(SPacketEncryptionRequest packetIn);
+public interface INetHandlerLoginClient extends INetHandler {
+   void func_147389_a(SPacketEncryptionRequest var1);
 
-    void handleLoginSuccess(SPacketLoginSuccess packetIn);
+   void func_147390_a(SPacketLoginSuccess var1);
 
-    void handleDisconnect(SPacketDisconnect packetIn);
+   void func_147388_a(SPacketDisconnect var1);
 
-    void handleEnableCompression(SPacketEnableCompression packetIn);
+   void func_180464_a(SPacketEnableCompression var1);
 }

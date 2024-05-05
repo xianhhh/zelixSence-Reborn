@@ -4,20 +4,15 @@ import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 
-public interface IBlockStatePalette
-{
-    int idFor(IBlockState state);
+public interface IBlockStatePalette {
+   int func_186041_a(IBlockState var1);
 
-    @Nullable
+   @Nullable
+   IBlockState func_186039_a(int var1);
 
-    /**
-     * Gets the block state by the palette id.
-     */
-    IBlockState getBlockState(int indexKey);
+   void func_186038_a(PacketBuffer var1);
 
-    void read(PacketBuffer buf);
+   void func_186037_b(PacketBuffer var1);
 
-    void write(PacketBuffer buf);
-
-    int getSerializedState();
+   int func_186040_a();
 }

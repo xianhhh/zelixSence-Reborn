@@ -9,85 +9,58 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockRedstoneLight extends Block
-{
-    private final boolean isOn;
+public class BlockRedstoneLight extends Block {
+   private final boolean field_150171_a;
 
-    public BlockRedstoneLight(boolean isOn)
-    {
-        super(Material.REDSTONE_LIGHT);
-        this.isOn = isOn;
+   public BlockRedstoneLight(boolean p_i45421_1_) {
+      super(Material.field_151591_t);
+      this.field_150171_a = p_i45421_1_;
+      if (p_i45421_1_) {
+         this.func_149715_a(1.0F);
+      }
 
-        if (isOn)
-        {
-            this.setLightLevel(1.0F);
-        }
-    }
+   }
 
-    /**
-     * Called after the block is set in the Chunk data, but before the Tile Entity is set
-     */
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (!worldIn.isRemote)
-        {
-            if (this.isOn && !worldIn.isBlockPowered(pos))
-            {
-                worldIn.setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
-            }
-            else if (!this.isOn && worldIn.isBlockPowered(pos))
-            {
-                worldIn.setBlockState(pos, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
-            }
-        }
-    }
+   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
+      if (!p_176213_1_.field_72995_K) {
+         if (this.field_150171_a && !p_176213_1_.func_175640_z(p_176213_2_)) {
+            p_176213_1_.func_180501_a(p_176213_2_, Blocks.field_150379_bu.func_176223_P(), 2);
+         } else if (!this.field_150171_a && p_176213_1_.func_175640_z(p_176213_2_)) {
+            p_176213_1_.func_180501_a(p_176213_2_, Blocks.field_150374_bv.func_176223_P(), 2);
+         }
 
-    /**
-     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
-     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
-     * block, etc.
-     */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
-    {
-        if (!worldIn.isRemote)
-        {
-            if (this.isOn && !worldIn.isBlockPowered(pos))
-            {
-                worldIn.scheduleUpdate(pos, this, 4);
-            }
-            else if (!this.isOn && worldIn.isBlockPowered(pos))
-            {
-                worldIn.setBlockState(pos, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
-            }
-        }
-    }
+      }
+   }
 
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-        if (!worldIn.isRemote)
-        {
-            if (this.isOn && !worldIn.isBlockPowered(pos))
-            {
-                worldIn.setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
-            }
-        }
-    }
+   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
+      if (!p_189540_2_.field_72995_K) {
+         if (this.field_150171_a && !p_189540_2_.func_175640_z(p_189540_3_)) {
+            p_189540_2_.func_175684_a(p_189540_3_, this, 4);
+         } else if (!this.field_150171_a && p_189540_2_.func_175640_z(p_189540_3_)) {
+            p_189540_2_.func_180501_a(p_189540_3_, Blocks.field_150374_bv.func_176223_P(), 2);
+         }
 
-    /**
-     * Get the Item that this Block should drop when harvested.
-     */
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-        return Item.getItemFromBlock(Blocks.REDSTONE_LAMP);
-    }
+      }
+   }
 
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return new ItemStack(Blocks.REDSTONE_LAMP);
-    }
+   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
+      if (!p_180650_1_.field_72995_K) {
+         if (this.field_150171_a && !p_180650_1_.func_175640_z(p_180650_2_)) {
+            p_180650_1_.func_180501_a(p_180650_2_, Blocks.field_150379_bu.func_176223_P(), 2);
+         }
 
-    protected ItemStack getSilkTouchDrop(IBlockState state)
-    {
-        return new ItemStack(Blocks.REDSTONE_LAMP);
-    }
+      }
+   }
+
+   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
+      return Item.func_150898_a(Blocks.field_150379_bu);
+   }
+
+   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
+      return new ItemStack(Blocks.field_150379_bu);
+   }
+
+   protected ItemStack func_180643_i(IBlockState p_180643_1_) {
+      return new ItemStack(Blocks.field_150379_bu);
+   }
 }

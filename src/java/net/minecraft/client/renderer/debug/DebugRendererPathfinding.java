@@ -14,145 +14,119 @@ import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 
-public class DebugRendererPathfinding implements DebugRenderer.IDebugRenderer
-{
-    private final Minecraft minecraft;
-    private final Map<Integer, Path> pathMap = Maps.<Integer, Path>newHashMap();
-    private final Map<Integer, Float> pathMaxDistance = Maps.<Integer, Float>newHashMap();
-    private final Map<Integer, Long> creationMap = Maps.<Integer, Long>newHashMap();
-    private EntityPlayer player;
-    private double xo;
-    private double yo;
-    private double zo;
+public class DebugRendererPathfinding implements DebugRenderer.IDebugRenderer {
+   private final Minecraft field_188290_a;
+   private final Map<Integer, Path> field_188291_b = Maps.<Integer, Path>newHashMap();
+   private final Map<Integer, Float> field_188292_c = Maps.<Integer, Float>newHashMap();
+   private final Map<Integer, Long> field_188293_d = Maps.<Integer, Long>newHashMap();
+   private EntityPlayer field_190068_e;
+   private double field_190069_f;
+   private double field_190070_g;
+   private double field_190071_h;
 
-    public DebugRendererPathfinding(Minecraft minecraftIn)
-    {
-        this.minecraft = minecraftIn;
-    }
+   public DebugRendererPathfinding(Minecraft p_i46556_1_) {
+      this.field_188290_a = p_i46556_1_;
+   }
 
-    public void addPath(int p_188289_1_, Path p_188289_2_, float p_188289_3_)
-    {
-        this.pathMap.put(Integer.valueOf(p_188289_1_), p_188289_2_);
-        this.creationMap.put(Integer.valueOf(p_188289_1_), Long.valueOf(System.currentTimeMillis()));
-        this.pathMaxDistance.put(Integer.valueOf(p_188289_1_), Float.valueOf(p_188289_3_));
-    }
+   public void func_188289_a(int p_188289_1_, Path p_188289_2_, float p_188289_3_) {
+      this.field_188291_b.put(Integer.valueOf(p_188289_1_), p_188289_2_);
+      this.field_188293_d.put(Integer.valueOf(p_188289_1_), Long.valueOf(System.currentTimeMillis()));
+      this.field_188292_c.put(Integer.valueOf(p_188289_1_), Float.valueOf(p_188289_3_));
+   }
 
-    public void render(float p_190060_1_, long p_190060_2_)
-    {
-        if (!this.pathMap.isEmpty())
-        {
-            long i = System.currentTimeMillis();
-            this.player = this.minecraft.player;
-            this.xo = this.player.lastTickPosX + (this.player.posX - this.player.lastTickPosX) * (double)p_190060_1_;
-            this.yo = this.player.lastTickPosY + (this.player.posY - this.player.lastTickPosY) * (double)p_190060_1_;
-            this.zo = this.player.lastTickPosZ + (this.player.posZ - this.player.lastTickPosZ) * (double)p_190060_1_;
-            GlStateManager.pushMatrix();
-            GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            GlStateManager.color(0.0F, 1.0F, 0.0F, 0.75F);
-            GlStateManager.disableTexture2D();
-            GlStateManager.glLineWidth(6.0F);
+   public void func_190060_a(float p_190060_1_, long p_190060_2_) {
+      if (!this.field_188291_b.isEmpty()) {
+         long i = System.currentTimeMillis();
+         this.field_190068_e = this.field_188290_a.field_71439_g;
+         this.field_190069_f = this.field_190068_e.field_70142_S + (this.field_190068_e.field_70165_t - this.field_190068_e.field_70142_S) * (double)p_190060_1_;
+         this.field_190070_g = this.field_190068_e.field_70137_T + (this.field_190068_e.field_70163_u - this.field_190068_e.field_70137_T) * (double)p_190060_1_;
+         this.field_190071_h = this.field_190068_e.field_70136_U + (this.field_190068_e.field_70161_v - this.field_190068_e.field_70136_U) * (double)p_190060_1_;
+         GlStateManager.func_179094_E();
+         GlStateManager.func_179147_l();
+         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+         GlStateManager.func_179131_c(0.0F, 1.0F, 0.0F, 0.75F);
+         GlStateManager.func_179090_x();
+         GlStateManager.func_187441_d(6.0F);
 
-            for (Integer integer : this.pathMap.keySet())
-            {
-                Path path = this.pathMap.get(integer);
-                float f = ((Float)this.pathMaxDistance.get(integer)).floatValue();
-                this.renderPathLine(p_190060_1_, path);
-                PathPoint pathpoint = path.getTarget();
+         for(Integer integer : this.field_188291_b.keySet()) {
+            Path path = this.field_188291_b.get(integer);
+            float f = ((Float)this.field_188292_c.get(integer)).floatValue();
+            this.func_190067_a(p_190060_1_, path);
+            PathPoint pathpoint = path.func_189964_i();
+            if (this.func_190066_a(pathpoint) <= 40.0F) {
+               RenderGlobal.func_189696_b((new AxisAlignedBB((double)((float)pathpoint.field_75839_a + 0.25F), (double)((float)pathpoint.field_75837_b + 0.25F), (double)pathpoint.field_75838_c + 0.25D, (double)((float)pathpoint.field_75839_a + 0.75F), (double)((float)pathpoint.field_75837_b + 0.75F), (double)((float)pathpoint.field_75838_c + 0.75F))).func_72317_d(-this.field_190069_f, -this.field_190070_g, -this.field_190071_h), 0.0F, 1.0F, 0.0F, 0.5F);
 
-                if (this.addDistanceToPlayer(pathpoint) <= 40.0F)
-                {
-                    RenderGlobal.renderFilledBox((new AxisAlignedBB((double)((float)pathpoint.xCoord + 0.25F), (double)((float)pathpoint.yCoord + 0.25F), (double)pathpoint.zCoord + 0.25D, (double)((float)pathpoint.xCoord + 0.75F), (double)((float)pathpoint.yCoord + 0.75F), (double)((float)pathpoint.zCoord + 0.75F))).offset(-this.xo, -this.yo, -this.zo), 0.0F, 1.0F, 0.0F, 0.5F);
+               for(int j = 0; j < path.func_75874_d(); ++j) {
+                  PathPoint pathpoint1 = path.func_75877_a(j);
+                  if (this.func_190066_a(pathpoint1) <= 40.0F) {
+                     float f1 = j == path.func_75873_e() ? 1.0F : 0.0F;
+                     float f2 = j == path.func_75873_e() ? 0.0F : 1.0F;
+                     RenderGlobal.func_189696_b((new AxisAlignedBB((double)((float)pathpoint1.field_75839_a + 0.5F - f), (double)((float)pathpoint1.field_75837_b + 0.01F * (float)j), (double)((float)pathpoint1.field_75838_c + 0.5F - f), (double)((float)pathpoint1.field_75839_a + 0.5F + f), (double)((float)pathpoint1.field_75837_b + 0.25F + 0.01F * (float)j), (double)((float)pathpoint1.field_75838_c + 0.5F + f))).func_72317_d(-this.field_190069_f, -this.field_190070_g, -this.field_190071_h), f1, 0.0F, f2, 0.5F);
+                  }
+               }
+            }
+         }
 
-                    for (int j = 0; j < path.getCurrentPathLength(); ++j)
-                    {
-                        PathPoint pathpoint1 = path.getPathPointFromIndex(j);
+         for(Integer integer1 : this.field_188291_b.keySet()) {
+            Path path1 = this.field_188291_b.get(integer1);
 
-                        if (this.addDistanceToPlayer(pathpoint1) <= 40.0F)
-                        {
-                            float f1 = j == path.getCurrentPathIndex() ? 1.0F : 0.0F;
-                            float f2 = j == path.getCurrentPathIndex() ? 0.0F : 1.0F;
-                            RenderGlobal.renderFilledBox((new AxisAlignedBB((double)((float)pathpoint1.xCoord + 0.5F - f), (double)((float)pathpoint1.yCoord + 0.01F * (float)j), (double)((float)pathpoint1.zCoord + 0.5F - f), (double)((float)pathpoint1.xCoord + 0.5F + f), (double)((float)pathpoint1.yCoord + 0.25F + 0.01F * (float)j), (double)((float)pathpoint1.zCoord + 0.5F + f))).offset(-this.xo, -this.yo, -this.zo), f1, 0.0F, f2, 0.5F);
-                        }
-                    }
-                }
+            for(PathPoint pathpoint3 : path1.func_189965_h()) {
+               if (this.func_190066_a(pathpoint3) <= 40.0F) {
+                  DebugRenderer.func_190076_a(String.format("%s", pathpoint3.field_186287_m), (double)pathpoint3.field_75839_a + 0.5D, (double)pathpoint3.field_75837_b + 0.75D, (double)pathpoint3.field_75838_c + 0.5D, p_190060_1_, -65536);
+                  DebugRenderer.func_190076_a(String.format("%.2f", pathpoint3.field_186286_l), (double)pathpoint3.field_75839_a + 0.5D, (double)pathpoint3.field_75837_b + 0.25D, (double)pathpoint3.field_75838_c + 0.5D, p_190060_1_, -65536);
+               }
             }
 
-            for (Integer integer1 : this.pathMap.keySet())
-            {
-                Path path1 = this.pathMap.get(integer1);
-
-                for (PathPoint pathpoint3 : path1.getClosedSet())
-                {
-                    if (this.addDistanceToPlayer(pathpoint3) <= 40.0F)
-                    {
-                        DebugRenderer.renderDebugText(String.format("%s", pathpoint3.nodeType), (double)pathpoint3.xCoord + 0.5D, (double)pathpoint3.yCoord + 0.75D, (double)pathpoint3.zCoord + 0.5D, p_190060_1_, -65536);
-                        DebugRenderer.renderDebugText(String.format("%.2f", pathpoint3.costMalus), (double)pathpoint3.xCoord + 0.5D, (double)pathpoint3.yCoord + 0.25D, (double)pathpoint3.zCoord + 0.5D, p_190060_1_, -65536);
-                    }
-                }
-
-                for (PathPoint pathpoint4 : path1.getOpenSet())
-                {
-                    if (this.addDistanceToPlayer(pathpoint4) <= 40.0F)
-                    {
-                        DebugRenderer.renderDebugText(String.format("%s", pathpoint4.nodeType), (double)pathpoint4.xCoord + 0.5D, (double)pathpoint4.yCoord + 0.75D, (double)pathpoint4.zCoord + 0.5D, p_190060_1_, -16776961);
-                        DebugRenderer.renderDebugText(String.format("%.2f", pathpoint4.costMalus), (double)pathpoint4.xCoord + 0.5D, (double)pathpoint4.yCoord + 0.25D, (double)pathpoint4.zCoord + 0.5D, p_190060_1_, -16776961);
-                    }
-                }
-
-                for (int k = 0; k < path1.getCurrentPathLength(); ++k)
-                {
-                    PathPoint pathpoint2 = path1.getPathPointFromIndex(k);
-
-                    if (this.addDistanceToPlayer(pathpoint2) <= 40.0F)
-                    {
-                        DebugRenderer.renderDebugText(String.format("%s", pathpoint2.nodeType), (double)pathpoint2.xCoord + 0.5D, (double)pathpoint2.yCoord + 0.75D, (double)pathpoint2.zCoord + 0.5D, p_190060_1_, -1);
-                        DebugRenderer.renderDebugText(String.format("%.2f", pathpoint2.costMalus), (double)pathpoint2.xCoord + 0.5D, (double)pathpoint2.yCoord + 0.25D, (double)pathpoint2.zCoord + 0.5D, p_190060_1_, -1);
-                    }
-                }
+            for(PathPoint pathpoint4 : path1.func_189966_g()) {
+               if (this.func_190066_a(pathpoint4) <= 40.0F) {
+                  DebugRenderer.func_190076_a(String.format("%s", pathpoint4.field_186287_m), (double)pathpoint4.field_75839_a + 0.5D, (double)pathpoint4.field_75837_b + 0.75D, (double)pathpoint4.field_75838_c + 0.5D, p_190060_1_, -16776961);
+                  DebugRenderer.func_190076_a(String.format("%.2f", pathpoint4.field_186286_l), (double)pathpoint4.field_75839_a + 0.5D, (double)pathpoint4.field_75837_b + 0.25D, (double)pathpoint4.field_75838_c + 0.5D, p_190060_1_, -16776961);
+               }
             }
 
-            for (Integer integer2 : (Integer[])this.creationMap.keySet().toArray(new Integer[0]))
-            {
-                if (i - ((Long)this.creationMap.get(integer2)).longValue() > 20000L)
-                {
-                    this.pathMap.remove(integer2);
-                    this.creationMap.remove(integer2);
-                }
+            for(int k = 0; k < path1.func_75874_d(); ++k) {
+               PathPoint pathpoint2 = path1.func_75877_a(k);
+               if (this.func_190066_a(pathpoint2) <= 40.0F) {
+                  DebugRenderer.func_190076_a(String.format("%s", pathpoint2.field_186287_m), (double)pathpoint2.field_75839_a + 0.5D, (double)pathpoint2.field_75837_b + 0.75D, (double)pathpoint2.field_75838_c + 0.5D, p_190060_1_, -1);
+                  DebugRenderer.func_190076_a(String.format("%.2f", pathpoint2.field_186286_l), (double)pathpoint2.field_75839_a + 0.5D, (double)pathpoint2.field_75837_b + 0.25D, (double)pathpoint2.field_75838_c + 0.5D, p_190060_1_, -1);
+               }
             }
+         }
 
-            GlStateManager.enableTexture2D();
-            GlStateManager.disableBlend();
-            GlStateManager.popMatrix();
-        }
-    }
-
-    public void renderPathLine(float p_190067_1_, Path p_190067_2_)
-    {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-
-        for (int i = 0; i < p_190067_2_.getCurrentPathLength(); ++i)
-        {
-            PathPoint pathpoint = p_190067_2_.getPathPointFromIndex(i);
-
-            if (this.addDistanceToPlayer(pathpoint) <= 40.0F)
-            {
-                float f = (float)i / (float)p_190067_2_.getCurrentPathLength() * 0.33F;
-                int j = i == 0 ? 0 : MathHelper.hsvToRGB(f, 0.9F, 0.9F);
-                int k = j >> 16 & 255;
-                int l = j >> 8 & 255;
-                int i1 = j & 255;
-                bufferbuilder.pos((double)pathpoint.xCoord - this.xo + 0.5D, (double)pathpoint.yCoord - this.yo + 0.5D, (double)pathpoint.zCoord - this.zo + 0.5D).color(k, l, i1, 255).endVertex();
+         for(Integer integer2 : (Integer[])this.field_188293_d.keySet().toArray(new Integer[0])) {
+            if (i - ((Long)this.field_188293_d.get(integer2)).longValue() > 20000L) {
+               this.field_188291_b.remove(integer2);
+               this.field_188293_d.remove(integer2);
             }
-        }
+         }
 
-        tessellator.draw();
-    }
+         GlStateManager.func_179098_w();
+         GlStateManager.func_179084_k();
+         GlStateManager.func_179121_F();
+      }
+   }
 
-    private float addDistanceToPlayer(PathPoint p_190066_1_)
-    {
-        return (float)(Math.abs((double)p_190066_1_.xCoord - this.player.posX) + Math.abs((double)p_190066_1_.yCoord - this.player.posY) + Math.abs((double)p_190066_1_.zCoord - this.player.posZ));
-    }
+   public void func_190067_a(float p_190067_1_, Path p_190067_2_) {
+      Tessellator tessellator = Tessellator.func_178181_a();
+      BufferBuilder bufferbuilder = tessellator.func_178180_c();
+      bufferbuilder.func_181668_a(3, DefaultVertexFormats.field_181706_f);
+
+      for(int i = 0; i < p_190067_2_.func_75874_d(); ++i) {
+         PathPoint pathpoint = p_190067_2_.func_75877_a(i);
+         if (this.func_190066_a(pathpoint) <= 40.0F) {
+            float f = (float)i / (float)p_190067_2_.func_75874_d() * 0.33F;
+            int j = i == 0 ? 0 : MathHelper.func_181758_c(f, 0.9F, 0.9F);
+            int k = j >> 16 & 255;
+            int l = j >> 8 & 255;
+            int i1 = j & 255;
+            bufferbuilder.func_181662_b((double)pathpoint.field_75839_a - this.field_190069_f + 0.5D, (double)pathpoint.field_75837_b - this.field_190070_g + 0.5D, (double)pathpoint.field_75838_c - this.field_190071_h + 0.5D).func_181669_b(k, l, i1, 255).func_181675_d();
+         }
+      }
+
+      tessellator.func_78381_a();
+   }
+
+   private float func_190066_a(PathPoint p_190066_1_) {
+      return (float)(Math.abs((double)p_190066_1_.field_75839_a - this.field_190068_e.field_70165_t) + Math.abs((double)p_190066_1_.field_75837_b - this.field_190068_e.field_70163_u) + Math.abs((double)p_190066_1_.field_75838_c - this.field_190068_e.field_70161_v));
+   }
 }

@@ -21,120 +21,84 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityWitherSkeleton extends AbstractSkeleton
-{
-    public EntityWitherSkeleton(World p_i47278_1_)
-    {
-        super(p_i47278_1_);
-        this.setSize(0.7F, 2.4F);
-        this.isImmuneToFire = true;
-    }
+public class EntityWitherSkeleton extends AbstractSkeleton {
+   public EntityWitherSkeleton(World p_i47278_1_) {
+      super(p_i47278_1_);
+      this.func_70105_a(0.7F, 2.4F);
+      this.field_70178_ae = true;
+   }
 
-    public static void func_190729_b(DataFixer p_190729_0_)
-    {
-        EntityLiving.registerFixesMob(p_190729_0_, EntityWitherSkeleton.class);
-    }
+   public static void func_190729_b(DataFixer p_190729_0_) {
+      EntityLiving.func_189752_a(p_190729_0_, EntityWitherSkeleton.class);
+   }
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_WITHER_SKELETON;
-    }
+   @Nullable
+   protected ResourceLocation func_184647_J() {
+      return LootTableList.field_186386_ak;
+   }
 
-    protected SoundEvent getAmbientSound()
-    {
-        return SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT;
-    }
+   protected SoundEvent func_184639_G() {
+      return SoundEvents.field_190036_ha;
+   }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
-    {
-        return SoundEvents.ENTITY_WITHER_SKELETON_HURT;
-    }
+   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
+      return SoundEvents.field_190038_hc;
+   }
 
-    protected SoundEvent getDeathSound()
-    {
-        return SoundEvents.ENTITY_WITHER_SKELETON_DEATH;
-    }
+   protected SoundEvent func_184615_bR() {
+      return SoundEvents.field_190037_hb;
+   }
 
-    SoundEvent func_190727_o()
-    {
-        return SoundEvents.ENTITY_WITHER_SKELETON_STEP;
-    }
+   SoundEvent func_190727_o() {
+      return SoundEvents.field_190039_hd;
+   }
 
-    /**
-     * Called when the mob's health reaches 0.
-     */
-    public void onDeath(DamageSource cause)
-    {
-        super.onDeath(cause);
+   public void func_70645_a(DamageSource p_70645_1_) {
+      super.func_70645_a(p_70645_1_);
+      if (p_70645_1_.func_76346_g() instanceof EntityCreeper) {
+         EntityCreeper entitycreeper = (EntityCreeper)p_70645_1_.func_76346_g();
+         if (entitycreeper.func_70830_n() && entitycreeper.func_70650_aV()) {
+            entitycreeper.func_175493_co();
+            this.func_70099_a(new ItemStack(Items.field_151144_bL, 1, 1), 0.0F);
+         }
+      }
 
-        if (cause.getEntity() instanceof EntityCreeper)
-        {
-            EntityCreeper entitycreeper = (EntityCreeper)cause.getEntity();
+   }
 
-            if (entitycreeper.getPowered() && entitycreeper.isAIEnabled())
-            {
-                entitycreeper.incrementDroppedSkulls();
-                this.entityDropItem(new ItemStack(Items.SKULL, 1, 1), 0.0F);
-            }
-        }
-    }
+   protected void func_180481_a(DifficultyInstance p_180481_1_) {
+      this.func_184201_a(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.field_151052_q));
+   }
 
-    /**
-     * Gives armor or weapon for entity based on given DifficultyInstance
-     */
-    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty)
-    {
-        this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
-    }
+   protected void func_180483_b(DifficultyInstance p_180483_1_) {
+   }
 
-    /**
-     * Enchants Entity's current equipments based on given DifficultyInstance
-     */
-    protected void setEnchantmentBasedOnDifficulty(DifficultyInstance difficulty)
-    {
-    }
+   @Nullable
+   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_) {
+      IEntityLivingData ientitylivingdata = super.func_180482_a(p_180482_1_, p_180482_2_);
+      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(4.0D);
+      this.func_85036_m();
+      return ientitylivingdata;
+   }
 
-    @Nullable
+   public float func_70047_e() {
+      return 2.1F;
+   }
 
-    /**
-     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
-     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
-     */
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
-    {
-        IEntityLivingData ientitylivingdata = super.onInitialSpawn(difficulty, livingdata);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0D);
-        this.setCombatTask();
-        return ientitylivingdata;
-    }
+   public boolean func_70652_k(Entity p_70652_1_) {
+      if (!super.func_70652_k(p_70652_1_)) {
+         return false;
+      } else {
+         if (p_70652_1_ instanceof EntityLivingBase) {
+            ((EntityLivingBase)p_70652_1_).func_70690_d(new PotionEffect(MobEffects.field_82731_v, 200));
+         }
 
-    public float getEyeHeight()
-    {
-        return 2.1F;
-    }
+         return true;
+      }
+   }
 
-    public boolean attackEntityAsMob(Entity entityIn)
-    {
-        if (!super.attackEntityAsMob(entityIn))
-        {
-            return false;
-        }
-        else
-        {
-            if (entityIn instanceof EntityLivingBase)
-            {
-                ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
-            }
-
-            return true;
-        }
-    }
-
-    protected EntityArrow func_190726_a(float p_190726_1_)
-    {
-        EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
-        entityarrow.setFire(100);
-        return entityarrow;
-    }
+   protected EntityArrow func_190726_a(float p_190726_1_) {
+      EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
+      entityarrow.func_70015_d(100);
+      return entityarrow;
+   }
 }

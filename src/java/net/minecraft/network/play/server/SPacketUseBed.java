@@ -8,56 +8,37 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SPacketUseBed implements Packet<INetHandlerPlayClient>
-{
-    private int playerID;
+public class SPacketUseBed implements Packet<INetHandlerPlayClient> {
+   private int field_149097_a;
+   private BlockPos field_179799_b;
 
-    /** Block location of the head part of the bed */
-    private BlockPos bedPos;
+   public SPacketUseBed() {
+   }
 
-    public SPacketUseBed()
-    {
-    }
+   public SPacketUseBed(EntityPlayer p_i46927_1_, BlockPos p_i46927_2_) {
+      this.field_149097_a = p_i46927_1_.func_145782_y();
+      this.field_179799_b = p_i46927_2_;
+   }
 
-    public SPacketUseBed(EntityPlayer player, BlockPos posIn)
-    {
-        this.playerID = player.getEntityId();
-        this.bedPos = posIn;
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149097_a = p_148837_1_.func_150792_a();
+      this.field_179799_b = p_148837_1_.func_179259_c();
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.playerID = buf.readVarIntFromBuffer();
-        this.bedPos = buf.readBlockPos();
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_150787_b(this.field_149097_a);
+      p_148840_1_.func_179255_a(this.field_179799_b);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeVarIntToBuffer(this.playerID);
-        buf.writeBlockPos(this.bedPos);
-    }
+   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
+      p_148833_1_.func_147278_a(this);
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerPlayClient handler)
-    {
-        handler.handleUseBed(this);
-    }
+   public EntityPlayer func_149091_a(World p_149091_1_) {
+      return (EntityPlayer)p_149091_1_.func_73045_a(this.field_149097_a);
+   }
 
-    public EntityPlayer getPlayer(World worldIn)
-    {
-        return (EntityPlayer)worldIn.getEntityByID(this.playerID);
-    }
-
-    public BlockPos getBedPosition()
-    {
-        return this.bedPos;
-    }
+   public BlockPos func_179798_a() {
+      return this.field_179799_b;
+   }
 }

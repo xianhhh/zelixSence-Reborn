@@ -1,23 +1,19 @@
 package net.minecraft.client.resources.data;
 
-public class TextureMetadataSection implements IMetadataSection
-{
-    private final boolean textureBlur;
-    private final boolean textureClamp;
+public class TextureMetadataSection implements IMetadataSection {
+   private final boolean field_110482_a;
+   private final boolean field_110481_b;
 
-    public TextureMetadataSection(boolean textureBlurIn, boolean textureClampIn)
-    {
-        this.textureBlur = textureBlurIn;
-        this.textureClamp = textureClampIn;
-    }
+   public TextureMetadataSection(boolean p_i46538_1_, boolean p_i46538_2_) {
+      this.field_110482_a = p_i46538_1_;
+      this.field_110481_b = p_i46538_2_;
+   }
 
-    public boolean getTextureBlur()
-    {
-        return this.textureBlur;
-    }
+   public boolean func_110479_a() {
+      return this.field_110482_a;
+   }
 
-    public boolean getTextureClamp()
-    {
-        return this.textureClamp;
-    }
+   public boolean func_110480_b() {
+      return this.field_110481_b;
+   }
 }

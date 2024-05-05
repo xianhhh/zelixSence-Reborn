@@ -17,298 +17,194 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
-public abstract class CommandBlockBaseLogic implements ICommandSender
-{
-    /** The formatting for the timestamp on commands run. */
-    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("HH:mm:ss");
-    private long field_193041_b = -1L;
-    private boolean field_193042_c = true;
+public abstract class CommandBlockBaseLogic implements ICommandSender {
+   private static final SimpleDateFormat field_145766_a = new SimpleDateFormat("HH:mm:ss");
+   private long field_193041_b = -1L;
+   private boolean field_193042_c = true;
+   private int field_145764_b;
+   private boolean field_145765_c = true;
+   private ITextComponent field_145762_d;
+   private String field_145763_e = "";
+   private String field_145761_f = "@";
+   private final CommandResultStats field_175575_g = new CommandResultStats();
 
-    /** The number of successful commands run. (used for redstone output) */
-    private int successCount;
-    private boolean trackOutput = true;
+   public int func_145760_g() {
+      return this.field_145764_b;
+   }
 
-    /** The previously run command. */
-    private ITextComponent lastOutput;
+   public void func_184167_a(int p_184167_1_) {
+      this.field_145764_b = p_184167_1_;
+   }
 
-    /** The command stored in the command block. */
-    private String commandStored = "";
+   public ITextComponent func_145749_h() {
+      return (ITextComponent)(this.field_145762_d == null ? new TextComponentString("") : this.field_145762_d);
+   }
 
-    /** The custom name of the command block. (defaults to "@") */
-    private String customName = "@";
-    private final CommandResultStats resultStats = new CommandResultStats();
+   public NBTTagCompound func_189510_a(NBTTagCompound p_189510_1_) {
+      p_189510_1_.func_74778_a("Command", this.field_145763_e);
+      p_189510_1_.func_74768_a("SuccessCount", this.field_145764_b);
+      p_189510_1_.func_74778_a("CustomName", this.field_145761_f);
+      p_189510_1_.func_74757_a("TrackOutput", this.field_145765_c);
+      if (this.field_145762_d != null && this.field_145765_c) {
+         p_189510_1_.func_74778_a("LastOutput", ITextComponent.Serializer.func_150696_a(this.field_145762_d));
+      }
 
-    /**
-     * returns the successCount int.
-     */
-    public int getSuccessCount()
-    {
-        return this.successCount;
-    }
+      p_189510_1_.func_74757_a("UpdateLastExecution", this.field_193042_c);
+      if (this.field_193042_c && this.field_193041_b > 0L) {
+         p_189510_1_.func_74772_a("LastExecution", this.field_193041_b);
+      }
 
-    public void setSuccessCount(int successCountIn)
-    {
-        this.successCount = successCountIn;
-    }
+      this.field_175575_g.func_179670_b(p_189510_1_);
+      return p_189510_1_;
+   }
 
-    /**
-     * Returns the lastOutput.
-     */
-    public ITextComponent getLastOutput()
-    {
-        return (ITextComponent)(this.lastOutput == null ? new TextComponentString("") : this.lastOutput);
-    }
+   public void func_145759_b(NBTTagCompound p_145759_1_) {
+      this.field_145763_e = p_145759_1_.func_74779_i("Command");
+      this.field_145764_b = p_145759_1_.func_74762_e("SuccessCount");
+      if (p_145759_1_.func_150297_b("CustomName", 8)) {
+         this.field_145761_f = p_145759_1_.func_74779_i("CustomName");
+      }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound p_189510_1_)
-    {
-        p_189510_1_.setString("Command", this.commandStored);
-        p_189510_1_.setInteger("SuccessCount", this.successCount);
-        p_189510_1_.setString("CustomName", this.customName);
-        p_189510_1_.setBoolean("TrackOutput", this.trackOutput);
+      if (p_145759_1_.func_150297_b("TrackOutput", 1)) {
+         this.field_145765_c = p_145759_1_.func_74767_n("TrackOutput");
+      }
 
-        if (this.lastOutput != null && this.trackOutput)
-        {
-            p_189510_1_.setString("LastOutput", ITextComponent.Serializer.componentToJson(this.lastOutput));
-        }
+      if (p_145759_1_.func_150297_b("LastOutput", 8) && this.field_145765_c) {
+         try {
+            this.field_145762_d = ITextComponent.Serializer.func_150699_a(p_145759_1_.func_74779_i("LastOutput"));
+         } catch (Throwable throwable) {
+            this.field_145762_d = new TextComponentString(throwable.getMessage());
+         }
+      } else {
+         this.field_145762_d = null;
+      }
 
-        p_189510_1_.setBoolean("UpdateLastExecution", this.field_193042_c);
+      if (p_145759_1_.func_74764_b("UpdateLastExecution")) {
+         this.field_193042_c = p_145759_1_.func_74767_n("UpdateLastExecution");
+      }
 
-        if (this.field_193042_c && this.field_193041_b > 0L)
-        {
-            p_189510_1_.setLong("LastExecution", this.field_193041_b);
-        }
+      if (this.field_193042_c && p_145759_1_.func_74764_b("LastExecution")) {
+         this.field_193041_b = p_145759_1_.func_74763_f("LastExecution");
+      } else {
+         this.field_193041_b = -1L;
+      }
 
-        this.resultStats.writeStatsToNBT(p_189510_1_);
-        return p_189510_1_;
-    }
+      this.field_175575_g.func_179668_a(p_145759_1_);
+   }
 
-    /**
-     * Reads NBT formatting and stored data into variables.
-     */
-    public void readDataFromNBT(NBTTagCompound nbt)
-    {
-        this.commandStored = nbt.getString("Command");
-        this.successCount = nbt.getInteger("SuccessCount");
+   public boolean func_70003_b(int p_70003_1_, String p_70003_2_) {
+      return p_70003_1_ <= 2;
+   }
 
-        if (nbt.hasKey("CustomName", 8))
-        {
-            this.customName = nbt.getString("CustomName");
-        }
+   public void func_145752_a(String p_145752_1_) {
+      this.field_145763_e = p_145752_1_;
+      this.field_145764_b = 0;
+   }
 
-        if (nbt.hasKey("TrackOutput", 1))
-        {
-            this.trackOutput = nbt.getBoolean("TrackOutput");
-        }
+   public String func_145753_i() {
+      return this.field_145763_e;
+   }
 
-        if (nbt.hasKey("LastOutput", 8) && this.trackOutput)
-        {
-            try
-            {
-                this.lastOutput = ITextComponent.Serializer.jsonToComponent(nbt.getString("LastOutput"));
+   public boolean func_145755_a(World p_145755_1_) {
+      if (!p_145755_1_.field_72995_K && p_145755_1_.func_82737_E() != this.field_193041_b) {
+         if ("Searge".equalsIgnoreCase(this.field_145763_e)) {
+            this.field_145762_d = new TextComponentString("#itzlipofutzli");
+            this.field_145764_b = 1;
+            return true;
+         } else {
+            MinecraftServer minecraftserver = this.func_184102_h();
+            if (minecraftserver != null && minecraftserver.func_175578_N() && minecraftserver.func_82356_Z()) {
+               try {
+                  this.field_145762_d = null;
+                  this.field_145764_b = minecraftserver.func_71187_D().func_71556_a(this, this.field_145763_e);
+               } catch (Throwable throwable) {
+                  CrashReport crashreport = CrashReport.func_85055_a(throwable, "Executing command block");
+                  CrashReportCategory crashreportcategory = crashreport.func_85058_a("Command to be executed");
+                  crashreportcategory.func_189529_a("Command", new ICrashReportDetail<String>() {
+                     public String call() throws Exception {
+                        return CommandBlockBaseLogic.this.func_145753_i();
+                     }
+                  });
+                  crashreportcategory.func_189529_a("Name", new ICrashReportDetail<String>() {
+                     public String call() throws Exception {
+                        return CommandBlockBaseLogic.this.func_70005_c_();
+                     }
+                  });
+                  throw new ReportedException(crashreport);
+               }
+            } else {
+               this.field_145764_b = 0;
             }
-            catch (Throwable throwable)
-            {
-                this.lastOutput = new TextComponentString(throwable.getMessage());
-            }
-        }
-        else
-        {
-            this.lastOutput = null;
-        }
 
-        if (nbt.hasKey("UpdateLastExecution"))
-        {
-            this.field_193042_c = nbt.getBoolean("UpdateLastExecution");
-        }
-
-        if (this.field_193042_c && nbt.hasKey("LastExecution"))
-        {
-            this.field_193041_b = nbt.getLong("LastExecution");
-        }
-        else
-        {
-            this.field_193041_b = -1L;
-        }
-
-        this.resultStats.readStatsFromNBT(nbt);
-    }
-
-    /**
-     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
-     */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
-    {
-        return permLevel <= 2;
-    }
-
-    /**
-     * Sets the command.
-     */
-    public void setCommand(String command)
-    {
-        this.commandStored = command;
-        this.successCount = 0;
-    }
-
-    /**
-     * Returns the command of the command block.
-     */
-    public String getCommand()
-    {
-        return this.commandStored;
-    }
-
-    public boolean trigger(World worldIn)
-    {
-        if (!worldIn.isRemote && worldIn.getTotalWorldTime() != this.field_193041_b)
-        {
-            if ("Searge".equalsIgnoreCase(this.commandStored))
-            {
-                this.lastOutput = new TextComponentString("#itzlipofutzli");
-                this.successCount = 1;
-                return true;
-            }
-            else
-            {
-                MinecraftServer minecraftserver = this.getServer();
-
-                if (minecraftserver != null && minecraftserver.isAnvilFileSet() && minecraftserver.isCommandBlockEnabled())
-                {
-                    try
-                    {
-                        this.lastOutput = null;
-                        this.successCount = minecraftserver.getCommandManager().executeCommand(this, this.commandStored);
-                    }
-                    catch (Throwable throwable)
-                    {
-                        CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Executing command block");
-                        CrashReportCategory crashreportcategory = crashreport.makeCategory("Command to be executed");
-                        crashreportcategory.setDetail("Command", new ICrashReportDetail<String>()
-                        {
-                            public String call() throws Exception
-                            {
-                                return CommandBlockBaseLogic.this.getCommand();
-                            }
-                        });
-                        crashreportcategory.setDetail("Name", new ICrashReportDetail<String>()
-                        {
-                            public String call() throws Exception
-                            {
-                                return CommandBlockBaseLogic.this.getName();
-                            }
-                        });
-                        throw new ReportedException(crashreport);
-                    }
-                }
-                else
-                {
-                    this.successCount = 0;
-                }
-
-                if (this.field_193042_c)
-                {
-                    this.field_193041_b = worldIn.getTotalWorldTime();
-                }
-                else
-                {
-                    this.field_193041_b = -1L;
-                }
-
-                return true;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.customName;
-    }
-
-    public void setName(String name)
-    {
-        this.customName = name;
-    }
-
-    /**
-     * Send a chat message to the CommandSender
-     */
-    public void addChatMessage(ITextComponent component)
-    {
-        if (this.trackOutput && this.getEntityWorld() != null && !this.getEntityWorld().isRemote)
-        {
-            this.lastOutput = (new TextComponentString("[" + TIMESTAMP_FORMAT.format(new Date()) + "] ")).appendSibling(component);
-            this.updateCommand();
-        }
-    }
-
-    /**
-     * Returns true if the command sender should be sent feedback about executed commands
-     */
-    public boolean sendCommandFeedback()
-    {
-        MinecraftServer minecraftserver = this.getServer();
-        return minecraftserver == null || !minecraftserver.isAnvilFileSet() || minecraftserver.worldServers[0].getGameRules().getBoolean("commandBlockOutput");
-    }
-
-    public void setCommandStat(CommandResultStats.Type type, int amount)
-    {
-        this.resultStats.setCommandStatForSender(this.getServer(), this, type, amount);
-    }
-
-    public abstract void updateCommand();
-
-    /**
-     * Currently this returns 0 for the traditional command block, and 1 for the minecart command block
-     */
-    public abstract int getCommandBlockType();
-
-    /**
-     * Fills in information about the command block for the packet. X/Y/Z for the minecart version, and entityId for the
-     * traditional version
-     */
-    public abstract void fillInInfo(ByteBuf buf);
-
-    public void setLastOutput(@Nullable ITextComponent lastOutputMessage)
-    {
-        this.lastOutput = lastOutputMessage;
-    }
-
-    public void setTrackOutput(boolean shouldTrackOutput)
-    {
-        this.trackOutput = shouldTrackOutput;
-    }
-
-    public boolean shouldTrackOutput()
-    {
-        return this.trackOutput;
-    }
-
-    public boolean tryOpenEditCommandBlock(EntityPlayer playerIn)
-    {
-        if (!playerIn.canUseCommandBlock())
-        {
-            return false;
-        }
-        else
-        {
-            if (playerIn.getEntityWorld().isRemote)
-            {
-                playerIn.displayGuiEditCommandCart(this);
+            if (this.field_193042_c) {
+               this.field_193041_b = p_145755_1_.func_82737_E();
+            } else {
+               this.field_193041_b = -1L;
             }
 
             return true;
-        }
-    }
+         }
+      } else {
+         return false;
+      }
+   }
 
-    public CommandResultStats getCommandResultStats()
-    {
-        return this.resultStats;
-    }
+   public String func_70005_c_() {
+      return this.field_145761_f;
+   }
+
+   public void func_145754_b(String p_145754_1_) {
+      this.field_145761_f = p_145754_1_;
+   }
+
+   public void func_145747_a(ITextComponent p_145747_1_) {
+      if (this.field_145765_c && this.func_130014_f_() != null && !this.func_130014_f_().field_72995_K) {
+         this.field_145762_d = (new TextComponentString("[" + field_145766_a.format(new Date()) + "] ")).func_150257_a(p_145747_1_);
+         this.func_145756_e();
+      }
+
+   }
+
+   public boolean func_174792_t_() {
+      MinecraftServer minecraftserver = this.func_184102_h();
+      return minecraftserver == null || !minecraftserver.func_175578_N() || minecraftserver.field_71305_c[0].func_82736_K().func_82766_b("commandBlockOutput");
+   }
+
+   public void func_174794_a(CommandResultStats.Type p_174794_1_, int p_174794_2_) {
+      this.field_175575_g.func_184932_a(this.func_184102_h(), this, p_174794_1_, p_174794_2_);
+   }
+
+   public abstract void func_145756_e();
+
+   public abstract int func_145751_f();
+
+   public abstract void func_145757_a(ByteBuf var1);
+
+   public void func_145750_b(@Nullable ITextComponent p_145750_1_) {
+      this.field_145762_d = p_145750_1_;
+   }
+
+   public void func_175573_a(boolean p_175573_1_) {
+      this.field_145765_c = p_175573_1_;
+   }
+
+   public boolean func_175571_m() {
+      return this.field_145765_c;
+   }
+
+   public boolean func_175574_a(EntityPlayer p_175574_1_) {
+      if (!p_175574_1_.func_189808_dh()) {
+         return false;
+      } else {
+         if (p_175574_1_.func_130014_f_().field_72995_K) {
+            p_175574_1_.func_184809_a(this);
+         }
+
+         return true;
+      }
+   }
+
+   public CommandResultStats func_175572_n() {
+      return this.field_175575_g;
+   }
 }

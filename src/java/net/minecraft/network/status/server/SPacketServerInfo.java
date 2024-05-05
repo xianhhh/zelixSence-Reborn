@@ -12,46 +12,30 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 
-public class SPacketServerInfo implements Packet<INetHandlerStatusClient>
-{
-    private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(ServerStatusResponse.Version.class, new ServerStatusResponse.Version.Serializer()).registerTypeAdapter(ServerStatusResponse.Players.class, new ServerStatusResponse.Players.Serializer()).registerTypeAdapter(ServerStatusResponse.class, new ServerStatusResponse.Serializer()).registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer()).registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).registerTypeAdapterFactory(new EnumTypeAdapterFactory()).create();
-    private ServerStatusResponse response;
+public class SPacketServerInfo implements Packet<INetHandlerStatusClient> {
+   private static final Gson field_149297_a = (new GsonBuilder()).registerTypeAdapter(ServerStatusResponse.Version.class, new ServerStatusResponse.Version.Serializer()).registerTypeAdapter(ServerStatusResponse.Players.class, new ServerStatusResponse.Players.Serializer()).registerTypeAdapter(ServerStatusResponse.class, new ServerStatusResponse.Serializer()).registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer()).registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).registerTypeAdapterFactory(new EnumTypeAdapterFactory()).create();
+   private ServerStatusResponse field_149296_b;
 
-    public SPacketServerInfo()
-    {
-    }
+   public SPacketServerInfo() {
+   }
 
-    public SPacketServerInfo(ServerStatusResponse responseIn)
-    {
-        this.response = responseIn;
-    }
+   public SPacketServerInfo(ServerStatusResponse p_i46848_1_) {
+      this.field_149296_b = p_i46848_1_;
+   }
 
-    /**
-     * Reads the raw packet data from the data stream.
-     */
-    public void readPacketData(PacketBuffer buf) throws IOException
-    {
-        this.response = (ServerStatusResponse)JsonUtils.gsonDeserialize(GSON, buf.readStringFromBuffer(32767), ServerStatusResponse.class);
-    }
+   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
+      this.field_149296_b = (ServerStatusResponse)JsonUtils.func_188178_a(field_149297_a, p_148837_1_.func_150789_c(32767), ServerStatusResponse.class);
+   }
 
-    /**
-     * Writes the raw packet data to the data stream.
-     */
-    public void writePacketData(PacketBuffer buf) throws IOException
-    {
-        buf.writeString(GSON.toJson(this.response));
-    }
+   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
+      p_148840_1_.func_180714_a(field_149297_a.toJson(this.field_149296_b));
+   }
 
-    /**
-     * Passes this Packet on to the NetHandler for processing.
-     */
-    public void processPacket(INetHandlerStatusClient handler)
-    {
-        handler.handleServerInfo(this);
-    }
+   public void func_148833_a(INetHandlerStatusClient p_148833_1_) {
+      p_148833_1_.func_147397_a(this);
+   }
 
-    public ServerStatusResponse getResponse()
-    {
-        return this.response;
-    }
+   public ServerStatusResponse func_149294_c() {
+      return this.field_149296_b;
+   }
 }

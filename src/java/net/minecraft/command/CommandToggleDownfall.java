@@ -3,44 +3,26 @@ package net.minecraft.command;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.WorldInfo;
 
-public class CommandToggleDownfall extends CommandBase
-{
-    /**
-     * Gets the name of the command
-     */
-    public String getCommandName()
-    {
-        return "toggledownfall";
-    }
+public class CommandToggleDownfall extends CommandBase {
+   public String func_71517_b() {
+      return "toggledownfall";
+   }
 
-    /**
-     * Return the required permission level for this command.
-     */
-    public int getRequiredPermissionLevel()
-    {
-        return 2;
-    }
+   public int func_82362_a() {
+      return 2;
+   }
 
-    /**
-     * Gets the usage string for the command.
-     */
-    public String getCommandUsage(ICommandSender sender)
-    {
-        return "commands.downfall.usage";
-    }
+   public String func_71518_a(ICommandSender p_71518_1_) {
+      return "commands.downfall.usage";
+   }
 
-    /**
-     * Callback for when the command is executed
-     */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
-    {
-        this.toggleRainfall(server);
-        notifyCommandListener(sender, this, "commands.downfall.success", new Object[0]);
-    }
+   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
+      this.func_184930_a(p_184881_1_);
+      func_152373_a(p_184881_2_, this, "commands.downfall.success", new Object[0]);
+   }
 
-    protected void toggleRainfall(MinecraftServer server)
-    {
-        WorldInfo worldinfo = server.worldServers[0].getWorldInfo();
-        worldinfo.setRaining(!worldinfo.isRaining());
-    }
+   protected void func_184930_a(MinecraftServer p_184930_1_) {
+      WorldInfo worldinfo = p_184930_1_.field_71305_c[0].func_72912_H();
+      worldinfo.func_76084_b(!worldinfo.func_76059_o());
+   }
 }
