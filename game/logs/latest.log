@@ -1,0 +1,23 @@
+[15:51:40] [Client thread/ERROR]: Can't find the resource index file: assets\indexes\1.12.json
+[15:51:40] [Client thread/INFO]: Setting user: Player984
+[15:51:41] [Client thread/ERROR]: Couldn't find .mcassetsroot
+[15:51:41] [Client thread/ERROR]: Errors with built-in recipes!
+[15:51:41] [Client thread/INFO]: [STDERR]: java.lang.ExceptionInInitializerError
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.util.text.translation.I18n.<clinit>(I18n.java:6)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.item.Item.getUnlocalizedNameInefficiently(Item.java:355)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.item.Item.getItemStackDisplayName(Item.java:458)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.item.ItemStack.getDisplayName(ItemStack.java:693)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.item.ItemStack.getTextComponent(ItemStack.java:1154)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.stats.StatList.initMiningStats(StatList.java:203)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.stats.StatList.init(StatList.java:143)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.init.Bootstrap.register(Bootstrap.java:517)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.client.Minecraft.<init>(Minecraft.java:439)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.client.main.Main.main(Main.java:115)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at Start.main(Start.java:11)
+[15:51:41] [Client thread/INFO]: [STDERR]: Caused by: java.lang.NullPointerException
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at java.base/java.io.Reader.<init>(Reader.java:167)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at java.base/java.io.InputStreamReader.<init>(InputStreamReader.java:109)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at org.apache.commons.io.IOUtils.readLines(IOUtils.java:1247)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.util.text.translation.LanguageMap.<init>(LanguageMap.java:41)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	at net.minecraft.util.text.translation.LanguageMap.<clinit>(LanguageMap.java:27)
+[15:51:41] [Client thread/INFO]: [STDERR]: 	... 11 more
