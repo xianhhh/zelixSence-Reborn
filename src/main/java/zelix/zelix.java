@@ -8,7 +8,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.Display;
 import zelix.module.ModuleManager;
-import zelix.module.guis.ClickGui;
 
 import java.awt.event.KeyEvent;
 

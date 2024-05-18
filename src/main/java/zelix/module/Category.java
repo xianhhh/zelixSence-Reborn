@@ -1,5 +1,5 @@
 package zelix.module;
 
 public enum Category {
-    Player.Render
+    Player,Render
 }
