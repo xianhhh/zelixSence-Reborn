@@ -1,0 +1,16 @@
+[
+{
+  "modid": "zelix",
+  "name": "Zelix-reborn",
+  "description": "zelix",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["only xianhhh"],
+  "credits": "zelix",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["zelix-reborn"]
+}
+]
