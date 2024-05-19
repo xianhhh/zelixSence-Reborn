@@ -16,124 +16,121 @@ import net.minecraft.util.math.Vec3d;
 
 public class LevitationTrigger implements ICriterionTrigger<LevitationTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("levitation");
-    private final Map<PlayerAdvancements, LevitationTrigger.Listeners> listeners = Maps.<PlayerAdvancements, LevitationTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_193164_a = new ResourceLocation("levitation");
+    private final Map<PlayerAdvancements, LevitationTrigger.Listeners> field_193165_b = Maps.<PlayerAdvancements, LevitationTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_193164_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<LevitationTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<LevitationTrigger.Instance> p_192165_2_)
     {
-        LevitationTrigger.Listeners levitationtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        LevitationTrigger.Listeners levitationtrigger$listeners = this.field_193165_b.get(p_192165_1_);
 
         if (levitationtrigger$listeners == null)
         {
-            levitationtrigger$listeners = new LevitationTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, levitationtrigger$listeners);
+            levitationtrigger$listeners = new LevitationTrigger.Listeners(p_192165_1_);
+            this.field_193165_b.put(p_192165_1_, levitationtrigger$listeners);
         }
 
-        levitationtrigger$listeners.add(listener);
+        levitationtrigger$listeners.func_193449_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<LevitationTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<LevitationTrigger.Instance> p_192164_2_)
     {
-        LevitationTrigger.Listeners levitationtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        LevitationTrigger.Listeners levitationtrigger$listeners = this.field_193165_b.get(p_192164_1_);
 
         if (levitationtrigger$listeners != null)
         {
-            levitationtrigger$listeners.remove(listener);
+            levitationtrigger$listeners.func_193446_b(p_192164_2_);
 
-            if (levitationtrigger$listeners.isEmpty())
+            if (levitationtrigger$listeners.func_193447_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_193165_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_193165_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public LevitationTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public LevitationTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        DistancePredicate distancepredicate = DistancePredicate.deserialize(json.get("distance"));
-        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(json.get("duration"));
+        DistancePredicate distancepredicate = DistancePredicate.func_193421_a(p_192166_1_.get("distance"));
+        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(p_192166_1_.get("duration"));
         return new LevitationTrigger.Instance(distancepredicate, minmaxbounds);
     }
 
-    public void trigger(EntityPlayerMP player, Vec3d startPos, int duration)
+    public void func_193162_a(EntityPlayerMP p_193162_1_, Vec3d p_193162_2_, int p_193162_3_)
     {
-        LevitationTrigger.Listeners levitationtrigger$listeners = this.listeners.get(player.getAdvancements());
+        LevitationTrigger.Listeners levitationtrigger$listeners = this.field_193165_b.get(p_193162_1_.func_192039_O());
 
         if (levitationtrigger$listeners != null)
         {
-            levitationtrigger$listeners.trigger(player, startPos, duration);
+            levitationtrigger$listeners.func_193448_a(p_193162_1_, p_193162_2_, p_193162_3_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final DistancePredicate distance;
-        private final MinMaxBounds duration;
+        private final DistancePredicate field_193202_a;
+        private final MinMaxBounds field_193203_b;
 
-        public Instance(DistancePredicate distance, MinMaxBounds duration)
+        public Instance(DistancePredicate p_i47571_1_, MinMaxBounds p_i47571_2_)
         {
-            super(LevitationTrigger.ID);
-            this.distance = distance;
-            this.duration = duration;
+            super(LevitationTrigger.field_193164_a);
+            this.field_193202_a = p_i47571_1_;
+            this.field_193203_b = p_i47571_2_;
         }
 
-        public boolean test(EntityPlayerMP player, Vec3d startPos, int durationIn)
+        public boolean func_193201_a(EntityPlayerMP p_193201_1_, Vec3d p_193201_2_, int p_193201_3_)
         {
-            if (!this.distance.test(startPos.x, startPos.y, startPos.z, player.posX, player.posY, player.posZ))
+            if (!this.field_193202_a.func_193422_a(p_193201_2_.xCoord, p_193201_2_.yCoord, p_193201_2_.zCoord, p_193201_1_.posX, p_193201_1_.posY, p_193201_1_.posZ))
             {
                 return false;
             }
             else
             {
-                return this.duration.test((float)durationIn);
+                return this.field_193203_b.func_192514_a((float)p_193201_3_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<LevitationTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<LevitationTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_193450_a;
+        private final Set<ICriterionTrigger.Listener<LevitationTrigger.Instance>> field_193451_b = Sets.<ICriterionTrigger.Listener<LevitationTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47572_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_193450_a = p_i47572_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_193447_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_193451_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<LevitationTrigger.Instance> listener)
+        public void func_193449_a(ICriterionTrigger.Listener<LevitationTrigger.Instance> p_193449_1_)
         {
-            this.listeners.add(listener);
+            this.field_193451_b.add(p_193449_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<LevitationTrigger.Instance> listener)
+        public void func_193446_b(ICriterionTrigger.Listener<LevitationTrigger.Instance> p_193446_1_)
         {
-            this.listeners.remove(listener);
+            this.field_193451_b.remove(p_193446_1_);
         }
 
-        public void trigger(EntityPlayerMP player, Vec3d startPos, int durationIn)
+        public void func_193448_a(EntityPlayerMP p_193448_1_, Vec3d p_193448_2_, int p_193448_3_)
         {
             List<ICriterionTrigger.Listener<LevitationTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<LevitationTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<LevitationTrigger.Instance> listener : this.field_193451_b)
             {
-                if (((LevitationTrigger.Instance)listener.getCriterionInstance()).test(player, startPos, durationIn))
+                if (((LevitationTrigger.Instance)listener.func_192158_a()).func_193201_a(p_193448_1_, p_193448_2_, p_193448_3_))
                 {
                     if (list == null)
                     {
@@ -148,7 +145,7 @@ public class LevitationTrigger implements ICriterionTrigger<LevitationTrigger.In
             {
                 for (ICriterionTrigger.Listener<LevitationTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_193450_a);
                 }
             }
         }

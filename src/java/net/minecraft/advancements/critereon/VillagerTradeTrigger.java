@@ -17,124 +17,121 @@ import net.minecraft.util.ResourceLocation;
 
 public class VillagerTradeTrigger implements ICriterionTrigger<VillagerTradeTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("villager_trade");
-    private final Map<PlayerAdvancements, VillagerTradeTrigger.Listeners> listeners = Maps.<PlayerAdvancements, VillagerTradeTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192237_a = new ResourceLocation("villager_trade");
+    private final Map<PlayerAdvancements, VillagerTradeTrigger.Listeners> field_192238_b = Maps.<PlayerAdvancements, VillagerTradeTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192237_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> p_192165_2_)
     {
-        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.field_192238_b.get(p_192165_1_);
 
         if (villagertradetrigger$listeners == null)
         {
-            villagertradetrigger$listeners = new VillagerTradeTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, villagertradetrigger$listeners);
+            villagertradetrigger$listeners = new VillagerTradeTrigger.Listeners(p_192165_1_);
+            this.field_192238_b.put(p_192165_1_, villagertradetrigger$listeners);
         }
 
-        villagertradetrigger$listeners.add(listener);
+        villagertradetrigger$listeners.func_192540_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> p_192164_2_)
     {
-        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.field_192238_b.get(p_192164_1_);
 
         if (villagertradetrigger$listeners != null)
         {
-            villagertradetrigger$listeners.remove(listener);
+            villagertradetrigger$listeners.func_192538_b(p_192164_2_);
 
-            if (villagertradetrigger$listeners.isEmpty())
+            if (villagertradetrigger$listeners.func_192539_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192238_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192238_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public VillagerTradeTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public VillagerTradeTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("villager"));
-        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
+        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("villager"));
+        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
         return new VillagerTradeTrigger.Instance(entitypredicate, itempredicate);
     }
 
-    public void trigger(EntityPlayerMP player, EntityVillager villager, ItemStack item)
+    public void func_192234_a(EntityPlayerMP p_192234_1_, EntityVillager p_192234_2_, ItemStack p_192234_3_)
     {
-        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.listeners.get(player.getAdvancements());
+        VillagerTradeTrigger.Listeners villagertradetrigger$listeners = this.field_192238_b.get(p_192234_1_.func_192039_O());
 
         if (villagertradetrigger$listeners != null)
         {
-            villagertradetrigger$listeners.trigger(player, villager, item);
+            villagertradetrigger$listeners.func_192537_a(p_192234_1_, p_192234_2_, p_192234_3_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final EntityPredicate villager;
-        private final ItemPredicate item;
+        private final EntityPredicate field_192286_a;
+        private final ItemPredicate field_192287_b;
 
-        public Instance(EntityPredicate villager, ItemPredicate item)
+        public Instance(EntityPredicate p_i47457_1_, ItemPredicate p_i47457_2_)
         {
-            super(VillagerTradeTrigger.ID);
-            this.villager = villager;
-            this.item = item;
+            super(VillagerTradeTrigger.field_192237_a);
+            this.field_192286_a = p_i47457_1_;
+            this.field_192287_b = p_i47457_2_;
         }
 
-        public boolean test(EntityPlayerMP player, EntityVillager villager, ItemStack item)
+        public boolean func_192285_a(EntityPlayerMP p_192285_1_, EntityVillager p_192285_2_, ItemStack p_192285_3_)
         {
-            if (!this.villager.test(player, villager))
+            if (!this.field_192286_a.func_192482_a(p_192285_1_, p_192285_2_))
             {
                 return false;
             }
             else
             {
-                return this.item.test(item);
+                return this.field_192287_b.func_192493_a(p_192285_3_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<VillagerTradeTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<VillagerTradeTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192541_a;
+        private final Set<ICriterionTrigger.Listener<VillagerTradeTrigger.Instance>> field_192542_b = Sets.<ICriterionTrigger.Listener<VillagerTradeTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47458_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192541_a = p_i47458_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192539_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192542_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener)
+        public void func_192540_a(ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> p_192540_1_)
         {
-            this.listeners.add(listener);
+            this.field_192542_b.add(p_192540_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener)
+        public void func_192538_b(ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> p_192538_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192542_b.remove(p_192538_1_);
         }
 
-        public void trigger(EntityPlayerMP player, EntityVillager villager, ItemStack item)
+        public void func_192537_a(EntityPlayerMP p_192537_1_, EntityVillager p_192537_2_, ItemStack p_192537_3_)
         {
             List<ICriterionTrigger.Listener<VillagerTradeTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener : this.field_192542_b)
             {
-                if (((VillagerTradeTrigger.Instance)listener.getCriterionInstance()).test(player, villager, item))
+                if (((VillagerTradeTrigger.Instance)listener.func_192158_a()).func_192285_a(p_192537_1_, p_192537_2_, p_192537_3_))
                 {
                     if (list == null)
                     {
@@ -149,7 +146,7 @@ public class VillagerTradeTrigger implements ICriterionTrigger<VillagerTradeTrig
             {
                 for (ICriterionTrigger.Listener<VillagerTradeTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192541_a);
                 }
             }
         }

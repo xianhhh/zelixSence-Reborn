@@ -15,47 +15,46 @@ import net.minecraft.util.JsonUtils;
 
 public class NBTPredicate
 {
-    /** The predicate that matches any NBT tag. */
-    public static final NBTPredicate ANY = new NBTPredicate((NBTTagCompound)null);
+    public static final NBTPredicate field_193479_a = new NBTPredicate((NBTTagCompound)null);
     @Nullable
-    private final NBTTagCompound tag;
+    private final NBTTagCompound field_193480_b;
 
-    public NBTPredicate(@Nullable NBTTagCompound tag)
+    public NBTPredicate(@Nullable NBTTagCompound p_i47536_1_)
     {
-        this.tag = tag;
+        this.field_193480_b = p_i47536_1_;
     }
 
-    public boolean test(ItemStack item)
+    public boolean func_193478_a(ItemStack p_193478_1_)
     {
-        return this == ANY ? true : this.test(item.getTagCompound());
+        return this == field_193479_a ? true : this.func_193477_a(p_193478_1_.getTagCompound());
     }
 
-    public boolean test(Entity entityIn)
+    public boolean func_193475_a(Entity p_193475_1_)
     {
-        return this == ANY ? true : this.test(CommandBase.entityToNBT(entityIn));
+        return this == field_193479_a ? true : this.func_193477_a(CommandBase.entityToNBT(p_193475_1_));
     }
 
-    public boolean test(@Nullable NBTBase nbt)
+    public boolean func_193477_a(@Nullable NBTBase p_193477_1_)
     {
-        if (nbt == null)
+        if (p_193477_1_ == null)
         {
-            return this == ANY;
+            return this == field_193479_a;
         }
         else
         {
-            return this.tag == null || NBTUtil.areNBTEquals(this.tag, nbt, true);
+            return this.field_193480_b == null || NBTUtil.areNBTEquals(this.field_193480_b, p_193477_1_, true);
         }
     }
 
-    public static NBTPredicate deserialize(@Nullable JsonElement json)
+    public static NBTPredicate func_193476_a(@Nullable JsonElement p_193476_0_)
     {
-        if (json != null && !json.isJsonNull())
+        if (p_193476_0_ != null && !p_193476_0_.isJsonNull())
         {
             NBTTagCompound nbttagcompound;
 
             try
             {
-                nbttagcompound = JsonToNBT.getTagFromJson(JsonUtils.getString(json, "nbt"));
+                nbttagcompound = JsonToNBT.getTagFromJson(JsonUtils.getString(p_193476_0_, "nbt"));
             }
             catch (NBTException nbtexception)
             {
@@ -66,7 +65,7 @@ public class NBTPredicate
         }
         else
         {
-            return ANY;
+            return field_193479_a;
         }
     }
 }

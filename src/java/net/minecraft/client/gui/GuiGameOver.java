@@ -114,17 +114,17 @@ public class GuiGameOver extends GuiScreen
         this.drawGradientRect(0, 0, this.width, this.height, 1615855616, -1602211792);
         GlStateManager.pushMatrix();
         GlStateManager.scale(2.0F, 2.0F, 2.0F);
-        this.drawCenteredString(this.fontRenderer, I18n.format(flag ? "deathScreen.title.hardcore" : "deathScreen.title"), this.width / 2 / 2, 30, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format(flag ? "deathScreen.title.hardcore" : "deathScreen.title"), this.width / 2 / 2, 30, 16777215);
         GlStateManager.popMatrix();
 
         if (this.causeOfDeath != null)
         {
-            this.drawCenteredString(this.fontRenderer, this.causeOfDeath.getFormattedText(), this.width / 2, 85, 16777215);
+            this.drawCenteredString(this.fontRendererObj, this.causeOfDeath.getFormattedText(), this.width / 2, 85, 16777215);
         }
 
-        this.drawCenteredString(this.fontRenderer, I18n.format("deathScreen.score") + ": " + TextFormatting.YELLOW + this.mc.player.getScore(), this.width / 2, 100, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("deathScreen.score") + ": " + TextFormatting.YELLOW + this.mc.player.getScore(), this.width / 2, 100, 16777215);
 
-        if (this.causeOfDeath != null && mouseY > 85 && mouseY < 85 + this.fontRenderer.FONT_HEIGHT)
+        if (this.causeOfDeath != null && mouseY > 85 && mouseY < 85 + this.fontRendererObj.FONT_HEIGHT)
         {
             ITextComponent itextcomponent = this.getClickedComponentAt(mouseX);
 
@@ -146,7 +146,7 @@ public class GuiGameOver extends GuiScreen
         }
         else
         {
-            int i = this.mc.fontRenderer.getStringWidth(this.causeOfDeath.getFormattedText());
+            int i = this.mc.fontRendererObj.getStringWidth(this.causeOfDeath.getFormattedText());
             int j = this.width / 2 - i / 2;
             int k = this.width / 2 + i / 2;
             int l = j;
@@ -155,7 +155,7 @@ public class GuiGameOver extends GuiScreen
             {
                 for (ITextComponent itextcomponent : this.causeOfDeath)
                 {
-                    l += this.mc.fontRenderer.getStringWidth(GuiUtilRenderComponents.removeTextColorsIfConfigured(itextcomponent.getUnformattedComponentText(), false));
+                    l += this.mc.fontRendererObj.getStringWidth(GuiUtilRenderComponents.removeTextColorsIfConfigured(itextcomponent.getUnformattedComponentText(), false));
 
                     if (l > p_184870_1_)
                     {

@@ -77,11 +77,11 @@ public class BlockPumpkin extends BlockHorizontal
             EntitySnowman entitysnowman = new EntitySnowman(worldIn);
             BlockPos blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
             entitysnowman.setLocationAndAngles((double)blockpos1.getX() + 0.5D, (double)blockpos1.getY() + 0.05D, (double)blockpos1.getZ() + 0.5D, 0.0F, 0.0F);
-            worldIn.spawnEntity(entitysnowman);
+            worldIn.spawnEntityInWorld(entitysnowman);
 
-            for (EntityPlayerMP entityplayermp : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, entitysnowman.getEntityBoundingBox().grow(5.0D)))
+            for (EntityPlayerMP entityplayermp : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, entitysnowman.getEntityBoundingBox().expandXyz(5.0D)))
             {
-                CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp, entitysnowman);
+                CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp, entitysnowman);
             }
 
             for (int l = 0; l < 120; ++l)
@@ -113,11 +113,11 @@ public class BlockPumpkin extends BlockHorizontal
                 EntityIronGolem entityirongolem = new EntityIronGolem(worldIn);
                 entityirongolem.setPlayerCreated(true);
                 entityirongolem.setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.05D, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
-                worldIn.spawnEntity(entityirongolem);
+                worldIn.spawnEntityInWorld(entityirongolem);
 
-                for (EntityPlayerMP entityplayermp1 : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, entityirongolem.getEntityBoundingBox().grow(5.0D)))
+                for (EntityPlayerMP entityplayermp1 : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, entityirongolem.getEntityBoundingBox().expandXyz(5.0D)))
                 {
-                    CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp1, entityirongolem);
+                    CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp1, entityirongolem);
                 }
 
                 for (int j1 = 0; j1 < 120; ++j1)
@@ -139,7 +139,7 @@ public class BlockPumpkin extends BlockHorizontal
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return worldIn.getBlockState(pos).getBlock().blockMaterial.isReplaceable() && worldIn.getBlockState(pos.down()).isTopSolid();
+        return worldIn.getBlockState(pos).getBlock().blockMaterial.isReplaceable() && worldIn.getBlockState(pos.down()).isFullyOpaque();
     }
 
     /**
@@ -164,7 +164,7 @@ public class BlockPumpkin extends BlockHorizontal
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }

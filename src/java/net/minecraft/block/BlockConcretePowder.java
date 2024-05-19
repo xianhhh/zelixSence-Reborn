@@ -18,12 +18,12 @@ import net.minecraft.world.World;
 
 public class BlockConcretePowder extends BlockFalling
 {
-    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+    public static final PropertyEnum<EnumDyeColor> field_192426_a = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
 
     public BlockConcretePowder()
     {
         super(Material.SAND);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_192426_a, EnumDyeColor.WHITE));
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
@@ -31,11 +31,11 @@ public class BlockConcretePowder extends BlockFalling
     {
         if (p_176502_4_.getMaterial().isLiquid())
         {
-            worldIn.setBlockState(pos, Blocks.CONCRETE.getDefaultState().withProperty(BlockColored.COLOR, p_176502_3_.getValue(COLOR)), 3);
+            worldIn.setBlockState(pos, Blocks.field_192443_dR.getDefaultState().withProperty(BlockColored.COLOR, p_176502_3_.getValue(field_192426_a)), 3);
         }
     }
 
-    protected boolean tryTouchWater(World worldIn, BlockPos pos, IBlockState state)
+    protected boolean func_192425_e(World p_192425_1_, BlockPos p_192425_2_, IBlockState p_192425_3_)
     {
         boolean flag = false;
 
@@ -43,9 +43,9 @@ public class BlockConcretePowder extends BlockFalling
         {
             if (enumfacing != EnumFacing.DOWN)
             {
-                BlockPos blockpos = pos.offset(enumfacing);
+                BlockPos blockpos = p_192425_2_.offset(enumfacing);
 
-                if (worldIn.getBlockState(blockpos).getMaterial() == Material.WATER)
+                if (p_192425_1_.getBlockState(blockpos).getMaterial() == Material.WATER)
                 {
                     flag = true;
                     break;
@@ -55,7 +55,7 @@ public class BlockConcretePowder extends BlockFalling
 
         if (flag)
         {
-            worldIn.setBlockState(pos, Blocks.CONCRETE.getDefaultState().withProperty(BlockColored.COLOR, state.getValue(COLOR)), 3);
+            p_192425_1_.setBlockState(p_192425_2_, Blocks.field_192443_dR.getDefaultState().withProperty(BlockColored.COLOR, p_192425_3_.getValue(field_192426_a)), 3);
         }
 
         return flag;
@@ -66,11 +66,11 @@ public class BlockConcretePowder extends BlockFalling
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
-        if (!this.tryTouchWater(worldIn, pos, state))
+        if (!this.func_192425_e(worldIn, pos, state))
         {
-            super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+            super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
         }
     }
 
@@ -79,7 +79,7 @@ public class BlockConcretePowder extends BlockFalling
      */
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        if (!this.tryTouchWater(worldIn, pos, state))
+        if (!this.func_192425_e(worldIn, pos, state))
         {
             super.onBlockAdded(worldIn, pos, state);
         }
@@ -91,26 +91,26 @@ public class BlockConcretePowder extends BlockFalling
      */
     public int damageDropped(IBlockState state)
     {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+        return ((EnumDyeColor)state.getValue(field_192426_a)).getMetadata();
     }
 
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
-            items.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
+            tab.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
         }
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
-        return MapColor.getBlockColor((EnumDyeColor)state.getValue(COLOR));
+        return MapColor.func_193558_a((EnumDyeColor)state.getValue(field_192426_a));
     }
 
     /**
@@ -118,7 +118,7 @@ public class BlockConcretePowder extends BlockFalling
      */
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
+        return this.getDefaultState().withProperty(field_192426_a, EnumDyeColor.byMetadata(meta));
     }
 
     /**
@@ -126,11 +126,11 @@ public class BlockConcretePowder extends BlockFalling
      */
     public int getMetaFromState(IBlockState state)
     {
-        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+        return ((EnumDyeColor)state.getValue(field_192426_a)).getMetadata();
     }
 
     protected BlockStateContainer createBlockState()
     {
-        return new BlockStateContainer(this, new IProperty[] {COLOR});
+        return new BlockStateContainer(this, new IProperty[] {field_192426_a});
     }
 }

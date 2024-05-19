@@ -26,7 +26,7 @@ public class SpectatorMenu
         {
             return new TextComponentString("");
         }
-        public void renderIcon(float brightness, int alpha)
+        public void renderIcon(float p_178663_1_, int alpha)
         {
         }
         public boolean isEnabled()
@@ -40,24 +40,24 @@ public class SpectatorMenu
     private int selectedSlot = -1;
     private int page;
 
-    public SpectatorMenu(ISpectatorMenuRecipient menu)
+    public SpectatorMenu(ISpectatorMenuRecipient p_i45497_1_)
     {
-        this.listener = menu;
+        this.listener = p_i45497_1_;
     }
 
-    public ISpectatorMenuObject getItem(int index)
+    public ISpectatorMenuObject getItem(int p_178643_1_)
     {
-        int i = index + this.page * 6;
+        int i = p_178643_1_ + this.page * 6;
 
-        if (this.page > 0 && index == 0)
+        if (this.page > 0 && p_178643_1_ == 0)
         {
             return SCROLL_LEFT;
         }
-        else if (index == 7)
+        else if (p_178643_1_ == 7)
         {
             return i < this.category.getItems().size() ? SCROLL_RIGHT_ENABLED : SCROLL_RIGHT_DISABLED;
         }
-        else if (index == 8)
+        else if (p_178643_1_ == 8)
         {
             return CLOSE_ITEM;
         }
@@ -145,7 +145,7 @@ public class SpectatorMenu
             return new TextComponentTranslation("spectatorMenu.close", new Object[0]);
         }
 
-        public void renderIcon(float brightness, int alpha)
+        public void renderIcon(float p_178663_1_, int alpha)
         {
             Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
             Gui.drawModalRectWithCustomSizedTexture(0, 0, 128.0F, 0.0F, 16, 16, 256.0F, 256.0F);
@@ -178,7 +178,7 @@ public class SpectatorMenu
             return this.direction < 0 ? new TextComponentTranslation("spectatorMenu.previous_page", new Object[0]) : new TextComponentTranslation("spectatorMenu.next_page", new Object[0]);
         }
 
-        public void renderIcon(float brightness, int alpha)
+        public void renderIcon(float p_178663_1_, int alpha)
         {
             Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
 

@@ -79,7 +79,7 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
 
         if (clientPlayer.isSpectator())
         {
-            modelplayer.setVisible(false);
+            modelplayer.setInvisible(false);
             modelplayer.bipedHead.showModel = true;
             modelplayer.bipedHeadwear.showModel = true;
         }
@@ -87,7 +87,7 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
         {
             ItemStack itemstack = clientPlayer.getHeldItemMainhand();
             ItemStack itemstack1 = clientPlayer.getHeldItemOffhand();
-            modelplayer.setVisible(true);
+            modelplayer.setInvisible(true);
             modelplayer.bipedHeadwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.HAT);
             modelplayer.bipedBodyWear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.JACKET);
             modelplayer.bipedLeftLegwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.LEFT_PANTS_LEG);
@@ -98,7 +98,7 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
             ModelBiped.ArmPose modelbiped$armpose = ModelBiped.ArmPose.EMPTY;
             ModelBiped.ArmPose modelbiped$armpose1 = ModelBiped.ArmPose.EMPTY;
 
-            if (!itemstack.isEmpty())
+            if (!itemstack.func_190926_b())
             {
                 modelbiped$armpose = ModelBiped.ArmPose.ITEM;
 
@@ -117,7 +117,7 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
                 }
             }
 
-            if (!itemstack1.isEmpty())
+            if (!itemstack1.func_190926_b())
             {
                 modelbiped$armpose1 = ModelBiped.ArmPose.ITEM;
 
@@ -236,7 +236,7 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
         }
     }
 
-    protected void applyRotations(AbstractClientPlayer entityLiving, float p_77043_2_, float rotationYaw, float partialTicks)
+    protected void rotateCorpse(AbstractClientPlayer entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks)
     {
         if (entityLiving.isEntityAlive() && entityLiving.isPlayerSleeping())
         {
@@ -246,24 +246,24 @@ public class RenderPlayer extends RenderLivingBase<AbstractClientPlayer>
         }
         else if (entityLiving.isElytraFlying())
         {
-            super.applyRotations(entityLiving, p_77043_2_, rotationYaw, partialTicks);
+            super.rotateCorpse(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
             float f = (float)entityLiving.getTicksElytraFlying() + partialTicks;
             float f1 = MathHelper.clamp(f * f / 100.0F, 0.0F, 1.0F);
             GlStateManager.rotate(f1 * (-90.0F - entityLiving.rotationPitch), 1.0F, 0.0F, 0.0F);
             Vec3d vec3d = entityLiving.getLook(partialTicks);
             double d0 = entityLiving.motionX * entityLiving.motionX + entityLiving.motionZ * entityLiving.motionZ;
-            double d1 = vec3d.x * vec3d.x + vec3d.z * vec3d.z;
+            double d1 = vec3d.xCoord * vec3d.xCoord + vec3d.zCoord * vec3d.zCoord;
 
             if (d0 > 0.0D && d1 > 0.0D)
             {
-                double d2 = (entityLiving.motionX * vec3d.x + entityLiving.motionZ * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
-                double d3 = entityLiving.motionX * vec3d.z - entityLiving.motionZ * vec3d.x;
+                double d2 = (entityLiving.motionX * vec3d.xCoord + entityLiving.motionZ * vec3d.zCoord) / (Math.sqrt(d0) * Math.sqrt(d1));
+                double d3 = entityLiving.motionX * vec3d.zCoord - entityLiving.motionZ * vec3d.xCoord;
                 GlStateManager.rotate((float)(Math.signum(d3) * Math.acos(d2)) * 180.0F / (float)Math.PI, 0.0F, 1.0F, 0.0F);
             }
         }
         else
         {
-            super.applyRotations(entityLiving, p_77043_2_, rotationYaw, partialTicks);
+            super.rotateCorpse(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
         }
     }
 }

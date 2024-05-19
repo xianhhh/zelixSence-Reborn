@@ -8,55 +8,55 @@ import net.minecraft.util.math.MathHelper;
 
 public class ModelIllager extends ModelBase
 {
-    public ModelRenderer head;
-    public ModelRenderer hat;
-    public ModelRenderer body;
-    public ModelRenderer arms;
-    public ModelRenderer leg0;
-    public ModelRenderer leg1;
-    public ModelRenderer nose;
-    public ModelRenderer rightArm;
-    public ModelRenderer leftArm;
+    public ModelRenderer field_191217_a;
+    public ModelRenderer field_193775_b;
+    public ModelRenderer field_191218_b;
+    public ModelRenderer field_191219_c;
+    public ModelRenderer field_191220_d;
+    public ModelRenderer field_191221_e;
+    public ModelRenderer field_191222_f;
+    public ModelRenderer field_191223_g;
+    public ModelRenderer field_191224_h;
 
-    public ModelIllager(float scaleFactor, float p_i47227_2_, int textureWidthIn, int textureHeightIn)
+    public ModelIllager(float p_i47227_1_, float p_i47227_2_, int p_i47227_3_, int p_i47227_4_)
     {
-        this.head = (new ModelRenderer(this)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.head.setRotationPoint(0.0F, 0.0F + p_i47227_2_, 0.0F);
-        this.head.setTextureOffset(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8, 10, 8, scaleFactor);
-        this.hat = (new ModelRenderer(this, 32, 0)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.hat.addBox(-4.0F, -10.0F, -4.0F, 8, 12, 8, scaleFactor + 0.45F);
-        this.head.addChild(this.hat);
-        this.hat.showModel = false;
-        this.nose = (new ModelRenderer(this)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.nose.setRotationPoint(0.0F, p_i47227_2_ - 2.0F, 0.0F);
-        this.nose.setTextureOffset(24, 0).addBox(-1.0F, -1.0F, -6.0F, 2, 4, 2, scaleFactor);
-        this.head.addChild(this.nose);
-        this.body = (new ModelRenderer(this)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.body.setRotationPoint(0.0F, 0.0F + p_i47227_2_, 0.0F);
-        this.body.setTextureOffset(16, 20).addBox(-4.0F, 0.0F, -3.0F, 8, 12, 6, scaleFactor);
-        this.body.setTextureOffset(0, 38).addBox(-4.0F, 0.0F, -3.0F, 8, 18, 6, scaleFactor + 0.5F);
-        this.arms = (new ModelRenderer(this)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.arms.setRotationPoint(0.0F, 0.0F + p_i47227_2_ + 2.0F, 0.0F);
-        this.arms.setTextureOffset(44, 22).addBox(-8.0F, -2.0F, -2.0F, 4, 8, 4, scaleFactor);
-        ModelRenderer modelrenderer = (new ModelRenderer(this, 44, 22)).setTextureSize(textureWidthIn, textureHeightIn);
+        this.field_191217_a = (new ModelRenderer(this)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191217_a.setRotationPoint(0.0F, 0.0F + p_i47227_2_, 0.0F);
+        this.field_191217_a.setTextureOffset(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8, 10, 8, p_i47227_1_);
+        this.field_193775_b = (new ModelRenderer(this, 32, 0)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_193775_b.addBox(-4.0F, -10.0F, -4.0F, 8, 12, 8, p_i47227_1_ + 0.45F);
+        this.field_191217_a.addChild(this.field_193775_b);
+        this.field_193775_b.showModel = false;
+        this.field_191222_f = (new ModelRenderer(this)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191222_f.setRotationPoint(0.0F, p_i47227_2_ - 2.0F, 0.0F);
+        this.field_191222_f.setTextureOffset(24, 0).addBox(-1.0F, -1.0F, -6.0F, 2, 4, 2, p_i47227_1_);
+        this.field_191217_a.addChild(this.field_191222_f);
+        this.field_191218_b = (new ModelRenderer(this)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191218_b.setRotationPoint(0.0F, 0.0F + p_i47227_2_, 0.0F);
+        this.field_191218_b.setTextureOffset(16, 20).addBox(-4.0F, 0.0F, -3.0F, 8, 12, 6, p_i47227_1_);
+        this.field_191218_b.setTextureOffset(0, 38).addBox(-4.0F, 0.0F, -3.0F, 8, 18, 6, p_i47227_1_ + 0.5F);
+        this.field_191219_c = (new ModelRenderer(this)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191219_c.setRotationPoint(0.0F, 0.0F + p_i47227_2_ + 2.0F, 0.0F);
+        this.field_191219_c.setTextureOffset(44, 22).addBox(-8.0F, -2.0F, -2.0F, 4, 8, 4, p_i47227_1_);
+        ModelRenderer modelrenderer = (new ModelRenderer(this, 44, 22)).setTextureSize(p_i47227_3_, p_i47227_4_);
         modelrenderer.mirror = true;
-        modelrenderer.addBox(4.0F, -2.0F, -2.0F, 4, 8, 4, scaleFactor);
-        this.arms.addChild(modelrenderer);
-        this.arms.setTextureOffset(40, 38).addBox(-4.0F, 2.0F, -2.0F, 8, 4, 4, scaleFactor);
-        this.leg0 = (new ModelRenderer(this, 0, 22)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.leg0.setRotationPoint(-2.0F, 12.0F + p_i47227_2_, 0.0F);
-        this.leg0.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, scaleFactor);
-        this.leg1 = (new ModelRenderer(this, 0, 22)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.leg1.mirror = true;
-        this.leg1.setRotationPoint(2.0F, 12.0F + p_i47227_2_, 0.0F);
-        this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, scaleFactor);
-        this.rightArm = (new ModelRenderer(this, 40, 46)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, scaleFactor);
-        this.rightArm.setRotationPoint(-5.0F, 2.0F + p_i47227_2_, 0.0F);
-        this.leftArm = (new ModelRenderer(this, 40, 46)).setTextureSize(textureWidthIn, textureHeightIn);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, scaleFactor);
-        this.leftArm.setRotationPoint(5.0F, 2.0F + p_i47227_2_, 0.0F);
+        modelrenderer.addBox(4.0F, -2.0F, -2.0F, 4, 8, 4, p_i47227_1_);
+        this.field_191219_c.addChild(modelrenderer);
+        this.field_191219_c.setTextureOffset(40, 38).addBox(-4.0F, 2.0F, -2.0F, 8, 4, 4, p_i47227_1_);
+        this.field_191220_d = (new ModelRenderer(this, 0, 22)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191220_d.setRotationPoint(-2.0F, 12.0F + p_i47227_2_, 0.0F);
+        this.field_191220_d.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, p_i47227_1_);
+        this.field_191221_e = (new ModelRenderer(this, 0, 22)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191221_e.mirror = true;
+        this.field_191221_e.setRotationPoint(2.0F, 12.0F + p_i47227_2_, 0.0F);
+        this.field_191221_e.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, p_i47227_1_);
+        this.field_191223_g = (new ModelRenderer(this, 40, 46)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191223_g.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, p_i47227_1_);
+        this.field_191223_g.setRotationPoint(-5.0F, 2.0F + p_i47227_2_, 0.0F);
+        this.field_191224_h = (new ModelRenderer(this, 40, 46)).setTextureSize(p_i47227_3_, p_i47227_4_);
+        this.field_191224_h.mirror = true;
+        this.field_191224_h.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, p_i47227_1_);
+        this.field_191224_h.setRotationPoint(5.0F, 2.0F + p_i47227_2_, 0.0F);
     }
 
     /**
@@ -65,20 +65,20 @@ public class ModelIllager extends ModelBase
     public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
         this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
-        this.head.render(scale);
-        this.body.render(scale);
-        this.leg0.render(scale);
-        this.leg1.render(scale);
+        this.field_191217_a.render(scale);
+        this.field_191218_b.render(scale);
+        this.field_191220_d.render(scale);
+        this.field_191221_e.render(scale);
         AbstractIllager abstractillager = (AbstractIllager)entityIn;
 
-        if (abstractillager.getArmPose() == AbstractIllager.IllagerArmPose.CROSSED)
+        if (abstractillager.func_193077_p() == AbstractIllager.IllagerArmPose.CROSSED)
         {
-            this.arms.render(scale);
+            this.field_191219_c.render(scale);
         }
         else
         {
-            this.rightArm.render(scale);
-            this.leftArm.render(scale);
+            this.field_191223_g.render(scale);
+            this.field_191224_h.render(scale);
         }
     }
 
@@ -89,71 +89,71 @@ public class ModelIllager extends ModelBase
      */
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
     {
-        this.head.rotateAngleY = netHeadYaw * 0.017453292F;
-        this.head.rotateAngleX = headPitch * 0.017453292F;
-        this.arms.rotationPointY = 3.0F;
-        this.arms.rotationPointZ = -1.0F;
-        this.arms.rotateAngleX = -0.75F;
-        this.leg0.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount * 0.5F;
-        this.leg1.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount * 0.5F;
-        this.leg0.rotateAngleY = 0.0F;
-        this.leg1.rotateAngleY = 0.0F;
-        AbstractIllager.IllagerArmPose abstractillager$illagerarmpose = ((AbstractIllager)entityIn).getArmPose();
+        this.field_191217_a.rotateAngleY = netHeadYaw * 0.017453292F;
+        this.field_191217_a.rotateAngleX = headPitch * 0.017453292F;
+        this.field_191219_c.rotationPointY = 3.0F;
+        this.field_191219_c.rotationPointZ = -1.0F;
+        this.field_191219_c.rotateAngleX = -0.75F;
+        this.field_191220_d.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount * 0.5F;
+        this.field_191221_e.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount * 0.5F;
+        this.field_191220_d.rotateAngleY = 0.0F;
+        this.field_191221_e.rotateAngleY = 0.0F;
+        AbstractIllager.IllagerArmPose abstractillager$illagerarmpose = ((AbstractIllager)entityIn).func_193077_p();
 
         if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.ATTACKING)
         {
             float f = MathHelper.sin(this.swingProgress * (float)Math.PI);
             float f1 = MathHelper.sin((1.0F - (1.0F - this.swingProgress) * (1.0F - this.swingProgress)) * (float)Math.PI);
-            this.rightArm.rotateAngleZ = 0.0F;
-            this.leftArm.rotateAngleZ = 0.0F;
-            this.rightArm.rotateAngleY = 0.15707964F;
-            this.leftArm.rotateAngleY = -0.15707964F;
+            this.field_191223_g.rotateAngleZ = 0.0F;
+            this.field_191224_h.rotateAngleZ = 0.0F;
+            this.field_191223_g.rotateAngleY = 0.15707964F;
+            this.field_191224_h.rotateAngleY = -0.15707964F;
 
             if (((EntityLivingBase)entityIn).getPrimaryHand() == EnumHandSide.RIGHT)
             {
-                this.rightArm.rotateAngleX = -1.8849558F + MathHelper.cos(ageInTicks * 0.09F) * 0.15F;
-                this.leftArm.rotateAngleX = -0.0F + MathHelper.cos(ageInTicks * 0.19F) * 0.5F;
-                this.rightArm.rotateAngleX += f * 2.2F - f1 * 0.4F;
-                this.leftArm.rotateAngleX += f * 1.2F - f1 * 0.4F;
+                this.field_191223_g.rotateAngleX = -1.8849558F + MathHelper.cos(ageInTicks * 0.09F) * 0.15F;
+                this.field_191224_h.rotateAngleX = -0.0F + MathHelper.cos(ageInTicks * 0.19F) * 0.5F;
+                this.field_191223_g.rotateAngleX += f * 2.2F - f1 * 0.4F;
+                this.field_191224_h.rotateAngleX += f * 1.2F - f1 * 0.4F;
             }
             else
             {
-                this.rightArm.rotateAngleX = -0.0F + MathHelper.cos(ageInTicks * 0.19F) * 0.5F;
-                this.leftArm.rotateAngleX = -1.8849558F + MathHelper.cos(ageInTicks * 0.09F) * 0.15F;
-                this.rightArm.rotateAngleX += f * 1.2F - f1 * 0.4F;
-                this.leftArm.rotateAngleX += f * 2.2F - f1 * 0.4F;
+                this.field_191223_g.rotateAngleX = -0.0F + MathHelper.cos(ageInTicks * 0.19F) * 0.5F;
+                this.field_191224_h.rotateAngleX = -1.8849558F + MathHelper.cos(ageInTicks * 0.09F) * 0.15F;
+                this.field_191223_g.rotateAngleX += f * 1.2F - f1 * 0.4F;
+                this.field_191224_h.rotateAngleX += f * 2.2F - f1 * 0.4F;
             }
 
-            this.rightArm.rotateAngleZ += MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
-            this.leftArm.rotateAngleZ -= MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
-            this.rightArm.rotateAngleX += MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
-            this.leftArm.rotateAngleX -= MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
+            this.field_191223_g.rotateAngleZ += MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
+            this.field_191224_h.rotateAngleZ -= MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
+            this.field_191223_g.rotateAngleX += MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
+            this.field_191224_h.rotateAngleX -= MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
         }
         else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.SPELLCASTING)
         {
-            this.rightArm.rotationPointZ = 0.0F;
-            this.rightArm.rotationPointX = -5.0F;
-            this.leftArm.rotationPointZ = 0.0F;
-            this.leftArm.rotationPointX = 5.0F;
-            this.rightArm.rotateAngleX = MathHelper.cos(ageInTicks * 0.6662F) * 0.25F;
-            this.leftArm.rotateAngleX = MathHelper.cos(ageInTicks * 0.6662F) * 0.25F;
-            this.rightArm.rotateAngleZ = 2.3561945F;
-            this.leftArm.rotateAngleZ = -2.3561945F;
-            this.rightArm.rotateAngleY = 0.0F;
-            this.leftArm.rotateAngleY = 0.0F;
+            this.field_191223_g.rotationPointZ = 0.0F;
+            this.field_191223_g.rotationPointX = -5.0F;
+            this.field_191224_h.rotationPointZ = 0.0F;
+            this.field_191224_h.rotationPointX = 5.0F;
+            this.field_191223_g.rotateAngleX = MathHelper.cos(ageInTicks * 0.6662F) * 0.25F;
+            this.field_191224_h.rotateAngleX = MathHelper.cos(ageInTicks * 0.6662F) * 0.25F;
+            this.field_191223_g.rotateAngleZ = 2.3561945F;
+            this.field_191224_h.rotateAngleZ = -2.3561945F;
+            this.field_191223_g.rotateAngleY = 0.0F;
+            this.field_191224_h.rotateAngleY = 0.0F;
         }
         else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.BOW_AND_ARROW)
         {
-            this.rightArm.rotateAngleY = -0.1F + this.head.rotateAngleY;
-            this.rightArm.rotateAngleX = -((float)Math.PI / 2F) + this.head.rotateAngleX;
-            this.leftArm.rotateAngleX = -0.9424779F + this.head.rotateAngleX;
-            this.leftArm.rotateAngleY = this.head.rotateAngleY - 0.4F;
-            this.leftArm.rotateAngleZ = ((float)Math.PI / 2F);
+            this.field_191223_g.rotateAngleY = -0.1F + this.field_191217_a.rotateAngleY;
+            this.field_191223_g.rotateAngleX = -((float)Math.PI / 2F) + this.field_191217_a.rotateAngleX;
+            this.field_191224_h.rotateAngleX = -0.9424779F + this.field_191217_a.rotateAngleX;
+            this.field_191224_h.rotateAngleY = this.field_191217_a.rotateAngleY - 0.4F;
+            this.field_191224_h.rotateAngleZ = ((float)Math.PI / 2F);
         }
     }
 
-    public ModelRenderer getArm(EnumHandSide p_191216_1_)
+    public ModelRenderer func_191216_a(EnumHandSide p_191216_1_)
     {
-        return p_191216_1_ == EnumHandSide.LEFT ? this.leftArm : this.rightArm;
+        return p_191216_1_ == EnumHandSide.LEFT ? this.field_191224_h : this.field_191223_g;
     }
 }

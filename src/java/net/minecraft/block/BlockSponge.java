@@ -61,10 +61,10 @@ public class BlockSponge extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         this.tryAbsorb(worldIn, pos, state);
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
     }
 
     protected void tryAbsorb(World worldIn, BlockPos pos, IBlockState state)
@@ -123,10 +123,10 @@ public class BlockSponge extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        items.add(new ItemStack(this, 1, 0));
-        items.add(new ItemStack(this, 1, 1));
+        tab.add(new ItemStack(this, 1, 0));
+        tab.add(new ItemStack(this, 1, 1));
     }
 
     /**
@@ -156,7 +156,7 @@ public class BlockSponge extends Block
         {
             EnumFacing enumfacing = EnumFacing.random(rand);
 
-            if (enumfacing != EnumFacing.UP && !worldIn.getBlockState(pos.offset(enumfacing)).isTopSolid())
+            if (enumfacing != EnumFacing.UP && !worldIn.getBlockState(pos.offset(enumfacing)).isFullyOpaque())
             {
                 double d0 = (double)pos.getX();
                 double d1 = (double)pos.getY();

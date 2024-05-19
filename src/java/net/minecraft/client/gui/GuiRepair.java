@@ -44,7 +44,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener
         Keyboard.enableRepeatEvents(true);
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
-        this.nameField = new GuiTextField(0, this.fontRenderer, i + 62, j + 24, 103, 12);
+        this.nameField = new GuiTextField(0, this.fontRendererObj, i + 62, j + 24, 103, 12);
         this.nameField.setTextColor(-1);
         this.nameField.setDisabledTextColour(-1);
         this.nameField.setEnableBackgroundDrawing(false);
@@ -70,7 +70,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener
     {
         GlStateManager.disableLighting();
         GlStateManager.disableBlend();
-        this.fontRenderer.drawString(I18n.format("container.repair"), 60, 6, 4210752);
+        this.fontRendererObj.drawString(I18n.format("container.repair"), 60, 6, 4210752);
 
         if (this.anvil.maximumCost > 0)
         {
@@ -95,22 +95,22 @@ public class GuiRepair extends GuiContainer implements IContainerListener
             if (flag)
             {
                 int j = -16777216 | (i & 16579836) >> 2 | i & -16777216;
-                int k = this.xSize - 8 - this.fontRenderer.getStringWidth(s);
+                int k = this.xSize - 8 - this.fontRendererObj.getStringWidth(s);
                 int l = 67;
 
-                if (this.fontRenderer.getUnicodeFlag())
+                if (this.fontRendererObj.getUnicodeFlag())
                 {
                     drawRect(k - 3, 65, this.xSize - 7, 77, -16777216);
                     drawRect(k - 2, 66, this.xSize - 8, 76, -12895429);
                 }
                 else
                 {
-                    this.fontRenderer.drawString(s, k, 68, j);
-                    this.fontRenderer.drawString(s, k + 1, 67, j);
-                    this.fontRenderer.drawString(s, k + 1, 68, j);
+                    this.fontRendererObj.drawString(s, k, 68, j);
+                    this.fontRendererObj.drawString(s, k + 1, 67, j);
+                    this.fontRendererObj.drawString(s, k + 1, 68, j);
                 }
 
-                this.fontRenderer.drawString(s, k, 67, i);
+                this.fontRendererObj.drawString(s, k, 67, i);
             }
         }
 
@@ -163,7 +163,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener
     {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.func_191948_b(mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.disableBlend();
         this.nameField.drawTextBox();
@@ -190,7 +190,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener
     /**
      * update the crafting window inventory with the items in the list
      */
-    public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList)
+    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
     {
         this.sendSlotContents(containerToSend, 0, containerToSend.getSlot(0).getStack());
     }
@@ -203,10 +203,10 @@ public class GuiRepair extends GuiContainer implements IContainerListener
     {
         if (slotInd == 0)
         {
-            this.nameField.setText(stack.isEmpty() ? "" : stack.getDisplayName());
-            this.nameField.setEnabled(!stack.isEmpty());
+            this.nameField.setText(stack.func_190926_b() ? "" : stack.getDisplayName());
+            this.nameField.setEnabled(!stack.func_190926_b());
 
-            if (!stack.isEmpty())
+            if (!stack.func_190926_b())
             {
                 this.renameItem();
             }
@@ -218,7 +218,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener
      * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
      * value. Both are truncated to shorts in non-local SMP.
      */
-    public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue)
+    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
     {
     }
 

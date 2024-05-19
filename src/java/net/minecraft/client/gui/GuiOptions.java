@@ -58,7 +58,7 @@ public class GuiOptions extends GuiScreen
             if (this.mc.isSingleplayer() && !this.mc.world.getWorldInfo().isHardcoreModeEnabled())
             {
                 this.difficultyButton.setWidth(this.difficultyButton.getButtonWidth() - 20);
-                this.lockButton = new GuiLockIconButton(109, this.difficultyButton.x + this.difficultyButton.getButtonWidth(), this.difficultyButton.y);
+                this.lockButton = new GuiLockIconButton(109, this.difficultyButton.xPosition + this.difficultyButton.getButtonWidth(), this.difficultyButton.yPosition);
                 this.buttonList.add(this.lockButton);
                 this.lockButton.setLocked(this.mc.world.getWorldInfo().isDifficultyLocked());
                 this.lockButton.enabled = !this.lockButton.isLocked();
@@ -130,7 +130,7 @@ public class GuiOptions extends GuiScreen
         {
             if (button.id < 100 && button instanceof GuiOptionButton)
             {
-                GameSettings.Options gamesettings$options = ((GuiOptionButton)button).getOption();
+                GameSettings.Options gamesettings$options = ((GuiOptionButton)button).returnEnumOptions();
                 this.settings.setOptionValue(gamesettings$options, 1);
                 button.displayString = this.settings.getKeyBinding(GameSettings.Options.getEnumOptions(button.id));
             }
@@ -208,7 +208,7 @@ public class GuiOptions extends GuiScreen
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRenderer, this.title, this.width / 2, 15, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 15, 16777215);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

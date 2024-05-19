@@ -8,47 +8,47 @@ import net.minecraft.util.text.ITextComponent;
 
 public class TutorialToast implements IToast
 {
-    private final TutorialToast.Icons icon;
-    private final String title;
-    private final String subtitle;
-    private IToast.Visibility visibility = IToast.Visibility.SHOW;
-    private long lastDelta;
-    private float displayedProgress;
-    private float currentProgress;
-    private final boolean hasProgressBar;
+    private final TutorialToast.Icons field_193671_c;
+    private final String field_193672_d;
+    private final String field_193673_e;
+    private IToast.Visibility field_193674_f = IToast.Visibility.SHOW;
+    private long field_193675_g;
+    private float field_193676_h;
+    private float field_193677_i;
+    private final boolean field_193678_j;
 
-    public TutorialToast(TutorialToast.Icons iconIn, ITextComponent titleComponent, @Nullable ITextComponent subtitleComponent, boolean drawProgressBar)
+    public TutorialToast(TutorialToast.Icons p_i47487_1_, ITextComponent p_i47487_2_, @Nullable ITextComponent p_i47487_3_, boolean p_i47487_4_)
     {
-        this.icon = iconIn;
-        this.title = titleComponent.getFormattedText();
-        this.subtitle = subtitleComponent == null ? null : subtitleComponent.getFormattedText();
-        this.hasProgressBar = drawProgressBar;
+        this.field_193671_c = p_i47487_1_;
+        this.field_193672_d = p_i47487_2_.getFormattedText();
+        this.field_193673_e = p_i47487_3_ == null ? null : p_i47487_3_.getFormattedText();
+        this.field_193678_j = p_i47487_4_;
     }
 
-    public IToast.Visibility draw(GuiToast toastGui, long delta)
+    public IToast.Visibility func_193653_a(GuiToast p_193653_1_, long p_193653_2_)
     {
-        toastGui.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
+        p_193653_1_.func_192989_b().getTextureManager().bindTexture(field_193654_a);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        toastGui.drawTexturedModalRect(0, 0, 0, 96, 160, 32);
-        this.icon.draw(toastGui, 6, 6);
+        p_193653_1_.drawTexturedModalRect(0, 0, 0, 96, 160, 32);
+        this.field_193671_c.func_193697_a(p_193653_1_, 6, 6);
 
-        if (this.subtitle == null)
+        if (this.field_193673_e == null)
         {
-            toastGui.getMinecraft().fontRenderer.drawString(this.title, 30, 12, -11534256);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193672_d, 30, 12, -11534256);
         }
         else
         {
-            toastGui.getMinecraft().fontRenderer.drawString(this.title, 30, 7, -11534256);
-            toastGui.getMinecraft().fontRenderer.drawString(this.subtitle, 30, 18, -16777216);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193672_d, 30, 7, -11534256);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193673_e, 30, 18, -16777216);
         }
 
-        if (this.hasProgressBar)
+        if (this.field_193678_j)
         {
             Gui.drawRect(3, 28, 157, 29, -1);
-            float f = (float)MathHelper.clampedLerp((double)this.displayedProgress, (double)this.currentProgress, (double)((float)(delta - this.lastDelta) / 100.0F));
+            float f = (float)MathHelper.clampedLerp((double)this.field_193676_h, (double)this.field_193677_i, (double)((float)(p_193653_2_ - this.field_193675_g) / 100.0F));
             int i;
 
-            if (this.currentProgress >= this.displayedProgress)
+            if (this.field_193677_i >= this.field_193676_h)
             {
                 i = -16755456;
             }
@@ -58,21 +58,21 @@ public class TutorialToast implements IToast
             }
 
             Gui.drawRect(3, 28, (int)(3.0F + 154.0F * f), 29, i);
-            this.displayedProgress = f;
-            this.lastDelta = delta;
+            this.field_193676_h = f;
+            this.field_193675_g = p_193653_2_;
         }
 
-        return this.visibility;
+        return this.field_193674_f;
     }
 
-    public void hide()
+    public void func_193670_a()
     {
-        this.visibility = IToast.Visibility.HIDE;
+        this.field_193674_f = IToast.Visibility.HIDE;
     }
 
-    public void setProgress(float progress)
+    public void func_193669_a(float p_193669_1_)
     {
-        this.currentProgress = progress;
+        this.field_193677_i = p_193669_1_;
     }
 
     public static enum Icons
@@ -83,19 +83,19 @@ public class TutorialToast implements IToast
         RECIPE_BOOK(0, 1),
         WOODEN_PLANKS(1, 1);
 
-        private final int column;
-        private final int row;
+        private final int field_193703_f;
+        private final int field_193704_g;
 
-        private Icons(int columnIn, int rowIn)
+        private Icons(int p_i47576_3_, int p_i47576_4_)
         {
-            this.column = columnIn;
-            this.row = rowIn;
+            this.field_193703_f = p_i47576_3_;
+            this.field_193704_g = p_i47576_4_;
         }
 
-        public void draw(Gui guiIn, int x, int y)
+        public void func_193697_a(Gui p_193697_1_, int p_193697_2_, int p_193697_3_)
         {
             GlStateManager.enableBlend();
-            guiIn.drawTexturedModalRect(x, y, 176 + this.column * 20, this.row * 20, 20, 20);
+            p_193697_1_.drawTexturedModalRect(p_193697_2_, p_193697_3_, 176 + this.field_193703_f * 20, this.field_193704_g * 20, 20, 20);
             GlStateManager.enableBlend();
         }
     }

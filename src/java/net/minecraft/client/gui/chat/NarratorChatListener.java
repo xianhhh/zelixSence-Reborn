@@ -11,66 +11,59 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 public class NarratorChatListener implements IChatListener
 {
-    public static final NarratorChatListener INSTANCE = new NarratorChatListener();
-    private final Narrator narrator = Narrator.getNarrator();
+    public static final NarratorChatListener field_193643_a = new NarratorChatListener();
+    private final Narrator field_192580_a = Narrator.getNarrator();
 
-    /**
-     * Called whenever this listener receives a chat message, if this listener is registered to the given type in {@link
-     * net.minecraft.client.gui.GuiIngame#chatListeners chatListeners}
-     *  
-     * @param chatTypeIn The type of chat message
-     * @param message The chat message.
-     */
-    public void say(ChatType chatTypeIn, ITextComponent message)
+    public void func_192576_a(ChatType p_192576_1_, ITextComponent p_192576_2_)
     {
-        int i = Minecraft.getMinecraft().gameSettings.narrator;
+        int i = Minecraft.getMinecraft().gameSettings.field_192571_R;
 
-        if (i != 0 && this.narrator.active())
+        if (i != 0 && this.field_192580_a.active())
         {
-            if (i == 1 || i == 2 && chatTypeIn == ChatType.CHAT || i == 3 && chatTypeIn == ChatType.SYSTEM)
+            if (i == 1 || i == 2 && p_192576_1_ == ChatType.CHAT || i == 3 && p_192576_1_ == ChatType.SYSTEM)
             {
-                if (message instanceof TextComponentTranslation && "chat.type.text".equals(((TextComponentTranslation)message).getKey()))
+                if (p_192576_2_ instanceof TextComponentTranslation && "chat.type.text".equals(((TextComponentTranslation)p_192576_2_).getKey()))
                 {
-                    this.narrator.say((new TextComponentTranslation("chat.type.text.narrate", ((TextComponentTranslation)message).getFormatArgs())).getUnformattedText());
+                    this.field_192580_a.say((new TextComponentTranslation("chat.type.text.narrate", ((TextComponentTranslation)p_192576_2_).getFormatArgs())).getUnformattedText());
                 }
                 else
                 {
-                    this.narrator.say(message.getUnformattedText());
+                    this.field_192580_a.say(p_192576_2_.getUnformattedText());
                 }
             }
         }
     }
 
-    public void announceMode(int p_193641_1_)
+    public void func_193641_a(int p_193641_1_)
     {
-        this.narrator.clear();
-        this.narrator.say((new TextComponentTranslation("options.narrator", new Object[0])).getUnformattedText() + " : " + (new TextComponentTranslation(GameSettings.NARRATOR_MODES[p_193641_1_], new Object[0])).getUnformattedText());
-        GuiToast guitoast = Minecraft.getMinecraft().getToastGui();
+        this.field_192580_a.clear();
+        this.field_192580_a.say((new TextComponentTranslation("options.narrator", new Object[0])).getUnformattedText() + " : " + (new TextComponentTranslation(GameSettings.field_193632_b[p_193641_1_], new Object[0])).getUnformattedText());
+        GuiToast guitoast = Minecraft.getMinecraft().func_193033_an();
 
-        if (this.narrator.active())
+        if (this.field_192580_a.active())
         {
             if (p_193641_1_ == 0)
             {
-                SystemToast.addOrUpdate(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.disabled", new Object[0]), (ITextComponent)null);
+                SystemToast.func_193657_a(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.disabled", new Object[0]), (ITextComponent)null);
             }
             else
             {
-                SystemToast.addOrUpdate(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.enabled", new Object[0]), new TextComponentTranslation(GameSettings.NARRATOR_MODES[p_193641_1_], new Object[0]));
+                SystemToast.func_193657_a(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.enabled", new Object[0]), new TextComponentTranslation(GameSettings.field_193632_b[p_193641_1_], new Object[0]));
             }
         }
         else
         {
-            SystemToast.addOrUpdate(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.disabled", new Object[0]), new TextComponentTranslation("options.narrator.notavailable", new Object[0]));
+            SystemToast.func_193657_a(guitoast, SystemToast.Type.NARRATOR_TOGGLE, new TextComponentTranslation("narrator.toast.disabled", new Object[0]), new TextComponentTranslation("options.narrator.notavailable", new Object[0]));
         }
     }
 
-    public boolean isActive()
+    public boolean func_193640_a()
     {
-        return this.narrator.active();
+        return this.field_192580_a.active();
     }
 
-    public void clear()
+    public void func_193642_b()
     {
-        this.narrator.clear();
+        this.field_192580_a.clear();
     }
 }

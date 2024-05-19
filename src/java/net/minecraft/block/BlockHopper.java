@@ -73,7 +73,7 @@ public class BlockHopper extends BlockContainer
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         EnumFacing enumfacing = facing.getOpposite();
 
@@ -106,15 +106,15 @@ public class BlockHopper extends BlockContainer
 
             if (tileentity instanceof TileEntityHopper)
             {
-                ((TileEntityHopper)tileentity).setCustomName(stack.getDisplayName());
+                ((TileEntityHopper)tileentity).func_190575_a(stack.getDisplayName());
             }
         }
     }
 
     /**
-     * Determines if the block is solid enough on the top side to support other blocks, like redstone components.
+     * Checks if an IBlockState represents a block that is opaque and a full cube.
      */
-    public boolean isTopSolid(IBlockState state)
+    public boolean isFullyOpaque(IBlockState state)
     {
         return true;
     }
@@ -127,10 +127,7 @@ public class BlockHopper extends BlockContainer
         this.updateState(worldIn, pos, state);
     }
 
-    /**
-     * Called when the block is right clicked by a player.
-     */
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -155,7 +152,7 @@ public class BlockHopper extends BlockContainer
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         this.updateState(worldIn, pos, state);
     }
@@ -289,7 +286,7 @@ public class BlockHopper extends BlockContainer
         return new BlockStateContainer(this, new IProperty[] {FACING, ENABLED});
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return p_193383_4_ == EnumFacing.UP ? BlockFaceShape.BOWL : BlockFaceShape.UNDEFINED;
     }

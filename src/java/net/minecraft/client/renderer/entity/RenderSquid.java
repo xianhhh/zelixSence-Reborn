@@ -22,12 +22,12 @@ public class RenderSquid extends RenderLiving<EntitySquid>
         return SQUID_TEXTURES;
     }
 
-    protected void applyRotations(EntitySquid entityLiving, float p_77043_2_, float rotationYaw, float partialTicks)
+    protected void rotateCorpse(EntitySquid entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks)
     {
         float f = entityLiving.prevSquidPitch + (entityLiving.squidPitch - entityLiving.prevSquidPitch) * partialTicks;
         float f1 = entityLiving.prevSquidYaw + (entityLiving.squidYaw - entityLiving.prevSquidYaw) * partialTicks;
         GlStateManager.translate(0.0F, 0.5F, 0.0F);
-        GlStateManager.rotate(180.0F - rotationYaw, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(f, 1.0F, 0.0F, 0.0F);
         GlStateManager.rotate(f1, 0.0F, 1.0F, 0.0F);
         GlStateManager.translate(0.0F, -1.2F, 0.0F);

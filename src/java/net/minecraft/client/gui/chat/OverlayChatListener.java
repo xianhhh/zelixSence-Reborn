@@ -6,22 +6,15 @@ import net.minecraft.util.text.ITextComponent;
 
 public class OverlayChatListener implements IChatListener
 {
-    private final Minecraft mc;
+    private final Minecraft field_192577_a;
 
-    public OverlayChatListener(Minecraft minecraftIn)
+    public OverlayChatListener(Minecraft p_i47394_1_)
     {
-        this.mc = minecraftIn;
+        this.field_192577_a = p_i47394_1_;
     }
 
-    /**
-     * Called whenever this listener receives a chat message, if this listener is registered to the given type in {@link
-     * net.minecraft.client.gui.GuiIngame#chatListeners chatListeners}
-     *  
-     * @param chatTypeIn The type of chat message
-     * @param message The chat message.
-     */
-    public void say(ChatType chatTypeIn, ITextComponent message)
+    public void func_192576_a(ChatType p_192576_1_, ITextComponent p_192576_2_)
     {
-        this.mc.ingameGUI.setOverlayMessage(message, false);
+        this.field_192577_a.ingameGUI.setRecordPlaying(p_192576_2_, false);
     }
 }

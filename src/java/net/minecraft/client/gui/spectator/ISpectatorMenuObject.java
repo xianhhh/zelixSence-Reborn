@@ -8,7 +8,7 @@ public interface ISpectatorMenuObject
 
     ITextComponent getSpectatorName();
 
-    void renderIcon(float brightness, int alpha);
+    void renderIcon(float p_178663_1_, int alpha);
 
     boolean isEnabled();
 }

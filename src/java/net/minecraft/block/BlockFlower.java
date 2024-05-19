@@ -29,7 +29,7 @@ public abstract class BlockFlower extends BlockBush
 
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        return super.getBoundingBox(state, source, pos).offset(state.getOffset(source, pos));
+        return super.getBoundingBox(state, source, pos).func_191194_a(state.func_191059_e(source, pos));
     }
 
     /**
@@ -44,11 +44,11 @@ public abstract class BlockFlower extends BlockBush
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockFlower.EnumFlowerType blockflower$enumflowertype : BlockFlower.EnumFlowerType.getTypes(this.getBlockType()))
         {
-            items.add(new ItemStack(this, 1, blockflower$enumflowertype.getMeta()));
+            tab.add(new ItemStack(this, 1, blockflower$enumflowertype.getMeta()));
         }
     }
 

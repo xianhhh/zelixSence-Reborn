@@ -178,7 +178,7 @@ public abstract class BlockLeaves extends Block
 
     public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
-        if (worldIn.isRainingAt(pos.up()) && !worldIn.getBlockState(pos.down()).isTopSolid() && rand.nextInt(15) == 1)
+        if (worldIn.isRainingAt(pos.up()) && !worldIn.getBlockState(pos.down()).isFullyOpaque() && rand.nextInt(15) == 1)
         {
             double d0 = (double)((float)pos.getX() + rand.nextFloat());
             double d1 = (double)pos.getY() - 0.05D;
@@ -280,7 +280,7 @@ public abstract class BlockLeaves extends Block
         return this.leavesFancy ? BlockRenderLayer.CUTOUT_MIPPED : BlockRenderLayer.SOLID;
     }
 
-    public boolean causesSuffocation(IBlockState state)
+    public boolean causesSuffocation(IBlockState p_176214_1_)
     {
         return false;
     }

@@ -5,5 +5,5 @@ import net.minecraft.item.crafting.IRecipe;
 
 public interface IRecipeUpdateListener
 {
-    void recipesShown(List<IRecipe> recipes);
+    void func_193001_a(List<IRecipe> p_193001_1_);
 }

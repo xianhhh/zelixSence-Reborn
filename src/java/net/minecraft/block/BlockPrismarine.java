@@ -39,7 +39,7 @@ public class BlockPrismarine extends Block
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
         return state.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
     }
@@ -77,11 +77,11 @@ public class BlockPrismarine extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        items.add(new ItemStack(this, 1, ROUGH_META));
-        items.add(new ItemStack(this, 1, BRICKS_META));
-        items.add(new ItemStack(this, 1, DARK_META));
+        tab.add(new ItemStack(this, 1, ROUGH_META));
+        tab.add(new ItemStack(this, 1, BRICKS_META));
+        tab.add(new ItemStack(this, 1, DARK_META));
     }
 
     public static enum EnumType implements IStringSerializable

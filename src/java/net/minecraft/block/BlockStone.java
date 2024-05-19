@@ -39,7 +39,7 @@ public class BlockStone extends Block
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
         return ((BlockStone.EnumType)state.getValue(VARIANT)).getMapColor();
     }
@@ -64,11 +64,11 @@ public class BlockStone extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockStone.EnumType blockstone$enumtype : BlockStone.EnumType.values())
         {
-            items.add(new ItemStack(this, 1, blockstone$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blockstone$enumtype.getMetadata()));
         }
     }
 
@@ -108,7 +108,7 @@ public class BlockStone extends Block
         private final String name;
         private final String unlocalizedName;
         private final MapColor mapColor;
-        private final boolean isNatural;
+        private final boolean field_190913_m;
 
         private EnumType(int p_i46383_3_, MapColor p_i46383_4_, String p_i46383_5_, boolean p_i46383_6_)
         {
@@ -121,7 +121,7 @@ public class BlockStone extends Block
             this.name = p_i46384_5_;
             this.unlocalizedName = p_i46384_6_;
             this.mapColor = p_i46384_4_;
-            this.isNatural = p_i46384_7_;
+            this.field_190913_m = p_i46384_7_;
         }
 
         public int getMetadata()
@@ -159,9 +159,9 @@ public class BlockStone extends Block
             return this.unlocalizedName;
         }
 
-        public boolean isNatural()
+        public boolean func_190912_e()
         {
-            return this.isNatural;
+            return this.field_190913_m;
         }
 
         static {

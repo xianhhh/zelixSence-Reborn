@@ -37,11 +37,11 @@ public class BlockStoneBrick extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockStoneBrick.EnumType blockstonebrick$enumtype : BlockStoneBrick.EnumType.values())
         {
-            items.add(new ItemStack(this, 1, blockstonebrick$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blockstonebrick$enumtype.getMetadata()));
         }
     }
 

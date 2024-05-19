@@ -16,114 +16,111 @@ import net.minecraft.util.ResourceLocation;
 
 public class UsedTotemTrigger implements ICriterionTrigger<UsedTotemTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("used_totem");
-    private final Map<PlayerAdvancements, UsedTotemTrigger.Listeners> listeners = Maps.<PlayerAdvancements, UsedTotemTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_193188_a = new ResourceLocation("used_totem");
+    private final Map<PlayerAdvancements, UsedTotemTrigger.Listeners> field_193189_b = Maps.<PlayerAdvancements, UsedTotemTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_193188_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<UsedTotemTrigger.Instance> p_192165_2_)
     {
-        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.field_193189_b.get(p_192165_1_);
 
         if (usedtotemtrigger$listeners == null)
         {
-            usedtotemtrigger$listeners = new UsedTotemTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, usedtotemtrigger$listeners);
+            usedtotemtrigger$listeners = new UsedTotemTrigger.Listeners(p_192165_1_);
+            this.field_193189_b.put(p_192165_1_, usedtotemtrigger$listeners);
         }
 
-        usedtotemtrigger$listeners.add(listener);
+        usedtotemtrigger$listeners.func_193508_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<UsedTotemTrigger.Instance> p_192164_2_)
     {
-        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.field_193189_b.get(p_192164_1_);
 
         if (usedtotemtrigger$listeners != null)
         {
-            usedtotemtrigger$listeners.remove(listener);
+            usedtotemtrigger$listeners.func_193506_b(p_192164_2_);
 
-            if (usedtotemtrigger$listeners.isEmpty())
+            if (usedtotemtrigger$listeners.func_193507_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_193189_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_193189_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public UsedTotemTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public UsedTotemTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
+        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
         return new UsedTotemTrigger.Instance(itempredicate);
     }
 
-    public void trigger(EntityPlayerMP player, ItemStack item)
+    public void func_193187_a(EntityPlayerMP p_193187_1_, ItemStack p_193187_2_)
     {
-        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.listeners.get(player.getAdvancements());
+        UsedTotemTrigger.Listeners usedtotemtrigger$listeners = this.field_193189_b.get(p_193187_1_.func_192039_O());
 
         if (usedtotemtrigger$listeners != null)
         {
-            usedtotemtrigger$listeners.trigger(item);
+            usedtotemtrigger$listeners.func_193509_a(p_193187_2_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final ItemPredicate item;
+        private final ItemPredicate field_193219_a;
 
-        public Instance(ItemPredicate item)
+        public Instance(ItemPredicate p_i47564_1_)
         {
-            super(UsedTotemTrigger.ID);
-            this.item = item;
+            super(UsedTotemTrigger.field_193188_a);
+            this.field_193219_a = p_i47564_1_;
         }
 
-        public boolean test(ItemStack item)
+        public boolean func_193218_a(ItemStack p_193218_1_)
         {
-            return this.item.test(item);
+            return this.field_193219_a.func_192493_a(p_193218_1_);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<UsedTotemTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<UsedTotemTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_193510_a;
+        private final Set<ICriterionTrigger.Listener<UsedTotemTrigger.Instance>> field_193511_b = Sets.<ICriterionTrigger.Listener<UsedTotemTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47565_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_193510_a = p_i47565_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_193507_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_193511_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener)
+        public void func_193508_a(ICriterionTrigger.Listener<UsedTotemTrigger.Instance> p_193508_1_)
         {
-            this.listeners.add(listener);
+            this.field_193511_b.add(p_193508_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener)
+        public void func_193506_b(ICriterionTrigger.Listener<UsedTotemTrigger.Instance> p_193506_1_)
         {
-            this.listeners.remove(listener);
+            this.field_193511_b.remove(p_193506_1_);
         }
 
-        public void trigger(ItemStack item)
+        public void func_193509_a(ItemStack p_193509_1_)
         {
             List<ICriterionTrigger.Listener<UsedTotemTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener : this.field_193511_b)
             {
-                if (((UsedTotemTrigger.Instance)listener.getCriterionInstance()).test(item))
+                if (((UsedTotemTrigger.Instance)listener.func_192158_a()).func_193218_a(p_193509_1_))
                 {
                     if (list == null)
                     {
@@ -138,7 +135,7 @@ public class UsedTotemTrigger implements ICriterionTrigger<UsedTotemTrigger.Inst
             {
                 for (ICriterionTrigger.Listener<UsedTotemTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_193510_a);
                 }
             }
         }

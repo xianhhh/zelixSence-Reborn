@@ -55,7 +55,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
         return new TextComponentTranslation("spectatorMenu.team_teleport", new Object[0]);
     }
 
-    public void renderIcon(float brightness, int alpha)
+    public void renderIcon(float p_178663_1_, int alpha)
     {
         Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
         Gui.drawModalRectWithCustomSizedTexture(0, 0, 16.0F, 0.0F, 16, 16, 256.0F, 256.0F);
@@ -80,12 +80,12 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
         private final ResourceLocation location;
         private final List<NetworkPlayerInfo> players;
 
-        public TeamSelectionObject(ScorePlayerTeam teamIn)
+        public TeamSelectionObject(ScorePlayerTeam p_i45492_2_)
         {
-            this.team = teamIn;
+            this.team = p_i45492_2_;
             this.players = Lists.<NetworkPlayerInfo>newArrayList();
 
-            for (String s : teamIn.getMembershipCollection())
+            for (String s : p_i45492_2_.getMembershipCollection())
             {
                 NetworkPlayerInfo networkplayerinfo = Minecraft.getMinecraft().getConnection().getPlayerInfo(s);
 
@@ -114,17 +114,17 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
 
         public ITextComponent getSpectatorName()
         {
-            return new TextComponentString(this.team.getDisplayName());
+            return new TextComponentString(this.team.getTeamName());
         }
 
-        public void renderIcon(float brightness, int alpha)
+        public void renderIcon(float p_178663_1_, int alpha)
         {
             int i = -1;
-            String s = FontRenderer.getFormatFromString(this.team.getPrefix());
+            String s = FontRenderer.getFormatFromString(this.team.getColorPrefix());
 
             if (s.length() >= 2)
             {
-                i = Minecraft.getMinecraft().fontRenderer.getColorCode(s.charAt(1));
+                i = Minecraft.getMinecraft().fontRendererObj.getColorCode(s.charAt(1));
             }
 
             if (i >= 0)
@@ -132,11 +132,11 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
                 float f = (float)(i >> 16 & 255) / 255.0F;
                 float f1 = (float)(i >> 8 & 255) / 255.0F;
                 float f2 = (float)(i & 255) / 255.0F;
-                Gui.drawRect(1, 1, 15, 15, MathHelper.rgb(f * brightness, f1 * brightness, f2 * brightness) | alpha << 24);
+                Gui.drawRect(1, 1, 15, 15, MathHelper.rgb(f * p_178663_1_, f1 * p_178663_1_, f2 * p_178663_1_) | alpha << 24);
             }
 
             Minecraft.getMinecraft().getTextureManager().bindTexture(this.location);
-            GlStateManager.color(brightness, brightness, brightness, (float)alpha / 255.0F);
+            GlStateManager.color(p_178663_1_, p_178663_1_, p_178663_1_, (float)alpha / 255.0F);
             Gui.drawScaledCustomSizeModalRect(2, 2, 8.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
             Gui.drawScaledCustomSizeModalRect(2, 2, 40.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
         }

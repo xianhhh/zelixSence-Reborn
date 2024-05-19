@@ -5,25 +5,25 @@ import net.minecraft.util.math.AxisAlignedBB;
 public class Frustum implements ICamera
 {
     private final ClippingHelper clippingHelper;
-    private double x;
-    private double y;
-    private double z;
+    private double xPosition;
+    private double yPosition;
+    private double zPosition;
 
     public Frustum()
     {
         this(ClippingHelperImpl.getInstance());
     }
 
-    public Frustum(ClippingHelper clippingHelperIn)
+    public Frustum(ClippingHelper p_i46196_1_)
     {
-        this.clippingHelper = clippingHelperIn;
+        this.clippingHelper = p_i46196_1_;
     }
 
-    public void setPosition(double xIn, double yIn, double zIn)
+    public void setPosition(double p_78547_1_, double p_78547_3_, double p_78547_5_)
     {
-        this.x = xIn;
-        this.y = yIn;
-        this.z = zIn;
+        this.xPosition = p_78547_1_;
+        this.yPosition = p_78547_3_;
+        this.zPosition = p_78547_5_;
     }
 
     /**
@@ -31,7 +31,7 @@ public class Frustum implements ICamera
      */
     public boolean isBoxInFrustum(double p_78548_1_, double p_78548_3_, double p_78548_5_, double p_78548_7_, double p_78548_9_, double p_78548_11_)
     {
-        return this.clippingHelper.isBoxInFrustum(p_78548_1_ - this.x, p_78548_3_ - this.y, p_78548_5_ - this.z, p_78548_7_ - this.x, p_78548_9_ - this.y, p_78548_11_ - this.z);
+        return this.clippingHelper.isBoxInFrustum(p_78548_1_ - this.xPosition, p_78548_3_ - this.yPosition, p_78548_5_ - this.zPosition, p_78548_7_ - this.xPosition, p_78548_9_ - this.yPosition, p_78548_11_ - this.zPosition);
     }
 
     /**

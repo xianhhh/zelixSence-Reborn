@@ -15,16 +15,16 @@ import org.apache.logging.log4j.Logger;
 public class GuiListWorldSelection extends GuiListExtended
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final GuiWorldSelection worldSelection;
+    private final GuiWorldSelection worldSelectionObj;
     private final List<GuiListWorldSelectionEntry> entries = Lists.<GuiListWorldSelectionEntry>newArrayList();
 
     /** Index to the currently selected world */
     private int selectedIdx = -1;
 
-    public GuiListWorldSelection(GuiWorldSelection p_i46590_1_, Minecraft clientIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
+    public GuiListWorldSelection(GuiWorldSelection p_i46590_1_, Minecraft clientIn, int p_i46590_3_, int p_i46590_4_, int p_i46590_5_, int p_i46590_6_, int p_i46590_7_)
     {
-        super(clientIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
-        this.worldSelection = p_i46590_1_;
+        super(clientIn, p_i46590_3_, p_i46590_4_, p_i46590_5_, p_i46590_6_, p_i46590_7_);
+        this.worldSelectionObj = p_i46590_1_;
         this.refreshList();
     }
 
@@ -81,7 +81,7 @@ public class GuiListWorldSelection extends GuiListExtended
     public void selectWorld(int idx)
     {
         this.selectedIdx = idx;
-        this.worldSelection.selectWorld(this.getSelectedWorld());
+        this.worldSelectionObj.selectWorld(this.getSelectedWorld());
     }
 
     /**
@@ -100,6 +100,6 @@ public class GuiListWorldSelection extends GuiListExtended
 
     public GuiWorldSelection getGuiWorldSelection()
     {
-        return this.worldSelection;
+        return this.worldSelectionObj;
     }
 }

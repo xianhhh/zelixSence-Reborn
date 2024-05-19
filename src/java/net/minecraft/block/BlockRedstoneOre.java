@@ -46,7 +46,7 @@ public class BlockRedstoneOre extends Block
     }
 
     /**
-     * Called when the given entity walks on this Block
+     * Triggered whenever an entity collides with this block (enters into the block)
      */
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
@@ -54,13 +54,10 @@ public class BlockRedstoneOre extends Block
         super.onEntityWalk(worldIn, pos, entityIn);
     }
 
-    /**
-     * Called when the block is right clicked by a player.
-     */
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         this.activate(worldIn, pos);
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY);
     }
 
     private void activate(World worldIn, BlockPos pos)

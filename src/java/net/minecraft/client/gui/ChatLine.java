@@ -13,11 +13,11 @@ public class ChatLine
      */
     private final int chatLineID;
 
-    public ChatLine(int updateCounterCreatedIn, ITextComponent lineStringIn, int chatLineIDIn)
+    public ChatLine(int p_i45000_1_, ITextComponent p_i45000_2_, int p_i45000_3_)
     {
-        this.lineString = lineStringIn;
-        this.updateCounterCreated = updateCounterCreatedIn;
-        this.chatLineID = chatLineIDIn;
+        this.lineString = p_i45000_2_;
+        this.updateCounterCreated = p_i45000_1_;
+        this.chatLineID = p_i45000_3_;
     }
 
     public ITextComponent getChatComponent()

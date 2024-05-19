@@ -129,18 +129,27 @@ public class ModelPlayer extends ModelBiped
         copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
         copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
         copyModelAngles(this.bipedBody, this.bipedBodyWear);
+
+        if (entityIn.isSneaking())
+        {
+            this.bipedCape.rotationPointY = 2.0F;
+        }
+        else
+        {
+            this.bipedCape.rotationPointY = 0.0F;
+        }
     }
 
-    public void setVisible(boolean visible)
+    public void setInvisible(boolean invisible)
     {
-        super.setVisible(visible);
-        this.bipedLeftArmwear.showModel = visible;
-        this.bipedRightArmwear.showModel = visible;
-        this.bipedLeftLegwear.showModel = visible;
-        this.bipedRightLegwear.showModel = visible;
-        this.bipedBodyWear.showModel = visible;
-        this.bipedCape.showModel = visible;
-        this.bipedDeadmau5Head.showModel = visible;
+        super.setInvisible(invisible);
+        this.bipedLeftArmwear.showModel = invisible;
+        this.bipedRightArmwear.showModel = invisible;
+        this.bipedLeftLegwear.showModel = invisible;
+        this.bipedRightLegwear.showModel = invisible;
+        this.bipedBodyWear.showModel = invisible;
+        this.bipedCape.showModel = invisible;
+        this.bipedDeadmau5Head.showModel = invisible;
     }
 
     public void postRenderArm(float scale, EnumHandSide side)

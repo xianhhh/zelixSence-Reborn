@@ -60,7 +60,7 @@ public class BlockSlime extends BlockBreakable
     }
 
     /**
-     * Called when the given entity walks on this Block
+     * Triggered whenever an entity collides with this block (enters into the block)
      */
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {

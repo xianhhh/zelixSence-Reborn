@@ -50,7 +50,7 @@ public class GuiEnchantment extends GuiContainer
     public float flipA;
     public float open;
     public float oOpen;
-    private ItemStack last = ItemStack.EMPTY;
+    private ItemStack last = ItemStack.field_190927_a;
     private final IWorldNameable nameable;
 
     public GuiEnchantment(InventoryPlayer inventory, World worldIn, IWorldNameable nameable)
@@ -66,8 +66,8 @@ public class GuiEnchantment extends GuiContainer
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        this.fontRenderer.drawString(this.nameable.getDisplayName().getUnformattedText(), 12, 5, 4210752);
-        this.fontRenderer.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
+        this.fontRendererObj.drawString(this.nameable.getDisplayName().getUnformattedText(), 12, 5, 4210752);
+        this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
     /**
@@ -188,8 +188,8 @@ public class GuiEnchantment extends GuiContainer
             else
             {
                 String s = "" + k1;
-                int l1 = 86 - this.fontRenderer.getStringWidth(s);
-                String s1 = EnchantmentNameParts.getInstance().generateNewRandomName(this.fontRenderer, l1);
+                int l1 = 86 - this.fontRendererObj.getStringWidth(s);
+                String s1 = EnchantmentNameParts.getInstance().generateNewRandomName(this.fontRendererObj, l1);
                 FontRenderer fontrenderer = this.mc.standardGalacticFontRenderer;
                 int i2 = 6839882;
 
@@ -220,7 +220,7 @@ public class GuiEnchantment extends GuiContainer
                     i2 = 8453920;
                 }
 
-                fontrenderer = this.mc.fontRenderer;
+                fontrenderer = this.mc.fontRendererObj;
                 fontrenderer.drawStringWithShadow(s, (float)(j1 + 86 - fontrenderer.getStringWidth(s)), (float)(j + 16 + 19 * l + 7), i2);
             }
         }
@@ -231,10 +231,10 @@ public class GuiEnchantment extends GuiContainer
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        partialTicks = this.mc.getTickLength();
+        partialTicks = this.mc.func_193989_ak();
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.func_191948_b(mouseX, mouseY);
         boolean flag = this.mc.player.capabilities.isCreativeMode;
         int i = this.container.getLapisAmount();
 

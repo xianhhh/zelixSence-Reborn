@@ -31,7 +31,7 @@ public class ModelBlockDefinition
 
     public static ModelBlockDefinition parseFromReader(Reader reader)
     {
-        return (ModelBlockDefinition)JsonUtils.fromJson(GSON, reader, ModelBlockDefinition.class);
+        return (ModelBlockDefinition)JsonUtils.func_193839_a(GSON, reader, ModelBlockDefinition.class);
     }
 
     public ModelBlockDefinition(Map<String, VariantList> variants, Multipart multipartIn)

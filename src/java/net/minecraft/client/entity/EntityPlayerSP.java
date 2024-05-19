@@ -83,7 +83,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
 {
     public final NetHandlerPlayClient connection;
     private final StatisticsManager statWriter;
-    private final RecipeBook recipeBook;
+    private final RecipeBook field_192036_cb;
     private int permissionLevel = 0;
 
     /**
@@ -166,7 +166,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
         super(p_i47378_2_, p_i47378_3_.getGameProfile());
         this.connection = p_i47378_3_;
         this.statWriter = p_i47378_4_;
-        this.recipeBook = p_i47378_5_;
+        this.field_192036_cb = p_i47378_5_;
         this.mc = p_i47378_1_;
         this.dimension = 0;
     }
@@ -210,9 +210,6 @@ public class EntityPlayerSP extends AbstractClientPlayer
         }
     }
 
-    /**
-     * Dismounts this entity from the entity it is riding.
-     */
     public void dismountRidingEntity()
     {
         super.dismountRidingEntity();
@@ -239,7 +236,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
             if (this.isRiding())
             {
                 this.connection.sendPacket(new CPacketPlayer.Rotation(this.rotationYaw, this.rotationPitch, this.onGround));
-                this.connection.sendPacket(new CPacketInput(this.moveStrafing, this.moveForward, this.movementInput.jump, this.movementInput.sneak));
+                this.connection.sendPacket(new CPacketInput(this.moveStrafing, this.field_191988_bg, this.movementInput.jump, this.movementInput.sneak));
                 Entity entity = this.getLowestRidingEntity();
 
                 if (entity != this && entity.canPassengerSteer())
@@ -359,7 +356,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
 
     protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_)
     {
-        return ItemStack.EMPTY;
+        return ItemStack.field_190927_a;
     }
 
     /**
@@ -404,7 +401,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
 
     public void closeScreenAndDropStack()
     {
-        this.inventory.setItemStack(ItemStack.EMPTY);
+        this.inventory.setItemStack(ItemStack.field_190927_a);
         super.closeScreen();
         this.mc.displayGuiScreen((GuiScreen)null);
     }
@@ -432,7 +429,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
                 this.lastDamage = f;
                 this.setHealth(this.getHealth());
                 this.hurtResistantTime = this.maxHurtResistantTime;
-                this.damageEntity(DamageSource.GENERIC, f);
+                this.damageEntity(DamageSource.generic, f);
                 this.maxHurtTime = 10;
                 this.hurtTime = this.maxHurtTime;
             }
@@ -508,16 +505,16 @@ public class EntityPlayerSP extends AbstractClientPlayer
         return this.statWriter;
     }
 
-    public RecipeBook getRecipeBook()
+    public RecipeBook func_192035_E()
     {
-        return this.recipeBook;
+        return this.field_192036_cb;
     }
 
-    public void removeRecipeHighlight(IRecipe p_193103_1_)
+    public void func_193103_a(IRecipe p_193103_1_)
     {
-        if (this.recipeBook.isRecipeUnseen(p_193103_1_))
+        if (this.field_192036_cb.func_194076_e(p_193103_1_))
         {
-            this.recipeBook.setRecipeSeen(p_193103_1_);
+            this.field_192036_cb.func_194074_f(p_193103_1_);
             this.connection.sendPacket(new CPacketRecipeInfo(p_193103_1_));
         }
     }
@@ -532,11 +529,11 @@ public class EntityPlayerSP extends AbstractClientPlayer
         this.permissionLevel = p_184839_1_;
     }
 
-    public void sendStatusMessage(ITextComponent chatComponent, boolean actionBar)
+    public void addChatComponentMessage(ITextComponent chatComponent, boolean p_146105_2_)
     {
-        if (actionBar)
+        if (p_146105_2_)
         {
-            this.mc.ingameGUI.setOverlayMessage(chatComponent, false);
+            this.mc.ingameGUI.setRecordPlaying(chatComponent, false);
         }
         else
         {
@@ -642,7 +639,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
     /**
      * Send a chat message to the CommandSender
      */
-    public void sendMessage(ITextComponent component)
+    public void addChatMessage(ITextComponent component)
     {
         this.mc.ingameGUI.getChatGUI().printChatMessage(component);
     }
@@ -650,14 +647,11 @@ public class EntityPlayerSP extends AbstractClientPlayer
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    public boolean canUseCommand(int permLevel, String commandName)
+    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
     {
         return permLevel <= this.getPermissionLevel();
     }
 
-    /**
-     * Handler for {@link World#setEntityState}
-     */
     public void handleStatusUpdate(byte id)
     {
         if (id >= 24 && id <= 28)
@@ -696,7 +690,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
     {
         ItemStack itemstack = this.getHeldItem(hand);
 
-        if (!itemstack.isEmpty() && !this.isHandActive())
+        if (!itemstack.func_190926_b() && !this.isHandActive())
         {
             super.setActiveHand(hand);
             this.handActive = true;
@@ -887,7 +881,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
         if (this.isCurrentViewEntity())
         {
             this.moveStrafing = this.movementInput.moveStrafe;
-            this.moveForward = this.movementInput.moveForward;
+            this.field_191988_bg = this.movementInput.field_192832_b;
             this.isJumping = this.movementInput.jump;
             this.prevRenderArmYaw = this.renderArmYaw;
             this.prevRenderArmPitch = this.renderArmPitch;
@@ -967,14 +961,14 @@ public class EntityPlayerSP extends AbstractClientPlayer
         boolean flag = this.movementInput.jump;
         boolean flag1 = this.movementInput.sneak;
         float f = 0.8F;
-        boolean flag2 = this.movementInput.moveForward >= 0.8F;
+        boolean flag2 = this.movementInput.field_192832_b >= 0.8F;
         this.movementInput.updatePlayerMoveState();
-        this.mc.getTutorial().handleMovement(this.movementInput);
+        this.mc.func_193032_ao().func_193293_a(this.movementInput);
 
         if (this.isHandActive() && !this.isRiding())
         {
             this.movementInput.moveStrafe *= 0.2F;
-            this.movementInput.moveForward *= 0.2F;
+            this.movementInput.field_192832_b *= 0.2F;
             this.sprintToggleTimer = 0;
         }
 
@@ -994,7 +988,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
         this.pushOutOfBlocks(this.posX + (double)this.width * 0.35D, axisalignedbb.minY + 0.5D, this.posZ + (double)this.width * 0.35D);
         boolean flag4 = (float)this.getFoodStats().getFoodLevel() > 6.0F || this.capabilities.allowFlying;
 
-        if (this.onGround && !flag1 && !flag2 && this.movementInput.moveForward >= 0.8F && !this.isSprinting() && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS))
+        if (this.onGround && !flag1 && !flag2 && this.movementInput.field_192832_b >= 0.8F && !this.isSprinting() && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS))
         {
             if (this.sprintToggleTimer <= 0 && !this.mc.gameSettings.keyBindSprint.isKeyDown())
             {
@@ -1006,12 +1000,12 @@ public class EntityPlayerSP extends AbstractClientPlayer
             }
         }
 
-        if (!this.isSprinting() && this.movementInput.moveForward >= 0.8F && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS) && this.mc.gameSettings.keyBindSprint.isKeyDown())
+        if (!this.isSprinting() && this.movementInput.field_192832_b >= 0.8F && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS) && this.mc.gameSettings.keyBindSprint.isKeyDown())
         {
             this.setSprinting(true);
         }
 
-        if (this.isSprinting() && (this.movementInput.moveForward < 0.8F || this.isCollidedHorizontally || !flag4))
+        if (this.isSprinting() && (this.movementInput.field_192832_b < 0.8F || this.isCollidedHorizontally || !flag4))
         {
             this.setSprinting(false);
         }
@@ -1045,7 +1039,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
         {
             ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 
-            if (itemstack.getItem() == Items.ELYTRA && ItemElytra.isUsable(itemstack))
+            if (itemstack.getItem() == Items.ELYTRA && ItemElytra.isBroken(itemstack))
             {
                 this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_FALL_FLYING));
             }
@@ -1058,7 +1052,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
             if (this.movementInput.sneak)
             {
                 this.movementInput.moveStrafe = (float)((double)this.movementInput.moveStrafe / 0.3D);
-                this.movementInput.moveForward = (float)((double)this.movementInput.moveForward / 0.3D);
+                this.movementInput.field_192832_b = (float)((double)this.movementInput.field_192832_b / 0.3D);
                 this.motionY -= (double)(this.capabilities.getFlySpeed() * 3.0F);
             }
 
@@ -1122,7 +1116,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
     }
 
     /**
-     * Handles updating while riding another entity
+     * Handles updating while being ridden by an entity
      */
     public void updateRidden()
     {
@@ -1162,11 +1156,11 @@ public class EntityPlayerSP extends AbstractClientPlayer
     /**
      * Tries to move the entity towards the specified location.
      */
-    public void move(MoverType type, double x, double y, double z)
+    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
     {
         double d0 = this.posX;
         double d1 = this.posZ;
-        super.move(type, x, y, z);
+        super.moveEntity(x, p_70091_2_, p_70091_4_, p_70091_6_);
         this.updateAutoJump((float)(this.posX - d0), (float)(this.posZ - d1));
     }
 
@@ -1199,7 +1193,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
                         float f3 = f * vec2f.y;
                         float f4 = MathHelper.sin(this.rotationYaw * 0.017453292F);
                         float f5 = MathHelper.cos(this.rotationYaw * 0.017453292F);
-                        vec3d2 = new Vec3d((double)(f2 * f5 - f3 * f4), vec3d2.y, (double)(f3 * f5 + f2 * f4));
+                        vec3d2 = new Vec3d((double)(f2 * f5 - f3 * f4), vec3d2.yCoord, (double)(f3 * f5 + f2 * f4));
                         f1 = (float)vec3d2.lengthSquared();
 
                         if (f1 <= 0.001F)
@@ -1211,7 +1205,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
                     float f12 = (float)MathHelper.fastInvSqrt((double)f1);
                     Vec3d vec3d12 = vec3d2.scale((double)f12);
                     Vec3d vec3d13 = this.getForward();
-                    float f13 = (float)(vec3d13.x * vec3d12.x + vec3d13.z * vec3d12.z);
+                    float f13 = (float)(vec3d13.xCoord * vec3d12.xCoord + vec3d13.zCoord * vec3d12.zCoord);
 
                     if (f13 >= -0.15F)
                     {
@@ -1237,7 +1231,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
                                 Vec3d vec3d4 = vec3d1.add(vec3d12.scale((double)f8));
                                 float f9 = this.width;
                                 float f10 = this.height;
-                                AxisAlignedBB axisalignedbb = (new AxisAlignedBB(vec3d, vec3d4.addVector(0.0D, (double)f10, 0.0D))).grow((double)f9, 0.0D, (double)f9);
+                                AxisAlignedBB axisalignedbb = (new AxisAlignedBB(vec3d, vec3d4.addVector(0.0D, (double)f10, 0.0D))).expand((double)f9, 0.0D, (double)f9);
                                 Vec3d lvt_19_1_ = vec3d.addVector(0.0D, 0.5099999904632568D, 0.0D);
                                 vec3d4 = vec3d4.addVector(0.0D, 0.5099999904632568D, 0.0D);
                                 Vec3d vec3d5 = vec3d12.crossProduct(new Vec3d(0.0D, 1.0D, 0.0D));

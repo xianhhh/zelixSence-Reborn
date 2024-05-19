@@ -16,29 +16,24 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.src.Config;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.optifine.entity.model.IEntityRenderer;
-import shadersmod.client.Shaders;
 
-public abstract class Render<T extends Entity> implements IEntityRenderer
+public abstract class Render<T extends Entity>
 {
     private static final ResourceLocation SHADOW_TEXTURES = new ResourceLocation("textures/misc/shadow.png");
     protected final RenderManager renderManager;
-    public float shadowSize;
+    protected float shadowSize;
 
     /**
      * Determines the darkness of the object's shadow. Higher value makes a darker shadow.
      */
     protected float shadowOpaque = 1.0F;
     protected boolean renderOutlines;
-    private Class entityClass = null;
-    private ResourceLocation locationTextureCustom = null;
 
     protected Render(RenderManager renderManager)
     {
@@ -52,7 +47,7 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
 
     public boolean shouldRender(T livingEntity, ICamera camera, double camX, double camY, double camZ)
     {
-        AxisAlignedBB axisalignedbb = livingEntity.getRenderBoundingBox().grow(0.5D);
+        AxisAlignedBB axisalignedbb = livingEntity.getRenderBoundingBox().expandXyz(0.5D);
 
         if (axisalignedbb.hasNaN() || axisalignedbb.getAverageEdgeLength() == 0.0D)
         {
@@ -80,7 +75,7 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
 
         if (scoreplayerteam != null)
         {
-            String s = FontRenderer.getFormatFromString(scoreplayerteam.getPrefix());
+            String s = FontRenderer.getFormatFromString(scoreplayerteam.getColorPrefix());
 
             if (s.length() >= 2)
             {
@@ -119,11 +114,6 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
     protected boolean bindEntityTexture(T entity)
     {
         ResourceLocation resourcelocation = this.getEntityTexture(entity);
-
-        if (this.locationTextureCustom != null)
-        {
-            resourcelocation = this.locationTextureCustom;
-        }
 
         if (resourcelocation == null)
         {
@@ -204,57 +194,54 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
      */
     private void renderShadow(Entity entityIn, double x, double y, double z, float shadowAlpha, float partialTicks)
     {
-        if (!Config.isShaders() || !Shaders.shouldSkipDefaultShadow)
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        this.renderManager.renderEngine.bindTexture(SHADOW_TEXTURES);
+        World world = this.getWorldFromRenderManager();
+        GlStateManager.depthMask(false);
+        float f = this.shadowSize;
+
+        if (entityIn instanceof EntityLiving)
         {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            this.renderManager.renderEngine.bindTexture(SHADOW_TEXTURES);
-            World world = this.getWorldFromRenderManager();
-            GlStateManager.depthMask(false);
-            float f = this.shadowSize;
+            EntityLiving entityliving = (EntityLiving)entityIn;
+            f *= entityliving.getRenderSizeModifier();
 
-            if (entityIn instanceof EntityLiving)
+            if (entityliving.isChild())
             {
-                EntityLiving entityliving = (EntityLiving)entityIn;
-                f *= entityliving.getRenderSizeModifier();
-
-                if (entityliving.isChild())
-                {
-                    f *= 0.5F;
-                }
+                f *= 0.5F;
             }
-
-            double d5 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
-            double d0 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
-            double d1 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
-            int i = MathHelper.floor(d5 - (double)f);
-            int j = MathHelper.floor(d5 + (double)f);
-            int k = MathHelper.floor(d0 - (double)f);
-            int l = MathHelper.floor(d0);
-            int i1 = MathHelper.floor(d1 - (double)f);
-            int j1 = MathHelper.floor(d1 + (double)f);
-            double d2 = x - d5;
-            double d3 = y - d0;
-            double d4 = z - d1;
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuffer();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-
-            for (BlockPos blockpos : BlockPos.getAllInBoxMutable(new BlockPos(i, k, i1), new BlockPos(j, l, j1)))
-            {
-                IBlockState iblockstate = world.getBlockState(blockpos.down());
-
-                if (iblockstate.getRenderType() != EnumBlockRenderType.INVISIBLE && world.getLightFromNeighbors(blockpos) > 3)
-                {
-                    this.renderShadowSingle(iblockstate, x, y, z, blockpos, shadowAlpha, f, d2, d3, d4);
-                }
-            }
-
-            tessellator.draw();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.disableBlend();
-            GlStateManager.depthMask(true);
         }
+
+        double d5 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
+        double d0 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
+        double d1 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+        int i = MathHelper.floor(d5 - (double)f);
+        int j = MathHelper.floor(d5 + (double)f);
+        int k = MathHelper.floor(d0 - (double)f);
+        int l = MathHelper.floor(d0);
+        int i1 = MathHelper.floor(d1 - (double)f);
+        int j1 = MathHelper.floor(d1 + (double)f);
+        double d2 = x - d5;
+        double d3 = y - d0;
+        double d4 = z - d1;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+
+        for (BlockPos blockpos : BlockPos.getAllInBoxMutable(new BlockPos(i, k, i1), new BlockPos(j, l, j1)))
+        {
+            IBlockState iblockstate = world.getBlockState(blockpos.down());
+
+            if (iblockstate.getRenderType() != EnumBlockRenderType.INVISIBLE && world.getLightFromNeighbors(blockpos) > 3)
+            {
+                this.renderShadowSingle(iblockstate, x, y, z, blockpos, shadowAlpha, f, d2, d3, d4);
+            }
+        }
+
+        tessellator.draw();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
     }
 
     /**
@@ -262,7 +249,7 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
      */
     private World getWorldFromRenderManager()
     {
-        return this.renderManager.world;
+        return this.renderManager.worldObj;
     }
 
     private void renderShadowSingle(IBlockState state, double p_188299_2_, double p_188299_4_, double p_188299_6_, BlockPos p_188299_8_, float p_188299_9_, float p_188299_10_, double p_188299_11_, double p_188299_13_, double p_188299_15_)
@@ -402,25 +389,5 @@ public abstract class Render<T extends Entity> implements IEntityRenderer
 
     public void renderMultipass(T p_188300_1_, double p_188300_2_, double p_188300_4_, double p_188300_6_, float p_188300_8_, float p_188300_9_)
     {
-    }
-
-    public Class getEntityClass()
-    {
-        return this.entityClass;
-    }
-
-    public void setEntityClass(Class p_setEntityClass_1_)
-    {
-        this.entityClass = p_setEntityClass_1_;
-    }
-
-    public ResourceLocation getLocationTextureCustom()
-    {
-        return this.locationTextureCustom;
-    }
-
-    public void setLocationTextureCustom(ResourceLocation p_setLocationTextureCustom_1_)
-    {
-        this.locationTextureCustom = p_setLocationTextureCustom_1_;
     }
 }

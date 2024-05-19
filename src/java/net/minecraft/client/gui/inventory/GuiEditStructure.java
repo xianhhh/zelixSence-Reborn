@@ -105,45 +105,45 @@ public class GuiEditStructure extends GuiScreen
         this.rotateNinetyDegreesButton = this.addButton(new GuiButton(12, this.width / 2 - 1 - 40 - 20, 185, 40, 20, "90"));
         this.rotate180DegreesButton = this.addButton(new GuiButton(13, this.width / 2 + 1 + 20, 185, 40, 20, "180"));
         this.rotate270DegressButton = this.addButton(new GuiButton(14, this.width / 2 + 1 + 40 + 1 + 20, 185, 40, 20, "270"));
-        this.nameEdit = new GuiTextField(2, this.fontRenderer, this.width / 2 - 152, 40, 300, 20);
+        this.nameEdit = new GuiTextField(2, this.fontRendererObj, this.width / 2 - 152, 40, 300, 20);
         this.nameEdit.setMaxStringLength(64);
         this.nameEdit.setText(this.tileStructure.getName());
         this.tabOrder.add(this.nameEdit);
         BlockPos blockpos = this.tileStructure.getPosition();
-        this.posXEdit = new GuiTextField(3, this.fontRenderer, this.width / 2 - 152, 80, 80, 20);
+        this.posXEdit = new GuiTextField(3, this.fontRendererObj, this.width / 2 - 152, 80, 80, 20);
         this.posXEdit.setMaxStringLength(15);
         this.posXEdit.setText(Integer.toString(blockpos.getX()));
         this.tabOrder.add(this.posXEdit);
-        this.posYEdit = new GuiTextField(4, this.fontRenderer, this.width / 2 - 72, 80, 80, 20);
+        this.posYEdit = new GuiTextField(4, this.fontRendererObj, this.width / 2 - 72, 80, 80, 20);
         this.posYEdit.setMaxStringLength(15);
         this.posYEdit.setText(Integer.toString(blockpos.getY()));
         this.tabOrder.add(this.posYEdit);
-        this.posZEdit = new GuiTextField(5, this.fontRenderer, this.width / 2 + 8, 80, 80, 20);
+        this.posZEdit = new GuiTextField(5, this.fontRendererObj, this.width / 2 + 8, 80, 80, 20);
         this.posZEdit.setMaxStringLength(15);
         this.posZEdit.setText(Integer.toString(blockpos.getZ()));
         this.tabOrder.add(this.posZEdit);
         BlockPos blockpos1 = this.tileStructure.getStructureSize();
-        this.sizeXEdit = new GuiTextField(6, this.fontRenderer, this.width / 2 - 152, 120, 80, 20);
+        this.sizeXEdit = new GuiTextField(6, this.fontRendererObj, this.width / 2 - 152, 120, 80, 20);
         this.sizeXEdit.setMaxStringLength(15);
         this.sizeXEdit.setText(Integer.toString(blockpos1.getX()));
         this.tabOrder.add(this.sizeXEdit);
-        this.sizeYEdit = new GuiTextField(7, this.fontRenderer, this.width / 2 - 72, 120, 80, 20);
+        this.sizeYEdit = new GuiTextField(7, this.fontRendererObj, this.width / 2 - 72, 120, 80, 20);
         this.sizeYEdit.setMaxStringLength(15);
         this.sizeYEdit.setText(Integer.toString(blockpos1.getY()));
         this.tabOrder.add(this.sizeYEdit);
-        this.sizeZEdit = new GuiTextField(8, this.fontRenderer, this.width / 2 + 8, 120, 80, 20);
+        this.sizeZEdit = new GuiTextField(8, this.fontRendererObj, this.width / 2 + 8, 120, 80, 20);
         this.sizeZEdit.setMaxStringLength(15);
         this.sizeZEdit.setText(Integer.toString(blockpos1.getZ()));
         this.tabOrder.add(this.sizeZEdit);
-        this.integrityEdit = new GuiTextField(15, this.fontRenderer, this.width / 2 - 152, 120, 80, 20);
+        this.integrityEdit = new GuiTextField(15, this.fontRendererObj, this.width / 2 - 152, 120, 80, 20);
         this.integrityEdit.setMaxStringLength(15);
         this.integrityEdit.setText(this.decimalFormat.format((double)this.tileStructure.getIntegrity()));
         this.tabOrder.add(this.integrityEdit);
-        this.seedEdit = new GuiTextField(16, this.fontRenderer, this.width / 2 - 72, 120, 80, 20);
+        this.seedEdit = new GuiTextField(16, this.fontRendererObj, this.width / 2 - 72, 120, 80, 20);
         this.seedEdit.setMaxStringLength(31);
         this.seedEdit.setText(Long.toString(this.tileStructure.getSeed()));
         this.tabOrder.add(this.seedEdit);
-        this.dataEdit = new GuiTextField(17, this.fontRenderer, this.width / 2 - 152, 120, 240, 20);
+        this.dataEdit = new GuiTextField(17, this.fontRendererObj, this.width / 2 - 152, 120, 240, 20);
         this.dataEdit.setMaxStringLength(128);
         this.dataEdit.setText(this.tileStructure.getMetadata());
         this.tabOrder.add(this.dataEdit);
@@ -714,57 +714,57 @@ public class GuiEditStructure extends GuiScreen
     {
         this.drawDefaultBackground();
         TileEntityStructure.Mode tileentitystructure$mode = this.tileStructure.getMode();
-        this.drawCenteredString(this.fontRenderer, I18n.format("tile.structureBlock.name"), this.width / 2, 10, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("tile.structureBlock.name"), this.width / 2, 10, 16777215);
 
         if (tileentitystructure$mode != TileEntityStructure.Mode.DATA)
         {
-            this.drawString(this.fontRenderer, I18n.format("structure_block.structure_name"), this.width / 2 - 153, 30, 10526880);
+            this.drawString(this.fontRendererObj, I18n.format("structure_block.structure_name"), this.width / 2 - 153, 30, 10526880);
             this.nameEdit.drawTextBox();
         }
 
         if (tileentitystructure$mode == TileEntityStructure.Mode.LOAD || tileentitystructure$mode == TileEntityStructure.Mode.SAVE)
         {
-            this.drawString(this.fontRenderer, I18n.format("structure_block.position"), this.width / 2 - 153, 70, 10526880);
+            this.drawString(this.fontRendererObj, I18n.format("structure_block.position"), this.width / 2 - 153, 70, 10526880);
             this.posXEdit.drawTextBox();
             this.posYEdit.drawTextBox();
             this.posZEdit.drawTextBox();
             String s = I18n.format("structure_block.include_entities");
-            int i = this.fontRenderer.getStringWidth(s);
-            this.drawString(this.fontRenderer, s, this.width / 2 + 154 - i, 150, 10526880);
+            int i = this.fontRendererObj.getStringWidth(s);
+            this.drawString(this.fontRendererObj, s, this.width / 2 + 154 - i, 150, 10526880);
         }
 
         if (tileentitystructure$mode == TileEntityStructure.Mode.SAVE)
         {
-            this.drawString(this.fontRenderer, I18n.format("structure_block.size"), this.width / 2 - 153, 110, 10526880);
+            this.drawString(this.fontRendererObj, I18n.format("structure_block.size"), this.width / 2 - 153, 110, 10526880);
             this.sizeXEdit.drawTextBox();
             this.sizeYEdit.drawTextBox();
             this.sizeZEdit.drawTextBox();
             String s2 = I18n.format("structure_block.detect_size");
-            int k = this.fontRenderer.getStringWidth(s2);
-            this.drawString(this.fontRenderer, s2, this.width / 2 + 154 - k, 110, 10526880);
+            int k = this.fontRendererObj.getStringWidth(s2);
+            this.drawString(this.fontRendererObj, s2, this.width / 2 + 154 - k, 110, 10526880);
             String s1 = I18n.format("structure_block.show_air");
-            int j = this.fontRenderer.getStringWidth(s1);
-            this.drawString(this.fontRenderer, s1, this.width / 2 + 154 - j, 70, 10526880);
+            int j = this.fontRendererObj.getStringWidth(s1);
+            this.drawString(this.fontRendererObj, s1, this.width / 2 + 154 - j, 70, 10526880);
         }
 
         if (tileentitystructure$mode == TileEntityStructure.Mode.LOAD)
         {
-            this.drawString(this.fontRenderer, I18n.format("structure_block.integrity"), this.width / 2 - 153, 110, 10526880);
+            this.drawString(this.fontRendererObj, I18n.format("structure_block.integrity"), this.width / 2 - 153, 110, 10526880);
             this.integrityEdit.drawTextBox();
             this.seedEdit.drawTextBox();
             String s3 = I18n.format("structure_block.show_boundingbox");
-            int l = this.fontRenderer.getStringWidth(s3);
-            this.drawString(this.fontRenderer, s3, this.width / 2 + 154 - l, 70, 10526880);
+            int l = this.fontRendererObj.getStringWidth(s3);
+            this.drawString(this.fontRendererObj, s3, this.width / 2 + 154 - l, 70, 10526880);
         }
 
         if (tileentitystructure$mode == TileEntityStructure.Mode.DATA)
         {
-            this.drawString(this.fontRenderer, I18n.format("structure_block.custom_data"), this.width / 2 - 153, 110, 10526880);
+            this.drawString(this.fontRendererObj, I18n.format("structure_block.custom_data"), this.width / 2 - 153, 110, 10526880);
             this.dataEdit.drawTextBox();
         }
 
         String s4 = "structure_block.mode_info." + tileentitystructure$mode.getName();
-        this.drawString(this.fontRenderer, I18n.format(s4), this.width / 2 - 153, 174, 10526880);
+        this.drawString(this.fontRendererObj, I18n.format(s4), this.width / 2 - 153, 174, 10526880);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

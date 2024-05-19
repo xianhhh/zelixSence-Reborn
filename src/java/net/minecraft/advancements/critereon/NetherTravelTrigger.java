@@ -17,131 +17,128 @@ import net.minecraft.world.WorldServer;
 
 public class NetherTravelTrigger implements ICriterionTrigger<NetherTravelTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("nether_travel");
-    private final Map<PlayerAdvancements, NetherTravelTrigger.Listeners> listeners = Maps.<PlayerAdvancements, NetherTravelTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_193169_a = new ResourceLocation("nether_travel");
+    private final Map<PlayerAdvancements, NetherTravelTrigger.Listeners> field_193170_b = Maps.<PlayerAdvancements, NetherTravelTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_193169_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<NetherTravelTrigger.Instance> p_192165_2_)
     {
-        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.field_193170_b.get(p_192165_1_);
 
         if (nethertraveltrigger$listeners == null)
         {
-            nethertraveltrigger$listeners = new NetherTravelTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, nethertraveltrigger$listeners);
+            nethertraveltrigger$listeners = new NetherTravelTrigger.Listeners(p_192165_1_);
+            this.field_193170_b.put(p_192165_1_, nethertraveltrigger$listeners);
         }
 
-        nethertraveltrigger$listeners.add(listener);
+        nethertraveltrigger$listeners.func_193484_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<NetherTravelTrigger.Instance> p_192164_2_)
     {
-        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.field_193170_b.get(p_192164_1_);
 
         if (nethertraveltrigger$listeners != null)
         {
-            nethertraveltrigger$listeners.remove(listener);
+            nethertraveltrigger$listeners.func_193481_b(p_192164_2_);
 
-            if (nethertraveltrigger$listeners.isEmpty())
+            if (nethertraveltrigger$listeners.func_193482_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_193170_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_193170_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public NetherTravelTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public NetherTravelTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        LocationPredicate locationpredicate = LocationPredicate.deserialize(json.get("entered"));
-        LocationPredicate locationpredicate1 = LocationPredicate.deserialize(json.get("exited"));
-        DistancePredicate distancepredicate = DistancePredicate.deserialize(json.get("distance"));
+        LocationPredicate locationpredicate = LocationPredicate.func_193454_a(p_192166_1_.get("entered"));
+        LocationPredicate locationpredicate1 = LocationPredicate.func_193454_a(p_192166_1_.get("exited"));
+        DistancePredicate distancepredicate = DistancePredicate.func_193421_a(p_192166_1_.get("distance"));
         return new NetherTravelTrigger.Instance(locationpredicate, locationpredicate1, distancepredicate);
     }
 
-    public void trigger(EntityPlayerMP player, Vec3d enteredNetherPosition)
+    public void func_193168_a(EntityPlayerMP p_193168_1_, Vec3d p_193168_2_)
     {
-        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.listeners.get(player.getAdvancements());
+        NetherTravelTrigger.Listeners nethertraveltrigger$listeners = this.field_193170_b.get(p_193168_1_.func_192039_O());
 
         if (nethertraveltrigger$listeners != null)
         {
-            nethertraveltrigger$listeners.trigger(player.getServerWorld(), enteredNetherPosition, player.posX, player.posY, player.posZ);
+            nethertraveltrigger$listeners.func_193483_a(p_193168_1_.getServerWorld(), p_193168_2_, p_193168_1_.posX, p_193168_1_.posY, p_193168_1_.posZ);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final LocationPredicate entered;
-        private final LocationPredicate exited;
-        private final DistancePredicate distance;
+        private final LocationPredicate field_193207_a;
+        private final LocationPredicate field_193208_b;
+        private final DistancePredicate field_193209_c;
 
-        public Instance(LocationPredicate enteredIn, LocationPredicate exitedIn, DistancePredicate distanceIn)
+        public Instance(LocationPredicate p_i47574_1_, LocationPredicate p_i47574_2_, DistancePredicate p_i47574_3_)
         {
-            super(NetherTravelTrigger.ID);
-            this.entered = enteredIn;
-            this.exited = exitedIn;
-            this.distance = distanceIn;
+            super(NetherTravelTrigger.field_193169_a);
+            this.field_193207_a = p_i47574_1_;
+            this.field_193208_b = p_i47574_2_;
+            this.field_193209_c = p_i47574_3_;
         }
 
-        public boolean test(WorldServer world, Vec3d enteredNetherPosition, double x, double y, double z)
+        public boolean func_193206_a(WorldServer p_193206_1_, Vec3d p_193206_2_, double p_193206_3_, double p_193206_5_, double p_193206_7_)
         {
-            if (!this.entered.test(world, enteredNetherPosition.x, enteredNetherPosition.y, enteredNetherPosition.z))
+            if (!this.field_193207_a.func_193452_a(p_193206_1_, p_193206_2_.xCoord, p_193206_2_.yCoord, p_193206_2_.zCoord))
             {
                 return false;
             }
-            else if (!this.exited.test(world, x, y, z))
+            else if (!this.field_193208_b.func_193452_a(p_193206_1_, p_193206_3_, p_193206_5_, p_193206_7_))
             {
                 return false;
             }
             else
             {
-                return this.distance.test(enteredNetherPosition.x, enteredNetherPosition.y, enteredNetherPosition.z, x, y, z);
+                return this.field_193209_c.func_193422_a(p_193206_2_.xCoord, p_193206_2_.yCoord, p_193206_2_.zCoord, p_193206_3_, p_193206_5_, p_193206_7_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<NetherTravelTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<NetherTravelTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_193485_a;
+        private final Set<ICriterionTrigger.Listener<NetherTravelTrigger.Instance>> field_193486_b = Sets.<ICriterionTrigger.Listener<NetherTravelTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47575_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_193485_a = p_i47575_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_193482_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_193486_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener)
+        public void func_193484_a(ICriterionTrigger.Listener<NetherTravelTrigger.Instance> p_193484_1_)
         {
-            this.listeners.add(listener);
+            this.field_193486_b.add(p_193484_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener)
+        public void func_193481_b(ICriterionTrigger.Listener<NetherTravelTrigger.Instance> p_193481_1_)
         {
-            this.listeners.remove(listener);
+            this.field_193486_b.remove(p_193481_1_);
         }
 
-        public void trigger(WorldServer world, Vec3d enteredNetherPosition, double x, double y, double z)
+        public void func_193483_a(WorldServer p_193483_1_, Vec3d p_193483_2_, double p_193483_3_, double p_193483_5_, double p_193483_7_)
         {
             List<ICriterionTrigger.Listener<NetherTravelTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener : this.field_193486_b)
             {
-                if (((NetherTravelTrigger.Instance)listener.getCriterionInstance()).test(world, enteredNetherPosition, x, y, z))
+                if (((NetherTravelTrigger.Instance)listener.func_192158_a()).func_193206_a(p_193483_1_, p_193483_2_, p_193483_3_, p_193483_5_, p_193483_7_))
                 {
                     if (list == null)
                     {
@@ -156,7 +153,7 @@ public class NetherTravelTrigger implements ICriterionTrigger<NetherTravelTrigge
             {
                 for (ICriterionTrigger.Listener<NetherTravelTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_193485_a);
                 }
             }
         }

@@ -117,7 +117,7 @@ public class GuiWorldSelection extends GuiScreen
     {
         this.worldVersTooltip = null;
         this.selectionList.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, this.title, this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 20, 16777215);
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         if (this.worldVersTooltip != null)

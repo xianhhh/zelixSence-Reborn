@@ -29,7 +29,7 @@ public class RenderEntityItem extends Render<EntityItem>
 
     private int transformModelCount(EntityItem itemIn, double p_177077_2_, double p_177077_4_, double p_177077_6_, float p_177077_8_, IBakedModel p_177077_9_)
     {
-        ItemStack itemstack = itemIn.getItem();
+        ItemStack itemstack = itemIn.getEntityItem();
         Item item = itemstack.getItem();
 
         if (item == null)
@@ -60,19 +60,19 @@ public class RenderEntityItem extends Render<EntityItem>
     {
         int i = 1;
 
-        if (stack.getCount() > 48)
+        if (stack.func_190916_E() > 48)
         {
             i = 5;
         }
-        else if (stack.getCount() > 32)
+        else if (stack.func_190916_E() > 32)
         {
             i = 4;
         }
-        else if (stack.getCount() > 16)
+        else if (stack.func_190916_E() > 16)
         {
             i = 3;
         }
-        else if (stack.getCount() > 1)
+        else if (stack.func_190916_E() > 1)
         {
             i = 2;
         }
@@ -85,8 +85,8 @@ public class RenderEntityItem extends Render<EntityItem>
      */
     public void doRender(EntityItem entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
-        ItemStack itemstack = entity.getItem();
-        int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
+        ItemStack itemstack = entity.getEntityItem();
+        int i = itemstack.func_190926_b() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
         this.random.setSeed((long)i);
         boolean flag = false;
 

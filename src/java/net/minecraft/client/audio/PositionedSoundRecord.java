@@ -14,12 +14,12 @@ public class PositionedSoundRecord extends PositionedSound
 
     public static PositionedSoundRecord getMasterRecord(SoundEvent soundIn, float pitchIn)
     {
-        return getRecord(soundIn, pitchIn, 0.25F);
+        return func_194007_a(soundIn, pitchIn, 0.25F);
     }
 
-    public static PositionedSoundRecord getRecord(SoundEvent soundIn, float pitchIn, float volumeIn)
+    public static PositionedSoundRecord func_194007_a(SoundEvent p_194007_0_, float p_194007_1_, float p_194007_2_)
     {
-        return new PositionedSoundRecord(soundIn, SoundCategory.MASTER, volumeIn, pitchIn, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
+        return new PositionedSoundRecord(p_194007_0_, SoundCategory.MASTER, p_194007_2_, p_194007_1_, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
     }
 
     public static PositionedSoundRecord getMusicRecord(SoundEvent soundIn)

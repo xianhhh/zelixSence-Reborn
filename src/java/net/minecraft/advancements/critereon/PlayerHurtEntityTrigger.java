@@ -17,124 +17,121 @@ import net.minecraft.util.ResourceLocation;
 
 public class PlayerHurtEntityTrigger implements ICriterionTrigger<PlayerHurtEntityTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("player_hurt_entity");
-    private final Map<PlayerAdvancements, PlayerHurtEntityTrigger.Listeners> listeners = Maps.<PlayerAdvancements, PlayerHurtEntityTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192222_a = new ResourceLocation("player_hurt_entity");
+    private final Map<PlayerAdvancements, PlayerHurtEntityTrigger.Listeners> field_192223_b = Maps.<PlayerAdvancements, PlayerHurtEntityTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192222_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> p_192165_2_)
     {
-        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.field_192223_b.get(p_192165_1_);
 
         if (playerhurtentitytrigger$listeners == null)
         {
-            playerhurtentitytrigger$listeners = new PlayerHurtEntityTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, playerhurtentitytrigger$listeners);
+            playerhurtentitytrigger$listeners = new PlayerHurtEntityTrigger.Listeners(p_192165_1_);
+            this.field_192223_b.put(p_192165_1_, playerhurtentitytrigger$listeners);
         }
 
-        playerhurtentitytrigger$listeners.add(listener);
+        playerhurtentitytrigger$listeners.func_192522_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> p_192164_2_)
     {
-        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.field_192223_b.get(p_192164_1_);
 
         if (playerhurtentitytrigger$listeners != null)
         {
-            playerhurtentitytrigger$listeners.remove(listener);
+            playerhurtentitytrigger$listeners.func_192519_b(p_192164_2_);
 
-            if (playerhurtentitytrigger$listeners.isEmpty())
+            if (playerhurtentitytrigger$listeners.func_192520_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192223_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192223_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public PlayerHurtEntityTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public PlayerHurtEntityTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        DamagePredicate damagepredicate = DamagePredicate.deserialize(json.get("damage"));
-        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("entity"));
+        DamagePredicate damagepredicate = DamagePredicate.func_192364_a(p_192166_1_.get("damage"));
+        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("entity"));
         return new PlayerHurtEntityTrigger.Instance(damagepredicate, entitypredicate);
     }
 
-    public void trigger(EntityPlayerMP player, Entity entityIn, DamageSource source, float amountDealt, float amountTaken, boolean blocked)
+    public void func_192220_a(EntityPlayerMP p_192220_1_, Entity p_192220_2_, DamageSource p_192220_3_, float p_192220_4_, float p_192220_5_, boolean p_192220_6_)
     {
-        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.listeners.get(player.getAdvancements());
+        PlayerHurtEntityTrigger.Listeners playerhurtentitytrigger$listeners = this.field_192223_b.get(p_192220_1_.func_192039_O());
 
         if (playerhurtentitytrigger$listeners != null)
         {
-            playerhurtentitytrigger$listeners.trigger(player, entityIn, source, amountDealt, amountTaken, blocked);
+            playerhurtentitytrigger$listeners.func_192521_a(p_192220_1_, p_192220_2_, p_192220_3_, p_192220_4_, p_192220_5_, p_192220_6_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final DamagePredicate damage;
-        private final EntityPredicate entity;
+        private final DamagePredicate field_192279_a;
+        private final EntityPredicate field_192280_b;
 
-        public Instance(DamagePredicate damage, EntityPredicate entity)
+        public Instance(DamagePredicate p_i47406_1_, EntityPredicate p_i47406_2_)
         {
-            super(PlayerHurtEntityTrigger.ID);
-            this.damage = damage;
-            this.entity = entity;
+            super(PlayerHurtEntityTrigger.field_192222_a);
+            this.field_192279_a = p_i47406_1_;
+            this.field_192280_b = p_i47406_2_;
         }
 
-        public boolean test(EntityPlayerMP player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked)
+        public boolean func_192278_a(EntityPlayerMP p_192278_1_, Entity p_192278_2_, DamageSource p_192278_3_, float p_192278_4_, float p_192278_5_, boolean p_192278_6_)
         {
-            if (!this.damage.test(player, source, dealt, taken, blocked))
+            if (!this.field_192279_a.func_192365_a(p_192278_1_, p_192278_3_, p_192278_4_, p_192278_5_, p_192278_6_))
             {
                 return false;
             }
             else
             {
-                return this.entity.test(player, entity);
+                return this.field_192280_b.func_192482_a(p_192278_1_, p_192278_2_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192523_a;
+        private final Set<ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance>> field_192524_b = Sets.<ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47407_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192523_a = p_i47407_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192520_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192524_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener)
+        public void func_192522_a(ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> p_192522_1_)
         {
-            this.listeners.add(listener);
+            this.field_192524_b.add(p_192522_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener)
+        public void func_192519_b(ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> p_192519_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192524_b.remove(p_192519_1_);
         }
 
-        public void trigger(EntityPlayerMP player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked)
+        public void func_192521_a(EntityPlayerMP p_192521_1_, Entity p_192521_2_, DamageSource p_192521_3_, float p_192521_4_, float p_192521_5_, boolean p_192521_6_)
         {
             List<ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener : this.field_192524_b)
             {
-                if (((PlayerHurtEntityTrigger.Instance)listener.getCriterionInstance()).test(player, entity, source, dealt, taken, blocked))
+                if (((PlayerHurtEntityTrigger.Instance)listener.func_192158_a()).func_192278_a(p_192521_1_, p_192521_2_, p_192521_3_, p_192521_4_, p_192521_5_, p_192521_6_))
                 {
                     if (list == null)
                     {
@@ -149,7 +146,7 @@ public class PlayerHurtEntityTrigger implements ICriterionTrigger<PlayerHurtEnti
             {
                 for (ICriterionTrigger.Listener<PlayerHurtEntityTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192523_a);
                 }
             }
         }

@@ -50,26 +50,23 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
         if (state.getValue(PART) == BlockBed.EnumPartType.FOOT)
         {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+            TileEntity tileentity = p_180659_2_.getTileEntity(p_180659_3_);
 
             if (tileentity instanceof TileEntityBed)
             {
-                EnumDyeColor enumdyecolor = ((TileEntityBed)tileentity).getColor();
-                return MapColor.getBlockColor(enumdyecolor);
+                EnumDyeColor enumdyecolor = ((TileEntityBed)tileentity).func_193048_a();
+                return MapColor.func_193558_a(enumdyecolor);
             }
         }
 
         return MapColor.CLOTH;
     }
 
-    /**
-     * Called when the block is right clicked by a player.
-     */
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -96,7 +93,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
 
                     if (entityplayer != null)
                     {
-                        playerIn.sendStatusMessage(new TextComponentTranslation("tile.bed.occupied", new Object[0]), true);
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.occupied", new Object[0]), true);
                         return true;
                     }
 
@@ -116,15 +113,15 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
                 {
                     if (entityplayer$sleepresult == EntityPlayer.SleepResult.NOT_POSSIBLE_NOW)
                     {
-                        playerIn.sendStatusMessage(new TextComponentTranslation("tile.bed.noSleep", new Object[0]), true);
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.noSleep", new Object[0]), true);
                     }
                     else if (entityplayer$sleepresult == EntityPlayer.SleepResult.NOT_SAFE)
                     {
-                        playerIn.sendStatusMessage(new TextComponentTranslation("tile.bed.notSafe", new Object[0]), true);
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.notSafe", new Object[0]), true);
                     }
                     else if (entityplayer$sleepresult == EntityPlayer.SleepResult.TOO_FAR_AWAY)
                     {
-                        playerIn.sendStatusMessage(new TextComponentTranslation("tile.bed.tooFarAway", new Object[0]), true);
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.tooFarAway", new Object[0]), true);
                     }
 
                     return true;
@@ -207,7 +204,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
@@ -234,7 +231,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return state.getValue(PART) == BlockBed.EnumPartType.FOOT ? Items.AIR : Items.BED;
+        return state.getValue(PART) == BlockBed.EnumPartType.FOOT ? Items.field_190931_a : Items.BED;
     }
 
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
@@ -242,7 +239,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         return BED_AABB;
     }
 
-    public boolean hasCustomBreakingProgress(IBlockState state)
+    public boolean func_190946_v(IBlockState p_190946_1_)
     {
         return true;
     }
@@ -290,7 +287,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
 
     protected static boolean hasRoomForPlayer(World worldIn, BlockPos pos)
     {
-        return worldIn.getBlockState(pos.down()).isTopSolid() && !worldIn.getBlockState(pos).getMaterial().isSolid() && !worldIn.getBlockState(pos.up()).getMaterial().isSolid();
+        return worldIn.getBlockState(pos.down()).isFullyOpaque() && !worldIn.getBlockState(pos).getMaterial().isSolid() && !worldIn.getBlockState(pos.up()).getMaterial().isSolid();
     }
 
     /**
@@ -301,7 +298,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         if (state.getValue(PART) == BlockBed.EnumPartType.HEAD)
         {
             TileEntity tileentity = worldIn.getTileEntity(pos);
-            EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).getColor() : EnumDyeColor.RED;
+            EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).func_193048_a() : EnumDyeColor.RED;
             spawnAsEntity(worldIn, pos, new ItemStack(Items.BED, 1, enumdyecolor.getMetadata()));
         }
     }
@@ -335,14 +332,10 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         }
 
         TileEntity tileentity = worldIn.getTileEntity(blockpos);
-        EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).getColor() : EnumDyeColor.RED;
+        EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).func_193048_a() : EnumDyeColor.RED;
         return new ItemStack(Items.BED, 1, enumdyecolor.getMetadata());
     }
 
-    /**
-     * Called before the Block is set to air in the world. Called regardless of if the player's tool can actually
-     * collect this block
-     */
     public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
     {
         if (player.capabilities.isCreativeMode && state.getValue(PART) == BlockBed.EnumPartType.FOOT)
@@ -356,16 +349,12 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         }
     }
 
-    /**
-     * Spawns the block's drops in the world. By the time this is called the Block has possibly been set to air via
-     * Block.removedByPlayer
-     */
     public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack stack)
     {
         if (state.getValue(PART) == BlockBed.EnumPartType.HEAD && te instanceof TileEntityBed)
         {
             TileEntityBed tileentitybed = (TileEntityBed)te;
-            ItemStack itemstack = tileentitybed.getItemStack();
+            ItemStack itemstack = tileentitybed.func_193049_f();
             spawnAsEntity(worldIn, pos, itemstack);
         }
         else
@@ -450,7 +439,7 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         return i;
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }
@@ -468,9 +457,9 @@ public class BlockBed extends BlockHorizontal implements ITileEntityProvider
         return new TileEntityBed();
     }
 
-    public static boolean isHeadPiece(int metadata)
+    public static boolean func_193385_b(int p_193385_0_)
     {
-        return (metadata & 8) != 0;
+        return (p_193385_0_ & 8) != 0;
     }
 
     public static enum EnumPartType implements IStringSerializable

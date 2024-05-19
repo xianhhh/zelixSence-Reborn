@@ -23,9 +23,9 @@ public class GuiScreenCustomizePresets extends GuiScreen
     private String shareText;
     private String listText;
 
-    public GuiScreenCustomizePresets(GuiCustomizeWorldScreen parentIn)
+    public GuiScreenCustomizePresets(GuiCustomizeWorldScreen p_i45524_1_)
     {
-        this.parent = parentIn;
+        this.parent = p_i45524_1_;
     }
 
     /**
@@ -39,7 +39,7 @@ public class GuiScreenCustomizePresets extends GuiScreen
         this.title = I18n.format("createWorld.customize.custom.presets.title");
         this.shareText = I18n.format("createWorld.customize.presets.share");
         this.listText = I18n.format("createWorld.customize.presets.list");
-        this.export = new GuiTextField(2, this.fontRenderer, 50, 40, this.width - 100, 20);
+        this.export = new GuiTextField(2, this.fontRendererObj, 50, 40, this.width - 100, 20);
         this.list = new GuiScreenCustomizePresets.ListPreset();
         this.export.setMaxStringLength(2000);
         this.export.setText(this.parent.saveValues());
@@ -110,9 +110,9 @@ public class GuiScreenCustomizePresets extends GuiScreen
     {
         this.drawDefaultBackground();
         this.list.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, this.title, this.width / 2, 8, 16777215);
-        this.drawString(this.fontRenderer, this.shareText, 50, 30, 10526880);
-        this.drawString(this.fontRenderer, this.listText, 50, 70, 10526880);
+        this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 8, 16777215);
+        this.drawString(this.fontRendererObj, this.shareText, 50, 30, 10526880);
+        this.drawString(this.fontRendererObj, this.listText, 50, 70, 10526880);
         this.export.drawTextBox();
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
@@ -205,7 +205,7 @@ public class GuiScreenCustomizePresets extends GuiScreen
         {
         }
 
-        private void blitIcon(int p_178051_1_, int p_178051_2_, ResourceLocation texture)
+        private void blitIcon(int p_178051_1_, int p_178051_2_, ResourceLocation p_178051_3_)
         {
             int i = p_178051_1_ + 5;
             GuiScreenCustomizePresets.this.drawHorizontalLine(i - 1, i + 32, p_178051_2_ - 1, -2039584);
@@ -213,7 +213,7 @@ public class GuiScreenCustomizePresets extends GuiScreen
             GuiScreenCustomizePresets.this.drawVerticalLine(i - 1, p_178051_2_ - 1, p_178051_2_ + 32, -2039584);
             GuiScreenCustomizePresets.this.drawVerticalLine(i + 32, p_178051_2_ - 1, p_178051_2_ + 32, -6250336);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.mc.getTextureManager().bindTexture(texture);
+            this.mc.getTextureManager().bindTexture(p_178051_3_);
             int j = 32;
             int k = 32;
             Tessellator tessellator = Tessellator.getInstance();
@@ -226,11 +226,11 @@ public class GuiScreenCustomizePresets extends GuiScreen
             tessellator.draw();
         }
 
-        protected void drawSlot(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
+        protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
         {
             GuiScreenCustomizePresets.Info guiscreencustomizepresets$info = GuiScreenCustomizePresets.PRESETS.get(p_192637_1_);
             this.blitIcon(p_192637_2_, p_192637_3_, guiscreencustomizepresets$info.texture);
-            GuiScreenCustomizePresets.this.fontRenderer.drawString(guiscreencustomizepresets$info.name, p_192637_2_ + 32 + 10, p_192637_3_ + 14, 16777215);
+            GuiScreenCustomizePresets.this.fontRendererObj.drawString(guiscreencustomizepresets$info.name, p_192637_2_ + 32 + 10, p_192637_3_ + 14, 16777215);
         }
     }
 }

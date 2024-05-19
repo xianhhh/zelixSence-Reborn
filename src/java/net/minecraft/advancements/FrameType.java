@@ -8,42 +8,42 @@ public enum FrameType
     CHALLENGE("challenge", 26, TextFormatting.DARK_PURPLE),
     GOAL("goal", 52, TextFormatting.GREEN);
 
-    private final String name;
-    private final int icon;
-    private final TextFormatting format;
+    private final String field_192313_d;
+    private final int field_192314_e;
+    private final TextFormatting field_193230_f;
 
-    private FrameType(String nameIn, int iconIn, TextFormatting formatIn)
+    private FrameType(String p_i47585_3_, int p_i47585_4_, TextFormatting p_i47585_5_)
     {
-        this.name = nameIn;
-        this.icon = iconIn;
-        this.format = formatIn;
+        this.field_192313_d = p_i47585_3_;
+        this.field_192314_e = p_i47585_4_;
+        this.field_193230_f = p_i47585_5_;
     }
 
-    public String getName()
+    public String func_192307_a()
     {
-        return this.name;
+        return this.field_192313_d;
     }
 
-    public int getIcon()
+    public int func_192309_b()
     {
-        return this.icon;
+        return this.field_192314_e;
     }
 
-    public static FrameType byName(String nameIn)
+    public static FrameType func_192308_a(String p_192308_0_)
     {
         for (FrameType frametype : values())
         {
-            if (frametype.name.equals(nameIn))
+            if (frametype.field_192313_d.equals(p_192308_0_))
             {
                 return frametype;
             }
         }
 
-        throw new IllegalArgumentException("Unknown frame type '" + nameIn + "'");
+        throw new IllegalArgumentException("Unknown frame type '" + p_192308_0_ + "'");
     }
 
-    public TextFormatting getFormat()
+    public TextFormatting func_193229_c()
     {
-        return this.format;
+        return this.field_193230_f;
     }
 }

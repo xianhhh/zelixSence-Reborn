@@ -15,24 +15,24 @@ import net.minecraft.stats.RecipeBook;
 
 public class GuiButtonRecipeTab extends GuiButtonToggle
 {
-    private final CreativeTabs category;
-    private float animationTime;
+    private final CreativeTabs field_193921_u;
+    private float field_193922_v;
 
     public GuiButtonRecipeTab(int p_i47588_1_, CreativeTabs p_i47588_2_)
     {
         super(p_i47588_1_, 0, 0, 35, 27, false);
-        this.category = p_i47588_2_;
-        this.initTextureValues(153, 2, 35, 0, GuiRecipeBook.RECIPE_BOOK);
+        this.field_193921_u = p_i47588_2_;
+        this.func_191751_a(153, 2, 35, 0, GuiRecipeBook.field_191894_a);
     }
 
-    public void startAnimation(Minecraft p_193918_1_)
+    public void func_193918_a(Minecraft p_193918_1_)
     {
-        RecipeBook recipebook = p_193918_1_.player.getRecipeBook();
+        RecipeBook recipebook = p_193918_1_.player.func_192035_E();
         label21:
 
-        for (RecipeList recipelist : RecipeBookClient.RECIPES_BY_TAB.get(this.category))
+        for (RecipeList recipelist : RecipeBookClient.field_194086_e.get(this.field_193921_u))
         {
-            Iterator iterator = recipelist.getRecipes(recipebook.isFilteringCraftable()).iterator();
+            Iterator iterator = recipelist.func_194208_a(recipebook.func_192815_c()).iterator();
 
             while (true)
             {
@@ -43,106 +43,103 @@ public class GuiButtonRecipeTab extends GuiButtonToggle
 
                 IRecipe irecipe = (IRecipe)iterator.next();
 
-                if (recipebook.isRecipeUnseen(irecipe))
+                if (recipebook.func_194076_e(irecipe))
                 {
                     break;
                 }
             }
 
-            this.animationTime = 15.0F;
+            this.field_193922_v = 15.0F;
             return;
         }
     }
 
-    /**
-     * Draws this button to the screen.
-     */
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
+    public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
     {
         if (this.visible)
         {
-            if (this.animationTime > 0.0F)
+            if (this.field_193922_v > 0.0F)
             {
-                float f = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float)Math.PI));
+                float f = 1.0F + 0.1F * (float)Math.sin((double)(this.field_193922_v / 15.0F * (float)Math.PI));
                 GlStateManager.pushMatrix();
-                GlStateManager.translate((float)(this.x + 8), (float)(this.y + 12), 0.0F);
+                GlStateManager.translate((float)(this.xPosition + 8), (float)(this.yPosition + 12), 0.0F);
                 GlStateManager.scale(1.0F, f, 1.0F);
-                GlStateManager.translate((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
+                GlStateManager.translate((float)(-(this.xPosition + 8)), (float)(-(this.yPosition + 12)), 0.0F);
             }
 
-            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            mc.getTextureManager().bindTexture(this.resourceLocation);
+            this.hovered = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
+            p_191745_1_.getTextureManager().bindTexture(this.field_191760_o);
             GlStateManager.disableDepth();
-            int k = this.xTexStart;
-            int i = this.yTexStart;
+            int k = this.field_191756_q;
+            int i = this.field_191757_r;
 
-            if (this.stateTriggered)
+            if (this.field_191755_p)
             {
-                k += this.xDiffTex;
+                k += this.field_191758_s;
             }
 
             if (this.hovered)
             {
-                i += this.yDiffTex;
+                i += this.field_191759_t;
             }
 
-            int j = this.x;
+            int j = this.xPosition;
 
-            if (this.stateTriggered)
+            if (this.field_191755_p)
             {
                 j -= 2;
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(j, this.y, k, i, this.width, this.height);
+            this.drawTexturedModalRect(j, this.yPosition, k, i, this.width, this.height);
             GlStateManager.enableDepth();
             RenderHelper.enableGUIStandardItemLighting();
             GlStateManager.disableLighting();
-            this.renderIcon(mc.getRenderItem());
+            this.func_193920_a(p_191745_1_.getRenderItem());
             GlStateManager.enableLighting();
             RenderHelper.disableStandardItemLighting();
 
-            if (this.animationTime > 0.0F)
+            if (this.field_193922_v > 0.0F)
             {
                 GlStateManager.popMatrix();
-                this.animationTime -= partialTicks;
+                this.field_193922_v -= p_191745_4_;
             }
         }
     }
 
-    private void renderIcon(RenderItem p_193920_1_)
+    private void func_193920_a(RenderItem p_193920_1_)
     {
-        ItemStack itemstack = this.category.getIconItemStack();
+        ItemStack itemstack = this.field_193921_u.getIconItemStack();
 
-        if (this.category == CreativeTabs.TOOLS)
+        if (this.field_193921_u == CreativeTabs.TOOLS)
         {
-            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.x + 3, this.y + 5);
-            p_193920_1_.renderItemAndEffectIntoGUI(CreativeTabs.COMBAT.getIconItemStack(), this.x + 14, this.y + 5);
+            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.xPosition + 3, this.yPosition + 5);
+            p_193920_1_.renderItemAndEffectIntoGUI(CreativeTabs.COMBAT.getIconItemStack(), this.xPosition + 14, this.yPosition + 5);
         }
-        else if (this.category == CreativeTabs.MISC)
+        else if (this.field_193921_u == CreativeTabs.MISC)
         {
-            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.x + 3, this.y + 5);
-            p_193920_1_.renderItemAndEffectIntoGUI(CreativeTabs.FOOD.getIconItemStack(), this.x + 14, this.y + 5);
+            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.xPosition + 3, this.yPosition + 5);
+            p_193920_1_.renderItemAndEffectIntoGUI(CreativeTabs.FOOD.getIconItemStack(), this.xPosition + 14, this.yPosition + 5);
         }
         else
         {
-            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.x + 9, this.y + 5);
+            p_193920_1_.renderItemAndEffectIntoGUI(itemstack, this.xPosition + 9, this.yPosition + 5);
         }
     }
 
-    public CreativeTabs getCategory()
+    public CreativeTabs func_191764_e()
     {
-        return this.category;
+        return this.field_193921_u;
     }
 
-    public boolean updateVisibility()
+    public boolean func_193919_e()
     {
-        List<RecipeList> list = (List)RecipeBookClient.RECIPES_BY_TAB.get(this.category);
+        List<RecipeList> list = (List)RecipeBookClient.field_194086_e.get(this.field_193921_u);
         this.visible = false;
 
         for (RecipeList recipelist : list)
         {
-            if (recipelist.isNotEmpty() && recipelist.containsValidRecipes())
+            if (recipelist.func_194209_a() && recipelist.func_194212_c())
             {
                 this.visible = true;
                 break;

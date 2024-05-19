@@ -71,9 +71,6 @@ public abstract class BlockBasePressurePlate extends Block
         return false;
     }
 
-    /**
-     * Determines if an entity can path through this block
-     */
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
     {
         return true;
@@ -97,7 +94,7 @@ public abstract class BlockBasePressurePlate extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         if (!this.canBePlacedOn(worldIn, pos.down()))
         {
@@ -108,7 +105,7 @@ public abstract class BlockBasePressurePlate extends Block
 
     private boolean canBePlacedOn(World worldIn, BlockPos pos)
     {
-        return worldIn.getBlockState(pos).isTopSolid() || worldIn.getBlockState(pos).getBlock() instanceof BlockFence;
+        return worldIn.getBlockState(pos).isFullyOpaque() || worldIn.getBlockState(pos).getBlock() instanceof BlockFence;
     }
 
     /**
@@ -234,7 +231,7 @@ public abstract class BlockBasePressurePlate extends Block
 
     protected abstract IBlockState setRedstoneStrength(IBlockState state, int strength);
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

@@ -25,7 +25,7 @@ public class ItemColors
 {
     private final ObjectIntIdentityMap<IItemColor> mapItemColors = new ObjectIntIdentityMap<IItemColor>(32);
 
-    public static ItemColors init(final BlockColors colors)
+    public static ItemColors init(final BlockColors p_186729_0_)
     {
         ItemColors itemcolors = new ItemColors();
         itemcolors.registerItemColorHandler(new IItemColor()
@@ -93,14 +93,14 @@ public class ItemColors
         {
             public int getColorFromItemstack(ItemStack stack, int tintIndex)
             {
-                return tintIndex > 0 ? -1 : PotionUtils.getColor(stack);
+                return tintIndex > 0 ? -1 : PotionUtils.func_190932_c(stack);
             }
         }, Items.POTIONITEM, Items.SPLASH_POTION, Items.LINGERING_POTION);
         itemcolors.registerItemColorHandler(new IItemColor()
         {
             public int getColorFromItemstack(ItemStack stack, int tintIndex)
             {
-                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(ItemMonsterPlacer.getNamedIdFrom(stack));
+                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(ItemMonsterPlacer.func_190908_h(stack));
 
                 if (entitylist$entityegginfo == null)
                 {
@@ -117,21 +117,21 @@ public class ItemColors
             public int getColorFromItemstack(ItemStack stack, int tintIndex)
             {
                 IBlockState iblockstate = ((ItemBlock)stack.getItem()).getBlock().getStateFromMeta(stack.getMetadata());
-                return colors.colorMultiplier(iblockstate, (IBlockAccess)null, (BlockPos)null, tintIndex);
+                return p_186729_0_.colorMultiplier(iblockstate, (IBlockAccess)null, (BlockPos)null, tintIndex);
             }
         }, Blocks.GRASS, Blocks.TALLGRASS, Blocks.VINE, Blocks.LEAVES, Blocks.LEAVES2, Blocks.WATERLILY);
         itemcolors.registerItemColorHandler(new IItemColor()
         {
             public int getColorFromItemstack(ItemStack stack, int tintIndex)
             {
-                return tintIndex == 0 ? PotionUtils.getColor(stack) : -1;
+                return tintIndex == 0 ? PotionUtils.func_190932_c(stack) : -1;
             }
         }, Items.TIPPED_ARROW);
         itemcolors.registerItemColorHandler(new IItemColor()
         {
             public int getColorFromItemstack(ItemStack stack, int tintIndex)
             {
-                return tintIndex == 0 ? -1 : ItemMap.getColor(stack);
+                return tintIndex == 0 ? -1 : ItemMap.func_190907_h(stack);
             }
         }, Items.FILLED_MAP);
         return itemcolors;

@@ -78,7 +78,7 @@ public class BlockPistonMoving extends BlockContainer
     }
 
     /**
-     * Check whether this Block can be placed at pos, while aiming at the specified side of an adjacent block
+     * Check whether this Block can be placed on the given side
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
@@ -86,7 +86,7 @@ public class BlockPistonMoving extends BlockContainer
     }
 
     /**
-     * Called after a player destroys this Block - the posiiton pos may no longer hold the state indicated.
+     * Called when a player destroys this Block
      */
     public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
@@ -112,10 +112,7 @@ public class BlockPistonMoving extends BlockContainer
         return false;
     }
 
-    /**
-     * Called when the block is right clicked by a player.
-     */
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (!worldIn.isRemote && worldIn.getTileEntity(pos) == null)
         {
@@ -133,7 +130,7 @@ public class BlockPistonMoving extends BlockContainer
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.AIR;
+        return Items.field_190931_a;
     }
 
     /**
@@ -168,7 +165,7 @@ public class BlockPistonMoving extends BlockContainer
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         if (!worldIn.isRemote)
         {
@@ -189,7 +186,7 @@ public class BlockPistonMoving extends BlockContainer
 
         if (tileentitypiston != null)
         {
-            tileentitypiston.addCollissionAABBs(worldIn, pos, entityBox, collidingBoxes, entityIn);
+            tileentitypiston.func_190609_a(worldIn, pos, entityBox, collidingBoxes, entityIn);
         }
     }
 
@@ -212,7 +209,7 @@ public class BlockPistonMoving extends BlockContainer
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return ItemStack.EMPTY;
+        return ItemStack.field_190927_a;
     }
 
     /**
@@ -262,7 +259,7 @@ public class BlockPistonMoving extends BlockContainer
         return new BlockStateContainer(this, new IProperty[] {FACING, TYPE});
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

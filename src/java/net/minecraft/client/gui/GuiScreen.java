@@ -63,7 +63,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     public boolean allowUserInput;
 
     /** The FontRenderer used by GuiScreen */
-    protected FontRenderer fontRenderer;
+    protected FontRenderer fontRendererObj;
 
     /** The button that was just pressed. */
     protected GuiButton selectedButton;
@@ -75,7 +75,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
      */
     private int touchValue;
     private URI clickedLinkURI;
-    private boolean focused;
+    private boolean field_193977_u;
 
     /**
      * Draws the screen and all the components in it.
@@ -84,7 +84,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     {
         for (int i = 0; i < this.buttonList.size(); ++i)
         {
-            ((GuiButton)this.buttonList.get(i)).drawButton(this.mc, mouseX, mouseY, partialTicks);
+            ((GuiButton)this.buttonList.get(i)).func_191745_a(this.mc, mouseX, mouseY, partialTicks);
         }
 
         for (int j = 0; j < this.labelList.size(); ++j)
@@ -110,10 +110,10 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
         }
     }
 
-    protected <T extends GuiButton> T addButton(T buttonIn)
+    protected <T extends GuiButton> T addButton(T p_189646_1_)
     {
-        this.buttonList.add(buttonIn);
-        return buttonIn;
+        this.buttonList.add(p_189646_1_);
+        return p_189646_1_;
     }
 
     /**
@@ -159,10 +159,10 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
 
     protected void renderToolTip(ItemStack stack, int x, int y)
     {
-        this.drawHoveringText(this.getItemToolTip(stack), x, y);
+        this.drawHoveringText(this.func_191927_a(stack), x, y);
     }
 
-    public List<String> getItemToolTip(ItemStack p_191927_1_)
+    public List<String> func_191927_a(ItemStack p_191927_1_)
     {
         List<String> list = p_191927_1_.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
 
@@ -182,21 +182,22 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     }
 
     /**
-     * Draws the given text as a tooltip.
+     * Draws the text when mouse is over creative inventory tab. Params: current creative tab to be checked, current
+     * mouse x position, current mouse y position.
      */
-    public void drawHoveringText(String text, int x, int y)
+    public void drawCreativeTabHoveringText(String tabName, int mouseX, int mouseY)
     {
-        this.drawHoveringText(Arrays.asList(text), x, y);
+        this.drawHoveringText(Arrays.asList(tabName), mouseX, mouseY);
     }
 
-    public void setFocused(boolean hasFocusedControlIn)
+    public void func_193975_a(boolean p_193975_1_)
     {
-        this.focused = hasFocusedControlIn;
+        this.field_193977_u = p_193975_1_;
     }
 
-    public boolean isFocused()
+    public boolean func_193976_p()
     {
-        return this.focused;
+        return this.field_193977_u;
     }
 
     /**
@@ -214,7 +215,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
 
             for (String s : textLines)
             {
-                int j = this.fontRenderer.getStringWidth(s);
+                int j = this.fontRendererObj.getStringWidth(s);
 
                 if (j > i)
                 {
@@ -259,7 +260,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
             for (int k1 = 0; k1 < textLines.size(); ++k1)
             {
                 String s1 = textLines.get(k1);
-                this.fontRenderer.drawStringWithShadow(s1, (float)l1, (float)i2, -1);
+                this.fontRendererObj.drawStringWithShadow(s1, (float)l1, (float)i2, -1);
 
                 if (k1 == 0)
                 {
@@ -289,7 +290,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
 
             if (hoverevent.getAction() == HoverEvent.Action.SHOW_ITEM)
             {
-                ItemStack itemstack = ItemStack.EMPTY;
+                ItemStack itemstack = ItemStack.field_190927_a;
 
                 try
                 {
@@ -305,9 +306,9 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
                     ;
                 }
 
-                if (itemstack.isEmpty())
+                if (itemstack.func_190926_b())
                 {
-                    this.drawHoveringText(TextFormatting.RED + "Invalid Item!", x, y);
+                    this.drawCreativeTabHoveringText(TextFormatting.RED + "Invalid Item!", x, y);
                 }
                 else
                 {
@@ -335,13 +336,13 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
                     }
                     catch (NBTException var8)
                     {
-                        this.drawHoveringText(TextFormatting.RED + "Invalid Entity!", x, y);
+                        this.drawCreativeTabHoveringText(TextFormatting.RED + "Invalid Entity!", x, y);
                     }
                 }
             }
             else if (hoverevent.getAction() == HoverEvent.Action.SHOW_TEXT)
             {
-                this.drawHoveringText(this.mc.fontRenderer.listFormattedStringToWidth(hoverevent.getValue().getFormattedText(), Math.max(this.width / 2, 200)), x, y);
+                this.drawHoveringText(this.mc.fontRendererObj.listFormattedStringToWidth(hoverevent.getValue().getFormattedText(), Math.max(this.width / 2, 200)), x, y);
             }
 
             GlStateManager.disableLighting();
@@ -513,7 +514,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     {
         this.mc = mc;
         this.itemRender = mc.getRenderItem();
-        this.fontRenderer = mc.fontRenderer;
+        this.fontRendererObj = mc.fontRendererObj;
         this.width = width;
         this.height = height;
         this.buttonList.clear();

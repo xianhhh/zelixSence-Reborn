@@ -19,54 +19,51 @@ import net.minecraft.util.ResourceLocation;
 
 public class RecipeUnlockedTrigger implements ICriterionTrigger<RecipeUnlockedTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("recipe_unlocked");
-    private final Map<PlayerAdvancements, RecipeUnlockedTrigger.Listeners> listeners = Maps.<PlayerAdvancements, RecipeUnlockedTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192227_a = new ResourceLocation("recipe_unlocked");
+    private final Map<PlayerAdvancements, RecipeUnlockedTrigger.Listeners> field_192228_b = Maps.<PlayerAdvancements, RecipeUnlockedTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192227_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> p_192165_2_)
     {
-        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.field_192228_b.get(p_192165_1_);
 
         if (recipeunlockedtrigger$listeners == null)
         {
-            recipeunlockedtrigger$listeners = new RecipeUnlockedTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, recipeunlockedtrigger$listeners);
+            recipeunlockedtrigger$listeners = new RecipeUnlockedTrigger.Listeners(p_192165_1_);
+            this.field_192228_b.put(p_192165_1_, recipeunlockedtrigger$listeners);
         }
 
-        recipeunlockedtrigger$listeners.add(listener);
+        recipeunlockedtrigger$listeners.func_192528_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> p_192164_2_)
     {
-        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.field_192228_b.get(p_192164_1_);
 
         if (recipeunlockedtrigger$listeners != null)
         {
-            recipeunlockedtrigger$listeners.remove(listener);
+            recipeunlockedtrigger$listeners.func_192525_b(p_192164_2_);
 
-            if (recipeunlockedtrigger$listeners.isEmpty())
+            if (recipeunlockedtrigger$listeners.func_192527_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192228_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192228_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public RecipeUnlockedTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public RecipeUnlockedTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(json, "recipe"));
-        IRecipe irecipe = CraftingManager.getRecipe(resourcelocation);
+        ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(p_192166_1_, "recipe"));
+        IRecipe irecipe = CraftingManager.func_193373_a(resourcelocation);
 
         if (irecipe == null)
         {
@@ -78,64 +75,64 @@ public class RecipeUnlockedTrigger implements ICriterionTrigger<RecipeUnlockedTr
         }
     }
 
-    public void trigger(EntityPlayerMP player, IRecipe recipe)
+    public void func_192225_a(EntityPlayerMP p_192225_1_, IRecipe p_192225_2_)
     {
-        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.listeners.get(player.getAdvancements());
+        RecipeUnlockedTrigger.Listeners recipeunlockedtrigger$listeners = this.field_192228_b.get(p_192225_1_.func_192039_O());
 
         if (recipeunlockedtrigger$listeners != null)
         {
-            recipeunlockedtrigger$listeners.trigger(recipe);
+            recipeunlockedtrigger$listeners.func_193493_a(p_192225_2_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final IRecipe recipe;
+        private final IRecipe field_192282_a;
 
-        public Instance(IRecipe recipe)
+        public Instance(IRecipe p_i47526_1_)
         {
-            super(RecipeUnlockedTrigger.ID);
-            this.recipe = recipe;
+            super(RecipeUnlockedTrigger.field_192227_a);
+            this.field_192282_a = p_i47526_1_;
         }
 
-        public boolean test(IRecipe recipe)
+        public boolean func_193215_a(IRecipe p_193215_1_)
         {
-            return this.recipe == recipe;
+            return this.field_192282_a == p_193215_1_;
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192529_a;
+        private final Set<ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance>> field_192530_b = Sets.<ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47397_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192529_a = p_i47397_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192527_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192530_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener)
+        public void func_192528_a(ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> p_192528_1_)
         {
-            this.listeners.add(listener);
+            this.field_192530_b.add(p_192528_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener)
+        public void func_192525_b(ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> p_192525_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192530_b.remove(p_192525_1_);
         }
 
-        public void trigger(IRecipe recipe)
+        public void func_193493_a(IRecipe p_193493_1_)
         {
             List<ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener : this.field_192530_b)
             {
-                if (((RecipeUnlockedTrigger.Instance)listener.getCriterionInstance()).test(recipe))
+                if (((RecipeUnlockedTrigger.Instance)listener.func_192158_a()).func_193215_a(p_193493_1_))
                 {
                     if (list == null)
                     {
@@ -150,7 +147,7 @@ public class RecipeUnlockedTrigger implements ICriterionTrigger<RecipeUnlockedTr
             {
                 for (ICriterionTrigger.Listener<RecipeUnlockedTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192529_a);
                 }
             }
         }

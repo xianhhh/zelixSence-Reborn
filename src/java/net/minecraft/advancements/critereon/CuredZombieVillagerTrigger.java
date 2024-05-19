@@ -17,124 +17,121 @@ import net.minecraft.util.ResourceLocation;
 
 public class CuredZombieVillagerTrigger implements ICriterionTrigger<CuredZombieVillagerTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("cured_zombie_villager");
-    private final Map<PlayerAdvancements, CuredZombieVillagerTrigger.Listeners> listeners = Maps.<PlayerAdvancements, CuredZombieVillagerTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192186_a = new ResourceLocation("cured_zombie_villager");
+    private final Map<PlayerAdvancements, CuredZombieVillagerTrigger.Listeners> field_192187_b = Maps.<PlayerAdvancements, CuredZombieVillagerTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192186_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> p_192165_2_)
     {
-        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.field_192187_b.get(p_192165_1_);
 
         if (curedzombievillagertrigger$listeners == null)
         {
-            curedzombievillagertrigger$listeners = new CuredZombieVillagerTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, curedzombievillagertrigger$listeners);
+            curedzombievillagertrigger$listeners = new CuredZombieVillagerTrigger.Listeners(p_192165_1_);
+            this.field_192187_b.put(p_192165_1_, curedzombievillagertrigger$listeners);
         }
 
-        curedzombievillagertrigger$listeners.add(listener);
+        curedzombievillagertrigger$listeners.func_192360_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> p_192164_2_)
     {
-        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.field_192187_b.get(p_192164_1_);
 
         if (curedzombievillagertrigger$listeners != null)
         {
-            curedzombievillagertrigger$listeners.remove(listener);
+            curedzombievillagertrigger$listeners.func_192358_b(p_192164_2_);
 
-            if (curedzombievillagertrigger$listeners.isEmpty())
+            if (curedzombievillagertrigger$listeners.func_192359_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192187_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192187_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public CuredZombieVillagerTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public CuredZombieVillagerTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("zombie"));
-        EntityPredicate entitypredicate1 = EntityPredicate.deserialize(json.get("villager"));
+        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("zombie"));
+        EntityPredicate entitypredicate1 = EntityPredicate.func_192481_a(p_192166_1_.get("villager"));
         return new CuredZombieVillagerTrigger.Instance(entitypredicate, entitypredicate1);
     }
 
-    public void trigger(EntityPlayerMP player, EntityZombie zombie, EntityVillager villager)
+    public void func_192183_a(EntityPlayerMP p_192183_1_, EntityZombie p_192183_2_, EntityVillager p_192183_3_)
     {
-        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.listeners.get(player.getAdvancements());
+        CuredZombieVillagerTrigger.Listeners curedzombievillagertrigger$listeners = this.field_192187_b.get(p_192183_1_.func_192039_O());
 
         if (curedzombievillagertrigger$listeners != null)
         {
-            curedzombievillagertrigger$listeners.trigger(player, zombie, villager);
+            curedzombievillagertrigger$listeners.func_192361_a(p_192183_1_, p_192183_2_, p_192183_3_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final EntityPredicate zombie;
-        private final EntityPredicate villager;
+        private final EntityPredicate field_192255_a;
+        private final EntityPredicate field_192256_b;
 
-        public Instance(EntityPredicate zombie, EntityPredicate villager)
+        public Instance(EntityPredicate p_i47459_1_, EntityPredicate p_i47459_2_)
         {
-            super(CuredZombieVillagerTrigger.ID);
-            this.zombie = zombie;
-            this.villager = villager;
+            super(CuredZombieVillagerTrigger.field_192186_a);
+            this.field_192255_a = p_i47459_1_;
+            this.field_192256_b = p_i47459_2_;
         }
 
-        public boolean test(EntityPlayerMP player, EntityZombie zombie, EntityVillager villager)
+        public boolean func_192254_a(EntityPlayerMP p_192254_1_, EntityZombie p_192254_2_, EntityVillager p_192254_3_)
         {
-            if (!this.zombie.test(player, zombie))
+            if (!this.field_192255_a.func_192482_a(p_192254_1_, p_192254_2_))
             {
                 return false;
             }
             else
             {
-                return this.villager.test(player, villager);
+                return this.field_192256_b.func_192482_a(p_192254_1_, p_192254_3_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192362_a;
+        private final Set<ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance>> field_192363_b = Sets.<ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47460_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192362_a = p_i47460_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192359_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192363_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener)
+        public void func_192360_a(ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> p_192360_1_)
         {
-            this.listeners.add(listener);
+            this.field_192363_b.add(p_192360_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener)
+        public void func_192358_b(ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> p_192358_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192363_b.remove(p_192358_1_);
         }
 
-        public void trigger(EntityPlayerMP player, EntityZombie zombie, EntityVillager villager)
+        public void func_192361_a(EntityPlayerMP p_192361_1_, EntityZombie p_192361_2_, EntityVillager p_192361_3_)
         {
             List<ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener : this.field_192363_b)
             {
-                if (((CuredZombieVillagerTrigger.Instance)listener.getCriterionInstance()).test(player, zombie, villager))
+                if (((CuredZombieVillagerTrigger.Instance)listener.func_192158_a()).func_192254_a(p_192361_1_, p_192361_2_, p_192361_3_))
                 {
                     if (list == null)
                     {
@@ -149,7 +146,7 @@ public class CuredZombieVillagerTrigger implements ICriterionTrigger<CuredZombie
             {
                 for (ICriterionTrigger.Listener<CuredZombieVillagerTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192362_a);
                 }
             }
         }

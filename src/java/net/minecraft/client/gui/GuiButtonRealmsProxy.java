@@ -46,7 +46,7 @@ public class GuiButtonRealmsProxy extends GuiButton
 
     public int getPositionY()
     {
-        return this.y;
+        return this.yPosition;
     }
 
     /**

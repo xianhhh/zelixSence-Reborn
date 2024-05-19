@@ -19,77 +19,77 @@ import net.minecraft.util.math.MathHelper;
 
 public class GuiRecipeOverlay extends Gui
 {
-    private static final ResourceLocation RECIPE_BOOK_TEXTURE = new ResourceLocation("textures/gui/recipe_book.png");
-    private final List<GuiRecipeOverlay.Button> buttonList = Lists.<GuiRecipeOverlay.Button>newArrayList();
-    private boolean visible;
-    private int x;
-    private int y;
-    private Minecraft mc;
-    private RecipeList recipeList;
-    private IRecipe lastRecipeClicked;
-    private float time;
+    private static final ResourceLocation field_191847_a = new ResourceLocation("textures/gui/recipe_book.png");
+    private final List<GuiRecipeOverlay.Button> field_193972_f = Lists.<GuiRecipeOverlay.Button>newArrayList();
+    private boolean field_191850_h;
+    private int field_191851_i;
+    private int field_191852_j;
+    private Minecraft field_191853_k;
+    private RecipeList field_191848_f;
+    private IRecipe field_193973_l;
+    private float field_193974_m;
 
-    public void init(Minecraft mcIn, RecipeList recipeListIn, int p_191845_3_, int p_191845_4_, int p_191845_5_, int p_191845_6_, float p_191845_7_, RecipeBook p_191845_8_)
+    public void func_191845_a(Minecraft p_191845_1_, RecipeList p_191845_2_, int p_191845_3_, int p_191845_4_, int p_191845_5_, int p_191845_6_, float p_191845_7_, RecipeBook p_191845_8_)
     {
-        this.mc = mcIn;
-        this.recipeList = recipeListIn;
-        boolean flag = p_191845_8_.isFilteringCraftable();
-        List<IRecipe> list = recipeListIn.getDisplayRecipes(true);
-        List<IRecipe> list1 = flag ? Collections.emptyList() : recipeListIn.getDisplayRecipes(false);
+        this.field_191853_k = p_191845_1_;
+        this.field_191848_f = p_191845_2_;
+        boolean flag = p_191845_8_.func_192815_c();
+        List<IRecipe> list = p_191845_2_.func_194207_b(true);
+        List<IRecipe> list1 = flag ? Collections.emptyList() : p_191845_2_.func_194207_b(false);
         int i = list.size();
         int j = i + list1.size();
         int k = j <= 16 ? 4 : 5;
         int l = (int)Math.ceil((double)((float)j / (float)k));
-        this.x = p_191845_3_;
-        this.y = p_191845_4_;
+        this.field_191851_i = p_191845_3_;
+        this.field_191852_j = p_191845_4_;
         int i1 = 25;
-        float f = (float)(this.x + Math.min(j, k) * 25);
+        float f = (float)(this.field_191851_i + Math.min(j, k) * 25);
         float f1 = (float)(p_191845_5_ + 50);
 
         if (f > f1)
         {
-            this.x = (int)((float)this.x - p_191845_7_ * (float)((int)((f - f1) / p_191845_7_)));
+            this.field_191851_i = (int)((float)this.field_191851_i - p_191845_7_ * (float)((int)((f - f1) / p_191845_7_)));
         }
 
-        float f2 = (float)(this.y + l * 25);
+        float f2 = (float)(this.field_191852_j + l * 25);
         float f3 = (float)(p_191845_6_ + 50);
 
         if (f2 > f3)
         {
-            this.y = (int)((float)this.y - p_191845_7_ * (float)MathHelper.ceil((f2 - f3) / p_191845_7_));
+            this.field_191852_j = (int)((float)this.field_191852_j - p_191845_7_ * (float)MathHelper.ceil((f2 - f3) / p_191845_7_));
         }
 
-        float f4 = (float)this.y;
+        float f4 = (float)this.field_191852_j;
         float f5 = (float)(p_191845_6_ - 100);
 
         if (f4 < f5)
         {
-            this.y = (int)((float)this.y - p_191845_7_ * (float)MathHelper.ceil((f4 - f5) / p_191845_7_));
+            this.field_191852_j = (int)((float)this.field_191852_j - p_191845_7_ * (float)MathHelper.ceil((f4 - f5) / p_191845_7_));
         }
 
-        this.visible = true;
-        this.buttonList.clear();
+        this.field_191850_h = true;
+        this.field_193972_f.clear();
 
         for (int j1 = 0; j1 < j; ++j1)
         {
             boolean flag1 = j1 < i;
-            this.buttonList.add(new GuiRecipeOverlay.Button(this.x + 4 + 25 * (j1 % k), this.y + 5 + 25 * (j1 / k), flag1 ? (IRecipe)list.get(j1) : (IRecipe)list1.get(j1 - i), flag1));
+            this.field_193972_f.add(new GuiRecipeOverlay.Button(this.field_191851_i + 4 + 25 * (j1 % k), this.field_191852_j + 5 + 25 * (j1 / k), flag1 ? (IRecipe)list.get(j1) : (IRecipe)list1.get(j1 - i), flag1));
         }
 
-        this.lastRecipeClicked = null;
+        this.field_193973_l = null;
     }
 
-    public RecipeList getRecipeList()
+    public RecipeList func_193971_a()
     {
-        return this.recipeList;
+        return this.field_191848_f;
     }
 
-    public IRecipe getLastRecipeClicked()
+    public IRecipe func_193967_b()
     {
-        return this.lastRecipeClicked;
+        return this.field_193973_l;
     }
 
-    public boolean buttonClicked(int p_193968_1_, int p_193968_2_, int p_193968_3_)
+    public boolean func_193968_a(int p_193968_1_, int p_193968_2_, int p_193968_3_)
     {
         if (p_193968_3_ != 0)
         {
@@ -97,11 +97,11 @@ public class GuiRecipeOverlay extends Gui
         }
         else
         {
-            for (GuiRecipeOverlay.Button guirecipeoverlay$button : this.buttonList)
+            for (GuiRecipeOverlay.Button guirecipeoverlay$button : this.field_193972_f)
             {
-                if (guirecipeoverlay$button.mousePressed(this.mc, p_193968_1_, p_193968_2_))
+                if (guirecipeoverlay$button.mousePressed(this.field_191853_k, p_193968_1_, p_193968_2_))
                 {
-                    this.lastRecipeClicked = guirecipeoverlay$button.recipe;
+                    this.field_193973_l = guirecipeoverlay$button.field_193924_p;
                     return true;
                 }
             }
@@ -110,107 +110,107 @@ public class GuiRecipeOverlay extends Gui
         }
     }
 
-    public void render(int p_191842_1_, int p_191842_2_, float p_191842_3_)
+    public void func_191842_a(int p_191842_1_, int p_191842_2_, float p_191842_3_)
     {
-        if (this.visible)
+        if (this.field_191850_h)
         {
-            this.time += p_191842_3_;
+            this.field_193974_m += p_191842_3_;
             RenderHelper.enableGUIStandardItemLighting();
             GlStateManager.enableBlend();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.mc.getTextureManager().bindTexture(RECIPE_BOOK_TEXTURE);
+            this.field_191853_k.getTextureManager().bindTexture(field_191847_a);
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.0F, 0.0F, 170.0F);
-            int i = this.buttonList.size() <= 16 ? 4 : 5;
-            int j = Math.min(this.buttonList.size(), i);
-            int k = MathHelper.ceil((float)this.buttonList.size() / (float)i);
+            int i = this.field_193972_f.size() <= 16 ? 4 : 5;
+            int j = Math.min(this.field_193972_f.size(), i);
+            int k = MathHelper.ceil((float)this.field_193972_f.size() / (float)i);
             int l = 24;
             int i1 = 4;
             int j1 = 82;
             int k1 = 208;
-            this.nineInchSprite(j, k, 24, 4, 82, 208);
+            this.func_191846_c(j, k, 24, 4, 82, 208);
             GlStateManager.disableBlend();
             RenderHelper.disableStandardItemLighting();
 
-            for (GuiRecipeOverlay.Button guirecipeoverlay$button : this.buttonList)
+            for (GuiRecipeOverlay.Button guirecipeoverlay$button : this.field_193972_f)
             {
-                guirecipeoverlay$button.drawButton(this.mc, p_191842_1_, p_191842_2_, p_191842_3_);
+                guirecipeoverlay$button.func_191745_a(this.field_191853_k, p_191842_1_, p_191842_2_, p_191842_3_);
             }
 
             GlStateManager.popMatrix();
         }
     }
 
-    private void nineInchSprite(int p_191846_1_, int p_191846_2_, int p_191846_3_, int p_191846_4_, int p_191846_5_, int p_191846_6_)
+    private void func_191846_c(int p_191846_1_, int p_191846_2_, int p_191846_3_, int p_191846_4_, int p_191846_5_, int p_191846_6_)
     {
-        this.drawTexturedModalRect(this.x, this.y, p_191846_5_, p_191846_6_, p_191846_4_, p_191846_4_);
-        this.drawTexturedModalRect(this.x + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.y, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_, p_191846_4_, p_191846_4_);
-        this.drawTexturedModalRect(this.x, this.y + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
-        this.drawTexturedModalRect(this.x + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.y + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
+        this.drawTexturedModalRect(this.field_191851_i, this.field_191852_j, p_191846_5_, p_191846_6_, p_191846_4_, p_191846_4_);
+        this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.field_191852_j, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_, p_191846_4_, p_191846_4_);
+        this.drawTexturedModalRect(this.field_191851_i, this.field_191852_j + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
+        this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.field_191852_j + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
 
         for (int i = 0; i < p_191846_1_; ++i)
         {
-            this.drawTexturedModalRect(this.x + p_191846_4_ + i * p_191846_3_, this.y, p_191846_5_ + p_191846_4_, p_191846_6_, p_191846_3_, p_191846_4_);
-            this.drawTexturedModalRect(this.x + p_191846_4_ + (i + 1) * p_191846_3_, this.y, p_191846_5_ + p_191846_4_, p_191846_6_, p_191846_4_, p_191846_4_);
+            this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + i * p_191846_3_, this.field_191852_j, p_191846_5_ + p_191846_4_, p_191846_6_, p_191846_3_, p_191846_4_);
+            this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + (i + 1) * p_191846_3_, this.field_191852_j, p_191846_5_ + p_191846_4_, p_191846_6_, p_191846_4_, p_191846_4_);
 
             for (int j = 0; j < p_191846_2_; ++j)
             {
                 if (i == 0)
                 {
-                    this.drawTexturedModalRect(this.x, this.y + p_191846_4_ + j * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
-                    this.drawTexturedModalRect(this.x, this.y + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_4_);
+                    this.drawTexturedModalRect(this.field_191851_i, this.field_191852_j + p_191846_4_ + j * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
+                    this.drawTexturedModalRect(this.field_191851_i, this.field_191852_j + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_4_);
                 }
 
-                this.drawTexturedModalRect(this.x + p_191846_4_ + i * p_191846_3_, this.y + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_3_, p_191846_3_);
-                this.drawTexturedModalRect(this.x + p_191846_4_ + (i + 1) * p_191846_3_, this.y + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
-                this.drawTexturedModalRect(this.x + p_191846_4_ + i * p_191846_3_, this.y + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_3_, p_191846_4_);
-                this.drawTexturedModalRect(this.x + p_191846_4_ + (i + 1) * p_191846_3_ - 1, this.y + p_191846_4_ + (j + 1) * p_191846_3_ - 1, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_ + 1, p_191846_4_ + 1);
+                this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + i * p_191846_3_, this.field_191852_j + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_3_, p_191846_3_);
+                this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + (i + 1) * p_191846_3_, this.field_191852_j + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
+                this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + i * p_191846_3_, this.field_191852_j + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_3_, p_191846_4_);
+                this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + (i + 1) * p_191846_3_ - 1, this.field_191852_j + p_191846_4_ + (j + 1) * p_191846_3_ - 1, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_ + 1, p_191846_4_ + 1);
 
                 if (i == p_191846_1_ - 1)
                 {
-                    this.drawTexturedModalRect(this.x + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.y + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
-                    this.drawTexturedModalRect(this.x + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.y + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_4_);
+                    this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.field_191852_j + p_191846_4_ + j * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_3_);
+                    this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ * 2 + p_191846_1_ * p_191846_3_, this.field_191852_j + p_191846_4_ + (j + 1) * p_191846_3_, p_191846_5_ + p_191846_3_ + p_191846_4_, p_191846_6_ + p_191846_4_, p_191846_4_, p_191846_4_);
                 }
             }
 
-            this.drawTexturedModalRect(this.x + p_191846_4_ + i * p_191846_3_, this.y + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_3_, p_191846_4_);
-            this.drawTexturedModalRect(this.x + p_191846_4_ + (i + 1) * p_191846_3_, this.y + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
+            this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + i * p_191846_3_, this.field_191852_j + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_3_, p_191846_4_);
+            this.drawTexturedModalRect(this.field_191851_i + p_191846_4_ + (i + 1) * p_191846_3_, this.field_191852_j + p_191846_4_ * 2 + p_191846_2_ * p_191846_3_, p_191846_5_ + p_191846_4_, p_191846_6_ + p_191846_3_ + p_191846_4_, p_191846_4_, p_191846_4_);
         }
     }
 
-    public void setVisible(boolean p_192999_1_)
+    public void func_192999_a(boolean p_192999_1_)
     {
-        this.visible = p_192999_1_;
+        this.field_191850_h = p_192999_1_;
     }
 
-    public boolean isVisible()
+    public boolean func_191839_a()
     {
-        return this.visible;
+        return this.field_191850_h;
     }
 
     class Button extends GuiButton
     {
-        private final IRecipe recipe;
-        private final boolean isCraftable;
+        private final IRecipe field_193924_p;
+        private final boolean field_193925_q;
 
         public Button(int p_i47594_2_, int p_i47594_3_, IRecipe p_i47594_4_, boolean p_i47594_5_)
         {
             super(0, p_i47594_2_, p_i47594_3_, "");
             this.width = 24;
             this.height = 24;
-            this.recipe = p_i47594_4_;
-            this.isCraftable = p_i47594_5_;
+            this.field_193924_p = p_i47594_4_;
+            this.field_193925_q = p_i47594_5_;
         }
 
-        public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
+        public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
         {
             RenderHelper.enableGUIStandardItemLighting();
             GlStateManager.enableAlpha();
-            mc.getTextureManager().bindTexture(GuiRecipeOverlay.RECIPE_BOOK_TEXTURE);
-            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+            p_191745_1_.getTextureManager().bindTexture(GuiRecipeOverlay.field_191847_a);
+            this.hovered = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
             int i = 152;
 
-            if (!this.isCraftable)
+            if (!this.field_193925_q)
             {
                 i += 26;
             }
@@ -222,18 +222,18 @@ public class GuiRecipeOverlay extends Gui
                 j += 26;
             }
 
-            this.drawTexturedModalRect(this.x, this.y, i, j, this.width, this.height);
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, i, j, this.width, this.height);
             int k = 3;
             int l = 3;
 
-            if (this.recipe instanceof ShapedRecipes)
+            if (this.field_193924_p instanceof ShapedRecipes)
             {
-                ShapedRecipes shapedrecipes = (ShapedRecipes)this.recipe;
-                k = shapedrecipes.getWidth();
-                l = shapedrecipes.getHeight();
+                ShapedRecipes shapedrecipes = (ShapedRecipes)this.field_193924_p;
+                k = shapedrecipes.func_192403_f();
+                l = shapedrecipes.func_192404_g();
             }
 
-            Iterator<Ingredient> iterator = this.recipe.getIngredients().iterator();
+            Iterator<Ingredient> iterator = this.field_193924_p.func_192400_c().iterator();
 
             for (int i1 = 0; i1 < l; ++i1)
             {
@@ -243,18 +243,18 @@ public class GuiRecipeOverlay extends Gui
                 {
                     if (iterator.hasNext())
                     {
-                        ItemStack[] aitemstack = ((Ingredient)iterator.next()).getMatchingStacks();
+                        ItemStack[] aitemstack = ((Ingredient)iterator.next()).func_193365_a();
 
                         if (aitemstack.length != 0)
                         {
                             int l1 = 3 + k1 * 7;
                             GlStateManager.pushMatrix();
                             float f = 0.42F;
-                            int i2 = (int)((float)(this.x + l1) / 0.42F - 3.0F);
-                            int j2 = (int)((float)(this.y + j1) / 0.42F - 3.0F);
+                            int i2 = (int)((float)(this.xPosition + l1) / 0.42F - 3.0F);
+                            int j2 = (int)((float)(this.yPosition + j1) / 0.42F - 3.0F);
                             GlStateManager.scale(0.42F, 0.42F, 1.0F);
                             GlStateManager.enableLighting();
-                            mc.getRenderItem().renderItemAndEffectIntoGUI(aitemstack[MathHelper.floor(GuiRecipeOverlay.this.time / 30.0F) % aitemstack.length], i2, j2);
+                            p_191745_1_.getRenderItem().renderItemAndEffectIntoGUI(aitemstack[MathHelper.floor(GuiRecipeOverlay.this.field_193974_m / 30.0F) % aitemstack.length], i2, j2);
                             GlStateManager.disableLighting();
                             GlStateManager.popMatrix();
                         }

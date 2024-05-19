@@ -236,7 +236,7 @@ public class GuiPageButtonList extends GuiListExtended
 
     private GuiTextField createTextField(int p_178068_1_, int p_178068_2_, GuiPageButtonList.EditBoxEntry p_178068_3_)
     {
-        GuiTextField guitextfield = new GuiTextField(p_178068_3_.getId(), this.mc.fontRenderer, p_178068_1_, p_178068_2_, 150, 20);
+        GuiTextField guitextfield = new GuiTextField(p_178068_3_.getId(), this.mc.fontRendererObj, p_178068_1_, p_178068_2_, 150, 20);
         guitextfield.setText(p_178068_3_.getCaption());
         guitextfield.setGuiResponder(this.responder);
         guitextfield.setVisible(p_178068_3_.shouldStartVisible());
@@ -250,11 +250,11 @@ public class GuiPageButtonList extends GuiListExtended
 
         if (p_178063_4_)
         {
-            guilabel = new GuiLabel(this.mc.fontRenderer, p_178063_3_.getId(), p_178063_1_, p_178063_2_, this.width - p_178063_1_ * 2, 20, -1);
+            guilabel = new GuiLabel(this.mc.fontRendererObj, p_178063_3_.getId(), p_178063_1_, p_178063_2_, this.width - p_178063_1_ * 2, 20, -1);
         }
         else
         {
-            guilabel = new GuiLabel(this.mc.fontRenderer, p_178063_3_.getId(), p_178063_1_, p_178063_2_, 150, 20, -1);
+            guilabel = new GuiLabel(this.mc.fontRendererObj, p_178063_3_.getId(), p_178063_1_, p_178063_2_, 150, 20, -1);
         }
 
         guilabel.visible = p_178063_3_.shouldStartVisible();
@@ -299,8 +299,8 @@ public class GuiPageButtonList extends GuiListExtended
                     this.focusedControl = this.editBoxes.get(k);
                     guitextfield = (GuiTextField)this.focusedControl;
                     guitextfield.setFocused(true);
-                    int l = guitextfield.y + this.slotHeight;
-                    int i1 = guitextfield.y;
+                    int l = guitextfield.yPosition + this.slotHeight;
+                    int i1 = guitextfield.yPosition;
 
                     if (l > this.bottom)
                     {
@@ -327,7 +327,7 @@ public class GuiPageButtonList extends GuiListExtended
                 {
                     GuiTextField guitextfield1 = this.editBoxes.get(j);
                     guitextfield1.setText(s1);
-                    guitextfield1.setResponderEntryValue(guitextfield1.getId(), s1);
+                    guitextfield1.func_190516_a(guitextfield1.getId(), s1);
 
                     if (j == this.editBoxes.size() - 1)
                     {
@@ -428,19 +428,19 @@ public class GuiPageButtonList extends GuiListExtended
             return this.component2;
         }
 
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks)
+        public void func_192634_a(int p_192634_1_, int p_192634_2_, int p_192634_3_, int p_192634_4_, int p_192634_5_, int p_192634_6_, int p_192634_7_, boolean p_192634_8_, float p_192634_9_)
         {
-            this.renderComponent(this.component1, y, mouseX, mouseY, false, partialTicks);
-            this.renderComponent(this.component2, y, mouseX, mouseY, false, partialTicks);
+            this.func_192636_a(this.component1, p_192634_3_, p_192634_6_, p_192634_7_, false, p_192634_9_);
+            this.func_192636_a(this.component2, p_192634_3_, p_192634_6_, p_192634_7_, false, p_192634_9_);
         }
 
-        private void renderComponent(Gui p_192636_1_, int p_192636_2_, int p_192636_3_, int p_192636_4_, boolean p_192636_5_, float p_192636_6_)
+        private void func_192636_a(Gui p_192636_1_, int p_192636_2_, int p_192636_3_, int p_192636_4_, boolean p_192636_5_, float p_192636_6_)
         {
             if (p_192636_1_ != null)
             {
                 if (p_192636_1_ instanceof GuiButton)
                 {
-                    this.renderButton((GuiButton)p_192636_1_, p_192636_2_, p_192636_3_, p_192636_4_, p_192636_5_, p_192636_6_);
+                    this.func_192635_a((GuiButton)p_192636_1_, p_192636_2_, p_192636_3_, p_192636_4_, p_192636_5_, p_192636_6_);
                 }
                 else if (p_192636_1_ instanceof GuiTextField)
                 {
@@ -453,19 +453,19 @@ public class GuiPageButtonList extends GuiListExtended
             }
         }
 
-        private void renderButton(GuiButton p_192635_1_, int p_192635_2_, int p_192635_3_, int p_192635_4_, boolean p_192635_5_, float p_192635_6_)
+        private void func_192635_a(GuiButton p_192635_1_, int p_192635_2_, int p_192635_3_, int p_192635_4_, boolean p_192635_5_, float p_192635_6_)
         {
-            p_192635_1_.y = p_192635_2_;
+            p_192635_1_.yPosition = p_192635_2_;
 
             if (!p_192635_5_)
             {
-                p_192635_1_.drawButton(this.client, p_192635_3_, p_192635_4_, p_192635_6_);
+                p_192635_1_.func_191745_a(this.client, p_192635_3_, p_192635_4_, p_192635_6_);
             }
         }
 
         private void renderTextField(GuiTextField p_178027_1_, int p_178027_2_, boolean p_178027_3_)
         {
-            p_178027_1_.y = p_178027_2_;
+            p_178027_1_.yPosition = p_178027_2_;
 
             if (!p_178027_3_)
             {
@@ -483,10 +483,10 @@ public class GuiPageButtonList extends GuiListExtended
             }
         }
 
-        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
+        public void func_192633_a(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
         {
-            this.renderComponent(this.component1, p_192633_3_, 0, 0, true, p_192633_4_);
-            this.renderComponent(this.component2, p_192633_3_, 0, 0, true, p_192633_4_);
+            this.func_192636_a(this.component1, p_192633_3_, 0, 0, true, p_192633_4_);
+            this.func_192636_a(this.component2, p_192633_3_, 0, 0, true, p_192633_4_);
         }
 
         public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY)

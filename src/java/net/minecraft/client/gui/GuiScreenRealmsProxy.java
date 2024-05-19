@@ -33,20 +33,20 @@ public class GuiScreenRealmsProxy extends GuiScreen
         super.initGui();
     }
 
-    public void drawCenteredString(String text, int x, int y, int color)
+    public void drawCenteredString(String p_154325_1_, int p_154325_2_, int p_154325_3_, int p_154325_4_)
     {
-        super.drawCenteredString(this.fontRenderer, text, x, y, color);
+        super.drawCenteredString(this.fontRendererObj, p_154325_1_, p_154325_2_, p_154325_3_, p_154325_4_);
     }
 
-    public void drawString(String text, int x, int y, int color, boolean p_154322_5_)
+    public void drawString(String p_154322_1_, int p_154322_2_, int p_154322_3_, int p_154322_4_, boolean p_154322_5_)
     {
         if (p_154322_5_)
         {
-            super.drawString(this.fontRenderer, text, x, y, color);
+            super.drawString(this.fontRendererObj, p_154322_1_, p_154322_2_, p_154322_3_, p_154322_4_);
         }
         else
         {
-            this.fontRenderer.drawString(text, x, y, color);
+            this.fontRendererObj.drawString(p_154322_1_, p_154322_2_, p_154322_3_, p_154322_4_);
         }
     }
 
@@ -103,11 +103,12 @@ public class GuiScreenRealmsProxy extends GuiScreen
     }
 
     /**
-     * Draws the given text as a tooltip.
+     * Draws the text when mouse is over creative inventory tab. Params: current creative tab to be checked, current
+     * mouse x position, current mouse y position.
      */
-    public void drawHoveringText(String text, int x, int y)
+    public void drawCreativeTabHoveringText(String tabName, int mouseX, int mouseY)
     {
-        super.drawHoveringText(text, x, y);
+        super.drawCreativeTabHoveringText(tabName, mouseX, mouseY);
     }
 
     /**
@@ -129,22 +130,22 @@ public class GuiScreenRealmsProxy extends GuiScreen
 
     public int getFontHeight()
     {
-        return this.fontRenderer.FONT_HEIGHT;
+        return this.fontRendererObj.FONT_HEIGHT;
     }
 
-    public int getStringWidth(String text)
+    public int getStringWidth(String p_154326_1_)
     {
-        return this.fontRenderer.getStringWidth(text);
+        return this.fontRendererObj.getStringWidth(p_154326_1_);
     }
 
-    public void fontDrawShadow(String text, int x, int y, int color)
+    public void fontDrawShadow(String p_154319_1_, int p_154319_2_, int p_154319_3_, int p_154319_4_)
     {
-        this.fontRenderer.drawStringWithShadow(text, (float)x, (float)y, color);
+        this.fontRendererObj.drawStringWithShadow(p_154319_1_, (float)p_154319_2_, (float)p_154319_3_, p_154319_4_);
     }
 
-    public List<String> fontSplit(String text, int wrapWidth)
+    public List<String> fontSplit(String p_154323_1_, int p_154323_2_)
     {
-        return this.fontRenderer.listFormattedStringToWidth(text, wrapWidth);
+        return this.fontRendererObj.listFormattedStringToWidth(p_154323_1_, p_154323_2_);
     }
 
     /**

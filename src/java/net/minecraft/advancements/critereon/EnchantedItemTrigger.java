@@ -16,124 +16,121 @@ import net.minecraft.util.ResourceLocation;
 
 public class EnchantedItemTrigger implements ICriterionTrigger<EnchantedItemTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("enchanted_item");
-    private final Map<PlayerAdvancements, EnchantedItemTrigger.Listeners> listeners = Maps.<PlayerAdvancements, EnchantedItemTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192191_a = new ResourceLocation("enchanted_item");
+    private final Map<PlayerAdvancements, EnchantedItemTrigger.Listeners> field_192192_b = Maps.<PlayerAdvancements, EnchantedItemTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192191_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> p_192165_2_)
     {
-        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.field_192192_b.get(p_192165_1_);
 
         if (enchanteditemtrigger$listeners == null)
         {
-            enchanteditemtrigger$listeners = new EnchantedItemTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, enchanteditemtrigger$listeners);
+            enchanteditemtrigger$listeners = new EnchantedItemTrigger.Listeners(p_192165_1_);
+            this.field_192192_b.put(p_192165_1_, enchanteditemtrigger$listeners);
         }
 
-        enchanteditemtrigger$listeners.add(listener);
+        enchanteditemtrigger$listeners.func_192460_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> p_192164_2_)
     {
-        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.field_192192_b.get(p_192164_1_);
 
         if (enchanteditemtrigger$listeners != null)
         {
-            enchanteditemtrigger$listeners.remove(listener);
+            enchanteditemtrigger$listeners.func_192457_b(p_192164_2_);
 
-            if (enchanteditemtrigger$listeners.isEmpty())
+            if (enchanteditemtrigger$listeners.func_192458_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192192_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192192_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public EnchantedItemTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public EnchantedItemTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
-        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
-        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(json.get("levels"));
+        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
+        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(p_192166_1_.get("levels"));
         return new EnchantedItemTrigger.Instance(itempredicate, minmaxbounds);
     }
 
-    public void trigger(EntityPlayerMP player, ItemStack item, int p_192190_3_)
+    public void func_192190_a(EntityPlayerMP p_192190_1_, ItemStack p_192190_2_, int p_192190_3_)
     {
-        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.listeners.get(player.getAdvancements());
+        EnchantedItemTrigger.Listeners enchanteditemtrigger$listeners = this.field_192192_b.get(p_192190_1_.func_192039_O());
 
         if (enchanteditemtrigger$listeners != null)
         {
-            enchanteditemtrigger$listeners.trigger(item, p_192190_3_);
+            enchanteditemtrigger$listeners.func_192459_a(p_192190_2_, p_192190_3_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final ItemPredicate item;
-        private final MinMaxBounds levels;
+        private final ItemPredicate field_192258_a;
+        private final MinMaxBounds field_192259_b;
 
-        public Instance(ItemPredicate item, MinMaxBounds levels)
+        public Instance(ItemPredicate p_i47376_1_, MinMaxBounds p_i47376_2_)
         {
-            super(EnchantedItemTrigger.ID);
-            this.item = item;
-            this.levels = levels;
+            super(EnchantedItemTrigger.field_192191_a);
+            this.field_192258_a = p_i47376_1_;
+            this.field_192259_b = p_i47376_2_;
         }
 
-        public boolean test(ItemStack item, int levelsIn)
+        public boolean func_192257_a(ItemStack p_192257_1_, int p_192257_2_)
         {
-            if (!this.item.test(item))
+            if (!this.field_192258_a.func_192493_a(p_192257_1_))
             {
                 return false;
             }
             else
             {
-                return this.levels.test((float)levelsIn);
+                return this.field_192259_b.func_192514_a((float)p_192257_2_);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<EnchantedItemTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<EnchantedItemTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192461_a;
+        private final Set<ICriterionTrigger.Listener<EnchantedItemTrigger.Instance>> field_192462_b = Sets.<ICriterionTrigger.Listener<EnchantedItemTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47377_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192461_a = p_i47377_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192458_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192462_b.isEmpty();
         }
 
-        public void add(ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener)
+        public void func_192460_a(ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> p_192460_1_)
         {
-            this.listeners.add(listener);
+            this.field_192462_b.add(p_192460_1_);
         }
 
-        public void remove(ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener)
+        public void func_192457_b(ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> p_192457_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192462_b.remove(p_192457_1_);
         }
 
-        public void trigger(ItemStack item, int levelsIn)
+        public void func_192459_a(ItemStack p_192459_1_, int p_192459_2_)
         {
             List<ICriterionTrigger.Listener<EnchantedItemTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener : this.field_192462_b)
             {
-                if (((EnchantedItemTrigger.Instance)listener.getCriterionInstance()).test(item, levelsIn))
+                if (((EnchantedItemTrigger.Instance)listener.func_192158_a()).func_192257_a(p_192459_1_, p_192459_2_))
                 {
                     if (list == null)
                     {
@@ -148,7 +145,7 @@ public class EnchantedItemTrigger implements ICriterionTrigger<EnchantedItemTrig
             {
                 for (ICriterionTrigger.Listener<EnchantedItemTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192461_a);
                 }
             }
         }

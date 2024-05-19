@@ -1,8 +1,9 @@
 package net.minecraft.client.renderer.chunk;
 
-import java.util.ArrayDeque;
+import com.google.common.collect.Queues;
 import java.util.BitSet;
 import java.util.EnumSet;
+import java.util.Queue;
 import java.util.Set;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IntegerCache;
@@ -64,26 +65,26 @@ public class VisGraph
         return this.floodFill(getIndex(pos));
     }
 
-    private Set<EnumFacing> floodFill(int pos)
+    private Set<EnumFacing> floodFill(int p_178604_1_)
     {
         Set<EnumFacing> set = EnumSet.<EnumFacing>noneOf(EnumFacing.class);
-        ArrayDeque arraydeque = new ArrayDeque(384);
-        arraydeque.add(IntegerCache.getInteger(pos));
-        this.bitSet.set(pos, true);
+        Queue<Integer> queue = Queues.<Integer>newArrayDeque();
+        queue.add(IntegerCache.getInteger(p_178604_1_));
+        this.bitSet.set(p_178604_1_, true);
 
-        while (!arraydeque.isEmpty())
+        while (!queue.isEmpty())
         {
-            int i = ((Integer)arraydeque.poll()).intValue();
+            int i = ((Integer)queue.poll()).intValue();
             this.addEdges(i, set);
 
-            for (EnumFacing enumfacing : EnumFacing.VALUES)
+            for (EnumFacing enumfacing : EnumFacing.values())
             {
                 int j = this.getNeighborIndexAtFace(i, enumfacing);
 
                 if (j >= 0 && !this.bitSet.get(j))
                 {
                     this.bitSet.set(j, true);
-                    arraydeque.add(IntegerCache.getInteger(j));
+                    queue.add(IntegerCache.getInteger(j));
                 }
             }
         }
@@ -91,9 +92,9 @@ public class VisGraph
         return set;
     }
 
-    private void addEdges(int pos, Set<EnumFacing> p_178610_2_)
+    private void addEdges(int p_178610_1_, Set<EnumFacing> p_178610_2_)
     {
-        int i = pos >> 0 & 15;
+        int i = p_178610_1_ >> 0 & 15;
 
         if (i == 0)
         {
@@ -104,7 +105,7 @@ public class VisGraph
             p_178610_2_.add(EnumFacing.EAST);
         }
 
-        int j = pos >> 8 & 15;
+        int j = p_178610_1_ >> 8 & 15;
 
         if (j == 0)
         {
@@ -115,7 +116,7 @@ public class VisGraph
             p_178610_2_.add(EnumFacing.UP);
         }
 
-        int k = pos >> 4 & 15;
+        int k = p_178610_1_ >> 4 & 15;
 
         if (k == 0)
         {
@@ -127,57 +128,57 @@ public class VisGraph
         }
     }
 
-    private int getNeighborIndexAtFace(int pos, EnumFacing facing)
+    private int getNeighborIndexAtFace(int p_178603_1_, EnumFacing p_178603_2_)
     {
-        switch (facing)
+        switch (p_178603_2_)
         {
             case DOWN:
-                if ((pos >> 8 & 15) == 0)
+                if ((p_178603_1_ >> 8 & 15) == 0)
                 {
                     return -1;
                 }
 
-                return pos - DY;
+                return p_178603_1_ - DY;
 
             case UP:
-                if ((pos >> 8 & 15) == 15)
+                if ((p_178603_1_ >> 8 & 15) == 15)
                 {
                     return -1;
                 }
 
-                return pos + DY;
+                return p_178603_1_ + DY;
 
             case NORTH:
-                if ((pos >> 4 & 15) == 0)
+                if ((p_178603_1_ >> 4 & 15) == 0)
                 {
                     return -1;
                 }
 
-                return pos - DZ;
+                return p_178603_1_ - DZ;
 
             case SOUTH:
-                if ((pos >> 4 & 15) == 15)
+                if ((p_178603_1_ >> 4 & 15) == 15)
                 {
                     return -1;
                 }
 
-                return pos + DZ;
+                return p_178603_1_ + DZ;
 
             case WEST:
-                if ((pos >> 0 & 15) == 0)
+                if ((p_178603_1_ >> 0 & 15) == 0)
                 {
                     return -1;
                 }
 
-                return pos - DX;
+                return p_178603_1_ - DX;
 
             case EAST:
-                if ((pos >> 0 & 15) == 15)
+                if ((p_178603_1_ >> 0 & 15) == 15)
                 {
                     return -1;
                 }
 
-                return pos + DX;
+                return p_178603_1_ + DX;
 
             default:
                 return -1;

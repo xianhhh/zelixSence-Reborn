@@ -58,7 +58,7 @@ public class GuiScreenResourcePacks extends GuiScreen
 
             if (resourcepackrepository$entry2 != null)
             {
-                this.selectedResourcePacks.add(new ResourcePackListEntryServer(this, resourcepackrepository.getServerResourcePack()));
+                this.selectedResourcePacks.add(new ResourcePackListEntryServer(this, resourcepackrepository.getResourcePackInstance()));
             }
 
             for (ResourcePackRepository.Entry resourcepackrepository$entry1 : Lists.reverse(resourcepackrepository.getRepositoryEntries()))
@@ -87,14 +87,14 @@ public class GuiScreenResourcePacks extends GuiScreen
         this.availableResourcePacksList.handleMouseInput();
     }
 
-    public boolean hasResourcePackEntry(ResourcePackListEntry resourcePackEntry)
+    public boolean hasResourcePackEntry(ResourcePackListEntry p_146961_1_)
     {
-        return this.selectedResourcePacks.contains(resourcePackEntry);
+        return this.selectedResourcePacks.contains(p_146961_1_);
     }
 
-    public List<ResourcePackListEntry> getListContaining(ResourcePackListEntry resourcePackEntry)
+    public List<ResourcePackListEntry> getListContaining(ResourcePackListEntry p_146962_1_)
     {
-        return this.hasResourcePackEntry(resourcePackEntry) ? this.selectedResourcePacks : this.availableResourcePacks;
+        return this.hasResourcePackEntry(p_146962_1_) ? this.selectedResourcePacks : this.availableResourcePacks;
     }
 
     public List<ResourcePackListEntry> getAvailableResourcePacks()
@@ -183,8 +183,8 @@ public class GuiScreenResourcePacks extends GuiScreen
         this.drawBackground(0);
         this.availableResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);
         this.selectedResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, I18n.format("resourcePack.title"), this.width / 2, 16, 16777215);
-        this.drawCenteredString(this.fontRenderer, I18n.format("resourcePack.folderInfo"), this.width / 2 - 77, this.height - 26, 8421504);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.title"), this.width / 2, 16, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.folderInfo"), this.width / 2 - 77, this.height - 26, 8421504);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

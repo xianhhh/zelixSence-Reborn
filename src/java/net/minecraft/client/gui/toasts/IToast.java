@@ -8,31 +8,31 @@ import net.minecraft.util.SoundEvent;
 
 public interface IToast
 {
-    ResourceLocation TEXTURE_TOASTS = new ResourceLocation("textures/gui/toasts.png");
-    Object NO_TOKEN = new Object();
+    ResourceLocation field_193654_a = new ResourceLocation("textures/gui/toasts.png");
+    Object field_193655_b = new Object();
 
-    IToast.Visibility draw(GuiToast toastGui, long delta);
+    IToast.Visibility func_193653_a(GuiToast p_193653_1_, long p_193653_2_);
 
-default Object getType()
+default Object func_193652_b()
     {
-        return NO_TOKEN;
+        return field_193655_b;
     }
 
     public static enum Visibility
     {
-        SHOW(SoundEvents.UI_TOAST_IN),
-        HIDE(SoundEvents.UI_TOAST_OUT);
+        SHOW(SoundEvents.field_194226_id),
+        HIDE(SoundEvents.field_194227_ie);
 
-        private final SoundEvent sound;
+        private final SoundEvent field_194170_c;
 
-        private Visibility(SoundEvent soundIn)
+        private Visibility(SoundEvent p_i47607_3_)
         {
-            this.sound = soundIn;
+            this.field_194170_c = p_i47607_3_;
         }
 
-        public void playSound(SoundHandler handler)
+        public void func_194169_a(SoundHandler p_194169_1_)
         {
-            handler.playSound(PositionedSoundRecord.getRecord(this.sound, 1.0F, 1.0F));
+            p_194169_1_.playSound(PositionedSoundRecord.func_194007_a(this.field_194170_c, 1.0F, 1.0F));
         }
     }
 }

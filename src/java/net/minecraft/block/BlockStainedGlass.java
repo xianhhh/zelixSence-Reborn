@@ -39,20 +39,20 @@ public class BlockStainedGlass extends BlockBreakable
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
-            items.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
+            tab.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
         }
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
-        return MapColor.getBlockColor((EnumDyeColor)state.getValue(COLOR));
+        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
     }
 
     public BlockRenderLayer getBlockLayer()

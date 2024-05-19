@@ -61,7 +61,7 @@ public class BlockLever extends Block
     }
 
     /**
-     * Check whether this Block can be placed at pos, while aiming at the specified side of an adjacent block
+     * Check whether this Block can be placed on the given side
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
@@ -81,16 +81,16 @@ public class BlockLever extends Block
         return false;
     }
 
-    protected static boolean canAttachTo(World worldIn, BlockPos p_181090_1_, EnumFacing p_181090_2_)
+    protected static boolean canAttachTo(World p_181090_0_, BlockPos p_181090_1_, EnumFacing p_181090_2_)
     {
-        return BlockButton.canPlaceBlock(worldIn, p_181090_1_, p_181090_2_);
+        return BlockButton.canPlaceBlock(p_181090_0_, p_181090_1_, p_181090_2_);
     }
 
     /**
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         IBlockState iblockstate = this.getDefaultState().withProperty(POWERED, Boolean.valueOf(false));
 
@@ -108,7 +108,7 @@ public class BlockLever extends Block
                 }
             }
 
-            if (worldIn.getBlockState(pos.down()).isTopSolid())
+            if (worldIn.getBlockState(pos.down()).isFullyOpaque())
             {
                 return iblockstate.withProperty(FACING, BlockLever.EnumOrientation.forFacings(EnumFacing.UP, placer.getHorizontalFacing()));
             }
@@ -124,7 +124,7 @@ public class BlockLever extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         if (this.checkCanSurvive(worldIn, pos, state) && !canAttachTo(worldIn, pos, ((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing()))
         {
@@ -133,16 +133,16 @@ public class BlockLever extends Block
         }
     }
 
-    private boolean checkCanSurvive(World worldIn, BlockPos pos, IBlockState state)
+    private boolean checkCanSurvive(World p_181091_1_, BlockPos p_181091_2_, IBlockState p_181091_3_)
     {
-        if (this.canPlaceBlockAt(worldIn, pos))
+        if (this.canPlaceBlockAt(p_181091_1_, p_181091_2_))
         {
             return true;
         }
         else
         {
-            this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockToAir(pos);
+            this.dropBlockAsItem(p_181091_1_, p_181091_2_, p_181091_3_, 0);
+            p_181091_1_.setBlockToAir(p_181091_2_);
             return false;
         }
     }
@@ -174,10 +174,7 @@ public class BlockLever extends Block
         }
     }
 
-    /**
-     * Called when the block is right clicked by a player.
-     */
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -362,7 +359,7 @@ public class BlockLever extends Block
         return new BlockStateContainer(this, new IProperty[] {FACING, POWERED});
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

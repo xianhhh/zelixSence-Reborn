@@ -12,10 +12,10 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
 {
     private final RealmsSimpleScrolledSelectionList realmsScrolledSelectionList;
 
-    public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList realmsScrolledSelectionListIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
+    public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList p_i45525_1_, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
     {
         super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
-        this.realmsScrolledSelectionList = realmsScrolledSelectionListIn;
+        this.realmsScrolledSelectionList = p_i45525_1_;
     }
 
     protected int getSize()
@@ -44,7 +44,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
         this.realmsScrolledSelectionList.renderBackground();
     }
 
-    protected void drawSlot(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
+    protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
     {
         this.realmsScrolledSelectionList.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
     }
@@ -104,7 +104,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
                 this.drawListHeader(k, l, tessellator);
             }
 
-            this.drawSelectionBox(k, l, mouseXIn, mouseYIn, partialTicks);
+            this.func_192638_a(k, l, mouseXIn, mouseYIn, partialTicks);
             GlStateManager.disableDepth();
             this.overlayBackground(0, this.top, 255, 255);
             this.overlayBackground(this.bottom, this.height, 255, 255);

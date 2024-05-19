@@ -13,52 +13,52 @@ import net.minecraft.util.math.MathHelper;
 
 public class GuiToast extends Gui
 {
-    private final Minecraft mc;
-    private final GuiToast.ToastInstance<?>[] visible = new GuiToast.ToastInstance[5];
-    private final Deque<IToast> toastsQueue = Queues.<IToast>newArrayDeque();
+    private final Minecraft field_191790_f;
+    private final GuiToast.ToastInstance<?>[] field_191791_g = new GuiToast.ToastInstance[5];
+    private final Deque<IToast> field_191792_h = Queues.<IToast>newArrayDeque();
 
-    public GuiToast(Minecraft mcIn)
+    public GuiToast(Minecraft p_i47388_1_)
     {
-        this.mc = mcIn;
+        this.field_191790_f = p_i47388_1_;
     }
 
-    public void drawToast(ScaledResolution resolution)
+    public void func_191783_a(ScaledResolution p_191783_1_)
     {
-        if (!this.mc.gameSettings.hideGUI)
+        if (!this.field_191790_f.gameSettings.hideGUI)
         {
             RenderHelper.disableStandardItemLighting();
 
-            for (int i = 0; i < this.visible.length; ++i)
+            for (int i = 0; i < this.field_191791_g.length; ++i)
             {
-                GuiToast.ToastInstance<?> toastinstance = this.visible[i];
+                GuiToast.ToastInstance<?> toastinstance = this.field_191791_g[i];
 
-                if (toastinstance != null && toastinstance.render(resolution.getScaledWidth(), i))
+                if (toastinstance != null && toastinstance.func_193684_a(p_191783_1_.getScaledWidth(), i))
                 {
-                    this.visible[i] = null;
+                    this.field_191791_g[i] = null;
                 }
 
-                if (this.visible[i] == null && !this.toastsQueue.isEmpty())
+                if (this.field_191791_g[i] == null && !this.field_191792_h.isEmpty())
                 {
-                    this.visible[i] = new GuiToast.ToastInstance(this.toastsQueue.removeFirst());
+                    this.field_191791_g[i] = new GuiToast.ToastInstance(this.field_191792_h.removeFirst());
                 }
             }
         }
     }
 
     @Nullable
-    public <T extends IToast> T getToast(Class <? extends T > p_192990_1_, Object p_192990_2_)
+    public <T extends IToast> T func_192990_a(Class <? extends T > p_192990_1_, Object p_192990_2_)
     {
-        for (GuiToast.ToastInstance<?> toastinstance : this.visible)
+        for (GuiToast.ToastInstance<?> toastinstance : this.field_191791_g)
         {
-            if (toastinstance != null && p_192990_1_.isAssignableFrom(toastinstance.getToast().getClass()) && toastinstance.getToast().getType().equals(p_192990_2_))
+            if (toastinstance != null && p_192990_1_.isAssignableFrom(toastinstance.func_193685_a().getClass()) && toastinstance.func_193685_a().func_193652_b().equals(p_192990_2_))
             {
-                return (T)toastinstance.getToast();
+                return (T)toastinstance.func_193685_a();
             }
         }
 
-        for (IToast itoast : this.toastsQueue)
+        for (IToast itoast : this.field_191792_h)
         {
-            if (p_192990_1_.isAssignableFrom(itoast.getClass()) && itoast.getType().equals(p_192990_2_))
+            if (p_192990_1_.isAssignableFrom(itoast.getClass()) && itoast.func_193652_b().equals(p_192990_2_))
             {
                 return (T)itoast;
             }
@@ -67,77 +67,77 @@ public class GuiToast extends Gui
         return (T)null;
     }
 
-    public void clear()
+    public void func_191788_b()
     {
-        Arrays.fill(this.visible, (Object)null);
-        this.toastsQueue.clear();
+        Arrays.fill(this.field_191791_g, (Object)null);
+        this.field_191792_h.clear();
     }
 
-    public void add(IToast toastIn)
+    public void func_192988_a(IToast p_192988_1_)
     {
-        this.toastsQueue.add(toastIn);
+        this.field_191792_h.add(p_192988_1_);
     }
 
-    public Minecraft getMinecraft()
+    public Minecraft func_192989_b()
     {
-        return this.mc;
+        return this.field_191790_f;
     }
 
     class ToastInstance<T extends IToast>
     {
-        private final T toast;
-        private long animationTime;
-        private long visibleTime;
-        private IToast.Visibility visibility;
+        private final T field_193688_b;
+        private long field_193689_c;
+        private long field_193690_d;
+        private IToast.Visibility field_193691_e;
 
-        private ToastInstance(T toastIn)
+        private ToastInstance(T p_i47483_2_)
         {
-            this.animationTime = -1L;
-            this.visibleTime = -1L;
-            this.visibility = IToast.Visibility.SHOW;
-            this.toast = toastIn;
+            this.field_193689_c = -1L;
+            this.field_193690_d = -1L;
+            this.field_193691_e = IToast.Visibility.SHOW;
+            this.field_193688_b = p_i47483_2_;
         }
 
-        public T getToast()
+        public T func_193685_a()
         {
-            return this.toast;
+            return this.field_193688_b;
         }
 
-        private float getVisibility(long p_193686_1_)
+        private float func_193686_a(long p_193686_1_)
         {
-            float f = MathHelper.clamp((float)(p_193686_1_ - this.animationTime) / 600.0F, 0.0F, 1.0F);
+            float f = MathHelper.clamp((float)(p_193686_1_ - this.field_193689_c) / 600.0F, 0.0F, 1.0F);
             f = f * f;
-            return this.visibility == IToast.Visibility.HIDE ? 1.0F - f : f;
+            return this.field_193691_e == IToast.Visibility.HIDE ? 1.0F - f : f;
         }
 
-        public boolean render(int p_193684_1_, int p_193684_2_)
+        public boolean func_193684_a(int p_193684_1_, int p_193684_2_)
         {
             long i = Minecraft.getSystemTime();
 
-            if (this.animationTime == -1L)
+            if (this.field_193689_c == -1L)
             {
-                this.animationTime = i;
-                this.visibility.playSound(GuiToast.this.mc.getSoundHandler());
+                this.field_193689_c = i;
+                this.field_193691_e.func_194169_a(GuiToast.this.field_191790_f.getSoundHandler());
             }
 
-            if (this.visibility == IToast.Visibility.SHOW && i - this.animationTime <= 600L)
+            if (this.field_193691_e == IToast.Visibility.SHOW && i - this.field_193689_c <= 600L)
             {
-                this.visibleTime = i;
+                this.field_193690_d = i;
             }
 
             GlStateManager.pushMatrix();
-            GlStateManager.translate((float)p_193684_1_ - 160.0F * this.getVisibility(i), (float)(p_193684_2_ * 32), (float)(500 + p_193684_2_));
-            IToast.Visibility itoast$visibility = this.toast.draw(GuiToast.this, i - this.visibleTime);
+            GlStateManager.translate((float)p_193684_1_ - 160.0F * this.func_193686_a(i), (float)(p_193684_2_ * 32), (float)(500 + p_193684_2_));
+            IToast.Visibility itoast$visibility = this.field_193688_b.func_193653_a(GuiToast.this, i - this.field_193690_d);
             GlStateManager.popMatrix();
 
-            if (itoast$visibility != this.visibility)
+            if (itoast$visibility != this.field_193691_e)
             {
-                this.animationTime = i - (long)((int)((1.0F - this.getVisibility(i)) * 600.0F));
-                this.visibility = itoast$visibility;
-                this.visibility.playSound(GuiToast.this.mc.getSoundHandler());
+                this.field_193689_c = i - (long)((int)((1.0F - this.func_193686_a(i)) * 600.0F));
+                this.field_193691_e = itoast$visibility;
+                this.field_193691_e.func_194169_a(GuiToast.this.field_191790_f.getSoundHandler());
             }
 
-            return this.visibility == IToast.Visibility.HIDE && i - this.animationTime > 600L;
+            return this.field_193691_e == IToast.Visibility.HIDE && i - this.field_193689_c > 600L;
         }
     }
 }

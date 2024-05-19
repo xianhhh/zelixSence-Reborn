@@ -22,103 +22,100 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class Advancement
 {
-    private final Advancement parent;
-    private final DisplayInfo display;
-    private final AdvancementRewards rewards;
-    private final ResourceLocation id;
-    private final Map<String, Criterion> criteria;
-    private final String[][] requirements;
-    private final Set<Advancement> children = Sets.<Advancement>newLinkedHashSet();
-    private final ITextComponent displayText;
+    private final Advancement field_192076_a;
+    private final DisplayInfo field_192077_b;
+    private final AdvancementRewards field_192078_c;
+    private final ResourceLocation field_192079_d;
+    private final Map<String, Criterion> field_192080_e;
+    private final String[][] field_192081_f;
+    private final Set<Advancement> field_192082_g = Sets.<Advancement>newLinkedHashSet();
+    private final ITextComponent field_193125_h;
 
-    public Advancement(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn, AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn)
+    public Advancement(ResourceLocation p_i47472_1_, @Nullable Advancement p_i47472_2_, @Nullable DisplayInfo p_i47472_3_, AdvancementRewards p_i47472_4_, Map<String, Criterion> p_i47472_5_, String[][] p_i47472_6_)
     {
-        this.id = id;
-        this.display = displayIn;
-        this.criteria = ImmutableMap.copyOf(criteriaIn);
-        this.parent = parentIn;
-        this.rewards = rewardsIn;
-        this.requirements = requirementsIn;
+        this.field_192079_d = p_i47472_1_;
+        this.field_192077_b = p_i47472_3_;
+        this.field_192080_e = ImmutableMap.copyOf(p_i47472_5_);
+        this.field_192076_a = p_i47472_2_;
+        this.field_192078_c = p_i47472_4_;
+        this.field_192081_f = p_i47472_6_;
 
-        if (parentIn != null)
+        if (p_i47472_2_ != null)
         {
-            parentIn.addChild(this);
+            p_i47472_2_.func_192071_a(this);
         }
 
-        if (displayIn == null)
+        if (p_i47472_3_ == null)
         {
-            this.displayText = new TextComponentString(id.toString());
+            this.field_193125_h = new TextComponentString(p_i47472_1_.toString());
         }
         else
         {
-            this.displayText = new TextComponentString("[");
-            this.displayText.getStyle().setColor(displayIn.getFrame().getFormat());
-            ITextComponent itextcomponent = displayIn.getTitle().createCopy();
+            this.field_193125_h = new TextComponentString("[");
+            this.field_193125_h.getStyle().setColor(p_i47472_3_.func_192291_d().func_193229_c());
+            ITextComponent itextcomponent = p_i47472_3_.func_192297_a().createCopy();
             ITextComponent itextcomponent1 = new TextComponentString("");
             ITextComponent itextcomponent2 = itextcomponent.createCopy();
-            itextcomponent2.getStyle().setColor(displayIn.getFrame().getFormat());
+            itextcomponent2.getStyle().setColor(p_i47472_3_.func_192291_d().func_193229_c());
             itextcomponent1.appendSibling(itextcomponent2);
             itextcomponent1.appendText("\n");
-            itextcomponent1.appendSibling(displayIn.getDescription());
+            itextcomponent1.appendSibling(p_i47472_3_.func_193222_b());
             itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1));
-            this.displayText.appendSibling(itextcomponent);
-            this.displayText.appendText("]");
+            this.field_193125_h.appendSibling(itextcomponent);
+            this.field_193125_h.appendText("]");
         }
     }
 
-    /**
-     * Creates a new advancement builder with the data from this advancement
-     */
-    public Advancement.Builder copy()
+    public Advancement.Builder func_192075_a()
     {
-        return new Advancement.Builder(this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements);
+        return new Advancement.Builder(this.field_192076_a == null ? null : this.field_192076_a.func_192067_g(), this.field_192077_b, this.field_192078_c, this.field_192080_e, this.field_192081_f);
     }
 
     @Nullable
-    public Advancement getParent()
+    public Advancement func_192070_b()
     {
-        return this.parent;
+        return this.field_192076_a;
     }
 
     @Nullable
-    public DisplayInfo getDisplay()
+    public DisplayInfo func_192068_c()
     {
-        return this.display;
+        return this.field_192077_b;
     }
 
-    public AdvancementRewards getRewards()
+    public AdvancementRewards func_192072_d()
     {
-        return this.rewards;
+        return this.field_192078_c;
     }
 
     public String toString()
     {
-        return "SimpleAdvancement{id=" + this.getId() + ", parent=" + (this.parent == null ? "null" : this.parent.getId()) + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + '}';
+        return "SimpleAdvancement{id=" + this.func_192067_g() + ", parent=" + (this.field_192076_a == null ? "null" : this.field_192076_a.func_192067_g()) + ", display=" + this.field_192077_b + ", rewards=" + this.field_192078_c + ", criteria=" + this.field_192080_e + ", requirements=" + Arrays.deepToString(this.field_192081_f) + '}';
     }
 
-    public Iterable<Advancement> getChildren()
+    public Iterable<Advancement> func_192069_e()
     {
-        return this.children;
+        return this.field_192082_g;
     }
 
-    public Map<String, Criterion> getCriteria()
+    public Map<String, Criterion> func_192073_f()
     {
-        return this.criteria;
+        return this.field_192080_e;
     }
 
-    public int getRequirementCount()
+    public int func_193124_g()
     {
-        return this.requirements.length;
+        return this.field_192081_f.length;
     }
 
-    public void addChild(Advancement advancementIn)
+    public void func_192071_a(Advancement p_192071_1_)
     {
-        this.children.add(advancementIn);
+        this.field_192082_g.add(p_192071_1_);
     }
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192067_g()
     {
-        return this.id;
+        return this.field_192079_d;
     }
 
     public boolean equals(Object p_equals_1_)
@@ -134,108 +131,108 @@ public class Advancement
         else
         {
             Advancement advancement = (Advancement)p_equals_1_;
-            return this.id.equals(advancement.id);
+            return this.field_192079_d.equals(advancement.field_192079_d);
         }
     }
 
     public int hashCode()
     {
-        return this.id.hashCode();
+        return this.field_192079_d.hashCode();
     }
 
-    public String[][] getRequirements()
+    public String[][] func_192074_h()
     {
-        return this.requirements;
+        return this.field_192081_f;
     }
 
-    public ITextComponent getDisplayText()
+    public ITextComponent func_193123_j()
     {
-        return this.displayText;
+        return this.field_193125_h;
     }
 
     public static class Builder
     {
-        private final ResourceLocation parentId;
-        private Advancement parent;
-        private final DisplayInfo display;
-        private final AdvancementRewards rewards;
-        private final Map<String, Criterion> criteria;
-        private final String[][] requirements;
+        private final ResourceLocation field_192061_a;
+        private Advancement field_192062_b;
+        private final DisplayInfo field_192063_c;
+        private final AdvancementRewards field_192064_d;
+        private final Map<String, Criterion> field_192065_e;
+        private final String[][] field_192066_f;
 
         Builder(@Nullable ResourceLocation p_i47414_1_, @Nullable DisplayInfo p_i47414_2_, AdvancementRewards p_i47414_3_, Map<String, Criterion> p_i47414_4_, String[][] p_i47414_5_)
         {
-            this.parentId = p_i47414_1_;
-            this.display = p_i47414_2_;
-            this.rewards = p_i47414_3_;
-            this.criteria = p_i47414_4_;
-            this.requirements = p_i47414_5_;
+            this.field_192061_a = p_i47414_1_;
+            this.field_192063_c = p_i47414_2_;
+            this.field_192064_d = p_i47414_3_;
+            this.field_192065_e = p_i47414_4_;
+            this.field_192066_f = p_i47414_5_;
         }
 
-        public boolean resolveParent(Function<ResourceLocation, Advancement> lookup)
+        public boolean func_192058_a(Function<ResourceLocation, Advancement> p_192058_1_)
         {
-            if (this.parentId == null)
+            if (this.field_192061_a == null)
             {
                 return true;
             }
             else
             {
-                this.parent = lookup.apply(this.parentId);
-                return this.parent != null;
+                this.field_192062_b = p_192058_1_.apply(this.field_192061_a);
+                return this.field_192062_b != null;
             }
         }
 
-        public Advancement build(ResourceLocation id)
+        public Advancement func_192056_a(ResourceLocation p_192056_1_)
         {
-            return new Advancement(id, this.parent, this.display, this.rewards, this.criteria, this.requirements);
+            return new Advancement(p_192056_1_, this.field_192062_b, this.field_192063_c, this.field_192064_d, this.field_192065_e, this.field_192066_f);
         }
 
-        public void writeTo(PacketBuffer buf)
+        public void func_192057_a(PacketBuffer p_192057_1_)
         {
-            if (this.parentId == null)
+            if (this.field_192061_a == null)
             {
-                buf.writeBoolean(false);
+                p_192057_1_.writeBoolean(false);
             }
             else
             {
-                buf.writeBoolean(true);
-                buf.writeResourceLocation(this.parentId);
+                p_192057_1_.writeBoolean(true);
+                p_192057_1_.func_192572_a(this.field_192061_a);
             }
 
-            if (this.display == null)
+            if (this.field_192063_c == null)
             {
-                buf.writeBoolean(false);
+                p_192057_1_.writeBoolean(false);
             }
             else
             {
-                buf.writeBoolean(true);
-                this.display.write(buf);
+                p_192057_1_.writeBoolean(true);
+                this.field_192063_c.func_192290_a(p_192057_1_);
             }
 
-            Criterion.serializeToNetwork(this.criteria, buf);
-            buf.writeVarInt(this.requirements.length);
+            Criterion.func_192141_a(this.field_192065_e, p_192057_1_);
+            p_192057_1_.writeVarIntToBuffer(this.field_192066_f.length);
 
-            for (String[] astring : this.requirements)
+            for (String[] astring : this.field_192066_f)
             {
-                buf.writeVarInt(astring.length);
+                p_192057_1_.writeVarIntToBuffer(astring.length);
 
                 for (String s : astring)
                 {
-                    buf.writeString(s);
+                    p_192057_1_.writeString(s);
                 }
             }
         }
 
         public String toString()
         {
-            return "Task Advancement{parentId=" + this.parentId + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + '}';
+            return "Task Advancement{parentId=" + this.field_192061_a + ", display=" + this.field_192063_c + ", rewards=" + this.field_192064_d + ", criteria=" + this.field_192065_e + ", requirements=" + Arrays.deepToString(this.field_192066_f) + '}';
         }
 
-        public static Advancement.Builder deserialize(JsonObject json, JsonDeserializationContext context)
+        public static Advancement.Builder func_192059_a(JsonObject p_192059_0_, JsonDeserializationContext p_192059_1_)
         {
-            ResourceLocation resourcelocation = json.has("parent") ? new ResourceLocation(JsonUtils.getString(json, "parent")) : null;
-            DisplayInfo displayinfo = json.has("display") ? DisplayInfo.deserialize(JsonUtils.getJsonObject(json, "display"), context) : null;
-            AdvancementRewards advancementrewards = (AdvancementRewards)JsonUtils.deserializeClass(json, "rewards", AdvancementRewards.EMPTY, context, AdvancementRewards.class);
-            Map<String, Criterion> map = Criterion.criteriaFromJson(JsonUtils.getJsonObject(json, "criteria"), context);
+            ResourceLocation resourcelocation = p_192059_0_.has("parent") ? new ResourceLocation(JsonUtils.getString(p_192059_0_, "parent")) : null;
+            DisplayInfo displayinfo = p_192059_0_.has("display") ? DisplayInfo.func_192294_a(JsonUtils.getJsonObject(p_192059_0_, "display"), p_192059_1_) : null;
+            AdvancementRewards advancementrewards = (AdvancementRewards)JsonUtils.deserializeClass(p_192059_0_, "rewards", AdvancementRewards.field_192114_a, p_192059_1_, AdvancementRewards.class);
+            Map<String, Criterion> map = Criterion.func_192144_b(JsonUtils.getJsonObject(p_192059_0_, "criteria"), p_192059_1_);
 
             if (map.isEmpty())
             {
@@ -243,7 +240,7 @@ public class Advancement
             }
             else
             {
-                JsonArray jsonarray = JsonUtils.getJsonArray(json, "requirements", new JsonArray());
+                JsonArray jsonarray = JsonUtils.getJsonArray(p_192059_0_, "requirements", new JsonArray());
                 String[][] astring = new String[jsonarray.size()][];
 
                 for (int i = 0; i < jsonarray.size(); ++i)
@@ -307,24 +304,24 @@ public class Advancement
             }
         }
 
-        public static Advancement.Builder readFrom(PacketBuffer buf) throws IOException
+        public static Advancement.Builder func_192060_b(PacketBuffer p_192060_0_) throws IOException
         {
-            ResourceLocation resourcelocation = buf.readBoolean() ? buf.readResourceLocation() : null;
-            DisplayInfo displayinfo = buf.readBoolean() ? DisplayInfo.read(buf) : null;
-            Map<String, Criterion> map = Criterion.criteriaFromNetwork(buf);
-            String[][] astring = new String[buf.readVarInt()][];
+            ResourceLocation resourcelocation = p_192060_0_.readBoolean() ? p_192060_0_.func_192575_l() : null;
+            DisplayInfo displayinfo = p_192060_0_.readBoolean() ? DisplayInfo.func_192295_b(p_192060_0_) : null;
+            Map<String, Criterion> map = Criterion.func_192142_c(p_192060_0_);
+            String[][] astring = new String[p_192060_0_.readVarIntFromBuffer()][];
 
             for (int i = 0; i < astring.length; ++i)
             {
-                astring[i] = new String[buf.readVarInt()];
+                astring[i] = new String[p_192060_0_.readVarIntFromBuffer()];
 
                 for (int j = 0; j < astring[i].length; ++j)
                 {
-                    astring[i][j] = buf.readString(32767);
+                    astring[i][j] = p_192060_0_.readStringFromBuffer(32767);
                 }
             }
 
-            return new Advancement.Builder(resourcelocation, displayinfo, AdvancementRewards.EMPTY, map, astring);
+            return new Advancement.Builder(resourcelocation, displayinfo, AdvancementRewards.field_192114_a, map, astring);
         }
     }
 }

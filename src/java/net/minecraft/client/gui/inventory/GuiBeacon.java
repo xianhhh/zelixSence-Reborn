@@ -126,7 +126,7 @@ public class GuiBeacon extends GuiContainer
             }
         }
 
-        this.beaconConfirmButton.enabled = !this.tileBeacon.getStackInSlot(0).isEmpty() && potion != null;
+        this.beaconConfirmButton.enabled = !this.tileBeacon.getStackInSlot(0).func_190926_b() && potion != null;
     }
 
     /**
@@ -182,7 +182,7 @@ public class GuiBeacon extends GuiContainer
     {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.func_191948_b(mouseX, mouseY);
     }
 
     /**
@@ -191,8 +191,8 @@ public class GuiBeacon extends GuiContainer
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
         RenderHelper.disableStandardItemLighting();
-        this.drawCenteredString(this.fontRenderer, I18n.format("tile.beacon.primary"), 62, 10, 14737632);
-        this.drawCenteredString(this.fontRenderer, I18n.format("tile.beacon.secondary"), 169, 10, 14737632);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("tile.beacon.primary"), 62, 10, 14737632);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("tile.beacon.secondary"), 169, 10, 14737632);
 
         for (GuiButton guibutton : this.buttonList)
         {
@@ -239,13 +239,13 @@ public class GuiBeacon extends GuiContainer
             this.iconY = iconYIn;
         }
 
-        public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
+        public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
         {
             if (this.visible)
             {
-                mc.getTextureManager().bindTexture(GuiBeacon.BEACON_GUI_TEXTURES);
+                p_191745_1_.getTextureManager().bindTexture(GuiBeacon.BEACON_GUI_TEXTURES);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+                this.hovered = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
                 int i = 219;
                 int j = 0;
 
@@ -262,14 +262,14 @@ public class GuiBeacon extends GuiContainer
                     j += this.width * 3;
                 }
 
-                this.drawTexturedModalRect(this.x, this.y, j, 219, this.width, this.height);
+                this.drawTexturedModalRect(this.xPosition, this.yPosition, j, 219, this.width, this.height);
 
                 if (!GuiBeacon.BEACON_GUI_TEXTURES.equals(this.iconTexture))
                 {
-                    mc.getTextureManager().bindTexture(this.iconTexture);
+                    p_191745_1_.getTextureManager().bindTexture(this.iconTexture);
                 }
 
-                this.drawTexturedModalRect(this.x + 2, this.y + 2, this.iconX, this.iconY, 18, 18);
+                this.drawTexturedModalRect(this.xPosition + 2, this.yPosition + 2, this.iconX, this.iconY, 18, 18);
             }
         }
 
@@ -293,7 +293,7 @@ public class GuiBeacon extends GuiContainer
 
         public void drawButtonForegroundLayer(int mouseX, int mouseY)
         {
-            GuiBeacon.this.drawHoveringText(I18n.format("gui.cancel"), mouseX, mouseY);
+            GuiBeacon.this.drawCreativeTabHoveringText(I18n.format("gui.cancel"), mouseX, mouseY);
         }
     }
 
@@ -306,7 +306,7 @@ public class GuiBeacon extends GuiContainer
 
         public void drawButtonForegroundLayer(int mouseX, int mouseY)
         {
-            GuiBeacon.this.drawHoveringText(I18n.format("gui.done"), mouseX, mouseY);
+            GuiBeacon.this.drawCreativeTabHoveringText(I18n.format("gui.done"), mouseX, mouseY);
         }
     }
 
@@ -331,7 +331,7 @@ public class GuiBeacon extends GuiContainer
                 s = s + " II";
             }
 
-            GuiBeacon.this.drawHoveringText(s, mouseX, mouseY);
+            GuiBeacon.this.drawCreativeTabHoveringText(s, mouseX, mouseY);
         }
     }
 }

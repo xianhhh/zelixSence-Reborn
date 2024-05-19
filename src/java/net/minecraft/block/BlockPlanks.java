@@ -36,11 +36,11 @@ public class BlockPlanks extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values())
         {
-            items.add(new ItemStack(this, 1, blockplanks$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blockplanks$enumtype.getMetadata()));
         }
     }
 
@@ -55,7 +55,7 @@ public class BlockPlanks extends Block
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
         return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMapColor();
     }

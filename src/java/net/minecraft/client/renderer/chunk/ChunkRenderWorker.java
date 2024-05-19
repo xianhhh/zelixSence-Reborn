@@ -26,9 +26,9 @@ public class ChunkRenderWorker implements Runnable
     private final RegionRenderCacheBuilder regionRenderCacheBuilder;
     private boolean shouldRun;
 
-    public ChunkRenderWorker(ChunkRenderDispatcher chunkRenderDispatcherIn)
+    public ChunkRenderWorker(ChunkRenderDispatcher p_i46201_1_)
     {
-        this(chunkRenderDispatcherIn, (RegionRenderCacheBuilder)null);
+        this(p_i46201_1_, (RegionRenderCacheBuilder)null);
     }
 
     public ChunkRenderWorker(ChunkRenderDispatcher chunkRenderDispatcherIn, @Nullable RegionRenderCacheBuilder regionRenderCacheBuilderIn)
@@ -100,18 +100,18 @@ public class ChunkRenderWorker implements Runnable
             generator.getLock().unlock();
         }
 
-        Entity entity1 = Minecraft.getMinecraft().getRenderViewEntity();
+        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
 
-        if (entity1 == null)
+        if (entity == null)
         {
             generator.finish();
         }
         else
         {
             generator.setRegionRenderCacheBuilder(this.getRegionRenderCacheBuilder());
-            float f = (float)entity1.posX;
-            float f1 = (float)entity1.posY + entity1.getEyeHeight();
-            float f2 = (float)entity1.posZ;
+            float f = (float)entity.posX;
+            float f1 = (float)entity.posY + entity.getEyeHeight();
+            float f2 = (float)entity.posZ;
             ChunkCompileTaskGenerator.Type chunkcompiletaskgenerator$type = generator.getType();
 
             if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK)
@@ -145,25 +145,25 @@ public class ChunkRenderWorker implements Runnable
                 generator.getLock().unlock();
             }
 
-            final CompiledChunk compiledchunk1 = generator.getCompiledChunk();
-            ArrayList arraylist1 = Lists.newArrayList();
+            final CompiledChunk compiledchunk = generator.getCompiledChunk();
+            ArrayList arraylist = Lists.newArrayList();
 
             if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK)
             {
                 for (BlockRenderLayer blockrenderlayer : BlockRenderLayer.values())
                 {
-                    if (compiledchunk1.isLayerStarted(blockrenderlayer))
+                    if (compiledchunk.isLayerStarted(blockrenderlayer))
                     {
-                        arraylist1.add(this.chunkRenderDispatcher.uploadChunk(blockrenderlayer, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(blockrenderlayer), generator.getRenderChunk(), compiledchunk1, generator.getDistanceSq()));
+                        arraylist.add(this.chunkRenderDispatcher.uploadChunk(blockrenderlayer, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(blockrenderlayer), generator.getRenderChunk(), compiledchunk, generator.getDistanceSq()));
                     }
                 }
             }
             else if (chunkcompiletaskgenerator$type == ChunkCompileTaskGenerator.Type.RESORT_TRANSPARENCY)
             {
-                arraylist1.add(this.chunkRenderDispatcher.uploadChunk(BlockRenderLayer.TRANSLUCENT, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(BlockRenderLayer.TRANSLUCENT), generator.getRenderChunk(), compiledchunk1, generator.getDistanceSq()));
+                arraylist.add(this.chunkRenderDispatcher.uploadChunk(BlockRenderLayer.TRANSLUCENT, generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(BlockRenderLayer.TRANSLUCENT), generator.getRenderChunk(), compiledchunk, generator.getDistanceSq()));
             }
 
-            final ListenableFuture<List<Object>> listenablefuture = Futures.allAsList(arraylist1);
+            final ListenableFuture<List<Object>> listenablefuture = Futures.allAsList(arraylist);
             generator.addFinishRunnable(new Runnable()
             {
                 public void run()
@@ -177,27 +177,29 @@ public class ChunkRenderWorker implements Runnable
                 {
                     ChunkRenderWorker.this.freeRenderBuilder(generator);
                     generator.getLock().lock();
-
-                    try
+                    label49:
                     {
-                        if (generator.getStatus() != ChunkCompileTaskGenerator.Status.UPLOADING)
+                        try
                         {
+                            if (generator.getStatus() == ChunkCompileTaskGenerator.Status.UPLOADING)
+                            {
+                                generator.setStatus(ChunkCompileTaskGenerator.Status.DONE);
+                                break label49;
+                            }
+
                             if (!generator.isFinished())
                             {
                                 ChunkRenderWorker.LOGGER.warn("Chunk render task was {} when I expected it to be uploading; aborting task", (Object)generator.getStatus());
                             }
-
-                            return;
+                        }
+                        finally
+                        {
+                            generator.getLock().unlock();
                         }
 
-                        generator.setStatus(ChunkCompileTaskGenerator.Status.DONE);
+                        return;
                     }
-                    finally
-                    {
-                        generator.getLock().unlock();
-                    }
-
-                    generator.getRenderChunk().setCompiledChunk(compiledchunk1);
+                    generator.getRenderChunk().setCompiledChunk(compiledchunk);
                 }
                 public void onFailure(Throwable p_onFailure_1_)
                 {
@@ -212,16 +214,9 @@ public class ChunkRenderWorker implements Runnable
         }
     }
 
-    private boolean isChunkExisting(BlockPos pos, World worldIn)
+    private boolean isChunkExisting(BlockPos p_188263_1_, World p_188263_2_)
     {
-        if (worldIn == null)
-        {
-            return false;
-        }
-        else
-        {
-            return !worldIn.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4).isEmpty();
-        }
+        return !p_188263_2_.getChunkFromChunkCoords(p_188263_1_.getX() >> 4, p_188263_1_.getZ() >> 4).isEmpty();
     }
 
     private RegionRenderCacheBuilder getRegionRenderCacheBuilder() throws InterruptedException

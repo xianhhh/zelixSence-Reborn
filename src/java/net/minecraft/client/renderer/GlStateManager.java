@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import javax.annotation.Nullable;
-import net.minecraft.src.Config;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -37,19 +36,12 @@ public class GlStateManager
     private static final GlStateManager.BooleanState rescaleNormalState;
     private static final GlStateManager.ColorMask colorMaskState;
     private static final GlStateManager.Color colorState;
-    public static boolean clearEnabled = true;
 
-    /**
-     * Do not use (see MinecraftForge issue #1637)
-     */
     public static void pushAttrib()
     {
         GL11.glPushAttrib(8256);
     }
 
-    /**
-     * Do not use (see MinecraftForge issue #1637)
-     */
     public static void popAttrib()
     {
         GL11.glPopAttrib();
@@ -432,34 +424,34 @@ public class GlStateManager
         textureState[activeTextureUnit].texture2DState.setDisabled();
     }
 
-    public static void glTexEnv(int target, int parameterName, FloatBuffer parameters)
+    public static void glTexEnv(int p_187448_0_, int p_187448_1_, FloatBuffer p_187448_2_)
     {
-        GL11.glTexEnv(target, parameterName, parameters);
+        GL11.glTexEnv(p_187448_0_, p_187448_1_, p_187448_2_);
     }
 
-    public static void glTexEnvi(int target, int parameterName, int parameter)
+    public static void glTexEnvi(int p_187399_0_, int p_187399_1_, int p_187399_2_)
     {
-        GL11.glTexEnvi(target, parameterName, parameter);
+        GL11.glTexEnvi(p_187399_0_, p_187399_1_, p_187399_2_);
     }
 
-    public static void glTexEnvf(int target, int parameterName, float parameter)
+    public static void glTexEnvf(int p_187436_0_, int p_187436_1_, float p_187436_2_)
     {
-        GL11.glTexEnvf(target, parameterName, parameter);
+        GL11.glTexEnvf(p_187436_0_, p_187436_1_, p_187436_2_);
     }
 
-    public static void glTexParameterf(int target, int parameterName, float parameter)
+    public static void glTexParameterf(int p_187403_0_, int p_187403_1_, float p_187403_2_)
     {
-        GL11.glTexParameterf(target, parameterName, parameter);
+        GL11.glTexParameterf(p_187403_0_, p_187403_1_, p_187403_2_);
     }
 
-    public static void glTexParameteri(int target, int parameterName, int parameter)
+    public static void glTexParameteri(int p_187421_0_, int p_187421_1_, int p_187421_2_)
     {
-        GL11.glTexParameteri(target, parameterName, parameter);
+        GL11.glTexParameteri(p_187421_0_, p_187421_1_, p_187421_2_);
     }
 
-    public static int glGetTexLevelParameteri(int target, int level, int parameterName)
+    public static int glGetTexLevelParameteri(int p_187411_0_, int p_187411_1_, int p_187411_2_)
     {
-        return GL11.glGetTexLevelParameteri(target, level, parameterName);
+        return GL11.glGetTexLevelParameteri(p_187411_0_, p_187411_1_, p_187411_2_);
     }
 
     public static int generateTexture()
@@ -469,16 +461,13 @@ public class GlStateManager
 
     public static void deleteTexture(int texture)
     {
-        if (texture != 0)
-        {
-            GL11.glDeleteTextures(texture);
+        GL11.glDeleteTextures(texture);
 
-            for (GlStateManager.TextureState glstatemanager$texturestate : textureState)
+        for (GlStateManager.TextureState glstatemanager$texturestate : textureState)
+        {
+            if (glstatemanager$texturestate.textureName == texture)
             {
-                if (glstatemanager$texturestate.textureName == texture)
-                {
-                    glstatemanager$texturestate.textureName = 0;
-                }
+                glstatemanager$texturestate.textureName = -1;
             }
         }
     }
@@ -492,24 +481,24 @@ public class GlStateManager
         }
     }
 
-    public static void glTexImage2D(int target, int level, int internalFormat, int width, int height, int border, int format, int type, @Nullable IntBuffer pixels)
+    public static void glTexImage2D(int p_187419_0_, int p_187419_1_, int p_187419_2_, int p_187419_3_, int p_187419_4_, int p_187419_5_, int p_187419_6_, int p_187419_7_, @Nullable IntBuffer p_187419_8_)
     {
-        GL11.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
+        GL11.glTexImage2D(p_187419_0_, p_187419_1_, p_187419_2_, p_187419_3_, p_187419_4_, p_187419_5_, p_187419_6_, p_187419_7_, p_187419_8_);
     }
 
-    public static void glTexSubImage2D(int target, int level, int xOffset, int yOffset, int width, int height, int format, int type, IntBuffer pixels)
+    public static void glTexSubImage2D(int p_187414_0_, int p_187414_1_, int p_187414_2_, int p_187414_3_, int p_187414_4_, int p_187414_5_, int p_187414_6_, int p_187414_7_, IntBuffer p_187414_8_)
     {
-        GL11.glTexSubImage2D(target, level, xOffset, yOffset, width, height, format, type, pixels);
+        GL11.glTexSubImage2D(p_187414_0_, p_187414_1_, p_187414_2_, p_187414_3_, p_187414_4_, p_187414_5_, p_187414_6_, p_187414_7_, p_187414_8_);
     }
 
-    public static void glCopyTexSubImage2D(int target, int level, int xOffset, int yOffset, int x, int y, int width, int height)
+    public static void glCopyTexSubImage2D(int p_187443_0_, int p_187443_1_, int p_187443_2_, int p_187443_3_, int p_187443_4_, int p_187443_5_, int p_187443_6_, int p_187443_7_)
     {
-        GL11.glCopyTexSubImage2D(target, level, xOffset, yOffset, x, y, width, height);
+        GL11.glCopyTexSubImage2D(p_187443_0_, p_187443_1_, p_187443_2_, p_187443_3_, p_187443_4_, p_187443_5_, p_187443_6_, p_187443_7_);
     }
 
-    public static void glGetTexImage(int target, int level, int format, int type, IntBuffer pixels)
+    public static void glGetTexImage(int p_187433_0_, int p_187433_1_, int p_187433_2_, int p_187433_3_, IntBuffer p_187433_4_)
     {
-        GL11.glGetTexImage(target, level, format, type, pixels);
+        GL11.glGetTexImage(p_187433_0_, p_187433_1_, p_187433_2_, p_187433_3_, p_187433_4_);
     }
 
     public static void enableNormalize()
@@ -581,10 +570,7 @@ public class GlStateManager
 
     public static void clear(int mask)
     {
-        if (clearEnabled)
-        {
-            GL11.glClear(mask);
-        }
+        GL11.glClear(mask);
     }
 
     public static void matrixMode(int mode)
@@ -647,41 +633,41 @@ public class GlStateManager
         GL11.glMultMatrix(matrix);
     }
 
-    public static void rotate(Quaternion quaternionIn)
+    public static void rotate(Quaternion p_187444_0_)
     {
-        multMatrix(quatToGlMatrix(BUF_FLOAT_16, quaternionIn));
+        multMatrix(quatToGlMatrix(BUF_FLOAT_16, p_187444_0_));
     }
 
-    public static FloatBuffer quatToGlMatrix(FloatBuffer buffer, Quaternion quaternionIn)
+    public static FloatBuffer quatToGlMatrix(FloatBuffer p_187418_0_, Quaternion p_187418_1_)
     {
-        buffer.clear();
-        float f = quaternionIn.x * quaternionIn.x;
-        float f1 = quaternionIn.x * quaternionIn.y;
-        float f2 = quaternionIn.x * quaternionIn.z;
-        float f3 = quaternionIn.x * quaternionIn.w;
-        float f4 = quaternionIn.y * quaternionIn.y;
-        float f5 = quaternionIn.y * quaternionIn.z;
-        float f6 = quaternionIn.y * quaternionIn.w;
-        float f7 = quaternionIn.z * quaternionIn.z;
-        float f8 = quaternionIn.z * quaternionIn.w;
-        buffer.put(1.0F - 2.0F * (f4 + f7));
-        buffer.put(2.0F * (f1 + f8));
-        buffer.put(2.0F * (f2 - f6));
-        buffer.put(0.0F);
-        buffer.put(2.0F * (f1 - f8));
-        buffer.put(1.0F - 2.0F * (f + f7));
-        buffer.put(2.0F * (f5 + f3));
-        buffer.put(0.0F);
-        buffer.put(2.0F * (f2 + f6));
-        buffer.put(2.0F * (f5 - f3));
-        buffer.put(1.0F - 2.0F * (f + f4));
-        buffer.put(0.0F);
-        buffer.put(0.0F);
-        buffer.put(0.0F);
-        buffer.put(0.0F);
-        buffer.put(1.0F);
-        buffer.rewind();
-        return buffer;
+        p_187418_0_.clear();
+        float f = p_187418_1_.x * p_187418_1_.x;
+        float f1 = p_187418_1_.x * p_187418_1_.y;
+        float f2 = p_187418_1_.x * p_187418_1_.z;
+        float f3 = p_187418_1_.x * p_187418_1_.w;
+        float f4 = p_187418_1_.y * p_187418_1_.y;
+        float f5 = p_187418_1_.y * p_187418_1_.z;
+        float f6 = p_187418_1_.y * p_187418_1_.w;
+        float f7 = p_187418_1_.z * p_187418_1_.z;
+        float f8 = p_187418_1_.z * p_187418_1_.w;
+        p_187418_0_.put(1.0F - 2.0F * (f4 + f7));
+        p_187418_0_.put(2.0F * (f1 + f8));
+        p_187418_0_.put(2.0F * (f2 - f6));
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(2.0F * (f1 - f8));
+        p_187418_0_.put(1.0F - 2.0F * (f + f7));
+        p_187418_0_.put(2.0F * (f5 + f3));
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(2.0F * (f2 + f6));
+        p_187418_0_.put(2.0F * (f5 - f3));
+        p_187418_0_.put(1.0F - 2.0F * (f + f4));
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(0.0F);
+        p_187418_0_.put(1.0F);
+        p_187418_0_.rewind();
+        return p_187418_0_;
     }
 
     public static void color(float colorRed, float colorGreen, float colorBlue, float colorAlpha)
@@ -701,14 +687,14 @@ public class GlStateManager
         color(colorRed, colorGreen, colorBlue, 1.0F);
     }
 
-    public static void glTexCoord2f(float sCoord, float tCoord)
+    public static void glTexCoord2f(float p_187426_0_, float p_187426_1_)
     {
-        GL11.glTexCoord2f(sCoord, tCoord);
+        GL11.glTexCoord2f(p_187426_0_, p_187426_1_);
     }
 
-    public static void glVertex3f(float x, float y, float z)
+    public static void glVertex3f(float p_187435_0_, float p_187435_1_, float p_187435_2_)
     {
-        GL11.glVertex3f(x, y, z);
+        GL11.glVertex3f(p_187435_0_, p_187435_1_, p_187435_2_);
     }
 
     public static void resetColor()
@@ -719,54 +705,54 @@ public class GlStateManager
         colorState.alpha = -1.0F;
     }
 
-    public static void glNormalPointer(int type, int stride, ByteBuffer buffer)
+    public static void glNormalPointer(int p_187446_0_, int p_187446_1_, ByteBuffer p_187446_2_)
     {
-        GL11.glNormalPointer(type, stride, buffer);
+        GL11.glNormalPointer(p_187446_0_, p_187446_1_, p_187446_2_);
     }
 
-    public static void glTexCoordPointer(int size, int type, int stride, int buffer_offset)
+    public static void glTexCoordPointer(int p_187405_0_, int p_187405_1_, int p_187405_2_, int p_187405_3_)
     {
-        GL11.glTexCoordPointer(size, type, stride, (long)buffer_offset);
+        GL11.glTexCoordPointer(p_187405_0_, p_187405_1_, p_187405_2_, (long)p_187405_3_);
     }
 
-    public static void glTexCoordPointer(int size, int type, int stride, ByteBuffer buffer)
+    public static void glTexCoordPointer(int p_187404_0_, int p_187404_1_, int p_187404_2_, ByteBuffer p_187404_3_)
     {
-        GL11.glTexCoordPointer(size, type, stride, buffer);
+        GL11.glTexCoordPointer(p_187404_0_, p_187404_1_, p_187404_2_, p_187404_3_);
     }
 
-    public static void glVertexPointer(int size, int type, int stride, int buffer_offset)
+    public static void glVertexPointer(int p_187420_0_, int p_187420_1_, int p_187420_2_, int p_187420_3_)
     {
-        GL11.glVertexPointer(size, type, stride, (long)buffer_offset);
+        GL11.glVertexPointer(p_187420_0_, p_187420_1_, p_187420_2_, (long)p_187420_3_);
     }
 
-    public static void glVertexPointer(int size, int type, int stride, ByteBuffer buffer)
+    public static void glVertexPointer(int p_187427_0_, int p_187427_1_, int p_187427_2_, ByteBuffer p_187427_3_)
     {
-        GL11.glVertexPointer(size, type, stride, buffer);
+        GL11.glVertexPointer(p_187427_0_, p_187427_1_, p_187427_2_, p_187427_3_);
     }
 
-    public static void glColorPointer(int size, int type, int stride, int buffer_offset)
+    public static void glColorPointer(int p_187406_0_, int p_187406_1_, int p_187406_2_, int p_187406_3_)
     {
-        GL11.glColorPointer(size, type, stride, (long)buffer_offset);
+        GL11.glColorPointer(p_187406_0_, p_187406_1_, p_187406_2_, (long)p_187406_3_);
     }
 
-    public static void glColorPointer(int size, int type, int stride, ByteBuffer buffer)
+    public static void glColorPointer(int p_187400_0_, int p_187400_1_, int p_187400_2_, ByteBuffer p_187400_3_)
     {
-        GL11.glColorPointer(size, type, stride, buffer);
+        GL11.glColorPointer(p_187400_0_, p_187400_1_, p_187400_2_, p_187400_3_);
     }
 
-    public static void glDisableClientState(int cap)
+    public static void glDisableClientState(int p_187429_0_)
     {
-        GL11.glDisableClientState(cap);
+        GL11.glDisableClientState(p_187429_0_);
     }
 
-    public static void glEnableClientState(int cap)
+    public static void glEnableClientState(int p_187410_0_)
     {
-        GL11.glEnableClientState(cap);
+        GL11.glEnableClientState(p_187410_0_);
     }
 
-    public static void glBegin(int mode)
+    public static void glBegin(int p_187447_0_)
     {
-        GL11.glBegin(mode);
+        GL11.glBegin(p_187447_0_);
     }
 
     public static void glEnd()
@@ -774,14 +760,14 @@ public class GlStateManager
         GL11.glEnd();
     }
 
-    public static void glDrawArrays(int mode, int first, int count)
+    public static void glDrawArrays(int p_187439_0_, int p_187439_1_, int p_187439_2_)
     {
-        GL11.glDrawArrays(mode, first, count);
+        GL11.glDrawArrays(p_187439_0_, p_187439_1_, p_187439_2_);
     }
 
-    public static void glLineWidth(float width)
+    public static void glLineWidth(float p_187441_0_)
     {
-        GL11.glLineWidth(width);
+        GL11.glLineWidth(p_187441_0_);
     }
 
     public static void callList(int list)
@@ -789,14 +775,14 @@ public class GlStateManager
         GL11.glCallList(list);
     }
 
-    public static void glDeleteLists(int list, int range)
+    public static void glDeleteLists(int p_187449_0_, int p_187449_1_)
     {
-        GL11.glDeleteLists(list, range);
+        GL11.glDeleteLists(p_187449_0_, p_187449_1_);
     }
 
-    public static void glNewList(int list, int mode)
+    public static void glNewList(int p_187423_0_, int p_187423_1_)
     {
-        GL11.glNewList(list, mode);
+        GL11.glNewList(p_187423_0_, p_187423_1_);
     }
 
     public static void glEndList()
@@ -804,19 +790,19 @@ public class GlStateManager
         GL11.glEndList();
     }
 
-    public static int glGenLists(int range)
+    public static int glGenLists(int p_187442_0_)
     {
-        return GL11.glGenLists(range);
+        return GL11.glGenLists(p_187442_0_);
     }
 
-    public static void glPixelStorei(int parameterName, int param)
+    public static void glPixelStorei(int p_187425_0_, int p_187425_1_)
     {
-        GL11.glPixelStorei(parameterName, param);
+        GL11.glPixelStorei(p_187425_0_, p_187425_1_);
     }
 
-    public static void glReadPixels(int x, int y, int width, int height, int format, int type, IntBuffer pixels)
+    public static void glReadPixels(int p_187413_0_, int p_187413_1_, int p_187413_2_, int p_187413_3_, int p_187413_4_, int p_187413_5_, IntBuffer p_187413_6_)
     {
-        GL11.glReadPixels(x, y, width, height, format, type, pixels);
+        GL11.glReadPixels(p_187413_0_, p_187413_1_, p_187413_2_, p_187413_3_, p_187413_4_, p_187413_5_, p_187413_6_);
     }
 
     public static int glGetError()
@@ -824,19 +810,19 @@ public class GlStateManager
         return GL11.glGetError();
     }
 
-    public static String glGetString(int name)
+    public static String glGetString(int p_187416_0_)
     {
-        return GL11.glGetString(name);
+        return GL11.glGetString(p_187416_0_);
     }
 
-    public static void glGetInteger(int parameterName, IntBuffer parameters)
+    public static void glGetInteger(int p_187445_0_, IntBuffer p_187445_1_)
     {
-        GL11.glGetInteger(parameterName, parameters);
+        GL11.glGetInteger(p_187445_0_, p_187445_1_);
     }
 
-    public static int glGetInteger(int parameterName)
+    public static int glGetInteger(int p_187397_0_)
     {
-        return GL11.glGetInteger(parameterName);
+        return GL11.glGetInteger(p_187397_0_);
     }
 
     public static void enableBlendProfile(GlStateManager.Profile p_187408_0_)
@@ -847,63 +833,6 @@ public class GlStateManager
     public static void disableBlendProfile(GlStateManager.Profile p_187440_0_)
     {
         p_187440_0_.clean();
-    }
-
-    public static int getActiveTextureUnit()
-    {
-        return OpenGlHelper.defaultTexUnit + activeTextureUnit;
-    }
-
-    public static void bindCurrentTexture()
-    {
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureState[activeTextureUnit].textureName);
-    }
-
-    public static int getBoundTexture()
-    {
-        return textureState[activeTextureUnit].textureName;
-    }
-
-    public static void checkBoundTexture()
-    {
-        if (Config.isMinecraftThread())
-        {
-            int i = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE);
-            int j = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-            int k = getActiveTextureUnit();
-            int l = getBoundTexture();
-
-            if (l > 0)
-            {
-                if (i != k || j != l)
-                {
-                    Config.dbg("checkTexture: act: " + k + ", glAct: " + i + ", tex: " + l + ", glTex: " + j);
-                }
-            }
-        }
-    }
-
-    public static void deleteTextures(IntBuffer p_deleteTextures_0_)
-    {
-        p_deleteTextures_0_.rewind();
-
-        while (p_deleteTextures_0_.position() < p_deleteTextures_0_.limit())
-        {
-            int i = p_deleteTextures_0_.get();
-            deleteTexture(i);
-        }
-
-        p_deleteTextures_0_.rewind();
-    }
-
-    public static boolean isFogEnabled()
-    {
-        return fogState.fog.currentState;
-    }
-
-    public static void setFogEnabled(boolean p_setFogEnabled_0_)
-    {
-        fogState.fog.setState(p_setFogEnabled_0_);
     }
 
     static
@@ -924,9 +853,9 @@ public class GlStateManager
         clearState = new GlStateManager.ClearState();
         stencilState = new GlStateManager.StencilState();
         normalizeState = new GlStateManager.BooleanState(2977);
-        textureState = new GlStateManager.TextureState[32];
+        textureState = new GlStateManager.TextureState[8];
 
-        for (int j = 0; j < textureState.length; ++j)
+        for (int j = 0; j < 8; ++j)
         {
             textureState[j] = new GlStateManager.TextureState();
         }

@@ -202,11 +202,11 @@ public class BlockPistonStructureHelper
         this.toMove.addAll(list2);
     }
 
-    private boolean addBranchingBlocks(BlockPos fromPos)
+    private boolean addBranchingBlocks(BlockPos p_177250_1_)
     {
         for (EnumFacing enumfacing : EnumFacing.values())
         {
-            if (enumfacing.getAxis() != this.moveDirection.getAxis() && !this.addBlockLine(fromPos.offset(enumfacing), enumfacing))
+            if (enumfacing.getAxis() != this.moveDirection.getAxis() && !this.addBlockLine(p_177250_1_.offset(enumfacing), enumfacing))
             {
                 return false;
             }

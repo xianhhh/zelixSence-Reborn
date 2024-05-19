@@ -32,7 +32,7 @@ public class PlayerMenuObject implements ISpectatorMenuObject
         return new TextComponentString(this.profile.getName());
     }
 
-    public void renderIcon(float brightness, int alpha)
+    public void renderIcon(float p_178663_1_, int alpha)
     {
         Minecraft.getMinecraft().getTextureManager().bindTexture(this.resourceLocation);
         GlStateManager.color(1.0F, 1.0F, 1.0F, (float)alpha / 255.0F);

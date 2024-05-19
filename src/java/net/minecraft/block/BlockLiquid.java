@@ -48,9 +48,6 @@ public abstract class BlockLiquid extends Block
         return NULL_AABB;
     }
 
-    /**
-     * Determines if an entity can path through this block
-     */
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
     {
         return this.blockMaterial != Material.LAVA;
@@ -69,14 +66,14 @@ public abstract class BlockLiquid extends Block
         return (float)(meta + 1) / 9.0F;
     }
 
-    protected int getDepth(IBlockState state)
+    protected int getDepth(IBlockState p_189542_1_)
     {
-        return state.getMaterial() == this.blockMaterial ? ((Integer)state.getValue(LEVEL)).intValue() : -1;
+        return p_189542_1_.getMaterial() == this.blockMaterial ? ((Integer)p_189542_1_.getValue(LEVEL)).intValue() : -1;
     }
 
-    protected int getRenderedDepth(IBlockState state)
+    protected int getRenderedDepth(IBlockState p_189545_1_)
     {
-        int i = this.getDepth(state);
+        int i = this.getDepth(p_189545_1_);
         return i >= 8 ? 0 : i;
     }
 
@@ -99,10 +96,9 @@ public abstract class BlockLiquid extends Block
     }
 
     /**
-     * Checks if an additional {@code -6} vertical drag should be applied to the entity. See {#link
-     * net.minecraft.block.BlockLiquid#getFlow()}
+     * Whether this Block is solid on the given Side
      */
-    private boolean causesDownwardCurrent(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    private boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
         IBlockState iblockstate = worldIn.getBlockState(pos);
         Block block = iblockstate.getBlock();
@@ -122,8 +118,8 @@ public abstract class BlockLiquid extends Block
         }
         else
         {
-            boolean flag = isExceptBlockForAttachWithPiston(block) || block instanceof BlockStairs;
-            return !flag && iblockstate.getBlockFaceShape(worldIn, pos, side) == BlockFaceShape.SOLID;
+            boolean flag = func_193382_c(block) || block instanceof BlockStairs;
+            return !flag && iblockstate.func_193401_d(worldIn, pos, side) == BlockFaceShape.SOLID;
         }
     }
 
@@ -171,7 +167,7 @@ public abstract class BlockLiquid extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.AIR;
+        return Items.field_190931_a;
     }
 
     /**
@@ -182,24 +178,24 @@ public abstract class BlockLiquid extends Block
         return 0;
     }
 
-    protected Vec3d getFlow(IBlockAccess worldIn, BlockPos pos, IBlockState state)
+    protected Vec3d getFlow(IBlockAccess p_189543_1_, BlockPos p_189543_2_, IBlockState p_189543_3_)
     {
         double d0 = 0.0D;
         double d1 = 0.0D;
         double d2 = 0.0D;
-        int i = this.getRenderedDepth(state);
+        int i = this.getRenderedDepth(p_189543_3_);
         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
         {
-            blockpos$pooledmutableblockpos.setPos(pos).move(enumfacing);
-            int j = this.getRenderedDepth(worldIn.getBlockState(blockpos$pooledmutableblockpos));
+            blockpos$pooledmutableblockpos.setPos(p_189543_2_).move(enumfacing);
+            int j = this.getRenderedDepth(p_189543_1_.getBlockState(blockpos$pooledmutableblockpos));
 
             if (j < 0)
             {
-                if (!worldIn.getBlockState(blockpos$pooledmutableblockpos).getMaterial().blocksMovement())
+                if (!p_189543_1_.getBlockState(blockpos$pooledmutableblockpos).getMaterial().blocksMovement())
                 {
-                    j = this.getRenderedDepth(worldIn.getBlockState(blockpos$pooledmutableblockpos.down()));
+                    j = this.getRenderedDepth(p_189543_1_.getBlockState(blockpos$pooledmutableblockpos.down()));
 
                     if (j >= 0)
                     {
@@ -221,13 +217,13 @@ public abstract class BlockLiquid extends Block
 
         Vec3d vec3d = new Vec3d(d0, d1, d2);
 
-        if (((Integer)state.getValue(LEVEL)).intValue() >= 8)
+        if (((Integer)p_189543_3_.getValue(LEVEL)).intValue() >= 8)
         {
             for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL)
             {
-                blockpos$pooledmutableblockpos.setPos(pos).move(enumfacing1);
+                blockpos$pooledmutableblockpos.setPos(p_189543_2_).move(enumfacing1);
 
-                if (this.causesDownwardCurrent(worldIn, blockpos$pooledmutableblockpos, enumfacing1) || this.causesDownwardCurrent(worldIn, blockpos$pooledmutableblockpos.up(), enumfacing1))
+                if (this.isBlockSolid(p_189543_1_, blockpos$pooledmutableblockpos, enumfacing1) || this.isBlockSolid(p_189543_1_, blockpos$pooledmutableblockpos.up(), enumfacing1))
                 {
                     vec3d = vec3d.normalize().addVector(0.0D, -6.0D, 0.0D);
                     break;
@@ -255,7 +251,7 @@ public abstract class BlockLiquid extends Block
         }
         else if (this.blockMaterial == Material.LAVA)
         {
-            return worldIn.provider.isNether() ? 10 : 30;
+            return worldIn.provider.getHasNoSky() ? 10 : 30;
         }
         else
         {
@@ -319,7 +315,7 @@ public abstract class BlockLiquid extends Block
             }
         }
 
-        if (rand.nextInt(10) == 0 && worldIn.getBlockState(pos.down()).isTopSolid())
+        if (rand.nextInt(10) == 0 && worldIn.getBlockState(pos.down()).isFullyOpaque())
         {
             Material material = worldIn.getBlockState(pos.down(2)).getMaterial();
 
@@ -341,10 +337,10 @@ public abstract class BlockLiquid extends Block
         }
     }
 
-    public static float getSlopeAngle(IBlockAccess worldIn, BlockPos pos, Material materialIn, IBlockState state)
+    public static float getSlopeAngle(IBlockAccess p_189544_0_, BlockPos p_189544_1_, Material p_189544_2_, IBlockState p_189544_3_)
     {
-        Vec3d vec3d = getFlowingBlock(materialIn).getFlow(worldIn, pos, state);
-        return vec3d.x == 0.0D && vec3d.z == 0.0D ? -1000.0F : (float)MathHelper.atan2(vec3d.z, vec3d.x) - ((float)Math.PI / 2F);
+        Vec3d vec3d = getFlowingBlock(p_189544_2_).getFlow(p_189544_0_, p_189544_1_, p_189544_3_);
+        return vec3d.xCoord == 0.0D && vec3d.zCoord == 0.0D ? -1000.0F : (float)MathHelper.atan2(vec3d.zCoord, vec3d.xCoord) - ((float)Math.PI / 2F);
     }
 
     /**
@@ -360,7 +356,7 @@ public abstract class BlockLiquid extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         this.checkForMixing(worldIn, pos, state);
     }
@@ -469,18 +465,18 @@ public abstract class BlockLiquid extends Block
         }
     }
 
-    public static float getBlockLiquidHeight(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public static float func_190973_f(IBlockState p_190973_0_, IBlockAccess p_190973_1_, BlockPos p_190973_2_)
     {
-        int i = ((Integer)state.getValue(LEVEL)).intValue();
-        return (i & 7) == 0 && worldIn.getBlockState(pos.up()).getMaterial() == Material.WATER ? 1.0F : 1.0F - getLiquidHeightPercent(i);
+        int i = ((Integer)p_190973_0_.getValue(LEVEL)).intValue();
+        return (i & 7) == 0 && p_190973_1_.getBlockState(p_190973_2_.up()).getMaterial() == Material.WATER ? 1.0F : 1.0F - getLiquidHeightPercent(i);
     }
 
-    public static float getLiquidHeight(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public static float func_190972_g(IBlockState p_190972_0_, IBlockAccess p_190972_1_, BlockPos p_190972_2_)
     {
-        return (float)pos.getY() + getBlockLiquidHeight(state, worldIn, pos);
+        return (float)p_190972_2_.getY() + func_190973_f(p_190972_0_, p_190972_1_, p_190972_2_);
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

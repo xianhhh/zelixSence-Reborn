@@ -13,75 +13,75 @@ import net.minecraft.world.biome.Biome;
 
 public class LocationPredicate
 {
-    public static LocationPredicate ANY = new LocationPredicate(MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, (Biome)null, (String)null, (DimensionType)null);
-    private final MinMaxBounds x;
-    private final MinMaxBounds y;
-    private final MinMaxBounds z;
+    public static LocationPredicate field_193455_a = new LocationPredicate(MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a, (Biome)null, (String)null, (DimensionType)null);
+    private final MinMaxBounds field_193457_c;
+    private final MinMaxBounds field_193458_d;
+    private final MinMaxBounds field_193459_e;
     @Nullable
-    final Biome biome;
+    final Biome field_193456_b;
     @Nullable
-    private final String feature;
+    private final String field_193460_f;
     @Nullable
-    private final DimensionType dimension;
+    private final DimensionType field_193461_g;
 
-    public LocationPredicate(MinMaxBounds x, MinMaxBounds y, MinMaxBounds z, @Nullable Biome biome, @Nullable String feature, @Nullable DimensionType dimension)
+    public LocationPredicate(MinMaxBounds p_i47539_1_, MinMaxBounds p_i47539_2_, MinMaxBounds p_i47539_3_, @Nullable Biome p_i47539_4_, @Nullable String p_i47539_5_, @Nullable DimensionType p_i47539_6_)
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.biome = biome;
-        this.feature = feature;
-        this.dimension = dimension;
+        this.field_193457_c = p_i47539_1_;
+        this.field_193458_d = p_i47539_2_;
+        this.field_193459_e = p_i47539_3_;
+        this.field_193456_b = p_i47539_4_;
+        this.field_193460_f = p_i47539_5_;
+        this.field_193461_g = p_i47539_6_;
     }
 
-    public boolean test(WorldServer world, double x, double y, double z)
+    public boolean func_193452_a(WorldServer p_193452_1_, double p_193452_2_, double p_193452_4_, double p_193452_6_)
     {
-        return this.test(world, (float)x, (float)y, (float)z);
+        return this.func_193453_a(p_193452_1_, (float)p_193452_2_, (float)p_193452_4_, (float)p_193452_6_);
     }
 
-    public boolean test(WorldServer world, float x, float y, float z)
+    public boolean func_193453_a(WorldServer p_193453_1_, float p_193453_2_, float p_193453_3_, float p_193453_4_)
     {
-        if (!this.x.test(x))
+        if (!this.field_193457_c.func_192514_a(p_193453_2_))
         {
             return false;
         }
-        else if (!this.y.test(y))
+        else if (!this.field_193458_d.func_192514_a(p_193453_3_))
         {
             return false;
         }
-        else if (!this.z.test(z))
+        else if (!this.field_193459_e.func_192514_a(p_193453_4_))
         {
             return false;
         }
-        else if (this.dimension != null && this.dimension != world.provider.getDimensionType())
+        else if (this.field_193461_g != null && this.field_193461_g != p_193453_1_.provider.getDimensionType())
         {
             return false;
         }
         else
         {
-            BlockPos blockpos = new BlockPos((double)x, (double)y, (double)z);
+            BlockPos blockpos = new BlockPos((double)p_193453_2_, (double)p_193453_3_, (double)p_193453_4_);
 
-            if (this.biome != null && this.biome != world.getBiome(blockpos))
+            if (this.field_193456_b != null && this.field_193456_b != p_193453_1_.getBiome(blockpos))
             {
                 return false;
             }
             else
             {
-                return this.feature == null || world.getChunkProvider().isInsideStructure(world, this.feature, blockpos);
+                return this.field_193460_f == null || p_193453_1_.getChunkProvider().func_193413_a(p_193453_1_, this.field_193460_f, blockpos);
             }
         }
     }
 
-    public static LocationPredicate deserialize(@Nullable JsonElement element)
+    public static LocationPredicate func_193454_a(@Nullable JsonElement p_193454_0_)
     {
-        if (element != null && !element.isJsonNull())
+        if (p_193454_0_ != null && !p_193454_0_.isJsonNull())
         {
-            JsonObject jsonobject = JsonUtils.getJsonObject(element, "location");
+            JsonObject jsonobject = JsonUtils.getJsonObject(p_193454_0_, "location");
             JsonObject jsonobject1 = JsonUtils.getJsonObject(jsonobject, "position", new JsonObject());
-            MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(jsonobject1.get("x"));
-            MinMaxBounds minmaxbounds1 = MinMaxBounds.deserialize(jsonobject1.get("y"));
-            MinMaxBounds minmaxbounds2 = MinMaxBounds.deserialize(jsonobject1.get("z"));
-            DimensionType dimensiontype = jsonobject.has("dimension") ? DimensionType.byName(JsonUtils.getString(jsonobject, "dimension")) : null;
+            MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(jsonobject1.get("x"));
+            MinMaxBounds minmaxbounds1 = MinMaxBounds.func_192515_a(jsonobject1.get("y"));
+            MinMaxBounds minmaxbounds2 = MinMaxBounds.func_192515_a(jsonobject1.get("z"));
+            DimensionType dimensiontype = jsonobject.has("dimension") ? DimensionType.func_193417_a(JsonUtils.getString(jsonobject, "dimension")) : null;
             String s = jsonobject.has("feature") ? JsonUtils.getString(jsonobject, "feature") : null;
             Biome biome = null;
 
@@ -100,7 +100,7 @@ public class LocationPredicate
         }
         else
         {
-            return ANY;
+            return field_193455_a;
         }
     }
 }

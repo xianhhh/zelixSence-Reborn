@@ -19,57 +19,54 @@ import net.minecraft.util.ResourceLocation;
 
 public class BrewedPotionTrigger implements ICriterionTrigger<BrewedPotionTrigger.Instance>
 {
-    private static final ResourceLocation ID = new ResourceLocation("brewed_potion");
-    private final Map<PlayerAdvancements, BrewedPotionTrigger.Listeners> listeners = Maps.<PlayerAdvancements, BrewedPotionTrigger.Listeners>newHashMap();
+    private static final ResourceLocation field_192176_a = new ResourceLocation("brewed_potion");
+    private final Map<PlayerAdvancements, BrewedPotionTrigger.Listeners> field_192177_b = Maps.<PlayerAdvancements, BrewedPotionTrigger.Listeners>newHashMap();
 
-    public ResourceLocation getId()
+    public ResourceLocation func_192163_a()
     {
-        return ID;
+        return field_192176_a;
     }
 
-    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener)
+    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> p_192165_2_)
     {
-        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.field_192177_b.get(p_192165_1_);
 
         if (brewedpotiontrigger$listeners == null)
         {
-            brewedpotiontrigger$listeners = new BrewedPotionTrigger.Listeners(playerAdvancementsIn);
-            this.listeners.put(playerAdvancementsIn, brewedpotiontrigger$listeners);
+            brewedpotiontrigger$listeners = new BrewedPotionTrigger.Listeners(p_192165_1_);
+            this.field_192177_b.put(p_192165_1_, brewedpotiontrigger$listeners);
         }
 
-        brewedpotiontrigger$listeners.addListener(listener);
+        brewedpotiontrigger$listeners.func_192349_a(p_192165_2_);
     }
 
-    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener)
+    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> p_192164_2_)
     {
-        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
+        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.field_192177_b.get(p_192164_1_);
 
         if (brewedpotiontrigger$listeners != null)
         {
-            brewedpotiontrigger$listeners.removeListener(listener);
+            brewedpotiontrigger$listeners.func_192346_b(p_192164_2_);
 
-            if (brewedpotiontrigger$listeners.isEmpty())
+            if (brewedpotiontrigger$listeners.func_192347_a())
             {
-                this.listeners.remove(playerAdvancementsIn);
+                this.field_192177_b.remove(p_192164_1_);
             }
         }
     }
 
-    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
+    public void func_192167_a(PlayerAdvancements p_192167_1_)
     {
-        this.listeners.remove(playerAdvancementsIn);
+        this.field_192177_b.remove(p_192167_1_);
     }
 
-    /**
-     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
-     */
-    public BrewedPotionTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
+    public BrewedPotionTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
     {
         PotionType potiontype = null;
 
-        if (json.has("potion"))
+        if (p_192166_1_.has("potion"))
         {
-            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(json, "potion"));
+            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(p_192166_1_, "potion"));
 
             if (!PotionType.REGISTRY.containsKey(resourcelocation))
             {
@@ -82,64 +79,64 @@ public class BrewedPotionTrigger implements ICriterionTrigger<BrewedPotionTrigge
         return new BrewedPotionTrigger.Instance(potiontype);
     }
 
-    public void trigger(EntityPlayerMP player, PotionType potionIn)
+    public void func_192173_a(EntityPlayerMP p_192173_1_, PotionType p_192173_2_)
     {
-        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.listeners.get(player.getAdvancements());
+        BrewedPotionTrigger.Listeners brewedpotiontrigger$listeners = this.field_192177_b.get(p_192173_1_.func_192039_O());
 
         if (brewedpotiontrigger$listeners != null)
         {
-            brewedpotiontrigger$listeners.trigger(potionIn);
+            brewedpotiontrigger$listeners.func_192348_a(p_192173_2_);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final PotionType potion;
+        private final PotionType field_192251_a;
 
-        public Instance(@Nullable PotionType potion)
+        public Instance(@Nullable PotionType p_i47398_1_)
         {
-            super(BrewedPotionTrigger.ID);
-            this.potion = potion;
+            super(BrewedPotionTrigger.field_192176_a);
+            this.field_192251_a = p_i47398_1_;
         }
 
-        public boolean test(PotionType potion)
+        public boolean func_192250_a(PotionType p_192250_1_)
         {
-            return this.potion == null || this.potion == potion;
+            return this.field_192251_a == null || this.field_192251_a == p_192250_1_;
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements playerAdvancements;
-        private final Set<ICriterionTrigger.Listener<BrewedPotionTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<BrewedPotionTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements field_192350_a;
+        private final Set<ICriterionTrigger.Listener<BrewedPotionTrigger.Instance>> field_192351_b = Sets.<ICriterionTrigger.Listener<BrewedPotionTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements playerAdvancementsIn)
+        public Listeners(PlayerAdvancements p_i47399_1_)
         {
-            this.playerAdvancements = playerAdvancementsIn;
+            this.field_192350_a = p_i47399_1_;
         }
 
-        public boolean isEmpty()
+        public boolean func_192347_a()
         {
-            return this.listeners.isEmpty();
+            return this.field_192351_b.isEmpty();
         }
 
-        public void addListener(ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener)
+        public void func_192349_a(ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> p_192349_1_)
         {
-            this.listeners.add(listener);
+            this.field_192351_b.add(p_192349_1_);
         }
 
-        public void removeListener(ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener)
+        public void func_192346_b(ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> p_192346_1_)
         {
-            this.listeners.remove(listener);
+            this.field_192351_b.remove(p_192346_1_);
         }
 
-        public void trigger(PotionType potion)
+        public void func_192348_a(PotionType p_192348_1_)
         {
             List<ICriterionTrigger.Listener<BrewedPotionTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener : this.listeners)
+            for (ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener : this.field_192351_b)
             {
-                if (((BrewedPotionTrigger.Instance)listener.getCriterionInstance()).test(potion))
+                if (((BrewedPotionTrigger.Instance)listener.func_192158_a()).func_192250_a(p_192348_1_))
                 {
                     if (list == null)
                     {
@@ -154,7 +151,7 @@ public class BrewedPotionTrigger implements ICriterionTrigger<BrewedPotionTrigge
             {
                 for (ICriterionTrigger.Listener<BrewedPotionTrigger.Instance> listener1 : list)
                 {
-                    listener1.grantCriterion(this.playerAdvancements);
+                    listener1.func_192159_a(this.field_192350_a);
                 }
             }
         }

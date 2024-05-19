@@ -13,9 +13,9 @@ public class GuiConfirmOpenLink extends GuiYesNo
     private final String linkText;
     private boolean showSecurityWarning = true;
 
-    public GuiConfirmOpenLink(GuiYesNoCallback parentScreenIn, String linkTextIn, int parentButtonClickedIdIn, boolean p_i1084_4_)
+    public GuiConfirmOpenLink(GuiYesNoCallback p_i1084_1_, String linkTextIn, int p_i1084_3_, boolean p_i1084_4_)
     {
-        super(parentScreenIn, I18n.format(p_i1084_4_ ? "chat.link.confirmTrusted" : "chat.link.confirm"), linkTextIn, parentButtonClickedIdIn);
+        super(p_i1084_1_, I18n.format(p_i1084_4_ ? "chat.link.confirmTrusted" : "chat.link.confirm"), linkTextIn, p_i1084_3_);
         this.confirmButtonText = I18n.format(p_i1084_4_ ? "chat.link.open" : "gui.yes");
         this.cancelButtonText = I18n.format(p_i1084_4_ ? "gui.cancel" : "gui.no");
         this.copyLinkButtonText = I18n.format("chat.copy");
@@ -66,7 +66,7 @@ public class GuiConfirmOpenLink extends GuiYesNo
 
         if (this.showSecurityWarning)
         {
-            this.drawCenteredString(this.fontRenderer, this.openLinkWarning, this.width / 2, 110, 16764108);
+            this.drawCenteredString(this.fontRendererObj, this.openLinkWarning, this.width / 2, 110, 16764108);
         }
     }
 

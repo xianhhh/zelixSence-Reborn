@@ -39,12 +39,12 @@ public class BlockPistonExtension extends BlockDirectional
     protected static final AxisAlignedBB NORTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, 0.25D, 0.625D, 0.625D, 1.25D);
     protected static final AxisAlignedBB EAST_ARM_AABB = new AxisAlignedBB(-0.25D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
     protected static final AxisAlignedBB WEST_ARM_AABB = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 1.25D, 0.625D, 0.625D);
-    protected static final AxisAlignedBB SHORT_UP_ARM_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.375D, 0.625D, 0.75D, 0.625D);
-    protected static final AxisAlignedBB SHORT_DOWN_ARM_AABB = new AxisAlignedBB(0.375D, 0.25D, 0.375D, 0.625D, 1.0D, 0.625D);
-    protected static final AxisAlignedBB SHORT_SOUTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, 0.0D, 0.625D, 0.625D, 0.75D);
-    protected static final AxisAlignedBB SHORT_NORTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, 0.25D, 0.625D, 0.625D, 1.0D);
-    protected static final AxisAlignedBB SHORT_EAST_ARM_AABB = new AxisAlignedBB(0.0D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
-    protected static final AxisAlignedBB SHORT_WEST_ARM_AABB = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 1.0D, 0.625D, 0.625D);
+    protected static final AxisAlignedBB field_190964_J = new AxisAlignedBB(0.375D, 0.0D, 0.375D, 0.625D, 0.75D, 0.625D);
+    protected static final AxisAlignedBB field_190965_K = new AxisAlignedBB(0.375D, 0.25D, 0.375D, 0.625D, 1.0D, 0.625D);
+    protected static final AxisAlignedBB field_190966_L = new AxisAlignedBB(0.375D, 0.375D, 0.0D, 0.625D, 0.625D, 0.75D);
+    protected static final AxisAlignedBB field_190967_M = new AxisAlignedBB(0.375D, 0.375D, 0.25D, 0.625D, 0.625D, 1.0D);
+    protected static final AxisAlignedBB field_190968_N = new AxisAlignedBB(0.0D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
+    protected static final AxisAlignedBB field_190969_O = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 1.0D, 0.625D, 0.625D);
 
     public BlockPistonExtension()
     {
@@ -93,37 +93,33 @@ public class BlockPistonExtension extends BlockDirectional
         {
             case DOWN:
             default:
-                return flag ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB;
+                return flag ? field_190965_K : DOWN_ARM_AABB;
 
             case UP:
-                return flag ? SHORT_UP_ARM_AABB : UP_ARM_AABB;
+                return flag ? field_190964_J : UP_ARM_AABB;
 
             case NORTH:
-                return flag ? SHORT_NORTH_ARM_AABB : NORTH_ARM_AABB;
+                return flag ? field_190967_M : NORTH_ARM_AABB;
 
             case SOUTH:
-                return flag ? SHORT_SOUTH_ARM_AABB : SOUTH_ARM_AABB;
+                return flag ? field_190966_L : SOUTH_ARM_AABB;
 
             case WEST:
-                return flag ? SHORT_WEST_ARM_AABB : WEST_ARM_AABB;
+                return flag ? field_190969_O : WEST_ARM_AABB;
 
             case EAST:
-                return flag ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB;
+                return flag ? field_190968_N : EAST_ARM_AABB;
         }
     }
 
     /**
-     * Determines if the block is solid enough on the top side to support other blocks, like redstone components.
+     * Checks if an IBlockState represents a block that is opaque and a full cube.
      */
-    public boolean isTopSolid(IBlockState state)
+    public boolean isFullyOpaque(IBlockState state)
     {
         return state.getValue(FACING) == EnumFacing.UP;
     }
 
-    /**
-     * Called before the Block is set to air in the world. Called regardless of if the player's tool can actually
-     * collect this block
-     */
     public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
     {
         if (player.capabilities.isCreativeMode)
@@ -176,7 +172,7 @@ public class BlockPistonExtension extends BlockDirectional
     }
 
     /**
-     * Check whether this Block can be placed at pos, while aiming at the specified side of an adjacent block
+     * Check whether this Block can be placed on the given side
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
@@ -196,7 +192,7 @@ public class BlockPistonExtension extends BlockDirectional
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
@@ -208,7 +204,7 @@ public class BlockPistonExtension extends BlockDirectional
         }
         else
         {
-            iblockstate.neighborChanged(worldIn, blockpos, blockIn, fromPos);
+            iblockstate.neighborChanged(worldIn, blockpos, blockIn, p_189540_5_);
         }
     }
 
@@ -276,7 +272,7 @@ public class BlockPistonExtension extends BlockDirectional
         return new BlockStateContainer(this, new IProperty[] {FACING, TYPE, SHORT});
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return p_193383_4_ == p_193383_2_.getValue(FACING) ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }

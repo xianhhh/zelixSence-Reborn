@@ -69,9 +69,6 @@ public class BlockCactus extends Block
         return CACTUS_COLLISION_AABB;
     }
 
-    /**
-     * Return an AABB (in world coords!) that should be highlighted when the player is targeting this Block
-     */
     public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
     {
         return CACTUS_AABB.offset(pos);
@@ -100,7 +97,7 @@ public class BlockCactus extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         if (!this.canBlockStay(worldIn, pos))
         {
@@ -129,7 +126,7 @@ public class BlockCactus extends Block
      */
     public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        entityIn.attackEntityFrom(DamageSource.CACTUS, 1.0F);
+        entityIn.attackEntityFrom(DamageSource.cactus, 1.0F);
     }
 
     public BlockRenderLayer getBlockLayer()
@@ -158,7 +155,7 @@ public class BlockCactus extends Block
         return new BlockStateContainer(this, new IProperty[] {AGE});
     }
 
-    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

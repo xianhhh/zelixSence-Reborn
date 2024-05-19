@@ -26,12 +26,12 @@ public class BlockGravel extends BlockFalling
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
         return MapColor.STONE;
     }
 
-    public int getDustColor(IBlockState state)
+    public int getDustColor(IBlockState p_189876_1_)
     {
         return -8356741;
     }

@@ -6,67 +6,67 @@ import net.minecraft.util.text.ITextComponent;
 
 public class SystemToast implements IToast
 {
-    private final SystemToast.Type type;
-    private String title;
-    private String subtitle;
-    private long firstDrawTime;
-    private boolean newDisplay;
+    private final SystemToast.Type field_193659_c;
+    private String field_193660_d;
+    private String field_193661_e;
+    private long field_193662_f;
+    private boolean field_193663_g;
 
-    public SystemToast(SystemToast.Type typeIn, ITextComponent titleComponent, @Nullable ITextComponent subtitleComponent)
+    public SystemToast(SystemToast.Type p_i47488_1_, ITextComponent p_i47488_2_, @Nullable ITextComponent p_i47488_3_)
     {
-        this.type = typeIn;
-        this.title = titleComponent.getUnformattedText();
-        this.subtitle = subtitleComponent == null ? null : subtitleComponent.getUnformattedText();
+        this.field_193659_c = p_i47488_1_;
+        this.field_193660_d = p_i47488_2_.getUnformattedText();
+        this.field_193661_e = p_i47488_3_ == null ? null : p_i47488_3_.getUnformattedText();
     }
 
-    public IToast.Visibility draw(GuiToast toastGui, long delta)
+    public IToast.Visibility func_193653_a(GuiToast p_193653_1_, long p_193653_2_)
     {
-        if (this.newDisplay)
+        if (this.field_193663_g)
         {
-            this.firstDrawTime = delta;
-            this.newDisplay = false;
+            this.field_193662_f = p_193653_2_;
+            this.field_193663_g = false;
         }
 
-        toastGui.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
+        p_193653_1_.func_192989_b().getTextureManager().bindTexture(field_193654_a);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        toastGui.drawTexturedModalRect(0, 0, 0, 64, 160, 32);
+        p_193653_1_.drawTexturedModalRect(0, 0, 0, 64, 160, 32);
 
-        if (this.subtitle == null)
+        if (this.field_193661_e == null)
         {
-            toastGui.getMinecraft().fontRenderer.drawString(this.title, 18, 12, -256);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193660_d, 18, 12, -256);
         }
         else
         {
-            toastGui.getMinecraft().fontRenderer.drawString(this.title, 18, 7, -256);
-            toastGui.getMinecraft().fontRenderer.drawString(this.subtitle, 18, 18, -1);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193660_d, 18, 7, -256);
+            p_193653_1_.func_192989_b().fontRendererObj.drawString(this.field_193661_e, 18, 18, -1);
         }
 
-        return delta - this.firstDrawTime < 5000L ? IToast.Visibility.SHOW : IToast.Visibility.HIDE;
+        return p_193653_2_ - this.field_193662_f < 5000L ? IToast.Visibility.SHOW : IToast.Visibility.HIDE;
     }
 
-    public void setDisplayedText(ITextComponent titleComponent, @Nullable ITextComponent subtitleComponent)
+    public void func_193656_a(ITextComponent p_193656_1_, @Nullable ITextComponent p_193656_2_)
     {
-        this.title = titleComponent.getUnformattedText();
-        this.subtitle = subtitleComponent == null ? null : subtitleComponent.getUnformattedText();
-        this.newDisplay = true;
+        this.field_193660_d = p_193656_1_.getUnformattedText();
+        this.field_193661_e = p_193656_2_ == null ? null : p_193656_2_.getUnformattedText();
+        this.field_193663_g = true;
     }
 
-    public SystemToast.Type getType()
+    public SystemToast.Type func_193652_b()
     {
-        return this.type;
+        return this.field_193659_c;
     }
 
-    public static void addOrUpdate(GuiToast p_193657_0_, SystemToast.Type p_193657_1_, ITextComponent p_193657_2_, @Nullable ITextComponent p_193657_3_)
+    public static void func_193657_a(GuiToast p_193657_0_, SystemToast.Type p_193657_1_, ITextComponent p_193657_2_, @Nullable ITextComponent p_193657_3_)
     {
-        SystemToast systemtoast = (SystemToast)p_193657_0_.getToast(SystemToast.class, p_193657_1_);
+        SystemToast systemtoast = (SystemToast)p_193657_0_.func_192990_a(SystemToast.class, p_193657_1_);
 
         if (systemtoast == null)
         {
-            p_193657_0_.add(new SystemToast(p_193657_1_, p_193657_2_, p_193657_3_));
+            p_193657_0_.func_192988_a(new SystemToast(p_193657_1_, p_193657_2_, p_193657_3_));
         }
         else
         {
-            systemtoast.setDisplayedText(p_193657_2_, p_193657_3_);
+            systemtoast.func_193656_a(p_193657_2_, p_193657_3_);
         }
     }
 

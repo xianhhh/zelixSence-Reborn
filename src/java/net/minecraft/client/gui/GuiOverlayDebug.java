@@ -3,7 +3,6 @@ package net.minecraft.client.gui;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.UnmodifiableIterator;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import net.minecraft.block.Block;
@@ -15,7 +14,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.src.Reflector;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +34,7 @@ public class GuiOverlayDebug extends Gui
     public GuiOverlayDebug(Minecraft mc)
     {
         this.mc = mc;
-        this.fontRenderer = mc.fontRenderer;
+        this.fontRenderer = mc.fontRendererObj;
     }
 
     public void renderDebugInfo(ScaledResolution scaledResolutionIn)
@@ -46,6 +44,12 @@ public class GuiOverlayDebug extends Gui
         this.renderDebugInfoLeft();
         this.renderDebugInfoRight(scaledResolutionIn);
         GlStateManager.popMatrix();
+
+        if (this.mc.gameSettings.showLagometer)
+        {
+            this.renderLagometer();
+        }
+
         this.mc.mcProfiler.endSection();
     }
 
@@ -185,13 +189,6 @@ public class GuiOverlayDebug extends Gui
         long l = j - k;
         List<String> list = Lists.newArrayList(String.format("Java: %s %dbit", System.getProperty("java.version"), this.mc.isJava64bit() ? 64 : 32), String.format("Mem: % 2d%% %03d/%03dMB", l * 100L / i, bytesToMb(l), bytesToMb(i)), String.format("Allocated: % 2d%% %03dMB", j * 100L / i, bytesToMb(j)), "", String.format("CPU: %s", OpenGlHelper.getCpu()), "", String.format("Display: %dx%d (%s)", Display.getWidth(), Display.getHeight(), GlStateManager.glGetString(7936)), GlStateManager.glGetString(7937), GlStateManager.glGetString(7938));
 
-        if (Reflector.FMLCommonHandler_getBrandings.exists())
-        {
-            Object object = Reflector.call(Reflector.FMLCommonHandler_instance);
-            list.add("");
-            list.addAll((Collection)Reflector.call(object, Reflector.FMLCommonHandler_getBrandings, false));
-        }
-
         if (this.mc.isReducedDebug())
         {
             return list;
@@ -203,7 +200,7 @@ public class GuiOverlayDebug extends Gui
                 BlockPos blockpos = this.mc.objectMouseOver.getBlockPos();
                 IBlockState iblockstate = this.mc.world.getBlockState(blockpos);
 
-                if (this.mc.world.getWorldType() != WorldType.DEBUG_ALL_BLOCK_STATES)
+                if (this.mc.world.getWorldType() != WorldType.DEBUG_WORLD)
                 {
                     iblockstate = iblockstate.getActualState(this.mc.world, blockpos);
                 }
