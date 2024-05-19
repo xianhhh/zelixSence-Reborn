@@ -11,49 +11,58 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class DebugRendererWater implements DebugRenderer.IDebugRenderer {
-   private final Minecraft field_188288_a;
-   private EntityPlayer field_190062_b;
-   private double field_190063_c;
-   private double field_190064_d;
-   private double field_190065_e;
+public class DebugRendererWater implements DebugRenderer.IDebugRenderer
+{
+    private final Minecraft minecraft;
+    private EntityPlayer player;
+    private double xo;
+    private double yo;
+    private double zo;
 
-   public DebugRendererWater(Minecraft p_i46555_1_) {
-      this.field_188288_a = p_i46555_1_;
-   }
+    public DebugRendererWater(Minecraft minecraftIn)
+    {
+        this.minecraft = minecraftIn;
+    }
 
-   public void func_190060_a(float p_190060_1_, long p_190060_2_) {
-      this.field_190062_b = this.field_188288_a.field_71439_g;
-      this.field_190063_c = this.field_190062_b.field_70142_S + (this.field_190062_b.field_70165_t - this.field_190062_b.field_70142_S) * (double)p_190060_1_;
-      this.field_190064_d = this.field_190062_b.field_70137_T + (this.field_190062_b.field_70163_u - this.field_190062_b.field_70137_T) * (double)p_190060_1_;
-      this.field_190065_e = this.field_190062_b.field_70136_U + (this.field_190062_b.field_70161_v - this.field_190062_b.field_70136_U) * (double)p_190060_1_;
-      BlockPos blockpos = this.field_188288_a.field_71439_g.func_180425_c();
-      World world = this.field_188288_a.field_71439_g.field_70170_p;
-      GlStateManager.func_179147_l();
-      GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-      GlStateManager.func_179131_c(0.0F, 1.0F, 0.0F, 0.75F);
-      GlStateManager.func_179090_x();
-      GlStateManager.func_187441_d(6.0F);
+    public void render(float p_190060_1_, long p_190060_2_)
+    {
+        this.player = this.minecraft.player;
+        this.xo = this.player.lastTickPosX + (this.player.posX - this.player.lastTickPosX) * (double)p_190060_1_;
+        this.yo = this.player.lastTickPosY + (this.player.posY - this.player.lastTickPosY) * (double)p_190060_1_;
+        this.zo = this.player.lastTickPosZ + (this.player.posZ - this.player.lastTickPosZ) * (double)p_190060_1_;
+        BlockPos blockpos = this.minecraft.player.getPosition();
+        World world = this.minecraft.player.world;
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(0.0F, 1.0F, 0.0F, 0.75F);
+        GlStateManager.disableTexture2D();
+        GlStateManager.glLineWidth(6.0F);
 
-      for(BlockPos blockpos1 : BlockPos.func_177980_a(blockpos.func_177982_a(-10, -10, -10), blockpos.func_177982_a(10, 10, 10))) {
-         IBlockState iblockstate = world.func_180495_p(blockpos1);
-         if (iblockstate.func_177230_c() == Blocks.field_150355_j || iblockstate.func_177230_c() == Blocks.field_150358_i) {
-            double d0 = (double)BlockLiquid.func_190972_g(iblockstate, world, blockpos1);
-            RenderGlobal.func_189696_b((new AxisAlignedBB((double)((float)blockpos1.func_177958_n() + 0.01F), (double)((float)blockpos1.func_177956_o() + 0.01F), (double)((float)blockpos1.func_177952_p() + 0.01F), (double)((float)blockpos1.func_177958_n() + 0.99F), d0, (double)((float)blockpos1.func_177952_p() + 0.99F))).func_72317_d(-this.field_190063_c, -this.field_190064_d, -this.field_190065_e), 1.0F, 1.0F, 1.0F, 0.2F);
-         }
-      }
+        for (BlockPos blockpos1 : BlockPos.getAllInBox(blockpos.add(-10, -10, -10), blockpos.add(10, 10, 10)))
+        {
+            IBlockState iblockstate = world.getBlockState(blockpos1);
 
-      for(BlockPos blockpos2 : BlockPos.func_177980_a(blockpos.func_177982_a(-10, -10, -10), blockpos.func_177982_a(10, 10, 10))) {
-         IBlockState iblockstate1 = world.func_180495_p(blockpos2);
-         if (iblockstate1.func_177230_c() == Blocks.field_150355_j || iblockstate1.func_177230_c() == Blocks.field_150358_i) {
-            Integer integer = (Integer)iblockstate1.func_177229_b(BlockLiquid.field_176367_b);
-            double d1 = integer.intValue() > 7 ? 0.9D : 1.0D - 0.11D * (double)integer.intValue();
-            String s = iblockstate1.func_177230_c() == Blocks.field_150358_i ? "f" : "s";
-            DebugRenderer.func_190076_a(s + " " + integer, (double)blockpos2.func_177958_n() + 0.5D, (double)blockpos2.func_177956_o() + d1, (double)blockpos2.func_177952_p() + 0.5D, p_190060_1_, -16777216);
-         }
-      }
+            if (iblockstate.getBlock() == Blocks.WATER || iblockstate.getBlock() == Blocks.FLOWING_WATER)
+            {
+                double d0 = (double)BlockLiquid.func_190972_g(iblockstate, world, blockpos1);
+                RenderGlobal.renderFilledBox((new AxisAlignedBB((double)((float)blockpos1.getX() + 0.01F), (double)((float)blockpos1.getY() + 0.01F), (double)((float)blockpos1.getZ() + 0.01F), (double)((float)blockpos1.getX() + 0.99F), d0, (double)((float)blockpos1.getZ() + 0.99F))).offset(-this.xo, -this.yo, -this.zo), 1.0F, 1.0F, 1.0F, 0.2F);
+            }
+        }
 
-      GlStateManager.func_179098_w();
-      GlStateManager.func_179084_k();
-   }
+        for (BlockPos blockpos2 : BlockPos.getAllInBox(blockpos.add(-10, -10, -10), blockpos.add(10, 10, 10)))
+        {
+            IBlockState iblockstate1 = world.getBlockState(blockpos2);
+
+            if (iblockstate1.getBlock() == Blocks.WATER || iblockstate1.getBlock() == Blocks.FLOWING_WATER)
+            {
+                Integer integer = (Integer)iblockstate1.getValue(BlockLiquid.LEVEL);
+                double d1 = integer.intValue() > 7 ? 0.9D : 1.0D - 0.11D * (double)integer.intValue();
+                String s = iblockstate1.getBlock() == Blocks.FLOWING_WATER ? "f" : "s";
+                DebugRenderer.renderDebugText(s + " " + integer, (double)blockpos2.getX() + 0.5D, (double)blockpos2.getY() + d1, (double)blockpos2.getZ() + 0.5D, p_190060_1_, -16777216);
+            }
+        }
+
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
 }

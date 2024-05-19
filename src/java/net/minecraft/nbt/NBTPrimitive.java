@@ -1,15 +1,16 @@
 package net.minecraft.nbt;
 
-abstract class NBTPrimitive extends NBTBase {
-   public abstract long func_150291_c();
+abstract class NBTPrimitive extends NBTBase
+{
+    public abstract long getLong();
 
-   public abstract int func_150287_d();
+    public abstract int getInt();
 
-   public abstract short func_150289_e();
+    public abstract short getShort();
 
-   public abstract byte func_150290_f();
+    public abstract byte getByte();
 
-   public abstract double func_150286_g();
+    public abstract double getDouble();
 
-   public abstract float func_150288_h();
+    public abstract float getFloat();
 }

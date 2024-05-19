@@ -7,43 +7,60 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketSetPassengers implements Packet<INetHandlerPlayClient> {
-   private int field_186973_a;
-   private int[] field_186974_b;
+public class SPacketSetPassengers implements Packet<INetHandlerPlayClient>
+{
+    private int entityId;
+    private int[] passengerIds;
 
-   public SPacketSetPassengers() {
-   }
+    public SPacketSetPassengers()
+    {
+    }
 
-   public SPacketSetPassengers(Entity p_i46909_1_) {
-      this.field_186973_a = p_i46909_1_.func_145782_y();
-      List<Entity> list = p_i46909_1_.func_184188_bt();
-      this.field_186974_b = new int[list.size()];
+    public SPacketSetPassengers(Entity entityIn)
+    {
+        this.entityId = entityIn.getEntityId();
+        List<Entity> list = entityIn.getPassengers();
+        this.passengerIds = new int[list.size()];
 
-      for(int i = 0; i < list.size(); ++i) {
-         this.field_186974_b[i] = ((Entity)list.get(i)).func_145782_y();
-      }
+        for (int i = 0; i < list.size(); ++i)
+        {
+            this.passengerIds[i] = ((Entity)list.get(i)).getEntityId();
+        }
+    }
 
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityId = buf.readVarIntFromBuffer();
+        this.passengerIds = buf.readVarIntArray();
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_186973_a = p_148837_1_.func_150792_a();
-      this.field_186974_b = p_148837_1_.func_186863_b();
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeVarIntArray(this.passengerIds);
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_186973_a);
-      p_148840_1_.func_186875_a(this.field_186974_b);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleSetPassengers(this);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_184328_a(this);
-   }
+    public int[] getPassengerIds()
+    {
+        return this.passengerIds;
+    }
 
-   public int[] func_186971_a() {
-      return this.field_186974_b;
-   }
-
-   public int func_186972_b() {
-      return this.field_186973_a;
-   }
+    public int getEntityId()
+    {
+        return this.entityId;
+    }
 }

@@ -40,337 +40,430 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockStateContainer {
-   private static final Pattern field_185921_a = Pattern.compile("^[a-z0-9_]+$");
-   private static final Function<IProperty<?>, String> field_177626_b = new Function<IProperty<?>, String>() {
-      @Nullable
-      public String apply(@Nullable IProperty<?> p_apply_1_) {
-         return p_apply_1_ == null ? "<NULL>" : p_apply_1_.func_177701_a();
-      }
-   };
-   private final Block field_177627_c;
-   private final ImmutableSortedMap<String, IProperty<?>> field_177624_d;
-   private final ImmutableList<IBlockState> field_177625_e;
+public class BlockStateContainer
+{
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
+    private static final Function < IProperty<?>, String > GET_NAME_FUNC = new Function < IProperty<?>, String > ()
+    {
+        @Nullable
+        public String apply(@Nullable IProperty<?> p_apply_1_)
+        {
+            return p_apply_1_ == null ? "<NULL>" : p_apply_1_.getName();
+        }
+    };
+    private final Block block;
+    private final ImmutableSortedMap < String, IProperty<? >> properties;
+    private final ImmutableList<IBlockState> validStates;
 
-   public BlockStateContainer(Block p_i45663_1_, IProperty<?>... p_i45663_2_) {
-      this.field_177627_c = p_i45663_1_;
-      Map<String, IProperty<?>> map = Maps.<String, IProperty<?>>newHashMap();
+    public BlockStateContainer(Block blockIn, IProperty<?>... properties)
+    {
+        this.block = blockIn;
+        Map < String, IProperty<? >> map = Maps. < String, IProperty<? >> newHashMap();
 
-      for(IProperty<?> iproperty : p_i45663_2_) {
-         func_185919_a(p_i45663_1_, iproperty);
-         map.put(iproperty.func_177701_a(), iproperty);
-      }
+        for (IProperty<?> iproperty : properties)
+        {
+            validateProperty(blockIn, iproperty);
+            map.put(iproperty.getName(), iproperty);
+        }
 
-      this.field_177624_d = ImmutableSortedMap.copyOf(map);
-      Map<Map<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> map2 = Maps.<Map<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation>newLinkedHashMap();
-      List<BlockStateContainer.StateImplementation> list1 = Lists.<BlockStateContainer.StateImplementation>newArrayList();
+        this.properties = ImmutableSortedMap.copyOf(map);
+        Map < Map < IProperty<?>, Comparable<? >> , BlockStateContainer.StateImplementation > map2 = Maps. < Map < IProperty<?>, Comparable<? >> , BlockStateContainer.StateImplementation > newLinkedHashMap();
+        List<BlockStateContainer.StateImplementation> list1 = Lists.<BlockStateContainer.StateImplementation>newArrayList();
 
-      for(List<Comparable<?>> list : Cartesian.func_179321_a(this.func_177620_e())) {
-         Map<IProperty<?>, Comparable<?>> map1 = MapPopulator.<IProperty<?>, Comparable<?>>func_179400_b(this.field_177624_d.values(), list);
-         BlockStateContainer.StateImplementation blockstatecontainer$stateimplementation = new BlockStateContainer.StateImplementation(p_i45663_1_, ImmutableMap.copyOf(map1));
-         map2.put(map1, blockstatecontainer$stateimplementation);
-         list1.add(blockstatecontainer$stateimplementation);
-      }
+        for (List < Comparable<? >> list : Cartesian.cartesianProduct(this.getAllowedValues()))
+        {
+            Map < IProperty<?>, Comparable<? >> map1 = MapPopulator. < IProperty<?>, Comparable<? >> createMap(this.properties.values(), list);
+            BlockStateContainer.StateImplementation blockstatecontainer$stateimplementation = new BlockStateContainer.StateImplementation(blockIn, ImmutableMap.copyOf(map1));
+            map2.put(map1, blockstatecontainer$stateimplementation);
+            list1.add(blockstatecontainer$stateimplementation);
+        }
 
-      for(BlockStateContainer.StateImplementation blockstatecontainer$stateimplementation1 : list1) {
-         blockstatecontainer$stateimplementation1.func_177235_a(map2);
-      }
+        for (BlockStateContainer.StateImplementation blockstatecontainer$stateimplementation1 : list1)
+        {
+            blockstatecontainer$stateimplementation1.buildPropertyValueTable(map2);
+        }
 
-      this.field_177625_e = ImmutableList.copyOf(list1);
-   }
+        this.validStates = ImmutableList.<IBlockState>copyOf(list1);
+    }
 
-   public static <T extends Comparable<T>> String func_185919_a(Block p_185919_0_, IProperty<T> p_185919_1_) {
-      String s = p_185919_1_.func_177701_a();
-      if (!field_185921_a.matcher(s).matches()) {
-         throw new IllegalArgumentException("Block: " + p_185919_0_.getClass() + " has invalidly named property: " + s);
-      } else {
-         for(T t : p_185919_1_.func_177700_c()) {
-            String s1 = p_185919_1_.func_177702_a(t);
-            if (!field_185921_a.matcher(s1).matches()) {
-               throw new IllegalArgumentException("Block: " + p_185919_0_.getClass() + " has property: " + s + " with invalidly named value: " + s1);
-            }
-         }
+    public static <T extends Comparable<T>> String validateProperty(Block block, IProperty<T> property)
+    {
+        String s = property.getName();
 
-         return s;
-      }
-   }
+        if (!NAME_PATTERN.matcher(s).matches())
+        {
+            throw new IllegalArgumentException("Block: " + block.getClass() + " has invalidly named property: " + s);
+        }
+        else
+        {
+            for (T t : property.getAllowedValues())
+            {
+                String s1 = property.getName(t);
 
-   public ImmutableList<IBlockState> func_177619_a() {
-      return this.field_177625_e;
-   }
-
-   private List<Iterable<Comparable<?>>> func_177620_e() {
-      List<Iterable<Comparable<?>>> list = Lists.<Iterable<Comparable<?>>>newArrayList();
-      ImmutableCollection<IProperty<?>> immutablecollection = this.field_177624_d.values();
-      UnmodifiableIterator unmodifiableiterator = immutablecollection.iterator();
-
-      while(unmodifiableiterator.hasNext()) {
-         IProperty<?> iproperty = (IProperty)unmodifiableiterator.next();
-         list.add(iproperty.func_177700_c());
-      }
-
-      return list;
-   }
-
-   public IBlockState func_177621_b() {
-      return (IBlockState)this.field_177625_e.get(0);
-   }
-
-   public Block func_177622_c() {
-      return this.field_177627_c;
-   }
-
-   public Collection<IProperty<?>> func_177623_d() {
-      return this.field_177624_d.values();
-   }
-
-   public String toString() {
-      return MoreObjects.toStringHelper(this).add("block", Block.field_149771_c.func_177774_c(this.field_177627_c)).add("properties", Iterables.transform(this.field_177624_d.values(), field_177626_b)).toString();
-   }
-
-   @Nullable
-   public IProperty<?> func_185920_a(String p_185920_1_) {
-      return (IProperty)this.field_177624_d.get(p_185920_1_);
-   }
-
-   static class StateImplementation extends BlockStateBase {
-      private final Block field_177239_a;
-      private final ImmutableMap<IProperty<?>, Comparable<?>> field_177237_b;
-      private ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> field_177238_c;
-
-      private StateImplementation(Block p_i45660_1_, ImmutableMap<IProperty<?>, Comparable<?>> p_i45660_2_) {
-         this.field_177239_a = p_i45660_1_;
-         this.field_177237_b = p_i45660_2_;
-      }
-
-      public Collection<IProperty<?>> func_177227_a() {
-         return Collections.<IProperty<?>>unmodifiableCollection(this.field_177237_b.keySet());
-      }
-
-      public <T extends Comparable<T>> T func_177229_b(IProperty<T> p_177229_1_) {
-         Comparable<?> comparable = (Comparable)this.field_177237_b.get(p_177229_1_);
-         if (comparable == null) {
-            throw new IllegalArgumentException("Cannot get property " + p_177229_1_ + " as it does not exist in " + this.field_177239_a.func_176194_O());
-         } else {
-            return (T)(p_177229_1_.func_177699_b().cast(comparable));
-         }
-      }
-
-      public <T extends Comparable<T>, V extends T> IBlockState func_177226_a(IProperty<T> p_177226_1_, V p_177226_2_) {
-         Comparable<?> comparable = (Comparable)this.field_177237_b.get(p_177226_1_);
-         if (comparable == null) {
-            throw new IllegalArgumentException("Cannot set property " + p_177226_1_ + " as it does not exist in " + this.field_177239_a.func_176194_O());
-         } else if (comparable == p_177226_2_) {
-            return this;
-         } else {
-            IBlockState iblockstate = (IBlockState)this.field_177238_c.get(p_177226_1_, p_177226_2_);
-            if (iblockstate == null) {
-               throw new IllegalArgumentException("Cannot set property " + p_177226_1_ + " to " + p_177226_2_ + " on block " + Block.field_149771_c.func_177774_c(this.field_177239_a) + ", it is not an allowed value");
-            } else {
-               return iblockstate;
-            }
-         }
-      }
-
-      public ImmutableMap<IProperty<?>, Comparable<?>> func_177228_b() {
-         return this.field_177237_b;
-      }
-
-      public Block func_177230_c() {
-         return this.field_177239_a;
-      }
-
-      public boolean equals(Object p_equals_1_) {
-         return this == p_equals_1_;
-      }
-
-      public int hashCode() {
-         return this.field_177237_b.hashCode();
-      }
-
-      public void func_177235_a(Map<Map<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> p_177235_1_) {
-         if (this.field_177238_c != null) {
-            throw new IllegalStateException();
-         } else {
-            Table<IProperty<?>, Comparable<?>, IBlockState> table = HashBasedTable.<IProperty<?>, Comparable<?>, IBlockState>create();
-            UnmodifiableIterator unmodifiableiterator = this.field_177237_b.entrySet().iterator();
-
-            while(unmodifiableiterator.hasNext()) {
-               Entry<IProperty<?>, Comparable<?>> entry = (Entry)unmodifiableiterator.next();
-               IProperty<?> iproperty = (IProperty)entry.getKey();
-
-               for(Comparable<?> comparable : iproperty.func_177700_c()) {
-                  if (comparable != entry.getValue()) {
-                     table.put(iproperty, comparable, p_177235_1_.get(this.func_177236_b(iproperty, comparable)));
-                  }
-               }
+                if (!NAME_PATTERN.matcher(s1).matches())
+                {
+                    throw new IllegalArgumentException("Block: " + block.getClass() + " has property: " + s + " with invalidly named value: " + s1);
+                }
             }
 
-            this.field_177238_c = ImmutableTable.copyOf(table);
-         }
-      }
+            return s;
+        }
+    }
 
-      private Map<IProperty<?>, Comparable<?>> func_177236_b(IProperty<?> p_177236_1_, Comparable<?> p_177236_2_) {
-         Map<IProperty<?>, Comparable<?>> map = Maps.<IProperty<?>, Comparable<?>>newHashMap(this.field_177237_b);
-         map.put(p_177236_1_, p_177236_2_);
-         return map;
-      }
+    public ImmutableList<IBlockState> getValidStates()
+    {
+        return this.validStates;
+    }
 
-      public Material func_185904_a() {
-         return this.field_177239_a.func_149688_o(this);
-      }
+    private List < Iterable < Comparable<? >>> getAllowedValues()
+    {
+        List < Iterable < Comparable<? >>> list = Lists. < Iterable < Comparable<? >>> newArrayList();
+        ImmutableCollection < IProperty<? >> immutablecollection = this.properties.values();
+        UnmodifiableIterator unmodifiableiterator = immutablecollection.iterator();
 
-      public boolean func_185913_b() {
-         return this.field_177239_a.func_149730_j(this);
-      }
+        while (unmodifiableiterator.hasNext())
+        {
+            IProperty<?> iproperty = (IProperty)unmodifiableiterator.next();
+            list.add(((IProperty)iproperty).getAllowedValues());
+        }
 
-      public boolean func_189884_a(Entity p_189884_1_) {
-         return this.field_177239_a.func_189872_a(this, p_189884_1_);
-      }
+        return list;
+    }
 
-      public int func_185891_c() {
-         return this.field_177239_a.func_149717_k(this);
-      }
+    public IBlockState getBaseState()
+    {
+        return (IBlockState)this.validStates.get(0);
+    }
 
-      public int func_185906_d() {
-         return this.field_177239_a.func_149750_m(this);
-      }
+    public Block getBlock()
+    {
+        return this.block;
+    }
 
-      public boolean func_185895_e() {
-         return this.field_177239_a.func_149751_l(this);
-      }
+    public Collection < IProperty<? >> getProperties()
+    {
+        return this.properties.values();
+    }
 
-      public boolean func_185916_f() {
-         return this.field_177239_a.func_149710_n(this);
-      }
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this).add("block", Block.REGISTRY.getNameForObject(this.block)).add("properties", Iterables.transform(this.properties.values(), GET_NAME_FUNC)).toString();
+    }
 
-      public MapColor func_185909_g(IBlockAccess p_185909_1_, BlockPos p_185909_2_) {
-         return this.field_177239_a.func_180659_g(this, p_185909_1_, p_185909_2_);
-      }
+    @Nullable
+    public IProperty<?> getProperty(String propertyName)
+    {
+        return (IProperty)this.properties.get(propertyName);
+    }
 
-      public IBlockState func_185907_a(Rotation p_185907_1_) {
-         return this.field_177239_a.func_185499_a(this, p_185907_1_);
-      }
+    static class StateImplementation extends BlockStateBase
+    {
+        private final Block block;
+        private final ImmutableMap < IProperty<?>, Comparable<? >> properties;
+        private ImmutableTable < IProperty<?>, Comparable<?>, IBlockState > propertyValueTable;
 
-      public IBlockState func_185902_a(Mirror p_185902_1_) {
-         return this.field_177239_a.func_185471_a(this, p_185902_1_);
-      }
+        private StateImplementation(Block blockIn, ImmutableMap < IProperty<?>, Comparable<? >> propertiesIn)
+        {
+            this.block = blockIn;
+            this.properties = propertiesIn;
+        }
 
-      public boolean func_185917_h() {
-         return this.field_177239_a.func_149686_d(this);
-      }
+        public Collection < IProperty<? >> getPropertyNames()
+        {
+            return Collections. < IProperty<? >> unmodifiableCollection(this.properties.keySet());
+        }
 
-      public boolean func_191057_i() {
-         return this.field_177239_a.func_190946_v(this);
-      }
+        public <T extends Comparable<T>> T getValue(IProperty<T> property)
+        {
+            Comparable<?> comparable = (Comparable)this.properties.get(property);
 
-      public EnumBlockRenderType func_185901_i() {
-         return this.field_177239_a.func_149645_b(this);
-      }
+            if (comparable == null)
+            {
+                throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.block.getBlockState());
+            }
+            else
+            {
+                return (T)(property.getValueClass().cast(comparable));
+            }
+        }
 
-      public int func_185889_a(IBlockAccess p_185889_1_, BlockPos p_185889_2_) {
-         return this.field_177239_a.func_185484_c(this, p_185889_1_, p_185889_2_);
-      }
+        public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> property, V value)
+        {
+            Comparable<?> comparable = (Comparable)this.properties.get(property);
 
-      public float func_185892_j() {
-         return this.field_177239_a.func_185485_f(this);
-      }
+            if (comparable == null)
+            {
+                throw new IllegalArgumentException("Cannot set property " + property + " as it does not exist in " + this.block.getBlockState());
+            }
+            else if (comparable == value)
+            {
+                return this;
+            }
+            else
+            {
+                IBlockState iblockstate = (IBlockState)this.propertyValueTable.get(property, value);
 
-      public boolean func_185898_k() {
-         return this.field_177239_a.func_149637_q(this);
-      }
+                if (iblockstate == null)
+                {
+                    throw new IllegalArgumentException("Cannot set property " + property + " to " + value + " on block " + Block.REGISTRY.getNameForObject(this.block) + ", it is not an allowed value");
+                }
+                else
+                {
+                    return iblockstate;
+                }
+            }
+        }
 
-      public boolean func_185915_l() {
-         return this.field_177239_a.func_149721_r(this);
-      }
+        public ImmutableMap < IProperty<?>, Comparable<? >> getProperties()
+        {
+            return this.properties;
+        }
 
-      public boolean func_185897_m() {
-         return this.field_177239_a.func_149744_f(this);
-      }
+        public Block getBlock()
+        {
+            return this.block;
+        }
 
-      public int func_185911_a(IBlockAccess p_185911_1_, BlockPos p_185911_2_, EnumFacing p_185911_3_) {
-         return this.field_177239_a.func_180656_a(this, p_185911_1_, p_185911_2_, p_185911_3_);
-      }
+        public boolean equals(Object p_equals_1_)
+        {
+            return this == p_equals_1_;
+        }
 
-      public boolean func_185912_n() {
-         return this.field_177239_a.func_149740_M(this);
-      }
+        public int hashCode()
+        {
+            return this.properties.hashCode();
+        }
 
-      public int func_185888_a(World p_185888_1_, BlockPos p_185888_2_) {
-         return this.field_177239_a.func_180641_l(this, p_185888_1_, p_185888_2_);
-      }
+        public void buildPropertyValueTable(Map < Map < IProperty<?>, Comparable<? >> , BlockStateContainer.StateImplementation > map)
+        {
+            if (this.propertyValueTable != null)
+            {
+                throw new IllegalStateException();
+            }
+            else
+            {
+                Table < IProperty<?>, Comparable<?>, IBlockState > table = HashBasedTable. < IProperty<?>, Comparable<?>, IBlockState > create();
+                UnmodifiableIterator unmodifiableiterator = this.properties.entrySet().iterator();
 
-      public float func_185887_b(World p_185887_1_, BlockPos p_185887_2_) {
-         return this.field_177239_a.func_176195_g(this, p_185887_1_, p_185887_2_);
-      }
+                while (unmodifiableiterator.hasNext())
+                {
+                    Entry < IProperty<?>, Comparable<? >> entry = (Entry)unmodifiableiterator.next();
+                    IProperty<?> iproperty = (IProperty)entry.getKey();
 
-      public float func_185903_a(EntityPlayer p_185903_1_, World p_185903_2_, BlockPos p_185903_3_) {
-         return this.field_177239_a.func_180647_a(this, p_185903_1_, p_185903_2_, p_185903_3_);
-      }
+                    for (Comparable<?> comparable : iproperty.getAllowedValues())
+                    {
+                        if (comparable != entry.getValue())
+                        {
+                            table.put(iproperty, comparable, map.get(this.getPropertiesWithValue(iproperty, comparable)));
+                        }
+                    }
+                }
 
-      public int func_185893_b(IBlockAccess p_185893_1_, BlockPos p_185893_2_, EnumFacing p_185893_3_) {
-         return this.field_177239_a.func_176211_b(this, p_185893_1_, p_185893_2_, p_185893_3_);
-      }
+                this.propertyValueTable = ImmutableTable.copyOf(table);
+            }
+        }
 
-      public EnumPushReaction func_185905_o() {
-         return this.field_177239_a.func_149656_h(this);
-      }
+        private Map < IProperty<?>, Comparable<? >> getPropertiesWithValue(IProperty<?> property, Comparable<?> value)
+        {
+            Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newHashMap(this.properties);
+            map.put(property, value);
+            return map;
+        }
 
-      public IBlockState func_185899_b(IBlockAccess p_185899_1_, BlockPos p_185899_2_) {
-         return this.field_177239_a.func_176221_a(this, p_185899_1_, p_185899_2_);
-      }
+        public Material getMaterial()
+        {
+            return this.block.getMaterial(this);
+        }
 
-      public AxisAlignedBB func_185918_c(World p_185918_1_, BlockPos p_185918_2_) {
-         return this.field_177239_a.func_180640_a(this, p_185918_1_, p_185918_2_);
-      }
+        public boolean isFullBlock()
+        {
+            return this.block.isFullBlock(this);
+        }
 
-      public boolean func_185894_c(IBlockAccess p_185894_1_, BlockPos p_185894_2_, EnumFacing p_185894_3_) {
-         return this.field_177239_a.func_176225_a(this, p_185894_1_, p_185894_2_, p_185894_3_);
-      }
+        public boolean canEntitySpawn(Entity entityIn)
+        {
+            return this.block.canEntitySpawn(this, entityIn);
+        }
 
-      public boolean func_185914_p() {
-         return this.field_177239_a.func_149662_c(this);
-      }
+        public int getLightOpacity()
+        {
+            return this.block.getLightOpacity(this);
+        }
 
-      @Nullable
-      public AxisAlignedBB func_185890_d(IBlockAccess p_185890_1_, BlockPos p_185890_2_) {
-         return this.field_177239_a.func_180646_a(this, p_185890_1_, p_185890_2_);
-      }
+        public int getLightValue()
+        {
+            return this.block.getLightValue(this);
+        }
 
-      public void func_185908_a(World p_185908_1_, BlockPos p_185908_2_, AxisAlignedBB p_185908_3_, List<AxisAlignedBB> p_185908_4_, @Nullable Entity p_185908_5_, boolean p_185908_6_) {
-         this.field_177239_a.func_185477_a(this, p_185908_1_, p_185908_2_, p_185908_3_, p_185908_4_, p_185908_5_, p_185908_6_);
-      }
+        public boolean isTranslucent()
+        {
+            return this.block.isTranslucent(this);
+        }
 
-      public AxisAlignedBB func_185900_c(IBlockAccess p_185900_1_, BlockPos p_185900_2_) {
-         return this.field_177239_a.func_185496_a(this, p_185900_1_, p_185900_2_);
-      }
+        public boolean useNeighborBrightness()
+        {
+            return this.block.getUseNeighborBrightness(this);
+        }
 
-      public RayTraceResult func_185910_a(World p_185910_1_, BlockPos p_185910_2_, Vec3d p_185910_3_, Vec3d p_185910_4_) {
-         return this.field_177239_a.func_180636_a(this, p_185910_1_, p_185910_2_, p_185910_3_, p_185910_4_);
-      }
+        public MapColor getMapColor(IBlockAccess p_185909_1_, BlockPos p_185909_2_)
+        {
+            return this.block.getMapColor(this, p_185909_1_, p_185909_2_);
+        }
 
-      public boolean func_185896_q() {
-         return this.field_177239_a.func_185481_k(this);
-      }
+        public IBlockState withRotation(Rotation rot)
+        {
+            return this.block.withRotation(this, rot);
+        }
 
-      public Vec3d func_191059_e(IBlockAccess p_191059_1_, BlockPos p_191059_2_) {
-         return this.field_177239_a.func_190949_e(this, p_191059_1_, p_191059_2_);
-      }
+        public IBlockState withMirror(Mirror mirrorIn)
+        {
+            return this.block.withMirror(this, mirrorIn);
+        }
 
-      public boolean func_189547_a(World p_189547_1_, BlockPos p_189547_2_, int p_189547_3_, int p_189547_4_) {
-         return this.field_177239_a.func_189539_a(this, p_189547_1_, p_189547_2_, p_189547_3_, p_189547_4_);
-      }
+        public boolean isFullCube()
+        {
+            return this.block.isFullCube(this);
+        }
 
-      public void func_189546_a(World p_189546_1_, BlockPos p_189546_2_, Block p_189546_3_, BlockPos p_189546_4_) {
-         this.field_177239_a.func_189540_a(this, p_189546_1_, p_189546_2_, p_189546_3_, p_189546_4_);
-      }
+        public boolean func_191057_i()
+        {
+            return this.block.func_190946_v(this);
+        }
 
-      public boolean func_191058_s() {
-         return this.field_177239_a.func_176214_u(this);
-      }
+        public EnumBlockRenderType getRenderType()
+        {
+            return this.block.getRenderType(this);
+        }
 
-      public BlockFaceShape func_193401_d(IBlockAccess p_193401_1_, BlockPos p_193401_2_, EnumFacing p_193401_3_) {
-         return this.field_177239_a.func_193383_a(p_193401_1_, this, p_193401_2_, p_193401_3_);
-      }
-   }
+        public int getPackedLightmapCoords(IBlockAccess source, BlockPos pos)
+        {
+            return this.block.getPackedLightmapCoords(this, source, pos);
+        }
+
+        public float getAmbientOcclusionLightValue()
+        {
+            return this.block.getAmbientOcclusionLightValue(this);
+        }
+
+        public boolean isBlockNormalCube()
+        {
+            return this.block.isBlockNormalCube(this);
+        }
+
+        public boolean isNormalCube()
+        {
+            return this.block.isNormalCube(this);
+        }
+
+        public boolean canProvidePower()
+        {
+            return this.block.canProvidePower(this);
+        }
+
+        public int getWeakPower(IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+        {
+            return this.block.getWeakPower(this, blockAccess, pos, side);
+        }
+
+        public boolean hasComparatorInputOverride()
+        {
+            return this.block.hasComparatorInputOverride(this);
+        }
+
+        public int getComparatorInputOverride(World worldIn, BlockPos pos)
+        {
+            return this.block.getComparatorInputOverride(this, worldIn, pos);
+        }
+
+        public float getBlockHardness(World worldIn, BlockPos pos)
+        {
+            return this.block.getBlockHardness(this, worldIn, pos);
+        }
+
+        public float getPlayerRelativeBlockHardness(EntityPlayer player, World worldIn, BlockPos pos)
+        {
+            return this.block.getPlayerRelativeBlockHardness(this, player, worldIn, pos);
+        }
+
+        public int getStrongPower(IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+        {
+            return this.block.getStrongPower(this, blockAccess, pos, side);
+        }
+
+        public EnumPushReaction getMobilityFlag()
+        {
+            return this.block.getMobilityFlag(this);
+        }
+
+        public IBlockState getActualState(IBlockAccess blockAccess, BlockPos pos)
+        {
+            return this.block.getActualState(this, blockAccess, pos);
+        }
+
+        public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
+        {
+            return this.block.getSelectedBoundingBox(this, worldIn, pos);
+        }
+
+        public boolean shouldSideBeRendered(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing)
+        {
+            return this.block.shouldSideBeRendered(this, blockAccess, pos, facing);
+        }
+
+        public boolean isOpaqueCube()
+        {
+            return this.block.isOpaqueCube(this);
+        }
+
+        @Nullable
+        public AxisAlignedBB getCollisionBoundingBox(IBlockAccess worldIn, BlockPos pos)
+        {
+            return this.block.getCollisionBoundingBox(this, worldIn, pos);
+        }
+
+        public void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB p_185908_3_, List<AxisAlignedBB> p_185908_4_, @Nullable Entity p_185908_5_, boolean p_185908_6_)
+        {
+            this.block.addCollisionBoxToList(this, worldIn, pos, p_185908_3_, p_185908_4_, p_185908_5_, p_185908_6_);
+        }
+
+        public AxisAlignedBB getBoundingBox(IBlockAccess blockAccess, BlockPos pos)
+        {
+            return this.block.getBoundingBox(this, blockAccess, pos);
+        }
+
+        public RayTraceResult collisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end)
+        {
+            return this.block.collisionRayTrace(this, worldIn, pos, start, end);
+        }
+
+        public boolean isFullyOpaque()
+        {
+            return this.block.isFullyOpaque(this);
+        }
+
+        public Vec3d func_191059_e(IBlockAccess p_191059_1_, BlockPos p_191059_2_)
+        {
+            return this.block.func_190949_e(this, p_191059_1_, p_191059_2_);
+        }
+
+        public boolean onBlockEventReceived(World worldIn, BlockPos pos, int id, int param)
+        {
+            return this.block.eventReceived(this, worldIn, pos, id, param);
+        }
+
+        public void neighborChanged(World worldIn, BlockPos pos, Block blockIn, BlockPos p_189546_4_)
+        {
+            this.block.neighborChanged(this, worldIn, pos, blockIn, p_189546_4_);
+        }
+
+        public boolean func_191058_s()
+        {
+            return this.block.causesSuffocation(this);
+        }
+
+        public BlockFaceShape func_193401_d(IBlockAccess p_193401_1_, BlockPos p_193401_2_, EnumFacing p_193401_3_)
+        {
+            return this.block.func_193383_a(p_193401_1_, this, p_193401_2_, p_193401_3_);
+        }
+    }
 }

@@ -15,49 +15,82 @@ import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-public class CommandBanPlayer extends CommandBase {
-   public String func_71517_b() {
-      return "ban";
-   }
+public class CommandBanPlayer extends CommandBase
+{
+    /**
+     * Gets the name of the command
+     */
+    public String getCommandName()
+    {
+        return "ban";
+    }
 
-   public int func_82362_a() {
-      return 3;
-   }
+    /**
+     * Return the required permission level for this command.
+     */
+    public int getRequiredPermissionLevel()
+    {
+        return 3;
+    }
 
-   public String func_71518_a(ICommandSender p_71518_1_) {
-      return "commands.ban.usage";
-   }
+    /**
+     * Gets the usage string for the command.
+     */
+    public String getCommandUsage(ICommandSender sender)
+    {
+        return "commands.ban.usage";
+    }
 
-   public boolean func_184882_a(MinecraftServer p_184882_1_, ICommandSender p_184882_2_) {
-      return p_184882_1_.func_184103_al().func_152608_h().func_152689_b() && super.func_184882_a(p_184882_1_, p_184882_2_);
-   }
+    /**
+     * Check if the given ICommandSender has permission to execute this command
+     */
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
+    {
+        return server.getPlayerList().getBannedPlayers().isLanServer() && super.checkPermission(server, sender);
+    }
 
-   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
-      if (p_184881_3_.length >= 1 && p_184881_3_[0].length() > 0) {
-         GameProfile gameprofile = p_184881_1_.func_152358_ax().func_152655_a(p_184881_3_[0]);
-         if (gameprofile == null) {
-            throw new CommandException("commands.ban.failed", new Object[]{p_184881_3_[0]});
-         } else {
-            String s = null;
-            if (p_184881_3_.length >= 2) {
-               s = func_147178_a(p_184881_2_, p_184881_3_, 1).func_150260_c();
+    /**
+     * Callback for when the command is executed
+     */
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length >= 1 && args[0].length() > 0)
+        {
+            GameProfile gameprofile = server.getPlayerProfileCache().getGameProfileForUsername(args[0]);
+
+            if (gameprofile == null)
+            {
+                throw new CommandException("commands.ban.failed", new Object[] {args[0]});
             }
+            else
+            {
+                String s = null;
 
-            UserListBansEntry userlistbansentry = new UserListBansEntry(gameprofile, (Date)null, p_184881_2_.func_70005_c_(), (Date)null, s);
-            p_184881_1_.func_184103_al().func_152608_h().func_152687_a(userlistbansentry);
-            EntityPlayerMP entityplayermp = p_184881_1_.func_184103_al().func_152612_a(p_184881_3_[0]);
-            if (entityplayermp != null) {
-               entityplayermp.field_71135_a.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
+                if (args.length >= 2)
+                {
+                    s = getChatComponentFromNthArg(sender, args, 1).getUnformattedText();
+                }
+
+                UserListBansEntry userlistbansentry = new UserListBansEntry(gameprofile, (Date)null, sender.getName(), (Date)null, s);
+                server.getPlayerList().getBannedPlayers().addEntry(userlistbansentry);
+                EntityPlayerMP entityplayermp = server.getPlayerList().getPlayerByUsername(args[0]);
+
+                if (entityplayermp != null)
+                {
+                    entityplayermp.connection.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
+                }
+
+                notifyCommandListener(sender, this, "commands.ban.success", new Object[] {args[0]});
             }
+        }
+        else
+        {
+            throw new WrongUsageException("commands.ban.usage", new Object[0]);
+        }
+    }
 
-            func_152373_a(p_184881_2_, this, "commands.ban.success", new Object[]{p_184881_3_[0]});
-         }
-      } else {
-         throw new WrongUsageException("commands.ban.usage", new Object[0]);
-      }
-   }
-
-   public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_) {
-      return p_184883_3_.length >= 1 ? func_71530_a(p_184883_3_, p_184883_1_.func_71213_z()) : Collections.emptyList();
-   }
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+    }
 }

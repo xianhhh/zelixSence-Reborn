@@ -7,53 +7,78 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 
-public class SPacketBlockAction implements Packet<INetHandlerPlayClient> {
-   private BlockPos field_179826_a;
-   private int field_148872_d;
-   private int field_148873_e;
-   private Block field_148871_f;
+public class SPacketBlockAction implements Packet<INetHandlerPlayClient>
+{
+    private BlockPos blockPosition;
+    private int instrument;
+    private int pitch;
+    private Block block;
 
-   public SPacketBlockAction() {
-   }
+    public SPacketBlockAction()
+    {
+    }
 
-   public SPacketBlockAction(BlockPos p_i46966_1_, Block p_i46966_2_, int p_i46966_3_, int p_i46966_4_) {
-      this.field_179826_a = p_i46966_1_;
-      this.field_148872_d = p_i46966_3_;
-      this.field_148873_e = p_i46966_4_;
-      this.field_148871_f = p_i46966_2_;
-   }
+    public SPacketBlockAction(BlockPos pos, Block blockIn, int instrumentIn, int pitchIn)
+    {
+        this.blockPosition = pos;
+        this.instrument = instrumentIn;
+        this.pitch = pitchIn;
+        this.block = blockIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179826_a = p_148837_1_.func_179259_c();
-      this.field_148872_d = p_148837_1_.readUnsignedByte();
-      this.field_148873_e = p_148837_1_.readUnsignedByte();
-      this.field_148871_f = Block.func_149729_e(p_148837_1_.func_150792_a() & 4095);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.blockPosition = buf.readBlockPos();
+        this.instrument = buf.readUnsignedByte();
+        this.pitch = buf.readUnsignedByte();
+        this.block = Block.getBlockById(buf.readVarIntFromBuffer() & 4095);
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179255_a(this.field_179826_a);
-      p_148840_1_.writeByte(this.field_148872_d);
-      p_148840_1_.writeByte(this.field_148873_e);
-      p_148840_1_.func_150787_b(Block.func_149682_b(this.field_148871_f) & 4095);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeBlockPos(this.blockPosition);
+        buf.writeByte(this.instrument);
+        buf.writeByte(this.pitch);
+        buf.writeVarIntToBuffer(Block.getIdFromBlock(this.block) & 4095);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147261_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleBlockAction(this);
+    }
 
-   public BlockPos func_179825_a() {
-      return this.field_179826_a;
-   }
+    public BlockPos getBlockPosition()
+    {
+        return this.blockPosition;
+    }
 
-   public int func_148869_g() {
-      return this.field_148872_d;
-   }
+    /**
+     * instrument data for noteblocks
+     */
+    public int getData1()
+    {
+        return this.instrument;
+    }
 
-   public int func_148864_h() {
-      return this.field_148873_e;
-   }
+    /**
+     * pitch data for noteblocks
+     */
+    public int getData2()
+    {
+        return this.pitch;
+    }
 
-   public Block func_148868_c() {
-      return this.field_148871_f;
-   }
+    public Block getBlockType()
+    {
+        return this.block;
+    }
 }

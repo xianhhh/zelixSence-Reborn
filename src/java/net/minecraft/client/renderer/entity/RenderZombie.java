@@ -5,21 +5,29 @@ import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderZombie extends RenderBiped<EntityZombie> {
-   private static final ResourceLocation field_110865_p = new ResourceLocation("textures/entity/zombie/zombie.png");
+public class RenderZombie extends RenderBiped<EntityZombie>
+{
+    private static final ResourceLocation ZOMBIE_TEXTURES = new ResourceLocation("textures/entity/zombie/zombie.png");
 
-   public RenderZombie(RenderManager p_i46127_1_) {
-      super(p_i46127_1_, new ModelZombie(), 0.5F);
-      LayerBipedArmor layerbipedarmor = new LayerBipedArmor(this) {
-         protected void func_177177_a() {
-            this.field_177189_c = (T)(new ModelZombie(0.5F, true));
-            this.field_177186_d = (T)(new ModelZombie(1.0F, true));
-         }
-      };
-      this.func_177094_a(layerbipedarmor);
-   }
+    public RenderZombie(RenderManager renderManagerIn)
+    {
+        super(renderManagerIn, new ModelZombie(), 0.5F);
+        LayerBipedArmor layerbipedarmor = new LayerBipedArmor(this)
+        {
+            protected void initArmor()
+            {
+                this.modelLeggings = new ModelZombie(0.5F, true);
+                this.modelArmor = new ModelZombie(1.0F, true);
+            }
+        };
+        this.addLayer(layerbipedarmor);
+    }
 
-   protected ResourceLocation func_110775_a(EntityZombie p_110775_1_) {
-      return field_110865_p;
-   }
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(EntityZombie entity)
+    {
+        return ZOMBIE_TEXTURES;
+    }
 }

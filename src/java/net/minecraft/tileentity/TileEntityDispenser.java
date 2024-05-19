@@ -13,97 +13,134 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 
-public class TileEntityDispenser extends TileEntityLockableLoot {
-   private static final Random field_174913_f = new Random();
-   private NonNullList<ItemStack> field_146022_i = NonNullList.<ItemStack>func_191197_a(9, ItemStack.field_190927_a);
+public class TileEntityDispenser extends TileEntityLockableLoot
+{
+    private static final Random RNG = new Random();
+    private NonNullList<ItemStack> stacks = NonNullList.<ItemStack>func_191197_a(9, ItemStack.field_190927_a);
 
-   public int func_70302_i_() {
-      return 9;
-   }
+    /**
+     * Returns the number of slots in the inventory.
+     */
+    public int getSizeInventory()
+    {
+        return 9;
+    }
 
-   public boolean func_191420_l() {
-      for(ItemStack itemstack : this.field_146022_i) {
-         if (!itemstack.func_190926_b()) {
-            return false;
-         }
-      }
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.stacks)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
 
-      return true;
-   }
+        return true;
+    }
 
-   public int func_146017_i() {
-      this.func_184281_d((EntityPlayer)null);
-      int i = -1;
-      int j = 1;
+    public int getDispenseSlot()
+    {
+        this.fillWithLoot((EntityPlayer)null);
+        int i = -1;
+        int j = 1;
 
-      for(int k = 0; k < this.field_146022_i.size(); ++k) {
-         if (!((ItemStack)this.field_146022_i.get(k)).func_190926_b() && field_174913_f.nextInt(j++) == 0) {
-            i = k;
-         }
-      }
+        for (int k = 0; k < this.stacks.size(); ++k)
+        {
+            if (!((ItemStack)this.stacks.get(k)).func_190926_b() && RNG.nextInt(j++) == 0)
+            {
+                i = k;
+            }
+        }
 
-      return i;
-   }
+        return i;
+    }
 
-   public int func_146019_a(ItemStack p_146019_1_) {
-      for(int i = 0; i < this.field_146022_i.size(); ++i) {
-         if (((ItemStack)this.field_146022_i.get(i)).func_190926_b()) {
-            this.func_70299_a(i, p_146019_1_);
-            return i;
-         }
-      }
+    /**
+     * Add the given ItemStack to this Dispenser. Return the Slot the Item was placed in or -1 if no free slot is
+     * available.
+     */
+    public int addItemStack(ItemStack stack)
+    {
+        for (int i = 0; i < this.stacks.size(); ++i)
+        {
+            if (((ItemStack)this.stacks.get(i)).func_190926_b())
+            {
+                this.setInventorySlotContents(i, stack);
+                return i;
+            }
+        }
 
-      return -1;
-   }
+        return -1;
+    }
 
-   public String func_70005_c_() {
-      return this.func_145818_k_() ? this.field_190577_o : "container.dispenser";
-   }
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        return this.hasCustomName() ? this.field_190577_o : "container.dispenser";
+    }
 
-   public static void func_189678_a(DataFixer p_189678_0_) {
-      p_189678_0_.func_188258_a(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityDispenser.class, new String[]{"Items"}));
-   }
+    public static void registerFixes(DataFixer fixer)
+    {
+        fixer.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityDispenser.class, new String[] {"Items"}));
+    }
 
-   public void func_145839_a(NBTTagCompound p_145839_1_) {
-      super.func_145839_a(p_145839_1_);
-      this.field_146022_i = NonNullList.<ItemStack>func_191197_a(this.func_70302_i_(), ItemStack.field_190927_a);
-      if (!this.func_184283_b(p_145839_1_)) {
-         ItemStackHelper.func_191283_b(p_145839_1_, this.field_146022_i);
-      }
+    public void readFromNBT(NBTTagCompound compound)
+    {
+        super.readFromNBT(compound);
+        this.stacks = NonNullList.<ItemStack>func_191197_a(this.getSizeInventory(), ItemStack.field_190927_a);
 
-      if (p_145839_1_.func_150297_b("CustomName", 8)) {
-         this.field_190577_o = p_145839_1_.func_74779_i("CustomName");
-      }
+        if (!this.checkLootAndRead(compound))
+        {
+            ItemStackHelper.func_191283_b(compound, this.stacks);
+        }
 
-   }
+        if (compound.hasKey("CustomName", 8))
+        {
+            this.field_190577_o = compound.getString("CustomName");
+        }
+    }
 
-   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
-      super.func_189515_b(p_189515_1_);
-      if (!this.func_184282_c(p_189515_1_)) {
-         ItemStackHelper.func_191282_a(p_189515_1_, this.field_146022_i);
-      }
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    {
+        super.writeToNBT(compound);
 
-      if (this.func_145818_k_()) {
-         p_189515_1_.func_74778_a("CustomName", this.field_190577_o);
-      }
+        if (!this.checkLootAndWrite(compound))
+        {
+            ItemStackHelper.func_191282_a(compound, this.stacks);
+        }
 
-      return p_189515_1_;
-   }
+        if (this.hasCustomName())
+        {
+            compound.setString("CustomName", this.field_190577_o);
+        }
 
-   public int func_70297_j_() {
-      return 64;
-   }
+        return compound;
+    }
 
-   public String func_174875_k() {
-      return "minecraft:dispenser";
-   }
+    /**
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     */
+    public int getInventoryStackLimit()
+    {
+        return 64;
+    }
 
-   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
-      this.func_184281_d(p_174876_2_);
-      return new ContainerDispenser(p_174876_1_, this);
-   }
+    public String getGuiID()
+    {
+        return "minecraft:dispenser";
+    }
 
-   protected NonNullList<ItemStack> func_190576_q() {
-      return this.field_146022_i;
-   }
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+    {
+        this.fillWithLoot(playerIn);
+        return new ContainerDispenser(playerInventory, this);
+    }
+
+    protected NonNullList<ItemStack> func_190576_q()
+    {
+        return this.stacks;
+    }
 }

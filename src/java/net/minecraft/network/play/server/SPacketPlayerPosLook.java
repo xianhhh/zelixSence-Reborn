@@ -7,121 +7,152 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketPlayerPosLook implements Packet<INetHandlerPlayClient> {
-   private double field_148940_a;
-   private double field_148938_b;
-   private double field_148939_c;
-   private float field_148936_d;
-   private float field_148937_e;
-   private Set<SPacketPlayerPosLook.EnumFlags> field_179835_f;
-   private int field_186966_g;
+public class SPacketPlayerPosLook implements Packet<INetHandlerPlayClient>
+{
+    private double x;
+    private double y;
+    private double z;
+    private float yaw;
+    private float pitch;
+    private Set<SPacketPlayerPosLook.EnumFlags> flags;
+    private int teleportId;
 
-   public SPacketPlayerPosLook() {
-   }
+    public SPacketPlayerPosLook()
+    {
+    }
 
-   public SPacketPlayerPosLook(double p_i46928_1_, double p_i46928_3_, double p_i46928_5_, float p_i46928_7_, float p_i46928_8_, Set<SPacketPlayerPosLook.EnumFlags> p_i46928_9_, int p_i46928_10_) {
-      this.field_148940_a = p_i46928_1_;
-      this.field_148938_b = p_i46928_3_;
-      this.field_148939_c = p_i46928_5_;
-      this.field_148936_d = p_i46928_7_;
-      this.field_148937_e = p_i46928_8_;
-      this.field_179835_f = p_i46928_9_;
-      this.field_186966_g = p_i46928_10_;
-   }
+    public SPacketPlayerPosLook(double xIn, double yIn, double zIn, float yawIn, float pitchIn, Set<SPacketPlayerPosLook.EnumFlags> flagsIn, int teleportIdIn)
+    {
+        this.x = xIn;
+        this.y = yIn;
+        this.z = zIn;
+        this.yaw = yawIn;
+        this.pitch = pitchIn;
+        this.flags = flagsIn;
+        this.teleportId = teleportIdIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_148940_a = p_148837_1_.readDouble();
-      this.field_148938_b = p_148837_1_.readDouble();
-      this.field_148939_c = p_148837_1_.readDouble();
-      this.field_148936_d = p_148837_1_.readFloat();
-      this.field_148937_e = p_148837_1_.readFloat();
-      this.field_179835_f = SPacketPlayerPosLook.EnumFlags.func_187044_a(p_148837_1_.readUnsignedByte());
-      this.field_186966_g = p_148837_1_.func_150792_a();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.x = buf.readDouble();
+        this.y = buf.readDouble();
+        this.z = buf.readDouble();
+        this.yaw = buf.readFloat();
+        this.pitch = buf.readFloat();
+        this.flags = SPacketPlayerPosLook.EnumFlags.unpack(buf.readUnsignedByte());
+        this.teleportId = buf.readVarIntFromBuffer();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeDouble(this.field_148940_a);
-      p_148840_1_.writeDouble(this.field_148938_b);
-      p_148840_1_.writeDouble(this.field_148939_c);
-      p_148840_1_.writeFloat(this.field_148936_d);
-      p_148840_1_.writeFloat(this.field_148937_e);
-      p_148840_1_.writeByte(SPacketPlayerPosLook.EnumFlags.func_187040_a(this.field_179835_f));
-      p_148840_1_.func_150787_b(this.field_186966_g);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeDouble(this.x);
+        buf.writeDouble(this.y);
+        buf.writeDouble(this.z);
+        buf.writeFloat(this.yaw);
+        buf.writeFloat(this.pitch);
+        buf.writeByte(SPacketPlayerPosLook.EnumFlags.pack(this.flags));
+        buf.writeVarIntToBuffer(this.teleportId);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_184330_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handlePlayerPosLook(this);
+    }
 
-   public double func_148932_c() {
-      return this.field_148940_a;
-   }
+    public double getX()
+    {
+        return this.x;
+    }
 
-   public double func_148928_d() {
-      return this.field_148938_b;
-   }
+    public double getY()
+    {
+        return this.y;
+    }
 
-   public double func_148933_e() {
-      return this.field_148939_c;
-   }
+    public double getZ()
+    {
+        return this.z;
+    }
 
-   public float func_148931_f() {
-      return this.field_148936_d;
-   }
+    public float getYaw()
+    {
+        return this.yaw;
+    }
 
-   public float func_148930_g() {
-      return this.field_148937_e;
-   }
+    public float getPitch()
+    {
+        return this.pitch;
+    }
 
-   public int func_186965_f() {
-      return this.field_186966_g;
-   }
+    public int getTeleportId()
+    {
+        return this.teleportId;
+    }
 
-   public Set<SPacketPlayerPosLook.EnumFlags> func_179834_f() {
-      return this.field_179835_f;
-   }
+    public Set<SPacketPlayerPosLook.EnumFlags> getFlags()
+    {
+        return this.flags;
+    }
 
-   public static enum EnumFlags {
-      X(0),
-      Y(1),
-      Z(2),
-      Y_ROT(3),
-      X_ROT(4);
+    public static enum EnumFlags
+    {
+        X(0),
+        Y(1),
+        Z(2),
+        Y_ROT(3),
+        X_ROT(4);
 
-      private final int field_187050_f;
+        private final int bit;
 
-      private EnumFlags(int p_i46690_3_) {
-         this.field_187050_f = p_i46690_3_;
-      }
+        private EnumFlags(int p_i46690_3_)
+        {
+            this.bit = p_i46690_3_;
+        }
 
-      private int func_187042_a() {
-         return 1 << this.field_187050_f;
-      }
+        private int getMask()
+        {
+            return 1 << this.bit;
+        }
 
-      private boolean func_187043_b(int p_187043_1_) {
-         return (p_187043_1_ & this.func_187042_a()) == this.func_187042_a();
-      }
+        private boolean isSet(int p_187043_1_)
+        {
+            return (p_187043_1_ & this.getMask()) == this.getMask();
+        }
 
-      public static Set<SPacketPlayerPosLook.EnumFlags> func_187044_a(int p_187044_0_) {
-         Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.<SPacketPlayerPosLook.EnumFlags>noneOf(SPacketPlayerPosLook.EnumFlags.class);
+        public static Set<SPacketPlayerPosLook.EnumFlags> unpack(int flags)
+        {
+            Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.<SPacketPlayerPosLook.EnumFlags>noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
-         for(SPacketPlayerPosLook.EnumFlags spacketplayerposlook$enumflags : values()) {
-            if (spacketplayerposlook$enumflags.func_187043_b(p_187044_0_)) {
-               set.add(spacketplayerposlook$enumflags);
+            for (SPacketPlayerPosLook.EnumFlags spacketplayerposlook$enumflags : values())
+            {
+                if (spacketplayerposlook$enumflags.isSet(flags))
+                {
+                    set.add(spacketplayerposlook$enumflags);
+                }
             }
-         }
 
-         return set;
-      }
+            return set;
+        }
 
-      public static int func_187040_a(Set<SPacketPlayerPosLook.EnumFlags> p_187040_0_) {
-         int i = 0;
+        public static int pack(Set<SPacketPlayerPosLook.EnumFlags> flags)
+        {
+            int i = 0;
 
-         for(SPacketPlayerPosLook.EnumFlags spacketplayerposlook$enumflags : p_187040_0_) {
-            i |= spacketplayerposlook$enumflags.func_187042_a();
-         }
+            for (SPacketPlayerPosLook.EnumFlags spacketplayerposlook$enumflags : flags)
+            {
+                i |= spacketplayerposlook$enumflags.getMask();
+            }
 
-         return i;
-      }
-   }
+            return i;
+        }
+    }
 }

@@ -2,10 +2,20 @@ package net.minecraft.world;
 
 import net.minecraft.util.text.ITextComponent;
 
-public interface IWorldNameable {
-   String func_70005_c_();
+public interface IWorldNameable
+{
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    String getName();
 
-   boolean func_145818_k_();
+    /**
+     * Returns true if this thing is named
+     */
+    boolean hasCustomName();
 
-   ITextComponent func_145748_c_();
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    ITextComponent getDisplayName();
 }

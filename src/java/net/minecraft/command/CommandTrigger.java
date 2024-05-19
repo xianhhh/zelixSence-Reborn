@@ -13,83 +13,132 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
-public class CommandTrigger extends CommandBase {
-   public String func_71517_b() {
-      return "trigger";
-   }
+public class CommandTrigger extends CommandBase
+{
+    /**
+     * Gets the name of the command
+     */
+    public String getCommandName()
+    {
+        return "trigger";
+    }
 
-   public int func_82362_a() {
-      return 0;
-   }
+    /**
+     * Return the required permission level for this command.
+     */
+    public int getRequiredPermissionLevel()
+    {
+        return 0;
+    }
 
-   public String func_71518_a(ICommandSender p_71518_1_) {
-      return "commands.trigger.usage";
-   }
+    /**
+     * Gets the usage string for the command.
+     */
+    public String getCommandUsage(ICommandSender sender)
+    {
+        return "commands.trigger.usage";
+    }
 
-   public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException {
-      if (p_184881_3_.length < 3) {
-         throw new WrongUsageException("commands.trigger.usage", new Object[0]);
-      } else {
-         EntityPlayerMP entityplayermp;
-         if (p_184881_2_ instanceof EntityPlayerMP) {
-            entityplayermp = (EntityPlayerMP)p_184881_2_;
-         } else {
-            Entity entity = p_184881_2_.func_174793_f();
-            if (!(entity instanceof EntityPlayerMP)) {
-               throw new CommandException("commands.trigger.invalidPlayer", new Object[0]);
+    /**
+     * Callback for when the command is executed
+     */
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length < 3)
+        {
+            throw new WrongUsageException("commands.trigger.usage", new Object[0]);
+        }
+        else
+        {
+            EntityPlayerMP entityplayermp;
+
+            if (sender instanceof EntityPlayerMP)
+            {
+                entityplayermp = (EntityPlayerMP)sender;
+            }
+            else
+            {
+                Entity entity = sender.getCommandSenderEntity();
+
+                if (!(entity instanceof EntityPlayerMP))
+                {
+                    throw new CommandException("commands.trigger.invalidPlayer", new Object[0]);
+                }
+
+                entityplayermp = (EntityPlayerMP)entity;
             }
 
-            entityplayermp = (EntityPlayerMP)entity;
-         }
+            Scoreboard scoreboard = server.worldServerForDimension(0).getScoreboard();
+            ScoreObjective scoreobjective = scoreboard.getObjective(args[0]);
 
-         Scoreboard scoreboard = p_184881_1_.func_71218_a(0).func_96441_U();
-         ScoreObjective scoreobjective = scoreboard.func_96518_b(p_184881_3_[0]);
-         if (scoreobjective != null && scoreobjective.func_96680_c() == IScoreCriteria.field_178791_c) {
-            int i = func_175755_a(p_184881_3_[2]);
-            if (!scoreboard.func_178819_b(entityplayermp.func_70005_c_(), scoreobjective)) {
-               throw new CommandException("commands.trigger.invalidObjective", new Object[]{p_184881_3_[0]});
-            } else {
-               Score score = scoreboard.func_96529_a(entityplayermp.func_70005_c_(), scoreobjective);
-               if (score.func_178816_g()) {
-                  throw new CommandException("commands.trigger.disabled", new Object[]{p_184881_3_[0]});
-               } else {
-                  if ("set".equals(p_184881_3_[1])) {
-                     score.func_96647_c(i);
-                  } else {
-                     if (!"add".equals(p_184881_3_[1])) {
-                        throw new CommandException("commands.trigger.invalidMode", new Object[]{p_184881_3_[1]});
-                     }
+            if (scoreobjective != null && scoreobjective.getCriteria() == IScoreCriteria.TRIGGER)
+            {
+                int i = parseInt(args[2]);
 
-                     score.func_96649_a(i);
-                  }
+                if (!scoreboard.entityHasObjective(entityplayermp.getName(), scoreobjective))
+                {
+                    throw new CommandException("commands.trigger.invalidObjective", new Object[] {args[0]});
+                }
+                else
+                {
+                    Score score = scoreboard.getOrCreateScore(entityplayermp.getName(), scoreobjective);
 
-                  score.func_178815_a(true);
-                  if (entityplayermp.field_71134_c.func_73083_d()) {
-                     func_152373_a(p_184881_2_, this, "commands.trigger.success", new Object[]{p_184881_3_[0], p_184881_3_[1], p_184881_3_[2]});
-                  }
+                    if (score.isLocked())
+                    {
+                        throw new CommandException("commands.trigger.disabled", new Object[] {args[0]});
+                    }
+                    else
+                    {
+                        if ("set".equals(args[1]))
+                        {
+                            score.setScorePoints(i);
+                        }
+                        else
+                        {
+                            if (!"add".equals(args[1]))
+                            {
+                                throw new CommandException("commands.trigger.invalidMode", new Object[] {args[1]});
+                            }
 
-               }
+                            score.increaseScore(i);
+                        }
+
+                        score.setLocked(true);
+
+                        if (entityplayermp.interactionManager.isCreative())
+                        {
+                            notifyCommandListener(sender, this, "commands.trigger.success", new Object[] {args[0], args[1], args[2]});
+                        }
+                    }
+                }
             }
-         } else {
-            throw new CommandException("commands.trigger.invalidObjective", new Object[]{p_184881_3_[0]});
-         }
-      }
-   }
-
-   public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_) {
-      if (p_184883_3_.length == 1) {
-         Scoreboard scoreboard = p_184883_1_.func_71218_a(0).func_96441_U();
-         List<String> list = Lists.<String>newArrayList();
-
-         for(ScoreObjective scoreobjective : scoreboard.func_96514_c()) {
-            if (scoreobjective.func_96680_c() == IScoreCriteria.field_178791_c) {
-               list.add(scoreobjective.func_96679_b());
+            else
+            {
+                throw new CommandException("commands.trigger.invalidObjective", new Object[] {args[0]});
             }
-         }
+        }
+    }
 
-         return func_71530_a(p_184883_3_, (String[])list.toArray(new String[list.size()]));
-      } else {
-         return p_184883_3_.length == 2 ? func_71530_a(p_184883_3_, new String[]{"add", "set"}) : Collections.emptyList();
-      }
-   }
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        if (args.length == 1)
+        {
+            Scoreboard scoreboard = server.worldServerForDimension(0).getScoreboard();
+            List<String> list = Lists.<String>newArrayList();
+
+            for (ScoreObjective scoreobjective : scoreboard.getScoreObjectives())
+            {
+                if (scoreobjective.getCriteria() == IScoreCriteria.TRIGGER)
+                {
+                    list.add(scoreobjective.getName());
+                }
+            }
+
+            return getListOfStringsMatchingLastWord(args, (String[])list.toArray(new String[list.size()]));
+        }
+        else
+        {
+            return args.length == 2 ? getListOfStringsMatchingLastWord(args, new String[] {"add", "set"}) : Collections.emptyList();
+        }
+    }
 }

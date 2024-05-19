@@ -8,80 +8,112 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockStaticLiquid extends BlockLiquid {
-   protected BlockStaticLiquid(Material p_i45429_1_) {
-      super(p_i45429_1_);
-      this.func_149675_a(false);
-      if (p_i45429_1_ == Material.field_151587_i) {
-         this.func_149675_a(true);
-      }
+public class BlockStaticLiquid extends BlockLiquid
+{
+    protected BlockStaticLiquid(Material materialIn)
+    {
+        super(materialIn);
+        this.setTickRandomly(false);
 
-   }
+        if (materialIn == Material.LAVA)
+        {
+            this.setTickRandomly(true);
+        }
+    }
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      if (!this.func_176365_e(p_189540_2_, p_189540_3_, p_189540_1_)) {
-         this.func_176370_f(p_189540_2_, p_189540_3_, p_189540_1_);
-      }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        if (!this.checkForMixing(worldIn, pos, state))
+        {
+            this.updateLiquid(worldIn, pos, state);
+        }
+    }
 
-   }
+    private void updateLiquid(World worldIn, BlockPos pos, IBlockState state)
+    {
+        BlockDynamicLiquid blockdynamicliquid = getFlowingBlock(this.blockMaterial);
+        worldIn.setBlockState(pos, blockdynamicliquid.getDefaultState().withProperty(LEVEL, state.getValue(LEVEL)), 2);
+        worldIn.scheduleUpdate(pos, blockdynamicliquid, this.tickRate(worldIn));
+    }
 
-   private void func_176370_f(World p_176370_1_, BlockPos p_176370_2_, IBlockState p_176370_3_) {
-      BlockDynamicLiquid blockdynamicliquid = func_176361_a(this.field_149764_J);
-      p_176370_1_.func_180501_a(p_176370_2_, blockdynamicliquid.func_176223_P().func_177226_a(field_176367_b, p_176370_3_.func_177229_b(field_176367_b)), 2);
-      p_176370_1_.func_175684_a(p_176370_2_, blockdynamicliquid, this.func_149738_a(p_176370_1_));
-   }
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        if (this.blockMaterial == Material.LAVA)
+        {
+            if (worldIn.getGameRules().getBoolean("doFireTick"))
+            {
+                int i = rand.nextInt(3);
 
-   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
-      if (this.field_149764_J == Material.field_151587_i) {
-         if (p_180650_1_.func_82736_K().func_82766_b("doFireTick")) {
-            int i = p_180650_4_.nextInt(3);
-            if (i > 0) {
-               BlockPos blockpos = p_180650_2_;
+                if (i > 0)
+                {
+                    BlockPos blockpos = pos;
 
-               for(int j = 0; j < i; ++j) {
-                  blockpos = blockpos.func_177982_a(p_180650_4_.nextInt(3) - 1, 1, p_180650_4_.nextInt(3) - 1);
-                  if (blockpos.func_177956_o() >= 0 && blockpos.func_177956_o() < 256 && !p_180650_1_.func_175667_e(blockpos)) {
-                     return;
-                  }
+                    for (int j = 0; j < i; ++j)
+                    {
+                        blockpos = blockpos.add(rand.nextInt(3) - 1, 1, rand.nextInt(3) - 1);
 
-                  Block block = p_180650_1_.func_180495_p(blockpos).func_177230_c();
-                  if (block.field_149764_J == Material.field_151579_a) {
-                     if (this.func_176369_e(p_180650_1_, blockpos)) {
-                        p_180650_1_.func_175656_a(blockpos, Blocks.field_150480_ab.func_176223_P());
-                        return;
-                     }
-                  } else if (block.field_149764_J.func_76230_c()) {
-                     return;
-                  }
-               }
-            } else {
-               for(int k = 0; k < 3; ++k) {
-                  BlockPos blockpos1 = p_180650_2_.func_177982_a(p_180650_4_.nextInt(3) - 1, 0, p_180650_4_.nextInt(3) - 1);
-                  if (blockpos1.func_177956_o() >= 0 && blockpos1.func_177956_o() < 256 && !p_180650_1_.func_175667_e(blockpos1)) {
-                     return;
-                  }
+                        if (blockpos.getY() >= 0 && blockpos.getY() < 256 && !worldIn.isBlockLoaded(blockpos))
+                        {
+                            return;
+                        }
 
-                  if (p_180650_1_.func_175623_d(blockpos1.func_177984_a()) && this.func_176368_m(p_180650_1_, blockpos1)) {
-                     p_180650_1_.func_175656_a(blockpos1.func_177984_a(), Blocks.field_150480_ab.func_176223_P());
-                  }
-               }
+                        Block block = worldIn.getBlockState(blockpos).getBlock();
+
+                        if (block.blockMaterial == Material.AIR)
+                        {
+                            if (this.isSurroundingBlockFlammable(worldIn, blockpos))
+                            {
+                                worldIn.setBlockState(blockpos, Blocks.FIRE.getDefaultState());
+                                return;
+                            }
+                        }
+                        else if (block.blockMaterial.blocksMovement())
+                        {
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < 3; ++k)
+                    {
+                        BlockPos blockpos1 = pos.add(rand.nextInt(3) - 1, 0, rand.nextInt(3) - 1);
+
+                        if (blockpos1.getY() >= 0 && blockpos1.getY() < 256 && !worldIn.isBlockLoaded(blockpos1))
+                        {
+                            return;
+                        }
+
+                        if (worldIn.isAirBlock(blockpos1.up()) && this.getCanBlockBurn(worldIn, blockpos1))
+                        {
+                            worldIn.setBlockState(blockpos1.up(), Blocks.FIRE.getDefaultState());
+                        }
+                    }
+                }
             }
+        }
+    }
 
-         }
-      }
-   }
+    protected boolean isSurroundingBlockFlammable(World worldIn, BlockPos pos)
+    {
+        for (EnumFacing enumfacing : EnumFacing.values())
+        {
+            if (this.getCanBlockBurn(worldIn, pos.offset(enumfacing)))
+            {
+                return true;
+            }
+        }
 
-   protected boolean func_176369_e(World p_176369_1_, BlockPos p_176369_2_) {
-      for(EnumFacing enumfacing : EnumFacing.values()) {
-         if (this.func_176368_m(p_176369_1_, p_176369_2_.func_177972_a(enumfacing))) {
-            return true;
-         }
-      }
+        return false;
+    }
 
-      return false;
-   }
-
-   private boolean func_176368_m(World p_176368_1_, BlockPos p_176368_2_) {
-      return p_176368_2_.func_177956_o() >= 0 && p_176368_2_.func_177956_o() < 256 && !p_176368_1_.func_175667_e(p_176368_2_) ? false : p_176368_1_.func_180495_p(p_176368_2_).func_185904_a().func_76217_h();
-   }
+    private boolean getCanBlockBurn(World worldIn, BlockPos pos)
+    {
+        return pos.getY() >= 0 && pos.getY() < 256 && !worldIn.isBlockLoaded(pos) ? false : worldIn.getBlockState(pos).getMaterial().getCanBurn();
+    }
 }

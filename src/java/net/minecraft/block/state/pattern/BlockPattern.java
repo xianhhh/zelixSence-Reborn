@@ -11,151 +11,205 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-public class BlockPattern {
-   private final Predicate<BlockWorldState>[][][] field_177689_a;
-   private final int field_177687_b;
-   private final int field_177688_c;
-   private final int field_177686_d;
+public class BlockPattern
+{
+    private final Predicate<BlockWorldState>[][][] blockMatches;
+    private final int fingerLength;
+    private final int thumbLength;
+    private final int palmLength;
 
-   public BlockPattern(Predicate<BlockWorldState>[][][] p_i45657_1_) {
-      this.field_177689_a = p_i45657_1_;
-      this.field_177687_b = p_i45657_1_.length;
-      if (this.field_177687_b > 0) {
-         this.field_177688_c = p_i45657_1_[0].length;
-         if (this.field_177688_c > 0) {
-            this.field_177686_d = p_i45657_1_[0][0].length;
-         } else {
-            this.field_177686_d = 0;
-         }
-      } else {
-         this.field_177688_c = 0;
-         this.field_177686_d = 0;
-      }
+    public BlockPattern(Predicate<BlockWorldState>[][][] predicatesIn)
+    {
+        this.blockMatches = predicatesIn;
+        this.fingerLength = predicatesIn.length;
 
-   }
+        if (this.fingerLength > 0)
+        {
+            this.thumbLength = predicatesIn[0].length;
 
-   public int func_185922_a() {
-      return this.field_177687_b;
-   }
-
-   public int func_177685_b() {
-      return this.field_177688_c;
-   }
-
-   public int func_177684_c() {
-      return this.field_177686_d;
-   }
-
-   @Nullable
-   private BlockPattern.PatternHelper func_177682_a(BlockPos p_177682_1_, EnumFacing p_177682_2_, EnumFacing p_177682_3_, LoadingCache<BlockPos, BlockWorldState> p_177682_4_) {
-      for(int i = 0; i < this.field_177686_d; ++i) {
-         for(int j = 0; j < this.field_177688_c; ++j) {
-            for(int k = 0; k < this.field_177687_b; ++k) {
-               if (!this.field_177689_a[k][j][i].apply(p_177682_4_.getUnchecked(func_177683_a(p_177682_1_, p_177682_2_, p_177682_3_, i, j, k)))) {
-                  return null;
-               }
+            if (this.thumbLength > 0)
+            {
+                this.palmLength = predicatesIn[0][0].length;
             }
-         }
-      }
-
-      return new BlockPattern.PatternHelper(p_177682_1_, p_177682_2_, p_177682_3_, p_177682_4_, this.field_177686_d, this.field_177688_c, this.field_177687_b);
-   }
-
-   @Nullable
-   public BlockPattern.PatternHelper func_177681_a(World p_177681_1_, BlockPos p_177681_2_) {
-      LoadingCache<BlockPos, BlockWorldState> loadingcache = func_181627_a(p_177681_1_, false);
-      int i = Math.max(Math.max(this.field_177686_d, this.field_177688_c), this.field_177687_b);
-
-      for(BlockPos blockpos : BlockPos.func_177980_a(p_177681_2_, p_177681_2_.func_177982_a(i - 1, i - 1, i - 1))) {
-         for(EnumFacing enumfacing : EnumFacing.values()) {
-            for(EnumFacing enumfacing1 : EnumFacing.values()) {
-               if (enumfacing1 != enumfacing && enumfacing1 != enumfacing.func_176734_d()) {
-                  BlockPattern.PatternHelper blockpattern$patternhelper = this.func_177682_a(blockpos, enumfacing, enumfacing1, loadingcache);
-                  if (blockpattern$patternhelper != null) {
-                     return blockpattern$patternhelper;
-                  }
-               }
+            else
+            {
+                this.palmLength = 0;
             }
-         }
-      }
+        }
+        else
+        {
+            this.thumbLength = 0;
+            this.palmLength = 0;
+        }
+    }
 
-      return null;
-   }
+    public int getFingerLength()
+    {
+        return this.fingerLength;
+    }
 
-   public static LoadingCache<BlockPos, BlockWorldState> func_181627_a(World p_181627_0_, boolean p_181627_1_) {
-      return CacheBuilder.newBuilder().<BlockPos, BlockWorldState>build(new BlockPattern.CacheLoader(p_181627_0_, p_181627_1_));
-   }
+    public int getThumbLength()
+    {
+        return this.thumbLength;
+    }
 
-   protected static BlockPos func_177683_a(BlockPos p_177683_0_, EnumFacing p_177683_1_, EnumFacing p_177683_2_, int p_177683_3_, int p_177683_4_, int p_177683_5_) {
-      if (p_177683_1_ != p_177683_2_ && p_177683_1_ != p_177683_2_.func_176734_d()) {
-         Vec3i vec3i = new Vec3i(p_177683_1_.func_82601_c(), p_177683_1_.func_96559_d(), p_177683_1_.func_82599_e());
-         Vec3i vec3i1 = new Vec3i(p_177683_2_.func_82601_c(), p_177683_2_.func_96559_d(), p_177683_2_.func_82599_e());
-         Vec3i vec3i2 = vec3i.func_177955_d(vec3i1);
-         return p_177683_0_.func_177982_a(vec3i1.func_177958_n() * -p_177683_4_ + vec3i2.func_177958_n() * p_177683_3_ + vec3i.func_177958_n() * p_177683_5_, vec3i1.func_177956_o() * -p_177683_4_ + vec3i2.func_177956_o() * p_177683_3_ + vec3i.func_177956_o() * p_177683_5_, vec3i1.func_177952_p() * -p_177683_4_ + vec3i2.func_177952_p() * p_177683_3_ + vec3i.func_177952_p() * p_177683_5_);
-      } else {
-         throw new IllegalArgumentException("Invalid forwards & up combination");
-      }
-   }
+    public int getPalmLength()
+    {
+        return this.palmLength;
+    }
 
-   static class CacheLoader extends com.google.common.cache.CacheLoader<BlockPos, BlockWorldState> {
-      private final World field_177680_a;
-      private final boolean field_181626_b;
+    @Nullable
 
-      public CacheLoader(World p_i46460_1_, boolean p_i46460_2_) {
-         this.field_177680_a = p_i46460_1_;
-         this.field_181626_b = p_i46460_2_;
-      }
+    /**
+     * checks that the given pattern & rotation is at the block co-ordinates.
+     */
+    private BlockPattern.PatternHelper checkPatternAt(BlockPos pos, EnumFacing finger, EnumFacing thumb, LoadingCache<BlockPos, BlockWorldState> lcache)
+    {
+        for (int i = 0; i < this.palmLength; ++i)
+        {
+            for (int j = 0; j < this.thumbLength; ++j)
+            {
+                for (int k = 0; k < this.fingerLength; ++k)
+                {
+                    if (!this.blockMatches[k][j][i].apply(lcache.getUnchecked(translateOffset(pos, finger, thumb, i, j, k))))
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
 
-      public BlockWorldState load(BlockPos p_load_1_) throws Exception {
-         return new BlockWorldState(this.field_177680_a, p_load_1_, this.field_181626_b);
-      }
-   }
+        return new BlockPattern.PatternHelper(pos, finger, thumb, lcache, this.palmLength, this.thumbLength, this.fingerLength);
+    }
 
-   public static class PatternHelper {
-      private final BlockPos field_177674_a;
-      private final EnumFacing field_177672_b;
-      private final EnumFacing field_177673_c;
-      private final LoadingCache<BlockPos, BlockWorldState> field_177671_d;
-      private final int field_181120_e;
-      private final int field_181121_f;
-      private final int field_181122_g;
+    @Nullable
 
-      public PatternHelper(BlockPos p_i46378_1_, EnumFacing p_i46378_2_, EnumFacing p_i46378_3_, LoadingCache<BlockPos, BlockWorldState> p_i46378_4_, int p_i46378_5_, int p_i46378_6_, int p_i46378_7_) {
-         this.field_177674_a = p_i46378_1_;
-         this.field_177672_b = p_i46378_2_;
-         this.field_177673_c = p_i46378_3_;
-         this.field_177671_d = p_i46378_4_;
-         this.field_181120_e = p_i46378_5_;
-         this.field_181121_f = p_i46378_6_;
-         this.field_181122_g = p_i46378_7_;
-      }
+    /**
+     * Calculates whether the given world position matches the pattern. Warning, fairly heavy function. @return a
+     * BlockPattern.PatternHelper if found, null otherwise.
+     */
+    public BlockPattern.PatternHelper match(World worldIn, BlockPos pos)
+    {
+        LoadingCache<BlockPos, BlockWorldState> loadingcache = createLoadingCache(worldIn, false);
+        int i = Math.max(Math.max(this.palmLength, this.thumbLength), this.fingerLength);
 
-      public BlockPos func_181117_a() {
-         return this.field_177674_a;
-      }
+        for (BlockPos blockpos : BlockPos.getAllInBox(pos, pos.add(i - 1, i - 1, i - 1)))
+        {
+            for (EnumFacing enumfacing : EnumFacing.values())
+            {
+                for (EnumFacing enumfacing1 : EnumFacing.values())
+                {
+                    if (enumfacing1 != enumfacing && enumfacing1 != enumfacing.getOpposite())
+                    {
+                        BlockPattern.PatternHelper blockpattern$patternhelper = this.checkPatternAt(blockpos, enumfacing, enumfacing1, loadingcache);
 
-      public EnumFacing func_177669_b() {
-         return this.field_177672_b;
-      }
+                        if (blockpattern$patternhelper != null)
+                        {
+                            return blockpattern$patternhelper;
+                        }
+                    }
+                }
+            }
+        }
 
-      public EnumFacing func_177668_c() {
-         return this.field_177673_c;
-      }
+        return null;
+    }
 
-      public int func_181118_d() {
-         return this.field_181120_e;
-      }
+    public static LoadingCache<BlockPos, BlockWorldState> createLoadingCache(World worldIn, boolean forceLoadIn)
+    {
+        return CacheBuilder.newBuilder().<BlockPos, BlockWorldState>build(new BlockPattern.CacheLoader(worldIn, forceLoadIn));
+    }
 
-      public int func_181119_e() {
-         return this.field_181121_f;
-      }
+    /**
+     * Offsets the position of pos in the direction of finger and thumb facing by offset amounts, follows the right-hand
+     * rule for cross products (finger, thumb, palm) @return A new BlockPos offset in the facing directions
+     */
+    protected static BlockPos translateOffset(BlockPos pos, EnumFacing finger, EnumFacing thumb, int palmOffset, int thumbOffset, int fingerOffset)
+    {
+        if (finger != thumb && finger != thumb.getOpposite())
+        {
+            Vec3i vec3i = new Vec3i(finger.getFrontOffsetX(), finger.getFrontOffsetY(), finger.getFrontOffsetZ());
+            Vec3i vec3i1 = new Vec3i(thumb.getFrontOffsetX(), thumb.getFrontOffsetY(), thumb.getFrontOffsetZ());
+            Vec3i vec3i2 = vec3i.crossProduct(vec3i1);
+            return pos.add(vec3i1.getX() * -thumbOffset + vec3i2.getX() * palmOffset + vec3i.getX() * fingerOffset, vec3i1.getY() * -thumbOffset + vec3i2.getY() * palmOffset + vec3i.getY() * fingerOffset, vec3i1.getZ() * -thumbOffset + vec3i2.getZ() * palmOffset + vec3i.getZ() * fingerOffset);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Invalid forwards & up combination");
+        }
+    }
 
-      public BlockWorldState func_177670_a(int p_177670_1_, int p_177670_2_, int p_177670_3_) {
-         return this.field_177671_d.getUnchecked(BlockPattern.func_177683_a(this.field_177674_a, this.func_177669_b(), this.func_177668_c(), p_177670_1_, p_177670_2_, p_177670_3_));
-      }
+    static class CacheLoader extends com.google.common.cache.CacheLoader<BlockPos, BlockWorldState>
+    {
+        private final World world;
+        private final boolean forceLoad;
 
-      public String toString() {
-         return MoreObjects.toStringHelper(this).add("up", this.field_177673_c).add("forwards", this.field_177672_b).add("frontTopLeft", this.field_177674_a).toString();
-      }
-   }
+        public CacheLoader(World worldIn, boolean forceLoadIn)
+        {
+            this.world = worldIn;
+            this.forceLoad = forceLoadIn;
+        }
+
+        public BlockWorldState load(BlockPos p_load_1_) throws Exception
+        {
+            return new BlockWorldState(this.world, p_load_1_, this.forceLoad);
+        }
+    }
+
+    public static class PatternHelper
+    {
+        private final BlockPos frontTopLeft;
+        private final EnumFacing forwards;
+        private final EnumFacing up;
+        private final LoadingCache<BlockPos, BlockWorldState> lcache;
+        private final int width;
+        private final int height;
+        private final int depth;
+
+        public PatternHelper(BlockPos posIn, EnumFacing fingerIn, EnumFacing thumbIn, LoadingCache<BlockPos, BlockWorldState> lcacheIn, int p_i46378_5_, int p_i46378_6_, int p_i46378_7_)
+        {
+            this.frontTopLeft = posIn;
+            this.forwards = fingerIn;
+            this.up = thumbIn;
+            this.lcache = lcacheIn;
+            this.width = p_i46378_5_;
+            this.height = p_i46378_6_;
+            this.depth = p_i46378_7_;
+        }
+
+        public BlockPos getFrontTopLeft()
+        {
+            return this.frontTopLeft;
+        }
+
+        public EnumFacing getForwards()
+        {
+            return this.forwards;
+        }
+
+        public EnumFacing getUp()
+        {
+            return this.up;
+        }
+
+        public int getWidth()
+        {
+            return this.width;
+        }
+
+        public int getHeight()
+        {
+            return this.height;
+        }
+
+        public BlockWorldState translateOffset(int palmOffset, int thumbOffset, int fingerOffset)
+        {
+            return this.lcache.getUnchecked(BlockPattern.translateOffset(this.frontTopLeft, this.getForwards(), this.getUp(), palmOffset, thumbOffset, fingerOffset));
+        }
+
+        public String toString()
+        {
+            return MoreObjects.toStringHelper(this).add("up", this.up).add("forwards", this.forwards).add("frontTopLeft", this.frontTopLeft).toString();
+        }
+    }
 }

@@ -5,16 +5,17 @@ import java.util.Collection;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 
-public interface IBlockState extends IBlockBehaviors, IBlockProperties {
-   Collection<IProperty<?>> func_177227_a();
+public interface IBlockState extends IBlockBehaviors, IBlockProperties
+{
+    Collection < IProperty<? >> getPropertyNames();
 
-   <T extends Comparable<T>> T func_177229_b(IProperty<T> var1);
+    <T extends Comparable<T>> T getValue(IProperty<T> property);
 
-   <T extends Comparable<T>, V extends T> IBlockState func_177226_a(IProperty<T> var1, V var2);
+    <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> property, V value);
 
-   <T extends Comparable<T>> IBlockState func_177231_a(IProperty<T> var1);
+    <T extends Comparable<T>> IBlockState cycleProperty(IProperty<T> property);
 
-   ImmutableMap<IProperty<?>, Comparable<?>> func_177228_b();
+    ImmutableMap < IProperty<?>, Comparable<? >> getProperties();
 
-   Block func_177230_c();
+    Block getBlock();
 }

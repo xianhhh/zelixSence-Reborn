@@ -6,17 +6,33 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-public interface IChunkLoader {
-   @Nullable
-   Chunk func_75815_a(World var1, int var2, int var3) throws IOException;
+public interface IChunkLoader
+{
+    @Nullable
 
-   void func_75816_a(World var1, Chunk var2) throws MinecraftException, IOException;
+    /**
+     * Loads the specified(XZ) chunk into the specified world.
+     */
+    Chunk loadChunk(World worldIn, int x, int z) throws IOException;
 
-   void func_75819_b(World var1, Chunk var2) throws IOException;
+    void saveChunk(World worldIn, Chunk chunkIn) throws MinecraftException, IOException;
 
-   void func_75817_a();
+    /**
+     * Save extra data associated with this Chunk not normally saved during autosave, only during chunk unload.
+     * Currently unused.
+     */
+    void saveExtraChunkData(World worldIn, Chunk chunkIn) throws IOException;
 
-   void func_75818_b();
+    /**
+     * Called every World.tick()
+     */
+    void chunkTick();
 
-   boolean func_191063_a(int var1, int var2);
+    /**
+     * Save extra data not associated with any Chunk.  Not saved during autosave, only during world unload.  Currently
+     * unused.
+     */
+    void saveExtraData();
+
+    boolean func_191063_a(int p_191063_1_, int p_191063_2_);
 }

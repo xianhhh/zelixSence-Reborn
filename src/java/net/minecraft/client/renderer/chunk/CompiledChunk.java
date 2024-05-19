@@ -7,69 +7,83 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 
-public class CompiledChunk {
-   public static final CompiledChunk field_178502_a = new CompiledChunk() {
-      protected void func_178486_a(BlockRenderLayer p_178486_1_) {
-         throw new UnsupportedOperationException();
-      }
+public class CompiledChunk
+{
+    public static final CompiledChunk DUMMY = new CompiledChunk()
+    {
+        protected void setLayerUsed(BlockRenderLayer layer)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public void setLayerStarted(BlockRenderLayer layer)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public boolean isVisible(EnumFacing facing, EnumFacing facing2)
+        {
+            return false;
+        }
+    };
+    private final boolean[] layersUsed = new boolean[BlockRenderLayer.values().length];
+    private final boolean[] layersStarted = new boolean[BlockRenderLayer.values().length];
+    private boolean empty = true;
+    private final List<TileEntity> tileEntities = Lists.<TileEntity>newArrayList();
+    private SetVisibility setVisibility = new SetVisibility();
+    private BufferBuilder.State state;
 
-      public void func_178493_c(BlockRenderLayer p_178493_1_) {
-         throw new UnsupportedOperationException();
-      }
+    public boolean isEmpty()
+    {
+        return this.empty;
+    }
 
-      public boolean func_178495_a(EnumFacing p_178495_1_, EnumFacing p_178495_2_) {
-         return false;
-      }
-   };
-   private final boolean[] field_178500_b = new boolean[BlockRenderLayer.values().length];
-   private final boolean[] field_178501_c = new boolean[BlockRenderLayer.values().length];
-   private boolean field_178498_d = true;
-   private final List<TileEntity> field_178499_e = Lists.<TileEntity>newArrayList();
-   private SetVisibility field_178496_f = new SetVisibility();
-   private BufferBuilder.State field_178497_g;
+    protected void setLayerUsed(BlockRenderLayer layer)
+    {
+        this.empty = false;
+        this.layersUsed[layer.ordinal()] = true;
+    }
 
-   public boolean func_178489_a() {
-      return this.field_178498_d;
-   }
+    public boolean isLayerEmpty(BlockRenderLayer layer)
+    {
+        return !this.layersUsed[layer.ordinal()];
+    }
 
-   protected void func_178486_a(BlockRenderLayer p_178486_1_) {
-      this.field_178498_d = false;
-      this.field_178500_b[p_178486_1_.ordinal()] = true;
-   }
+    public void setLayerStarted(BlockRenderLayer layer)
+    {
+        this.layersStarted[layer.ordinal()] = true;
+    }
 
-   public boolean func_178491_b(BlockRenderLayer p_178491_1_) {
-      return !this.field_178500_b[p_178491_1_.ordinal()];
-   }
+    public boolean isLayerStarted(BlockRenderLayer layer)
+    {
+        return this.layersStarted[layer.ordinal()];
+    }
 
-   public void func_178493_c(BlockRenderLayer p_178493_1_) {
-      this.field_178501_c[p_178493_1_.ordinal()] = true;
-   }
+    public List<TileEntity> getTileEntities()
+    {
+        return this.tileEntities;
+    }
 
-   public boolean func_178492_d(BlockRenderLayer p_178492_1_) {
-      return this.field_178501_c[p_178492_1_.ordinal()];
-   }
+    public void addTileEntity(TileEntity tileEntityIn)
+    {
+        this.tileEntities.add(tileEntityIn);
+    }
 
-   public List<TileEntity> func_178485_b() {
-      return this.field_178499_e;
-   }
+    public boolean isVisible(EnumFacing facing, EnumFacing facing2)
+    {
+        return this.setVisibility.isVisible(facing, facing2);
+    }
 
-   public void func_178490_a(TileEntity p_178490_1_) {
-      this.field_178499_e.add(p_178490_1_);
-   }
+    public void setVisibility(SetVisibility visibility)
+    {
+        this.setVisibility = visibility;
+    }
 
-   public boolean func_178495_a(EnumFacing p_178495_1_, EnumFacing p_178495_2_) {
-      return this.field_178496_f.func_178621_a(p_178495_1_, p_178495_2_);
-   }
+    public BufferBuilder.State getState()
+    {
+        return this.state;
+    }
 
-   public void func_178488_a(SetVisibility p_178488_1_) {
-      this.field_178496_f = p_178488_1_;
-   }
-
-   public BufferBuilder.State func_178487_c() {
-      return this.field_178497_g;
-   }
-
-   public void func_178494_a(BufferBuilder.State p_178494_1_) {
-      this.field_178497_g = p_178494_1_;
-   }
+    public void setState(BufferBuilder.State stateIn)
+    {
+        this.state = stateIn;
+    }
 }

@@ -5,36 +5,61 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.network.play.client.CPacketKeepAlive;
 
-public class GuiDownloadTerrain extends GuiScreen {
-   private final NetHandlerPlayClient field_146594_a;
-   private int field_146593_f;
+public class GuiDownloadTerrain extends GuiScreen
+{
+    private final NetHandlerPlayClient connection;
+    private int progress;
 
-   public GuiDownloadTerrain(NetHandlerPlayClient p_i45023_1_) {
-      this.field_146594_a = p_i45023_1_;
-   }
+    public GuiDownloadTerrain(NetHandlerPlayClient netHandler)
+    {
+        this.connection = netHandler;
+    }
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-   }
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+    }
 
-   public void func_73866_w_() {
-      this.field_146292_n.clear();
-   }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        this.buttonList.clear();
+    }
 
-   public void func_73876_c() {
-      ++this.field_146593_f;
-      if (this.field_146593_f % 20 == 0) {
-         this.field_146594_a.func_147297_a(new CPacketKeepAlive());
-      }
+    /**
+     * Called from the main game loop to update the screen.
+     */
+    public void updateScreen()
+    {
+        ++this.progress;
 
-   }
+        if (this.progress % 20 == 0)
+        {
+            this.connection.sendPacket(new CPacketKeepAlive());
+        }
+    }
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.func_146278_c(0);
-      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("multiplayer.downloadingTerrain"), this.field_146294_l / 2, this.field_146295_m / 2 - 50, 16777215);
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawBackground(0);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 16777215);
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
 
-   public boolean func_73868_f() {
-      return false;
-   }
+    /**
+     * Returns true if this GUI should pause the game when it is displayed in single-player
+     */
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
 }

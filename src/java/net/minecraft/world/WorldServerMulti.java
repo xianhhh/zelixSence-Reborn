@@ -8,65 +8,83 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.storage.DerivedWorldInfo;
 import net.minecraft.world.storage.ISaveHandler;
 
-public class WorldServerMulti extends WorldServer {
-   private final WorldServer field_175743_a;
+public class WorldServerMulti extends WorldServer
+{
+    private final WorldServer delegate;
 
-   public WorldServerMulti(MinecraftServer p_i45923_1_, ISaveHandler p_i45923_2_, int p_i45923_3_, WorldServer p_i45923_4_, Profiler p_i45923_5_) {
-      super(p_i45923_1_, p_i45923_2_, new DerivedWorldInfo(p_i45923_4_.func_72912_H()), p_i45923_3_, p_i45923_5_);
-      this.field_175743_a = p_i45923_4_;
-      p_i45923_4_.func_175723_af().func_177737_a(new IBorderListener() {
-         public void func_177694_a(WorldBorder p_177694_1_, double p_177694_2_) {
-            WorldServerMulti.this.func_175723_af().func_177750_a(p_177694_2_);
-         }
+    public WorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, int dimensionId, WorldServer delegate, Profiler profilerIn)
+    {
+        super(server, saveHandlerIn, new DerivedWorldInfo(delegate.getWorldInfo()), dimensionId, profilerIn);
+        this.delegate = delegate;
+        delegate.getWorldBorder().addListener(new IBorderListener()
+        {
+            public void onSizeChanged(WorldBorder border, double newSize)
+            {
+                WorldServerMulti.this.getWorldBorder().setTransition(newSize);
+            }
+            public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time)
+            {
+                WorldServerMulti.this.getWorldBorder().setTransition(oldSize, newSize, time);
+            }
+            public void onCenterChanged(WorldBorder border, double x, double z)
+            {
+                WorldServerMulti.this.getWorldBorder().setCenter(x, z);
+            }
+            public void onWarningTimeChanged(WorldBorder border, int newTime)
+            {
+                WorldServerMulti.this.getWorldBorder().setWarningTime(newTime);
+            }
+            public void onWarningDistanceChanged(WorldBorder border, int newDistance)
+            {
+                WorldServerMulti.this.getWorldBorder().setWarningDistance(newDistance);
+            }
+            public void onDamageAmountChanged(WorldBorder border, double newAmount)
+            {
+                WorldServerMulti.this.getWorldBorder().setDamageAmount(newAmount);
+            }
+            public void onDamageBufferChanged(WorldBorder border, double newSize)
+            {
+                WorldServerMulti.this.getWorldBorder().setDamageBuffer(newSize);
+            }
+        });
+    }
 
-         public void func_177692_a(WorldBorder p_177692_1_, double p_177692_2_, double p_177692_4_, long p_177692_6_) {
-            WorldServerMulti.this.func_175723_af().func_177738_a(p_177692_2_, p_177692_4_, p_177692_6_);
-         }
+    /**
+     * Saves the chunks to disk.
+     */
+    protected void saveLevel() throws MinecraftException
+    {
+    }
 
-         public void func_177693_a(WorldBorder p_177693_1_, double p_177693_2_, double p_177693_4_) {
-            WorldServerMulti.this.func_175723_af().func_177739_c(p_177693_2_, p_177693_4_);
-         }
+    public World init()
+    {
+        this.mapStorage = this.delegate.getMapStorage();
+        this.worldScoreboard = this.delegate.getScoreboard();
+        this.lootTable = this.delegate.getLootTableManager();
+        this.field_191951_C = this.delegate.func_191952_z();
+        String s = VillageCollection.fileNameForProvider(this.provider);
+        VillageCollection villagecollection = (VillageCollection)this.mapStorage.getOrLoadData(VillageCollection.class, s);
 
-         public void func_177691_a(WorldBorder p_177691_1_, int p_177691_2_) {
-            WorldServerMulti.this.func_175723_af().func_177723_b(p_177691_2_);
-         }
+        if (villagecollection == null)
+        {
+            this.villageCollectionObj = new VillageCollection(this);
+            this.mapStorage.setData(s, this.villageCollectionObj);
+        }
+        else
+        {
+            this.villageCollectionObj = villagecollection;
+            this.villageCollectionObj.setWorldsForAll(this);
+        }
 
-         public void func_177690_b(WorldBorder p_177690_1_, int p_177690_2_) {
-            WorldServerMulti.this.func_175723_af().func_177747_c(p_177690_2_);
-         }
+        return this;
+    }
 
-         public void func_177696_b(WorldBorder p_177696_1_, double p_177696_2_) {
-            WorldServerMulti.this.func_175723_af().func_177744_c(p_177696_2_);
-         }
-
-         public void func_177695_c(WorldBorder p_177695_1_, double p_177695_2_) {
-            WorldServerMulti.this.func_175723_af().func_177724_b(p_177695_2_);
-         }
-      });
-   }
-
-   protected void func_73042_a() throws MinecraftException {
-   }
-
-   public World func_175643_b() {
-      this.field_72988_C = this.field_175743_a.func_175693_T();
-      this.field_96442_D = this.field_175743_a.func_96441_U();
-      this.field_184151_B = this.field_175743_a.func_184146_ak();
-      this.field_191951_C = this.field_175743_a.func_191952_z();
-      String s = VillageCollection.func_176062_a(this.field_73011_w);
-      VillageCollection villagecollection = (VillageCollection)this.field_72988_C.func_75742_a(VillageCollection.class, s);
-      if (villagecollection == null) {
-         this.field_72982_D = new VillageCollection(this);
-         this.field_72988_C.func_75745_a(s, this.field_72982_D);
-      } else {
-         this.field_72982_D = villagecollection;
-         this.field_72982_D.func_82566_a(this);
-      }
-
-      return this;
-   }
-
-   public void func_184166_c() {
-      this.field_73011_w.func_186057_q();
-   }
+    /**
+     * Called during saving of a world to give children worlds a chance to save additional data. Only used to save
+     * WorldProviderEnd's data in Vanilla.
+     */
+    public void saveAdditionalData()
+    {
+        this.provider.onWorldSave();
+    }
 }

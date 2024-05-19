@@ -2,38 +2,68 @@ package net.minecraft.client.renderer;
 
 import net.minecraft.util.math.BlockPos;
 
-public class DestroyBlockProgress {
-   private final int field_73115_a;
-   private final BlockPos field_180247_b;
-   private int field_73112_e;
-   private int field_82745_f;
+public class DestroyBlockProgress
+{
+    /**
+     * entity ID of the player associated with this partially destroyed Block. Used to identify the Blocks in the client
+     * Renderer, max 1 per player on a server
+     */
+    private final int miningPlayerEntId;
+    private final BlockPos position;
 
-   public DestroyBlockProgress(int p_i45925_1_, BlockPos p_i45925_2_) {
-      this.field_73115_a = p_i45925_1_;
-      this.field_180247_b = p_i45925_2_;
-   }
+    /**
+     * damage ranges from 1 to 10. -1 causes the client to delete the partial block renderer.
+     */
+    private int partialBlockProgress;
 
-   public BlockPos func_180246_b() {
-      return this.field_180247_b;
-   }
+    /**
+     * keeps track of how many ticks this PartiallyDestroyedBlock already exists
+     */
+    private int createdAtCloudUpdateTick;
 
-   public void func_73107_a(int p_73107_1_) {
-      if (p_73107_1_ > 10) {
-         p_73107_1_ = 10;
-      }
+    public DestroyBlockProgress(int miningPlayerEntIdIn, BlockPos positionIn)
+    {
+        this.miningPlayerEntId = miningPlayerEntIdIn;
+        this.position = positionIn;
+    }
 
-      this.field_73112_e = p_73107_1_;
-   }
+    public BlockPos getPosition()
+    {
+        return this.position;
+    }
 
-   public int func_73106_e() {
-      return this.field_73112_e;
-   }
+    /**
+     * inserts damage value into this partially destroyed Block. -1 causes client renderer to delete it, otherwise
+     * ranges from 1 to 10
+     */
+    public void setPartialBlockDamage(int damage)
+    {
+        if (damage > 10)
+        {
+            damage = 10;
+        }
 
-   public void func_82744_b(int p_82744_1_) {
-      this.field_82745_f = p_82744_1_;
-   }
+        this.partialBlockProgress = damage;
+    }
 
-   public int func_82743_f() {
-      return this.field_82745_f;
-   }
+    public int getPartialBlockDamage()
+    {
+        return this.partialBlockProgress;
+    }
+
+    /**
+     * saves the current Cloud update tick into the PartiallyDestroyedBlock
+     */
+    public void setCloudUpdateTick(int createdAtCloudUpdateTickIn)
+    {
+        this.createdAtCloudUpdateTick = createdAtCloudUpdateTickIn;
+    }
+
+    /**
+     * retrieves the 'date' at which the PartiallyDestroyedBlock was created
+     */
+    public int getCreationCloudUpdateTick()
+    {
+        return this.createdAtCloudUpdateTick;
+    }
 }

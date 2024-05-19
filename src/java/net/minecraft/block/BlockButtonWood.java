@@ -7,16 +7,20 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockButtonWood extends BlockButton {
-   protected BlockButtonWood() {
-      super(true);
-   }
+public class BlockButtonWood extends BlockButton
+{
+    protected BlockButtonWood()
+    {
+        super(true);
+    }
 
-   protected void func_185615_a(@Nullable EntityPlayer p_185615_1_, World p_185615_2_, BlockPos p_185615_3_) {
-      p_185615_2_.func_184133_a(p_185615_1_, p_185615_3_, SoundEvents.field_187885_gS, SoundCategory.BLOCKS, 0.3F, 0.6F);
-   }
+    protected void playClickSound(@Nullable EntityPlayer player, World worldIn, BlockPos pos)
+    {
+        worldIn.playSound(player, pos, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
+    }
 
-   protected void func_185617_b(World p_185617_1_, BlockPos p_185617_2_) {
-      p_185617_1_.func_184133_a((EntityPlayer)null, p_185617_2_, SoundEvents.field_187883_gR, SoundCategory.BLOCKS, 0.3F, 0.5F);
-   }
+    protected void playReleaseSound(World worldIn, BlockPos pos)
+    {
+        worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.5F);
+    }
 }

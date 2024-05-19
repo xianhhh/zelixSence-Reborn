@@ -17,87 +17,134 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockCarpet extends Block {
-   public static final PropertyEnum<EnumDyeColor> field_176330_a = PropertyEnum.<EnumDyeColor>func_177709_a("color", EnumDyeColor.class);
-   protected static final AxisAlignedBB field_185758_b = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0625D, 1.0D);
+public class BlockCarpet extends Block
+{
+    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+    protected static final AxisAlignedBB CARPET_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0625D, 1.0D);
 
-   protected BlockCarpet() {
-      super(Material.field_151593_r);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176330_a, EnumDyeColor.WHITE));
-      this.func_149675_a(true);
-      this.func_149647_a(CreativeTabs.field_78031_c);
-   }
+    protected BlockCarpet()
+    {
+        super(Material.CARPET);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(COLOR, EnumDyeColor.WHITE));
+        this.setTickRandomly(true);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
 
-   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
-      return field_185758_b;
-   }
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return CARPET_AABB;
+    }
 
-   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
-      return MapColor.func_193558_a((EnumDyeColor)p_180659_1_.func_177229_b(field_176330_a));
-   }
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    {
+        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
+    }
 
-   public boolean func_149662_c(IBlockState p_149662_1_) {
-      return false;
-   }
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_) {
-      return super.func_176196_c(p_176196_1_, p_176196_2_) && this.func_176329_d(p_176196_1_, p_176196_2_);
-   }
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return super.canPlaceBlockAt(worldIn, pos) && this.canBlockStay(worldIn, pos);
+    }
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      this.func_176328_e(p_189540_2_, p_189540_3_, p_189540_1_);
-   }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        this.checkForDrop(worldIn, pos, state);
+    }
 
-   private boolean func_176328_e(World p_176328_1_, BlockPos p_176328_2_, IBlockState p_176328_3_) {
-      if (!this.func_176329_d(p_176328_1_, p_176328_2_)) {
-         this.func_176226_b(p_176328_1_, p_176328_2_, p_176328_3_, 0);
-         p_176328_1_.func_175698_g(p_176328_2_);
-         return false;
-      } else {
-         return true;
-      }
-   }
+    private boolean checkForDrop(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!this.canBlockStay(worldIn, pos))
+        {
+            this.dropBlockAsItem(worldIn, pos, state, 0);
+            worldIn.setBlockToAir(pos);
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 
-   private boolean func_176329_d(World p_176329_1_, BlockPos p_176329_2_) {
-      return !p_176329_1_.func_175623_d(p_176329_2_.func_177977_b());
-   }
+    private boolean canBlockStay(World worldIn, BlockPos pos)
+    {
+        return !worldIn.isAirBlock(pos.down());
+    }
 
-   public boolean func_176225_a(IBlockState p_176225_1_, IBlockAccess p_176225_2_, BlockPos p_176225_3_, EnumFacing p_176225_4_) {
-      if (p_176225_4_ == EnumFacing.UP) {
-         return true;
-      } else {
-         return p_176225_2_.func_180495_p(p_176225_3_.func_177972_a(p_176225_4_)).func_177230_c() == this ? true : super.func_176225_a(p_176225_1_, p_176225_2_, p_176225_3_, p_176225_4_);
-      }
-   }
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+        if (side == EnumFacing.UP)
+        {
+            return true;
+        }
+        else
+        {
+            return blockAccess.getBlockState(pos.offset(side)).getBlock() == this ? true : super.shouldSideBeRendered(blockState, blockAccess, pos, side);
+        }
+    }
 
-   public int func_180651_a(IBlockState p_180651_1_) {
-      return ((EnumDyeColor)p_180651_1_.func_177229_b(field_176330_a)).func_176765_a();
-   }
+    /**
+     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
+     * returns the metadata of the dropped item based on the old metadata of the block.
+     */
+    public int damageDropped(IBlockState state)
+    {
+        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+    }
 
-   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
-      for(int i = 0; i < 16; ++i) {
-         p_149666_2_.add(new ItemStack(this, 1, i));
-      }
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    {
+        for (int i = 0; i < 16; ++i)
+        {
+            tab.add(new ItemStack(this, 1, i));
+        }
+    }
 
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_176330_a, EnumDyeColor.func_176764_b(p_176203_1_));
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+    }
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      return ((EnumDyeColor)p_176201_1_.func_177229_b(field_176330_a)).func_176765_a();
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {COLOR});
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176330_a});
-   }
-
-   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
-      return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
-   }
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
+    }
 }

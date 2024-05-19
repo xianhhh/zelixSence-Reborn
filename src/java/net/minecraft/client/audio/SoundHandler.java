@@ -30,219 +30,293 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SoundHandler implements IResourceManagerReloadListener, ITickable {
-   public static final Sound field_147700_a = new Sound("meta:missing_sound", 1.0F, 1.0F, 1, Sound.Type.FILE, false);
-   private static final Logger field_147698_b = LogManager.getLogger();
-   private static final Gson field_147699_c = (new GsonBuilder()).registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer()).registerTypeAdapter(SoundList.class, new SoundListSerializer()).create();
-   private static final ParameterizedType field_147696_d = new ParameterizedType() {
-      public Type[] getActualTypeArguments() {
-         return new Type[]{String.class, SoundList.class};
-      }
+public class SoundHandler implements IResourceManagerReloadListener, ITickable
+{
+    public static final Sound MISSING_SOUND = new Sound("meta:missing_sound", 1.0F, 1.0F, 1, Sound.Type.FILE, false);
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Gson GSON = (new GsonBuilder()).registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer()).registerTypeAdapter(SoundList.class, new SoundListSerializer()).create();
+    private static final ParameterizedType TYPE = new ParameterizedType()
+    {
+        public Type[] getActualTypeArguments()
+        {
+            return new Type[] {String.class, SoundList.class};
+        }
+        public Type getRawType()
+        {
+            return Map.class;
+        }
+        public Type getOwnerType()
+        {
+            return null;
+        }
+    };
+    private final SoundRegistry soundRegistry = new SoundRegistry();
+    private final SoundManager sndManager;
+    private final IResourceManager mcResourceManager;
 
-      public Type getRawType() {
-         return Map.class;
-      }
+    public SoundHandler(IResourceManager manager, GameSettings gameSettingsIn)
+    {
+        this.mcResourceManager = manager;
+        this.sndManager = new SoundManager(this, gameSettingsIn);
+    }
 
-      public Type getOwnerType() {
-         return null;
-      }
-   };
-   private final SoundRegistry field_147697_e = new SoundRegistry();
-   private final SoundManager field_147694_f;
-   private final IResourceManager field_147695_g;
+    public void onResourceManagerReload(IResourceManager resourceManager)
+    {
+        this.soundRegistry.clearMap();
 
-   public SoundHandler(IResourceManager p_i45122_1_, GameSettings p_i45122_2_) {
-      this.field_147695_g = p_i45122_1_;
-      this.field_147694_f = new SoundManager(this, p_i45122_2_);
-   }
+        for (String s : resourceManager.getResourceDomains())
+        {
+            try
+            {
+                for (IResource iresource : resourceManager.getAllResources(new ResourceLocation(s, "sounds.json")))
+                {
+                    try
+                    {
+                        Map<String, SoundList> map = this.getSoundMap(iresource.getInputStream());
 
-   public void func_110549_a(IResourceManager p_110549_1_) {
-      this.field_147697_e.func_148763_c();
-
-      for(String s : p_110549_1_.func_135055_a()) {
-         try {
-            for(IResource iresource : p_110549_1_.func_135056_b(new ResourceLocation(s, "sounds.json"))) {
-               try {
-                  Map<String, SoundList> map = this.func_175085_a(iresource.func_110527_b());
-
-                  for(Entry<String, SoundList> entry : map.entrySet()) {
-                     this.func_147693_a(new ResourceLocation(s, entry.getKey()), entry.getValue());
-                  }
-               } catch (RuntimeException runtimeexception) {
-                  field_147698_b.warn("Invalid sounds.json", (Throwable)runtimeexception);
-               }
+                        for (Entry<String, SoundList> entry : map.entrySet())
+                        {
+                            this.loadSoundResource(new ResourceLocation(s, entry.getKey()), entry.getValue());
+                        }
+                    }
+                    catch (RuntimeException runtimeexception)
+                    {
+                        LOGGER.warn("Invalid sounds.json", (Throwable)runtimeexception);
+                    }
+                }
             }
-         } catch (IOException var11) {
-            ;
-         }
-      }
-
-      for(ResourceLocation resourcelocation : this.field_147697_e.func_148742_b()) {
-         SoundEventAccessor soundeventaccessor = (SoundEventAccessor)this.field_147697_e.func_82594_a(resourcelocation);
-         if (soundeventaccessor.func_188712_c() instanceof TextComponentTranslation) {
-            String s1 = ((TextComponentTranslation)soundeventaccessor.func_188712_c()).func_150268_i();
-            if (!I18n.func_188566_a(s1)) {
-               field_147698_b.debug("Missing subtitle {} for event: {}", s1, resourcelocation);
+            catch (IOException var11)
+            {
+                ;
             }
-         }
-      }
+        }
 
-      for(ResourceLocation resourcelocation1 : this.field_147697_e.func_148742_b()) {
-         if (SoundEvent.field_187505_a.func_82594_a(resourcelocation1) == null) {
-            field_147698_b.debug("Not having sound event for: {}", (Object)resourcelocation1);
-         }
-      }
+        for (ResourceLocation resourcelocation : this.soundRegistry.getKeys())
+        {
+            SoundEventAccessor soundeventaccessor = (SoundEventAccessor)this.soundRegistry.getObject(resourcelocation);
 
-      this.field_147694_f.func_148596_a();
-   }
+            if (soundeventaccessor.getSubtitle() instanceof TextComponentTranslation)
+            {
+                String s1 = ((TextComponentTranslation)soundeventaccessor.getSubtitle()).getKey();
 
-   @Nullable
-   protected Map<String, SoundList> func_175085_a(InputStream p_175085_1_) {
-      Map map;
-      try {
-         map = (Map)JsonUtils.func_193841_a(field_147699_c, new InputStreamReader(p_175085_1_, StandardCharsets.UTF_8), field_147696_d);
-      } finally {
-         IOUtils.closeQuietly(p_175085_1_);
-      }
+                if (!I18n.hasKey(s1))
+                {
+                    LOGGER.debug("Missing subtitle {} for event: {}", s1, resourcelocation);
+                }
+            }
+        }
 
-      return map;
-   }
+        for (ResourceLocation resourcelocation1 : this.soundRegistry.getKeys())
+        {
+            if (SoundEvent.REGISTRY.getObject(resourcelocation1) == null)
+            {
+                LOGGER.debug("Not having sound event for: {}", (Object)resourcelocation1);
+            }
+        }
 
-   private void func_147693_a(ResourceLocation p_147693_1_, SoundList p_147693_2_) {
-      SoundEventAccessor soundeventaccessor = (SoundEventAccessor)this.field_147697_e.func_82594_a(p_147693_1_);
-      boolean flag = soundeventaccessor == null;
-      if (flag || p_147693_2_.func_148574_b()) {
-         if (!flag) {
-            field_147698_b.debug("Replaced sound event location {}", (Object)p_147693_1_);
-         }
+        this.sndManager.reloadSoundSystem();
+    }
 
-         soundeventaccessor = new SoundEventAccessor(p_147693_1_, p_147693_2_.func_188701_c());
-         this.field_147697_e.func_186803_a(soundeventaccessor);
-      }
+    @Nullable
+    protected Map<String, SoundList> getSoundMap(InputStream stream)
+    {
+        Map map;
 
-      for(final Sound sound : p_147693_2_.func_188700_a()) {
-         final ResourceLocation resourcelocation = sound.func_188719_a();
-         ISoundEventAccessor<Sound> isoundeventaccessor;
-         switch(sound.func_188722_g()) {
-         case FILE:
-            if (!this.func_184401_a(sound, p_147693_1_)) {
-               continue;
+        try
+        {
+            map = (Map)JsonUtils.func_193841_a(GSON, new InputStreamReader(stream, StandardCharsets.UTF_8), TYPE);
+        }
+        finally
+        {
+            IOUtils.closeQuietly(stream);
+        }
+
+        return map;
+    }
+
+    private void loadSoundResource(ResourceLocation location, SoundList sounds)
+    {
+        SoundEventAccessor soundeventaccessor = (SoundEventAccessor)this.soundRegistry.getObject(location);
+        boolean flag = soundeventaccessor == null;
+
+        if (flag || sounds.canReplaceExisting())
+        {
+            if (!flag)
+            {
+                LOGGER.debug("Replaced sound event location {}", (Object)location);
             }
 
-            isoundeventaccessor = sound;
-            break;
-         case SOUND_EVENT:
-            isoundeventaccessor = new ISoundEventAccessor<Sound>() {
-               public int func_148721_a() {
-                  SoundEventAccessor soundeventaccessor1 = (SoundEventAccessor)SoundHandler.this.field_147697_e.func_82594_a(resourcelocation);
-                  return soundeventaccessor1 == null ? 0 : soundeventaccessor1.func_148721_a();
-               }
+            soundeventaccessor = new SoundEventAccessor(location, sounds.getSubtitle());
+            this.soundRegistry.add(soundeventaccessor);
+        }
 
-               public Sound func_148720_g() {
-                  SoundEventAccessor soundeventaccessor1 = (SoundEventAccessor)SoundHandler.this.field_147697_e.func_82594_a(resourcelocation);
-                  if (soundeventaccessor1 == null) {
-                     return SoundHandler.field_147700_a;
-                  } else {
-                     Sound sound1 = soundeventaccessor1.func_148720_g();
-                     return new Sound(sound1.func_188719_a().toString(), sound1.func_188724_c() * sound.func_188724_c(), sound1.func_188725_d() * sound.func_188725_d(), sound.func_148721_a(), Sound.Type.FILE, sound1.func_188723_h() || sound.func_188723_h());
-                  }
-               }
-            };
-            break;
-         default:
-            throw new IllegalStateException("Unknown SoundEventRegistration type: " + sound.func_188722_g());
-         }
+        for (final Sound sound : sounds.getSounds())
+        {
+            final ResourceLocation resourcelocation = sound.getSoundLocation();
+            ISoundEventAccessor<Sound> isoundeventaccessor;
 
-         soundeventaccessor.func_188715_a(isoundeventaccessor);
-      }
+            switch (sound.getType())
+            {
+                case FILE:
+                    if (!this.validateSoundResource(sound, location))
+                    {
+                        continue;
+                    }
 
-   }
+                    isoundeventaccessor = sound;
+                    break;
 
-   private boolean func_184401_a(Sound p_184401_1_, ResourceLocation p_184401_2_) {
-      ResourceLocation resourcelocation = p_184401_1_.func_188721_b();
-      IResource iresource = null;
+                case SOUND_EVENT:
+                    isoundeventaccessor = new ISoundEventAccessor<Sound>()
+                    {
+                        public int getWeight()
+                        {
+                            SoundEventAccessor soundeventaccessor1 = (SoundEventAccessor)SoundHandler.this.soundRegistry.getObject(resourcelocation);
+                            return soundeventaccessor1 == null ? 0 : soundeventaccessor1.getWeight();
+                        }
+                        public Sound cloneEntry()
+                        {
+                            SoundEventAccessor soundeventaccessor1 = (SoundEventAccessor)SoundHandler.this.soundRegistry.getObject(resourcelocation);
 
-      boolean flag;
-      try {
-         iresource = this.field_147695_g.func_110536_a(resourcelocation);
-         iresource.func_110527_b();
-         return true;
-      } catch (FileNotFoundException var11) {
-         field_147698_b.warn("File {} does not exist, cannot add it to event {}", resourcelocation, p_184401_2_);
-         flag = false;
-      } catch (IOException ioexception) {
-         field_147698_b.warn("Could not load sound file {}, cannot add it to event {}", resourcelocation, p_184401_2_, ioexception);
-         flag = false;
-         return flag;
-      } finally {
-         IOUtils.closeQuietly((Closeable)iresource);
-      }
+                            if (soundeventaccessor1 == null)
+                            {
+                                return SoundHandler.MISSING_SOUND;
+                            }
+                            else
+                            {
+                                Sound sound1 = soundeventaccessor1.cloneEntry();
+                                return new Sound(sound1.getSoundLocation().toString(), sound1.getVolume() * sound.getVolume(), sound1.getPitch() * sound.getPitch(), sound.getWeight(), Sound.Type.FILE, sound1.isStreaming() || sound.isStreaming());
+                            }
+                        }
+                    };
 
-      return flag;
-   }
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown SoundEventRegistration type: " + sound.getType());
+            }
 
-   @Nullable
-   public SoundEventAccessor func_184398_a(ResourceLocation p_184398_1_) {
-      return (SoundEventAccessor)this.field_147697_e.func_82594_a(p_184398_1_);
-   }
+            soundeventaccessor.addSound(isoundeventaccessor);
+        }
+    }
 
-   public void func_147682_a(ISound p_147682_1_) {
-      this.field_147694_f.func_148611_c(p_147682_1_);
-   }
+    private boolean validateSoundResource(Sound p_184401_1_, ResourceLocation p_184401_2_)
+    {
+        ResourceLocation resourcelocation = p_184401_1_.getSoundAsOggLocation();
+        IResource iresource = null;
+        boolean flag;
 
-   public void func_147681_a(ISound p_147681_1_, int p_147681_2_) {
-      this.field_147694_f.func_148599_a(p_147681_1_, p_147681_2_);
-   }
+        try
+        {
+            iresource = this.mcResourceManager.getResource(resourcelocation);
+            iresource.getInputStream();
+            return true;
+        }
+        catch (FileNotFoundException var11)
+        {
+            LOGGER.warn("File {} does not exist, cannot add it to event {}", resourcelocation, p_184401_2_);
+            flag = false;
+        }
+        catch (IOException ioexception)
+        {
+            LOGGER.warn("Could not load sound file {}, cannot add it to event {}", resourcelocation, p_184401_2_, ioexception);
+            flag = false;
+            return flag;
+        }
+        finally
+        {
+            IOUtils.closeQuietly((Closeable)iresource);
+        }
 
-   public void func_147691_a(EntityPlayer p_147691_1_, float p_147691_2_) {
-      this.field_147694_f.func_148615_a(p_147691_1_, p_147691_2_);
-   }
+        return flag;
+    }
 
-   public void func_147689_b() {
-      this.field_147694_f.func_148610_e();
-   }
+    @Nullable
+    public SoundEventAccessor getAccessor(ResourceLocation location)
+    {
+        return (SoundEventAccessor)this.soundRegistry.getObject(location);
+    }
 
-   public void func_147690_c() {
-      this.field_147694_f.func_148614_c();
-   }
+    /**
+     * Play a sound
+     */
+    public void playSound(ISound sound)
+    {
+        this.sndManager.playSound(sound);
+    }
 
-   public void func_147685_d() {
-      this.field_147694_f.func_148613_b();
-   }
+    /**
+     * Plays the sound in n ticks
+     */
+    public void playDelayedSound(ISound sound, int delay)
+    {
+        this.sndManager.playDelayedSound(sound, delay);
+    }
 
-   public void func_73660_a() {
-      this.field_147694_f.func_148605_d();
-   }
+    public void setListener(EntityPlayer player, float p_147691_2_)
+    {
+        this.sndManager.setListener(player, p_147691_2_);
+    }
 
-   public void func_147687_e() {
-      this.field_147694_f.func_148604_f();
-   }
+    public void pauseSounds()
+    {
+        this.sndManager.pauseAllSounds();
+    }
 
-   public void func_184399_a(SoundCategory p_184399_1_, float p_184399_2_) {
-      if (p_184399_1_ == SoundCategory.MASTER && p_184399_2_ <= 0.0F) {
-         this.func_147690_c();
-      }
+    public void stopSounds()
+    {
+        this.sndManager.stopAllSounds();
+    }
 
-      this.field_147694_f.func_188771_a(p_184399_1_, p_184399_2_);
-   }
+    public void unloadSounds()
+    {
+        this.sndManager.unloadSoundSystem();
+    }
 
-   public void func_147683_b(ISound p_147683_1_) {
-      this.field_147694_f.func_148602_b(p_147683_1_);
-   }
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
+    public void update()
+    {
+        this.sndManager.updateAllSounds();
+    }
 
-   public boolean func_147692_c(ISound p_147692_1_) {
-      return this.field_147694_f.func_148597_a(p_147692_1_);
-   }
+    public void resumeSounds()
+    {
+        this.sndManager.resumeAllSounds();
+    }
 
-   public void func_184402_a(ISoundEventListener p_184402_1_) {
-      this.field_147694_f.func_188774_a(p_184402_1_);
-   }
+    public void setSoundLevel(SoundCategory category, float volume)
+    {
+        if (category == SoundCategory.MASTER && volume <= 0.0F)
+        {
+            this.stopSounds();
+        }
 
-   public void func_184400_b(ISoundEventListener p_184400_1_) {
-      this.field_147694_f.func_188773_b(p_184400_1_);
-   }
+        this.sndManager.setVolume(category, volume);
+    }
 
-   public void func_189520_a(String p_189520_1_, SoundCategory p_189520_2_) {
-      this.field_147694_f.func_189567_a(p_189520_1_, p_189520_2_);
-   }
+    public void stopSound(ISound soundIn)
+    {
+        this.sndManager.stopSound(soundIn);
+    }
+
+    public boolean isSoundPlaying(ISound sound)
+    {
+        return this.sndManager.isSoundPlaying(sound);
+    }
+
+    public void addListener(ISoundEventListener listener)
+    {
+        this.sndManager.addListener(listener);
+    }
+
+    public void removeListener(ISoundEventListener listener)
+    {
+        this.sndManager.removeListener(listener);
+    }
+
+    public void stop(String p_189520_1_, SoundCategory p_189520_2_)
+    {
+        this.sndManager.stop(p_189520_1_, p_189520_2_);
+    }
 }

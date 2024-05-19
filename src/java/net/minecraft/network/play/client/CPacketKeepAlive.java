@@ -5,29 +5,45 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class CPacketKeepAlive implements Packet<INetHandlerPlayServer> {
-   private int field_149461_a;
+public class CPacketKeepAlive implements Packet<INetHandlerPlayServer>
+{
+    private int key;
 
-   public CPacketKeepAlive() {
-   }
+    public CPacketKeepAlive()
+    {
+    }
 
-   public CPacketKeepAlive(int p_i46876_1_) {
-      this.field_149461_a = p_i46876_1_;
-   }
+    public CPacketKeepAlive(int idIn)
+    {
+        this.key = idIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_147353_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.processKeepAlive(this);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149461_a = p_148837_1_.func_150792_a();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.key = buf.readVarIntFromBuffer();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_149461_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.key);
+    }
 
-   public int func_149460_c() {
-      return this.field_149461_a;
-   }
+    public int getKey()
+    {
+        return this.key;
+    }
 }

@@ -6,31 +6,58 @@ import javax.annotation.Nullable;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.util.IProgressUpdate;
 
-public interface ISaveFormat {
-   String func_154333_a();
+public interface ISaveFormat
+{
+    /**
+     * Returns the name of the save format.
+     */
+    String getName();
 
-   ISaveHandler func_75804_a(String var1, boolean var2);
+    /**
+     * Returns back a loader for the specified save directory
+     */
+    ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata);
 
-   List<WorldSummary> func_75799_b() throws AnvilConverterException;
+    List<WorldSummary> getSaveList() throws AnvilConverterException;
 
-   void func_75800_d();
+    void flushCache();
 
-   @Nullable
-   WorldInfo func_75803_c(String var1);
+    @Nullable
 
-   boolean func_154335_d(String var1);
+    /**
+     * Returns the world's WorldInfo object
+     */
+    WorldInfo getWorldInfo(String saveName);
 
-   boolean func_75802_e(String var1);
+    boolean isNewLevelIdAcceptable(String saveName);
 
-   void func_75806_a(String var1, String var2);
+    /**
+     * Deletes a world directory.
+     */
+    boolean deleteWorldDirectory(String saveName);
 
-   boolean func_154334_a(String var1);
+    /**
+     * Renames the world by storing the new name in level.dat. It does *not* rename the directory containing the world
+     * data.
+     */
+    void renameWorld(String dirName, String newName);
 
-   boolean func_75801_b(String var1);
+    boolean isConvertible(String saveName);
 
-   boolean func_75805_a(String var1, IProgressUpdate var2);
+    /**
+     * gets if the map is old chunk saving (true) or McRegion (false)
+     */
+    boolean isOldMapFormat(String saveName);
 
-   boolean func_90033_f(String var1);
+    /**
+     * converts the map to mcRegion
+     */
+    boolean convertMapFormat(String filename, IProgressUpdate progressCallback);
 
-   File func_186352_b(String var1, String var2);
+    /**
+     * Return whether the given world can be loaded.
+     */
+    boolean canLoadWorld(String saveName);
+
+    File getFile(String p_186352_1_, String p_186352_2_);
 }

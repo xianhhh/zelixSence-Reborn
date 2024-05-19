@@ -17,81 +17,131 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockStainedGlassPane extends BlockPane {
-   public static final PropertyEnum<EnumDyeColor> field_176245_a = PropertyEnum.<EnumDyeColor>func_177709_a("color", EnumDyeColor.class);
+public class BlockStainedGlassPane extends BlockPane
+{
+    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
 
-   public BlockStainedGlassPane() {
-      super(Material.field_151592_s, false);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176241_b, Boolean.valueOf(false)).func_177226_a(field_176242_M, Boolean.valueOf(false)).func_177226_a(field_176243_N, Boolean.valueOf(false)).func_177226_a(field_176244_O, Boolean.valueOf(false)).func_177226_a(field_176245_a, EnumDyeColor.WHITE));
-      this.func_149647_a(CreativeTabs.field_78031_c);
-   }
+    public BlockStainedGlassPane()
+    {
+        super(Material.GLASS, false);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)).withProperty(COLOR, EnumDyeColor.WHITE));
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
 
-   public int func_180651_a(IBlockState p_180651_1_) {
-      return ((EnumDyeColor)p_180651_1_.func_177229_b(field_176245_a)).func_176765_a();
-   }
+    /**
+     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
+     * returns the metadata of the dropped item based on the old metadata of the block.
+     */
+    public int damageDropped(IBlockState state)
+    {
+        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+    }
 
-   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
-      for(int i = 0; i < EnumDyeColor.values().length; ++i) {
-         p_149666_2_.add(new ItemStack(this, 1, i));
-      }
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    {
+        for (int i = 0; i < EnumDyeColor.values().length; ++i)
+        {
+            tab.add(new ItemStack(this, 1, i));
+        }
+    }
 
-   }
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    {
+        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
+    }
 
-   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
-      return MapColor.func_193558_a((EnumDyeColor)p_180659_1_.func_177229_b(field_176245_a));
-   }
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.TRANSLUCENT;
+    }
 
-   public BlockRenderLayer func_180664_k() {
-      return BlockRenderLayer.TRANSLUCENT;
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_176245_a, EnumDyeColor.func_176764_b(p_176203_1_));
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+    }
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      return ((EnumDyeColor)p_176201_1_.func_177229_b(field_176245_a)).func_176765_a();
-   }
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        switch (rot)
+        {
+            case CLOCKWISE_180:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
 
-   public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-      switch(p_185499_2_) {
-      case CLOCKWISE_180:
-         return p_185499_1_.func_177226_a(field_176241_b, p_185499_1_.func_177229_b(field_176243_N)).func_177226_a(field_176242_M, p_185499_1_.func_177229_b(field_176244_O)).func_177226_a(field_176243_N, p_185499_1_.func_177229_b(field_176241_b)).func_177226_a(field_176244_O, p_185499_1_.func_177229_b(field_176242_M));
-      case COUNTERCLOCKWISE_90:
-         return p_185499_1_.func_177226_a(field_176241_b, p_185499_1_.func_177229_b(field_176242_M)).func_177226_a(field_176242_M, p_185499_1_.func_177229_b(field_176243_N)).func_177226_a(field_176243_N, p_185499_1_.func_177229_b(field_176244_O)).func_177226_a(field_176244_O, p_185499_1_.func_177229_b(field_176241_b));
-      case CLOCKWISE_90:
-         return p_185499_1_.func_177226_a(field_176241_b, p_185499_1_.func_177229_b(field_176244_O)).func_177226_a(field_176242_M, p_185499_1_.func_177229_b(field_176241_b)).func_177226_a(field_176243_N, p_185499_1_.func_177229_b(field_176242_M)).func_177226_a(field_176244_O, p_185499_1_.func_177229_b(field_176243_N));
-      default:
-         return p_185499_1_;
-      }
-   }
+            case COUNTERCLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
 
-   public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-      switch(p_185471_2_) {
-      case LEFT_RIGHT:
-         return p_185471_1_.func_177226_a(field_176241_b, p_185471_1_.func_177229_b(field_176243_N)).func_177226_a(field_176243_N, p_185471_1_.func_177229_b(field_176241_b));
-      case FRONT_BACK:
-         return p_185471_1_.func_177226_a(field_176242_M, p_185471_1_.func_177229_b(field_176244_O)).func_177226_a(field_176244_O, p_185471_1_.func_177229_b(field_176242_M));
-      default:
-         return super.func_185471_a(p_185471_1_, p_185471_2_);
-      }
-   }
+            case CLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176241_b, field_176242_M, field_176244_O, field_176243_N, field_176245_a});
-   }
+            default:
+                return state;
+        }
+    }
 
-   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
-      if (!p_176213_1_.field_72995_K) {
-         BlockBeacon.func_176450_d(p_176213_1_, p_176213_2_);
-      }
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        switch (mirrorIn)
+        {
+            case LEFT_RIGHT:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
 
-   }
+            case FRONT_BACK:
+                return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
 
-   public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_) {
-      if (!p_180663_1_.field_72995_K) {
-         BlockBeacon.func_176450_d(p_180663_1_, p_180663_2_);
-      }
+            default:
+                return super.withMirror(state, mirrorIn);
+        }
+    }
 
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {NORTH, EAST, WEST, SOUTH, COLOR});
+    }
+
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            BlockBeacon.updateColorAsync(worldIn, pos);
+        }
+    }
+
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            BlockBeacon.updateColorAsync(worldIn, pos);
+        }
+    }
 }

@@ -2,24 +2,37 @@ package net.minecraft.util;
 
 import net.minecraft.client.Minecraft;
 
-public class Timer {
-   public int field_74280_b;
-   public float field_194147_b;
-   public float field_194148_c;
-   private long field_74277_g;
-   private float field_194149_e;
+public class Timer
+{
+    /**
+     * How many full ticks have turned over since the last call to updateTimer(), capped at 10.
+     */
+    public int elapsedTicks;
+    public float field_194147_b;
+    public float field_194148_c;
 
-   public Timer(float p_i1018_1_) {
-      this.field_194149_e = 1000.0F / p_i1018_1_;
-      this.field_74277_g = Minecraft.func_71386_F();
-   }
+    /**
+     * The time reported by the system clock at the last sync, in milliseconds
+     */
+    private long lastSyncSysClock;
+    private float field_194149_e;
 
-   public void func_74275_a() {
-      long i = Minecraft.func_71386_F();
-      this.field_194148_c = (float)(i - this.field_74277_g) / this.field_194149_e;
-      this.field_74277_g = i;
-      this.field_194147_b += this.field_194148_c;
-      this.field_74280_b = (int)this.field_194147_b;
-      this.field_194147_b -= (float)this.field_74280_b;
-   }
+    public Timer(float tps)
+    {
+        this.field_194149_e = 1000.0F / tps;
+        this.lastSyncSysClock = Minecraft.getSystemTime();
+    }
+
+    /**
+     * Updates all fields of the Timer using the current time
+     */
+    public void updateTimer()
+    {
+        long i = Minecraft.getSystemTime();
+        this.field_194148_c = (float)(i - this.lastSyncSysClock) / this.field_194149_e;
+        this.lastSyncSysClock = i;
+        this.field_194147_b += this.field_194148_c;
+        this.elapsedTicks = (int)this.field_194147_b;
+        this.field_194147_b -= (float)this.elapsedTicks;
+    }
 }

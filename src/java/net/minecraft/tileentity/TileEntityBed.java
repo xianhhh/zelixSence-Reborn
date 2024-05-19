@@ -7,49 +7,60 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 
-public class TileEntityBed extends TileEntity {
-   private EnumDyeColor field_193053_a = EnumDyeColor.RED;
+public class TileEntityBed extends TileEntity
+{
+    private EnumDyeColor field_193053_a = EnumDyeColor.RED;
 
-   public void func_193051_a(ItemStack p_193051_1_) {
-      this.func_193052_a(EnumDyeColor.func_176764_b(p_193051_1_.func_77960_j()));
-   }
+    public void func_193051_a(ItemStack p_193051_1_)
+    {
+        this.func_193052_a(EnumDyeColor.byMetadata(p_193051_1_.getMetadata()));
+    }
 
-   public void func_145839_a(NBTTagCompound p_145839_1_) {
-      super.func_145839_a(p_145839_1_);
-      if (p_145839_1_.func_74764_b("color")) {
-         this.field_193053_a = EnumDyeColor.func_176764_b(p_145839_1_.func_74762_e("color"));
-      }
+    public void readFromNBT(NBTTagCompound compound)
+    {
+        super.readFromNBT(compound);
 
-   }
+        if (compound.hasKey("color"))
+        {
+            this.field_193053_a = EnumDyeColor.byMetadata(compound.getInteger("color"));
+        }
+    }
 
-   public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_) {
-      super.func_189515_b(p_189515_1_);
-      p_189515_1_.func_74768_a("color", this.field_193053_a.func_176765_a());
-      return p_189515_1_;
-   }
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    {
+        super.writeToNBT(compound);
+        compound.setInteger("color", this.field_193053_a.getMetadata());
+        return compound;
+    }
 
-   public NBTTagCompound func_189517_E_() {
-      return this.func_189515_b(new NBTTagCompound());
-   }
+    public NBTTagCompound getUpdateTag()
+    {
+        return this.writeToNBT(new NBTTagCompound());
+    }
 
-   public SPacketUpdateTileEntity func_189518_D_() {
-      return new SPacketUpdateTileEntity(this.field_174879_c, 11, this.func_189517_E_());
-   }
+    public SPacketUpdateTileEntity getUpdatePacket()
+    {
+        return new SPacketUpdateTileEntity(this.pos, 11, this.getUpdateTag());
+    }
 
-   public EnumDyeColor func_193048_a() {
-      return this.field_193053_a;
-   }
+    public EnumDyeColor func_193048_a()
+    {
+        return this.field_193053_a;
+    }
 
-   public void func_193052_a(EnumDyeColor p_193052_1_) {
-      this.field_193053_a = p_193052_1_;
-      this.func_70296_d();
-   }
+    public void func_193052_a(EnumDyeColor p_193052_1_)
+    {
+        this.field_193053_a = p_193052_1_;
+        this.markDirty();
+    }
 
-   public boolean func_193050_e() {
-      return BlockBed.func_193385_b(this.func_145832_p());
-   }
+    public boolean func_193050_e()
+    {
+        return BlockBed.func_193385_b(this.getBlockMetadata());
+    }
 
-   public ItemStack func_193049_f() {
-      return new ItemStack(Items.field_151104_aV, 1, this.field_193053_a.func_176765_a());
-   }
+    public ItemStack func_193049_f()
+    {
+        return new ItemStack(Items.BED, 1, this.field_193053_a.getMetadata());
+    }
 }

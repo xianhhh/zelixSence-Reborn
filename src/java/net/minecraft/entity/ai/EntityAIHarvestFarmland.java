@@ -12,100 +12,145 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class EntityAIHarvestFarmland extends EntityAIMoveToBlock {
-   private final EntityVillager field_179504_c;
-   private boolean field_179502_d;
-   private boolean field_179503_e;
-   private int field_179501_f;
+public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
+{
+    /** Villager that is harvesting */
+    private final EntityVillager theVillager;
+    private boolean hasFarmItem;
+    private boolean wantsToReapStuff;
+    private int currentTask;
 
-   public EntityAIHarvestFarmland(EntityVillager p_i45889_1_, double p_i45889_2_) {
-      super(p_i45889_1_, p_i45889_2_, 16);
-      this.field_179504_c = p_i45889_1_;
-   }
+    public EntityAIHarvestFarmland(EntityVillager theVillagerIn, double speedIn)
+    {
+        super(theVillagerIn, speedIn, 16);
+        this.theVillager = theVillagerIn;
+    }
 
-   public boolean func_75250_a() {
-      if (this.field_179496_a <= 0) {
-         if (!this.field_179504_c.field_70170_p.func_82736_K().func_82766_b("mobGriefing")) {
-            return false;
-         }
-
-         this.field_179501_f = -1;
-         this.field_179502_d = this.field_179504_c.func_175556_cs();
-         this.field_179503_e = this.field_179504_c.func_175557_cr();
-      }
-
-      return super.func_75250_a();
-   }
-
-   public boolean func_75253_b() {
-      return this.field_179501_f >= 0 && super.func_75253_b();
-   }
-
-   public void func_75246_d() {
-      super.func_75246_d();
-      this.field_179504_c.func_70671_ap().func_75650_a((double)this.field_179494_b.func_177958_n() + 0.5D, (double)(this.field_179494_b.func_177956_o() + 1), (double)this.field_179494_b.func_177952_p() + 0.5D, 10.0F, (float)this.field_179504_c.func_70646_bf());
-      if (this.func_179487_f()) {
-         World world = this.field_179504_c.field_70170_p;
-         BlockPos blockpos = this.field_179494_b.func_177984_a();
-         IBlockState iblockstate = world.func_180495_p(blockpos);
-         Block block = iblockstate.func_177230_c();
-         if (this.field_179501_f == 0 && block instanceof BlockCrops && ((BlockCrops)block).func_185525_y(iblockstate)) {
-            world.func_175655_b(blockpos, true);
-         } else if (this.field_179501_f == 1 && iblockstate.func_185904_a() == Material.field_151579_a) {
-            InventoryBasic inventorybasic = this.field_179504_c.func_175551_co();
-
-            for(int i = 0; i < inventorybasic.func_70302_i_(); ++i) {
-               ItemStack itemstack = inventorybasic.func_70301_a(i);
-               boolean flag = false;
-               if (!itemstack.func_190926_b()) {
-                  if (itemstack.func_77973_b() == Items.field_151014_N) {
-                     world.func_180501_a(blockpos, Blocks.field_150464_aj.func_176223_P(), 3);
-                     flag = true;
-                  } else if (itemstack.func_77973_b() == Items.field_151174_bG) {
-                     world.func_180501_a(blockpos, Blocks.field_150469_bN.func_176223_P(), 3);
-                     flag = true;
-                  } else if (itemstack.func_77973_b() == Items.field_151172_bF) {
-                     world.func_180501_a(blockpos, Blocks.field_150459_bM.func_176223_P(), 3);
-                     flag = true;
-                  } else if (itemstack.func_77973_b() == Items.field_185163_cU) {
-                     world.func_180501_a(blockpos, Blocks.field_185773_cZ.func_176223_P(), 3);
-                     flag = true;
-                  }
-               }
-
-               if (flag) {
-                  itemstack.func_190918_g(1);
-                  if (itemstack.func_190926_b()) {
-                     inventorybasic.func_70299_a(i, ItemStack.field_190927_a);
-                  }
-                  break;
-               }
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        if (this.runDelay <= 0)
+        {
+            if (!this.theVillager.world.getGameRules().getBoolean("mobGriefing"))
+            {
+                return false;
             }
-         }
 
-         this.field_179501_f = -1;
-         this.field_179496_a = 10;
-      }
+            this.currentTask = -1;
+            this.hasFarmItem = this.theVillager.isFarmItemInInventory();
+            this.wantsToReapStuff = this.theVillager.wantsMoreFood();
+        }
 
-   }
+        return super.shouldExecute();
+    }
 
-   protected boolean func_179488_a(World p_179488_1_, BlockPos p_179488_2_) {
-      Block block = p_179488_1_.func_180495_p(p_179488_2_).func_177230_c();
-      if (block == Blocks.field_150458_ak) {
-         p_179488_2_ = p_179488_2_.func_177984_a();
-         IBlockState iblockstate = p_179488_1_.func_180495_p(p_179488_2_);
-         block = iblockstate.func_177230_c();
-         if (block instanceof BlockCrops && ((BlockCrops)block).func_185525_y(iblockstate) && this.field_179503_e && (this.field_179501_f == 0 || this.field_179501_f < 0)) {
-            this.field_179501_f = 0;
-            return true;
-         }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        return this.currentTask >= 0 && super.continueExecuting();
+    }
 
-         if (iblockstate.func_185904_a() == Material.field_151579_a && this.field_179502_d && (this.field_179501_f == 1 || this.field_179501_f < 0)) {
-            this.field_179501_f = 1;
-            return true;
-         }
-      }
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        super.updateTask();
+        this.theVillager.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.theVillager.getVerticalFaceSpeed());
 
-      return false;
-   }
+        if (this.getIsAboveDestination())
+        {
+            World world = this.theVillager.world;
+            BlockPos blockpos = this.destinationBlock.up();
+            IBlockState iblockstate = world.getBlockState(blockpos);
+            Block block = iblockstate.getBlock();
+
+            if (this.currentTask == 0 && block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate))
+            {
+                world.destroyBlock(blockpos, true);
+            }
+            else if (this.currentTask == 1 && iblockstate.getMaterial() == Material.AIR)
+            {
+                InventoryBasic inventorybasic = this.theVillager.getVillagerInventory();
+
+                for (int i = 0; i < inventorybasic.getSizeInventory(); ++i)
+                {
+                    ItemStack itemstack = inventorybasic.getStackInSlot(i);
+                    boolean flag = false;
+
+                    if (!itemstack.func_190926_b())
+                    {
+                        if (itemstack.getItem() == Items.WHEAT_SEEDS)
+                        {
+                            world.setBlockState(blockpos, Blocks.WHEAT.getDefaultState(), 3);
+                            flag = true;
+                        }
+                        else if (itemstack.getItem() == Items.POTATO)
+                        {
+                            world.setBlockState(blockpos, Blocks.POTATOES.getDefaultState(), 3);
+                            flag = true;
+                        }
+                        else if (itemstack.getItem() == Items.CARROT)
+                        {
+                            world.setBlockState(blockpos, Blocks.CARROTS.getDefaultState(), 3);
+                            flag = true;
+                        }
+                        else if (itemstack.getItem() == Items.BEETROOT_SEEDS)
+                        {
+                            world.setBlockState(blockpos, Blocks.BEETROOTS.getDefaultState(), 3);
+                            flag = true;
+                        }
+                    }
+
+                    if (flag)
+                    {
+                        itemstack.func_190918_g(1);
+
+                        if (itemstack.func_190926_b())
+                        {
+                            inventorybasic.setInventorySlotContents(i, ItemStack.field_190927_a);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            this.currentTask = -1;
+            this.runDelay = 10;
+        }
+    }
+
+    /**
+     * Return true to set given position as destination
+     */
+    protected boolean shouldMoveTo(World worldIn, BlockPos pos)
+    {
+        Block block = worldIn.getBlockState(pos).getBlock();
+
+        if (block == Blocks.FARMLAND)
+        {
+            pos = pos.up();
+            IBlockState iblockstate = worldIn.getBlockState(pos);
+            block = iblockstate.getBlock();
+
+            if (block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate) && this.wantsToReapStuff && (this.currentTask == 0 || this.currentTask < 0))
+            {
+                this.currentTask = 0;
+                return true;
+            }
+
+            if (iblockstate.getMaterial() == Material.AIR && this.hasFarmItem && (this.currentTask == 1 || this.currentTask < 0))
+            {
+                this.currentTask = 1;
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

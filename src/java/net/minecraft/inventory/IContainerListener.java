@@ -3,12 +3,25 @@ package net.minecraft.inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-public interface IContainerListener {
-   void func_71110_a(Container var1, NonNullList<ItemStack> var2);
+public interface IContainerListener
+{
+    /**
+     * update the crafting window inventory with the items in the list
+     */
+    void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList);
 
-   void func_71111_a(Container var1, int var2, ItemStack var3);
+    /**
+     * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
+     * contents of that slot.
+     */
+    void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack);
 
-   void func_71112_a(Container var1, int var2, int var3);
+    /**
+     * Sends two ints to the client-side Container. Used for furnace burning time, smelting progress, brewing progress,
+     * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
+     * value. Both are truncated to shorts in non-local SMP.
+     */
+    void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue);
 
-   void func_175173_a(Container var1, IInventory var2);
+    void sendAllWindowProperties(Container containerIn, IInventory inventory);
 }

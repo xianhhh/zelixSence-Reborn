@@ -9,61 +9,81 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public class SPacketSpawnPainting implements Packet<INetHandlerPlayClient> {
-   private int field_148973_a;
-   private UUID field_186896_b;
-   private BlockPos field_179838_b;
-   private EnumFacing field_179839_c;
-   private String field_148968_f;
+public class SPacketSpawnPainting implements Packet<INetHandlerPlayClient>
+{
+    private int entityID;
+    private UUID uniqueId;
+    private BlockPos position;
+    private EnumFacing facing;
+    private String title;
 
-   public SPacketSpawnPainting() {
-   }
+    public SPacketSpawnPainting()
+    {
+    }
 
-   public SPacketSpawnPainting(EntityPainting p_i46972_1_) {
-      this.field_148973_a = p_i46972_1_.func_145782_y();
-      this.field_186896_b = p_i46972_1_.func_110124_au();
-      this.field_179838_b = p_i46972_1_.func_174857_n();
-      this.field_179839_c = p_i46972_1_.field_174860_b;
-      this.field_148968_f = p_i46972_1_.field_70522_e.field_75702_A;
-   }
+    public SPacketSpawnPainting(EntityPainting painting)
+    {
+        this.entityID = painting.getEntityId();
+        this.uniqueId = painting.getUniqueID();
+        this.position = painting.getHangingPosition();
+        this.facing = painting.facingDirection;
+        this.title = painting.art.title;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_148973_a = p_148837_1_.func_150792_a();
-      this.field_186896_b = p_148837_1_.func_179253_g();
-      this.field_148968_f = p_148837_1_.func_150789_c(EntityPainting.EnumArt.field_180001_A);
-      this.field_179838_b = p_148837_1_.func_179259_c();
-      this.field_179839_c = EnumFacing.func_176731_b(p_148837_1_.readUnsignedByte());
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityID = buf.readVarIntFromBuffer();
+        this.uniqueId = buf.readUuid();
+        this.title = buf.readStringFromBuffer(EntityPainting.EnumArt.MAX_NAME_LENGTH);
+        this.position = buf.readBlockPos();
+        this.facing = EnumFacing.getHorizontal(buf.readUnsignedByte());
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_148973_a);
-      p_148840_1_.func_179252_a(this.field_186896_b);
-      p_148840_1_.func_180714_a(this.field_148968_f);
-      p_148840_1_.func_179255_a(this.field_179838_b);
-      p_148840_1_.writeByte(this.field_179839_c.func_176736_b());
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityID);
+        buf.writeUuid(this.uniqueId);
+        buf.writeString(this.title);
+        buf.writeBlockPos(this.position);
+        buf.writeByte(this.facing.getHorizontalIndex());
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147288_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleSpawnPainting(this);
+    }
 
-   public int func_148965_c() {
-      return this.field_148973_a;
-   }
+    public int getEntityID()
+    {
+        return this.entityID;
+    }
 
-   public UUID func_186895_b() {
-      return this.field_186896_b;
-   }
+    public UUID getUniqueId()
+    {
+        return this.uniqueId;
+    }
 
-   public BlockPos func_179837_b() {
-      return this.field_179838_b;
-   }
+    public BlockPos getPosition()
+    {
+        return this.position;
+    }
 
-   public EnumFacing func_179836_c() {
-      return this.field_179839_c;
-   }
+    public EnumFacing getFacing()
+    {
+        return this.facing;
+    }
 
-   public String func_148961_h() {
-      return this.field_148968_f;
-   }
+    public String getTitle()
+    {
+        return this.title;
+    }
 }

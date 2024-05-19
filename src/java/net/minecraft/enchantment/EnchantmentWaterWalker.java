@@ -3,25 +3,43 @@ package net.minecraft.enchantment;
 import net.minecraft.init.Enchantments;
 import net.minecraft.inventory.EntityEquipmentSlot;
 
-public class EnchantmentWaterWalker extends Enchantment {
-   public EnchantmentWaterWalker(Enchantment.Rarity p_i46720_1_, EntityEquipmentSlot... p_i46720_2_) {
-      super(p_i46720_1_, EnumEnchantmentType.ARMOR_FEET, p_i46720_2_);
-      this.func_77322_b("waterWalker");
-   }
+public class EnchantmentWaterWalker extends Enchantment
+{
+    public EnchantmentWaterWalker(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
+    {
+        super(rarityIn, EnumEnchantmentType.ARMOR_FEET, slots);
+        this.setName("waterWalker");
+    }
 
-   public int func_77321_a(int p_77321_1_) {
-      return p_77321_1_ * 10;
-   }
+    /**
+     * Returns the minimal value of enchantability needed on the enchantment level passed.
+     */
+    public int getMinEnchantability(int enchantmentLevel)
+    {
+        return enchantmentLevel * 10;
+    }
 
-   public int func_77317_b(int p_77317_1_) {
-      return this.func_77321_a(p_77317_1_) + 15;
-   }
+    /**
+     * Returns the maximum value of enchantability nedded on the enchantment level passed.
+     */
+    public int getMaxEnchantability(int enchantmentLevel)
+    {
+        return this.getMinEnchantability(enchantmentLevel) + 15;
+    }
 
-   public int func_77325_b() {
-      return 3;
-   }
+    /**
+     * Returns the maximum level that the enchantment can have.
+     */
+    public int getMaxLevel()
+    {
+        return 3;
+    }
 
-   public boolean func_77326_a(Enchantment p_77326_1_) {
-      return super.func_77326_a(p_77326_1_) && p_77326_1_ != Enchantments.field_185301_j;
-   }
+    /**
+     * Determines if the enchantment passed can be applyied together with this enchantment.
+     */
+    public boolean canApplyTogether(Enchantment ench)
+    {
+        return super.canApplyTogether(ench) && ench != Enchantments.FROST_WALKER;
+    }
 }

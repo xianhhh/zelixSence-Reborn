@@ -7,272 +7,339 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 
-public class ModelBiped extends ModelBase {
-   public ModelRenderer field_78116_c;
-   public ModelRenderer field_178720_f;
-   public ModelRenderer field_78115_e;
-   public ModelRenderer field_178723_h;
-   public ModelRenderer field_178724_i;
-   public ModelRenderer field_178721_j;
-   public ModelRenderer field_178722_k;
-   public ModelBiped.ArmPose field_187075_l;
-   public ModelBiped.ArmPose field_187076_m;
-   public boolean field_78117_n;
+public class ModelBiped extends ModelBase
+{
+    public ModelRenderer bipedHead;
 
-   public ModelBiped() {
-      this(0.0F);
-   }
+    /** The Biped's Headwear. Used for the outer layer of player skins. */
+    public ModelRenderer bipedHeadwear;
+    public ModelRenderer bipedBody;
 
-   public ModelBiped(float p_i1148_1_) {
-      this(p_i1148_1_, 0.0F, 64, 32);
-   }
+    /** The Biped's Right Arm */
+    public ModelRenderer bipedRightArm;
 
-   public ModelBiped(float p_i1149_1_, float p_i1149_2_, int p_i1149_3_, int p_i1149_4_) {
-      this.field_187075_l = ModelBiped.ArmPose.EMPTY;
-      this.field_187076_m = ModelBiped.ArmPose.EMPTY;
-      this.field_78090_t = p_i1149_3_;
-      this.field_78089_u = p_i1149_4_;
-      this.field_78116_c = new ModelRenderer(this, 0, 0);
-      this.field_78116_c.func_78790_a(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i1149_1_);
-      this.field_78116_c.func_78793_a(0.0F, 0.0F + p_i1149_2_, 0.0F);
-      this.field_178720_f = new ModelRenderer(this, 32, 0);
-      this.field_178720_f.func_78790_a(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i1149_1_ + 0.5F);
-      this.field_178720_f.func_78793_a(0.0F, 0.0F + p_i1149_2_, 0.0F);
-      this.field_78115_e = new ModelRenderer(this, 16, 16);
-      this.field_78115_e.func_78790_a(-4.0F, 0.0F, -2.0F, 8, 12, 4, p_i1149_1_);
-      this.field_78115_e.func_78793_a(0.0F, 0.0F + p_i1149_2_, 0.0F);
-      this.field_178723_h = new ModelRenderer(this, 40, 16);
-      this.field_178723_h.func_78790_a(-3.0F, -2.0F, -2.0F, 4, 12, 4, p_i1149_1_);
-      this.field_178723_h.func_78793_a(-5.0F, 2.0F + p_i1149_2_, 0.0F);
-      this.field_178724_i = new ModelRenderer(this, 40, 16);
-      this.field_178724_i.field_78809_i = true;
-      this.field_178724_i.func_78790_a(-1.0F, -2.0F, -2.0F, 4, 12, 4, p_i1149_1_);
-      this.field_178724_i.func_78793_a(5.0F, 2.0F + p_i1149_2_, 0.0F);
-      this.field_178721_j = new ModelRenderer(this, 0, 16);
-      this.field_178721_j.func_78790_a(-2.0F, 0.0F, -2.0F, 4, 12, 4, p_i1149_1_);
-      this.field_178721_j.func_78793_a(-1.9F, 12.0F + p_i1149_2_, 0.0F);
-      this.field_178722_k = new ModelRenderer(this, 0, 16);
-      this.field_178722_k.field_78809_i = true;
-      this.field_178722_k.func_78790_a(-2.0F, 0.0F, -2.0F, 4, 12, 4, p_i1149_1_);
-      this.field_178722_k.func_78793_a(1.9F, 12.0F + p_i1149_2_, 0.0F);
-   }
+    /** The Biped's Left Arm */
+    public ModelRenderer bipedLeftArm;
 
-   public void func_78088_a(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_) {
-      this.func_78087_a(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, p_78088_7_, p_78088_1_);
-      GlStateManager.func_179094_E();
-      if (this.field_78091_s) {
-         float f = 2.0F;
-         GlStateManager.func_179152_a(0.75F, 0.75F, 0.75F);
-         GlStateManager.func_179109_b(0.0F, 16.0F * p_78088_7_, 0.0F);
-         this.field_78116_c.func_78785_a(p_78088_7_);
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179094_E();
-         GlStateManager.func_179152_a(0.5F, 0.5F, 0.5F);
-         GlStateManager.func_179109_b(0.0F, 24.0F * p_78088_7_, 0.0F);
-         this.field_78115_e.func_78785_a(p_78088_7_);
-         this.field_178723_h.func_78785_a(p_78088_7_);
-         this.field_178724_i.func_78785_a(p_78088_7_);
-         this.field_178721_j.func_78785_a(p_78088_7_);
-         this.field_178722_k.func_78785_a(p_78088_7_);
-         this.field_178720_f.func_78785_a(p_78088_7_);
-      } else {
-         if (p_78088_1_.func_70093_af()) {
-            GlStateManager.func_179109_b(0.0F, 0.2F, 0.0F);
-         }
+    /** The Biped's Right Leg */
+    public ModelRenderer bipedRightLeg;
 
-         this.field_78116_c.func_78785_a(p_78088_7_);
-         this.field_78115_e.func_78785_a(p_78088_7_);
-         this.field_178723_h.func_78785_a(p_78088_7_);
-         this.field_178724_i.func_78785_a(p_78088_7_);
-         this.field_178721_j.func_78785_a(p_78088_7_);
-         this.field_178722_k.func_78785_a(p_78088_7_);
-         this.field_178720_f.func_78785_a(p_78088_7_);
-      }
+    /** The Biped's Left Leg */
+    public ModelRenderer bipedLeftLeg;
+    public ModelBiped.ArmPose leftArmPose;
+    public ModelBiped.ArmPose rightArmPose;
+    public boolean isSneak;
 
-      GlStateManager.func_179121_F();
-   }
+    public ModelBiped()
+    {
+        this(0.0F);
+    }
 
-   public void func_78087_a(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity p_78087_7_) {
-      boolean flag = p_78087_7_ instanceof EntityLivingBase && ((EntityLivingBase)p_78087_7_).func_184599_cB() > 4;
-      this.field_78116_c.field_78796_g = p_78087_4_ * 0.017453292F;
-      if (flag) {
-         this.field_78116_c.field_78795_f = -0.7853982F;
-      } else {
-         this.field_78116_c.field_78795_f = p_78087_5_ * 0.017453292F;
-      }
+    public ModelBiped(float modelSize)
+    {
+        this(modelSize, 0.0F, 64, 32);
+    }
 
-      this.field_78115_e.field_78796_g = 0.0F;
-      this.field_178723_h.field_78798_e = 0.0F;
-      this.field_178723_h.field_78800_c = -5.0F;
-      this.field_178724_i.field_78798_e = 0.0F;
-      this.field_178724_i.field_78800_c = 5.0F;
-      float f = 1.0F;
-      if (flag) {
-         f = (float)(p_78087_7_.field_70159_w * p_78087_7_.field_70159_w + p_78087_7_.field_70181_x * p_78087_7_.field_70181_x + p_78087_7_.field_70179_y * p_78087_7_.field_70179_y);
-         f = f / 0.2F;
-         f = f * f * f;
-      }
+    public ModelBiped(float modelSize, float p_i1149_2_, int textureWidthIn, int textureHeightIn)
+    {
+        this.leftArmPose = ModelBiped.ArmPose.EMPTY;
+        this.rightArmPose = ModelBiped.ArmPose.EMPTY;
+        this.textureWidth = textureWidthIn;
+        this.textureHeight = textureHeightIn;
+        this.bipedHead = new ModelRenderer(this, 0, 0);
+        this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, modelSize);
+        this.bipedHead.setRotationPoint(0.0F, 0.0F + p_i1149_2_, 0.0F);
+        this.bipedHeadwear = new ModelRenderer(this, 32, 0);
+        this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, modelSize + 0.5F);
+        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + p_i1149_2_, 0.0F);
+        this.bipedBody = new ModelRenderer(this, 16, 16);
+        this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize);
+        this.bipedBody.setRotationPoint(0.0F, 0.0F + p_i1149_2_, 0.0F);
+        this.bipedRightArm = new ModelRenderer(this, 40, 16);
+        this.bipedRightArm.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
+        this.bipedRightArm.setRotationPoint(-5.0F, 2.0F + p_i1149_2_, 0.0F);
+        this.bipedLeftArm = new ModelRenderer(this, 40, 16);
+        this.bipedLeftArm.mirror = true;
+        this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
+        this.bipedLeftArm.setRotationPoint(5.0F, 2.0F + p_i1149_2_, 0.0F);
+        this.bipedRightLeg = new ModelRenderer(this, 0, 16);
+        this.bipedRightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
+        this.bipedRightLeg.setRotationPoint(-1.9F, 12.0F + p_i1149_2_, 0.0F);
+        this.bipedLeftLeg = new ModelRenderer(this, 0, 16);
+        this.bipedLeftLeg.mirror = true;
+        this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
+        this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F + p_i1149_2_, 0.0F);
+    }
 
-      if (f < 1.0F) {
-         f = 1.0F;
-      }
+    /**
+     * Sets the models various rotation angles then renders the model.
+     */
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
+    {
+        this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
+        GlStateManager.pushMatrix();
 
-      this.field_178723_h.field_78795_f = MathHelper.func_76134_b(p_78087_1_ * 0.6662F + 3.1415927F) * 2.0F * p_78087_2_ * 0.5F / f;
-      this.field_178724_i.field_78795_f = MathHelper.func_76134_b(p_78087_1_ * 0.6662F) * 2.0F * p_78087_2_ * 0.5F / f;
-      this.field_178723_h.field_78808_h = 0.0F;
-      this.field_178724_i.field_78808_h = 0.0F;
-      this.field_178721_j.field_78795_f = MathHelper.func_76134_b(p_78087_1_ * 0.6662F) * 1.4F * p_78087_2_ / f;
-      this.field_178722_k.field_78795_f = MathHelper.func_76134_b(p_78087_1_ * 0.6662F + 3.1415927F) * 1.4F * p_78087_2_ / f;
-      this.field_178721_j.field_78796_g = 0.0F;
-      this.field_178722_k.field_78796_g = 0.0F;
-      this.field_178721_j.field_78808_h = 0.0F;
-      this.field_178722_k.field_78808_h = 0.0F;
-      if (this.field_78093_q) {
-         this.field_178723_h.field_78795_f += -0.62831855F;
-         this.field_178724_i.field_78795_f += -0.62831855F;
-         this.field_178721_j.field_78795_f = -1.4137167F;
-         this.field_178721_j.field_78796_g = 0.31415927F;
-         this.field_178721_j.field_78808_h = 0.07853982F;
-         this.field_178722_k.field_78795_f = -1.4137167F;
-         this.field_178722_k.field_78796_g = -0.31415927F;
-         this.field_178722_k.field_78808_h = -0.07853982F;
-      }
+        if (this.isChild)
+        {
+            float f = 2.0F;
+            GlStateManager.scale(0.75F, 0.75F, 0.75F);
+            GlStateManager.translate(0.0F, 16.0F * scale, 0.0F);
+            this.bipedHead.render(scale);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(0.5F, 0.5F, 0.5F);
+            GlStateManager.translate(0.0F, 24.0F * scale, 0.0F);
+            this.bipedBody.render(scale);
+            this.bipedRightArm.render(scale);
+            this.bipedLeftArm.render(scale);
+            this.bipedRightLeg.render(scale);
+            this.bipedLeftLeg.render(scale);
+            this.bipedHeadwear.render(scale);
+        }
+        else
+        {
+            if (entityIn.isSneaking())
+            {
+                GlStateManager.translate(0.0F, 0.2F, 0.0F);
+            }
 
-      this.field_178723_h.field_78796_g = 0.0F;
-      this.field_178723_h.field_78808_h = 0.0F;
-      switch(this.field_187075_l) {
-      case EMPTY:
-         this.field_178724_i.field_78796_g = 0.0F;
-         break;
-      case BLOCK:
-         this.field_178724_i.field_78795_f = this.field_178724_i.field_78795_f * 0.5F - 0.9424779F;
-         this.field_178724_i.field_78796_g = 0.5235988F;
-         break;
-      case ITEM:
-         this.field_178724_i.field_78795_f = this.field_178724_i.field_78795_f * 0.5F - 0.31415927F;
-         this.field_178724_i.field_78796_g = 0.0F;
-      }
+            this.bipedHead.render(scale);
+            this.bipedBody.render(scale);
+            this.bipedRightArm.render(scale);
+            this.bipedLeftArm.render(scale);
+            this.bipedRightLeg.render(scale);
+            this.bipedLeftLeg.render(scale);
+            this.bipedHeadwear.render(scale);
+        }
 
-      switch(this.field_187076_m) {
-      case EMPTY:
-         this.field_178723_h.field_78796_g = 0.0F;
-         break;
-      case BLOCK:
-         this.field_178723_h.field_78795_f = this.field_178723_h.field_78795_f * 0.5F - 0.9424779F;
-         this.field_178723_h.field_78796_g = -0.5235988F;
-         break;
-      case ITEM:
-         this.field_178723_h.field_78795_f = this.field_178723_h.field_78795_f * 0.5F - 0.31415927F;
-         this.field_178723_h.field_78796_g = 0.0F;
-      }
+        GlStateManager.popMatrix();
+    }
 
-      if (this.field_78095_p > 0.0F) {
-         EnumHandSide enumhandside = this.func_187072_a(p_78087_7_);
-         ModelRenderer modelrenderer = this.func_187074_a(enumhandside);
-         float f1 = this.field_78095_p;
-         this.field_78115_e.field_78796_g = MathHelper.func_76126_a(MathHelper.func_76129_c(f1) * 6.2831855F) * 0.2F;
-         if (enumhandside == EnumHandSide.LEFT) {
-            this.field_78115_e.field_78796_g *= -1.0F;
-         }
+    @SuppressWarnings("incomplete-switch")
 
-         this.field_178723_h.field_78798_e = MathHelper.func_76126_a(this.field_78115_e.field_78796_g) * 5.0F;
-         this.field_178723_h.field_78800_c = -MathHelper.func_76134_b(this.field_78115_e.field_78796_g) * 5.0F;
-         this.field_178724_i.field_78798_e = -MathHelper.func_76126_a(this.field_78115_e.field_78796_g) * 5.0F;
-         this.field_178724_i.field_78800_c = MathHelper.func_76134_b(this.field_78115_e.field_78796_g) * 5.0F;
-         this.field_178723_h.field_78796_g += this.field_78115_e.field_78796_g;
-         this.field_178724_i.field_78796_g += this.field_78115_e.field_78796_g;
-         this.field_178724_i.field_78795_f += this.field_78115_e.field_78796_g;
-         f1 = 1.0F - this.field_78095_p;
-         f1 = f1 * f1;
-         f1 = f1 * f1;
-         f1 = 1.0F - f1;
-         float f2 = MathHelper.func_76126_a(f1 * 3.1415927F);
-         float f3 = MathHelper.func_76126_a(this.field_78095_p * 3.1415927F) * -(this.field_78116_c.field_78795_f - 0.7F) * 0.75F;
-         modelrenderer.field_78795_f = (float)((double)modelrenderer.field_78795_f - ((double)f2 * 1.2D + (double)f3));
-         modelrenderer.field_78796_g += this.field_78115_e.field_78796_g * 2.0F;
-         modelrenderer.field_78808_h += MathHelper.func_76126_a(this.field_78095_p * 3.1415927F) * -0.4F;
-      }
+    /**
+     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms
+     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how
+     * "far" arms and legs can swing at most.
+     */
+    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
+    {
+        boolean flag = entityIn instanceof EntityLivingBase && ((EntityLivingBase)entityIn).getTicksElytraFlying() > 4;
+        this.bipedHead.rotateAngleY = netHeadYaw * 0.017453292F;
 
-      if (this.field_78117_n) {
-         this.field_78115_e.field_78795_f = 0.5F;
-         this.field_178723_h.field_78795_f += 0.4F;
-         this.field_178724_i.field_78795_f += 0.4F;
-         this.field_178721_j.field_78798_e = 4.0F;
-         this.field_178722_k.field_78798_e = 4.0F;
-         this.field_178721_j.field_78797_d = 9.0F;
-         this.field_178722_k.field_78797_d = 9.0F;
-         this.field_78116_c.field_78797_d = 1.0F;
-      } else {
-         this.field_78115_e.field_78795_f = 0.0F;
-         this.field_178721_j.field_78798_e = 0.1F;
-         this.field_178722_k.field_78798_e = 0.1F;
-         this.field_178721_j.field_78797_d = 12.0F;
-         this.field_178722_k.field_78797_d = 12.0F;
-         this.field_78116_c.field_78797_d = 0.0F;
-      }
+        if (flag)
+        {
+            this.bipedHead.rotateAngleX = -((float)Math.PI / 4F);
+        }
+        else
+        {
+            this.bipedHead.rotateAngleX = headPitch * 0.017453292F;
+        }
 
-      this.field_178723_h.field_78808_h += MathHelper.func_76134_b(p_78087_3_ * 0.09F) * 0.05F + 0.05F;
-      this.field_178724_i.field_78808_h -= MathHelper.func_76134_b(p_78087_3_ * 0.09F) * 0.05F + 0.05F;
-      this.field_178723_h.field_78795_f += MathHelper.func_76126_a(p_78087_3_ * 0.067F) * 0.05F;
-      this.field_178724_i.field_78795_f -= MathHelper.func_76126_a(p_78087_3_ * 0.067F) * 0.05F;
-      if (this.field_187076_m == ModelBiped.ArmPose.BOW_AND_ARROW) {
-         this.field_178723_h.field_78796_g = -0.1F + this.field_78116_c.field_78796_g;
-         this.field_178724_i.field_78796_g = 0.1F + this.field_78116_c.field_78796_g + 0.4F;
-         this.field_178723_h.field_78795_f = -1.5707964F + this.field_78116_c.field_78795_f;
-         this.field_178724_i.field_78795_f = -1.5707964F + this.field_78116_c.field_78795_f;
-      } else if (this.field_187075_l == ModelBiped.ArmPose.BOW_AND_ARROW) {
-         this.field_178723_h.field_78796_g = -0.1F + this.field_78116_c.field_78796_g - 0.4F;
-         this.field_178724_i.field_78796_g = 0.1F + this.field_78116_c.field_78796_g;
-         this.field_178723_h.field_78795_f = -1.5707964F + this.field_78116_c.field_78795_f;
-         this.field_178724_i.field_78795_f = -1.5707964F + this.field_78116_c.field_78795_f;
-      }
+        this.bipedBody.rotateAngleY = 0.0F;
+        this.bipedRightArm.rotationPointZ = 0.0F;
+        this.bipedRightArm.rotationPointX = -5.0F;
+        this.bipedLeftArm.rotationPointZ = 0.0F;
+        this.bipedLeftArm.rotationPointX = 5.0F;
+        float f = 1.0F;
 
-      func_178685_a(this.field_78116_c, this.field_178720_f);
-   }
+        if (flag)
+        {
+            f = (float)(entityIn.motionX * entityIn.motionX + entityIn.motionY * entityIn.motionY + entityIn.motionZ * entityIn.motionZ);
+            f = f / 0.2F;
+            f = f * f * f;
+        }
 
-   public void func_178686_a(ModelBase p_178686_1_) {
-      super.func_178686_a(p_178686_1_);
-      if (p_178686_1_ instanceof ModelBiped) {
-         ModelBiped modelbiped = (ModelBiped)p_178686_1_;
-         this.field_187075_l = modelbiped.field_187075_l;
-         this.field_187076_m = modelbiped.field_187076_m;
-         this.field_78117_n = modelbiped.field_78117_n;
-      }
+        if (f < 1.0F)
+        {
+            f = 1.0F;
+        }
 
-   }
+        this.bipedRightArm.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 2.0F * limbSwingAmount * 0.5F / f;
+        this.bipedLeftArm.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F / f;
+        this.bipedRightArm.rotateAngleZ = 0.0F;
+        this.bipedLeftArm.rotateAngleZ = 0.0F;
+        this.bipedRightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount / f;
+        this.bipedLeftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount / f;
+        this.bipedRightLeg.rotateAngleY = 0.0F;
+        this.bipedLeftLeg.rotateAngleY = 0.0F;
+        this.bipedRightLeg.rotateAngleZ = 0.0F;
+        this.bipedLeftLeg.rotateAngleZ = 0.0F;
 
-   public void func_178719_a(boolean p_178719_1_) {
-      this.field_78116_c.field_78806_j = p_178719_1_;
-      this.field_178720_f.field_78806_j = p_178719_1_;
-      this.field_78115_e.field_78806_j = p_178719_1_;
-      this.field_178723_h.field_78806_j = p_178719_1_;
-      this.field_178724_i.field_78806_j = p_178719_1_;
-      this.field_178721_j.field_78806_j = p_178719_1_;
-      this.field_178722_k.field_78806_j = p_178719_1_;
-   }
+        if (this.isRiding)
+        {
+            this.bipedRightArm.rotateAngleX += -((float)Math.PI / 5F);
+            this.bipedLeftArm.rotateAngleX += -((float)Math.PI / 5F);
+            this.bipedRightLeg.rotateAngleX = -1.4137167F;
+            this.bipedRightLeg.rotateAngleY = ((float)Math.PI / 10F);
+            this.bipedRightLeg.rotateAngleZ = 0.07853982F;
+            this.bipedLeftLeg.rotateAngleX = -1.4137167F;
+            this.bipedLeftLeg.rotateAngleY = -((float)Math.PI / 10F);
+            this.bipedLeftLeg.rotateAngleZ = -0.07853982F;
+        }
 
-   public void func_187073_a(float p_187073_1_, EnumHandSide p_187073_2_) {
-      this.func_187074_a(p_187073_2_).func_78794_c(p_187073_1_);
-   }
+        this.bipedRightArm.rotateAngleY = 0.0F;
+        this.bipedRightArm.rotateAngleZ = 0.0F;
 
-   protected ModelRenderer func_187074_a(EnumHandSide p_187074_1_) {
-      return p_187074_1_ == EnumHandSide.LEFT ? this.field_178724_i : this.field_178723_h;
-   }
+        switch (this.leftArmPose)
+        {
+            case EMPTY:
+                this.bipedLeftArm.rotateAngleY = 0.0F;
+                break;
 
-   protected EnumHandSide func_187072_a(Entity p_187072_1_) {
-      if (p_187072_1_ instanceof EntityLivingBase) {
-         EntityLivingBase entitylivingbase = (EntityLivingBase)p_187072_1_;
-         EnumHandSide enumhandside = entitylivingbase.func_184591_cq();
-         return entitylivingbase.field_184622_au == EnumHand.MAIN_HAND ? enumhandside : enumhandside.func_188468_a();
-      } else {
-         return EnumHandSide.RIGHT;
-      }
-   }
+            case BLOCK:
+                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - 0.9424779F;
+                this.bipedLeftArm.rotateAngleY = 0.5235988F;
+                break;
 
-   public static enum ArmPose {
-      EMPTY,
-      ITEM,
-      BLOCK,
-      BOW_AND_ARROW;
-   }
+            case ITEM:
+                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F);
+                this.bipedLeftArm.rotateAngleY = 0.0F;
+        }
+
+        switch (this.rightArmPose)
+        {
+            case EMPTY:
+                this.bipedRightArm.rotateAngleY = 0.0F;
+                break;
+
+            case BLOCK:
+                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - 0.9424779F;
+                this.bipedRightArm.rotateAngleY = -0.5235988F;
+                break;
+
+            case ITEM:
+                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F);
+                this.bipedRightArm.rotateAngleY = 0.0F;
+        }
+
+        if (this.swingProgress > 0.0F)
+        {
+            EnumHandSide enumhandside = this.getMainHand(entityIn);
+            ModelRenderer modelrenderer = this.getArmForSide(enumhandside);
+            float f1 = this.swingProgress;
+            this.bipedBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt(f1) * ((float)Math.PI * 2F)) * 0.2F;
+
+            if (enumhandside == EnumHandSide.LEFT)
+            {
+                this.bipedBody.rotateAngleY *= -1.0F;
+            }
+
+            this.bipedRightArm.rotationPointZ = MathHelper.sin(this.bipedBody.rotateAngleY) * 5.0F;
+            this.bipedRightArm.rotationPointX = -MathHelper.cos(this.bipedBody.rotateAngleY) * 5.0F;
+            this.bipedLeftArm.rotationPointZ = -MathHelper.sin(this.bipedBody.rotateAngleY) * 5.0F;
+            this.bipedLeftArm.rotationPointX = MathHelper.cos(this.bipedBody.rotateAngleY) * 5.0F;
+            this.bipedRightArm.rotateAngleY += this.bipedBody.rotateAngleY;
+            this.bipedLeftArm.rotateAngleY += this.bipedBody.rotateAngleY;
+            this.bipedLeftArm.rotateAngleX += this.bipedBody.rotateAngleY;
+            f1 = 1.0F - this.swingProgress;
+            f1 = f1 * f1;
+            f1 = f1 * f1;
+            f1 = 1.0F - f1;
+            float f2 = MathHelper.sin(f1 * (float)Math.PI);
+            float f3 = MathHelper.sin(this.swingProgress * (float)Math.PI) * -(this.bipedHead.rotateAngleX - 0.7F) * 0.75F;
+            modelrenderer.rotateAngleX = (float)((double)modelrenderer.rotateAngleX - ((double)f2 * 1.2D + (double)f3));
+            modelrenderer.rotateAngleY += this.bipedBody.rotateAngleY * 2.0F;
+            modelrenderer.rotateAngleZ += MathHelper.sin(this.swingProgress * (float)Math.PI) * -0.4F;
+        }
+
+        if (this.isSneak)
+        {
+            this.bipedBody.rotateAngleX = 0.5F;
+            this.bipedRightArm.rotateAngleX += 0.4F;
+            this.bipedLeftArm.rotateAngleX += 0.4F;
+            this.bipedRightLeg.rotationPointZ = 4.0F;
+            this.bipedLeftLeg.rotationPointZ = 4.0F;
+            this.bipedRightLeg.rotationPointY = 9.0F;
+            this.bipedLeftLeg.rotationPointY = 9.0F;
+            this.bipedHead.rotationPointY = 1.0F;
+        }
+        else
+        {
+            this.bipedBody.rotateAngleX = 0.0F;
+            this.bipedRightLeg.rotationPointZ = 0.1F;
+            this.bipedLeftLeg.rotationPointZ = 0.1F;
+            this.bipedRightLeg.rotationPointY = 12.0F;
+            this.bipedLeftLeg.rotationPointY = 12.0F;
+            this.bipedHead.rotationPointY = 0.0F;
+        }
+
+        this.bipedRightArm.rotateAngleZ += MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
+        this.bipedLeftArm.rotateAngleZ -= MathHelper.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
+        this.bipedRightArm.rotateAngleX += MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
+        this.bipedLeftArm.rotateAngleX -= MathHelper.sin(ageInTicks * 0.067F) * 0.05F;
+
+        if (this.rightArmPose == ModelBiped.ArmPose.BOW_AND_ARROW)
+        {
+            this.bipedRightArm.rotateAngleY = -0.1F + this.bipedHead.rotateAngleY;
+            this.bipedLeftArm.rotateAngleY = 0.1F + this.bipedHead.rotateAngleY + 0.4F;
+            this.bipedRightArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;
+            this.bipedLeftArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;
+        }
+        else if (this.leftArmPose == ModelBiped.ArmPose.BOW_AND_ARROW)
+        {
+            this.bipedRightArm.rotateAngleY = -0.1F + this.bipedHead.rotateAngleY - 0.4F;
+            this.bipedLeftArm.rotateAngleY = 0.1F + this.bipedHead.rotateAngleY;
+            this.bipedRightArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;
+            this.bipedLeftArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;
+        }
+
+        copyModelAngles(this.bipedHead, this.bipedHeadwear);
+    }
+
+    public void setModelAttributes(ModelBase model)
+    {
+        super.setModelAttributes(model);
+
+        if (model instanceof ModelBiped)
+        {
+            ModelBiped modelbiped = (ModelBiped)model;
+            this.leftArmPose = modelbiped.leftArmPose;
+            this.rightArmPose = modelbiped.rightArmPose;
+            this.isSneak = modelbiped.isSneak;
+        }
+    }
+
+    public void setInvisible(boolean invisible)
+    {
+        this.bipedHead.showModel = invisible;
+        this.bipedHeadwear.showModel = invisible;
+        this.bipedBody.showModel = invisible;
+        this.bipedRightArm.showModel = invisible;
+        this.bipedLeftArm.showModel = invisible;
+        this.bipedRightLeg.showModel = invisible;
+        this.bipedLeftLeg.showModel = invisible;
+    }
+
+    public void postRenderArm(float scale, EnumHandSide side)
+    {
+        this.getArmForSide(side).postRender(scale);
+    }
+
+    protected ModelRenderer getArmForSide(EnumHandSide side)
+    {
+        return side == EnumHandSide.LEFT ? this.bipedLeftArm : this.bipedRightArm;
+    }
+
+    protected EnumHandSide getMainHand(Entity entityIn)
+    {
+        if (entityIn instanceof EntityLivingBase)
+        {
+            EntityLivingBase entitylivingbase = (EntityLivingBase)entityIn;
+            EnumHandSide enumhandside = entitylivingbase.getPrimaryHand();
+            return entitylivingbase.swingingHand == EnumHand.MAIN_HAND ? enumhandside : enumhandside.opposite();
+        }
+        else
+        {
+            return EnumHandSide.RIGHT;
+        }
+    }
+
+    public static enum ArmPose
+    {
+        EMPTY,
+        ITEM,
+        BLOCK,
+        BOW_AND_ARROW;
+    }
 }

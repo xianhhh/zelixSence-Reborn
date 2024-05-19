@@ -3,28 +3,41 @@ package net.minecraft.util;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 
-public class ChatAllowedCharacters {
-   public static final Level field_184877_a = Level.DISABLED;
-   public static final char[] field_189861_b = new char[]{'.', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"'};
-   public static final char[] field_71567_b = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
+public class ChatAllowedCharacters
+{
+    public static final Level NETTY_LEAK_DETECTION = Level.DISABLED;
+    public static final char[] ILLEGAL_STRUCTURE_CHARACTERS = new char[] {'.', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"'};
 
-   public static boolean func_71566_a(char p_71566_0_) {
-      return p_71566_0_ != 167 && p_71566_0_ >= ' ' && p_71566_0_ != 127;
-   }
+    /**
+     * Array of the special characters that are allowed in any text drawing of Minecraft.
+     */
+    public static final char[] ILLEGAL_FILE_CHARACTERS = new char[] {'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
 
-   public static String func_71565_a(String p_71565_0_) {
-      StringBuilder stringbuilder = new StringBuilder();
+    public static boolean isAllowedCharacter(char character)
+    {
+        return character != 167 && character >= ' ' && character != 127;
+    }
 
-      for(char c0 : p_71565_0_.toCharArray()) {
-         if (func_71566_a(c0)) {
-            stringbuilder.append(c0);
-         }
-      }
+    /**
+     * Filter string by only keeping those characters for which isAllowedCharacter() returns true.
+     */
+    public static String filterAllowedCharacters(String input)
+    {
+        StringBuilder stringbuilder = new StringBuilder();
 
-      return stringbuilder.toString();
-   }
+        for (char c0 : input.toCharArray())
+        {
+            if (isAllowedCharacter(c0))
+            {
+                stringbuilder.append(c0);
+            }
+        }
 
-   static {
-      ResourceLeakDetector.setLevel(field_184877_a);
-   }
+        return stringbuilder.toString();
+    }
+
+    static
+    {
+        ResourceLeakDetector.setLevel(NETTY_LEAK_DETECTION);
+    }
 }

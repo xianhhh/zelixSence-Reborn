@@ -24,183 +24,249 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockBanner extends BlockContainer {
-   public static final PropertyDirection field_176449_a = BlockHorizontal.field_185512_D;
-   public static final PropertyInteger field_176448_b = PropertyInteger.func_177719_a("rotation", 0, 15);
-   protected static final AxisAlignedBB field_185550_c = new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D);
+public class BlockBanner extends BlockContainer
+{
+    public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    public static final PropertyInteger ROTATION = PropertyInteger.create("rotation", 0, 15);
+    protected static final AxisAlignedBB STANDING_AABB = new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D);
 
-   protected BlockBanner() {
-      super(Material.field_151575_d);
-   }
+    protected BlockBanner()
+    {
+        super(Material.WOOD);
+    }
 
-   public String func_149732_F() {
-      return I18n.func_74838_a("item.banner.white.name");
-   }
+    /**
+     * Gets the localized name of this block. Used for the statistics page.
+     */
+    public String getLocalizedName()
+    {
+        return I18n.translateToLocal("item.banner.white.name");
+    }
 
-   @Nullable
-   public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_) {
-      return field_185506_k;
-   }
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
+    {
+        return NULL_AABB;
+    }
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_176205_b(IBlockAccess p_176205_1_, BlockPos p_176205_2_) {
-      return true;
-   }
+    public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
+    {
+        return true;
+    }
 
-   public boolean func_149662_c(IBlockState p_149662_1_) {
-      return false;
-   }
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_181623_g() {
-      return true;
-   }
+    /**
+     * Return true if an entity can be spawned inside the block (used to get the player's bed spawn location)
+     */
+    public boolean canSpawnInBlock()
+    {
+        return true;
+    }
 
-   public TileEntity func_149915_a(World p_149915_1_, int p_149915_2_) {
-      return new TileEntityBanner();
-   }
+    /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     */
+    public TileEntity createNewTileEntity(World worldIn, int meta)
+    {
+        return new TileEntityBanner();
+    }
 
-   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
-      return Items.field_179564_cE;
-   }
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    {
+        return Items.BANNER;
+    }
 
-   private ItemStack func_185549_e(World p_185549_1_, BlockPos p_185549_2_) {
-      TileEntity tileentity = p_185549_1_.func_175625_s(p_185549_2_);
-      return tileentity instanceof TileEntityBanner ? ((TileEntityBanner)tileentity).func_190615_l() : ItemStack.field_190927_a;
-   }
+    private ItemStack getTileDataItemStack(World worldIn, BlockPos pos)
+    {
+        TileEntity tileentity = worldIn.getTileEntity(pos);
+        return tileentity instanceof TileEntityBanner ? ((TileEntityBanner)tileentity).func_190615_l() : ItemStack.field_190927_a;
+    }
 
-   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
-      ItemStack itemstack = this.func_185549_e(p_185473_1_, p_185473_2_);
-      return itemstack.func_190926_b() ? new ItemStack(Items.field_179564_cE) : itemstack;
-   }
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        ItemStack itemstack = this.getTileDataItemStack(worldIn, pos);
+        return itemstack.func_190926_b() ? new ItemStack(Items.BANNER) : itemstack;
+    }
 
-   public void func_180653_a(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_) {
-      ItemStack itemstack = this.func_185549_e(p_180653_1_, p_180653_2_);
-      if (itemstack.func_190926_b()) {
-         super.func_180653_a(p_180653_1_, p_180653_2_, p_180653_3_, p_180653_4_, p_180653_5_);
-      } else {
-         func_180635_a(p_180653_1_, p_180653_2_, itemstack);
-      }
+    /**
+     * Spawns this Block's drops into the World as EntityItems.
+     */
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    {
+        ItemStack itemstack = this.getTileDataItemStack(worldIn, pos);
 
-   }
+        if (itemstack.func_190926_b())
+        {
+            super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
+        }
+        else
+        {
+            spawnAsEntity(worldIn, pos, itemstack);
+        }
+    }
 
-   public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_) {
-      return !this.func_181087_e(p_176196_1_, p_176196_2_) && super.func_176196_c(p_176196_1_, p_176196_2_);
-   }
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
+    }
 
-   public void func_180657_a(World p_180657_1_, EntityPlayer p_180657_2_, BlockPos p_180657_3_, IBlockState p_180657_4_, @Nullable TileEntity p_180657_5_, ItemStack p_180657_6_) {
-      if (p_180657_5_ instanceof TileEntityBanner) {
-         TileEntityBanner tileentitybanner = (TileEntityBanner)p_180657_5_;
-         ItemStack itemstack = tileentitybanner.func_190615_l();
-         func_180635_a(p_180657_1_, p_180657_3_, itemstack);
-      } else {
-         super.func_180657_a(p_180657_1_, p_180657_2_, p_180657_3_, p_180657_4_, (TileEntity)null, p_180657_6_);
-      }
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
+    {
+        if (te instanceof TileEntityBanner)
+        {
+            TileEntityBanner tileentitybanner = (TileEntityBanner)te;
+            ItemStack itemstack = tileentitybanner.func_190615_l();
+            spawnAsEntity(worldIn, pos, itemstack);
+        }
+        else
+        {
+            super.harvestBlock(worldIn, player, pos, state, (TileEntity)null, stack);
+        }
+    }
 
-   }
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 
-   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
-      return BlockFaceShape.UNDEFINED;
-   }
+    public static class BlockBannerHanging extends BlockBanner
+    {
+        protected static final AxisAlignedBB NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 0.78125D, 1.0D);
+        protected static final AxisAlignedBB SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.78125D, 0.125D);
+        protected static final AxisAlignedBB WEST_AABB = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 0.78125D, 1.0D);
+        protected static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 0.78125D, 1.0D);
 
-   public static class BlockBannerHanging extends BlockBanner {
-      protected static final AxisAlignedBB field_185551_d = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 0.78125D, 1.0D);
-      protected static final AxisAlignedBB field_185552_e = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.78125D, 0.125D);
-      protected static final AxisAlignedBB field_185553_f = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 0.78125D, 1.0D);
-      protected static final AxisAlignedBB field_185554_g = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 0.78125D, 1.0D);
+        public BlockBannerHanging()
+        {
+            this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+        }
 
-      public BlockBannerHanging() {
-         this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176449_a, EnumFacing.NORTH));
-      }
+        public IBlockState withRotation(IBlockState state, Rotation rot)
+        {
+            return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+        }
 
-      public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-         return p_185499_1_.func_177226_a(field_176449_a, p_185499_2_.func_185831_a((EnumFacing)p_185499_1_.func_177229_b(field_176449_a)));
-      }
+        public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+        {
+            return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+        }
 
-      public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-         return p_185471_1_.func_185907_a(p_185471_2_.func_185800_a((EnumFacing)p_185471_1_.func_177229_b(field_176449_a)));
-      }
+        public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+        {
+            switch ((EnumFacing)state.getValue(FACING))
+            {
+                case NORTH:
+                default:
+                    return NORTH_AABB;
 
-      public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
-         switch((EnumFacing)p_185496_1_.func_177229_b(field_176449_a)) {
-         case NORTH:
-         default:
-            return field_185551_d;
-         case SOUTH:
-            return field_185552_e;
-         case WEST:
-            return field_185553_f;
-         case EAST:
-            return field_185554_g;
-         }
-      }
+                case SOUTH:
+                    return SOUTH_AABB;
 
-      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-         EnumFacing enumfacing = (EnumFacing)p_189540_1_.func_177229_b(field_176449_a);
-         if (!p_189540_2_.func_180495_p(p_189540_3_.func_177972_a(enumfacing.func_176734_d())).func_185904_a().func_76220_a()) {
-            this.func_176226_b(p_189540_2_, p_189540_3_, p_189540_1_, 0);
-            p_189540_2_.func_175698_g(p_189540_3_);
-         }
+                case WEST:
+                    return WEST_AABB;
 
-         super.func_189540_a(p_189540_1_, p_189540_2_, p_189540_3_, p_189540_4_, p_189540_5_);
-      }
+                case EAST:
+                    return EAST_AABB;
+            }
+        }
 
-      public IBlockState func_176203_a(int p_176203_1_) {
-         EnumFacing enumfacing = EnumFacing.func_82600_a(p_176203_1_);
-         if (enumfacing.func_176740_k() == EnumFacing.Axis.Y) {
-            enumfacing = EnumFacing.NORTH;
-         }
+        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+        {
+            EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
-         return this.func_176223_P().func_177226_a(field_176449_a, enumfacing);
-      }
+            if (!worldIn.getBlockState(pos.offset(enumfacing.getOpposite())).getMaterial().isSolid())
+            {
+                this.dropBlockAsItem(worldIn, pos, state, 0);
+                worldIn.setBlockToAir(pos);
+            }
 
-      public int func_176201_c(IBlockState p_176201_1_) {
-         return ((EnumFacing)p_176201_1_.func_177229_b(field_176449_a)).func_176745_a();
-      }
+            super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+        }
 
-      protected BlockStateContainer func_180661_e() {
-         return new BlockStateContainer(this, new IProperty[]{field_176449_a});
-      }
-   }
+        public IBlockState getStateFromMeta(int meta)
+        {
+            EnumFacing enumfacing = EnumFacing.getFront(meta);
 
-   public static class BlockBannerStanding extends BlockBanner {
-      public BlockBannerStanding() {
-         this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176448_b, Integer.valueOf(0)));
-      }
+            if (enumfacing.getAxis() == EnumFacing.Axis.Y)
+            {
+                enumfacing = EnumFacing.NORTH;
+            }
 
-      public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
-         return field_185550_c;
-      }
+            return this.getDefaultState().withProperty(FACING, enumfacing);
+        }
 
-      public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-         return p_185499_1_.func_177226_a(field_176448_b, Integer.valueOf(p_185499_2_.func_185833_a(((Integer)p_185499_1_.func_177229_b(field_176448_b)).intValue(), 16)));
-      }
+        public int getMetaFromState(IBlockState state)
+        {
+            return ((EnumFacing)state.getValue(FACING)).getIndex();
+        }
 
-      public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-         return p_185471_1_.func_177226_a(field_176448_b, Integer.valueOf(p_185471_2_.func_185802_a(((Integer)p_185471_1_.func_177229_b(field_176448_b)).intValue(), 16)));
-      }
+        protected BlockStateContainer createBlockState()
+        {
+            return new BlockStateContainer(this, new IProperty[] {FACING});
+        }
+    }
 
-      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-         if (!p_189540_2_.func_180495_p(p_189540_3_.func_177977_b()).func_185904_a().func_76220_a()) {
-            this.func_176226_b(p_189540_2_, p_189540_3_, p_189540_1_, 0);
-            p_189540_2_.func_175698_g(p_189540_3_);
-         }
+    public static class BlockBannerStanding extends BlockBanner
+    {
+        public BlockBannerStanding()
+        {
+            this.setDefaultState(this.blockState.getBaseState().withProperty(ROTATION, Integer.valueOf(0)));
+        }
 
-         super.func_189540_a(p_189540_1_, p_189540_2_, p_189540_3_, p_189540_4_, p_189540_5_);
-      }
+        public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+        {
+            return STANDING_AABB;
+        }
 
-      public IBlockState func_176203_a(int p_176203_1_) {
-         return this.func_176223_P().func_177226_a(field_176448_b, Integer.valueOf(p_176203_1_));
-      }
+        public IBlockState withRotation(IBlockState state, Rotation rot)
+        {
+            return state.withProperty(ROTATION, Integer.valueOf(rot.rotate(((Integer)state.getValue(ROTATION)).intValue(), 16)));
+        }
 
-      public int func_176201_c(IBlockState p_176201_1_) {
-         return ((Integer)p_176201_1_.func_177229_b(field_176448_b)).intValue();
-      }
+        public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+        {
+            return state.withProperty(ROTATION, Integer.valueOf(mirrorIn.mirrorRotation(((Integer)state.getValue(ROTATION)).intValue(), 16)));
+        }
 
-      protected BlockStateContainer func_180661_e() {
-         return new BlockStateContainer(this, new IProperty[]{field_176448_b});
-      }
-   }
+        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+        {
+            if (!worldIn.getBlockState(pos.down()).getMaterial().isSolid())
+            {
+                this.dropBlockAsItem(worldIn, pos, state, 0);
+                worldIn.setBlockToAir(pos);
+            }
+
+            super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+        }
+
+        public IBlockState getStateFromMeta(int meta)
+        {
+            return this.getDefaultState().withProperty(ROTATION, Integer.valueOf(meta));
+        }
+
+        public int getMetaFromState(IBlockState state)
+        {
+            return ((Integer)state.getValue(ROTATION)).intValue();
+        }
+
+        protected BlockStateContainer createBlockState()
+        {
+            return new BlockStateContainer(this, new IProperty[] {ROTATION});
+        }
+    }
 }

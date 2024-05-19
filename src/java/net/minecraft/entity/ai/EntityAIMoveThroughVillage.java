@@ -11,109 +11,162 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 
-public class EntityAIMoveThroughVillage extends EntityAIBase {
-   private final EntityCreature field_75420_a;
-   private final double field_75418_b;
-   private Path field_75419_c;
-   private VillageDoorInfo field_75416_d;
-   private final boolean field_75417_e;
-   private final List<VillageDoorInfo> field_75415_f = Lists.<VillageDoorInfo>newArrayList();
+public class EntityAIMoveThroughVillage extends EntityAIBase
+{
+    private final EntityCreature theEntity;
+    private final double movementSpeed;
 
-   public EntityAIMoveThroughVillage(EntityCreature p_i1638_1_, double p_i1638_2_, boolean p_i1638_4_) {
-      this.field_75420_a = p_i1638_1_;
-      this.field_75418_b = p_i1638_2_;
-      this.field_75417_e = p_i1638_4_;
-      this.func_75248_a(1);
-      if (!(p_i1638_1_.func_70661_as() instanceof PathNavigateGround)) {
-         throw new IllegalArgumentException("Unsupported mob for MoveThroughVillageGoal");
-      }
-   }
+    /** The PathNavigate of our entity. */
+    private Path entityPathNavigate;
+    private VillageDoorInfo doorInfo;
+    private final boolean isNocturnal;
+    private final List<VillageDoorInfo> doorList = Lists.<VillageDoorInfo>newArrayList();
 
-   public boolean func_75250_a() {
-      this.func_75414_f();
-      if (this.field_75417_e && this.field_75420_a.field_70170_p.func_72935_r()) {
-         return false;
-      } else {
-         Village village = this.field_75420_a.field_70170_p.func_175714_ae().func_176056_a(new BlockPos(this.field_75420_a), 0);
-         if (village == null) {
+    public EntityAIMoveThroughVillage(EntityCreature theEntityIn, double movementSpeedIn, boolean isNocturnalIn)
+    {
+        this.theEntity = theEntityIn;
+        this.movementSpeed = movementSpeedIn;
+        this.isNocturnal = isNocturnalIn;
+        this.setMutexBits(1);
+
+        if (!(theEntityIn.getNavigator() instanceof PathNavigateGround))
+        {
+            throw new IllegalArgumentException("Unsupported mob for MoveThroughVillageGoal");
+        }
+    }
+
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        this.resizeDoorList();
+
+        if (this.isNocturnal && this.theEntity.world.isDaytime())
+        {
             return false;
-         } else {
-            this.field_75416_d = this.func_75412_a(village);
-            if (this.field_75416_d == null) {
-               return false;
-            } else {
-               PathNavigateGround pathnavigateground = (PathNavigateGround)this.field_75420_a.func_70661_as();
-               boolean flag = pathnavigateground.func_179686_g();
-               pathnavigateground.func_179688_b(false);
-               this.field_75419_c = pathnavigateground.func_179680_a(this.field_75416_d.func_179852_d());
-               pathnavigateground.func_179688_b(flag);
-               if (this.field_75419_c != null) {
-                  return true;
-               } else {
-                  Vec3d vec3d = RandomPositionGenerator.func_75464_a(this.field_75420_a, 10, 7, new Vec3d((double)this.field_75416_d.func_179852_d().func_177958_n(), (double)this.field_75416_d.func_179852_d().func_177956_o(), (double)this.field_75416_d.func_179852_d().func_177952_p()));
-                  if (vec3d == null) {
-                     return false;
-                  } else {
-                     pathnavigateground.func_179688_b(false);
-                     this.field_75419_c = this.field_75420_a.func_70661_as().func_75488_a(vec3d.field_72450_a, vec3d.field_72448_b, vec3d.field_72449_c);
-                     pathnavigateground.func_179688_b(flag);
-                     return this.field_75419_c != null;
-                  }
-               }
+        }
+        else
+        {
+            Village village = this.theEntity.world.getVillageCollection().getNearestVillage(new BlockPos(this.theEntity), 0);
+
+            if (village == null)
+            {
+                return false;
             }
-         }
-      }
-   }
+            else
+            {
+                this.doorInfo = this.findNearestDoor(village);
 
-   public boolean func_75253_b() {
-      if (this.field_75420_a.func_70661_as().func_75500_f()) {
-         return false;
-      } else {
-         float f = this.field_75420_a.field_70130_N + 4.0F;
-         return this.field_75420_a.func_174818_b(this.field_75416_d.func_179852_d()) > (double)(f * f);
-      }
-   }
+                if (this.doorInfo == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    PathNavigateGround pathnavigateground = (PathNavigateGround)this.theEntity.getNavigator();
+                    boolean flag = pathnavigateground.getEnterDoors();
+                    pathnavigateground.setBreakDoors(false);
+                    this.entityPathNavigate = pathnavigateground.getPathToPos(this.doorInfo.getDoorBlockPos());
+                    pathnavigateground.setBreakDoors(flag);
 
-   public void func_75249_e() {
-      this.field_75420_a.func_70661_as().func_75484_a(this.field_75419_c, this.field_75418_b);
-   }
+                    if (this.entityPathNavigate != null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 10, 7, new Vec3d((double)this.doorInfo.getDoorBlockPos().getX(), (double)this.doorInfo.getDoorBlockPos().getY(), (double)this.doorInfo.getDoorBlockPos().getZ()));
 
-   public void func_75251_c() {
-      if (this.field_75420_a.func_70661_as().func_75500_f() || this.field_75420_a.func_174818_b(this.field_75416_d.func_179852_d()) < 16.0D) {
-         this.field_75415_f.add(this.field_75416_d);
-      }
+                        if (vec3d == null)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            pathnavigateground.setBreakDoors(false);
+                            this.entityPathNavigate = this.theEntity.getNavigator().getPathToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
+                            pathnavigateground.setBreakDoors(flag);
+                            return this.entityPathNavigate != null;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-   }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        if (this.theEntity.getNavigator().noPath())
+        {
+            return false;
+        }
+        else
+        {
+            float f = this.theEntity.width + 4.0F;
+            return this.theEntity.getDistanceSq(this.doorInfo.getDoorBlockPos()) > (double)(f * f);
+        }
+    }
 
-   private VillageDoorInfo func_75412_a(Village p_75412_1_) {
-      VillageDoorInfo villagedoorinfo = null;
-      int i = Integer.MAX_VALUE;
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
+    public void startExecuting()
+    {
+        this.theEntity.getNavigator().setPath(this.entityPathNavigate, this.movementSpeed);
+    }
 
-      for(VillageDoorInfo villagedoorinfo1 : p_75412_1_.func_75558_f()) {
-         int j = villagedoorinfo1.func_75474_b(MathHelper.func_76128_c(this.field_75420_a.field_70165_t), MathHelper.func_76128_c(this.field_75420_a.field_70163_u), MathHelper.func_76128_c(this.field_75420_a.field_70161_v));
-         if (j < i && !this.func_75413_a(villagedoorinfo1)) {
-            villagedoorinfo = villagedoorinfo1;
-            i = j;
-         }
-      }
+    /**
+     * Resets the task
+     */
+    public void resetTask()
+    {
+        if (this.theEntity.getNavigator().noPath() || this.theEntity.getDistanceSq(this.doorInfo.getDoorBlockPos()) < 16.0D)
+        {
+            this.doorList.add(this.doorInfo);
+        }
+    }
 
-      return villagedoorinfo;
-   }
+    private VillageDoorInfo findNearestDoor(Village villageIn)
+    {
+        VillageDoorInfo villagedoorinfo = null;
+        int i = Integer.MAX_VALUE;
 
-   private boolean func_75413_a(VillageDoorInfo p_75413_1_) {
-      for(VillageDoorInfo villagedoorinfo : this.field_75415_f) {
-         if (p_75413_1_.func_179852_d().equals(villagedoorinfo.func_179852_d())) {
-            return true;
-         }
-      }
+        for (VillageDoorInfo villagedoorinfo1 : villageIn.getVillageDoorInfoList())
+        {
+            int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor(this.theEntity.posX), MathHelper.floor(this.theEntity.posY), MathHelper.floor(this.theEntity.posZ));
 
-      return false;
-   }
+            if (j < i && !this.doesDoorListContain(villagedoorinfo1))
+            {
+                villagedoorinfo = villagedoorinfo1;
+                i = j;
+            }
+        }
 
-   private void func_75414_f() {
-      if (this.field_75415_f.size() > 15) {
-         this.field_75415_f.remove(0);
-      }
+        return villagedoorinfo;
+    }
 
-   }
+    private boolean doesDoorListContain(VillageDoorInfo doorInfoIn)
+    {
+        for (VillageDoorInfo villagedoorinfo : this.doorList)
+        {
+            if (doorInfoIn.getDoorBlockPos().equals(villagedoorinfo.getDoorBlockPos()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void resizeDoorList()
+    {
+        if (this.doorList.size() > 15)
+        {
+            this.doorList.remove(0);
+        }
+    }
 }

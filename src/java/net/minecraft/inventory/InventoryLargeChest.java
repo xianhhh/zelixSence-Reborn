@@ -9,141 +9,225 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 
-public class InventoryLargeChest implements ILockableContainer {
-   private final String field_70479_a;
-   private final ILockableContainer field_70477_b;
-   private final ILockableContainer field_70478_c;
+public class InventoryLargeChest implements ILockableContainer
+{
+    /** Name of the chest. */
+    private final String name;
 
-   public InventoryLargeChest(String p_i45905_1_, ILockableContainer p_i45905_2_, ILockableContainer p_i45905_3_) {
-      this.field_70479_a = p_i45905_1_;
-      if (p_i45905_2_ == null) {
-         p_i45905_2_ = p_i45905_3_;
-      }
+    /** Inventory object corresponding to double chest upper part */
+    private final ILockableContainer upperChest;
 
-      if (p_i45905_3_ == null) {
-         p_i45905_3_ = p_i45905_2_;
-      }
+    /** Inventory object corresponding to double chest lower part */
+    private final ILockableContainer lowerChest;
 
-      this.field_70477_b = p_i45905_2_;
-      this.field_70478_c = p_i45905_3_;
-      if (p_i45905_2_.func_174893_q_()) {
-         p_i45905_3_.func_174892_a(p_i45905_2_.func_174891_i());
-      } else if (p_i45905_3_.func_174893_q_()) {
-         p_i45905_2_.func_174892_a(p_i45905_3_.func_174891_i());
-      }
+    public InventoryLargeChest(String nameIn, ILockableContainer upperChestIn, ILockableContainer lowerChestIn)
+    {
+        this.name = nameIn;
 
-   }
+        if (upperChestIn == null)
+        {
+            upperChestIn = lowerChestIn;
+        }
 
-   public int func_70302_i_() {
-      return this.field_70477_b.func_70302_i_() + this.field_70478_c.func_70302_i_();
-   }
+        if (lowerChestIn == null)
+        {
+            lowerChestIn = upperChestIn;
+        }
 
-   public boolean func_191420_l() {
-      return this.field_70477_b.func_191420_l() && this.field_70478_c.func_191420_l();
-   }
+        this.upperChest = upperChestIn;
+        this.lowerChest = lowerChestIn;
 
-   public boolean func_90010_a(IInventory p_90010_1_) {
-      return this.field_70477_b == p_90010_1_ || this.field_70478_c == p_90010_1_;
-   }
+        if (upperChestIn.isLocked())
+        {
+            lowerChestIn.setLockCode(upperChestIn.getLockCode());
+        }
+        else if (lowerChestIn.isLocked())
+        {
+            upperChestIn.setLockCode(lowerChestIn.getLockCode());
+        }
+    }
 
-   public String func_70005_c_() {
-      if (this.field_70477_b.func_145818_k_()) {
-         return this.field_70477_b.func_70005_c_();
-      } else {
-         return this.field_70478_c.func_145818_k_() ? this.field_70478_c.func_70005_c_() : this.field_70479_a;
-      }
-   }
+    /**
+     * Returns the number of slots in the inventory.
+     */
+    public int getSizeInventory()
+    {
+        return this.upperChest.getSizeInventory() + this.lowerChest.getSizeInventory();
+    }
 
-   public boolean func_145818_k_() {
-      return this.field_70477_b.func_145818_k_() || this.field_70478_c.func_145818_k_();
-   }
+    public boolean func_191420_l()
+    {
+        return this.upperChest.func_191420_l() && this.lowerChest.func_191420_l();
+    }
 
-   public ITextComponent func_145748_c_() {
-      return (ITextComponent)(this.func_145818_k_() ? new TextComponentString(this.func_70005_c_()) : new TextComponentTranslation(this.func_70005_c_(), new Object[0]));
-   }
+    /**
+     * Return whether the given inventory is part of this large chest.
+     */
+    public boolean isPartOfLargeChest(IInventory inventoryIn)
+    {
+        return this.upperChest == inventoryIn || this.lowerChest == inventoryIn;
+    }
 
-   public ItemStack func_70301_a(int p_70301_1_) {
-      return p_70301_1_ >= this.field_70477_b.func_70302_i_() ? this.field_70478_c.func_70301_a(p_70301_1_ - this.field_70477_b.func_70302_i_()) : this.field_70477_b.func_70301_a(p_70301_1_);
-   }
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        if (this.upperChest.hasCustomName())
+        {
+            return this.upperChest.getName();
+        }
+        else
+        {
+            return this.lowerChest.hasCustomName() ? this.lowerChest.getName() : this.name;
+        }
+    }
 
-   public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_) {
-      return p_70298_1_ >= this.field_70477_b.func_70302_i_() ? this.field_70478_c.func_70298_a(p_70298_1_ - this.field_70477_b.func_70302_i_(), p_70298_2_) : this.field_70477_b.func_70298_a(p_70298_1_, p_70298_2_);
-   }
+    /**
+     * Returns true if this thing is named
+     */
+    public boolean hasCustomName()
+    {
+        return this.upperChest.hasCustomName() || this.lowerChest.hasCustomName();
+    }
 
-   public ItemStack func_70304_b(int p_70304_1_) {
-      return p_70304_1_ >= this.field_70477_b.func_70302_i_() ? this.field_70478_c.func_70304_b(p_70304_1_ - this.field_70477_b.func_70302_i_()) : this.field_70477_b.func_70304_b(p_70304_1_);
-   }
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    public ITextComponent getDisplayName()
+    {
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
+    }
 
-   public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_) {
-      if (p_70299_1_ >= this.field_70477_b.func_70302_i_()) {
-         this.field_70478_c.func_70299_a(p_70299_1_ - this.field_70477_b.func_70302_i_(), p_70299_2_);
-      } else {
-         this.field_70477_b.func_70299_a(p_70299_1_, p_70299_2_);
-      }
+    /**
+     * Returns the stack in the given slot.
+     */
+    public ItemStack getStackInSlot(int index)
+    {
+        return index >= this.upperChest.getSizeInventory() ? this.lowerChest.getStackInSlot(index - this.upperChest.getSizeInventory()) : this.upperChest.getStackInSlot(index);
+    }
 
-   }
+    /**
+     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
+     */
+    public ItemStack decrStackSize(int index, int count)
+    {
+        return index >= this.upperChest.getSizeInventory() ? this.lowerChest.decrStackSize(index - this.upperChest.getSizeInventory(), count) : this.upperChest.decrStackSize(index, count);
+    }
 
-   public int func_70297_j_() {
-      return this.field_70477_b.func_70297_j_();
-   }
+    /**
+     * Removes a stack from the given slot and returns it.
+     */
+    public ItemStack removeStackFromSlot(int index)
+    {
+        return index >= this.upperChest.getSizeInventory() ? this.lowerChest.removeStackFromSlot(index - this.upperChest.getSizeInventory()) : this.upperChest.removeStackFromSlot(index);
+    }
 
-   public void func_70296_d() {
-      this.field_70477_b.func_70296_d();
-      this.field_70478_c.func_70296_d();
-   }
+    /**
+     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
+     */
+    public void setInventorySlotContents(int index, ItemStack stack)
+    {
+        if (index >= this.upperChest.getSizeInventory())
+        {
+            this.lowerChest.setInventorySlotContents(index - this.upperChest.getSizeInventory(), stack);
+        }
+        else
+        {
+            this.upperChest.setInventorySlotContents(index, stack);
+        }
+    }
 
-   public boolean func_70300_a(EntityPlayer p_70300_1_) {
-      return this.field_70477_b.func_70300_a(p_70300_1_) && this.field_70478_c.func_70300_a(p_70300_1_);
-   }
+    /**
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     */
+    public int getInventoryStackLimit()
+    {
+        return this.upperChest.getInventoryStackLimit();
+    }
 
-   public void func_174889_b(EntityPlayer p_174889_1_) {
-      this.field_70477_b.func_174889_b(p_174889_1_);
-      this.field_70478_c.func_174889_b(p_174889_1_);
-   }
+    /**
+     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
+     * hasn't changed and skip it.
+     */
+    public void markDirty()
+    {
+        this.upperChest.markDirty();
+        this.lowerChest.markDirty();
+    }
 
-   public void func_174886_c(EntityPlayer p_174886_1_) {
-      this.field_70477_b.func_174886_c(p_174886_1_);
-      this.field_70478_c.func_174886_c(p_174886_1_);
-   }
+    /**
+     * Don't rename this method to canInteractWith due to conflicts with Container
+     */
+    public boolean isUsableByPlayer(EntityPlayer player)
+    {
+        return this.upperChest.isUsableByPlayer(player) && this.lowerChest.isUsableByPlayer(player);
+    }
 
-   public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_) {
-      return true;
-   }
+    public void openInventory(EntityPlayer player)
+    {
+        this.upperChest.openInventory(player);
+        this.lowerChest.openInventory(player);
+    }
 
-   public int func_174887_a_(int p_174887_1_) {
-      return 0;
-   }
+    public void closeInventory(EntityPlayer player)
+    {
+        this.upperChest.closeInventory(player);
+        this.lowerChest.closeInventory(player);
+    }
 
-   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
-   }
+    /**
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
+     */
+    public boolean isItemValidForSlot(int index, ItemStack stack)
+    {
+        return true;
+    }
 
-   public int func_174890_g() {
-      return 0;
-   }
+    public int getField(int id)
+    {
+        return 0;
+    }
 
-   public boolean func_174893_q_() {
-      return this.field_70477_b.func_174893_q_() || this.field_70478_c.func_174893_q_();
-   }
+    public void setField(int id, int value)
+    {
+    }
 
-   public void func_174892_a(LockCode p_174892_1_) {
-      this.field_70477_b.func_174892_a(p_174892_1_);
-      this.field_70478_c.func_174892_a(p_174892_1_);
-   }
+    public int getFieldCount()
+    {
+        return 0;
+    }
 
-   public LockCode func_174891_i() {
-      return this.field_70477_b.func_174891_i();
-   }
+    public boolean isLocked()
+    {
+        return this.upperChest.isLocked() || this.lowerChest.isLocked();
+    }
 
-   public String func_174875_k() {
-      return this.field_70477_b.func_174875_k();
-   }
+    public void setLockCode(LockCode code)
+    {
+        this.upperChest.setLockCode(code);
+        this.lowerChest.setLockCode(code);
+    }
 
-   public Container func_174876_a(InventoryPlayer p_174876_1_, EntityPlayer p_174876_2_) {
-      return new ContainerChest(p_174876_1_, this, p_174876_2_);
-   }
+    public LockCode getLockCode()
+    {
+        return this.upperChest.getLockCode();
+    }
 
-   public void func_174888_l() {
-      this.field_70477_b.func_174888_l();
-      this.field_70478_c.func_174888_l();
-   }
+    public String getGuiID()
+    {
+        return this.upperChest.getGuiID();
+    }
+
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+    {
+        return new ContainerChest(playerInventory, this, playerIn);
+    }
+
+    public void clear()
+    {
+        this.upperChest.clear();
+        this.lowerChest.clear();
+    }
 }

@@ -1,4 +1,5 @@
 package net.minecraft.util;
 
-public interface IObjectIntIterable extends Iterable {
+public interface IObjectIntIterable<V> extends Iterable<V>
+{
 }

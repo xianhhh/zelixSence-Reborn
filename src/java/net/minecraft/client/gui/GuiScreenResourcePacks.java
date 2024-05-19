@@ -13,132 +13,186 @@ import net.minecraft.client.resources.ResourcePackListEntryFound;
 import net.minecraft.client.resources.ResourcePackListEntryServer;
 import net.minecraft.client.resources.ResourcePackRepository;
 
-public class GuiScreenResourcePacks extends GuiScreen {
-   private final GuiScreen field_146965_f;
-   private List<ResourcePackListEntry> field_146966_g;
-   private List<ResourcePackListEntry> field_146969_h;
-   private GuiResourcePackAvailable field_146970_i;
-   private GuiResourcePackSelected field_146967_r;
-   private boolean field_175289_s;
+public class GuiScreenResourcePacks extends GuiScreen
+{
+    private final GuiScreen parentScreen;
+    private List<ResourcePackListEntry> availableResourcePacks;
+    private List<ResourcePackListEntry> selectedResourcePacks;
 
-   public GuiScreenResourcePacks(GuiScreen p_i45050_1_) {
-      this.field_146965_f = p_i45050_1_;
-   }
+    /** List component that contains the available resource packs */
+    private GuiResourcePackAvailable availableResourcePacksList;
 
-   public void func_73866_w_() {
-      this.field_146292_n.add(new GuiOptionButton(2, this.field_146294_l / 2 - 154, this.field_146295_m - 48, I18n.func_135052_a("resourcePack.openFolder")));
-      this.field_146292_n.add(new GuiOptionButton(1, this.field_146294_l / 2 + 4, this.field_146295_m - 48, I18n.func_135052_a("gui.done")));
-      if (!this.field_175289_s) {
-         this.field_146966_g = Lists.<ResourcePackListEntry>newArrayList();
-         this.field_146969_h = Lists.<ResourcePackListEntry>newArrayList();
-         ResourcePackRepository resourcepackrepository = this.field_146297_k.func_110438_M();
-         resourcepackrepository.func_110611_a();
-         List<ResourcePackRepository.Entry> list = Lists.newArrayList(resourcepackrepository.func_110609_b());
-         list.removeAll(resourcepackrepository.func_110613_c());
+    /** List component that contains the selected resource packs */
+    private GuiResourcePackSelected selectedResourcePacksList;
+    private boolean changed;
 
-         for(ResourcePackRepository.Entry resourcepackrepository$entry : list) {
-            this.field_146966_g.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry));
-         }
+    public GuiScreenResourcePacks(GuiScreen parentScreenIn)
+    {
+        this.parentScreen = parentScreenIn;
+    }
 
-         ResourcePackRepository.Entry resourcepackrepository$entry2 = resourcepackrepository.func_188565_b();
-         if (resourcepackrepository$entry2 != null) {
-            this.field_146969_h.add(new ResourcePackListEntryServer(this, resourcepackrepository.func_148530_e()));
-         }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        this.buttonList.add(new GuiOptionButton(2, this.width / 2 - 154, this.height - 48, I18n.format("resourcePack.openFolder")));
+        this.buttonList.add(new GuiOptionButton(1, this.width / 2 + 4, this.height - 48, I18n.format("gui.done")));
 
-         for(ResourcePackRepository.Entry resourcepackrepository$entry1 : Lists.reverse(resourcepackrepository.func_110613_c())) {
-            this.field_146969_h.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry1));
-         }
+        if (!this.changed)
+        {
+            this.availableResourcePacks = Lists.<ResourcePackListEntry>newArrayList();
+            this.selectedResourcePacks = Lists.<ResourcePackListEntry>newArrayList();
+            ResourcePackRepository resourcepackrepository = this.mc.getResourcePackRepository();
+            resourcepackrepository.updateRepositoryEntriesAll();
+            List<ResourcePackRepository.Entry> list = Lists.newArrayList(resourcepackrepository.getRepositoryEntriesAll());
+            list.removeAll(resourcepackrepository.getRepositoryEntries());
 
-         this.field_146969_h.add(new ResourcePackListEntryDefault(this));
-      }
-
-      this.field_146970_i = new GuiResourcePackAvailable(this.field_146297_k, 200, this.field_146295_m, this.field_146966_g);
-      this.field_146970_i.func_148140_g(this.field_146294_l / 2 - 4 - 200);
-      this.field_146970_i.func_148134_d(7, 8);
-      this.field_146967_r = new GuiResourcePackSelected(this.field_146297_k, 200, this.field_146295_m, this.field_146969_h);
-      this.field_146967_r.func_148140_g(this.field_146294_l / 2 + 4);
-      this.field_146967_r.func_148134_d(7, 8);
-   }
-
-   public void func_146274_d() throws IOException {
-      super.func_146274_d();
-      this.field_146967_r.func_178039_p();
-      this.field_146970_i.func_178039_p();
-   }
-
-   public boolean func_146961_a(ResourcePackListEntry p_146961_1_) {
-      return this.field_146969_h.contains(p_146961_1_);
-   }
-
-   public List<ResourcePackListEntry> func_146962_b(ResourcePackListEntry p_146962_1_) {
-      return this.func_146961_a(p_146962_1_) ? this.field_146969_h : this.field_146966_g;
-   }
-
-   public List<ResourcePackListEntry> func_146964_g() {
-      return this.field_146966_g;
-   }
-
-   public List<ResourcePackListEntry> func_146963_h() {
-      return this.field_146969_h;
-   }
-
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-      if (p_146284_1_.field_146124_l) {
-         if (p_146284_1_.field_146127_k == 2) {
-            File file1 = this.field_146297_k.func_110438_M().func_110612_e();
-            OpenGlHelper.func_188786_a(file1);
-         } else if (p_146284_1_.field_146127_k == 1) {
-            if (this.field_175289_s) {
-               List<ResourcePackRepository.Entry> list = Lists.<ResourcePackRepository.Entry>newArrayList();
-
-               for(ResourcePackListEntry resourcepacklistentry : this.field_146969_h) {
-                  if (resourcepacklistentry instanceof ResourcePackListEntryFound) {
-                     list.add(((ResourcePackListEntryFound)resourcepacklistentry).func_148318_i());
-                  }
-               }
-
-               Collections.reverse(list);
-               this.field_146297_k.func_110438_M().func_148527_a(list);
-               this.field_146297_k.field_71474_y.field_151453_l.clear();
-               this.field_146297_k.field_71474_y.field_183018_l.clear();
-
-               for(ResourcePackRepository.Entry resourcepackrepository$entry : list) {
-                  this.field_146297_k.field_71474_y.field_151453_l.add(resourcepackrepository$entry.func_110515_d());
-                  if (resourcepackrepository$entry.func_183027_f() != 3) {
-                     this.field_146297_k.field_71474_y.field_183018_l.add(resourcepackrepository$entry.func_110515_d());
-                  }
-               }
-
-               this.field_146297_k.field_71474_y.func_74303_b();
-               this.field_146297_k.func_110436_a();
+            for (ResourcePackRepository.Entry resourcepackrepository$entry : list)
+            {
+                this.availableResourcePacks.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry));
             }
 
-            this.field_146297_k.func_147108_a(this.field_146965_f);
-         }
+            ResourcePackRepository.Entry resourcepackrepository$entry2 = resourcepackrepository.getResourcePackEntry();
 
-      }
-   }
+            if (resourcepackrepository$entry2 != null)
+            {
+                this.selectedResourcePacks.add(new ResourcePackListEntryServer(this, resourcepackrepository.getResourcePackInstance()));
+            }
 
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      this.field_146970_i.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      this.field_146967_r.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
-   }
+            for (ResourcePackRepository.Entry resourcepackrepository$entry1 : Lists.reverse(resourcepackrepository.getRepositoryEntries()))
+            {
+                this.selectedResourcePacks.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry1));
+            }
 
-   protected void func_146286_b(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
-      super.func_146286_b(p_146286_1_, p_146286_2_, p_146286_3_);
-   }
+            this.selectedResourcePacks.add(new ResourcePackListEntryDefault(this));
+        }
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.func_146278_c(0);
-      this.field_146970_i.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      this.field_146967_r.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("resourcePack.title"), this.field_146294_l / 2, 16, 16777215);
-      this.func_73732_a(this.field_146289_q, I18n.func_135052_a("resourcePack.folderInfo"), this.field_146294_l / 2 - 77, this.field_146295_m - 26, 8421504);
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-   }
+        this.availableResourcePacksList = new GuiResourcePackAvailable(this.mc, 200, this.height, this.availableResourcePacks);
+        this.availableResourcePacksList.setSlotXBoundsFromLeft(this.width / 2 - 4 - 200);
+        this.availableResourcePacksList.registerScrollButtons(7, 8);
+        this.selectedResourcePacksList = new GuiResourcePackSelected(this.mc, 200, this.height, this.selectedResourcePacks);
+        this.selectedResourcePacksList.setSlotXBoundsFromLeft(this.width / 2 + 4);
+        this.selectedResourcePacksList.registerScrollButtons(7, 8);
+    }
 
-   public void func_175288_g() {
-      this.field_175289_s = true;
-   }
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        super.handleMouseInput();
+        this.selectedResourcePacksList.handleMouseInput();
+        this.availableResourcePacksList.handleMouseInput();
+    }
+
+    public boolean hasResourcePackEntry(ResourcePackListEntry p_146961_1_)
+    {
+        return this.selectedResourcePacks.contains(p_146961_1_);
+    }
+
+    public List<ResourcePackListEntry> getListContaining(ResourcePackListEntry p_146962_1_)
+    {
+        return this.hasResourcePackEntry(p_146962_1_) ? this.selectedResourcePacks : this.availableResourcePacks;
+    }
+
+    public List<ResourcePackListEntry> getAvailableResourcePacks()
+    {
+        return this.availableResourcePacks;
+    }
+
+    public List<ResourcePackListEntry> getSelectedResourcePacks()
+    {
+        return this.selectedResourcePacks;
+    }
+
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.enabled)
+        {
+            if (button.id == 2)
+            {
+                File file1 = this.mc.getResourcePackRepository().getDirResourcepacks();
+                OpenGlHelper.openFile(file1);
+            }
+            else if (button.id == 1)
+            {
+                if (this.changed)
+                {
+                    List<ResourcePackRepository.Entry> list = Lists.<ResourcePackRepository.Entry>newArrayList();
+
+                    for (ResourcePackListEntry resourcepacklistentry : this.selectedResourcePacks)
+                    {
+                        if (resourcepacklistentry instanceof ResourcePackListEntryFound)
+                        {
+                            list.add(((ResourcePackListEntryFound)resourcepacklistentry).getResourcePackEntry());
+                        }
+                    }
+
+                    Collections.reverse(list);
+                    this.mc.getResourcePackRepository().setRepositories(list);
+                    this.mc.gameSettings.resourcePacks.clear();
+                    this.mc.gameSettings.incompatibleResourcePacks.clear();
+
+                    for (ResourcePackRepository.Entry resourcepackrepository$entry : list)
+                    {
+                        this.mc.gameSettings.resourcePacks.add(resourcepackrepository$entry.getResourcePackName());
+
+                        if (resourcepackrepository$entry.getPackFormat() != 3)
+                        {
+                            this.mc.gameSettings.incompatibleResourcePacks.add(resourcepackrepository$entry.getResourcePackName());
+                        }
+                    }
+
+                    this.mc.gameSettings.saveOptions();
+                    this.mc.refreshResources();
+                }
+
+                this.mc.displayGuiScreen(this.parentScreen);
+            }
+        }
+    }
+
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.availableResourcePacksList.mouseClicked(mouseX, mouseY, mouseButton);
+        this.selectedResourcePacksList.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    /**
+     * Called when a mouse button is released.
+     */
+    protected void mouseReleased(int mouseX, int mouseY, int state)
+    {
+        super.mouseReleased(mouseX, mouseY, state);
+    }
+
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawBackground(0);
+        this.availableResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);
+        this.selectedResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.title"), this.width / 2, 16, 16777215);
+        this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.folderInfo"), this.width / 2 - 77, this.height - 26, 8421504);
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    /**
+     * Marks the selected resource packs list as changed to trigger a resource reload when the screen is closed
+     */
+    public void markChanged()
+    {
+        this.changed = true;
+    }
 }

@@ -3,12 +3,13 @@ package net.minecraft.client.renderer.texture;
 import java.io.IOException;
 import net.minecraft.client.resources.IResourceManager;
 
-public interface ITextureObject {
-   void func_174936_b(boolean var1, boolean var2);
+public interface ITextureObject
+{
+    void setBlurMipmap(boolean blurIn, boolean mipmapIn);
 
-   void func_174935_a();
+    void restoreLastBlurMipmap();
 
-   void func_110551_a(IResourceManager var1) throws IOException;
+    void loadTexture(IResourceManager resourceManager) throws IOException;
 
-   int func_110552_b();
+    int getGlTextureId();
 }

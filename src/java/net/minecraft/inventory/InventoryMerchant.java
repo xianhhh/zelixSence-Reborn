@@ -10,161 +10,253 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
-public class InventoryMerchant implements IInventory {
-   private final IMerchant field_70476_a;
-   private final NonNullList<ItemStack> field_70474_b = NonNullList.<ItemStack>func_191197_a(3, ItemStack.field_190927_a);
-   private final EntityPlayer field_70475_c;
-   private MerchantRecipe field_70472_d;
-   private int field_70473_e;
+public class InventoryMerchant implements IInventory
+{
+    private final IMerchant theMerchant;
+    private final NonNullList<ItemStack> theInventory = NonNullList.<ItemStack>func_191197_a(3, ItemStack.field_190927_a);
+    private final EntityPlayer thePlayer;
+    private MerchantRecipe currentRecipe;
+    private int currentRecipeIndex;
 
-   public InventoryMerchant(EntityPlayer p_i1820_1_, IMerchant p_i1820_2_) {
-      this.field_70475_c = p_i1820_1_;
-      this.field_70476_a = p_i1820_2_;
-   }
+    public InventoryMerchant(EntityPlayer thePlayerIn, IMerchant theMerchantIn)
+    {
+        this.thePlayer = thePlayerIn;
+        this.theMerchant = theMerchantIn;
+    }
 
-   public int func_70302_i_() {
-      return this.field_70474_b.size();
-   }
+    /**
+     * Returns the number of slots in the inventory.
+     */
+    public int getSizeInventory()
+    {
+        return this.theInventory.size();
+    }
 
-   public boolean func_191420_l() {
-      for(ItemStack itemstack : this.field_70474_b) {
-         if (!itemstack.func_190926_b()) {
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   public ItemStack func_70301_a(int p_70301_1_) {
-      return this.field_70474_b.get(p_70301_1_);
-   }
-
-   public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_) {
-      ItemStack itemstack = this.field_70474_b.get(p_70298_1_);
-      if (p_70298_1_ == 2 && !itemstack.func_190926_b()) {
-         return ItemStackHelper.func_188382_a(this.field_70474_b, p_70298_1_, itemstack.func_190916_E());
-      } else {
-         ItemStack itemstack1 = ItemStackHelper.func_188382_a(this.field_70474_b, p_70298_1_, p_70298_2_);
-         if (!itemstack1.func_190926_b() && this.func_70469_d(p_70298_1_)) {
-            this.func_70470_g();
-         }
-
-         return itemstack1;
-      }
-   }
-
-   private boolean func_70469_d(int p_70469_1_) {
-      return p_70469_1_ == 0 || p_70469_1_ == 1;
-   }
-
-   public ItemStack func_70304_b(int p_70304_1_) {
-      return ItemStackHelper.func_188383_a(this.field_70474_b, p_70304_1_);
-   }
-
-   public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_) {
-      this.field_70474_b.set(p_70299_1_, p_70299_2_);
-      if (!p_70299_2_.func_190926_b() && p_70299_2_.func_190916_E() > this.func_70297_j_()) {
-         p_70299_2_.func_190920_e(this.func_70297_j_());
-      }
-
-      if (this.func_70469_d(p_70299_1_)) {
-         this.func_70470_g();
-      }
-
-   }
-
-   public String func_70005_c_() {
-      return "mob.villager";
-   }
-
-   public boolean func_145818_k_() {
-      return false;
-   }
-
-   public ITextComponent func_145748_c_() {
-      return (ITextComponent)(this.func_145818_k_() ? new TextComponentString(this.func_70005_c_()) : new TextComponentTranslation(this.func_70005_c_(), new Object[0]));
-   }
-
-   public int func_70297_j_() {
-      return 64;
-   }
-
-   public boolean func_70300_a(EntityPlayer p_70300_1_) {
-      return this.field_70476_a.func_70931_l_() == p_70300_1_;
-   }
-
-   public void func_174889_b(EntityPlayer p_174889_1_) {
-   }
-
-   public void func_174886_c(EntityPlayer p_174886_1_) {
-   }
-
-   public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_) {
-      return true;
-   }
-
-   public void func_70296_d() {
-      this.func_70470_g();
-   }
-
-   public void func_70470_g() {
-      this.field_70472_d = null;
-      ItemStack itemstack = this.field_70474_b.get(0);
-      ItemStack itemstack1 = this.field_70474_b.get(1);
-      if (itemstack.func_190926_b()) {
-         itemstack = itemstack1;
-         itemstack1 = ItemStack.field_190927_a;
-      }
-
-      if (itemstack.func_190926_b()) {
-         this.func_70299_a(2, ItemStack.field_190927_a);
-      } else {
-         MerchantRecipeList merchantrecipelist = this.field_70476_a.func_70934_b(this.field_70475_c);
-         if (merchantrecipelist != null) {
-            MerchantRecipe merchantrecipe = merchantrecipelist.func_77203_a(itemstack, itemstack1, this.field_70473_e);
-            if (merchantrecipe != null && !merchantrecipe.func_82784_g()) {
-               this.field_70472_d = merchantrecipe;
-               this.func_70299_a(2, merchantrecipe.func_77397_d().func_77946_l());
-            } else if (!itemstack1.func_190926_b()) {
-               merchantrecipe = merchantrecipelist.func_77203_a(itemstack1, itemstack, this.field_70473_e);
-               if (merchantrecipe != null && !merchantrecipe.func_82784_g()) {
-                  this.field_70472_d = merchantrecipe;
-                  this.func_70299_a(2, merchantrecipe.func_77397_d().func_77946_l());
-               } else {
-                  this.func_70299_a(2, ItemStack.field_190927_a);
-               }
-            } else {
-               this.func_70299_a(2, ItemStack.field_190927_a);
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.theInventory)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
             }
-         }
+        }
 
-         this.field_70476_a.func_110297_a_(this.func_70301_a(2));
-      }
+        return true;
+    }
 
-   }
+    /**
+     * Returns the stack in the given slot.
+     */
+    public ItemStack getStackInSlot(int index)
+    {
+        return this.theInventory.get(index);
+    }
 
-   public MerchantRecipe func_70468_h() {
-      return this.field_70472_d;
-   }
+    /**
+     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
+     */
+    public ItemStack decrStackSize(int index, int count)
+    {
+        ItemStack itemstack = this.theInventory.get(index);
 
-   public void func_70471_c(int p_70471_1_) {
-      this.field_70473_e = p_70471_1_;
-      this.func_70470_g();
-   }
+        if (index == 2 && !itemstack.func_190926_b())
+        {
+            return ItemStackHelper.getAndSplit(this.theInventory, index, itemstack.func_190916_E());
+        }
+        else
+        {
+            ItemStack itemstack1 = ItemStackHelper.getAndSplit(this.theInventory, index, count);
 
-   public int func_174887_a_(int p_174887_1_) {
-      return 0;
-   }
+            if (!itemstack1.func_190926_b() && this.inventoryResetNeededOnSlotChange(index))
+            {
+                this.resetRecipeAndSlots();
+            }
 
-   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
-   }
+            return itemstack1;
+        }
+    }
 
-   public int func_174890_g() {
-      return 0;
-   }
+    /**
+     * if par1 slot has changed, does resetRecipeAndSlots need to be called?
+     */
+    private boolean inventoryResetNeededOnSlotChange(int slotIn)
+    {
+        return slotIn == 0 || slotIn == 1;
+    }
 
-   public void func_174888_l() {
-      this.field_70474_b.clear();
-   }
+    /**
+     * Removes a stack from the given slot and returns it.
+     */
+    public ItemStack removeStackFromSlot(int index)
+    {
+        return ItemStackHelper.getAndRemove(this.theInventory, index);
+    }
+
+    /**
+     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
+     */
+    public void setInventorySlotContents(int index, ItemStack stack)
+    {
+        this.theInventory.set(index, stack);
+
+        if (!stack.func_190926_b() && stack.func_190916_E() > this.getInventoryStackLimit())
+        {
+            stack.func_190920_e(this.getInventoryStackLimit());
+        }
+
+        if (this.inventoryResetNeededOnSlotChange(index))
+        {
+            this.resetRecipeAndSlots();
+        }
+    }
+
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        return "mob.villager";
+    }
+
+    /**
+     * Returns true if this thing is named
+     */
+    public boolean hasCustomName()
+    {
+        return false;
+    }
+
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    public ITextComponent getDisplayName()
+    {
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
+    }
+
+    /**
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     */
+    public int getInventoryStackLimit()
+    {
+        return 64;
+    }
+
+    /**
+     * Don't rename this method to canInteractWith due to conflicts with Container
+     */
+    public boolean isUsableByPlayer(EntityPlayer player)
+    {
+        return this.theMerchant.getCustomer() == player;
+    }
+
+    public void openInventory(EntityPlayer player)
+    {
+    }
+
+    public void closeInventory(EntityPlayer player)
+    {
+    }
+
+    /**
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
+     */
+    public boolean isItemValidForSlot(int index, ItemStack stack)
+    {
+        return true;
+    }
+
+    /**
+     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
+     * hasn't changed and skip it.
+     */
+    public void markDirty()
+    {
+        this.resetRecipeAndSlots();
+    }
+
+    public void resetRecipeAndSlots()
+    {
+        this.currentRecipe = null;
+        ItemStack itemstack = this.theInventory.get(0);
+        ItemStack itemstack1 = this.theInventory.get(1);
+
+        if (itemstack.func_190926_b())
+        {
+            itemstack = itemstack1;
+            itemstack1 = ItemStack.field_190927_a;
+        }
+
+        if (itemstack.func_190926_b())
+        {
+            this.setInventorySlotContents(2, ItemStack.field_190927_a);
+        }
+        else
+        {
+            MerchantRecipeList merchantrecipelist = this.theMerchant.getRecipes(this.thePlayer);
+
+            if (merchantrecipelist != null)
+            {
+                MerchantRecipe merchantrecipe = merchantrecipelist.canRecipeBeUsed(itemstack, itemstack1, this.currentRecipeIndex);
+
+                if (merchantrecipe != null && !merchantrecipe.isRecipeDisabled())
+                {
+                    this.currentRecipe = merchantrecipe;
+                    this.setInventorySlotContents(2, merchantrecipe.getItemToSell().copy());
+                }
+                else if (!itemstack1.func_190926_b())
+                {
+                    merchantrecipe = merchantrecipelist.canRecipeBeUsed(itemstack1, itemstack, this.currentRecipeIndex);
+
+                    if (merchantrecipe != null && !merchantrecipe.isRecipeDisabled())
+                    {
+                        this.currentRecipe = merchantrecipe;
+                        this.setInventorySlotContents(2, merchantrecipe.getItemToSell().copy());
+                    }
+                    else
+                    {
+                        this.setInventorySlotContents(2, ItemStack.field_190927_a);
+                    }
+                }
+                else
+                {
+                    this.setInventorySlotContents(2, ItemStack.field_190927_a);
+                }
+            }
+
+            this.theMerchant.verifySellingItem(this.getStackInSlot(2));
+        }
+    }
+
+    public MerchantRecipe getCurrentRecipe()
+    {
+        return this.currentRecipe;
+    }
+
+    public void setCurrentRecipeIndex(int currentRecipeIndexIn)
+    {
+        this.currentRecipeIndex = currentRecipeIndexIn;
+        this.resetRecipeAndSlots();
+    }
+
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    public void setField(int id, int value)
+    {
+    }
+
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    public void clear()
+    {
+        this.theInventory.clear();
+    }
 }

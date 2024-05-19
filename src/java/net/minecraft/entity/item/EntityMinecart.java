@@ -34,797 +34,1117 @@ import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class EntityMinecart extends Entity implements IWorldNameable {
-   private static final DataParameter<Integer> field_184265_a = EntityDataManager.<Integer>func_187226_a(EntityMinecart.class, DataSerializers.field_187192_b);
-   private static final DataParameter<Integer> field_184266_b = EntityDataManager.<Integer>func_187226_a(EntityMinecart.class, DataSerializers.field_187192_b);
-   private static final DataParameter<Float> field_184267_c = EntityDataManager.<Float>func_187226_a(EntityMinecart.class, DataSerializers.field_187193_c);
-   private static final DataParameter<Integer> field_184268_d = EntityDataManager.<Integer>func_187226_a(EntityMinecart.class, DataSerializers.field_187192_b);
-   private static final DataParameter<Integer> field_184269_e = EntityDataManager.<Integer>func_187226_a(EntityMinecart.class, DataSerializers.field_187192_b);
-   private static final DataParameter<Boolean> field_184270_f = EntityDataManager.<Boolean>func_187226_a(EntityMinecart.class, DataSerializers.field_187198_h);
-   private boolean field_70499_f;
-   private static final int[][][] field_70500_g = new int[][][]{{{0, 0, -1}, {0, 0, 1}}, {{-1, 0, 0}, {1, 0, 0}}, {{-1, -1, 0}, {1, 0, 0}}, {{-1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, {-1, 0, 0}}, {{0, 0, -1}, {-1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
-   private int field_70510_h;
-   private double field_70511_i;
-   private double field_70509_j;
-   private double field_70514_an;
-   private double field_70512_ao;
-   private double field_70513_ap;
-   private double field_70508_aq;
-   private double field_70507_ar;
-   private double field_70506_as;
+public abstract class EntityMinecart extends Entity implements IWorldNameable
+{
+    private static final DataParameter<Integer> ROLLING_AMPLITUDE = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> ROLLING_DIRECTION = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Float> DAMAGE = EntityDataManager.<Float>createKey(EntityMinecart.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> DISPLAY_TILE = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> DISPLAY_TILE_OFFSET = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> SHOW_BLOCK = EntityDataManager.<Boolean>createKey(EntityMinecart.class, DataSerializers.BOOLEAN);
+    private boolean isInReverse;
 
-   public EntityMinecart(World p_i1712_1_) {
-      super(p_i1712_1_);
-      this.field_70156_m = true;
-      this.func_70105_a(0.98F, 0.7F);
-   }
+    /** Minecart rotational logic matrix */
+    private static final int[][][] MATRIX = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
 
-   public static EntityMinecart func_184263_a(World p_184263_0_, double p_184263_1_, double p_184263_3_, double p_184263_5_, EntityMinecart.Type p_184263_7_) {
-      switch(p_184263_7_) {
-      case CHEST:
-         return new EntityMinecartChest(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      case FURNACE:
-         return new EntityMinecartFurnace(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      case TNT:
-         return new EntityMinecartTNT(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      case SPAWNER:
-         return new EntityMinecartMobSpawner(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      case HOPPER:
-         return new EntityMinecartHopper(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      case COMMAND_BLOCK:
-         return new EntityMinecartCommandBlock(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      default:
-         return new EntityMinecartEmpty(p_184263_0_, p_184263_1_, p_184263_3_, p_184263_5_);
-      }
-   }
+    /** appears to be the progress of the turn */
+    private int turnProgress;
+    private double minecartX;
+    private double minecartY;
+    private double minecartZ;
+    private double minecartYaw;
+    private double minecartPitch;
+    private double velocityX;
+    private double velocityY;
+    private double velocityZ;
 
-   protected boolean func_70041_e_() {
-      return false;
-   }
+    public EntityMinecart(World worldIn)
+    {
+        super(worldIn);
+        this.preventEntitySpawning = true;
+        this.setSize(0.98F, 0.7F);
+    }
 
-   protected void func_70088_a() {
-      this.field_70180_af.func_187214_a(field_184265_a, Integer.valueOf(0));
-      this.field_70180_af.func_187214_a(field_184266_b, Integer.valueOf(1));
-      this.field_70180_af.func_187214_a(field_184267_c, Float.valueOf(0.0F));
-      this.field_70180_af.func_187214_a(field_184268_d, Integer.valueOf(0));
-      this.field_70180_af.func_187214_a(field_184269_e, Integer.valueOf(6));
-      this.field_70180_af.func_187214_a(field_184270_f, Boolean.valueOf(false));
-   }
+    public static EntityMinecart create(World worldIn, double x, double y, double z, EntityMinecart.Type typeIn)
+    {
+        switch (typeIn)
+        {
+            case CHEST:
+                return new EntityMinecartChest(worldIn, x, y, z);
 
-   @Nullable
-   public AxisAlignedBB func_70114_g(Entity p_70114_1_) {
-      return p_70114_1_.func_70104_M() ? p_70114_1_.func_174813_aQ() : null;
-   }
+            case FURNACE:
+                return new EntityMinecartFurnace(worldIn, x, y, z);
 
-   @Nullable
-   public AxisAlignedBB func_70046_E() {
-      return null;
-   }
+            case TNT:
+                return new EntityMinecartTNT(worldIn, x, y, z);
 
-   public boolean func_70104_M() {
-      return true;
-   }
+            case SPAWNER:
+                return new EntityMinecartMobSpawner(worldIn, x, y, z);
 
-   public EntityMinecart(World p_i1713_1_, double p_i1713_2_, double p_i1713_4_, double p_i1713_6_) {
-      this(p_i1713_1_);
-      this.func_70107_b(p_i1713_2_, p_i1713_4_, p_i1713_6_);
-      this.field_70159_w = 0.0D;
-      this.field_70181_x = 0.0D;
-      this.field_70179_y = 0.0D;
-      this.field_70169_q = p_i1713_2_;
-      this.field_70167_r = p_i1713_4_;
-      this.field_70166_s = p_i1713_6_;
-   }
+            case HOPPER:
+                return new EntityMinecartHopper(worldIn, x, y, z);
 
-   public double func_70042_X() {
-      return 0.0D;
-   }
+            case COMMAND_BLOCK:
+                return new EntityMinecartCommandBlock(worldIn, x, y, z);
 
-   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
-      if (!this.field_70170_p.field_72995_K && !this.field_70128_L) {
-         if (this.func_180431_b(p_70097_1_)) {
-            return false;
-         } else {
-            this.func_70494_i(-this.func_70493_k());
-            this.func_70497_h(10);
-            this.func_70018_K();
-            this.func_70492_c(this.func_70491_i() + p_70097_2_ * 10.0F);
-            boolean flag = p_70097_1_.func_76346_g() instanceof EntityPlayer && ((EntityPlayer)p_70097_1_.func_76346_g()).field_71075_bZ.field_75098_d;
-            if (flag || this.func_70491_i() > 40.0F) {
-               this.func_184226_ay();
-               if (flag && !this.func_145818_k_()) {
-                  this.func_70106_y();
-               } else {
-                  this.func_94095_a(p_70097_1_);
-               }
+            default:
+                return new EntityMinecartEmpty(worldIn, x, y, z);
+        }
+    }
+
+    /**
+     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
+     * prevent them from trampling crops
+     */
+    protected boolean canTriggerWalking()
+    {
+        return false;
+    }
+
+    protected void entityInit()
+    {
+        this.dataManager.register(ROLLING_AMPLITUDE, Integer.valueOf(0));
+        this.dataManager.register(ROLLING_DIRECTION, Integer.valueOf(1));
+        this.dataManager.register(DAMAGE, Float.valueOf(0.0F));
+        this.dataManager.register(DISPLAY_TILE, Integer.valueOf(0));
+        this.dataManager.register(DISPLAY_TILE_OFFSET, Integer.valueOf(6));
+        this.dataManager.register(SHOW_BLOCK, Boolean.valueOf(false));
+    }
+
+    @Nullable
+
+    /**
+     * Returns a boundingBox used to collide the entity with other entities and blocks. This enables the entity to be
+     * pushable on contact, like boats or minecarts.
+     */
+    public AxisAlignedBB getCollisionBox(Entity entityIn)
+    {
+        return entityIn.canBePushed() ? entityIn.getEntityBoundingBox() : null;
+    }
+
+    @Nullable
+
+    /**
+     * Returns the collision bounding box for this entity
+     */
+    public AxisAlignedBB getCollisionBoundingBox()
+    {
+        return null;
+    }
+
+    /**
+     * Returns true if this entity should push and be pushed by other entities when colliding.
+     */
+    public boolean canBePushed()
+    {
+        return true;
+    }
+
+    public EntityMinecart(World worldIn, double x, double y, double z)
+    {
+        this(worldIn);
+        this.setPosition(x, y, z);
+        this.motionX = 0.0D;
+        this.motionY = 0.0D;
+        this.motionZ = 0.0D;
+        this.prevPosX = x;
+        this.prevPosY = y;
+        this.prevPosZ = z;
+    }
+
+    /**
+     * Returns the Y offset from the entity's position for any entity riding this one.
+     */
+    public double getMountedYOffset()
+    {
+        return 0.0D;
+    }
+
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        if (!this.world.isRemote && !this.isDead)
+        {
+            if (this.isEntityInvulnerable(source))
+            {
+                return false;
             }
+            else
+            {
+                this.setRollingDirection(-this.getRollingDirection());
+                this.setRollingAmplitude(10);
+                this.setBeenAttacked();
+                this.setDamage(this.getDamage() + amount * 10.0F);
+                boolean flag = source.getEntity() instanceof EntityPlayer && ((EntityPlayer)source.getEntity()).capabilities.isCreativeMode;
 
+                if (flag || this.getDamage() > 40.0F)
+                {
+                    this.removePassengers();
+
+                    if (flag && !this.hasCustomName())
+                    {
+                        this.setDead();
+                    }
+                    else
+                    {
+                        this.killMinecart(source);
+                    }
+                }
+
+                return true;
+            }
+        }
+        else
+        {
             return true;
-         }
-      } else {
-         return true;
-      }
-   }
+        }
+    }
 
-   public void func_94095_a(DamageSource p_94095_1_) {
-      this.func_70106_y();
-      if (this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops")) {
-         ItemStack itemstack = new ItemStack(Items.field_151143_au, 1);
-         if (this.func_145818_k_()) {
-            itemstack.func_151001_c(this.func_95999_t());
-         }
+    public void killMinecart(DamageSource source)
+    {
+        this.setDead();
 
-         this.func_70099_a(itemstack, 0.0F);
-      }
+        if (this.world.getGameRules().getBoolean("doEntityDrops"))
+        {
+            ItemStack itemstack = new ItemStack(Items.MINECART, 1);
 
-   }
-
-   public void func_70057_ab() {
-      this.func_70494_i(-this.func_70493_k());
-      this.func_70497_h(10);
-      this.func_70492_c(this.func_70491_i() + this.func_70491_i() * 10.0F);
-   }
-
-   public boolean func_70067_L() {
-      return !this.field_70128_L;
-   }
-
-   public EnumFacing func_184172_bi() {
-      return this.field_70499_f ? this.func_174811_aO().func_176734_d().func_176746_e() : this.func_174811_aO().func_176746_e();
-   }
-
-   public void func_70071_h_() {
-      if (this.func_70496_j() > 0) {
-         this.func_70497_h(this.func_70496_j() - 1);
-      }
-
-      if (this.func_70491_i() > 0.0F) {
-         this.func_70492_c(this.func_70491_i() - 1.0F);
-      }
-
-      if (this.field_70163_u < -64.0D) {
-         this.func_70076_C();
-      }
-
-      if (!this.field_70170_p.field_72995_K && this.field_70170_p instanceof WorldServer) {
-         this.field_70170_p.field_72984_F.func_76320_a("portal");
-         MinecraftServer minecraftserver = this.field_70170_p.func_73046_m();
-         int i = this.func_82145_z();
-         if (this.field_71087_bX) {
-            if (minecraftserver.func_71255_r()) {
-               if (!this.func_184218_aH() && this.field_82153_h++ >= i) {
-                  this.field_82153_h = i;
-                  this.field_71088_bW = this.func_82147_ab();
-                  int j;
-                  if (this.field_70170_p.field_73011_w.func_186058_p().func_186068_a() == -1) {
-                     j = 0;
-                  } else {
-                     j = -1;
-                  }
-
-                  this.func_184204_a(j);
-               }
-
-               this.field_71087_bX = false;
-            }
-         } else {
-            if (this.field_82153_h > 0) {
-               this.field_82153_h -= 4;
+            if (this.hasCustomName())
+            {
+                itemstack.setStackDisplayName(this.getCustomNameTag());
             }
 
-            if (this.field_82153_h < 0) {
-               this.field_82153_h = 0;
+            this.entityDropItem(itemstack, 0.0F);
+        }
+    }
+
+    /**
+     * Setups the entity to do the hurt animation. Only used by packets in multiplayer.
+     */
+    public void performHurtAnimation()
+    {
+        this.setRollingDirection(-this.getRollingDirection());
+        this.setRollingAmplitude(10);
+        this.setDamage(this.getDamage() + this.getDamage() * 10.0F);
+    }
+
+    /**
+     * Returns true if other Entities should be prevented from moving through this Entity.
+     */
+    public boolean canBeCollidedWith()
+    {
+        return !this.isDead;
+    }
+
+    /**
+     * Gets the horizontal facing direction of this Entity, adjusted to take specially-treated entity types into
+     * account.
+     */
+    public EnumFacing getAdjustedHorizontalFacing()
+    {
+        return this.isInReverse ? this.getHorizontalFacing().getOpposite().rotateY() : this.getHorizontalFacing().rotateY();
+    }
+
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        if (this.getRollingAmplitude() > 0)
+        {
+            this.setRollingAmplitude(this.getRollingAmplitude() - 1);
+        }
+
+        if (this.getDamage() > 0.0F)
+        {
+            this.setDamage(this.getDamage() - 1.0F);
+        }
+
+        if (this.posY < -64.0D)
+        {
+            this.kill();
+        }
+
+        if (!this.world.isRemote && this.world instanceof WorldServer)
+        {
+            this.world.theProfiler.startSection("portal");
+            MinecraftServer minecraftserver = this.world.getMinecraftServer();
+            int i = this.getMaxInPortalTime();
+
+            if (this.inPortal)
+            {
+                if (minecraftserver.getAllowNether())
+                {
+                    if (!this.isRiding() && this.portalCounter++ >= i)
+                    {
+                        this.portalCounter = i;
+                        this.timeUntilPortal = this.getPortalCooldown();
+                        int j;
+
+                        if (this.world.provider.getDimensionType().getId() == -1)
+                        {
+                            j = 0;
+                        }
+                        else
+                        {
+                            j = -1;
+                        }
+
+                        this.changeDimension(j);
+                    }
+
+                    this.inPortal = false;
+                }
             }
-         }
+            else
+            {
+                if (this.portalCounter > 0)
+                {
+                    this.portalCounter -= 4;
+                }
 
-         if (this.field_71088_bW > 0) {
-            --this.field_71088_bW;
-         }
-
-         this.field_70170_p.field_72984_F.func_76319_b();
-      }
-
-      if (this.field_70170_p.field_72995_K) {
-         if (this.field_70510_h > 0) {
-            double d4 = this.field_70165_t + (this.field_70511_i - this.field_70165_t) / (double)this.field_70510_h;
-            double d5 = this.field_70163_u + (this.field_70509_j - this.field_70163_u) / (double)this.field_70510_h;
-            double d6 = this.field_70161_v + (this.field_70514_an - this.field_70161_v) / (double)this.field_70510_h;
-            double d1 = MathHelper.func_76138_g(this.field_70512_ao - (double)this.field_70177_z);
-            this.field_70177_z = (float)((double)this.field_70177_z + d1 / (double)this.field_70510_h);
-            this.field_70125_A = (float)((double)this.field_70125_A + (this.field_70513_ap - (double)this.field_70125_A) / (double)this.field_70510_h);
-            --this.field_70510_h;
-            this.func_70107_b(d4, d5, d6);
-            this.func_70101_b(this.field_70177_z, this.field_70125_A);
-         } else {
-            this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-            this.func_70101_b(this.field_70177_z, this.field_70125_A);
-         }
-
-      } else {
-         this.field_70169_q = this.field_70165_t;
-         this.field_70167_r = this.field_70163_u;
-         this.field_70166_s = this.field_70161_v;
-         if (!this.func_189652_ae()) {
-            this.field_70181_x -= 0.03999999910593033D;
-         }
-
-         int k = MathHelper.func_76128_c(this.field_70165_t);
-         int l = MathHelper.func_76128_c(this.field_70163_u);
-         int i1 = MathHelper.func_76128_c(this.field_70161_v);
-         if (BlockRailBase.func_176562_d(this.field_70170_p, new BlockPos(k, l - 1, i1))) {
-            --l;
-         }
-
-         BlockPos blockpos = new BlockPos(k, l, i1);
-         IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos);
-         if (BlockRailBase.func_176563_d(iblockstate)) {
-            this.func_180460_a(blockpos, iblockstate);
-            if (iblockstate.func_177230_c() == Blocks.field_150408_cc) {
-               this.func_96095_a(k, l, i1, ((Boolean)iblockstate.func_177229_b(BlockRailPowered.field_176569_M)).booleanValue());
+                if (this.portalCounter < 0)
+                {
+                    this.portalCounter = 0;
+                }
             }
-         } else {
-            this.func_180459_n();
-         }
 
-         this.func_145775_I();
-         this.field_70125_A = 0.0F;
-         double d0 = this.field_70169_q - this.field_70165_t;
-         double d2 = this.field_70166_s - this.field_70161_v;
-         if (d0 * d0 + d2 * d2 > 0.001D) {
-            this.field_70177_z = (float)(MathHelper.func_181159_b(d2, d0) * 180.0D / 3.141592653589793D);
-            if (this.field_70499_f) {
-               this.field_70177_z += 180.0F;
+            if (this.timeUntilPortal > 0)
+            {
+                --this.timeUntilPortal;
             }
-         }
 
-         double d3 = (double)MathHelper.func_76142_g(this.field_70177_z - this.field_70126_B);
-         if (d3 < -170.0D || d3 >= 170.0D) {
-            this.field_70177_z += 180.0F;
-            this.field_70499_f = !this.field_70499_f;
-         }
+            this.world.theProfiler.endSection();
+        }
 
-         this.func_70101_b(this.field_70177_z, this.field_70125_A);
-         if (this.func_184264_v() == EntityMinecart.Type.RIDEABLE && this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y > 0.01D) {
-            List<Entity> list = this.field_70170_p.func_175674_a(this, this.func_174813_aQ().func_72314_b(0.20000000298023224D, 0.0D, 0.20000000298023224D), EntitySelectors.func_188442_a(this));
-            if (!list.isEmpty()) {
-               for(int j1 = 0; j1 < list.size(); ++j1) {
-                  Entity entity1 = list.get(j1);
-                  if (!(entity1 instanceof EntityPlayer) && !(entity1 instanceof EntityIronGolem) && !(entity1 instanceof EntityMinecart) && !this.func_184207_aI() && !entity1.func_184218_aH()) {
-                     entity1.func_184220_m(this);
-                  } else {
-                     entity1.func_70108_f(this);
-                  }
-               }
+        if (this.world.isRemote)
+        {
+            if (this.turnProgress > 0)
+            {
+                double d4 = this.posX + (this.minecartX - this.posX) / (double)this.turnProgress;
+                double d5 = this.posY + (this.minecartY - this.posY) / (double)this.turnProgress;
+                double d6 = this.posZ + (this.minecartZ - this.posZ) / (double)this.turnProgress;
+                double d1 = MathHelper.wrapDegrees(this.minecartYaw - (double)this.rotationYaw);
+                this.rotationYaw = (float)((double)this.rotationYaw + d1 / (double)this.turnProgress);
+                this.rotationPitch = (float)((double)this.rotationPitch + (this.minecartPitch - (double)this.rotationPitch) / (double)this.turnProgress);
+                --this.turnProgress;
+                this.setPosition(d4, d5, d6);
+                this.setRotation(this.rotationYaw, this.rotationPitch);
             }
-         } else {
-            for(Entity entity : this.field_70170_p.func_72839_b(this, this.func_174813_aQ().func_72314_b(0.20000000298023224D, 0.0D, 0.20000000298023224D))) {
-               if (!this.func_184196_w(entity) && entity.func_70104_M() && entity instanceof EntityMinecart) {
-                  entity.func_70108_f(this);
-               }
+            else
+            {
+                this.setPosition(this.posX, this.posY, this.posZ);
+                this.setRotation(this.rotationYaw, this.rotationPitch);
             }
-         }
+        }
+        else
+        {
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
 
-         this.func_70072_I();
-      }
-   }
-
-   protected double func_174898_m() {
-      return 0.4D;
-   }
-
-   public void func_96095_a(int p_96095_1_, int p_96095_2_, int p_96095_3_, boolean p_96095_4_) {
-   }
-
-   protected void func_180459_n() {
-      double d0 = this.func_174898_m();
-      this.field_70159_w = MathHelper.func_151237_a(this.field_70159_w, -d0, d0);
-      this.field_70179_y = MathHelper.func_151237_a(this.field_70179_y, -d0, d0);
-      if (this.field_70122_E) {
-         this.field_70159_w *= 0.5D;
-         this.field_70181_x *= 0.5D;
-         this.field_70179_y *= 0.5D;
-      }
-
-      this.func_70091_d(MoverType.SELF, this.field_70159_w, this.field_70181_x, this.field_70179_y);
-      if (!this.field_70122_E) {
-         this.field_70159_w *= 0.949999988079071D;
-         this.field_70181_x *= 0.949999988079071D;
-         this.field_70179_y *= 0.949999988079071D;
-      }
-
-   }
-
-   protected void func_180460_a(BlockPos p_180460_1_, IBlockState p_180460_2_) {
-      this.field_70143_R = 0.0F;
-      Vec3d vec3d = this.func_70489_a(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-      this.field_70163_u = (double)p_180460_1_.func_177956_o();
-      boolean flag = false;
-      boolean flag1 = false;
-      BlockRailBase blockrailbase = (BlockRailBase)p_180460_2_.func_177230_c();
-      if (blockrailbase == Blocks.field_150318_D) {
-         flag = ((Boolean)p_180460_2_.func_177229_b(BlockRailPowered.field_176569_M)).booleanValue();
-         flag1 = !flag;
-      }
-
-      double d0 = 0.0078125D;
-      BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)p_180460_2_.func_177229_b(blockrailbase.func_176560_l());
-      switch(blockrailbase$enumraildirection) {
-      case ASCENDING_EAST:
-         this.field_70159_w -= 0.0078125D;
-         ++this.field_70163_u;
-         break;
-      case ASCENDING_WEST:
-         this.field_70159_w += 0.0078125D;
-         ++this.field_70163_u;
-         break;
-      case ASCENDING_NORTH:
-         this.field_70179_y += 0.0078125D;
-         ++this.field_70163_u;
-         break;
-      case ASCENDING_SOUTH:
-         this.field_70179_y -= 0.0078125D;
-         ++this.field_70163_u;
-      }
-
-      int[][] aint = field_70500_g[blockrailbase$enumraildirection.func_177015_a()];
-      double d1 = (double)(aint[1][0] - aint[0][0]);
-      double d2 = (double)(aint[1][2] - aint[0][2]);
-      double d3 = Math.sqrt(d1 * d1 + d2 * d2);
-      double d4 = this.field_70159_w * d1 + this.field_70179_y * d2;
-      if (d4 < 0.0D) {
-         d1 = -d1;
-         d2 = -d2;
-      }
-
-      double d5 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-      if (d5 > 2.0D) {
-         d5 = 2.0D;
-      }
-
-      this.field_70159_w = d5 * d1 / d3;
-      this.field_70179_y = d5 * d2 / d3;
-      Entity entity = this.func_184188_bt().isEmpty() ? null : (Entity)this.func_184188_bt().get(0);
-      if (entity instanceof EntityLivingBase) {
-         double d6 = (double)((EntityLivingBase)entity).field_191988_bg;
-         if (d6 > 0.0D) {
-            double d7 = -Math.sin((double)(entity.field_70177_z * 0.017453292F));
-            double d8 = Math.cos((double)(entity.field_70177_z * 0.017453292F));
-            double d9 = this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y;
-            if (d9 < 0.01D) {
-               this.field_70159_w += d7 * 0.1D;
-               this.field_70179_y += d8 * 0.1D;
-               flag1 = false;
+            if (!this.hasNoGravity())
+            {
+                this.motionY -= 0.03999999910593033D;
             }
-         }
-      }
 
-      if (flag1) {
-         double d17 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-         if (d17 < 0.03D) {
-            this.field_70159_w *= 0.0D;
-            this.field_70181_x *= 0.0D;
-            this.field_70179_y *= 0.0D;
-         } else {
-            this.field_70159_w *= 0.5D;
-            this.field_70181_x *= 0.0D;
-            this.field_70179_y *= 0.5D;
-         }
-      }
+            int k = MathHelper.floor(this.posX);
+            int l = MathHelper.floor(this.posY);
+            int i1 = MathHelper.floor(this.posZ);
 
-      double d18 = (double)p_180460_1_.func_177958_n() + 0.5D + (double)aint[0][0] * 0.5D;
-      double d19 = (double)p_180460_1_.func_177952_p() + 0.5D + (double)aint[0][2] * 0.5D;
-      double d20 = (double)p_180460_1_.func_177958_n() + 0.5D + (double)aint[1][0] * 0.5D;
-      double d21 = (double)p_180460_1_.func_177952_p() + 0.5D + (double)aint[1][2] * 0.5D;
-      d1 = d20 - d18;
-      d2 = d21 - d19;
-      double d10;
-      if (d1 == 0.0D) {
-         this.field_70165_t = (double)p_180460_1_.func_177958_n() + 0.5D;
-         d10 = this.field_70161_v - (double)p_180460_1_.func_177952_p();
-      } else if (d2 == 0.0D) {
-         this.field_70161_v = (double)p_180460_1_.func_177952_p() + 0.5D;
-         d10 = this.field_70165_t - (double)p_180460_1_.func_177958_n();
-      } else {
-         double d11 = this.field_70165_t - d18;
-         double d12 = this.field_70161_v - d19;
-         d10 = (d11 * d1 + d12 * d2) * 2.0D;
-      }
-
-      this.field_70165_t = d18 + d1 * d10;
-      this.field_70161_v = d19 + d2 * d10;
-      this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-      double d22 = this.field_70159_w;
-      double d23 = this.field_70179_y;
-      if (this.func_184207_aI()) {
-         d22 *= 0.75D;
-         d23 *= 0.75D;
-      }
-
-      double d13 = this.func_174898_m();
-      d22 = MathHelper.func_151237_a(d22, -d13, d13);
-      d23 = MathHelper.func_151237_a(d23, -d13, d13);
-      this.func_70091_d(MoverType.SELF, d22, 0.0D, d23);
-      if (aint[0][1] != 0 && MathHelper.func_76128_c(this.field_70165_t) - p_180460_1_.func_177958_n() == aint[0][0] && MathHelper.func_76128_c(this.field_70161_v) - p_180460_1_.func_177952_p() == aint[0][2]) {
-         this.func_70107_b(this.field_70165_t, this.field_70163_u + (double)aint[0][1], this.field_70161_v);
-      } else if (aint[1][1] != 0 && MathHelper.func_76128_c(this.field_70165_t) - p_180460_1_.func_177958_n() == aint[1][0] && MathHelper.func_76128_c(this.field_70161_v) - p_180460_1_.func_177952_p() == aint[1][2]) {
-         this.func_70107_b(this.field_70165_t, this.field_70163_u + (double)aint[1][1], this.field_70161_v);
-      }
-
-      this.func_94101_h();
-      Vec3d vec3d1 = this.func_70489_a(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-      if (vec3d1 != null && vec3d != null) {
-         double d14 = (vec3d.field_72448_b - vec3d1.field_72448_b) * 0.05D;
-         d5 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-         if (d5 > 0.0D) {
-            this.field_70159_w = this.field_70159_w / d5 * (d5 + d14);
-            this.field_70179_y = this.field_70179_y / d5 * (d5 + d14);
-         }
-
-         this.func_70107_b(this.field_70165_t, vec3d1.field_72448_b, this.field_70161_v);
-      }
-
-      int j = MathHelper.func_76128_c(this.field_70165_t);
-      int i = MathHelper.func_76128_c(this.field_70161_v);
-      if (j != p_180460_1_.func_177958_n() || i != p_180460_1_.func_177952_p()) {
-         d5 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-         this.field_70159_w = d5 * (double)(j - p_180460_1_.func_177958_n());
-         this.field_70179_y = d5 * (double)(i - p_180460_1_.func_177952_p());
-      }
-
-      if (flag) {
-         double d15 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-         if (d15 > 0.01D) {
-            double d16 = 0.06D;
-            this.field_70159_w += this.field_70159_w / d15 * 0.06D;
-            this.field_70179_y += this.field_70179_y / d15 * 0.06D;
-         } else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.EAST_WEST) {
-            if (this.field_70170_p.func_180495_p(p_180460_1_.func_177976_e()).func_185915_l()) {
-               this.field_70159_w = 0.02D;
-            } else if (this.field_70170_p.func_180495_p(p_180460_1_.func_177974_f()).func_185915_l()) {
-               this.field_70159_w = -0.02D;
+            if (BlockRailBase.isRailBlock(this.world, new BlockPos(k, l - 1, i1)))
+            {
+                --l;
             }
-         } else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
-            if (this.field_70170_p.func_180495_p(p_180460_1_.func_177978_c()).func_185915_l()) {
-               this.field_70179_y = 0.02D;
-            } else if (this.field_70170_p.func_180495_p(p_180460_1_.func_177968_d()).func_185915_l()) {
-               this.field_70179_y = -0.02D;
+
+            BlockPos blockpos = new BlockPos(k, l, i1);
+            IBlockState iblockstate = this.world.getBlockState(blockpos);
+
+            if (BlockRailBase.isRailBlock(iblockstate))
+            {
+                this.moveAlongTrack(blockpos, iblockstate);
+
+                if (iblockstate.getBlock() == Blocks.ACTIVATOR_RAIL)
+                {
+                    this.onActivatorRailPass(k, l, i1, ((Boolean)iblockstate.getValue(BlockRailPowered.POWERED)).booleanValue());
+                }
             }
-         }
-      }
-
-   }
-
-   protected void func_94101_h() {
-      if (this.func_184207_aI()) {
-         this.field_70159_w *= 0.996999979019165D;
-         this.field_70181_x *= 0.0D;
-         this.field_70179_y *= 0.996999979019165D;
-      } else {
-         this.field_70159_w *= 0.9599999785423279D;
-         this.field_70181_x *= 0.0D;
-         this.field_70179_y *= 0.9599999785423279D;
-      }
-
-   }
-
-   public void func_70107_b(double p_70107_1_, double p_70107_3_, double p_70107_5_) {
-      this.field_70165_t = p_70107_1_;
-      this.field_70163_u = p_70107_3_;
-      this.field_70161_v = p_70107_5_;
-      float f = this.field_70130_N / 2.0F;
-      float f1 = this.field_70131_O;
-      this.func_174826_a(new AxisAlignedBB(p_70107_1_ - (double)f, p_70107_3_, p_70107_5_ - (double)f, p_70107_1_ + (double)f, p_70107_3_ + (double)f1, p_70107_5_ + (double)f));
-   }
-
-   @Nullable
-   public Vec3d func_70495_a(double p_70495_1_, double p_70495_3_, double p_70495_5_, double p_70495_7_) {
-      int i = MathHelper.func_76128_c(p_70495_1_);
-      int j = MathHelper.func_76128_c(p_70495_3_);
-      int k = MathHelper.func_76128_c(p_70495_5_);
-      if (BlockRailBase.func_176562_d(this.field_70170_p, new BlockPos(i, j - 1, k))) {
-         --j;
-      }
-
-      IBlockState iblockstate = this.field_70170_p.func_180495_p(new BlockPos(i, j, k));
-      if (BlockRailBase.func_176563_d(iblockstate)) {
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)iblockstate.func_177229_b(((BlockRailBase)iblockstate.func_177230_c()).func_176560_l());
-         p_70495_3_ = (double)j;
-         if (blockrailbase$enumraildirection.func_177018_c()) {
-            p_70495_3_ = (double)(j + 1);
-         }
-
-         int[][] aint = field_70500_g[blockrailbase$enumraildirection.func_177015_a()];
-         double d0 = (double)(aint[1][0] - aint[0][0]);
-         double d1 = (double)(aint[1][2] - aint[0][2]);
-         double d2 = Math.sqrt(d0 * d0 + d1 * d1);
-         d0 = d0 / d2;
-         d1 = d1 / d2;
-         p_70495_1_ = p_70495_1_ + d0 * p_70495_7_;
-         p_70495_5_ = p_70495_5_ + d1 * p_70495_7_;
-         if (aint[0][1] != 0 && MathHelper.func_76128_c(p_70495_1_) - i == aint[0][0] && MathHelper.func_76128_c(p_70495_5_) - k == aint[0][2]) {
-            p_70495_3_ += (double)aint[0][1];
-         } else if (aint[1][1] != 0 && MathHelper.func_76128_c(p_70495_1_) - i == aint[1][0] && MathHelper.func_76128_c(p_70495_5_) - k == aint[1][2]) {
-            p_70495_3_ += (double)aint[1][1];
-         }
-
-         return this.func_70489_a(p_70495_1_, p_70495_3_, p_70495_5_);
-      } else {
-         return null;
-      }
-   }
-
-   @Nullable
-   public Vec3d func_70489_a(double p_70489_1_, double p_70489_3_, double p_70489_5_) {
-      int i = MathHelper.func_76128_c(p_70489_1_);
-      int j = MathHelper.func_76128_c(p_70489_3_);
-      int k = MathHelper.func_76128_c(p_70489_5_);
-      if (BlockRailBase.func_176562_d(this.field_70170_p, new BlockPos(i, j - 1, k))) {
-         --j;
-      }
-
-      IBlockState iblockstate = this.field_70170_p.func_180495_p(new BlockPos(i, j, k));
-      if (BlockRailBase.func_176563_d(iblockstate)) {
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)iblockstate.func_177229_b(((BlockRailBase)iblockstate.func_177230_c()).func_176560_l());
-         int[][] aint = field_70500_g[blockrailbase$enumraildirection.func_177015_a()];
-         double d0 = (double)i + 0.5D + (double)aint[0][0] * 0.5D;
-         double d1 = (double)j + 0.0625D + (double)aint[0][1] * 0.5D;
-         double d2 = (double)k + 0.5D + (double)aint[0][2] * 0.5D;
-         double d3 = (double)i + 0.5D + (double)aint[1][0] * 0.5D;
-         double d4 = (double)j + 0.0625D + (double)aint[1][1] * 0.5D;
-         double d5 = (double)k + 0.5D + (double)aint[1][2] * 0.5D;
-         double d6 = d3 - d0;
-         double d7 = (d4 - d1) * 2.0D;
-         double d8 = d5 - d2;
-         double d9;
-         if (d6 == 0.0D) {
-            d9 = p_70489_5_ - (double)k;
-         } else if (d8 == 0.0D) {
-            d9 = p_70489_1_ - (double)i;
-         } else {
-            double d10 = p_70489_1_ - d0;
-            double d11 = p_70489_5_ - d2;
-            d9 = (d10 * d6 + d11 * d8) * 2.0D;
-         }
-
-         p_70489_1_ = d0 + d6 * d9;
-         p_70489_3_ = d1 + d7 * d9;
-         p_70489_5_ = d2 + d8 * d9;
-         if (d7 < 0.0D) {
-            ++p_70489_3_;
-         }
-
-         if (d7 > 0.0D) {
-            p_70489_3_ += 0.5D;
-         }
-
-         return new Vec3d(p_70489_1_, p_70489_3_, p_70489_5_);
-      } else {
-         return null;
-      }
-   }
-
-   public AxisAlignedBB func_184177_bl() {
-      AxisAlignedBB axisalignedbb = this.func_174813_aQ();
-      return this.func_94100_s() ? axisalignedbb.func_186662_g((double)Math.abs(this.func_94099_q()) / 16.0D) : axisalignedbb;
-   }
-
-   public static void func_189669_a(DataFixer p_189669_0_, Class<?> p_189669_1_) {
-   }
-
-   protected void func_70037_a(NBTTagCompound p_70037_1_) {
-      if (p_70037_1_.func_74767_n("CustomDisplayTile")) {
-         Block block;
-         if (p_70037_1_.func_150297_b("DisplayTile", 8)) {
-            block = Block.func_149684_b(p_70037_1_.func_74779_i("DisplayTile"));
-         } else {
-            block = Block.func_149729_e(p_70037_1_.func_74762_e("DisplayTile"));
-         }
-
-         int i = p_70037_1_.func_74762_e("DisplayData");
-         this.func_174899_a(block == null ? Blocks.field_150350_a.func_176223_P() : block.func_176203_a(i));
-         this.func_94086_l(p_70037_1_.func_74762_e("DisplayOffset"));
-      }
-
-   }
-
-   protected void func_70014_b(NBTTagCompound p_70014_1_) {
-      if (this.func_94100_s()) {
-         p_70014_1_.func_74757_a("CustomDisplayTile", true);
-         IBlockState iblockstate = this.func_174897_t();
-         ResourceLocation resourcelocation = Block.field_149771_c.func_177774_c(iblockstate.func_177230_c());
-         p_70014_1_.func_74778_a("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
-         p_70014_1_.func_74768_a("DisplayData", iblockstate.func_177230_c().func_176201_c(iblockstate));
-         p_70014_1_.func_74768_a("DisplayOffset", this.func_94099_q());
-      }
-
-   }
-
-   public void func_70108_f(Entity p_70108_1_) {
-      if (!this.field_70170_p.field_72995_K) {
-         if (!p_70108_1_.field_70145_X && !this.field_70145_X) {
-            if (!this.func_184196_w(p_70108_1_)) {
-               double d0 = p_70108_1_.field_70165_t - this.field_70165_t;
-               double d1 = p_70108_1_.field_70161_v - this.field_70161_v;
-               double d2 = d0 * d0 + d1 * d1;
-               if (d2 >= 9.999999747378752E-5D) {
-                  d2 = (double)MathHelper.func_76133_a(d2);
-                  d0 = d0 / d2;
-                  d1 = d1 / d2;
-                  double d3 = 1.0D / d2;
-                  if (d3 > 1.0D) {
-                     d3 = 1.0D;
-                  }
-
-                  d0 = d0 * d3;
-                  d1 = d1 * d3;
-                  d0 = d0 * 0.10000000149011612D;
-                  d1 = d1 * 0.10000000149011612D;
-                  d0 = d0 * (double)(1.0F - this.field_70144_Y);
-                  d1 = d1 * (double)(1.0F - this.field_70144_Y);
-                  d0 = d0 * 0.5D;
-                  d1 = d1 * 0.5D;
-                  if (p_70108_1_ instanceof EntityMinecart) {
-                     double d4 = p_70108_1_.field_70165_t - this.field_70165_t;
-                     double d5 = p_70108_1_.field_70161_v - this.field_70161_v;
-                     Vec3d vec3d = (new Vec3d(d4, 0.0D, d5)).func_72432_b();
-                     Vec3d vec3d1 = (new Vec3d((double)MathHelper.func_76134_b(this.field_70177_z * 0.017453292F), 0.0D, (double)MathHelper.func_76126_a(this.field_70177_z * 0.017453292F))).func_72432_b();
-                     double d6 = Math.abs(vec3d.func_72430_b(vec3d1));
-                     if (d6 < 0.800000011920929D) {
-                        return;
-                     }
-
-                     double d7 = p_70108_1_.field_70159_w + this.field_70159_w;
-                     double d8 = p_70108_1_.field_70179_y + this.field_70179_y;
-                     if (((EntityMinecart)p_70108_1_).func_184264_v() == EntityMinecart.Type.FURNACE && this.func_184264_v() != EntityMinecart.Type.FURNACE) {
-                        this.field_70159_w *= 0.20000000298023224D;
-                        this.field_70179_y *= 0.20000000298023224D;
-                        this.func_70024_g(p_70108_1_.field_70159_w - d0, 0.0D, p_70108_1_.field_70179_y - d1);
-                        p_70108_1_.field_70159_w *= 0.949999988079071D;
-                        p_70108_1_.field_70179_y *= 0.949999988079071D;
-                     } else if (((EntityMinecart)p_70108_1_).func_184264_v() != EntityMinecart.Type.FURNACE && this.func_184264_v() == EntityMinecart.Type.FURNACE) {
-                        p_70108_1_.field_70159_w *= 0.20000000298023224D;
-                        p_70108_1_.field_70179_y *= 0.20000000298023224D;
-                        p_70108_1_.func_70024_g(this.field_70159_w + d0, 0.0D, this.field_70179_y + d1);
-                        this.field_70159_w *= 0.949999988079071D;
-                        this.field_70179_y *= 0.949999988079071D;
-                     } else {
-                        d7 = d7 / 2.0D;
-                        d8 = d8 / 2.0D;
-                        this.field_70159_w *= 0.20000000298023224D;
-                        this.field_70179_y *= 0.20000000298023224D;
-                        this.func_70024_g(d7 - d0, 0.0D, d8 - d1);
-                        p_70108_1_.field_70159_w *= 0.20000000298023224D;
-                        p_70108_1_.field_70179_y *= 0.20000000298023224D;
-                        p_70108_1_.func_70024_g(d7 + d0, 0.0D, d8 + d1);
-                     }
-                  } else {
-                     this.func_70024_g(-d0, 0.0D, -d1);
-                     p_70108_1_.func_70024_g(d0 / 4.0D, 0.0D, d1 / 4.0D);
-                  }
-               }
-
+            else
+            {
+                this.moveDerailedMinecart();
             }
-         }
-      }
-   }
 
-   public void func_180426_a(double p_180426_1_, double p_180426_3_, double p_180426_5_, float p_180426_7_, float p_180426_8_, int p_180426_9_, boolean p_180426_10_) {
-      this.field_70511_i = p_180426_1_;
-      this.field_70509_j = p_180426_3_;
-      this.field_70514_an = p_180426_5_;
-      this.field_70512_ao = (double)p_180426_7_;
-      this.field_70513_ap = (double)p_180426_8_;
-      this.field_70510_h = p_180426_9_ + 2;
-      this.field_70159_w = this.field_70508_aq;
-      this.field_70181_x = this.field_70507_ar;
-      this.field_70179_y = this.field_70506_as;
-   }
+            this.doBlockCollisions();
+            this.rotationPitch = 0.0F;
+            double d0 = this.prevPosX - this.posX;
+            double d2 = this.prevPosZ - this.posZ;
 
-   public void func_70016_h(double p_70016_1_, double p_70016_3_, double p_70016_5_) {
-      this.field_70159_w = p_70016_1_;
-      this.field_70181_x = p_70016_3_;
-      this.field_70179_y = p_70016_5_;
-      this.field_70508_aq = this.field_70159_w;
-      this.field_70507_ar = this.field_70181_x;
-      this.field_70506_as = this.field_70179_y;
-   }
+            if (d0 * d0 + d2 * d2 > 0.001D)
+            {
+                this.rotationYaw = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI);
 
-   public void func_70492_c(float p_70492_1_) {
-      this.field_70180_af.func_187227_b(field_184267_c, Float.valueOf(p_70492_1_));
-   }
+                if (this.isInReverse)
+                {
+                    this.rotationYaw += 180.0F;
+                }
+            }
 
-   public float func_70491_i() {
-      return ((Float)this.field_70180_af.func_187225_a(field_184267_c)).floatValue();
-   }
+            double d3 = (double)MathHelper.wrapDegrees(this.rotationYaw - this.prevRotationYaw);
 
-   public void func_70497_h(int p_70497_1_) {
-      this.field_70180_af.func_187227_b(field_184265_a, Integer.valueOf(p_70497_1_));
-   }
+            if (d3 < -170.0D || d3 >= 170.0D)
+            {
+                this.rotationYaw += 180.0F;
+                this.isInReverse = !this.isInReverse;
+            }
 
-   public int func_70496_j() {
-      return ((Integer)this.field_70180_af.func_187225_a(field_184265_a)).intValue();
-   }
+            this.setRotation(this.rotationYaw, this.rotationPitch);
 
-   public void func_70494_i(int p_70494_1_) {
-      this.field_70180_af.func_187227_b(field_184266_b, Integer.valueOf(p_70494_1_));
-   }
+            if (this.getType() == EntityMinecart.Type.RIDEABLE && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D)
+            {
+                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
 
-   public int func_70493_k() {
-      return ((Integer)this.field_70180_af.func_187225_a(field_184266_b)).intValue();
-   }
+                if (!list.isEmpty())
+                {
+                    for (int j1 = 0; j1 < list.size(); ++j1)
+                    {
+                        Entity entity1 = list.get(j1);
 
-   public abstract EntityMinecart.Type func_184264_v();
+                        if (!(entity1 instanceof EntityPlayer) && !(entity1 instanceof EntityIronGolem) && !(entity1 instanceof EntityMinecart) && !this.isBeingRidden() && !entity1.isRiding())
+                        {
+                            entity1.startRiding(this);
+                        }
+                        else
+                        {
+                            entity1.applyEntityCollision(this);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D)))
+                {
+                    if (!this.isPassenger(entity) && entity.canBePushed() && entity instanceof EntityMinecart)
+                    {
+                        entity.applyEntityCollision(this);
+                    }
+                }
+            }
 
-   public IBlockState func_174897_t() {
-      return !this.func_94100_s() ? this.func_180457_u() : Block.func_176220_d(((Integer)this.func_184212_Q().func_187225_a(field_184268_d)).intValue());
-   }
+            this.handleWaterMovement();
+        }
+    }
 
-   public IBlockState func_180457_u() {
-      return Blocks.field_150350_a.func_176223_P();
-   }
+    /**
+     * Get's the maximum speed for a minecart
+     */
+    protected double getMaximumSpeed()
+    {
+        return 0.4D;
+    }
 
-   public int func_94099_q() {
-      return !this.func_94100_s() ? this.func_94085_r() : ((Integer)this.func_184212_Q().func_187225_a(field_184269_e)).intValue();
-   }
+    /**
+     * Called every tick the minecart is on an activator rail.
+     */
+    public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
+    {
+    }
 
-   public int func_94085_r() {
-      return 6;
-   }
+    /**
+     * Moves a minecart that is not attached to a rail
+     */
+    protected void moveDerailedMinecart()
+    {
+        double d0 = this.getMaximumSpeed();
+        this.motionX = MathHelper.clamp(this.motionX, -d0, d0);
+        this.motionZ = MathHelper.clamp(this.motionZ, -d0, d0);
 
-   public void func_174899_a(IBlockState p_174899_1_) {
-      this.func_184212_Q().func_187227_b(field_184268_d, Integer.valueOf(Block.func_176210_f(p_174899_1_)));
-      this.func_94096_e(true);
-   }
+        if (this.onGround)
+        {
+            this.motionX *= 0.5D;
+            this.motionY *= 0.5D;
+            this.motionZ *= 0.5D;
+        }
 
-   public void func_94086_l(int p_94086_1_) {
-      this.func_184212_Q().func_187227_b(field_184269_e, Integer.valueOf(p_94086_1_));
-      this.func_94096_e(true);
-   }
+        this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
-   public boolean func_94100_s() {
-      return ((Boolean)this.func_184212_Q().func_187225_a(field_184270_f)).booleanValue();
-   }
+        if (!this.onGround)
+        {
+            this.motionX *= 0.949999988079071D;
+            this.motionY *= 0.949999988079071D;
+            this.motionZ *= 0.949999988079071D;
+        }
+    }
 
-   public void func_94096_e(boolean p_94096_1_) {
-      this.func_184212_Q().func_187227_b(field_184270_f, Boolean.valueOf(p_94096_1_));
-   }
+    @SuppressWarnings("incomplete-switch")
+    protected void moveAlongTrack(BlockPos pos, IBlockState state)
+    {
+        this.fallDistance = 0.0F;
+        Vec3d vec3d = this.getPos(this.posX, this.posY, this.posZ);
+        this.posY = (double)pos.getY();
+        boolean flag = false;
+        boolean flag1 = false;
+        BlockRailBase blockrailbase = (BlockRailBase)state.getBlock();
 
-   public static enum Type {
-      RIDEABLE(0, "MinecartRideable"),
-      CHEST(1, "MinecartChest"),
-      FURNACE(2, "MinecartFurnace"),
-      TNT(3, "MinecartTNT"),
-      SPAWNER(4, "MinecartSpawner"),
-      HOPPER(5, "MinecartHopper"),
-      COMMAND_BLOCK(6, "MinecartCommandBlock");
+        if (blockrailbase == Blocks.GOLDEN_RAIL)
+        {
+            flag = ((Boolean)state.getValue(BlockRailPowered.POWERED)).booleanValue();
+            flag1 = !flag;
+        }
 
-      private static final Map<Integer, EntityMinecart.Type> field_184965_h = Maps.<Integer, EntityMinecart.Type>newHashMap();
-      private final int field_184966_i;
-      private final String field_184967_j;
+        double d0 = 0.0078125D;
+        BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)state.getValue(blockrailbase.getShapeProperty());
 
-      private Type(int p_i47005_3_, String p_i47005_4_) {
-         this.field_184966_i = p_i47005_3_;
-         this.field_184967_j = p_i47005_4_;
-      }
+        switch (blockrailbase$enumraildirection)
+        {
+            case ASCENDING_EAST:
+                this.motionX -= 0.0078125D;
+                ++this.posY;
+                break;
 
-      public int func_184956_a() {
-         return this.field_184966_i;
-      }
+            case ASCENDING_WEST:
+                this.motionX += 0.0078125D;
+                ++this.posY;
+                break;
 
-      public String func_184954_b() {
-         return this.field_184967_j;
-      }
+            case ASCENDING_NORTH:
+                this.motionZ += 0.0078125D;
+                ++this.posY;
+                break;
 
-      public static EntityMinecart.Type func_184955_a(int p_184955_0_) {
-         EntityMinecart.Type entityminecart$type = field_184965_h.get(Integer.valueOf(p_184955_0_));
-         return entityminecart$type == null ? RIDEABLE : entityminecart$type;
-      }
+            case ASCENDING_SOUTH:
+                this.motionZ -= 0.0078125D;
+                ++this.posY;
+        }
 
-      static {
-         for(EntityMinecart.Type entityminecart$type : values()) {
-            field_184965_h.put(Integer.valueOf(entityminecart$type.func_184956_a()), entityminecart$type);
-         }
+        int[][] aint = MATRIX[blockrailbase$enumraildirection.getMetadata()];
+        double d1 = (double)(aint[1][0] - aint[0][0]);
+        double d2 = (double)(aint[1][2] - aint[0][2]);
+        double d3 = Math.sqrt(d1 * d1 + d2 * d2);
+        double d4 = this.motionX * d1 + this.motionZ * d2;
 
-      }
-   }
+        if (d4 < 0.0D)
+        {
+            d1 = -d1;
+            d2 = -d2;
+        }
+
+        double d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+        if (d5 > 2.0D)
+        {
+            d5 = 2.0D;
+        }
+
+        this.motionX = d5 * d1 / d3;
+        this.motionZ = d5 * d2 / d3;
+        Entity entity = this.getPassengers().isEmpty() ? null : (Entity)this.getPassengers().get(0);
+
+        if (entity instanceof EntityLivingBase)
+        {
+            double d6 = (double)((EntityLivingBase)entity).field_191988_bg;
+
+            if (d6 > 0.0D)
+            {
+                double d7 = -Math.sin((double)(entity.rotationYaw * 0.017453292F));
+                double d8 = Math.cos((double)(entity.rotationYaw * 0.017453292F));
+                double d9 = this.motionX * this.motionX + this.motionZ * this.motionZ;
+
+                if (d9 < 0.01D)
+                {
+                    this.motionX += d7 * 0.1D;
+                    this.motionZ += d8 * 0.1D;
+                    flag1 = false;
+                }
+            }
+        }
+
+        if (flag1)
+        {
+            double d17 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d17 < 0.03D)
+            {
+                this.motionX *= 0.0D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.0D;
+            }
+            else
+            {
+                this.motionX *= 0.5D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.5D;
+            }
+        }
+
+        double d18 = (double)pos.getX() + 0.5D + (double)aint[0][0] * 0.5D;
+        double d19 = (double)pos.getZ() + 0.5D + (double)aint[0][2] * 0.5D;
+        double d20 = (double)pos.getX() + 0.5D + (double)aint[1][0] * 0.5D;
+        double d21 = (double)pos.getZ() + 0.5D + (double)aint[1][2] * 0.5D;
+        d1 = d20 - d18;
+        d2 = d21 - d19;
+        double d10;
+
+        if (d1 == 0.0D)
+        {
+            this.posX = (double)pos.getX() + 0.5D;
+            d10 = this.posZ - (double)pos.getZ();
+        }
+        else if (d2 == 0.0D)
+        {
+            this.posZ = (double)pos.getZ() + 0.5D;
+            d10 = this.posX - (double)pos.getX();
+        }
+        else
+        {
+            double d11 = this.posX - d18;
+            double d12 = this.posZ - d19;
+            d10 = (d11 * d1 + d12 * d2) * 2.0D;
+        }
+
+        this.posX = d18 + d1 * d10;
+        this.posZ = d19 + d2 * d10;
+        this.setPosition(this.posX, this.posY, this.posZ);
+        double d22 = this.motionX;
+        double d23 = this.motionZ;
+
+        if (this.isBeingRidden())
+        {
+            d22 *= 0.75D;
+            d23 *= 0.75D;
+        }
+
+        double d13 = this.getMaximumSpeed();
+        d22 = MathHelper.clamp(d22, -d13, d13);
+        d23 = MathHelper.clamp(d23, -d13, d13);
+        this.moveEntity(MoverType.SELF, d22, 0.0D, d23);
+
+        if (aint[0][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[0][2])
+        {
+            this.setPosition(this.posX, this.posY + (double)aint[0][1], this.posZ);
+        }
+        else if (aint[1][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[1][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[1][2])
+        {
+            this.setPosition(this.posX, this.posY + (double)aint[1][1], this.posZ);
+        }
+
+        this.applyDrag();
+        Vec3d vec3d1 = this.getPos(this.posX, this.posY, this.posZ);
+
+        if (vec3d1 != null && vec3d != null)
+        {
+            double d14 = (vec3d.yCoord - vec3d1.yCoord) * 0.05D;
+            d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d5 > 0.0D)
+            {
+                this.motionX = this.motionX / d5 * (d5 + d14);
+                this.motionZ = this.motionZ / d5 * (d5 + d14);
+            }
+
+            this.setPosition(this.posX, vec3d1.yCoord, this.posZ);
+        }
+
+        int j = MathHelper.floor(this.posX);
+        int i = MathHelper.floor(this.posZ);
+
+        if (j != pos.getX() || i != pos.getZ())
+        {
+            d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            this.motionX = d5 * (double)(j - pos.getX());
+            this.motionZ = d5 * (double)(i - pos.getZ());
+        }
+
+        if (flag)
+        {
+            double d15 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d15 > 0.01D)
+            {
+                double d16 = 0.06D;
+                this.motionX += this.motionX / d15 * 0.06D;
+                this.motionZ += this.motionZ / d15 * 0.06D;
+            }
+            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.EAST_WEST)
+            {
+                if (this.world.getBlockState(pos.west()).isNormalCube())
+                {
+                    this.motionX = 0.02D;
+                }
+                else if (this.world.getBlockState(pos.east()).isNormalCube())
+                {
+                    this.motionX = -0.02D;
+                }
+            }
+            else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.NORTH_SOUTH)
+            {
+                if (this.world.getBlockState(pos.north()).isNormalCube())
+                {
+                    this.motionZ = 0.02D;
+                }
+                else if (this.world.getBlockState(pos.south()).isNormalCube())
+                {
+                    this.motionZ = -0.02D;
+                }
+            }
+        }
+    }
+
+    protected void applyDrag()
+    {
+        if (this.isBeingRidden())
+        {
+            this.motionX *= 0.996999979019165D;
+            this.motionY *= 0.0D;
+            this.motionZ *= 0.996999979019165D;
+        }
+        else
+        {
+            this.motionX *= 0.9599999785423279D;
+            this.motionY *= 0.0D;
+            this.motionZ *= 0.9599999785423279D;
+        }
+    }
+
+    /**
+     * Sets the x,y,z of the entity from the given parameters. Also seems to set up a bounding box.
+     */
+    public void setPosition(double x, double y, double z)
+    {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        float f = this.width / 2.0F;
+        float f1 = this.height;
+        this.setEntityBoundingBox(new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
+    }
+
+    @Nullable
+    public Vec3d getPosOffset(double x, double y, double z, double offset)
+    {
+        int i = MathHelper.floor(x);
+        int j = MathHelper.floor(y);
+        int k = MathHelper.floor(z);
+
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(i, j - 1, k)))
+        {
+            --j;
+        }
+
+        IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
+
+        if (BlockRailBase.isRailBlock(iblockstate))
+        {
+            BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)iblockstate.getValue(((BlockRailBase)iblockstate.getBlock()).getShapeProperty());
+            y = (double)j;
+
+            if (blockrailbase$enumraildirection.isAscending())
+            {
+                y = (double)(j + 1);
+            }
+
+            int[][] aint = MATRIX[blockrailbase$enumraildirection.getMetadata()];
+            double d0 = (double)(aint[1][0] - aint[0][0]);
+            double d1 = (double)(aint[1][2] - aint[0][2]);
+            double d2 = Math.sqrt(d0 * d0 + d1 * d1);
+            d0 = d0 / d2;
+            d1 = d1 / d2;
+            x = x + d0 * offset;
+            z = z + d1 * offset;
+
+            if (aint[0][1] != 0 && MathHelper.floor(x) - i == aint[0][0] && MathHelper.floor(z) - k == aint[0][2])
+            {
+                y += (double)aint[0][1];
+            }
+            else if (aint[1][1] != 0 && MathHelper.floor(x) - i == aint[1][0] && MathHelper.floor(z) - k == aint[1][2])
+            {
+                y += (double)aint[1][1];
+            }
+
+            return this.getPos(x, y, z);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    @Nullable
+    public Vec3d getPos(double p_70489_1_, double p_70489_3_, double p_70489_5_)
+    {
+        int i = MathHelper.floor(p_70489_1_);
+        int j = MathHelper.floor(p_70489_3_);
+        int k = MathHelper.floor(p_70489_5_);
+
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(i, j - 1, k)))
+        {
+            --j;
+        }
+
+        IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
+
+        if (BlockRailBase.isRailBlock(iblockstate))
+        {
+            BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)iblockstate.getValue(((BlockRailBase)iblockstate.getBlock()).getShapeProperty());
+            int[][] aint = MATRIX[blockrailbase$enumraildirection.getMetadata()];
+            double d0 = (double)i + 0.5D + (double)aint[0][0] * 0.5D;
+            double d1 = (double)j + 0.0625D + (double)aint[0][1] * 0.5D;
+            double d2 = (double)k + 0.5D + (double)aint[0][2] * 0.5D;
+            double d3 = (double)i + 0.5D + (double)aint[1][0] * 0.5D;
+            double d4 = (double)j + 0.0625D + (double)aint[1][1] * 0.5D;
+            double d5 = (double)k + 0.5D + (double)aint[1][2] * 0.5D;
+            double d6 = d3 - d0;
+            double d7 = (d4 - d1) * 2.0D;
+            double d8 = d5 - d2;
+            double d9;
+
+            if (d6 == 0.0D)
+            {
+                d9 = p_70489_5_ - (double)k;
+            }
+            else if (d8 == 0.0D)
+            {
+                d9 = p_70489_1_ - (double)i;
+            }
+            else
+            {
+                double d10 = p_70489_1_ - d0;
+                double d11 = p_70489_5_ - d2;
+                d9 = (d10 * d6 + d11 * d8) * 2.0D;
+            }
+
+            p_70489_1_ = d0 + d6 * d9;
+            p_70489_3_ = d1 + d7 * d9;
+            p_70489_5_ = d2 + d8 * d9;
+
+            if (d7 < 0.0D)
+            {
+                ++p_70489_3_;
+            }
+
+            if (d7 > 0.0D)
+            {
+                p_70489_3_ += 0.5D;
+            }
+
+            return new Vec3d(p_70489_1_, p_70489_3_, p_70489_5_);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the bounding box of this Entity, adjusted to take auxiliary entities into account (e.g. the tile contained
+     * by a minecart, such as a command block).
+     */
+    public AxisAlignedBB getRenderBoundingBox()
+    {
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        return this.hasDisplayTile() ? axisalignedbb.expandXyz((double)Math.abs(this.getDisplayTileOffset()) / 16.0D) : axisalignedbb;
+    }
+
+    public static void registerFixesMinecart(DataFixer fixer, Class<?> name)
+    {
+    }
+
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    protected void readEntityFromNBT(NBTTagCompound compound)
+    {
+        if (compound.getBoolean("CustomDisplayTile"))
+        {
+            Block block;
+
+            if (compound.hasKey("DisplayTile", 8))
+            {
+                block = Block.getBlockFromName(compound.getString("DisplayTile"));
+            }
+            else
+            {
+                block = Block.getBlockById(compound.getInteger("DisplayTile"));
+            }
+
+            int i = compound.getInteger("DisplayData");
+            this.setDisplayTile(block == null ? Blocks.AIR.getDefaultState() : block.getStateFromMeta(i));
+            this.setDisplayTileOffset(compound.getInteger("DisplayOffset"));
+        }
+    }
+
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    protected void writeEntityToNBT(NBTTagCompound compound)
+    {
+        if (this.hasDisplayTile())
+        {
+            compound.setBoolean("CustomDisplayTile", true);
+            IBlockState iblockstate = this.getDisplayTile();
+            ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(iblockstate.getBlock());
+            compound.setString("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
+            compound.setInteger("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
+            compound.setInteger("DisplayOffset", this.getDisplayTileOffset());
+        }
+    }
+
+    /**
+     * Applies a velocity to the entities, to push them away from eachother.
+     */
+    public void applyEntityCollision(Entity entityIn)
+    {
+        if (!this.world.isRemote)
+        {
+            if (!entityIn.noClip && !this.noClip)
+            {
+                if (!this.isPassenger(entityIn))
+                {
+                    double d0 = entityIn.posX - this.posX;
+                    double d1 = entityIn.posZ - this.posZ;
+                    double d2 = d0 * d0 + d1 * d1;
+
+                    if (d2 >= 9.999999747378752E-5D)
+                    {
+                        d2 = (double)MathHelper.sqrt(d2);
+                        d0 = d0 / d2;
+                        d1 = d1 / d2;
+                        double d3 = 1.0D / d2;
+
+                        if (d3 > 1.0D)
+                        {
+                            d3 = 1.0D;
+                        }
+
+                        d0 = d0 * d3;
+                        d1 = d1 * d3;
+                        d0 = d0 * 0.10000000149011612D;
+                        d1 = d1 * 0.10000000149011612D;
+                        d0 = d0 * (double)(1.0F - this.entityCollisionReduction);
+                        d1 = d1 * (double)(1.0F - this.entityCollisionReduction);
+                        d0 = d0 * 0.5D;
+                        d1 = d1 * 0.5D;
+
+                        if (entityIn instanceof EntityMinecart)
+                        {
+                            double d4 = entityIn.posX - this.posX;
+                            double d5 = entityIn.posZ - this.posZ;
+                            Vec3d vec3d = (new Vec3d(d4, 0.0D, d5)).normalize();
+                            Vec3d vec3d1 = (new Vec3d((double)MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, (double)MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
+                            double d6 = Math.abs(vec3d.dotProduct(vec3d1));
+
+                            if (d6 < 0.800000011920929D)
+                            {
+                                return;
+                            }
+
+                            double d7 = entityIn.motionX + this.motionX;
+                            double d8 = entityIn.motionZ + this.motionZ;
+
+                            if (((EntityMinecart)entityIn).getType() == EntityMinecart.Type.FURNACE && this.getType() != EntityMinecart.Type.FURNACE)
+                            {
+                                this.motionX *= 0.20000000298023224D;
+                                this.motionZ *= 0.20000000298023224D;
+                                this.addVelocity(entityIn.motionX - d0, 0.0D, entityIn.motionZ - d1);
+                                entityIn.motionX *= 0.949999988079071D;
+                                entityIn.motionZ *= 0.949999988079071D;
+                            }
+                            else if (((EntityMinecart)entityIn).getType() != EntityMinecart.Type.FURNACE && this.getType() == EntityMinecart.Type.FURNACE)
+                            {
+                                entityIn.motionX *= 0.20000000298023224D;
+                                entityIn.motionZ *= 0.20000000298023224D;
+                                entityIn.addVelocity(this.motionX + d0, 0.0D, this.motionZ + d1);
+                                this.motionX *= 0.949999988079071D;
+                                this.motionZ *= 0.949999988079071D;
+                            }
+                            else
+                            {
+                                d7 = d7 / 2.0D;
+                                d8 = d8 / 2.0D;
+                                this.motionX *= 0.20000000298023224D;
+                                this.motionZ *= 0.20000000298023224D;
+                                this.addVelocity(d7 - d0, 0.0D, d8 - d1);
+                                entityIn.motionX *= 0.20000000298023224D;
+                                entityIn.motionZ *= 0.20000000298023224D;
+                                entityIn.addVelocity(d7 + d0, 0.0D, d8 + d1);
+                            }
+                        }
+                        else
+                        {
+                            this.addVelocity(-d0, 0.0D, -d1);
+                            entityIn.addVelocity(d0 / 4.0D, 0.0D, d1 / 4.0D);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Set the position and rotation values directly without any clamping.
+     */
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
+    {
+        this.minecartX = x;
+        this.minecartY = y;
+        this.minecartZ = z;
+        this.minecartYaw = (double)yaw;
+        this.minecartPitch = (double)pitch;
+        this.turnProgress = posRotationIncrements + 2;
+        this.motionX = this.velocityX;
+        this.motionY = this.velocityY;
+        this.motionZ = this.velocityZ;
+    }
+
+    /**
+     * Updates the velocity of the entity to a new value.
+     */
+    public void setVelocity(double x, double y, double z)
+    {
+        this.motionX = x;
+        this.motionY = y;
+        this.motionZ = z;
+        this.velocityX = this.motionX;
+        this.velocityY = this.motionY;
+        this.velocityZ = this.motionZ;
+    }
+
+    /**
+     * Sets the current amount of damage the minecart has taken. Decreases over time. The cart breaks when this is over
+     * 40.
+     */
+    public void setDamage(float damage)
+    {
+        this.dataManager.set(DAMAGE, Float.valueOf(damage));
+    }
+
+    /**
+     * Gets the current amount of damage the minecart has taken. Decreases over time. The cart breaks when this is over
+     * 40.
+     */
+    public float getDamage()
+    {
+        return ((Float)this.dataManager.get(DAMAGE)).floatValue();
+    }
+
+    /**
+     * Sets the rolling amplitude the cart rolls while being attacked.
+     */
+    public void setRollingAmplitude(int rollingAmplitude)
+    {
+        this.dataManager.set(ROLLING_AMPLITUDE, Integer.valueOf(rollingAmplitude));
+    }
+
+    /**
+     * Gets the rolling amplitude the cart rolls while being attacked.
+     */
+    public int getRollingAmplitude()
+    {
+        return ((Integer)this.dataManager.get(ROLLING_AMPLITUDE)).intValue();
+    }
+
+    /**
+     * Sets the rolling direction the cart rolls while being attacked. Can be 1 or -1.
+     */
+    public void setRollingDirection(int rollingDirection)
+    {
+        this.dataManager.set(ROLLING_DIRECTION, Integer.valueOf(rollingDirection));
+    }
+
+    /**
+     * Gets the rolling direction the cart rolls while being attacked. Can be 1 or -1.
+     */
+    public int getRollingDirection()
+    {
+        return ((Integer)this.dataManager.get(ROLLING_DIRECTION)).intValue();
+    }
+
+    public abstract EntityMinecart.Type getType();
+
+    public IBlockState getDisplayTile()
+    {
+        return !this.hasDisplayTile() ? this.getDefaultDisplayTile() : Block.getStateById(((Integer)this.getDataManager().get(DISPLAY_TILE)).intValue());
+    }
+
+    public IBlockState getDefaultDisplayTile()
+    {
+        return Blocks.AIR.getDefaultState();
+    }
+
+    public int getDisplayTileOffset()
+    {
+        return !this.hasDisplayTile() ? this.getDefaultDisplayTileOffset() : ((Integer)this.getDataManager().get(DISPLAY_TILE_OFFSET)).intValue();
+    }
+
+    public int getDefaultDisplayTileOffset()
+    {
+        return 6;
+    }
+
+    public void setDisplayTile(IBlockState displayTile)
+    {
+        this.getDataManager().set(DISPLAY_TILE, Integer.valueOf(Block.getStateId(displayTile)));
+        this.setHasDisplayTile(true);
+    }
+
+    public void setDisplayTileOffset(int displayTileOffset)
+    {
+        this.getDataManager().set(DISPLAY_TILE_OFFSET, Integer.valueOf(displayTileOffset));
+        this.setHasDisplayTile(true);
+    }
+
+    public boolean hasDisplayTile()
+    {
+        return ((Boolean)this.getDataManager().get(SHOW_BLOCK)).booleanValue();
+    }
+
+    public void setHasDisplayTile(boolean showBlock)
+    {
+        this.getDataManager().set(SHOW_BLOCK, Boolean.valueOf(showBlock));
+    }
+
+    public static enum Type
+    {
+        RIDEABLE(0, "MinecartRideable"),
+        CHEST(1, "MinecartChest"),
+        FURNACE(2, "MinecartFurnace"),
+        TNT(3, "MinecartTNT"),
+        SPAWNER(4, "MinecartSpawner"),
+        HOPPER(5, "MinecartHopper"),
+        COMMAND_BLOCK(6, "MinecartCommandBlock");
+
+        private static final Map<Integer, EntityMinecart.Type> BY_ID = Maps.<Integer, EntityMinecart.Type>newHashMap();
+        private final int id;
+        private final String name;
+
+        private Type(int idIn, String nameIn)
+        {
+            this.id = idIn;
+            this.name = nameIn;
+        }
+
+        public int getId()
+        {
+            return this.id;
+        }
+
+        public String getName()
+        {
+            return this.name;
+        }
+
+        public static EntityMinecart.Type getById(int idIn)
+        {
+            EntityMinecart.Type entityminecart$type = BY_ID.get(Integer.valueOf(idIn));
+            return entityminecart$type == null ? RIDEABLE : entityminecart$type;
+        }
+
+        static {
+            for (EntityMinecart.Type entityminecart$type : values())
+            {
+                BY_ID.put(Integer.valueOf(entityminecart$type.getId()), entityminecart$type);
+            }
+        }
+    }
 }

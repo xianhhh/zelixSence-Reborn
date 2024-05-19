@@ -8,113 +8,160 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
-public class EntityOtherPlayerMP extends AbstractClientPlayer {
-   private int field_71184_b;
-   private double field_71185_c;
-   private double field_71182_d;
-   private double field_71183_e;
-   private double field_71180_f;
-   private double field_71181_g;
+public class EntityOtherPlayerMP extends AbstractClientPlayer
+{
+    private int otherPlayerMPPosRotationIncrements;
+    private double otherPlayerMPX;
+    private double otherPlayerMPY;
+    private double otherPlayerMPZ;
+    private double otherPlayerMPYaw;
+    private double otherPlayerMPPitch;
 
-   public EntityOtherPlayerMP(World p_i45075_1_, GameProfile p_i45075_2_) {
-      super(p_i45075_1_, p_i45075_2_);
-      this.field_70138_W = 1.0F;
-      this.field_70145_X = true;
-      this.field_71082_cx = 0.25F;
-   }
+    public EntityOtherPlayerMP(World worldIn, GameProfile gameProfileIn)
+    {
+        super(worldIn, gameProfileIn);
+        this.stepHeight = 1.0F;
+        this.noClip = true;
+        this.renderOffsetY = 0.25F;
+    }
 
-   public boolean func_70112_a(double p_70112_1_) {
-      double d0 = this.func_174813_aQ().func_72320_b() * 10.0D;
-      if (Double.isNaN(d0)) {
-         d0 = 1.0D;
-      }
+    /**
+     * Checks if the entity is in range to render.
+     */
+    public boolean isInRangeToRenderDist(double distance)
+    {
+        double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0D;
 
-      d0 = d0 * 64.0D * func_184183_bd();
-      return p_70112_1_ < d0 * d0;
-   }
+        if (Double.isNaN(d0))
+        {
+            d0 = 1.0D;
+        }
 
-   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
-      return true;
-   }
+        d0 = d0 * 64.0D * getRenderDistanceWeight();
+        return distance < d0 * d0;
+    }
 
-   public void func_180426_a(double p_180426_1_, double p_180426_3_, double p_180426_5_, float p_180426_7_, float p_180426_8_, int p_180426_9_, boolean p_180426_10_) {
-      this.field_71185_c = p_180426_1_;
-      this.field_71182_d = p_180426_3_;
-      this.field_71183_e = p_180426_5_;
-      this.field_71180_f = (double)p_180426_7_;
-      this.field_71181_g = (double)p_180426_8_;
-      this.field_71184_b = p_180426_9_;
-   }
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        return true;
+    }
 
-   public void func_70071_h_() {
-      this.field_71082_cx = 0.0F;
-      super.func_70071_h_();
-      this.field_184618_aE = this.field_70721_aZ;
-      double d0 = this.field_70165_t - this.field_70169_q;
-      double d1 = this.field_70161_v - this.field_70166_s;
-      float f = MathHelper.func_76133_a(d0 * d0 + d1 * d1) * 4.0F;
-      if (f > 1.0F) {
-         f = 1.0F;
-      }
+    /**
+     * Set the position and rotation values directly without any clamping.
+     */
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
+    {
+        this.otherPlayerMPX = x;
+        this.otherPlayerMPY = y;
+        this.otherPlayerMPZ = z;
+        this.otherPlayerMPYaw = (double)yaw;
+        this.otherPlayerMPPitch = (double)pitch;
+        this.otherPlayerMPPosRotationIncrements = posRotationIncrements;
+    }
 
-      this.field_70721_aZ += (f - this.field_70721_aZ) * 0.4F;
-      this.field_184619_aG += this.field_70721_aZ;
-   }
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        this.renderOffsetY = 0.0F;
+        super.onUpdate();
+        this.prevLimbSwingAmount = this.limbSwingAmount;
+        double d0 = this.posX - this.prevPosX;
+        double d1 = this.posZ - this.prevPosZ;
+        float f = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
 
-   public void func_70636_d() {
-      if (this.field_71184_b > 0) {
-         double d0 = this.field_70165_t + (this.field_71185_c - this.field_70165_t) / (double)this.field_71184_b;
-         double d1 = this.field_70163_u + (this.field_71182_d - this.field_70163_u) / (double)this.field_71184_b;
-         double d2 = this.field_70161_v + (this.field_71183_e - this.field_70161_v) / (double)this.field_71184_b;
+        if (f > 1.0F)
+        {
+            f = 1.0F;
+        }
 
-         double d3;
-         for(d3 = this.field_71180_f - (double)this.field_70177_z; d3 < -180.0D; d3 += 360.0D) {
-            ;
-         }
+        this.limbSwingAmount += (f - this.limbSwingAmount) * 0.4F;
+        this.limbSwing += this.limbSwingAmount;
+    }
 
-         while(d3 >= 180.0D) {
-            d3 -= 360.0D;
-         }
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
+    public void onLivingUpdate()
+    {
+        if (this.otherPlayerMPPosRotationIncrements > 0)
+        {
+            double d0 = this.posX + (this.otherPlayerMPX - this.posX) / (double)this.otherPlayerMPPosRotationIncrements;
+            double d1 = this.posY + (this.otherPlayerMPY - this.posY) / (double)this.otherPlayerMPPosRotationIncrements;
+            double d2 = this.posZ + (this.otherPlayerMPZ - this.posZ) / (double)this.otherPlayerMPPosRotationIncrements;
+            double d3;
 
-         this.field_70177_z = (float)((double)this.field_70177_z + d3 / (double)this.field_71184_b);
-         this.field_70125_A = (float)((double)this.field_70125_A + (this.field_71181_g - (double)this.field_70125_A) / (double)this.field_71184_b);
-         --this.field_71184_b;
-         this.func_70107_b(d0, d1, d2);
-         this.func_70101_b(this.field_70177_z, this.field_70125_A);
-      }
+            for (d3 = this.otherPlayerMPYaw - (double)this.rotationYaw; d3 < -180.0D; d3 += 360.0D)
+            {
+                ;
+            }
 
-      this.field_71107_bF = this.field_71109_bG;
-      this.func_82168_bl();
-      float f1 = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
-      float f = (float)Math.atan(-this.field_70181_x * 0.20000000298023224D) * 15.0F;
-      if (f1 > 0.1F) {
-         f1 = 0.1F;
-      }
+            while (d3 >= 180.0D)
+            {
+                d3 -= 360.0D;
+            }
 
-      if (!this.field_70122_E || this.func_110143_aJ() <= 0.0F) {
-         f1 = 0.0F;
-      }
+            this.rotationYaw = (float)((double)this.rotationYaw + d3 / (double)this.otherPlayerMPPosRotationIncrements);
+            this.rotationPitch = (float)((double)this.rotationPitch + (this.otherPlayerMPPitch - (double)this.rotationPitch) / (double)this.otherPlayerMPPosRotationIncrements);
+            --this.otherPlayerMPPosRotationIncrements;
+            this.setPosition(d0, d1, d2);
+            this.setRotation(this.rotationYaw, this.rotationPitch);
+        }
 
-      if (this.field_70122_E || this.func_110143_aJ() <= 0.0F) {
-         f = 0.0F;
-      }
+        this.prevCameraYaw = this.cameraYaw;
+        this.updateArmSwingProgress();
+        float f1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        float f = (float)Math.atan(-this.motionY * 0.20000000298023224D) * 15.0F;
 
-      this.field_71109_bG += (f1 - this.field_71109_bG) * 0.4F;
-      this.field_70726_aT += (f - this.field_70726_aT) * 0.8F;
-      this.field_70170_p.field_72984_F.func_76320_a("push");
-      this.func_85033_bc();
-      this.field_70170_p.field_72984_F.func_76319_b();
-   }
+        if (f1 > 0.1F)
+        {
+            f1 = 0.1F;
+        }
 
-   public void func_145747_a(ITextComponent p_145747_1_) {
-      Minecraft.func_71410_x().field_71456_v.func_146158_b().func_146227_a(p_145747_1_);
-   }
+        if (!this.onGround || this.getHealth() <= 0.0F)
+        {
+            f1 = 0.0F;
+        }
 
-   public boolean func_70003_b(int p_70003_1_, String p_70003_2_) {
-      return false;
-   }
+        if (this.onGround || this.getHealth() <= 0.0F)
+        {
+            f = 0.0F;
+        }
 
-   public BlockPos func_180425_c() {
-      return new BlockPos(this.field_70165_t + 0.5D, this.field_70163_u + 0.5D, this.field_70161_v + 0.5D);
-   }
+        this.cameraYaw += (f1 - this.cameraYaw) * 0.4F;
+        this.cameraPitch += (f - this.cameraPitch) * 0.8F;
+        this.world.theProfiler.startSection("push");
+        this.collideWithNearbyEntities();
+        this.world.theProfiler.endSection();
+    }
+
+    /**
+     * Send a chat message to the CommandSender
+     */
+    public void addChatMessage(ITextComponent component)
+    {
+        Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(component);
+    }
+
+    /**
+     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
+     */
+    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    {
+        return false;
+    }
+
+    /**
+     * Get the position in the world. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
+     * the coordinates 0, 0, 0
+     */
+    public BlockPos getPosition()
+    {
+        return new BlockPos(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D);
+    }
 }

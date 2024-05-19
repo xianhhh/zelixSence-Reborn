@@ -12,129 +12,164 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import javax.annotation.Nullable;
 
-public class Cartesian {
-   public static <T> Iterable<T[]> func_179318_a(Class<T> p_179318_0_, Iterable<? extends Iterable<? extends T>> p_179318_1_) {
-      return new Cartesian.Product<T[]>(p_179318_0_, (Iterable[])func_179322_b(Iterable.class, p_179318_1_));
-   }
+public class Cartesian
+{
+    public static <T> Iterable<T[]> cartesianProduct(Class<T> clazz, Iterable <? extends Iterable <? extends T >> sets)
+    {
+        return new Cartesian.Product(clazz, (Iterable[])toArray(Iterable.class, sets));
+    }
 
-   public static <T> Iterable<List<T>> func_179321_a(Iterable<? extends Iterable<? extends T>> p_179321_0_) {
-      return func_179323_b(func_179318_a(Object.class, p_179321_0_));
-   }
+    public static <T> Iterable<List<T>> cartesianProduct(Iterable <? extends Iterable <? extends T >> sets)
+    {
+        return arraysAsLists(cartesianProduct(Object.class, sets));
+    }
 
-   private static <T> Iterable<List<T>> func_179323_b(Iterable<Object[]> p_179323_0_) {
-      return Iterables.transform(p_179323_0_, new Cartesian.GetList());
-   }
+    private static <T> Iterable<List<T>> arraysAsLists(Iterable<Object[]> arrays)
+    {
+        return Iterables.transform(arrays, new Cartesian.GetList());
+    }
 
-   private static <T> T[] func_179322_b(Class<? super T> p_179322_0_, Iterable<? extends T> p_179322_1_) {
-      List<T> list = Lists.<T>newArrayList();
+    private static <T> T[] toArray(Class <? super T > clazz, Iterable <? extends T > it)
+    {
+        List<T> list = Lists.<T>newArrayList();
 
-      for(T t : p_179322_1_) {
-         list.add(t);
-      }
+        for (T t : it)
+        {
+            list.add(t);
+        }
 
-      return (T[])(list.toArray(func_179319_b(p_179322_0_, list.size())));
-   }
+        return (T[])(list.toArray(createArray(clazz, list.size())));
+    }
 
-   private static <T> T[] func_179319_b(Class<? super T> p_179319_0_, int p_179319_1_) {
-      return (T[])((Object[])Array.newInstance(p_179319_0_, p_179319_1_));
-   }
+    private static <T> T[] createArray(Class <? super T > elementType, int length)
+    {
+        return (T[])((Object[])Array.newInstance(elementType, length));
+    }
 
-   static class GetList<T> implements Function<Object[], List<T>> {
-      private GetList() {
-      }
+    static class GetList<T> implements Function<Object[], List<T>>
+    {
+        private GetList()
+        {
+        }
 
-      public List<T> apply(@Nullable Object[] p_apply_1_) {
-         return Arrays.<T>asList(p_apply_1_);
-      }
-   }
+        public List<T> apply(@Nullable Object[] p_apply_1_)
+        {
+            return Arrays.<T>asList((T[])p_apply_1_);
+        }
+    }
 
-   static class Product<T> implements Iterable<T[]> {
-      private final Class<T> field_179429_a;
-      private final Iterable<? extends T>[] field_179428_b;
+    static class Product<T> implements Iterable<T[]>
+    {
+        private final Class<T> clazz;
+        private final Iterable <? extends T > [] iterables;
 
-      private Product(Class<T> p_i46020_1_, Iterable<? extends T>[] p_i46020_2_) {
-         this.field_179429_a = p_i46020_1_;
-         this.field_179428_b = p_i46020_2_;
-      }
+        private Product(Class<T> clazz, Iterable <? extends T > [] iterables)
+        {
+            this.clazz = clazz;
+            this.iterables = iterables;
+        }
 
-      public Iterator<T[]> iterator() {
-         return (Iterator<T[]>)(this.field_179428_b.length <= 0 ? Collections.singletonList(Cartesian.func_179319_b(this.field_179429_a, 0)).iterator() : new Cartesian.Product.ProductIterator(this.field_179429_a, this.field_179428_b));
-      }
+        public Iterator<T[]> iterator()
+        {
+            return (Iterator<T[]>)(this.iterables.length <= 0 ? Collections.singletonList(Cartesian.createArray(this.clazz, 0)).iterator() : new Cartesian.Product.ProductIterator(this.clazz, this.iterables));
+        }
 
-      static class ProductIterator<T> extends UnmodifiableIterator<T[]> {
-         private int field_179426_a;
-         private final Iterable<? extends T>[] field_179424_b;
-         private final Iterator<? extends T>[] field_179425_c;
-         private final T[] field_179423_d;
+        static class ProductIterator<T> extends UnmodifiableIterator<T[]>
+        {
+            private int index;
+            private final Iterable <? extends T > [] iterables;
+            private final Iterator <? extends T > [] iterators;
+            private final T[] results;
 
-         private ProductIterator(Class<T> p_i46018_1_, Iterable<? extends T>[] p_i46018_2_) {
-            this.field_179426_a = -2;
-            this.field_179424_b = p_i46018_2_;
-            this.field_179425_c = (Iterator[])Cartesian.func_179319_b(Iterator.class, this.field_179424_b.length);
+            private ProductIterator(Class<T> clazz, Iterable <? extends T > [] iterables)
+            {
+                this.index = -2;
+                this.iterables = iterables;
+                this.iterators = (Iterator[])Cartesian.createArray(Iterator.class, this.iterables.length);
 
-            for(int i = 0; i < this.field_179424_b.length; ++i) {
-               this.field_179425_c[i] = p_i46018_2_[i].iterator();
+                for (int i = 0; i < this.iterables.length; ++i)
+                {
+                    this.iterators[i] = iterables[i].iterator();
+                }
+
+                this.results = (T[])Cartesian.createArray(clazz, this.iterators.length);
             }
 
-            this.field_179423_d = (T[])Cartesian.func_179319_b(p_i46018_1_, this.field_179425_c.length);
-         }
-
-         private void func_179422_b() {
-            this.field_179426_a = -1;
-            Arrays.fill(this.field_179425_c, (Object)null);
-            Arrays.fill(this.field_179423_d, (Object)null);
-         }
-
-         public boolean hasNext() {
-            if (this.field_179426_a == -2) {
-               this.field_179426_a = 0;
-
-               for(Iterator<? extends T> iterator1 : this.field_179425_c) {
-                  if (!iterator1.hasNext()) {
-                     this.func_179422_b();
-                     break;
-                  }
-               }
-
-               return true;
-            } else {
-               if (this.field_179426_a >= this.field_179425_c.length) {
-                  for(this.field_179426_a = this.field_179425_c.length - 1; this.field_179426_a >= 0; --this.field_179426_a) {
-                     Iterator<? extends T> iterator = this.field_179425_c[this.field_179426_a];
-                     if (iterator.hasNext()) {
-                        break;
-                     }
-
-                     if (this.field_179426_a == 0) {
-                        this.func_179422_b();
-                        break;
-                     }
-
-                     iterator = this.field_179424_b[this.field_179426_a].iterator();
-                     this.field_179425_c[this.field_179426_a] = iterator;
-                     if (!iterator.hasNext()) {
-                        this.func_179422_b();
-                        break;
-                     }
-                  }
-               }
-
-               return this.field_179426_a >= 0;
+            private void endOfData()
+            {
+                this.index = -1;
+                Arrays.fill(this.iterators, (Object)null);
+                Arrays.fill(this.results, (Object)null);
             }
-         }
 
-         public T[] next() {
-            if (!this.hasNext()) {
-               throw new NoSuchElementException();
-            } else {
-               while(this.field_179426_a < this.field_179425_c.length) {
-                  this.field_179423_d[this.field_179426_a] = this.field_179425_c[this.field_179426_a].next();
-                  ++this.field_179426_a;
-               }
+            public boolean hasNext()
+            {
+                if (this.index == -2)
+                {
+                    this.index = 0;
 
-               return (T[])((Object[])this.field_179423_d.clone());
+                    for (Iterator <? extends T > iterator1 : this.iterators)
+                    {
+                        if (!iterator1.hasNext())
+                        {
+                            this.endOfData();
+                            break;
+                        }
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    if (this.index >= this.iterators.length)
+                    {
+                        for (this.index = this.iterators.length - 1; this.index >= 0; --this.index)
+                        {
+                            Iterator <? extends T > iterator = this.iterators[this.index];
+
+                            if (iterator.hasNext())
+                            {
+                                break;
+                            }
+
+                            if (this.index == 0)
+                            {
+                                this.endOfData();
+                                break;
+                            }
+
+                            iterator = this.iterables[this.index].iterator();
+                            this.iterators[this.index] = iterator;
+
+                            if (!iterator.hasNext())
+                            {
+                                this.endOfData();
+                                break;
+                            }
+                        }
+                    }
+
+                    return this.index >= 0;
+                }
             }
-         }
-      }
-   }
+
+            public T[] next()
+            {
+                if (!this.hasNext())
+                {
+                    throw new NoSuchElementException();
+                }
+                else
+                {
+                    while (this.index < this.iterators.length)
+                    {
+                        this.results[this.index] = this.iterators[this.index].next();
+                        ++this.index;
+                    }
+
+                    return (T[])((Object[])this.results.clone());
+                }
+            }
+        }
+    }
 }

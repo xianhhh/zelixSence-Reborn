@@ -29,135 +29,188 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityVindicator extends AbstractIllager {
-   private boolean field_190643_b;
-   private static final Predicate<Entity> field_190644_c = new Predicate<Entity>() {
-      public boolean apply(@Nullable Entity p_apply_1_) {
-         return p_apply_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_apply_1_).func_190631_cK();
-      }
-   };
+public class EntityVindicator extends AbstractIllager
+{
+    private boolean field_190643_b;
+    private static final Predicate<Entity> field_190644_c = new Predicate<Entity>()
+    {
+        public boolean apply(@Nullable Entity p_apply_1_)
+        {
+            return p_apply_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_apply_1_).func_190631_cK();
+        }
+    };
 
-   public EntityVindicator(World p_i47279_1_) {
-      super(p_i47279_1_);
-      this.func_70105_a(0.6F, 1.95F);
-   }
+    public EntityVindicator(World p_i47279_1_)
+    {
+        super(p_i47279_1_);
+        this.setSize(0.6F, 1.95F);
+    }
 
-   public static void func_190641_b(DataFixer p_190641_0_) {
-      EntityLiving.func_189752_a(p_190641_0_, EntityVindicator.class);
-   }
+    public static void func_190641_b(DataFixer p_190641_0_)
+    {
+        EntityLiving.registerFixesMob(p_190641_0_, EntityVindicator.class);
+    }
 
-   protected void func_184651_r() {
-      super.func_184651_r();
-      this.field_70714_bg.func_75776_a(0, new EntityAISwimming(this));
-      this.field_70714_bg.func_75776_a(4, new EntityAIAttackMelee(this, 1.0D, false));
-      this.field_70714_bg.func_75776_a(8, new EntityAIWander(this, 0.6D));
-      this.field_70714_bg.func_75776_a(9, new EntityAIWatchClosest(this, EntityPlayer.class, 3.0F, 1.0F));
-      this.field_70714_bg.func_75776_a(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
-      this.field_70715_bh.func_75776_a(1, new EntityAIHurtByTarget(this, true, new Class[]{EntityVindicator.class}));
-      this.field_70715_bh.func_75776_a(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-      this.field_70715_bh.func_75776_a(3, new EntityAINearestAttackableTarget(this, EntityVillager.class, true));
-      this.field_70715_bh.func_75776_a(3, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
-      this.field_70715_bh.func_75776_a(4, new EntityVindicator.AIJohnnyAttack(this));
-   }
+    protected void initEntityAI()
+    {
+        super.initEntityAI();
+        this.tasks.addTask(0, new EntityAISwimming(this));
+        this.tasks.addTask(4, new EntityAIAttackMelee(this, 1.0D, false));
+        this.tasks.addTask(8, new EntityAIWander(this, 0.6D));
+        this.tasks.addTask(9, new EntityAIWatchClosest(this, EntityPlayer.class, 3.0F, 1.0F));
+        this.tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[] {EntityVindicator.class}));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityVillager.class, true));
+        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
+        this.targetTasks.addTask(4, new EntityVindicator.AIJohnnyAttack(this));
+    }
 
-   protected void func_110147_ax() {
-      super.func_110147_ax();
-      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.3499999940395355D);
-      this.func_110148_a(SharedMonsterAttributes.field_111265_b).func_111128_a(12.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(24.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(5.0D);
-   }
+    protected void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3499999940395355D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(12.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(24.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(5.0D);
+    }
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-   }
+    protected void entityInit()
+    {
+        super.entityInit();
+    }
 
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_191186_av;
-   }
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.field_191186_av;
+    }
 
-   public boolean func_190639_o() {
-      return this.func_193078_a(1);
-   }
+    public boolean func_190639_o()
+    {
+        return this.func_193078_a(1);
+    }
 
-   public void func_190636_a(boolean p_190636_1_) {
-      this.func_193079_a(1, p_190636_1_);
-   }
+    public void func_190636_a(boolean p_190636_1_)
+    {
+        this.func_193079_a(1, p_190636_1_);
+    }
 
-   public void func_70014_b(NBTTagCompound p_70014_1_) {
-      super.func_70014_b(p_70014_1_);
-      if (this.field_190643_b) {
-         p_70014_1_.func_74757_a("Johnny", true);
-      }
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    public void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
 
-   }
+        if (this.field_190643_b)
+        {
+            compound.setBoolean("Johnny", true);
+        }
+    }
 
-   public AbstractIllager.IllagerArmPose func_193077_p() {
-      return this.func_190639_o() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.CROSSED;
-   }
+    public AbstractIllager.IllagerArmPose func_193077_p()
+    {
+        return this.func_190639_o() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.CROSSED;
+    }
 
-   public void func_70037_a(NBTTagCompound p_70037_1_) {
-      super.func_70037_a(p_70037_1_);
-      if (p_70037_1_.func_150297_b("Johnny", 99)) {
-         this.field_190643_b = p_70037_1_.func_74767_n("Johnny");
-      }
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
 
-   }
+        if (compound.hasKey("Johnny", 99))
+        {
+            this.field_190643_b = compound.getBoolean("Johnny");
+        }
+    }
 
-   @Nullable
-   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_) {
-      IEntityLivingData ientitylivingdata = super.func_180482_a(p_180482_1_, p_180482_2_);
-      this.func_180481_a(p_180482_1_);
-      this.func_180483_b(p_180482_1_);
-      return ientitylivingdata;
-   }
+    @Nullable
 
-   protected void func_180481_a(DifficultyInstance p_180481_1_) {
-      this.func_184201_a(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.field_151036_c));
-   }
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
+    {
+        IEntityLivingData ientitylivingdata = super.onInitialSpawn(difficulty, livingdata);
+        this.setEquipmentBasedOnDifficulty(difficulty);
+        this.setEnchantmentBasedOnDifficulty(difficulty);
+        return ientitylivingdata;
+    }
 
-   protected void func_70619_bc() {
-      super.func_70619_bc();
-      this.func_190636_a(this.func_70638_az() != null);
-   }
+    /**
+     * Gives armor or weapon for entity based on given DifficultyInstance
+     */
+    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty)
+    {
+        this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+    }
 
-   public boolean func_184191_r(Entity p_184191_1_) {
-      if (super.func_184191_r(p_184191_1_)) {
-         return true;
-      } else if (p_184191_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_184191_1_).func_70668_bt() == EnumCreatureAttribute.ILLAGER) {
-         return this.func_96124_cp() == null && p_184191_1_.func_96124_cp() == null;
-      } else {
-         return false;
-      }
-   }
+    protected void updateAITasks()
+    {
+        super.updateAITasks();
+        this.func_190636_a(this.getAttackTarget() != null);
+    }
 
-   public void func_96094_a(String p_96094_1_) {
-      super.func_96094_a(p_96094_1_);
-      if (!this.field_190643_b && "Johnny".equals(p_96094_1_)) {
-         this.field_190643_b = true;
-      }
+    /**
+     * Returns whether this Entity is on the same team as the given Entity.
+     */
+    public boolean isOnSameTeam(Entity entityIn)
+    {
+        if (super.isOnSameTeam(entityIn))
+        {
+            return true;
+        }
+        else if (entityIn instanceof EntityLivingBase && ((EntityLivingBase)entityIn).getCreatureAttribute() == EnumCreatureAttribute.ILLAGER)
+        {
+            return this.getTeam() == null && entityIn.getTeam() == null;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-   }
+    /**
+     * Sets the custom name tag for this entity
+     */
+    public void setCustomNameTag(String name)
+    {
+        super.setCustomNameTag(name);
 
-   protected SoundEvent func_184639_G() {
-      return SoundEvents.field_191268_hm;
-   }
+        if (!this.field_190643_b && "Johnny".equals(name))
+        {
+            this.field_190643_b = true;
+        }
+    }
 
-   protected SoundEvent func_184615_bR() {
-      return SoundEvents.field_191269_hn;
-   }
+    protected SoundEvent getAmbientSound()
+    {
+        return SoundEvents.field_191268_hm;
+    }
 
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      return SoundEvents.field_191270_ho;
-   }
+    protected SoundEvent getDeathSound()
+    {
+        return SoundEvents.field_191269_hn;
+    }
 
-   static class AIJohnnyAttack extends EntityAINearestAttackableTarget<EntityLivingBase> {
-      public AIJohnnyAttack(EntityVindicator p_i47345_1_) {
-         super(p_i47345_1_, EntityLivingBase.class, 0, true, true, EntityVindicator.field_190644_c);
-      }
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        return SoundEvents.field_191270_ho;
+    }
 
-      public boolean func_75250_a() {
-         return ((EntityVindicator)this.field_75299_d).field_190643_b && super.func_75250_a();
-      }
-   }
+    static class AIJohnnyAttack extends EntityAINearestAttackableTarget<EntityLivingBase>
+    {
+        public AIJohnnyAttack(EntityVindicator p_i47345_1_)
+        {
+            super(p_i47345_1_, EntityLivingBase.class, 0, true, true, EntityVindicator.field_190644_c);
+        }
+
+        public boolean shouldExecute()
+        {
+            return ((EntityVindicator)this.taskOwner).field_190643_b && super.shouldExecute();
+        }
+    }
 }

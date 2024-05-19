@@ -79,838 +79,1237 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 
-public class EntityPlayerSP extends AbstractClientPlayer {
-   public final NetHandlerPlayClient field_71174_a;
-   private final StatisticsManager field_146108_bO;
-   private final RecipeBook field_192036_cb;
-   private int field_184845_bX = 0;
-   private double field_175172_bI;
-   private double field_175166_bJ;
-   private double field_175167_bK;
-   private float field_175164_bL;
-   private float field_175165_bM;
-   private boolean field_184841_cd;
-   private boolean field_175170_bN;
-   private boolean field_175171_bO;
-   private int field_175168_bP;
-   private boolean field_175169_bQ;
-   private String field_142022_ce;
-   public MovementInput field_71158_b;
-   protected Minecraft field_71159_c;
-   protected int field_71156_d;
-   public int field_71157_e;
-   public float field_71154_f;
-   public float field_71155_g;
-   public float field_71163_h;
-   public float field_71164_i;
-   private int field_110320_a;
-   private float field_110321_bQ;
-   public float field_71086_bY;
-   public float field_71080_cy;
-   private boolean field_184842_cm;
-   private EnumHand field_184843_cn;
-   private boolean field_184844_co;
-   private boolean field_189811_cr = true;
-   private int field_189812_cs;
-   private boolean field_189813_ct;
+public class EntityPlayerSP extends AbstractClientPlayer
+{
+    public final NetHandlerPlayClient connection;
+    private final StatisticsManager statWriter;
+    private final RecipeBook field_192036_cb;
+    private int permissionLevel = 0;
 
-   public EntityPlayerSP(Minecraft p_i47378_1_, World p_i47378_2_, NetHandlerPlayClient p_i47378_3_, StatisticsManager p_i47378_4_, RecipeBook p_i47378_5_) {
-      super(p_i47378_2_, p_i47378_3_.func_175105_e());
-      this.field_71174_a = p_i47378_3_;
-      this.field_146108_bO = p_i47378_4_;
-      this.field_192036_cb = p_i47378_5_;
-      this.field_71159_c = p_i47378_1_;
-      this.field_71093_bK = 0;
-   }
+    /**
+     * The last X position which was transmitted to the server, used to determine when the X position changes and needs
+     * to be re-trasmitted
+     */
+    private double lastReportedPosX;
 
-   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
-      return false;
-   }
+    /**
+     * The last Y position which was transmitted to the server, used to determine when the Y position changes and needs
+     * to be re-transmitted
+     */
+    private double lastReportedPosY;
 
-   public void func_70691_i(float p_70691_1_) {
-   }
+    /**
+     * The last Z position which was transmitted to the server, used to determine when the Z position changes and needs
+     * to be re-transmitted
+     */
+    private double lastReportedPosZ;
 
-   public boolean func_184205_a(Entity p_184205_1_, boolean p_184205_2_) {
-      if (!super.func_184205_a(p_184205_1_, p_184205_2_)) {
-         return false;
-      } else {
-         if (p_184205_1_ instanceof EntityMinecart) {
-            this.field_71159_c.func_147118_V().func_147682_a(new MovingSoundMinecartRiding(this, (EntityMinecart)p_184205_1_));
-         }
+    /**
+     * The last yaw value which was transmitted to the server, used to determine when the yaw changes and needs to be
+     * re-transmitted
+     */
+    private float lastReportedYaw;
 
-         if (p_184205_1_ instanceof EntityBoat) {
-            this.field_70126_B = p_184205_1_.field_70177_z;
-            this.field_70177_z = p_184205_1_.field_70177_z;
-            this.func_70034_d(p_184205_1_.field_70177_z);
-         }
+    /**
+     * The last pitch value which was transmitted to the server, used to determine when the pitch changes and needs to
+     * be re-transmitted
+     */
+    private float lastReportedPitch;
+    private boolean prevOnGround;
 
-         return true;
-      }
-   }
+    /** the last sneaking state sent to the server */
+    private boolean serverSneakState;
 
-   public void func_184210_p() {
-      super.func_184210_p();
-      this.field_184844_co = false;
-   }
+    /** the last sprinting state sent to the server */
+    private boolean serverSprintState;
 
-   public Vec3d func_70676_i(float p_70676_1_) {
-      return this.func_174806_f(this.field_70125_A, this.field_70177_z);
-   }
+    /**
+     * Reset to 0 every time position is sent to the server, used to send periodic updates every 20 ticks even when the
+     * player is not moving.
+     */
+    private int positionUpdateTicks;
+    private boolean hasValidHealth;
+    private String serverBrand;
+    public MovementInput movementInput;
+    protected Minecraft mc;
 
-   public void func_70071_h_() {
-      if (this.field_70170_p.func_175667_e(new BlockPos(this.field_70165_t, 0.0D, this.field_70161_v))) {
-         super.func_70071_h_();
-         if (this.func_184218_aH()) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer.Rotation(this.field_70177_z, this.field_70125_A, this.field_70122_E));
-            this.field_71174_a.func_147297_a(new CPacketInput(this.field_70702_br, this.field_191988_bg, this.field_71158_b.field_78901_c, this.field_71158_b.field_78899_d));
-            Entity entity = this.func_184208_bv();
-            if (entity != this && entity.func_184186_bw()) {
-               this.field_71174_a.func_147297_a(new CPacketVehicleMove(entity));
-            }
-         } else {
-            this.func_175161_p();
-         }
+    /**
+     * Used to tell if the player pressed forward twice. If this is at 0 and it's pressed (And they are allowed to
+     * sprint, aka enough food on the ground etc) it sets this to 7. If it's pressed and it's greater than 0 enable
+     * sprinting.
+     */
+    protected int sprintToggleTimer;
 
-      }
-   }
+    /** Ticks left before sprinting is disabled. */
+    public int sprintingTicksLeft;
+    public float renderArmYaw;
+    public float renderArmPitch;
+    public float prevRenderArmYaw;
+    public float prevRenderArmPitch;
+    private int horseJumpPowerCounter;
+    private float horseJumpPower;
 
-   private void func_175161_p() {
-      boolean flag = this.func_70051_ag();
-      if (flag != this.field_175171_bO) {
-         if (flag) {
-            this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SPRINTING));
-         } else {
-            this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SPRINTING));
-         }
+    /** The amount of time an entity has been in a Portal */
+    public float timeInPortal;
 
-         this.field_175171_bO = flag;
-      }
+    /** The amount of time an entity has been in a Portal the previous tick */
+    public float prevTimeInPortal;
+    private boolean handActive;
+    private EnumHand activeHand;
+    private boolean rowingBoat;
+    private boolean autoJumpEnabled = true;
+    private int autoJumpTime;
+    private boolean wasFallFlying;
 
-      boolean flag1 = this.func_70093_af();
-      if (flag1 != this.field_175170_bN) {
-         if (flag1) {
-            this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SNEAKING));
-         } else {
-            this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SNEAKING));
-         }
+    public EntityPlayerSP(Minecraft p_i47378_1_, World p_i47378_2_, NetHandlerPlayClient p_i47378_3_, StatisticsManager p_i47378_4_, RecipeBook p_i47378_5_)
+    {
+        super(p_i47378_2_, p_i47378_3_.getGameProfile());
+        this.connection = p_i47378_3_;
+        this.statWriter = p_i47378_4_;
+        this.field_192036_cb = p_i47378_5_;
+        this.mc = p_i47378_1_;
+        this.dimension = 0;
+    }
 
-         this.field_175170_bN = flag1;
-      }
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        return false;
+    }
 
-      if (this.func_175160_A()) {
-         AxisAlignedBB axisalignedbb = this.func_174813_aQ();
-         double d0 = this.field_70165_t - this.field_175172_bI;
-         double d1 = axisalignedbb.field_72338_b - this.field_175166_bJ;
-         double d2 = this.field_70161_v - this.field_175167_bK;
-         double d3 = (double)(this.field_70177_z - this.field_175164_bL);
-         double d4 = (double)(this.field_70125_A - this.field_175165_bM);
-         ++this.field_175168_bP;
-         boolean flag2 = d0 * d0 + d1 * d1 + d2 * d2 > 9.0E-4D || this.field_175168_bP >= 20;
-         boolean flag3 = d3 != 0.0D || d4 != 0.0D;
-         if (this.func_184218_aH()) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer.PositionRotation(this.field_70159_w, -999.0D, this.field_70179_y, this.field_70177_z, this.field_70125_A, this.field_70122_E));
-            flag2 = false;
-         } else if (flag2 && flag3) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer.PositionRotation(this.field_70165_t, axisalignedbb.field_72338_b, this.field_70161_v, this.field_70177_z, this.field_70125_A, this.field_70122_E));
-         } else if (flag2) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer.Position(this.field_70165_t, axisalignedbb.field_72338_b, this.field_70161_v, this.field_70122_E));
-         } else if (flag3) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer.Rotation(this.field_70177_z, this.field_70125_A, this.field_70122_E));
-         } else if (this.field_184841_cd != this.field_70122_E) {
-            this.field_71174_a.func_147297_a(new CPacketPlayer(this.field_70122_E));
-         }
+    /**
+     * Heal living entity (param: amount of half-hearts)
+     */
+    public void heal(float healAmount)
+    {
+    }
 
-         if (flag2) {
-            this.field_175172_bI = this.field_70165_t;
-            this.field_175166_bJ = axisalignedbb.field_72338_b;
-            this.field_175167_bK = this.field_70161_v;
-            this.field_175168_bP = 0;
-         }
-
-         if (flag3) {
-            this.field_175164_bL = this.field_70177_z;
-            this.field_175165_bM = this.field_70125_A;
-         }
-
-         this.field_184841_cd = this.field_70122_E;
-         this.field_189811_cr = this.field_71159_c.field_71474_y.field_189989_R;
-      }
-
-   }
-
-   @Nullable
-   public EntityItem func_71040_bB(boolean p_71040_1_) {
-      CPacketPlayerDigging.Action cpacketplayerdigging$action = p_71040_1_ ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
-      this.field_71174_a.func_147297_a(new CPacketPlayerDigging(cpacketplayerdigging$action, BlockPos.field_177992_a, EnumFacing.DOWN));
-      return null;
-   }
-
-   protected ItemStack func_184816_a(EntityItem p_184816_1_) {
-      return ItemStack.field_190927_a;
-   }
-
-   public void func_71165_d(String p_71165_1_) {
-      this.field_71174_a.func_147297_a(new CPacketChatMessage(p_71165_1_));
-   }
-
-   public void func_184609_a(EnumHand p_184609_1_) {
-      super.func_184609_a(p_184609_1_);
-      this.field_71174_a.func_147297_a(new CPacketAnimation(p_184609_1_));
-   }
-
-   public void func_71004_bE() {
-      this.field_71174_a.func_147297_a(new CPacketClientStatus(CPacketClientStatus.State.PERFORM_RESPAWN));
-   }
-
-   protected void func_70665_d(DamageSource p_70665_1_, float p_70665_2_) {
-      if (!this.func_180431_b(p_70665_1_)) {
-         this.func_70606_j(this.func_110143_aJ() - p_70665_2_);
-      }
-   }
-
-   public void func_71053_j() {
-      this.field_71174_a.func_147297_a(new CPacketCloseWindow(this.field_71070_bA.field_75152_c));
-      this.func_175159_q();
-   }
-
-   public void func_175159_q() {
-      this.field_71071_by.func_70437_b(ItemStack.field_190927_a);
-      super.func_71053_j();
-      this.field_71159_c.func_147108_a((GuiScreen)null);
-   }
-
-   public void func_71150_b(float p_71150_1_) {
-      if (this.field_175169_bQ) {
-         float f = this.func_110143_aJ() - p_71150_1_;
-         if (f <= 0.0F) {
-            this.func_70606_j(p_71150_1_);
-            if (f < 0.0F) {
-               this.field_70172_ad = this.field_70771_an / 2;
-            }
-         } else {
-            this.field_110153_bc = f;
-            this.func_70606_j(this.func_110143_aJ());
-            this.field_70172_ad = this.field_70771_an;
-            this.func_70665_d(DamageSource.field_76377_j, f);
-            this.field_70738_aO = 10;
-            this.field_70737_aN = this.field_70738_aO;
-         }
-      } else {
-         this.func_70606_j(p_71150_1_);
-         this.field_175169_bQ = true;
-      }
-
-   }
-
-   public void func_71064_a(StatBase p_71064_1_, int p_71064_2_) {
-      if (p_71064_1_ != null) {
-         if (p_71064_1_.field_75972_f) {
-            super.func_71064_a(p_71064_1_, p_71064_2_);
-         }
-
-      }
-   }
-
-   public void func_71016_p() {
-      this.field_71174_a.func_147297_a(new CPacketPlayerAbilities(this.field_71075_bZ));
-   }
-
-   public boolean func_175144_cb() {
-      return true;
-   }
-
-   protected void func_110318_g() {
-      this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.START_RIDING_JUMP, MathHelper.func_76141_d(this.func_110319_bJ() * 100.0F)));
-   }
-
-   public void func_175163_u() {
-      this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.OPEN_INVENTORY));
-   }
-
-   public void func_175158_f(String p_175158_1_) {
-      this.field_142022_ce = p_175158_1_;
-   }
-
-   public String func_142021_k() {
-      return this.field_142022_ce;
-   }
-
-   public StatisticsManager func_146107_m() {
-      return this.field_146108_bO;
-   }
-
-   public RecipeBook func_192035_E() {
-      return this.field_192036_cb;
-   }
-
-   public void func_193103_a(IRecipe p_193103_1_) {
-      if (this.field_192036_cb.func_194076_e(p_193103_1_)) {
-         this.field_192036_cb.func_194074_f(p_193103_1_);
-         this.field_71174_a.func_147297_a(new CPacketRecipeInfo(p_193103_1_));
-      }
-
-   }
-
-   public int func_184840_I() {
-      return this.field_184845_bX;
-   }
-
-   public void func_184839_n(int p_184839_1_) {
-      this.field_184845_bX = p_184839_1_;
-   }
-
-   public void func_146105_b(ITextComponent p_146105_1_, boolean p_146105_2_) {
-      if (p_146105_2_) {
-         this.field_71159_c.field_71456_v.func_175188_a(p_146105_1_, false);
-      } else {
-         this.field_71159_c.field_71456_v.func_146158_b().func_146227_a(p_146105_1_);
-      }
-
-   }
-
-   protected boolean func_145771_j(double p_145771_1_, double p_145771_3_, double p_145771_5_) {
-      if (this.field_70145_X) {
-         return false;
-      } else {
-         BlockPos blockpos = new BlockPos(p_145771_1_, p_145771_3_, p_145771_5_);
-         double d0 = p_145771_1_ - (double)blockpos.func_177958_n();
-         double d1 = p_145771_5_ - (double)blockpos.func_177952_p();
-         if (!this.func_175162_d(blockpos)) {
-            int i = -1;
-            double d2 = 9999.0D;
-            if (this.func_175162_d(blockpos.func_177976_e()) && d0 < d2) {
-               d2 = d0;
-               i = 0;
+    public boolean startRiding(Entity entityIn, boolean force)
+    {
+        if (!super.startRiding(entityIn, force))
+        {
+            return false;
+        }
+        else
+        {
+            if (entityIn instanceof EntityMinecart)
+            {
+                this.mc.getSoundHandler().playSound(new MovingSoundMinecartRiding(this, (EntityMinecart)entityIn));
             }
 
-            if (this.func_175162_d(blockpos.func_177974_f()) && 1.0D - d0 < d2) {
-               d2 = 1.0D - d0;
-               i = 1;
+            if (entityIn instanceof EntityBoat)
+            {
+                this.prevRotationYaw = entityIn.rotationYaw;
+                this.rotationYaw = entityIn.rotationYaw;
+                this.setRotationYawHead(entityIn.rotationYaw);
             }
 
-            if (this.func_175162_d(blockpos.func_177978_c()) && d1 < d2) {
-               d2 = d1;
-               i = 4;
+            return true;
+        }
+    }
+
+    public void dismountRidingEntity()
+    {
+        super.dismountRidingEntity();
+        this.rowingBoat = false;
+    }
+
+    /**
+     * interpolated look vector
+     */
+    public Vec3d getLook(float partialTicks)
+    {
+        return this.getVectorForRotation(this.rotationPitch, this.rotationYaw);
+    }
+
+    /**
+     * Called to update the entity's position/logic.
+     */
+    public void onUpdate()
+    {
+        if (this.world.isBlockLoaded(new BlockPos(this.posX, 0.0D, this.posZ)))
+        {
+            super.onUpdate();
+
+            if (this.isRiding())
+            {
+                this.connection.sendPacket(new CPacketPlayer.Rotation(this.rotationYaw, this.rotationPitch, this.onGround));
+                this.connection.sendPacket(new CPacketInput(this.moveStrafing, this.field_191988_bg, this.movementInput.jump, this.movementInput.sneak));
+                Entity entity = this.getLowestRidingEntity();
+
+                if (entity != this && entity.canPassengerSteer())
+                {
+                    this.connection.sendPacket(new CPacketVehicleMove(entity));
+                }
+            }
+            else
+            {
+                this.onUpdateWalkingPlayer();
+            }
+        }
+    }
+
+    /**
+     * called every tick when the player is on foot. Performs all the things that normally happen during movement.
+     */
+    private void onUpdateWalkingPlayer()
+    {
+        boolean flag = this.isSprinting();
+
+        if (flag != this.serverSprintState)
+        {
+            if (flag)
+            {
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SPRINTING));
+            }
+            else
+            {
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SPRINTING));
             }
 
-            if (this.func_175162_d(blockpos.func_177968_d()) && 1.0D - d1 < d2) {
-               d2 = 1.0D - d1;
-               i = 5;
+            this.serverSprintState = flag;
+        }
+
+        boolean flag1 = this.isSneaking();
+
+        if (flag1 != this.serverSneakState)
+        {
+            if (flag1)
+            {
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SNEAKING));
+            }
+            else
+            {
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SNEAKING));
             }
 
-            float f = 0.1F;
-            if (i == 0) {
-               this.field_70159_w = -0.10000000149011612D;
+            this.serverSneakState = flag1;
+        }
+
+        if (this.isCurrentViewEntity())
+        {
+            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+            double d0 = this.posX - this.lastReportedPosX;
+            double d1 = axisalignedbb.minY - this.lastReportedPosY;
+            double d2 = this.posZ - this.lastReportedPosZ;
+            double d3 = (double)(this.rotationYaw - this.lastReportedYaw);
+            double d4 = (double)(this.rotationPitch - this.lastReportedPitch);
+            ++this.positionUpdateTicks;
+            boolean flag2 = d0 * d0 + d1 * d1 + d2 * d2 > 9.0E-4D || this.positionUpdateTicks >= 20;
+            boolean flag3 = d3 != 0.0D || d4 != 0.0D;
+
+            if (this.isRiding())
+            {
+                this.connection.sendPacket(new CPacketPlayer.PositionRotation(this.motionX, -999.0D, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround));
+                flag2 = false;
+            }
+            else if (flag2 && flag3)
+            {
+                this.connection.sendPacket(new CPacketPlayer.PositionRotation(this.posX, axisalignedbb.minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround));
+            }
+            else if (flag2)
+            {
+                this.connection.sendPacket(new CPacketPlayer.Position(this.posX, axisalignedbb.minY, this.posZ, this.onGround));
+            }
+            else if (flag3)
+            {
+                this.connection.sendPacket(new CPacketPlayer.Rotation(this.rotationYaw, this.rotationPitch, this.onGround));
+            }
+            else if (this.prevOnGround != this.onGround)
+            {
+                this.connection.sendPacket(new CPacketPlayer(this.onGround));
             }
 
-            if (i == 1) {
-               this.field_70159_w = 0.10000000149011612D;
+            if (flag2)
+            {
+                this.lastReportedPosX = this.posX;
+                this.lastReportedPosY = axisalignedbb.minY;
+                this.lastReportedPosZ = this.posZ;
+                this.positionUpdateTicks = 0;
             }
 
-            if (i == 4) {
-               this.field_70179_y = -0.10000000149011612D;
+            if (flag3)
+            {
+                this.lastReportedYaw = this.rotationYaw;
+                this.lastReportedPitch = this.rotationPitch;
             }
 
-            if (i == 5) {
-               this.field_70179_y = 0.10000000149011612D;
+            this.prevOnGround = this.onGround;
+            this.autoJumpEnabled = this.mc.gameSettings.autoJump;
+        }
+    }
+
+    @Nullable
+
+    /**
+     * Drop one item out of the currently selected stack if {@code dropAll} is false. If {@code dropItem} is true the
+     * entire stack is dropped.
+     */
+    public EntityItem dropItem(boolean dropAll)
+    {
+        CPacketPlayerDigging.Action cpacketplayerdigging$action = dropAll ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
+        this.connection.sendPacket(new CPacketPlayerDigging(cpacketplayerdigging$action, BlockPos.ORIGIN, EnumFacing.DOWN));
+        return null;
+    }
+
+    protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_)
+    {
+        return ItemStack.field_190927_a;
+    }
+
+    /**
+     * Sends a chat message from the player.
+     */
+    public void sendChatMessage(String message)
+    {
+        this.connection.sendPacket(new CPacketChatMessage(message));
+    }
+
+    public void swingArm(EnumHand hand)
+    {
+        super.swingArm(hand);
+        this.connection.sendPacket(new CPacketAnimation(hand));
+    }
+
+    public void respawnPlayer()
+    {
+        this.connection.sendPacket(new CPacketClientStatus(CPacketClientStatus.State.PERFORM_RESPAWN));
+    }
+
+    /**
+     * Deals damage to the entity. This will take the armor of the entity into consideration before damaging the health
+     * bar.
+     */
+    protected void damageEntity(DamageSource damageSrc, float damageAmount)
+    {
+        if (!this.isEntityInvulnerable(damageSrc))
+        {
+            this.setHealth(this.getHealth() - damageAmount);
+        }
+    }
+
+    /**
+     * set current crafting inventory back to the 2x2 square
+     */
+    public void closeScreen()
+    {
+        this.connection.sendPacket(new CPacketCloseWindow(this.openContainer.windowId));
+        this.closeScreenAndDropStack();
+    }
+
+    public void closeScreenAndDropStack()
+    {
+        this.inventory.setItemStack(ItemStack.field_190927_a);
+        super.closeScreen();
+        this.mc.displayGuiScreen((GuiScreen)null);
+    }
+
+    /**
+     * Updates health locally.
+     */
+    public void setPlayerSPHealth(float health)
+    {
+        if (this.hasValidHealth)
+        {
+            float f = this.getHealth() - health;
+
+            if (f <= 0.0F)
+            {
+                this.setHealth(health);
+
+                if (f < 0.0F)
+                {
+                    this.hurtResistantTime = this.maxHurtResistantTime / 2;
+                }
             }
-         }
-
-         return false;
-      }
-   }
-
-   private boolean func_175162_d(BlockPos p_175162_1_) {
-      return !this.field_70170_p.func_180495_p(p_175162_1_).func_185915_l() && !this.field_70170_p.func_180495_p(p_175162_1_.func_177984_a()).func_185915_l();
-   }
-
-   public void func_70031_b(boolean p_70031_1_) {
-      super.func_70031_b(p_70031_1_);
-      this.field_71157_e = 0;
-   }
-
-   public void func_71152_a(float p_71152_1_, int p_71152_2_, int p_71152_3_) {
-      this.field_71106_cc = p_71152_1_;
-      this.field_71067_cb = p_71152_2_;
-      this.field_71068_ca = p_71152_3_;
-   }
-
-   public void func_145747_a(ITextComponent p_145747_1_) {
-      this.field_71159_c.field_71456_v.func_146158_b().func_146227_a(p_145747_1_);
-   }
-
-   public boolean func_70003_b(int p_70003_1_, String p_70003_2_) {
-      return p_70003_1_ <= this.func_184840_I();
-   }
-
-   public void func_70103_a(byte p_70103_1_) {
-      if (p_70103_1_ >= 24 && p_70103_1_ <= 28) {
-         this.func_184839_n(p_70103_1_ - 24);
-      } else {
-         super.func_70103_a(p_70103_1_);
-      }
-
-   }
-
-   public BlockPos func_180425_c() {
-      return new BlockPos(this.field_70165_t + 0.5D, this.field_70163_u + 0.5D, this.field_70161_v + 0.5D);
-   }
-
-   public void func_184185_a(SoundEvent p_184185_1_, float p_184185_2_, float p_184185_3_) {
-      this.field_70170_p.func_184134_a(this.field_70165_t, this.field_70163_u, this.field_70161_v, p_184185_1_, this.func_184176_by(), p_184185_2_, p_184185_3_, false);
-   }
-
-   public boolean func_70613_aW() {
-      return true;
-   }
-
-   public void func_184598_c(EnumHand p_184598_1_) {
-      ItemStack itemstack = this.func_184586_b(p_184598_1_);
-      if (!itemstack.func_190926_b() && !this.func_184587_cr()) {
-         super.func_184598_c(p_184598_1_);
-         this.field_184842_cm = true;
-         this.field_184843_cn = p_184598_1_;
-      }
-   }
-
-   public boolean func_184587_cr() {
-      return this.field_184842_cm;
-   }
-
-   public void func_184602_cy() {
-      super.func_184602_cy();
-      this.field_184842_cm = false;
-   }
-
-   public EnumHand func_184600_cs() {
-      return this.field_184843_cn;
-   }
-
-   public void func_184206_a(DataParameter<?> p_184206_1_) {
-      super.func_184206_a(p_184206_1_);
-      if (field_184621_as.equals(p_184206_1_)) {
-         boolean flag = (((Byte)this.field_70180_af.func_187225_a(field_184621_as)).byteValue() & 1) > 0;
-         EnumHand enumhand = (((Byte)this.field_70180_af.func_187225_a(field_184621_as)).byteValue() & 2) > 0 ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-         if (flag && !this.field_184842_cm) {
-            this.func_184598_c(enumhand);
-         } else if (!flag && this.field_184842_cm) {
-            this.func_184602_cy();
-         }
-      }
-
-      if (field_184240_ax.equals(p_184206_1_) && this.func_184613_cA() && !this.field_189813_ct) {
-         this.field_71159_c.func_147118_V().func_147682_a(new ElytraSound(this));
-      }
-
-   }
-
-   public boolean func_110317_t() {
-      Entity entity = this.func_184187_bx();
-      return this.func_184218_aH() && entity instanceof IJumpingMount && ((IJumpingMount)entity).func_184776_b();
-   }
-
-   public float func_110319_bJ() {
-      return this.field_110321_bQ;
-   }
-
-   public void func_175141_a(TileEntitySign p_175141_1_) {
-      this.field_71159_c.func_147108_a(new GuiEditSign(p_175141_1_));
-   }
-
-   public void func_184809_a(CommandBlockBaseLogic p_184809_1_) {
-      this.field_71159_c.func_147108_a(new GuiEditCommandBlockMinecart(p_184809_1_));
-   }
-
-   public void func_184824_a(TileEntityCommandBlock p_184824_1_) {
-      this.field_71159_c.func_147108_a(new GuiCommandBlock(p_184824_1_));
-   }
-
-   public void func_189807_a(TileEntityStructure p_189807_1_) {
-      this.field_71159_c.func_147108_a(new GuiEditStructure(p_189807_1_));
-   }
-
-   public void func_184814_a(ItemStack p_184814_1_, EnumHand p_184814_2_) {
-      Item item = p_184814_1_.func_77973_b();
-      if (item == Items.field_151099_bA) {
-         this.field_71159_c.func_147108_a(new GuiScreenBook(this, p_184814_1_, true));
-      }
-
-   }
-
-   public void func_71007_a(IInventory p_71007_1_) {
-      String s = p_71007_1_ instanceof IInteractionObject ? ((IInteractionObject)p_71007_1_).func_174875_k() : "minecraft:container";
-      if ("minecraft:chest".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiChest(this.field_71071_by, p_71007_1_));
-      } else if ("minecraft:hopper".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiHopper(this.field_71071_by, p_71007_1_));
-      } else if ("minecraft:furnace".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiFurnace(this.field_71071_by, p_71007_1_));
-      } else if ("minecraft:brewing_stand".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiBrewingStand(this.field_71071_by, p_71007_1_));
-      } else if ("minecraft:beacon".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiBeacon(this.field_71071_by, p_71007_1_));
-      } else if (!"minecraft:dispenser".equals(s) && !"minecraft:dropper".equals(s)) {
-         if ("minecraft:shulker_box".equals(s)) {
-            this.field_71159_c.func_147108_a(new GuiShulkerBox(this.field_71071_by, p_71007_1_));
-         } else {
-            this.field_71159_c.func_147108_a(new GuiChest(this.field_71071_by, p_71007_1_));
-         }
-      } else {
-         this.field_71159_c.func_147108_a(new GuiDispenser(this.field_71071_by, p_71007_1_));
-      }
-
-   }
-
-   public void func_184826_a(AbstractHorse p_184826_1_, IInventory p_184826_2_) {
-      this.field_71159_c.func_147108_a(new GuiScreenHorseInventory(this.field_71071_by, p_184826_2_, p_184826_1_));
-   }
-
-   public void func_180468_a(IInteractionObject p_180468_1_) {
-      String s = p_180468_1_.func_174875_k();
-      if ("minecraft:crafting_table".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiCrafting(this.field_71071_by, this.field_70170_p));
-      } else if ("minecraft:enchanting_table".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiEnchantment(this.field_71071_by, this.field_70170_p, p_180468_1_));
-      } else if ("minecraft:anvil".equals(s)) {
-         this.field_71159_c.func_147108_a(new GuiRepair(this.field_71071_by, this.field_70170_p));
-      }
-
-   }
-
-   public void func_180472_a(IMerchant p_180472_1_) {
-      this.field_71159_c.func_147108_a(new GuiMerchant(this.field_71071_by, p_180472_1_, this.field_70170_p));
-   }
-
-   public void func_71009_b(Entity p_71009_1_) {
-      this.field_71159_c.field_71452_i.func_178926_a(p_71009_1_, EnumParticleTypes.CRIT);
-   }
-
-   public void func_71047_c(Entity p_71047_1_) {
-      this.field_71159_c.field_71452_i.func_178926_a(p_71047_1_, EnumParticleTypes.CRIT_MAGIC);
-   }
-
-   public boolean func_70093_af() {
-      boolean flag = this.field_71158_b != null && this.field_71158_b.field_78899_d;
-      return flag && !this.field_71083_bS;
-   }
-
-   public void func_70626_be() {
-      super.func_70626_be();
-      if (this.func_175160_A()) {
-         this.field_70702_br = this.field_71158_b.field_78902_a;
-         this.field_191988_bg = this.field_71158_b.field_192832_b;
-         this.field_70703_bu = this.field_71158_b.field_78901_c;
-         this.field_71163_h = this.field_71154_f;
-         this.field_71164_i = this.field_71155_g;
-         this.field_71155_g = (float)((double)this.field_71155_g + (double)(this.field_70125_A - this.field_71155_g) * 0.5D);
-         this.field_71154_f = (float)((double)this.field_71154_f + (double)(this.field_70177_z - this.field_71154_f) * 0.5D);
-      }
-
-   }
-
-   protected boolean func_175160_A() {
-      return this.field_71159_c.func_175606_aa() == this;
-   }
-
-   public void func_70636_d() {
-      ++this.field_71157_e;
-      if (this.field_71156_d > 0) {
-         --this.field_71156_d;
-      }
-
-      this.field_71080_cy = this.field_71086_bY;
-      if (this.field_71087_bX) {
-         if (this.field_71159_c.field_71462_r != null && !this.field_71159_c.field_71462_r.func_73868_f()) {
-            this.field_71159_c.func_147108_a((GuiScreen)null);
-         }
-
-         if (this.field_71086_bY == 0.0F) {
-            this.field_71159_c.func_147118_V().func_147682_a(PositionedSoundRecord.func_184371_a(SoundEvents.field_187814_ei, this.field_70146_Z.nextFloat() * 0.4F + 0.8F));
-         }
-
-         this.field_71086_bY += 0.0125F;
-         if (this.field_71086_bY >= 1.0F) {
-            this.field_71086_bY = 1.0F;
-         }
-
-         this.field_71087_bX = false;
-      } else if (this.func_70644_a(MobEffects.field_76431_k) && this.func_70660_b(MobEffects.field_76431_k).func_76459_b() > 60) {
-         this.field_71086_bY += 0.006666667F;
-         if (this.field_71086_bY > 1.0F) {
-            this.field_71086_bY = 1.0F;
-         }
-      } else {
-         if (this.field_71086_bY > 0.0F) {
-            this.field_71086_bY -= 0.05F;
-         }
-
-         if (this.field_71086_bY < 0.0F) {
-            this.field_71086_bY = 0.0F;
-         }
-      }
-
-      if (this.field_71088_bW > 0) {
-         --this.field_71088_bW;
-      }
-
-      boolean flag = this.field_71158_b.field_78901_c;
-      boolean flag1 = this.field_71158_b.field_78899_d;
-      float f = 0.8F;
-      boolean flag2 = this.field_71158_b.field_192832_b >= 0.8F;
-      this.field_71158_b.func_78898_a();
-      this.field_71159_c.func_193032_ao().func_193293_a(this.field_71158_b);
-      if (this.func_184587_cr() && !this.func_184218_aH()) {
-         this.field_71158_b.field_78902_a *= 0.2F;
-         this.field_71158_b.field_192832_b *= 0.2F;
-         this.field_71156_d = 0;
-      }
-
-      boolean flag3 = false;
-      if (this.field_189812_cs > 0) {
-         --this.field_189812_cs;
-         flag3 = true;
-         this.field_71158_b.field_78901_c = true;
-      }
-
-      AxisAlignedBB axisalignedbb = this.func_174813_aQ();
-      this.func_145771_j(this.field_70165_t - (double)this.field_70130_N * 0.35D, axisalignedbb.field_72338_b + 0.5D, this.field_70161_v + (double)this.field_70130_N * 0.35D);
-      this.func_145771_j(this.field_70165_t - (double)this.field_70130_N * 0.35D, axisalignedbb.field_72338_b + 0.5D, this.field_70161_v - (double)this.field_70130_N * 0.35D);
-      this.func_145771_j(this.field_70165_t + (double)this.field_70130_N * 0.35D, axisalignedbb.field_72338_b + 0.5D, this.field_70161_v - (double)this.field_70130_N * 0.35D);
-      this.func_145771_j(this.field_70165_t + (double)this.field_70130_N * 0.35D, axisalignedbb.field_72338_b + 0.5D, this.field_70161_v + (double)this.field_70130_N * 0.35D);
-      boolean flag4 = (float)this.func_71024_bL().func_75116_a() > 6.0F || this.field_71075_bZ.field_75101_c;
-      if (this.field_70122_E && !flag1 && !flag2 && this.field_71158_b.field_192832_b >= 0.8F && !this.func_70051_ag() && flag4 && !this.func_184587_cr() && !this.func_70644_a(MobEffects.field_76440_q)) {
-         if (this.field_71156_d <= 0 && !this.field_71159_c.field_71474_y.field_151444_V.func_151470_d()) {
-            this.field_71156_d = 7;
-         } else {
-            this.func_70031_b(true);
-         }
-      }
-
-      if (!this.func_70051_ag() && this.field_71158_b.field_192832_b >= 0.8F && flag4 && !this.func_184587_cr() && !this.func_70644_a(MobEffects.field_76440_q) && this.field_71159_c.field_71474_y.field_151444_V.func_151470_d()) {
-         this.func_70031_b(true);
-      }
-
-      if (this.func_70051_ag() && (this.field_71158_b.field_192832_b < 0.8F || this.field_70123_F || !flag4)) {
-         this.func_70031_b(false);
-      }
-
-      if (this.field_71075_bZ.field_75101_c) {
-         if (this.field_71159_c.field_71442_b.func_178887_k()) {
-            if (!this.field_71075_bZ.field_75100_b) {
-               this.field_71075_bZ.field_75100_b = true;
-               this.func_71016_p();
+            else
+            {
+                this.lastDamage = f;
+                this.setHealth(this.getHealth());
+                this.hurtResistantTime = this.maxHurtResistantTime;
+                this.damageEntity(DamageSource.generic, f);
+                this.maxHurtTime = 10;
+                this.hurtTime = this.maxHurtTime;
             }
-         } else if (!flag && this.field_71158_b.field_78901_c && !flag3) {
-            if (this.field_71101_bC == 0) {
-               this.field_71101_bC = 7;
-            } else {
-               this.field_71075_bZ.field_75100_b = !this.field_71075_bZ.field_75100_b;
-               this.func_71016_p();
-               this.field_71101_bC = 0;
+        }
+        else
+        {
+            this.setHealth(health);
+            this.hasValidHealth = true;
+        }
+    }
+
+    /**
+     * Adds a value to a statistic field.
+     */
+    public void addStat(StatBase stat, int amount)
+    {
+        if (stat != null)
+        {
+            if (stat.isIndependent)
+            {
+                super.addStat(stat, amount);
             }
-         }
-      }
+        }
+    }
 
-      if (this.field_71158_b.field_78901_c && !flag && !this.field_70122_E && this.field_70181_x < 0.0D && !this.func_184613_cA() && !this.field_71075_bZ.field_75100_b) {
-         ItemStack itemstack = this.func_184582_a(EntityEquipmentSlot.CHEST);
-         if (itemstack.func_77973_b() == Items.field_185160_cR && ItemElytra.func_185069_d(itemstack)) {
-            this.field_71174_a.func_147297_a(new CPacketEntityAction(this, CPacketEntityAction.Action.START_FALL_FLYING));
-         }
-      }
+    /**
+     * Sends the player's abilities to the server (if there is one).
+     */
+    public void sendPlayerAbilities()
+    {
+        this.connection.sendPacket(new CPacketPlayerAbilities(this.capabilities));
+    }
 
-      this.field_189813_ct = this.func_184613_cA();
-      if (this.field_71075_bZ.field_75100_b && this.func_175160_A()) {
-         if (this.field_71158_b.field_78899_d) {
-            this.field_71158_b.field_78902_a = (float)((double)this.field_71158_b.field_78902_a / 0.3D);
-            this.field_71158_b.field_192832_b = (float)((double)this.field_71158_b.field_192832_b / 0.3D);
-            this.field_70181_x -= (double)(this.field_71075_bZ.func_75093_a() * 3.0F);
-         }
+    /**
+     * returns true if this is an EntityPlayerSP, or the logged in player.
+     */
+    public boolean isUser()
+    {
+        return true;
+    }
 
-         if (this.field_71158_b.field_78901_c) {
-            this.field_70181_x += (double)(this.field_71075_bZ.func_75093_a() * 3.0F);
-         }
-      }
+    protected void sendHorseJump()
+    {
+        this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_RIDING_JUMP, MathHelper.floor(this.getHorseJumpPower() * 100.0F)));
+    }
 
-      if (this.func_110317_t()) {
-         IJumpingMount ijumpingmount = (IJumpingMount)this.func_184187_bx();
-         if (this.field_110320_a < 0) {
-            ++this.field_110320_a;
-            if (this.field_110320_a == 0) {
-               this.field_110321_bQ = 0.0F;
+    public void sendHorseInventory()
+    {
+        this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.OPEN_INVENTORY));
+    }
+
+    /**
+     * Sets the brand of the currently connected server. Server brand information is sent over the {@code MC|Brand}
+     * plugin channel, and is used to identify modded servers in crash reports.
+     */
+    public void setServerBrand(String brand)
+    {
+        this.serverBrand = brand;
+    }
+
+    /**
+     * Gets the brand of the currently connected server. May be null if the server hasn't yet sent brand information.
+     * Server brand information is sent over the {@code MC|Brand} plugin channel, and is used to identify modded servers
+     * in crash reports.
+     */
+    public String getServerBrand()
+    {
+        return this.serverBrand;
+    }
+
+    public StatisticsManager getStatFileWriter()
+    {
+        return this.statWriter;
+    }
+
+    public RecipeBook func_192035_E()
+    {
+        return this.field_192036_cb;
+    }
+
+    public void func_193103_a(IRecipe p_193103_1_)
+    {
+        if (this.field_192036_cb.func_194076_e(p_193103_1_))
+        {
+            this.field_192036_cb.func_194074_f(p_193103_1_);
+            this.connection.sendPacket(new CPacketRecipeInfo(p_193103_1_));
+        }
+    }
+
+    public int getPermissionLevel()
+    {
+        return this.permissionLevel;
+    }
+
+    public void setPermissionLevel(int p_184839_1_)
+    {
+        this.permissionLevel = p_184839_1_;
+    }
+
+    public void addChatComponentMessage(ITextComponent chatComponent, boolean p_146105_2_)
+    {
+        if (p_146105_2_)
+        {
+            this.mc.ingameGUI.setRecordPlaying(chatComponent, false);
+        }
+        else
+        {
+            this.mc.ingameGUI.getChatGUI().printChatMessage(chatComponent);
+        }
+    }
+
+    protected boolean pushOutOfBlocks(double x, double y, double z)
+    {
+        if (this.noClip)
+        {
+            return false;
+        }
+        else
+        {
+            BlockPos blockpos = new BlockPos(x, y, z);
+            double d0 = x - (double)blockpos.getX();
+            double d1 = z - (double)blockpos.getZ();
+
+            if (!this.isOpenBlockSpace(blockpos))
+            {
+                int i = -1;
+                double d2 = 9999.0D;
+
+                if (this.isOpenBlockSpace(blockpos.west()) && d0 < d2)
+                {
+                    d2 = d0;
+                    i = 0;
+                }
+
+                if (this.isOpenBlockSpace(blockpos.east()) && 1.0D - d0 < d2)
+                {
+                    d2 = 1.0D - d0;
+                    i = 1;
+                }
+
+                if (this.isOpenBlockSpace(blockpos.north()) && d1 < d2)
+                {
+                    d2 = d1;
+                    i = 4;
+                }
+
+                if (this.isOpenBlockSpace(blockpos.south()) && 1.0D - d1 < d2)
+                {
+                    d2 = 1.0D - d1;
+                    i = 5;
+                }
+
+                float f = 0.1F;
+
+                if (i == 0)
+                {
+                    this.motionX = -0.10000000149011612D;
+                }
+
+                if (i == 1)
+                {
+                    this.motionX = 0.10000000149011612D;
+                }
+
+                if (i == 4)
+                {
+                    this.motionZ = -0.10000000149011612D;
+                }
+
+                if (i == 5)
+                {
+                    this.motionZ = 0.10000000149011612D;
+                }
             }
-         }
 
-         if (flag && !this.field_71158_b.field_78901_c) {
-            this.field_110320_a = -10;
-            ijumpingmount.func_110206_u(MathHelper.func_76141_d(this.func_110319_bJ() * 100.0F));
-            this.func_110318_g();
-         } else if (!flag && this.field_71158_b.field_78901_c) {
-            this.field_110320_a = 0;
-            this.field_110321_bQ = 0.0F;
-         } else if (flag) {
-            ++this.field_110320_a;
-            if (this.field_110320_a < 10) {
-               this.field_110321_bQ = (float)this.field_110320_a * 0.1F;
-            } else {
-               this.field_110321_bQ = 0.8F + 2.0F / (float)(this.field_110320_a - 9) * 0.1F;
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the block at the given BlockPos and the block above it are NOT full cubes.
+     */
+    private boolean isOpenBlockSpace(BlockPos pos)
+    {
+        return !this.world.getBlockState(pos).isNormalCube() && !this.world.getBlockState(pos.up()).isNormalCube();
+    }
+
+    /**
+     * Set sprinting switch for Entity.
+     */
+    public void setSprinting(boolean sprinting)
+    {
+        super.setSprinting(sprinting);
+        this.sprintingTicksLeft = 0;
+    }
+
+    /**
+     * Sets the current XP, total XP, and level number.
+     */
+    public void setXPStats(float currentXP, int maxXP, int level)
+    {
+        this.experience = currentXP;
+        this.experienceTotal = maxXP;
+        this.experienceLevel = level;
+    }
+
+    /**
+     * Send a chat message to the CommandSender
+     */
+    public void addChatMessage(ITextComponent component)
+    {
+        this.mc.ingameGUI.getChatGUI().printChatMessage(component);
+    }
+
+    /**
+     * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
+     */
+    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    {
+        return permLevel <= this.getPermissionLevel();
+    }
+
+    public void handleStatusUpdate(byte id)
+    {
+        if (id >= 24 && id <= 28)
+        {
+            this.setPermissionLevel(id - 24);
+        }
+        else
+        {
+            super.handleStatusUpdate(id);
+        }
+    }
+
+    /**
+     * Get the position in the world. <b>{@code null} is not allowed!</b> If you are not an entity in the world, return
+     * the coordinates 0, 0, 0
+     */
+    public BlockPos getPosition()
+    {
+        return new BlockPos(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D);
+    }
+
+    public void playSound(SoundEvent soundIn, float volume, float pitch)
+    {
+        this.world.playSound(this.posX, this.posY, this.posZ, soundIn, this.getSoundCategory(), volume, pitch, false);
+    }
+
+    /**
+     * Returns whether the entity is in a server world
+     */
+    public boolean isServerWorld()
+    {
+        return true;
+    }
+
+    public void setActiveHand(EnumHand hand)
+    {
+        ItemStack itemstack = this.getHeldItem(hand);
+
+        if (!itemstack.func_190926_b() && !this.isHandActive())
+        {
+            super.setActiveHand(hand);
+            this.handActive = true;
+            this.activeHand = hand;
+        }
+    }
+
+    public boolean isHandActive()
+    {
+        return this.handActive;
+    }
+
+    public void resetActiveHand()
+    {
+        super.resetActiveHand();
+        this.handActive = false;
+    }
+
+    public EnumHand getActiveHand()
+    {
+        return this.activeHand;
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        super.notifyDataManagerChange(key);
+
+        if (HAND_STATES.equals(key))
+        {
+            boolean flag = (((Byte)this.dataManager.get(HAND_STATES)).byteValue() & 1) > 0;
+            EnumHand enumhand = (((Byte)this.dataManager.get(HAND_STATES)).byteValue() & 2) > 0 ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+
+            if (flag && !this.handActive)
+            {
+                this.setActiveHand(enumhand);
             }
-         }
-      } else {
-         this.field_110321_bQ = 0.0F;
-      }
+            else if (!flag && this.handActive)
+            {
+                this.resetActiveHand();
+            }
+        }
 
-      super.func_70636_d();
-      if (this.field_70122_E && this.field_71075_bZ.field_75100_b && !this.field_71159_c.field_71442_b.func_178887_k()) {
-         this.field_71075_bZ.field_75100_b = false;
-         this.func_71016_p();
-      }
+        if (FLAGS.equals(key) && this.isElytraFlying() && !this.wasFallFlying)
+        {
+            this.mc.getSoundHandler().playSound(new ElytraSound(this));
+        }
+    }
 
-   }
+    public boolean isRidingHorse()
+    {
+        Entity entity = this.getRidingEntity();
+        return this.isRiding() && entity instanceof IJumpingMount && ((IJumpingMount)entity).canJump();
+    }
 
-   public void func_70098_U() {
-      super.func_70098_U();
-      this.field_184844_co = false;
-      if (this.func_184187_bx() instanceof EntityBoat) {
-         EntityBoat entityboat = (EntityBoat)this.func_184187_bx();
-         entityboat.func_184442_a(this.field_71158_b.field_187257_e, this.field_71158_b.field_187258_f, this.field_71158_b.field_187255_c, this.field_71158_b.field_187256_d);
-         this.field_184844_co |= this.field_71158_b.field_187257_e || this.field_71158_b.field_187258_f || this.field_71158_b.field_187255_c || this.field_71158_b.field_187256_d;
-      }
+    public float getHorseJumpPower()
+    {
+        return this.horseJumpPower;
+    }
 
-   }
+    public void openEditSign(TileEntitySign signTile)
+    {
+        this.mc.displayGuiScreen(new GuiEditSign(signTile));
+    }
 
-   public boolean func_184838_M() {
-      return this.field_184844_co;
-   }
+    public void displayGuiEditCommandCart(CommandBlockBaseLogic commandBlock)
+    {
+        this.mc.displayGuiScreen(new GuiEditCommandBlockMinecart(commandBlock));
+    }
 
-   @Nullable
-   public PotionEffect func_184596_c(@Nullable Potion p_184596_1_) {
-      if (p_184596_1_ == MobEffects.field_76431_k) {
-         this.field_71080_cy = 0.0F;
-         this.field_71086_bY = 0.0F;
-      }
+    public void displayGuiCommandBlock(TileEntityCommandBlock commandBlock)
+    {
+        this.mc.displayGuiScreen(new GuiCommandBlock(commandBlock));
+    }
 
-      return super.func_184596_c(p_184596_1_);
-   }
+    public void openEditStructure(TileEntityStructure structure)
+    {
+        this.mc.displayGuiScreen(new GuiEditStructure(structure));
+    }
 
-   public void func_70091_d(MoverType p_70091_1_, double p_70091_2_, double p_70091_4_, double p_70091_6_) {
-      double d0 = this.field_70165_t;
-      double d1 = this.field_70161_v;
-      super.func_70091_d(p_70091_1_, p_70091_2_, p_70091_4_, p_70091_6_);
-      this.func_189810_i((float)(this.field_70165_t - d0), (float)(this.field_70161_v - d1));
-   }
+    public void openBook(ItemStack stack, EnumHand hand)
+    {
+        Item item = stack.getItem();
 
-   public boolean func_189809_N() {
-      return this.field_189811_cr;
-   }
+        if (item == Items.WRITABLE_BOOK)
+        {
+            this.mc.displayGuiScreen(new GuiScreenBook(this, stack, true));
+        }
+    }
 
-   protected void func_189810_i(float p_189810_1_, float p_189810_2_) {
-      if (this.func_189809_N()) {
-         if (this.field_189812_cs <= 0 && this.field_70122_E && !this.func_70093_af() && !this.func_184218_aH()) {
-            Vec2f vec2f = this.field_71158_b.func_190020_b();
-            if (vec2f.field_189982_i != 0.0F || vec2f.field_189983_j != 0.0F) {
-               Vec3d vec3d = new Vec3d(this.field_70165_t, this.func_174813_aQ().field_72338_b, this.field_70161_v);
-               double d0 = this.field_70165_t + (double)p_189810_1_;
-               double d1 = this.field_70161_v + (double)p_189810_2_;
-               Vec3d vec3d1 = new Vec3d(d0, this.func_174813_aQ().field_72338_b, d1);
-               Vec3d vec3d2 = new Vec3d((double)p_189810_1_, 0.0D, (double)p_189810_2_);
-               float f = this.func_70689_ay();
-               float f1 = (float)vec3d2.func_189985_c();
-               if (f1 <= 0.001F) {
-                  float f2 = f * vec2f.field_189982_i;
-                  float f3 = f * vec2f.field_189983_j;
-                  float f4 = MathHelper.func_76126_a(this.field_70177_z * 0.017453292F);
-                  float f5 = MathHelper.func_76134_b(this.field_70177_z * 0.017453292F);
-                  vec3d2 = new Vec3d((double)(f2 * f5 - f3 * f4), vec3d2.field_72448_b, (double)(f3 * f5 + f2 * f4));
-                  f1 = (float)vec3d2.func_189985_c();
-                  if (f1 <= 0.001F) {
-                     return;
-                  }
-               }
+    /**
+     * Displays the GUI for interacting with a chest inventory.
+     */
+    public void displayGUIChest(IInventory chestInventory)
+    {
+        String s = chestInventory instanceof IInteractionObject ? ((IInteractionObject)chestInventory).getGuiID() : "minecraft:container";
 
-               float f12 = (float)MathHelper.func_181161_i((double)f1);
-               Vec3d vec3d12 = vec3d2.func_186678_a((double)f12);
-               Vec3d vec3d13 = this.func_189651_aD();
-               float f13 = (float)(vec3d13.field_72450_a * vec3d12.field_72450_a + vec3d13.field_72449_c * vec3d12.field_72449_c);
-               if (f13 >= -0.15F) {
-                  BlockPos blockpos = new BlockPos(this.field_70165_t, this.func_174813_aQ().field_72337_e, this.field_70161_v);
-                  IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos);
-                  if (iblockstate.func_185890_d(this.field_70170_p, blockpos) == null) {
-                     blockpos = blockpos.func_177984_a();
-                     IBlockState iblockstate1 = this.field_70170_p.func_180495_p(blockpos);
-                     if (iblockstate1.func_185890_d(this.field_70170_p, blockpos) == null) {
-                        float f6 = 7.0F;
-                        float f7 = 1.2F;
-                        if (this.func_70644_a(MobEffects.field_76430_j)) {
-                           f7 += (float)(this.func_70660_b(MobEffects.field_76430_j).func_76458_c() + 1) * 0.75F;
+        if ("minecraft:chest".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiChest(this.inventory, chestInventory));
+        }
+        else if ("minecraft:hopper".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiHopper(this.inventory, chestInventory));
+        }
+        else if ("minecraft:furnace".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiFurnace(this.inventory, chestInventory));
+        }
+        else if ("minecraft:brewing_stand".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiBrewingStand(this.inventory, chestInventory));
+        }
+        else if ("minecraft:beacon".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiBeacon(this.inventory, chestInventory));
+        }
+        else if (!"minecraft:dispenser".equals(s) && !"minecraft:dropper".equals(s))
+        {
+            if ("minecraft:shulker_box".equals(s))
+            {
+                this.mc.displayGuiScreen(new GuiShulkerBox(this.inventory, chestInventory));
+            }
+            else
+            {
+                this.mc.displayGuiScreen(new GuiChest(this.inventory, chestInventory));
+            }
+        }
+        else
+        {
+            this.mc.displayGuiScreen(new GuiDispenser(this.inventory, chestInventory));
+        }
+    }
+
+    public void openGuiHorseInventory(AbstractHorse horse, IInventory inventoryIn)
+    {
+        this.mc.displayGuiScreen(new GuiScreenHorseInventory(this.inventory, inventoryIn, horse));
+    }
+
+    public void displayGui(IInteractionObject guiOwner)
+    {
+        String s = guiOwner.getGuiID();
+
+        if ("minecraft:crafting_table".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiCrafting(this.inventory, this.world));
+        }
+        else if ("minecraft:enchanting_table".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiEnchantment(this.inventory, this.world, guiOwner));
+        }
+        else if ("minecraft:anvil".equals(s))
+        {
+            this.mc.displayGuiScreen(new GuiRepair(this.inventory, this.world));
+        }
+    }
+
+    public void displayVillagerTradeGui(IMerchant villager)
+    {
+        this.mc.displayGuiScreen(new GuiMerchant(this.inventory, villager, this.world));
+    }
+
+    /**
+     * Called when the entity is dealt a critical hit.
+     */
+    public void onCriticalHit(Entity entityHit)
+    {
+        this.mc.effectRenderer.emitParticleAtEntity(entityHit, EnumParticleTypes.CRIT);
+    }
+
+    public void onEnchantmentCritical(Entity entityHit)
+    {
+        this.mc.effectRenderer.emitParticleAtEntity(entityHit, EnumParticleTypes.CRIT_MAGIC);
+    }
+
+    /**
+     * Returns if this entity is sneaking.
+     */
+    public boolean isSneaking()
+    {
+        boolean flag = this.movementInput != null && this.movementInput.sneak;
+        return flag && !this.sleeping;
+    }
+
+    public void updateEntityActionState()
+    {
+        super.updateEntityActionState();
+
+        if (this.isCurrentViewEntity())
+        {
+            this.moveStrafing = this.movementInput.moveStrafe;
+            this.field_191988_bg = this.movementInput.field_192832_b;
+            this.isJumping = this.movementInput.jump;
+            this.prevRenderArmYaw = this.renderArmYaw;
+            this.prevRenderArmPitch = this.renderArmPitch;
+            this.renderArmPitch = (float)((double)this.renderArmPitch + (double)(this.rotationPitch - this.renderArmPitch) * 0.5D);
+            this.renderArmYaw = (float)((double)this.renderArmYaw + (double)(this.rotationYaw - this.renderArmYaw) * 0.5D);
+        }
+    }
+
+    protected boolean isCurrentViewEntity()
+    {
+        return this.mc.getRenderViewEntity() == this;
+    }
+
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
+    public void onLivingUpdate()
+    {
+        ++this.sprintingTicksLeft;
+
+        if (this.sprintToggleTimer > 0)
+        {
+            --this.sprintToggleTimer;
+        }
+
+        this.prevTimeInPortal = this.timeInPortal;
+
+        if (this.inPortal)
+        {
+            if (this.mc.currentScreen != null && !this.mc.currentScreen.doesGuiPauseGame())
+            {
+                this.mc.displayGuiScreen((GuiScreen)null);
+            }
+
+            if (this.timeInPortal == 0.0F)
+            {
+                this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_PORTAL_TRIGGER, this.rand.nextFloat() * 0.4F + 0.8F));
+            }
+
+            this.timeInPortal += 0.0125F;
+
+            if (this.timeInPortal >= 1.0F)
+            {
+                this.timeInPortal = 1.0F;
+            }
+
+            this.inPortal = false;
+        }
+        else if (this.isPotionActive(MobEffects.NAUSEA) && this.getActivePotionEffect(MobEffects.NAUSEA).getDuration() > 60)
+        {
+            this.timeInPortal += 0.006666667F;
+
+            if (this.timeInPortal > 1.0F)
+            {
+                this.timeInPortal = 1.0F;
+            }
+        }
+        else
+        {
+            if (this.timeInPortal > 0.0F)
+            {
+                this.timeInPortal -= 0.05F;
+            }
+
+            if (this.timeInPortal < 0.0F)
+            {
+                this.timeInPortal = 0.0F;
+            }
+        }
+
+        if (this.timeUntilPortal > 0)
+        {
+            --this.timeUntilPortal;
+        }
+
+        boolean flag = this.movementInput.jump;
+        boolean flag1 = this.movementInput.sneak;
+        float f = 0.8F;
+        boolean flag2 = this.movementInput.field_192832_b >= 0.8F;
+        this.movementInput.updatePlayerMoveState();
+        this.mc.func_193032_ao().func_193293_a(this.movementInput);
+
+        if (this.isHandActive() && !this.isRiding())
+        {
+            this.movementInput.moveStrafe *= 0.2F;
+            this.movementInput.field_192832_b *= 0.2F;
+            this.sprintToggleTimer = 0;
+        }
+
+        boolean flag3 = false;
+
+        if (this.autoJumpTime > 0)
+        {
+            --this.autoJumpTime;
+            flag3 = true;
+            this.movementInput.jump = true;
+        }
+
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        this.pushOutOfBlocks(this.posX - (double)this.width * 0.35D, axisalignedbb.minY + 0.5D, this.posZ + (double)this.width * 0.35D);
+        this.pushOutOfBlocks(this.posX - (double)this.width * 0.35D, axisalignedbb.minY + 0.5D, this.posZ - (double)this.width * 0.35D);
+        this.pushOutOfBlocks(this.posX + (double)this.width * 0.35D, axisalignedbb.minY + 0.5D, this.posZ - (double)this.width * 0.35D);
+        this.pushOutOfBlocks(this.posX + (double)this.width * 0.35D, axisalignedbb.minY + 0.5D, this.posZ + (double)this.width * 0.35D);
+        boolean flag4 = (float)this.getFoodStats().getFoodLevel() > 6.0F || this.capabilities.allowFlying;
+
+        if (this.onGround && !flag1 && !flag2 && this.movementInput.field_192832_b >= 0.8F && !this.isSprinting() && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS))
+        {
+            if (this.sprintToggleTimer <= 0 && !this.mc.gameSettings.keyBindSprint.isKeyDown())
+            {
+                this.sprintToggleTimer = 7;
+            }
+            else
+            {
+                this.setSprinting(true);
+            }
+        }
+
+        if (!this.isSprinting() && this.movementInput.field_192832_b >= 0.8F && flag4 && !this.isHandActive() && !this.isPotionActive(MobEffects.BLINDNESS) && this.mc.gameSettings.keyBindSprint.isKeyDown())
+        {
+            this.setSprinting(true);
+        }
+
+        if (this.isSprinting() && (this.movementInput.field_192832_b < 0.8F || this.isCollidedHorizontally || !flag4))
+        {
+            this.setSprinting(false);
+        }
+
+        if (this.capabilities.allowFlying)
+        {
+            if (this.mc.playerController.isSpectatorMode())
+            {
+                if (!this.capabilities.isFlying)
+                {
+                    this.capabilities.isFlying = true;
+                    this.sendPlayerAbilities();
+                }
+            }
+            else if (!flag && this.movementInput.jump && !flag3)
+            {
+                if (this.flyToggleTimer == 0)
+                {
+                    this.flyToggleTimer = 7;
+                }
+                else
+                {
+                    this.capabilities.isFlying = !this.capabilities.isFlying;
+                    this.sendPlayerAbilities();
+                    this.flyToggleTimer = 0;
+                }
+            }
+        }
+
+        if (this.movementInput.jump && !flag && !this.onGround && this.motionY < 0.0D && !this.isElytraFlying() && !this.capabilities.isFlying)
+        {
+            ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+
+            if (itemstack.getItem() == Items.ELYTRA && ItemElytra.isBroken(itemstack))
+            {
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_FALL_FLYING));
+            }
+        }
+
+        this.wasFallFlying = this.isElytraFlying();
+
+        if (this.capabilities.isFlying && this.isCurrentViewEntity())
+        {
+            if (this.movementInput.sneak)
+            {
+                this.movementInput.moveStrafe = (float)((double)this.movementInput.moveStrafe / 0.3D);
+                this.movementInput.field_192832_b = (float)((double)this.movementInput.field_192832_b / 0.3D);
+                this.motionY -= (double)(this.capabilities.getFlySpeed() * 3.0F);
+            }
+
+            if (this.movementInput.jump)
+            {
+                this.motionY += (double)(this.capabilities.getFlySpeed() * 3.0F);
+            }
+        }
+
+        if (this.isRidingHorse())
+        {
+            IJumpingMount ijumpingmount = (IJumpingMount)this.getRidingEntity();
+
+            if (this.horseJumpPowerCounter < 0)
+            {
+                ++this.horseJumpPowerCounter;
+
+                if (this.horseJumpPowerCounter == 0)
+                {
+                    this.horseJumpPower = 0.0F;
+                }
+            }
+
+            if (flag && !this.movementInput.jump)
+            {
+                this.horseJumpPowerCounter = -10;
+                ijumpingmount.setJumpPower(MathHelper.floor(this.getHorseJumpPower() * 100.0F));
+                this.sendHorseJump();
+            }
+            else if (!flag && this.movementInput.jump)
+            {
+                this.horseJumpPowerCounter = 0;
+                this.horseJumpPower = 0.0F;
+            }
+            else if (flag)
+            {
+                ++this.horseJumpPowerCounter;
+
+                if (this.horseJumpPowerCounter < 10)
+                {
+                    this.horseJumpPower = (float)this.horseJumpPowerCounter * 0.1F;
+                }
+                else
+                {
+                    this.horseJumpPower = 0.8F + 2.0F / (float)(this.horseJumpPowerCounter - 9) * 0.1F;
+                }
+            }
+        }
+        else
+        {
+            this.horseJumpPower = 0.0F;
+        }
+
+        super.onLivingUpdate();
+
+        if (this.onGround && this.capabilities.isFlying && !this.mc.playerController.isSpectatorMode())
+        {
+            this.capabilities.isFlying = false;
+            this.sendPlayerAbilities();
+        }
+    }
+
+    /**
+     * Handles updating while being ridden by an entity
+     */
+    public void updateRidden()
+    {
+        super.updateRidden();
+        this.rowingBoat = false;
+
+        if (this.getRidingEntity() instanceof EntityBoat)
+        {
+            EntityBoat entityboat = (EntityBoat)this.getRidingEntity();
+            entityboat.updateInputs(this.movementInput.leftKeyDown, this.movementInput.rightKeyDown, this.movementInput.forwardKeyDown, this.movementInput.backKeyDown);
+            this.rowingBoat |= this.movementInput.leftKeyDown || this.movementInput.rightKeyDown || this.movementInput.forwardKeyDown || this.movementInput.backKeyDown;
+        }
+    }
+
+    public boolean isRowingBoat()
+    {
+        return this.rowingBoat;
+    }
+
+    @Nullable
+
+    /**
+     * Removes the given potion effect from the active potion map and returns it. Does not call cleanup callbacks for
+     * the end of the potion effect.
+     */
+    public PotionEffect removeActivePotionEffect(@Nullable Potion potioneffectin)
+    {
+        if (potioneffectin == MobEffects.NAUSEA)
+        {
+            this.prevTimeInPortal = 0.0F;
+            this.timeInPortal = 0.0F;
+        }
+
+        return super.removeActivePotionEffect(potioneffectin);
+    }
+
+    /**
+     * Tries to move the entity towards the specified location.
+     */
+    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
+    {
+        double d0 = this.posX;
+        double d1 = this.posZ;
+        super.moveEntity(x, p_70091_2_, p_70091_4_, p_70091_6_);
+        this.updateAutoJump((float)(this.posX - d0), (float)(this.posZ - d1));
+    }
+
+    public boolean isAutoJumpEnabled()
+    {
+        return this.autoJumpEnabled;
+    }
+
+    protected void updateAutoJump(float p_189810_1_, float p_189810_2_)
+    {
+        if (this.isAutoJumpEnabled())
+        {
+            if (this.autoJumpTime <= 0 && this.onGround && !this.isSneaking() && !this.isRiding())
+            {
+                Vec2f vec2f = this.movementInput.getMoveVector();
+
+                if (vec2f.x != 0.0F || vec2f.y != 0.0F)
+                {
+                    Vec3d vec3d = new Vec3d(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+                    double d0 = this.posX + (double)p_189810_1_;
+                    double d1 = this.posZ + (double)p_189810_2_;
+                    Vec3d vec3d1 = new Vec3d(d0, this.getEntityBoundingBox().minY, d1);
+                    Vec3d vec3d2 = new Vec3d((double)p_189810_1_, 0.0D, (double)p_189810_2_);
+                    float f = this.getAIMoveSpeed();
+                    float f1 = (float)vec3d2.lengthSquared();
+
+                    if (f1 <= 0.001F)
+                    {
+                        float f2 = f * vec2f.x;
+                        float f3 = f * vec2f.y;
+                        float f4 = MathHelper.sin(this.rotationYaw * 0.017453292F);
+                        float f5 = MathHelper.cos(this.rotationYaw * 0.017453292F);
+                        vec3d2 = new Vec3d((double)(f2 * f5 - f3 * f4), vec3d2.yCoord, (double)(f3 * f5 + f2 * f4));
+                        f1 = (float)vec3d2.lengthSquared();
+
+                        if (f1 <= 0.001F)
+                        {
+                            return;
                         }
+                    }
 
-                        float f8 = Math.max(f * 7.0F, 1.0F / f12);
-                        Vec3d vec3d4 = vec3d1.func_178787_e(vec3d12.func_186678_a((double)f8));
-                        float f9 = this.field_70130_N;
-                        float f10 = this.field_70131_O;
-                        AxisAlignedBB axisalignedbb = (new AxisAlignedBB(vec3d, vec3d4.func_72441_c(0.0D, (double)f10, 0.0D))).func_72314_b((double)f9, 0.0D, (double)f9);
-                        Vec3d lvt_19_1_ = vec3d.func_72441_c(0.0D, 0.5099999904632568D, 0.0D);
-                        vec3d4 = vec3d4.func_72441_c(0.0D, 0.5099999904632568D, 0.0D);
-                        Vec3d vec3d5 = vec3d12.func_72431_c(new Vec3d(0.0D, 1.0D, 0.0D));
-                        Vec3d vec3d6 = vec3d5.func_186678_a((double)(f9 * 0.5F));
-                        Vec3d vec3d7 = lvt_19_1_.func_178788_d(vec3d6);
-                        Vec3d vec3d8 = vec3d4.func_178788_d(vec3d6);
-                        Vec3d vec3d9 = lvt_19_1_.func_178787_e(vec3d6);
-                        Vec3d vec3d10 = vec3d4.func_178787_e(vec3d6);
-                        List<AxisAlignedBB> list = this.field_70170_p.func_184144_a(this, axisalignedbb);
-                        if (!list.isEmpty()) {
-                           ;
-                        }
+                    float f12 = (float)MathHelper.fastInvSqrt((double)f1);
+                    Vec3d vec3d12 = vec3d2.scale((double)f12);
+                    Vec3d vec3d13 = this.getForward();
+                    float f13 = (float)(vec3d13.xCoord * vec3d12.xCoord + vec3d13.zCoord * vec3d12.zCoord);
 
-                        float f11 = Float.MIN_VALUE;
+                    if (f13 >= -0.15F)
+                    {
+                        BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().maxY, this.posZ);
+                        IBlockState iblockstate = this.world.getBlockState(blockpos);
 
-                        label86:
-                        for(AxisAlignedBB axisalignedbb2 : list) {
-                           if (axisalignedbb2.func_189973_a(vec3d7, vec3d8) || axisalignedbb2.func_189973_a(vec3d9, vec3d10)) {
-                              f11 = (float)axisalignedbb2.field_72337_e;
-                              Vec3d vec3d11 = axisalignedbb2.func_189972_c();
-                              BlockPos blockpos1 = new BlockPos(vec3d11);
-                              int i = 1;
+                        if (iblockstate.getCollisionBoundingBox(this.world, blockpos) == null)
+                        {
+                            blockpos = blockpos.up();
+                            IBlockState iblockstate1 = this.world.getBlockState(blockpos);
 
-                              while(true) {
-                                 if ((float)i >= f7) {
-                                    break label86;
-                                 }
+                            if (iblockstate1.getCollisionBoundingBox(this.world, blockpos) == null)
+                            {
+                                float f6 = 7.0F;
+                                float f7 = 1.2F;
 
-                                 BlockPos blockpos2 = blockpos1.func_177981_b(i);
-                                 IBlockState iblockstate2 = this.field_70170_p.func_180495_p(blockpos2);
-                                 AxisAlignedBB axisalignedbb1;
-                                 if ((axisalignedbb1 = iblockstate2.func_185890_d(this.field_70170_p, blockpos2)) != null) {
-                                    f11 = (float)axisalignedbb1.field_72337_e + (float)blockpos2.func_177956_o();
-                                    if ((double)f11 - this.func_174813_aQ().field_72338_b > (double)f7) {
-                                       return;
+                                if (this.isPotionActive(MobEffects.JUMP_BOOST))
+                                {
+                                    f7 += (float)(this.getActivePotionEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1) * 0.75F;
+                                }
+
+                                float f8 = Math.max(f * 7.0F, 1.0F / f12);
+                                Vec3d vec3d4 = vec3d1.add(vec3d12.scale((double)f8));
+                                float f9 = this.width;
+                                float f10 = this.height;
+                                AxisAlignedBB axisalignedbb = (new AxisAlignedBB(vec3d, vec3d4.addVector(0.0D, (double)f10, 0.0D))).expand((double)f9, 0.0D, (double)f9);
+                                Vec3d lvt_19_1_ = vec3d.addVector(0.0D, 0.5099999904632568D, 0.0D);
+                                vec3d4 = vec3d4.addVector(0.0D, 0.5099999904632568D, 0.0D);
+                                Vec3d vec3d5 = vec3d12.crossProduct(new Vec3d(0.0D, 1.0D, 0.0D));
+                                Vec3d vec3d6 = vec3d5.scale((double)(f9 * 0.5F));
+                                Vec3d vec3d7 = lvt_19_1_.subtract(vec3d6);
+                                Vec3d vec3d8 = vec3d4.subtract(vec3d6);
+                                Vec3d vec3d9 = lvt_19_1_.add(vec3d6);
+                                Vec3d vec3d10 = vec3d4.add(vec3d6);
+                                List<AxisAlignedBB> list = this.world.getCollisionBoxes(this, axisalignedbb);
+
+                                if (!list.isEmpty())
+                                {
+                                    ;
+                                }
+
+                                float f11 = Float.MIN_VALUE;
+                                label86:
+
+                                for (AxisAlignedBB axisalignedbb2 : list)
+                                {
+                                    if (axisalignedbb2.intersects(vec3d7, vec3d8) || axisalignedbb2.intersects(vec3d9, vec3d10))
+                                    {
+                                        f11 = (float)axisalignedbb2.maxY;
+                                        Vec3d vec3d11 = axisalignedbb2.getCenter();
+                                        BlockPos blockpos1 = new BlockPos(vec3d11);
+                                        int i = 1;
+
+                                        while (true)
+                                        {
+                                            if ((float)i >= f7)
+                                            {
+                                                break label86;
+                                            }
+
+                                            BlockPos blockpos2 = blockpos1.up(i);
+                                            IBlockState iblockstate2 = this.world.getBlockState(blockpos2);
+                                            AxisAlignedBB axisalignedbb1;
+
+                                            if ((axisalignedbb1 = iblockstate2.getCollisionBoundingBox(this.world, blockpos2)) != null)
+                                            {
+                                                f11 = (float)axisalignedbb1.maxY + (float)blockpos2.getY();
+
+                                                if ((double)f11 - this.getEntityBoundingBox().minY > (double)f7)
+                                                {
+                                                    return;
+                                                }
+                                            }
+
+                                            if (i > 1)
+                                            {
+                                                blockpos = blockpos.up();
+                                                IBlockState iblockstate3 = this.world.getBlockState(blockpos);
+
+                                                if (iblockstate3.getCollisionBoundingBox(this.world, blockpos) != null)
+                                                {
+                                                    return;
+                                                }
+                                            }
+
+                                            ++i;
+                                        }
                                     }
-                                 }
+                                }
 
-                                 if (i > 1) {
-                                    blockpos = blockpos.func_177984_a();
-                                    IBlockState iblockstate3 = this.field_70170_p.func_180495_p(blockpos);
-                                    if (iblockstate3.func_185890_d(this.field_70170_p, blockpos) != null) {
-                                       return;
+                                if (f11 != Float.MIN_VALUE)
+                                {
+                                    float f14 = (float)((double)f11 - this.getEntityBoundingBox().minY);
+
+                                    if (f14 > 0.5F && f14 <= f7)
+                                    {
+                                        this.autoJumpTime = 1;
                                     }
-                                 }
-
-                                 ++i;
-                              }
-                           }
+                                }
+                            }
                         }
-
-                        if (f11 != Float.MIN_VALUE) {
-                           float f14 = (float)((double)f11 - this.func_174813_aQ().field_72338_b);
-                           if (f14 > 0.5F && f14 <= f7) {
-                              this.field_189812_cs = 1;
-                           }
-                        }
-                     }
-                  }
-               }
+                    }
+                }
             }
-         }
-      }
-   }
+        }
+    }
 }

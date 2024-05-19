@@ -8,111 +8,143 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 
-public class SPacketTitle implements Packet<INetHandlerPlayClient> {
-   private SPacketTitle.Type field_179812_a;
-   private ITextComponent field_179810_b;
-   private int field_179811_c;
-   private int field_179808_d;
-   private int field_179809_e;
+public class SPacketTitle implements Packet<INetHandlerPlayClient>
+{
+    private SPacketTitle.Type type;
+    private ITextComponent message;
+    private int fadeInTime;
+    private int displayTime;
+    private int fadeOutTime;
 
-   public SPacketTitle() {
-   }
+    public SPacketTitle()
+    {
+    }
 
-   public SPacketTitle(SPacketTitle.Type p_i46899_1_, ITextComponent p_i46899_2_) {
-      this(p_i46899_1_, p_i46899_2_, -1, -1, -1);
-   }
+    public SPacketTitle(SPacketTitle.Type typeIn, ITextComponent messageIn)
+    {
+        this(typeIn, messageIn, -1, -1, -1);
+    }
 
-   public SPacketTitle(int p_i46900_1_, int p_i46900_2_, int p_i46900_3_) {
-      this(SPacketTitle.Type.TIMES, (ITextComponent)null, p_i46900_1_, p_i46900_2_, p_i46900_3_);
-   }
+    public SPacketTitle(int fadeInTimeIn, int displayTimeIn, int fadeOutTimeIn)
+    {
+        this(SPacketTitle.Type.TIMES, (ITextComponent)null, fadeInTimeIn, displayTimeIn, fadeOutTimeIn);
+    }
 
-   public SPacketTitle(SPacketTitle.Type p_i46901_1_, @Nullable ITextComponent p_i46901_2_, int p_i46901_3_, int p_i46901_4_, int p_i46901_5_) {
-      this.field_179812_a = p_i46901_1_;
-      this.field_179810_b = p_i46901_2_;
-      this.field_179811_c = p_i46901_3_;
-      this.field_179808_d = p_i46901_4_;
-      this.field_179809_e = p_i46901_5_;
-   }
+    public SPacketTitle(SPacketTitle.Type typeIn, @Nullable ITextComponent messageIn, int fadeInTimeIn, int displayTimeIn, int fadeOutTimeIn)
+    {
+        this.type = typeIn;
+        this.message = messageIn;
+        this.fadeInTime = fadeInTimeIn;
+        this.displayTime = displayTimeIn;
+        this.fadeOutTime = fadeOutTimeIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179812_a = (SPacketTitle.Type)p_148837_1_.func_179257_a(SPacketTitle.Type.class);
-      if (this.field_179812_a == SPacketTitle.Type.TITLE || this.field_179812_a == SPacketTitle.Type.SUBTITLE || this.field_179812_a == SPacketTitle.Type.ACTIONBAR) {
-         this.field_179810_b = p_148837_1_.func_179258_d();
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.type = (SPacketTitle.Type)buf.readEnumValue(SPacketTitle.Type.class);
 
-      if (this.field_179812_a == SPacketTitle.Type.TIMES) {
-         this.field_179811_c = p_148837_1_.readInt();
-         this.field_179808_d = p_148837_1_.readInt();
-         this.field_179809_e = p_148837_1_.readInt();
-      }
+        if (this.type == SPacketTitle.Type.TITLE || this.type == SPacketTitle.Type.SUBTITLE || this.type == SPacketTitle.Type.ACTIONBAR)
+        {
+            this.message = buf.readTextComponent();
+        }
 
-   }
+        if (this.type == SPacketTitle.Type.TIMES)
+        {
+            this.fadeInTime = buf.readInt();
+            this.displayTime = buf.readInt();
+            this.fadeOutTime = buf.readInt();
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179249_a(this.field_179812_a);
-      if (this.field_179812_a == SPacketTitle.Type.TITLE || this.field_179812_a == SPacketTitle.Type.SUBTITLE || this.field_179812_a == SPacketTitle.Type.ACTIONBAR) {
-         p_148840_1_.func_179256_a(this.field_179810_b);
-      }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeEnumValue(this.type);
 
-      if (this.field_179812_a == SPacketTitle.Type.TIMES) {
-         p_148840_1_.writeInt(this.field_179811_c);
-         p_148840_1_.writeInt(this.field_179808_d);
-         p_148840_1_.writeInt(this.field_179809_e);
-      }
+        if (this.type == SPacketTitle.Type.TITLE || this.type == SPacketTitle.Type.SUBTITLE || this.type == SPacketTitle.Type.ACTIONBAR)
+        {
+            buf.writeTextComponent(this.message);
+        }
 
-   }
+        if (this.type == SPacketTitle.Type.TIMES)
+        {
+            buf.writeInt(this.fadeInTime);
+            buf.writeInt(this.displayTime);
+            buf.writeInt(this.fadeOutTime);
+        }
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_175099_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleTitle(this);
+    }
 
-   public SPacketTitle.Type func_179807_a() {
-      return this.field_179812_a;
-   }
+    public SPacketTitle.Type getType()
+    {
+        return this.type;
+    }
 
-   public ITextComponent func_179805_b() {
-      return this.field_179810_b;
-   }
+    public ITextComponent getMessage()
+    {
+        return this.message;
+    }
 
-   public int func_179806_c() {
-      return this.field_179811_c;
-   }
+    public int getFadeInTime()
+    {
+        return this.fadeInTime;
+    }
 
-   public int func_179804_d() {
-      return this.field_179808_d;
-   }
+    public int getDisplayTime()
+    {
+        return this.displayTime;
+    }
 
-   public int func_179803_e() {
-      return this.field_179809_e;
-   }
+    public int getFadeOutTime()
+    {
+        return this.fadeOutTime;
+    }
 
-   public static enum Type {
-      TITLE,
-      SUBTITLE,
-      ACTIONBAR,
-      TIMES,
-      CLEAR,
-      RESET;
+    public static enum Type
+    {
+        TITLE,
+        SUBTITLE,
+        ACTIONBAR,
+        TIMES,
+        CLEAR,
+        RESET;
 
-      public static SPacketTitle.Type func_179969_a(String p_179969_0_) {
-         for(SPacketTitle.Type spackettitle$type : values()) {
-            if (spackettitle$type.name().equalsIgnoreCase(p_179969_0_)) {
-               return spackettitle$type;
+        public static SPacketTitle.Type byName(String name)
+        {
+            for (SPacketTitle.Type spackettitle$type : values())
+            {
+                if (spackettitle$type.name().equalsIgnoreCase(name))
+                {
+                    return spackettitle$type;
+                }
             }
-         }
 
-         return TITLE;
-      }
+            return TITLE;
+        }
 
-      public static String[] func_179971_a() {
-         String[] astring = new String[values().length];
-         int i = 0;
+        public static String[] getNames()
+        {
+            String[] astring = new String[values().length];
+            int i = 0;
 
-         for(SPacketTitle.Type spackettitle$type : values()) {
-            astring[i++] = spackettitle$type.name().toLowerCase(Locale.ROOT);
-         }
+            for (SPacketTitle.Type spackettitle$type : values())
+            {
+                astring[i++] = spackettitle$type.name().toLowerCase(Locale.ROOT);
+            }
 
-         return astring;
-      }
-   }
+            return astring;
+        }
+    }
 }

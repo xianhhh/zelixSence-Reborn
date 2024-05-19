@@ -6,42 +6,53 @@ import net.minecraft.client.util.JsonException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ShaderLinkHelper {
-   private static final Logger field_148080_a = LogManager.getLogger();
-   private static ShaderLinkHelper field_148079_b;
+public class ShaderLinkHelper
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static ShaderLinkHelper staticShaderLinkHelper;
 
-   public static void func_148076_a() {
-      field_148079_b = new ShaderLinkHelper();
-   }
+    public static void setNewStaticShaderLinkHelper()
+    {
+        staticShaderLinkHelper = new ShaderLinkHelper();
+    }
 
-   public static ShaderLinkHelper func_148074_b() {
-      return field_148079_b;
-   }
+    public static ShaderLinkHelper getStaticShaderLinkHelper()
+    {
+        return staticShaderLinkHelper;
+    }
 
-   public void func_148077_a(ShaderManager p_148077_1_) {
-      p_148077_1_.func_147994_f().func_148054_b(p_148077_1_);
-      p_148077_1_.func_147989_e().func_148054_b(p_148077_1_);
-      OpenGlHelper.func_153187_e(p_148077_1_.func_147986_h());
-   }
+    public void deleteShader(ShaderManager manager)
+    {
+        manager.getFragmentShaderLoader().deleteShader(manager);
+        manager.getVertexShaderLoader().deleteShader(manager);
+        OpenGlHelper.glDeleteProgram(manager.getProgram());
+    }
 
-   public int func_148078_c() throws JsonException {
-      int i = OpenGlHelper.func_153183_d();
-      if (i <= 0) {
-         throw new JsonException("Could not create shader program (returned program ID " + i + ")");
-      } else {
-         return i;
-      }
-   }
+    public int createProgram() throws JsonException
+    {
+        int i = OpenGlHelper.glCreateProgram();
 
-   public void func_148075_b(ShaderManager p_148075_1_) throws IOException {
-      p_148075_1_.func_147994_f().func_148056_a(p_148075_1_);
-      p_148075_1_.func_147989_e().func_148056_a(p_148075_1_);
-      OpenGlHelper.func_153179_f(p_148075_1_.func_147986_h());
-      int i = OpenGlHelper.func_153175_a(p_148075_1_.func_147986_h(), OpenGlHelper.field_153207_o);
-      if (i == 0) {
-         field_148080_a.warn("Error encountered when linking program containing VS {} and FS {}. Log output:", p_148075_1_.func_147989_e().func_148055_a(), p_148075_1_.func_147994_f().func_148055_a());
-         field_148080_a.warn(OpenGlHelper.func_153166_e(p_148075_1_.func_147986_h(), 32768));
-      }
+        if (i <= 0)
+        {
+            throw new JsonException("Could not create shader program (returned program ID " + i + ")");
+        }
+        else
+        {
+            return i;
+        }
+    }
 
-   }
+    public void linkProgram(ShaderManager manager) throws IOException
+    {
+        manager.getFragmentShaderLoader().attachShader(manager);
+        manager.getVertexShaderLoader().attachShader(manager);
+        OpenGlHelper.glLinkProgram(manager.getProgram());
+        int i = OpenGlHelper.glGetProgrami(manager.getProgram(), OpenGlHelper.GL_LINK_STATUS);
+
+        if (i == 0)
+        {
+            LOGGER.warn("Error encountered when linking program containing VS {} and FS {}. Log output:", manager.getVertexShaderLoader().getShaderFilename(), manager.getFragmentShaderLoader().getShaderFilename());
+            LOGGER.warn(OpenGlHelper.glGetProgramInfoLog(manager.getProgram(), 32768));
+        }
+    }
 }

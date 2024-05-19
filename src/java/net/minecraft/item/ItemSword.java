@@ -13,72 +13,116 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemSword extends Item {
-   private final float field_150934_a;
-   private final Item.ToolMaterial field_150933_b;
+public class ItemSword extends Item
+{
+    private final float attackDamage;
+    private final Item.ToolMaterial material;
 
-   public ItemSword(Item.ToolMaterial p_i45356_1_) {
-      this.field_150933_b = p_i45356_1_;
-      this.field_77777_bU = 1;
-      this.func_77656_e(p_i45356_1_.func_77997_a());
-      this.func_77637_a(CreativeTabs.field_78037_j);
-      this.field_150934_a = 3.0F + p_i45356_1_.func_78000_c();
-   }
+    public ItemSword(Item.ToolMaterial material)
+    {
+        this.material = material;
+        this.maxStackSize = 1;
+        this.setMaxDamage(material.getMaxUses());
+        this.setCreativeTab(CreativeTabs.COMBAT);
+        this.attackDamage = 3.0F + material.getDamageVsEntity();
+    }
 
-   public float func_150931_i() {
-      return this.field_150933_b.func_78000_c();
-   }
+    /**
+     * Returns the amount of damage this item will deal. One heart of damage is equal to 2 damage points.
+     */
+    public float getDamageVsEntity()
+    {
+        return this.material.getDamageVsEntity();
+    }
 
-   public float func_150893_a(ItemStack p_150893_1_, IBlockState p_150893_2_) {
-      Block block = p_150893_2_.func_177230_c();
-      if (block == Blocks.field_150321_G) {
-         return 15.0F;
-      } else {
-         Material material = p_150893_2_.func_185904_a();
-         return material != Material.field_151585_k && material != Material.field_151582_l && material != Material.field_151589_v && material != Material.field_151584_j && material != Material.field_151572_C ? 1.0F : 1.5F;
-      }
-   }
+    public float getStrVsBlock(ItemStack stack, IBlockState state)
+    {
+        Block block = state.getBlock();
 
-   public boolean func_77644_a(ItemStack p_77644_1_, EntityLivingBase p_77644_2_, EntityLivingBase p_77644_3_) {
-      p_77644_1_.func_77972_a(1, p_77644_3_);
-      return true;
-   }
+        if (block == Blocks.WEB)
+        {
+            return 15.0F;
+        }
+        else
+        {
+            Material material = state.getMaterial();
+            return material != Material.PLANTS && material != Material.VINE && material != Material.CORAL && material != Material.LEAVES && material != Material.GOURD ? 1.0F : 1.5F;
+        }
+    }
 
-   public boolean func_179218_a(ItemStack p_179218_1_, World p_179218_2_, IBlockState p_179218_3_, BlockPos p_179218_4_, EntityLivingBase p_179218_5_) {
-      if ((double)p_179218_3_.func_185887_b(p_179218_2_, p_179218_4_) != 0.0D) {
-         p_179218_1_.func_77972_a(2, p_179218_5_);
-      }
+    /**
+     * Current implementations of this method in child classes do not use the entry argument beside ev. They just raise
+     * the damage on the stack.
+     */
+    public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker)
+    {
+        stack.damageItem(1, attacker);
+        return true;
+    }
 
-      return true;
-   }
+    /**
+     * Called when a Block is destroyed using this Item. Return true to trigger the "Use Item" statistic.
+     */
+    public boolean onBlockDestroyed(ItemStack stack, World worldIn, IBlockState state, BlockPos pos, EntityLivingBase entityLiving)
+    {
+        if ((double)state.getBlockHardness(worldIn, pos) != 0.0D)
+        {
+            stack.damageItem(2, entityLiving);
+        }
 
-   public boolean func_77662_d() {
-      return true;
-   }
+        return true;
+    }
 
-   public boolean func_150897_b(IBlockState p_150897_1_) {
-      return p_150897_1_.func_177230_c() == Blocks.field_150321_G;
-   }
+    /**
+     * Returns True is the item is renderer in full 3D when hold.
+     */
+    public boolean isFull3D()
+    {
+        return true;
+    }
 
-   public int func_77619_b() {
-      return this.field_150933_b.func_77995_e();
-   }
+    /**
+     * Check whether this Item can harvest the given Block
+     */
+    public boolean canHarvestBlock(IBlockState blockIn)
+    {
+        return blockIn.getBlock() == Blocks.WEB;
+    }
 
-   public String func_150932_j() {
-      return this.field_150933_b.toString();
-   }
+    /**
+     * Return the enchantability factor of the item, most of the time is based on material.
+     */
+    public int getItemEnchantability()
+    {
+        return this.material.getEnchantability();
+    }
 
-   public boolean func_82789_a(ItemStack p_82789_1_, ItemStack p_82789_2_) {
-      return this.field_150933_b.func_150995_f() == p_82789_2_.func_77973_b() ? true : super.func_82789_a(p_82789_1_, p_82789_2_);
-   }
+    /**
+     * Return the name for this tool's material.
+     */
+    public String getToolMaterialName()
+    {
+        return this.material.toString();
+    }
 
-   public Multimap<String, AttributeModifier> func_111205_h(EntityEquipmentSlot p_111205_1_) {
-      Multimap<String, AttributeModifier> multimap = super.func_111205_h(p_111205_1_);
-      if (p_111205_1_ == EntityEquipmentSlot.MAINHAND) {
-         multimap.put(SharedMonsterAttributes.field_111264_e.func_111108_a(), new AttributeModifier(field_111210_e, "Weapon modifier", (double)this.field_150934_a, 0));
-         multimap.put(SharedMonsterAttributes.field_188790_f.func_111108_a(), new AttributeModifier(field_185050_h, "Weapon modifier", -2.4000000953674316D, 0));
-      }
+    /**
+     * Return whether this item is repairable in an anvil.
+     */
+    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair)
+    {
+        return this.material.getRepairItem() == repair.getItem() ? true : super.getIsRepairable(toRepair, repair);
+    }
 
-      return multimap;
-   }
+    public Multimap<String, AttributeModifier> getItemAttributeModifiers(EntityEquipmentSlot equipmentSlot)
+    {
+        Multimap<String, AttributeModifier> multimap = super.getItemAttributeModifiers(equipmentSlot);
+
+        if (equipmentSlot == EntityEquipmentSlot.MAINHAND)
+        {
+            multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getAttributeUnlocalizedName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", (double)this.attackDamage, 0));
+            multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getAttributeUnlocalizedName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", -2.4000000953674316D, 0));
+        }
+
+        return multimap;
+    }
 }

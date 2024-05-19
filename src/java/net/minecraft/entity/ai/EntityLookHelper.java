@@ -5,97 +5,140 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.MathHelper;
 
-public class EntityLookHelper {
-   private final EntityLiving field_75659_a;
-   private float field_75657_b;
-   private float field_75658_c;
-   private boolean field_75655_d;
-   private double field_75656_e;
-   private double field_75653_f;
-   private double field_75654_g;
+public class EntityLookHelper
+{
+    private final EntityLiving entity;
 
-   public EntityLookHelper(EntityLiving p_i1613_1_) {
-      this.field_75659_a = p_i1613_1_;
-   }
+    /**
+     * The amount of change that is made each update for an entity facing a direction.
+     */
+    private float deltaLookYaw;
 
-   public void func_75651_a(Entity p_75651_1_, float p_75651_2_, float p_75651_3_) {
-      this.field_75656_e = p_75651_1_.field_70165_t;
-      if (p_75651_1_ instanceof EntityLivingBase) {
-         this.field_75653_f = p_75651_1_.field_70163_u + (double)p_75651_1_.func_70047_e();
-      } else {
-         this.field_75653_f = (p_75651_1_.func_174813_aQ().field_72338_b + p_75651_1_.func_174813_aQ().field_72337_e) / 2.0D;
-      }
+    /**
+     * The amount of change that is made each update for an entity facing a direction.
+     */
+    private float deltaLookPitch;
 
-      this.field_75654_g = p_75651_1_.field_70161_v;
-      this.field_75657_b = p_75651_2_;
-      this.field_75658_c = p_75651_3_;
-      this.field_75655_d = true;
-   }
+    /** Whether or not the entity is trying to look at something. */
+    private boolean isLooking;
+    private double posX;
+    private double posY;
+    private double posZ;
 
-   public void func_75650_a(double p_75650_1_, double p_75650_3_, double p_75650_5_, float p_75650_7_, float p_75650_8_) {
-      this.field_75656_e = p_75650_1_;
-      this.field_75653_f = p_75650_3_;
-      this.field_75654_g = p_75650_5_;
-      this.field_75657_b = p_75650_7_;
-      this.field_75658_c = p_75650_8_;
-      this.field_75655_d = true;
-   }
+    public EntityLookHelper(EntityLiving entitylivingIn)
+    {
+        this.entity = entitylivingIn;
+    }
 
-   public void func_75649_a() {
-      this.field_75659_a.field_70125_A = 0.0F;
-      if (this.field_75655_d) {
-         this.field_75655_d = false;
-         double d0 = this.field_75656_e - this.field_75659_a.field_70165_t;
-         double d1 = this.field_75653_f - (this.field_75659_a.field_70163_u + (double)this.field_75659_a.func_70047_e());
-         double d2 = this.field_75654_g - this.field_75659_a.field_70161_v;
-         double d3 = (double)MathHelper.func_76133_a(d0 * d0 + d2 * d2);
-         float f = (float)(MathHelper.func_181159_b(d2, d0) * 57.2957763671875D) - 90.0F;
-         float f1 = (float)(-(MathHelper.func_181159_b(d1, d3) * 57.2957763671875D));
-         this.field_75659_a.field_70125_A = this.func_75652_a(this.field_75659_a.field_70125_A, f1, this.field_75658_c);
-         this.field_75659_a.field_70759_as = this.func_75652_a(this.field_75659_a.field_70759_as, f, this.field_75657_b);
-      } else {
-         this.field_75659_a.field_70759_as = this.func_75652_a(this.field_75659_a.field_70759_as, this.field_75659_a.field_70761_aq, 10.0F);
-      }
+    /**
+     * Sets position to look at using entity
+     */
+    public void setLookPositionWithEntity(Entity entityIn, float deltaYaw, float deltaPitch)
+    {
+        this.posX = entityIn.posX;
 
-      float f2 = MathHelper.func_76142_g(this.field_75659_a.field_70759_as - this.field_75659_a.field_70761_aq);
-      if (!this.field_75659_a.func_70661_as().func_75500_f()) {
-         if (f2 < -75.0F) {
-            this.field_75659_a.field_70759_as = this.field_75659_a.field_70761_aq - 75.0F;
-         }
+        if (entityIn instanceof EntityLivingBase)
+        {
+            this.posY = entityIn.posY + (double)entityIn.getEyeHeight();
+        }
+        else
+        {
+            this.posY = (entityIn.getEntityBoundingBox().minY + entityIn.getEntityBoundingBox().maxY) / 2.0D;
+        }
 
-         if (f2 > 75.0F) {
-            this.field_75659_a.field_70759_as = this.field_75659_a.field_70761_aq + 75.0F;
-         }
-      }
+        this.posZ = entityIn.posZ;
+        this.deltaLookYaw = deltaYaw;
+        this.deltaLookPitch = deltaPitch;
+        this.isLooking = true;
+    }
 
-   }
+    /**
+     * Sets position to look at
+     */
+    public void setLookPosition(double x, double y, double z, float deltaYaw, float deltaPitch)
+    {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.deltaLookYaw = deltaYaw;
+        this.deltaLookPitch = deltaPitch;
+        this.isLooking = true;
+    }
 
-   private float func_75652_a(float p_75652_1_, float p_75652_2_, float p_75652_3_) {
-      float f = MathHelper.func_76142_g(p_75652_2_ - p_75652_1_);
-      if (f > p_75652_3_) {
-         f = p_75652_3_;
-      }
+    /**
+     * Updates look
+     */
+    public void onUpdateLook()
+    {
+        this.entity.rotationPitch = 0.0F;
 
-      if (f < -p_75652_3_) {
-         f = -p_75652_3_;
-      }
+        if (this.isLooking)
+        {
+            this.isLooking = false;
+            double d0 = this.posX - this.entity.posX;
+            double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
+            double d2 = this.posZ - this.entity.posZ;
+            double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
+            float f = (float)(MathHelper.atan2(d2, d0) * (180D / Math.PI)) - 90.0F;
+            float f1 = (float)(-(MathHelper.atan2(d1, d3) * (180D / Math.PI)));
+            this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, f1, this.deltaLookPitch);
+            this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, f, this.deltaLookYaw);
+        }
+        else
+        {
+            this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, this.entity.renderYawOffset, 10.0F);
+        }
 
-      return p_75652_1_ + f;
-   }
+        float f2 = MathHelper.wrapDegrees(this.entity.rotationYawHead - this.entity.renderYawOffset);
 
-   public boolean func_180424_b() {
-      return this.field_75655_d;
-   }
+        if (!this.entity.getNavigator().noPath())
+        {
+            if (f2 < -75.0F)
+            {
+                this.entity.rotationYawHead = this.entity.renderYawOffset - 75.0F;
+            }
 
-   public double func_180423_e() {
-      return this.field_75656_e;
-   }
+            if (f2 > 75.0F)
+            {
+                this.entity.rotationYawHead = this.entity.renderYawOffset + 75.0F;
+            }
+        }
+    }
 
-   public double func_180422_f() {
-      return this.field_75653_f;
-   }
+    private float updateRotation(float p_75652_1_, float p_75652_2_, float p_75652_3_)
+    {
+        float f = MathHelper.wrapDegrees(p_75652_2_ - p_75652_1_);
 
-   public double func_180421_g() {
-      return this.field_75654_g;
-   }
+        if (f > p_75652_3_)
+        {
+            f = p_75652_3_;
+        }
+
+        if (f < -p_75652_3_)
+        {
+            f = -p_75652_3_;
+        }
+
+        return p_75652_1_ + f;
+    }
+
+    public boolean getIsLooking()
+    {
+        return this.isLooking;
+    }
+
+    public double getLookPosX()
+    {
+        return this.posX;
+    }
+
+    public double getLookPosY()
+    {
+        return this.posY;
+    }
+
+    public double getLookPosZ()
+    {
+        return this.posZ;
+    }
 }

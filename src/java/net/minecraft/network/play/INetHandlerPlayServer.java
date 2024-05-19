@@ -32,64 +32,134 @@ import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 
-public interface INetHandlerPlayServer extends INetHandler {
-   void func_175087_a(CPacketAnimation var1);
+public interface INetHandlerPlayServer extends INetHandler
+{
+    void handleAnimation(CPacketAnimation packetIn);
 
-   void func_147354_a(CPacketChatMessage var1);
+    /**
+     * Process chat messages (broadcast back to clients) and commands (executes)
+     */
+    void processChatMessage(CPacketChatMessage packetIn);
 
-   void func_147341_a(CPacketTabComplete var1);
+    /**
+     * Retrieves possible tab completions for the requested command string and sends them to the client
+     */
+    void processTabComplete(CPacketTabComplete packetIn);
 
-   void func_147342_a(CPacketClientStatus var1);
+    /**
+     * Processes the client status updates: respawn attempt from player, opening statistics or achievements, or
+     * acquiring 'open inventory' achievement
+     */
+    void processClientStatus(CPacketClientStatus packetIn);
 
-   void func_147352_a(CPacketClientSettings var1);
+    /**
+     * Updates serverside copy of client settings: language, render distance, chat visibility, chat colours, difficulty,
+     * and whether to show the cape
+     */
+    void processClientSettings(CPacketClientSettings packetIn);
 
-   void func_147339_a(CPacketConfirmTransaction var1);
+    /**
+     * Received in response to the server requesting to confirm that the client-side open container matches the servers'
+     * after a mismatched container-slot manipulation. It will unlock the player's ability to manipulate the container
+     * contents
+     */
+    void processConfirmTransaction(CPacketConfirmTransaction packetIn);
 
-   void func_147338_a(CPacketEnchantItem var1);
+    /**
+     * Enchants the item identified by the packet given some convoluted conditions (matching window, which
+     * should/shouldn't be in use?)
+     */
+    void processEnchantItem(CPacketEnchantItem packetIn);
 
-   void func_147351_a(CPacketClickWindow var1);
+    /**
+     * Executes a container/inventory slot manipulation as indicated by the packet. Sends the serverside result if they
+     * didn't match the indicated result and prevents further manipulation by the player until he confirms that it has
+     * the same open container/inventory
+     */
+    void processClickWindow(CPacketClickWindow packetIn);
 
-   void func_191985_a(CPacketRecipePlacement var1);
+    void func_191985_a(CPacketRecipePlacement p_191985_1_);
 
-   void func_147356_a(CPacketCloseWindow var1);
+    /**
+     * Processes the client closing windows (container)
+     */
+    void processCloseWindow(CPacketCloseWindow packetIn);
 
-   void func_147349_a(CPacketCustomPayload var1);
+    /**
+     * Synchronizes serverside and clientside book contents and signing
+     */
+    void processCustomPayload(CPacketCustomPayload packetIn);
 
-   void func_147340_a(CPacketUseEntity var1);
+    /**
+     * Processes interactions ((un)leashing, opening command block GUI) and attacks on an entity with players currently
+     * equipped item
+     */
+    void processUseEntity(CPacketUseEntity packetIn);
 
-   void func_147353_a(CPacketKeepAlive var1);
+    /**
+     * Updates a players' ping statistics
+     */
+    void processKeepAlive(CPacketKeepAlive packetIn);
 
-   void func_147347_a(CPacketPlayer var1);
+    /**
+     * Processes clients perspective on player positioning and/or orientation
+     */
+    void processPlayer(CPacketPlayer packetIn);
 
-   void func_147348_a(CPacketPlayerAbilities var1);
+    /**
+     * Processes a player starting/stopping flying
+     */
+    void processPlayerAbilities(CPacketPlayerAbilities packetIn);
 
-   void func_147345_a(CPacketPlayerDigging var1);
+    /**
+     * Processes the player initiating/stopping digging on a particular spot, as well as a player dropping items?. (0:
+     * initiated, 1: reinitiated, 2? , 3-4 drop item (respectively without or with player control), 5: stopped; x,y,z,
+     * side clicked on;)
+     */
+    void processPlayerDigging(CPacketPlayerDigging packetIn);
 
-   void func_147357_a(CPacketEntityAction var1);
+    /**
+     * Processes a range of action-types: sneaking, sprinting, waking from sleep, opening the inventory or setting jump
+     * height of the horse the player is riding
+     */
+    void processEntityAction(CPacketEntityAction packetIn);
 
-   void func_147358_a(CPacketInput var1);
+    /**
+     * Processes player movement input. Includes walking, strafing, jumping, sneaking; excludes riding and toggling
+     * flying/sprinting
+     */
+    void processInput(CPacketInput packetIn);
 
-   void func_147355_a(CPacketHeldItemChange var1);
+    /**
+     * Updates which quickbar slot is selected
+     */
+    void processHeldItemChange(CPacketHeldItemChange packetIn);
 
-   void func_147344_a(CPacketCreativeInventoryAction var1);
+    /**
+     * Update the server with an ItemStack in a slot.
+     */
+    void processCreativeInventoryAction(CPacketCreativeInventoryAction packetIn);
 
-   void func_147343_a(CPacketUpdateSign var1);
+    void processUpdateSign(CPacketUpdateSign packetIn);
 
-   void func_184337_a(CPacketPlayerTryUseItemOnBlock var1);
+    void processRightClickBlock(CPacketPlayerTryUseItemOnBlock packetIn);
 
-   void func_147346_a(CPacketPlayerTryUseItem var1);
+    /**
+     * Processes block placement and block activation (anvil, furnace, etc.)
+     */
+    void processPlayerBlockPlacement(CPacketPlayerTryUseItem packetIn);
 
-   void func_175088_a(CPacketSpectate var1);
+    void handleSpectate(CPacketSpectate packetIn);
 
-   void func_175086_a(CPacketResourcePackStatus var1);
+    void handleResourcePackStatus(CPacketResourcePackStatus packetIn);
 
-   void func_184340_a(CPacketSteerBoat var1);
+    void processSteerBoat(CPacketSteerBoat packetIn);
 
-   void func_184338_a(CPacketVehicleMove var1);
+    void processVehicleMove(CPacketVehicleMove packetIn);
 
-   void func_184339_a(CPacketConfirmTeleport var1);
+    void processConfirmTeleport(CPacketConfirmTeleport packetIn);
 
-   void func_191984_a(CPacketRecipeInfo var1);
+    void func_191984_a(CPacketRecipeInfo p_191984_1_);
 
-   void func_194027_a(CPacketSeenAdvancements var1);
+    void func_194027_a(CPacketSeenAdvancements p_194027_1_);
 }

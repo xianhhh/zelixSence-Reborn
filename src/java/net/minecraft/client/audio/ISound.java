@@ -4,44 +4,48 @@ import javax.annotation.Nullable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
-public interface ISound {
-   ResourceLocation func_147650_b();
+public interface ISound
+{
+    ResourceLocation getSoundLocation();
 
-   @Nullable
-   SoundEventAccessor func_184366_a(SoundHandler var1);
+    @Nullable
+    SoundEventAccessor createAccessor(SoundHandler handler);
 
-   Sound func_184364_b();
+    Sound getSound();
 
-   SoundCategory func_184365_d();
+    SoundCategory getCategory();
 
-   boolean func_147657_c();
+    boolean canRepeat();
 
-   int func_147652_d();
+    int getRepeatDelay();
 
-   float func_147653_e();
+    float getVolume();
 
-   float func_147655_f();
+    float getPitch();
 
-   float func_147649_g();
+    float getXPosF();
 
-   float func_147654_h();
+    float getYPosF();
 
-   float func_147651_i();
+    float getZPosF();
 
-   ISound.AttenuationType func_147656_j();
+    ISound.AttenuationType getAttenuationType();
 
-   public static enum AttenuationType {
-      NONE(0),
-      LINEAR(2);
+    public static enum AttenuationType
+    {
+        NONE(0),
+        LINEAR(2);
 
-      private final int field_148589_c;
+        private final int type;
 
-      private AttenuationType(int p_i45110_3_) {
-         this.field_148589_c = p_i45110_3_;
-      }
+        private AttenuationType(int typeIn)
+        {
+            this.type = typeIn;
+        }
 
-      public int func_148586_a() {
-         return this.field_148589_c;
-      }
-   }
+        public int getTypeInt()
+        {
+            return this.type;
+        }
+    }
 }

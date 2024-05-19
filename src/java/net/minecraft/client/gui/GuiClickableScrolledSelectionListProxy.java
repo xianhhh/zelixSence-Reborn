@@ -5,82 +5,110 @@ import net.minecraft.realms.RealmsClickableScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
 import org.lwjgl.input.Mouse;
 
-public class GuiClickableScrolledSelectionListProxy extends GuiSlot {
-   private final RealmsClickableScrolledSelectionList field_178046_u;
+public class GuiClickableScrolledSelectionListProxy extends GuiSlot
+{
+    private final RealmsClickableScrolledSelectionList proxy;
 
-   public GuiClickableScrolledSelectionListProxy(RealmsClickableScrolledSelectionList p_i45526_1_, int p_i45526_2_, int p_i45526_3_, int p_i45526_4_, int p_i45526_5_, int p_i45526_6_) {
-      super(Minecraft.func_71410_x(), p_i45526_2_, p_i45526_3_, p_i45526_4_, p_i45526_5_, p_i45526_6_);
-      this.field_178046_u = p_i45526_1_;
-   }
+    public GuiClickableScrolledSelectionListProxy(RealmsClickableScrolledSelectionList selectionList, int p_i45526_2_, int p_i45526_3_, int p_i45526_4_, int p_i45526_5_, int p_i45526_6_)
+    {
+        super(Minecraft.getMinecraft(), p_i45526_2_, p_i45526_3_, p_i45526_4_, p_i45526_5_, p_i45526_6_);
+        this.proxy = selectionList;
+    }
 
-   protected int func_148127_b() {
-      return this.field_178046_u.getItemCount();
-   }
+    protected int getSize()
+    {
+        return this.proxy.getItemCount();
+    }
 
-   protected void func_148144_a(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_) {
-      this.field_178046_u.selectItem(p_148144_1_, p_148144_2_, p_148144_3_, p_148144_4_);
-   }
+    /**
+     * The element in the slot that was clicked, boolean for whether it was double clicked or not
+     */
+    protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
+    {
+        this.proxy.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
+    }
 
-   protected boolean func_148131_a(int p_148131_1_) {
-      return this.field_178046_u.isSelectedItem(p_148131_1_);
-   }
+    /**
+     * Returns true if the element passed in is currently selected
+     */
+    protected boolean isSelected(int slotIndex)
+    {
+        return this.proxy.isSelectedItem(slotIndex);
+    }
 
-   protected void func_148123_a() {
-      this.field_178046_u.renderBackground();
-   }
+    protected void drawBackground()
+    {
+        this.proxy.renderBackground();
+    }
 
-   protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_) {
-      this.field_178046_u.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
-   }
+    protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
+    {
+        this.proxy.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
+    }
 
-   public int func_178044_e() {
-      return this.field_148155_a;
-   }
+    public int width()
+    {
+        return this.width;
+    }
 
-   public int func_178042_f() {
-      return this.field_148162_h;
-   }
+    public int mouseY()
+    {
+        return this.mouseY;
+    }
 
-   public int func_178045_g() {
-      return this.field_148150_g;
-   }
+    public int mouseX()
+    {
+        return this.mouseX;
+    }
 
-   protected int func_148138_e() {
-      return this.field_178046_u.getMaxPosition();
-   }
+    /**
+     * Return the height of the content being scrolled
+     */
+    protected int getContentHeight()
+    {
+        return this.proxy.getMaxPosition();
+    }
 
-   protected int func_148137_d() {
-      return this.field_178046_u.getScrollbarPosition();
-   }
+    protected int getScrollBarX()
+    {
+        return this.proxy.getScrollbarPosition();
+    }
 
-   public void func_178039_p() {
-      super.func_178039_p();
-      if (this.field_148170_p > 0.0F && Mouse.getEventButtonState()) {
-         this.field_178046_u.customMouseEvent(this.field_148153_b, this.field_148154_c, this.field_148160_j, this.field_148169_q, this.field_148149_f);
-      }
+    public void handleMouseInput()
+    {
+        super.handleMouseInput();
 
-   }
+        if (this.scrollMultiplier > 0.0F && Mouse.getEventButtonState())
+        {
+            this.proxy.customMouseEvent(this.top, this.bottom, this.headerPadding, this.amountScrolled, this.slotHeight);
+        }
+    }
 
-   public void func_178043_a(int p_178043_1_, int p_178043_2_, int p_178043_3_, Tezzelator p_178043_4_) {
-      this.field_178046_u.renderSelected(p_178043_1_, p_178043_2_, p_178043_3_, p_178043_4_);
-   }
+    public void renderSelected(int p_178043_1_, int p_178043_2_, int p_178043_3_, Tezzelator p_178043_4_)
+    {
+        this.proxy.renderSelected(p_178043_1_, p_178043_2_, p_178043_3_, p_178043_4_);
+    }
 
-   protected void func_192638_a(int p_192638_1_, int p_192638_2_, int p_192638_3_, int p_192638_4_, float p_192638_5_) {
-      int i = this.func_148127_b();
+    protected void func_192638_a(int p_192638_1_, int p_192638_2_, int p_192638_3_, int p_192638_4_, float p_192638_5_)
+    {
+        int i = this.getSize();
 
-      for(int j = 0; j < i; ++j) {
-         int k = p_192638_2_ + j * this.field_148149_f + this.field_148160_j;
-         int l = this.field_148149_f - 4;
-         if (k > this.field_148154_c || k + l < this.field_148153_b) {
-            this.func_192639_a(j, p_192638_1_, k, p_192638_5_);
-         }
+        for (int j = 0; j < i; ++j)
+        {
+            int k = p_192638_2_ + j * this.slotHeight + this.headerPadding;
+            int l = this.slotHeight - 4;
 
-         if (this.field_148166_t && this.func_148131_a(j)) {
-            this.func_178043_a(this.field_148155_a, k, l, Tezzelator.instance);
-         }
+            if (k > this.bottom || k + l < this.top)
+            {
+                this.func_192639_a(j, p_192638_1_, k, p_192638_5_);
+            }
 
-         this.func_192637_a(j, p_192638_1_, k, l, p_192638_3_, p_192638_4_, p_192638_5_);
-      }
+            if (this.showSelectionBox && this.isSelected(j))
+            {
+                this.renderSelected(this.width, k, l, Tezzelator.instance);
+            }
 
-   }
+            this.func_192637_a(j, p_192638_1_, k, l, p_192638_3_, p_192638_4_, p_192638_5_);
+        }
+    }
 }

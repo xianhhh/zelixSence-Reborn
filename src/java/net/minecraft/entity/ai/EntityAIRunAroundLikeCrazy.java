@@ -5,65 +5,95 @@ import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
 
-public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
-   private final AbstractHorse field_111180_a;
-   private final double field_111178_b;
-   private double field_111179_c;
-   private double field_111176_d;
-   private double field_111177_e;
+public class EntityAIRunAroundLikeCrazy extends EntityAIBase
+{
+    private final AbstractHorse horseHost;
+    private final double speed;
+    private double targetX;
+    private double targetY;
+    private double targetZ;
 
-   public EntityAIRunAroundLikeCrazy(AbstractHorse p_i1653_1_, double p_i1653_2_) {
-      this.field_111180_a = p_i1653_1_;
-      this.field_111178_b = p_i1653_2_;
-      this.func_75248_a(1);
-   }
+    public EntityAIRunAroundLikeCrazy(AbstractHorse horse, double speedIn)
+    {
+        this.horseHost = horse;
+        this.speed = speedIn;
+        this.setMutexBits(1);
+    }
 
-   public boolean func_75250_a() {
-      if (!this.field_111180_a.func_110248_bS() && this.field_111180_a.func_184207_aI()) {
-         Vec3d vec3d = RandomPositionGenerator.func_75463_a(this.field_111180_a, 5, 4);
-         if (vec3d == null) {
+    /**
+     * Returns whether the EntityAIBase should begin execution.
+     */
+    public boolean shouldExecute()
+    {
+        if (!this.horseHost.isTame() && this.horseHost.isBeingRidden())
+        {
+            Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.horseHost, 5, 4);
+
+            if (vec3d == null)
+            {
+                return false;
+            }
+            else
+            {
+                this.targetX = vec3d.xCoord;
+                this.targetY = vec3d.yCoord;
+                this.targetZ = vec3d.zCoord;
+                return true;
+            }
+        }
+        else
+        {
             return false;
-         } else {
-            this.field_111179_c = vec3d.field_72450_a;
-            this.field_111176_d = vec3d.field_72448_b;
-            this.field_111177_e = vec3d.field_72449_c;
-            return true;
-         }
-      } else {
-         return false;
-      }
-   }
+        }
+    }
 
-   public void func_75249_e() {
-      this.field_111180_a.func_70661_as().func_75492_a(this.field_111179_c, this.field_111176_d, this.field_111177_e, this.field_111178_b);
-   }
+    /**
+     * Execute a one shot task or start executing a continuous task
+     */
+    public void startExecuting()
+    {
+        this.horseHost.getNavigator().tryMoveToXYZ(this.targetX, this.targetY, this.targetZ, this.speed);
+    }
 
-   public boolean func_75253_b() {
-      return !this.field_111180_a.func_110248_bS() && !this.field_111180_a.func_70661_as().func_75500_f() && this.field_111180_a.func_184207_aI();
-   }
+    /**
+     * Returns whether an in-progress EntityAIBase should continue executing
+     */
+    public boolean continueExecuting()
+    {
+        return !this.horseHost.isTame() && !this.horseHost.getNavigator().noPath() && this.horseHost.isBeingRidden();
+    }
 
-   public void func_75246_d() {
-      if (!this.field_111180_a.func_110248_bS() && this.field_111180_a.func_70681_au().nextInt(50) == 0) {
-         Entity entity = (Entity)this.field_111180_a.func_184188_bt().get(0);
-         if (entity == null) {
-            return;
-         }
+    /**
+     * Updates the task
+     */
+    public void updateTask()
+    {
+        if (!this.horseHost.isTame() && this.horseHost.getRNG().nextInt(50) == 0)
+        {
+            Entity entity = (Entity)this.horseHost.getPassengers().get(0);
 
-         if (entity instanceof EntityPlayer) {
-            int i = this.field_111180_a.func_110252_cg();
-            int j = this.field_111180_a.func_190676_dC();
-            if (j > 0 && this.field_111180_a.func_70681_au().nextInt(j) < i) {
-               this.field_111180_a.func_110263_g((EntityPlayer)entity);
-               return;
+            if (entity == null)
+            {
+                return;
             }
 
-            this.field_111180_a.func_110198_t(5);
-         }
+            if (entity instanceof EntityPlayer)
+            {
+                int i = this.horseHost.getTemper();
+                int j = this.horseHost.func_190676_dC();
 
-         this.field_111180_a.func_184226_ay();
-         this.field_111180_a.func_190687_dF();
-         this.field_111180_a.field_70170_p.func_72960_a(this.field_111180_a, (byte)6);
-      }
+                if (j > 0 && this.horseHost.getRNG().nextInt(j) < i)
+                {
+                    this.horseHost.setTamedBy((EntityPlayer)entity);
+                    return;
+                }
 
-   }
+                this.horseHost.increaseTemper(5);
+            }
+
+            this.horseHost.removePassengers();
+            this.horseHost.func_190687_dF();
+            this.horseHost.world.setEntityState(this.horseHost, (byte)6);
+        }
+    }
 }

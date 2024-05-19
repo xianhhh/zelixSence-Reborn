@@ -15,79 +15,113 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public abstract class BlockPurpurSlab extends BlockSlab {
-   public static final PropertyEnum<BlockPurpurSlab.Variant> field_185678_d = PropertyEnum.<BlockPurpurSlab.Variant>func_177709_a("variant", BlockPurpurSlab.Variant.class);
+public abstract class BlockPurpurSlab extends BlockSlab
+{
+    public static final PropertyEnum<BlockPurpurSlab.Variant> VARIANT = PropertyEnum.<BlockPurpurSlab.Variant>create("variant", BlockPurpurSlab.Variant.class);
 
-   public BlockPurpurSlab() {
-      super(Material.field_151576_e, MapColor.field_151675_r);
-      IBlockState iblockstate = this.field_176227_L.func_177621_b();
-      if (!this.func_176552_j()) {
-         iblockstate = iblockstate.func_177226_a(field_176554_a, BlockSlab.EnumBlockHalf.BOTTOM);
-      }
+    public BlockPurpurSlab()
+    {
+        super(Material.ROCK, MapColor.MAGENTA);
+        IBlockState iblockstate = this.blockState.getBaseState();
 
-      this.func_180632_j(iblockstate.func_177226_a(field_185678_d, BlockPurpurSlab.Variant.DEFAULT));
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+        if (!this.isDouble())
+        {
+            iblockstate = iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
+        }
 
-   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
-      return Item.func_150898_a(Blocks.field_185771_cX);
-   }
+        this.setDefaultState(iblockstate.withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT));
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
-      return new ItemStack(Blocks.field_185771_cX);
-   }
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    {
+        return Item.getItemFromBlock(Blocks.PURPUR_SLAB);
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      IBlockState iblockstate = this.func_176223_P().func_177226_a(field_185678_d, BlockPurpurSlab.Variant.DEFAULT);
-      if (!this.func_176552_j()) {
-         iblockstate = iblockstate.func_177226_a(field_176554_a, (p_176203_1_ & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
-      }
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        return new ItemStack(Blocks.PURPUR_SLAB);
+    }
 
-      return iblockstate;
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        IBlockState iblockstate = this.getDefaultState().withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT);
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      int i = 0;
-      if (!this.func_176552_j() && p_176201_1_.func_177229_b(field_176554_a) == BlockSlab.EnumBlockHalf.TOP) {
-         i |= 8;
-      }
+        if (!this.isDouble())
+        {
+            iblockstate = iblockstate.withProperty(HALF, (meta & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
+        }
 
-      return i;
-   }
+        return iblockstate;
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return this.func_176552_j() ? new BlockStateContainer(this, new IProperty[]{field_185678_d}) : new BlockStateContainer(this, new IProperty[]{field_176554_a, field_185678_d});
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        int i = 0;
 
-   public String func_150002_b(int p_150002_1_) {
-      return super.func_149739_a();
-   }
+        if (!this.isDouble() && state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP)
+        {
+            i |= 8;
+        }
 
-   public IProperty<?> func_176551_l() {
-      return field_185678_d;
-   }
+        return i;
+    }
 
-   public Comparable<?> func_185674_a(ItemStack p_185674_1_) {
-      return BlockPurpurSlab.Variant.DEFAULT;
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return this.isDouble() ? new BlockStateContainer(this, new IProperty[] {VARIANT}) : new BlockStateContainer(this, new IProperty[] {HALF, VARIANT});
+    }
 
-   public static class Double extends BlockPurpurSlab {
-      public boolean func_176552_j() {
-         return true;
-      }
-   }
+    /**
+     * Returns the slab block name with the type associated with it
+     */
+    public String getUnlocalizedName(int meta)
+    {
+        return super.getUnlocalizedName();
+    }
 
-   public static class Half extends BlockPurpurSlab {
-      public boolean func_176552_j() {
-         return false;
-      }
-   }
+    public IProperty<?> getVariantProperty()
+    {
+        return VARIANT;
+    }
 
-   public static enum Variant implements IStringSerializable {
-      DEFAULT;
+    public Comparable<?> getTypeForItem(ItemStack stack)
+    {
+        return BlockPurpurSlab.Variant.DEFAULT;
+    }
 
-      public String func_176610_l() {
-         return "default";
-      }
-   }
+    public static class Double extends BlockPurpurSlab
+    {
+        public boolean isDouble()
+        {
+            return true;
+        }
+    }
+
+    public static class Half extends BlockPurpurSlab
+    {
+        public boolean isDouble()
+        {
+            return false;
+        }
+    }
+
+    public static enum Variant implements IStringSerializable
+    {
+        DEFAULT;
+
+        public String getName()
+        {
+            return "default";
+        }
+    }
 }

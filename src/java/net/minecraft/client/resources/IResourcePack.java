@@ -9,17 +9,18 @@ import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 
-public interface IResourcePack {
-   InputStream func_110590_a(ResourceLocation var1) throws IOException;
+public interface IResourcePack
+{
+    InputStream getInputStream(ResourceLocation location) throws IOException;
 
-   boolean func_110589_b(ResourceLocation var1);
+    boolean resourceExists(ResourceLocation location);
 
-   Set<String> func_110587_b();
+    Set<String> getResourceDomains();
 
-   @Nullable
-   <T extends IMetadataSection> T func_135058_a(MetadataSerializer var1, String var2) throws IOException;
+    @Nullable
+    <T extends IMetadataSection> T getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException;
 
-   BufferedImage func_110586_a() throws IOException;
+    BufferedImage getPackImage() throws IOException;
 
-   String func_130077_b();
+    String getPackName();
 }

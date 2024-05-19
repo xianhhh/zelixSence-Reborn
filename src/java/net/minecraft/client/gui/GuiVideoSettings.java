@@ -5,95 +5,138 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 
-public class GuiVideoSettings extends GuiScreen {
-   private final GuiScreen field_146498_f;
-   protected String field_146500_a = "Video Settings";
-   private final GameSettings field_146499_g;
-   private GuiListExtended field_146501_h;
-   private static final GameSettings.Options[] field_146502_i = new GameSettings.Options[]{GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.ATTACK_INDICATOR, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.USE_VBO, GameSettings.Options.ENTITY_SHADOWS};
+public class GuiVideoSettings extends GuiScreen
+{
+    private final GuiScreen parentGuiScreen;
+    protected String screenTitle = "Video Settings";
+    private final GameSettings guiGameSettings;
+    private GuiListExtended optionsRowList;
 
-   public GuiVideoSettings(GuiScreen p_i1062_1_, GameSettings p_i1062_2_) {
-      this.field_146498_f = p_i1062_1_;
-      this.field_146499_g = p_i1062_2_;
-   }
+    /** An array of all of GameSettings.Options's video options. */
+    private static final GameSettings.Options[] VIDEO_OPTIONS = new GameSettings.Options[] {GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.ATTACK_INDICATOR, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.USE_VBO, GameSettings.Options.ENTITY_SHADOWS};
 
-   public void func_73866_w_() {
-      this.field_146500_a = I18n.func_135052_a("options.videoTitle");
-      this.field_146292_n.clear();
-      this.field_146292_n.add(new GuiButton(200, this.field_146294_l / 2 - 100, this.field_146295_m - 27, I18n.func_135052_a("gui.done")));
-      if (OpenGlHelper.field_176083_O) {
-         this.field_146501_h = new GuiOptionsRowList(this.field_146297_k, this.field_146294_l, this.field_146295_m, 32, this.field_146295_m - 32, 25, field_146502_i);
-      } else {
-         GameSettings.Options[] agamesettings$options = new GameSettings.Options[field_146502_i.length - 1];
-         int i = 0;
+    public GuiVideoSettings(GuiScreen parentScreenIn, GameSettings gameSettingsIn)
+    {
+        this.parentGuiScreen = parentScreenIn;
+        this.guiGameSettings = gameSettingsIn;
+    }
 
-         for(GameSettings.Options gamesettings$options : field_146502_i) {
-            if (gamesettings$options == GameSettings.Options.USE_VBO) {
-               break;
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        this.screenTitle = I18n.format("options.videoTitle");
+        this.buttonList.clear();
+        this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height - 27, I18n.format("gui.done")));
+
+        if (OpenGlHelper.vboSupported)
+        {
+            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, VIDEO_OPTIONS);
+        }
+        else
+        {
+            GameSettings.Options[] agamesettings$options = new GameSettings.Options[VIDEO_OPTIONS.length - 1];
+            int i = 0;
+
+            for (GameSettings.Options gamesettings$options : VIDEO_OPTIONS)
+            {
+                if (gamesettings$options == GameSettings.Options.USE_VBO)
+                {
+                    break;
+                }
+
+                agamesettings$options[i] = gamesettings$options;
+                ++i;
             }
 
-            agamesettings$options[i] = gamesettings$options;
-            ++i;
-         }
+            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, agamesettings$options);
+        }
+    }
 
-         this.field_146501_h = new GuiOptionsRowList(this.field_146297_k, this.field_146294_l, this.field_146295_m, 32, this.field_146295_m - 32, 25, agamesettings$options);
-      }
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        super.handleMouseInput();
+        this.optionsRowList.handleMouseInput();
+    }
 
-   }
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        if (keyCode == 1)
+        {
+            this.mc.gameSettings.saveOptions();
+        }
 
-   public void func_146274_d() throws IOException {
-      super.func_146274_d();
-      this.field_146501_h.func_178039_p();
-   }
+        super.keyTyped(typedChar, keyCode);
+    }
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-      if (p_73869_2_ == 1) {
-         this.field_146297_k.field_71474_y.func_74303_b();
-      }
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.enabled)
+        {
+            if (button.id == 200)
+            {
+                this.mc.gameSettings.saveOptions();
+                this.mc.displayGuiScreen(this.parentGuiScreen);
+            }
+        }
+    }
 
-      super.func_73869_a(p_73869_1_, p_73869_2_);
-   }
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        int i = this.guiGameSettings.guiScale;
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.optionsRowList.mouseClicked(mouseX, mouseY, mouseButton);
 
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-      if (p_146284_1_.field_146124_l) {
-         if (p_146284_1_.field_146127_k == 200) {
-            this.field_146297_k.field_71474_y.func_74303_b();
-            this.field_146297_k.func_147108_a(this.field_146498_f);
-         }
+        if (this.guiGameSettings.guiScale != i)
+        {
+            ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+            int j = scaledresolution.getScaledWidth();
+            int k = scaledresolution.getScaledHeight();
+            this.setWorldAndResolution(this.mc, j, k);
+        }
+    }
 
-      }
-   }
+    /**
+     * Called when a mouse button is released.
+     */
+    protected void mouseReleased(int mouseX, int mouseY, int state)
+    {
+        int i = this.guiGameSettings.guiScale;
+        super.mouseReleased(mouseX, mouseY, state);
+        this.optionsRowList.mouseReleased(mouseX, mouseY, state);
 
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      int i = this.field_146499_g.field_74335_Z;
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      this.field_146501_h.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      if (this.field_146499_g.field_74335_Z != i) {
-         ScaledResolution scaledresolution = new ScaledResolution(this.field_146297_k);
-         int j = scaledresolution.func_78326_a();
-         int k = scaledresolution.func_78328_b();
-         this.func_146280_a(this.field_146297_k, j, k);
-      }
+        if (this.guiGameSettings.guiScale != i)
+        {
+            ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+            int j = scaledresolution.getScaledWidth();
+            int k = scaledresolution.getScaledHeight();
+            this.setWorldAndResolution(this.mc, j, k);
+        }
+    }
 
-   }
-
-   protected void func_146286_b(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
-      int i = this.field_146499_g.field_74335_Z;
-      super.func_146286_b(p_146286_1_, p_146286_2_, p_146286_3_);
-      this.field_146501_h.func_148181_b(p_146286_1_, p_146286_2_, p_146286_3_);
-      if (this.field_146499_g.field_74335_Z != i) {
-         ScaledResolution scaledresolution = new ScaledResolution(this.field_146297_k);
-         int j = scaledresolution.func_78326_a();
-         int k = scaledresolution.func_78328_b();
-         this.func_146280_a(this.field_146297_k, j, k);
-      }
-
-   }
-
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.func_146276_q_();
-      this.field_146501_h.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      this.func_73732_a(this.field_146289_q, this.field_146500_a, this.field_146294_l / 2, 5, 16777215);
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawDefaultBackground();
+        this.optionsRowList.drawScreen(mouseX, mouseY, partialTicks);
+        this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 5, 16777215);
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
 }

@@ -15,47 +15,76 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockGlazedTerracotta extends BlockHorizontal {
-   public BlockGlazedTerracotta(EnumDyeColor p_i47400_1_) {
-      super(Material.field_151576_e, MapColor.func_193558_a(p_i47400_1_));
-      this.func_149711_c(1.4F);
-      this.func_149672_a(SoundType.field_185851_d);
-      String s = p_i47400_1_.func_176762_d();
-      if (s.length() > 1) {
-         String s1 = s.substring(0, 1).toUpperCase() + s.substring(1, s.length());
-         this.func_149663_c("glazedTerracotta" + s1);
-      }
+public class BlockGlazedTerracotta extends BlockHorizontal
+{
+    public BlockGlazedTerracotta(EnumDyeColor p_i47400_1_)
+    {
+        super(Material.ROCK, MapColor.func_193558_a(p_i47400_1_));
+        this.setHardness(1.4F);
+        this.setSoundType(SoundType.STONE);
+        String s = p_i47400_1_.getUnlocalizedName();
 
-      this.func_149647_a(CreativeTabs.field_78031_c);
-   }
+        if (s.length() > 1)
+        {
+            String s1 = s.substring(0, 1).toUpperCase() + s.substring(1, s.length());
+            this.setUnlocalizedName("glazedTerracotta" + s1);
+        }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_185512_D});
-   }
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
 
-   public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_) {
-      return p_185499_1_.func_177226_a(field_185512_D, p_185499_2_.func_185831_a((EnumFacing)p_185499_1_.func_177229_b(field_185512_D)));
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING});
+    }
 
-   public IBlockState func_185471_a(IBlockState p_185471_1_, Mirror p_185471_2_) {
-      return p_185471_1_.func_185907_a(p_185471_2_.func_185800_a((EnumFacing)p_185471_1_.func_177229_b(field_185512_D)));
-   }
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
 
-   public IBlockState func_180642_a(World p_180642_1_, BlockPos p_180642_2_, EnumFacing p_180642_3_, float p_180642_4_, float p_180642_5_, float p_180642_6_, int p_180642_7_, EntityLivingBase p_180642_8_) {
-      return this.func_176223_P().func_177226_a(field_185512_D, p_180642_8_.func_174811_aO().func_176734_d());
-   }
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      int i = 0;
-      i = i | ((EnumFacing)p_176201_1_.func_177229_b(field_185512_D)).func_176736_b();
-      return i;
-   }
+    /**
+     * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
+     * IBlockstate
+     */
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_185512_D, EnumFacing.func_176731_b(p_176203_1_));
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        int i = 0;
+        i = i | ((EnumFacing)state.getValue(FACING)).getHorizontalIndex();
+        return i;
+    }
 
-   public EnumPushReaction func_149656_h(IBlockState p_149656_1_) {
-      return EnumPushReaction.PUSH_ONLY;
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta));
+    }
+
+    public EnumPushReaction getMobilityFlag(IBlockState state)
+    {
+        return EnumPushReaction.PUSH_ONLY;
+    }
 }

@@ -6,29 +6,33 @@ import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 
-public abstract class ChunkRenderContainer {
-   private double field_178008_c;
-   private double field_178005_d;
-   private double field_178006_e;
-   protected List<RenderChunk> field_178009_a = Lists.<RenderChunk>newArrayListWithCapacity(17424);
-   protected boolean field_178007_b;
+public abstract class ChunkRenderContainer
+{
+    private double viewEntityX;
+    private double viewEntityY;
+    private double viewEntityZ;
+    protected List<RenderChunk> renderChunks = Lists.<RenderChunk>newArrayListWithCapacity(17424);
+    protected boolean initialized;
 
-   public void func_178004_a(double p_178004_1_, double p_178004_3_, double p_178004_5_) {
-      this.field_178007_b = true;
-      this.field_178009_a.clear();
-      this.field_178008_c = p_178004_1_;
-      this.field_178005_d = p_178004_3_;
-      this.field_178006_e = p_178004_5_;
-   }
+    public void initialize(double viewEntityXIn, double viewEntityYIn, double viewEntityZIn)
+    {
+        this.initialized = true;
+        this.renderChunks.clear();
+        this.viewEntityX = viewEntityXIn;
+        this.viewEntityY = viewEntityYIn;
+        this.viewEntityZ = viewEntityZIn;
+    }
 
-   public void func_178003_a(RenderChunk p_178003_1_) {
-      BlockPos blockpos = p_178003_1_.func_178568_j();
-      GlStateManager.func_179109_b((float)((double)blockpos.func_177958_n() - this.field_178008_c), (float)((double)blockpos.func_177956_o() - this.field_178005_d), (float)((double)blockpos.func_177952_p() - this.field_178006_e));
-   }
+    public void preRenderChunk(RenderChunk renderChunkIn)
+    {
+        BlockPos blockpos = renderChunkIn.getPosition();
+        GlStateManager.translate((float)((double)blockpos.getX() - this.viewEntityX), (float)((double)blockpos.getY() - this.viewEntityY), (float)((double)blockpos.getZ() - this.viewEntityZ));
+    }
 
-   public void func_178002_a(RenderChunk p_178002_1_, BlockRenderLayer p_178002_2_) {
-      this.field_178009_a.add(p_178002_1_);
-   }
+    public void addRenderChunk(RenderChunk renderChunkIn, BlockRenderLayer layer)
+    {
+        this.renderChunks.add(renderChunkIn);
+    }
 
-   public abstract void func_178001_a(BlockRenderLayer var1);
+    public abstract void renderChunkLayer(BlockRenderLayer layer);
 }

@@ -5,29 +5,45 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.status.INetHandlerStatusServer;
 
-public class CPacketPing implements Packet<INetHandlerStatusServer> {
-   private long field_149290_a;
+public class CPacketPing implements Packet<INetHandlerStatusServer>
+{
+    private long clientTime;
 
-   public CPacketPing() {
-   }
+    public CPacketPing()
+    {
+    }
 
-   public CPacketPing(long p_i46842_1_) {
-      this.field_149290_a = p_i46842_1_;
-   }
+    public CPacketPing(long clientTimeIn)
+    {
+        this.clientTime = clientTimeIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149290_a = p_148837_1_.readLong();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.clientTime = buf.readLong();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeLong(this.field_149290_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeLong(this.clientTime);
+    }
 
-   public void func_148833_a(INetHandlerStatusServer p_148833_1_) {
-      p_148833_1_.func_147311_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerStatusServer handler)
+    {
+        handler.processPing(this);
+    }
 
-   public long func_149289_c() {
-      return this.field_149290_a;
-   }
+    public long getClientTime()
+    {
+        return this.clientTime;
+    }
 }

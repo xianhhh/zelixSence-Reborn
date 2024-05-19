@@ -3,12 +3,15 @@ package net.minecraft.world.biome;
 import java.util.Random;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
-public class BiomeForestMutated extends BiomeForest {
-   public BiomeForestMutated(Biome.BiomeProperties p_i46702_1_) {
-      super(BiomeForest.Type.BIRCH, p_i46702_1_);
-   }
+public class BiomeForestMutated extends BiomeForest
+{
+    public BiomeForestMutated(Biome.BiomeProperties properties)
+    {
+        super(BiomeForest.Type.BIRCH, properties);
+    }
 
-   public WorldGenAbstractTree func_150567_a(Random p_150567_1_) {
-      return p_150567_1_.nextBoolean() ? BiomeForest.field_150629_aC : BiomeForest.field_150630_aD;
-   }
+    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    {
+        return rand.nextBoolean() ? BiomeForest.SUPER_BIRCH_TREE : BiomeForest.BIRCH_TREE;
+    }
 }

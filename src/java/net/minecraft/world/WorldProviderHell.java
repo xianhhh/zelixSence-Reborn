@@ -7,64 +7,102 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.gen.ChunkGeneratorHell;
 import net.minecraft.world.gen.IChunkGenerator;
 
-public class WorldProviderHell extends WorldProvider {
-   public void func_76572_b() {
-      this.field_76578_c = new BiomeProviderSingle(Biomes.field_76778_j);
-      this.field_76575_d = true;
-      this.field_76576_e = true;
-   }
+public class WorldProviderHell extends WorldProvider
+{
+    /**
+     * creates a new world chunk manager for WorldProvider
+     */
+    public void createBiomeProvider()
+    {
+        this.biomeProvider = new BiomeProviderSingle(Biomes.HELL);
+        this.isHellWorld = true;
+        this.hasNoSky = true;
+    }
 
-   public Vec3d func_76562_b(float p_76562_1_, float p_76562_2_) {
-      return new Vec3d(0.20000000298023224D, 0.029999999329447746D, 0.029999999329447746D);
-   }
+    /**
+     * Return Vec3D with biome specific fog color
+     */
+    public Vec3d getFogColor(float p_76562_1_, float p_76562_2_)
+    {
+        return new Vec3d(0.20000000298023224D, 0.029999999329447746D, 0.029999999329447746D);
+    }
 
-   protected void func_76556_a() {
-      float f = 0.1F;
+    /**
+     * Creates the light to brightness table
+     */
+    protected void generateLightBrightnessTable()
+    {
+        float f = 0.1F;
 
-      for(int i = 0; i <= 15; ++i) {
-         float f1 = 1.0F - (float)i / 15.0F;
-         this.field_76573_f[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * 0.9F + 0.1F;
-      }
+        for (int i = 0; i <= 15; ++i)
+        {
+            float f1 = 1.0F - (float)i / 15.0F;
+            this.lightBrightnessTable[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * 0.9F + 0.1F;
+        }
+    }
 
-   }
+    public IChunkGenerator createChunkGenerator()
+    {
+        return new ChunkGeneratorHell(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed());
+    }
 
-   public IChunkGenerator func_186060_c() {
-      return new ChunkGeneratorHell(this.field_76579_a, this.field_76579_a.func_72912_H().func_76089_r(), this.field_76579_a.func_72905_C());
-   }
+    /**
+     * Returns 'true' if in the "main surface world", but 'false' if in the Nether or End dimensions.
+     */
+    public boolean isSurfaceWorld()
+    {
+        return false;
+    }
 
-   public boolean func_76569_d() {
-      return false;
-   }
+    /**
+     * Will check if the x, z position specified is alright to be set as the map spawn point
+     */
+    public boolean canCoordinateBeSpawn(int x, int z)
+    {
+        return false;
+    }
 
-   public boolean func_76566_a(int p_76566_1_, int p_76566_2_) {
-      return false;
-   }
+    /**
+     * Calculates the angle of sun and moon in the sky relative to a specified time (usually worldTime)
+     */
+    public float calculateCelestialAngle(long worldTime, float partialTicks)
+    {
+        return 0.5F;
+    }
 
-   public float func_76563_a(long p_76563_1_, float p_76563_3_) {
-      return 0.5F;
-   }
+    /**
+     * True if the player can respawn in this dimension (true = overworld, false = nether).
+     */
+    public boolean canRespawnHere()
+    {
+        return false;
+    }
 
-   public boolean func_76567_e() {
-      return false;
-   }
+    /**
+     * Returns true if the given X,Z coordinate should show environmental fog.
+     */
+    public boolean doesXZShowFog(int x, int z)
+    {
+        return true;
+    }
 
-   public boolean func_76568_b(int p_76568_1_, int p_76568_2_) {
-      return true;
-   }
+    public WorldBorder createWorldBorder()
+    {
+        return new WorldBorder()
+        {
+            public double getCenterX()
+            {
+                return super.getCenterX() / 8.0D;
+            }
+            public double getCenterZ()
+            {
+                return super.getCenterZ() / 8.0D;
+            }
+        };
+    }
 
-   public WorldBorder func_177501_r() {
-      return new WorldBorder() {
-         public double func_177731_f() {
-            return super.func_177731_f() / 8.0D;
-         }
-
-         public double func_177721_g() {
-            return super.func_177721_g() / 8.0D;
-         }
-      };
-   }
-
-   public DimensionType func_186058_p() {
-      return DimensionType.NETHER;
-   }
+    public DimensionType getDimensionType()
+    {
+        return DimensionType.NETHER;
+    }
 }

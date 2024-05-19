@@ -2,197 +2,299 @@ package net.minecraft.util.math;
 
 import javax.annotation.Nullable;
 
-public class Vec3d {
-   public static final Vec3d field_186680_a = new Vec3d(0.0D, 0.0D, 0.0D);
-   public final double field_72450_a;
-   public final double field_72448_b;
-   public final double field_72449_c;
+public class Vec3d
+{
+    public static final Vec3d ZERO = new Vec3d(0.0D, 0.0D, 0.0D);
 
-   public Vec3d(double p_i47092_1_, double p_i47092_3_, double p_i47092_5_) {
-      if (p_i47092_1_ == -0.0D) {
-         p_i47092_1_ = 0.0D;
-      }
+    /** X coordinate of Vec3D */
+    public final double xCoord;
 
-      if (p_i47092_3_ == -0.0D) {
-         p_i47092_3_ = 0.0D;
-      }
+    /** Y coordinate of Vec3D */
+    public final double yCoord;
 
-      if (p_i47092_5_ == -0.0D) {
-         p_i47092_5_ = 0.0D;
-      }
+    /** Z coordinate of Vec3D */
+    public final double zCoord;
 
-      this.field_72450_a = p_i47092_1_;
-      this.field_72448_b = p_i47092_3_;
-      this.field_72449_c = p_i47092_5_;
-   }
+    public Vec3d(double x, double y, double z)
+    {
+        if (x == -0.0D)
+        {
+            x = 0.0D;
+        }
 
-   public Vec3d(Vec3i p_i47093_1_) {
-      this((double)p_i47093_1_.func_177958_n(), (double)p_i47093_1_.func_177956_o(), (double)p_i47093_1_.func_177952_p());
-   }
+        if (y == -0.0D)
+        {
+            y = 0.0D;
+        }
 
-   public Vec3d func_72444_a(Vec3d p_72444_1_) {
-      return new Vec3d(p_72444_1_.field_72450_a - this.field_72450_a, p_72444_1_.field_72448_b - this.field_72448_b, p_72444_1_.field_72449_c - this.field_72449_c);
-   }
+        if (z == -0.0D)
+        {
+            z = 0.0D;
+        }
 
-   public Vec3d func_72432_b() {
-      double d0 = (double)MathHelper.func_76133_a(this.field_72450_a * this.field_72450_a + this.field_72448_b * this.field_72448_b + this.field_72449_c * this.field_72449_c);
-      return d0 < 1.0E-4D ? field_186680_a : new Vec3d(this.field_72450_a / d0, this.field_72448_b / d0, this.field_72449_c / d0);
-   }
+        this.xCoord = x;
+        this.yCoord = y;
+        this.zCoord = z;
+    }
 
-   public double func_72430_b(Vec3d p_72430_1_) {
-      return this.field_72450_a * p_72430_1_.field_72450_a + this.field_72448_b * p_72430_1_.field_72448_b + this.field_72449_c * p_72430_1_.field_72449_c;
-   }
+    public Vec3d(Vec3i vector)
+    {
+        this((double)vector.getX(), (double)vector.getY(), (double)vector.getZ());
+    }
 
-   public Vec3d func_72431_c(Vec3d p_72431_1_) {
-      return new Vec3d(this.field_72448_b * p_72431_1_.field_72449_c - this.field_72449_c * p_72431_1_.field_72448_b, this.field_72449_c * p_72431_1_.field_72450_a - this.field_72450_a * p_72431_1_.field_72449_c, this.field_72450_a * p_72431_1_.field_72448_b - this.field_72448_b * p_72431_1_.field_72450_a);
-   }
+    /**
+     * Returns a new vector with the result of the specified vector minus this.
+     */
+    public Vec3d subtractReverse(Vec3d vec)
+    {
+        return new Vec3d(vec.xCoord - this.xCoord, vec.yCoord - this.yCoord, vec.zCoord - this.zCoord);
+    }
 
-   public Vec3d func_178788_d(Vec3d p_178788_1_) {
-      return this.func_178786_a(p_178788_1_.field_72450_a, p_178788_1_.field_72448_b, p_178788_1_.field_72449_c);
-   }
+    /**
+     * Normalizes the vector to a length of 1 (except if it is the zero vector)
+     */
+    public Vec3d normalize()
+    {
+        double d0 = (double)MathHelper.sqrt(this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord);
+        return d0 < 1.0E-4D ? ZERO : new Vec3d(this.xCoord / d0, this.yCoord / d0, this.zCoord / d0);
+    }
 
-   public Vec3d func_178786_a(double p_178786_1_, double p_178786_3_, double p_178786_5_) {
-      return this.func_72441_c(-p_178786_1_, -p_178786_3_, -p_178786_5_);
-   }
+    public double dotProduct(Vec3d vec)
+    {
+        return this.xCoord * vec.xCoord + this.yCoord * vec.yCoord + this.zCoord * vec.zCoord;
+    }
 
-   public Vec3d func_178787_e(Vec3d p_178787_1_) {
-      return this.func_72441_c(p_178787_1_.field_72450_a, p_178787_1_.field_72448_b, p_178787_1_.field_72449_c);
-   }
+    /**
+     * Returns a new vector with the result of this vector x the specified vector.
+     */
+    public Vec3d crossProduct(Vec3d vec)
+    {
+        return new Vec3d(this.yCoord * vec.zCoord - this.zCoord * vec.yCoord, this.zCoord * vec.xCoord - this.xCoord * vec.zCoord, this.xCoord * vec.yCoord - this.yCoord * vec.xCoord);
+    }
 
-   public Vec3d func_72441_c(double p_72441_1_, double p_72441_3_, double p_72441_5_) {
-      return new Vec3d(this.field_72450_a + p_72441_1_, this.field_72448_b + p_72441_3_, this.field_72449_c + p_72441_5_);
-   }
+    public Vec3d subtract(Vec3d vec)
+    {
+        return this.subtract(vec.xCoord, vec.yCoord, vec.zCoord);
+    }
 
-   public double func_72438_d(Vec3d p_72438_1_) {
-      double d0 = p_72438_1_.field_72450_a - this.field_72450_a;
-      double d1 = p_72438_1_.field_72448_b - this.field_72448_b;
-      double d2 = p_72438_1_.field_72449_c - this.field_72449_c;
-      return (double)MathHelper.func_76133_a(d0 * d0 + d1 * d1 + d2 * d2);
-   }
+    public Vec3d subtract(double x, double y, double z)
+    {
+        return this.addVector(-x, -y, -z);
+    }
 
-   public double func_72436_e(Vec3d p_72436_1_) {
-      double d0 = p_72436_1_.field_72450_a - this.field_72450_a;
-      double d1 = p_72436_1_.field_72448_b - this.field_72448_b;
-      double d2 = p_72436_1_.field_72449_c - this.field_72449_c;
-      return d0 * d0 + d1 * d1 + d2 * d2;
-   }
+    public Vec3d add(Vec3d vec)
+    {
+        return this.addVector(vec.xCoord, vec.yCoord, vec.zCoord);
+    }
 
-   public double func_186679_c(double p_186679_1_, double p_186679_3_, double p_186679_5_) {
-      double d0 = p_186679_1_ - this.field_72450_a;
-      double d1 = p_186679_3_ - this.field_72448_b;
-      double d2 = p_186679_5_ - this.field_72449_c;
-      return d0 * d0 + d1 * d1 + d2 * d2;
-   }
+    /**
+     * Adds the specified x,y,z vector components to this vector and returns the resulting vector. Does not change this
+     * vector.
+     */
+    public Vec3d addVector(double x, double y, double z)
+    {
+        return new Vec3d(this.xCoord + x, this.yCoord + y, this.zCoord + z);
+    }
 
-   public Vec3d func_186678_a(double p_186678_1_) {
-      return new Vec3d(this.field_72450_a * p_186678_1_, this.field_72448_b * p_186678_1_, this.field_72449_c * p_186678_1_);
-   }
+    /**
+     * Euclidean distance between this and the specified vector, returned as double.
+     */
+    public double distanceTo(Vec3d vec)
+    {
+        double d0 = vec.xCoord - this.xCoord;
+        double d1 = vec.yCoord - this.yCoord;
+        double d2 = vec.zCoord - this.zCoord;
+        return (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+    }
 
-   public double func_72433_c() {
-      return (double)MathHelper.func_76133_a(this.field_72450_a * this.field_72450_a + this.field_72448_b * this.field_72448_b + this.field_72449_c * this.field_72449_c);
-   }
+    /**
+     * The square of the Euclidean distance between this and the specified vector.
+     */
+    public double squareDistanceTo(Vec3d vec)
+    {
+        double d0 = vec.xCoord - this.xCoord;
+        double d1 = vec.yCoord - this.yCoord;
+        double d2 = vec.zCoord - this.zCoord;
+        return d0 * d0 + d1 * d1 + d2 * d2;
+    }
 
-   public double func_189985_c() {
-      return this.field_72450_a * this.field_72450_a + this.field_72448_b * this.field_72448_b + this.field_72449_c * this.field_72449_c;
-   }
+    public double squareDistanceTo(double xIn, double yIn, double zIn)
+    {
+        double d0 = xIn - this.xCoord;
+        double d1 = yIn - this.yCoord;
+        double d2 = zIn - this.zCoord;
+        return d0 * d0 + d1 * d1 + d2 * d2;
+    }
 
-   @Nullable
-   public Vec3d func_72429_b(Vec3d p_72429_1_, double p_72429_2_) {
-      double d0 = p_72429_1_.field_72450_a - this.field_72450_a;
-      double d1 = p_72429_1_.field_72448_b - this.field_72448_b;
-      double d2 = p_72429_1_.field_72449_c - this.field_72449_c;
-      if (d0 * d0 < 1.0000000116860974E-7D) {
-         return null;
-      } else {
-         double d3 = (p_72429_2_ - this.field_72450_a) / d0;
-         return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.field_72450_a + d0 * d3, this.field_72448_b + d1 * d3, this.field_72449_c + d2 * d3) : null;
-      }
-   }
+    public Vec3d scale(double p_186678_1_)
+    {
+        return new Vec3d(this.xCoord * p_186678_1_, this.yCoord * p_186678_1_, this.zCoord * p_186678_1_);
+    }
 
-   @Nullable
-   public Vec3d func_72435_c(Vec3d p_72435_1_, double p_72435_2_) {
-      double d0 = p_72435_1_.field_72450_a - this.field_72450_a;
-      double d1 = p_72435_1_.field_72448_b - this.field_72448_b;
-      double d2 = p_72435_1_.field_72449_c - this.field_72449_c;
-      if (d1 * d1 < 1.0000000116860974E-7D) {
-         return null;
-      } else {
-         double d3 = (p_72435_2_ - this.field_72448_b) / d1;
-         return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.field_72450_a + d0 * d3, this.field_72448_b + d1 * d3, this.field_72449_c + d2 * d3) : null;
-      }
-   }
+    /**
+     * Returns the length of the vector.
+     */
+    public double lengthVector()
+    {
+        return (double)MathHelper.sqrt(this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord);
+    }
 
-   @Nullable
-   public Vec3d func_72434_d(Vec3d p_72434_1_, double p_72434_2_) {
-      double d0 = p_72434_1_.field_72450_a - this.field_72450_a;
-      double d1 = p_72434_1_.field_72448_b - this.field_72448_b;
-      double d2 = p_72434_1_.field_72449_c - this.field_72449_c;
-      if (d2 * d2 < 1.0000000116860974E-7D) {
-         return null;
-      } else {
-         double d3 = (p_72434_2_ - this.field_72449_c) / d2;
-         return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.field_72450_a + d0 * d3, this.field_72448_b + d1 * d3, this.field_72449_c + d2 * d3) : null;
-      }
-   }
+    public double lengthSquared()
+    {
+        return this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord;
+    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
-         return true;
-      } else if (!(p_equals_1_ instanceof Vec3d)) {
-         return false;
-      } else {
-         Vec3d vec3d = (Vec3d)p_equals_1_;
-         if (Double.compare(vec3d.field_72450_a, this.field_72450_a) != 0) {
+    @Nullable
+
+    /**
+     * Returns a new vector with x value equal to the second parameter, along the line between this vector and the
+     * passed in vector, or null if not possible.
+     */
+    public Vec3d getIntermediateWithXValue(Vec3d vec, double x)
+    {
+        double d0 = vec.xCoord - this.xCoord;
+        double d1 = vec.yCoord - this.yCoord;
+        double d2 = vec.zCoord - this.zCoord;
+
+        if (d0 * d0 < 1.0000000116860974E-7D)
+        {
+            return null;
+        }
+        else
+        {
+            double d3 = (x - this.xCoord) / d0;
+            return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.xCoord + d0 * d3, this.yCoord + d1 * d3, this.zCoord + d2 * d3) : null;
+        }
+    }
+
+    @Nullable
+
+    /**
+     * Returns a new vector with y value equal to the second parameter, along the line between this vector and the
+     * passed in vector, or null if not possible.
+     */
+    public Vec3d getIntermediateWithYValue(Vec3d vec, double y)
+    {
+        double d0 = vec.xCoord - this.xCoord;
+        double d1 = vec.yCoord - this.yCoord;
+        double d2 = vec.zCoord - this.zCoord;
+
+        if (d1 * d1 < 1.0000000116860974E-7D)
+        {
+            return null;
+        }
+        else
+        {
+            double d3 = (y - this.yCoord) / d1;
+            return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.xCoord + d0 * d3, this.yCoord + d1 * d3, this.zCoord + d2 * d3) : null;
+        }
+    }
+
+    @Nullable
+
+    /**
+     * Returns a new vector with z value equal to the second parameter, along the line between this vector and the
+     * passed in vector, or null if not possible.
+     */
+    public Vec3d getIntermediateWithZValue(Vec3d vec, double z)
+    {
+        double d0 = vec.xCoord - this.xCoord;
+        double d1 = vec.yCoord - this.yCoord;
+        double d2 = vec.zCoord - this.zCoord;
+
+        if (d2 * d2 < 1.0000000116860974E-7D)
+        {
+            return null;
+        }
+        else
+        {
+            double d3 = (z - this.zCoord) / d2;
+            return d3 >= 0.0D && d3 <= 1.0D ? new Vec3d(this.xCoord + d0 * d3, this.yCoord + d1 * d3, this.zCoord + d2 * d3) : null;
+        }
+    }
+
+    public boolean equals(Object p_equals_1_)
+    {
+        if (this == p_equals_1_)
+        {
+            return true;
+        }
+        else if (!(p_equals_1_ instanceof Vec3d))
+        {
             return false;
-         } else if (Double.compare(vec3d.field_72448_b, this.field_72448_b) != 0) {
-            return false;
-         } else {
-            return Double.compare(vec3d.field_72449_c, this.field_72449_c) == 0;
-         }
-      }
-   }
+        }
+        else
+        {
+            Vec3d vec3d = (Vec3d)p_equals_1_;
 
-   public int hashCode() {
-      long j = Double.doubleToLongBits(this.field_72450_a);
-      int i = (int)(j ^ j >>> 32);
-      j = Double.doubleToLongBits(this.field_72448_b);
-      i = 31 * i + (int)(j ^ j >>> 32);
-      j = Double.doubleToLongBits(this.field_72449_c);
-      i = 31 * i + (int)(j ^ j >>> 32);
-      return i;
-   }
+            if (Double.compare(vec3d.xCoord, this.xCoord) != 0)
+            {
+                return false;
+            }
+            else if (Double.compare(vec3d.yCoord, this.yCoord) != 0)
+            {
+                return false;
+            }
+            else
+            {
+                return Double.compare(vec3d.zCoord, this.zCoord) == 0;
+            }
+        }
+    }
 
-   public String toString() {
-      return "(" + this.field_72450_a + ", " + this.field_72448_b + ", " + this.field_72449_c + ")";
-   }
+    public int hashCode()
+    {
+        long j = Double.doubleToLongBits(this.xCoord);
+        int i = (int)(j ^ j >>> 32);
+        j = Double.doubleToLongBits(this.yCoord);
+        i = 31 * i + (int)(j ^ j >>> 32);
+        j = Double.doubleToLongBits(this.zCoord);
+        i = 31 * i + (int)(j ^ j >>> 32);
+        return i;
+    }
 
-   public Vec3d func_178789_a(float p_178789_1_) {
-      float f = MathHelper.func_76134_b(p_178789_1_);
-      float f1 = MathHelper.func_76126_a(p_178789_1_);
-      double d0 = this.field_72450_a;
-      double d1 = this.field_72448_b * (double)f + this.field_72449_c * (double)f1;
-      double d2 = this.field_72449_c * (double)f - this.field_72448_b * (double)f1;
-      return new Vec3d(d0, d1, d2);
-   }
+    public String toString()
+    {
+        return "(" + this.xCoord + ", " + this.yCoord + ", " + this.zCoord + ")";
+    }
 
-   public Vec3d func_178785_b(float p_178785_1_) {
-      float f = MathHelper.func_76134_b(p_178785_1_);
-      float f1 = MathHelper.func_76126_a(p_178785_1_);
-      double d0 = this.field_72450_a * (double)f + this.field_72449_c * (double)f1;
-      double d1 = this.field_72448_b;
-      double d2 = this.field_72449_c * (double)f - this.field_72450_a * (double)f1;
-      return new Vec3d(d0, d1, d2);
-   }
+    public Vec3d rotatePitch(float pitch)
+    {
+        float f = MathHelper.cos(pitch);
+        float f1 = MathHelper.sin(pitch);
+        double d0 = this.xCoord;
+        double d1 = this.yCoord * (double)f + this.zCoord * (double)f1;
+        double d2 = this.zCoord * (double)f - this.yCoord * (double)f1;
+        return new Vec3d(d0, d1, d2);
+    }
 
-   public static Vec3d func_189984_a(Vec2f p_189984_0_) {
-      return func_189986_a(p_189984_0_.field_189982_i, p_189984_0_.field_189983_j);
-   }
+    public Vec3d rotateYaw(float yaw)
+    {
+        float f = MathHelper.cos(yaw);
+        float f1 = MathHelper.sin(yaw);
+        double d0 = this.xCoord * (double)f + this.zCoord * (double)f1;
+        double d1 = this.yCoord;
+        double d2 = this.zCoord * (double)f - this.xCoord * (double)f1;
+        return new Vec3d(d0, d1, d2);
+    }
 
-   public static Vec3d func_189986_a(float p_189986_0_, float p_189986_1_) {
-      float f = MathHelper.func_76134_b(-p_189986_1_ * 0.017453292F - 3.1415927F);
-      float f1 = MathHelper.func_76126_a(-p_189986_1_ * 0.017453292F - 3.1415927F);
-      float f2 = -MathHelper.func_76134_b(-p_189986_0_ * 0.017453292F);
-      float f3 = MathHelper.func_76126_a(-p_189986_0_ * 0.017453292F);
-      return new Vec3d((double)(f1 * f2), (double)f3, (double)(f * f2));
-   }
+    /**
+     * returns a Vec3d from given pitch and yaw degrees as Vec2f
+     */
+    public static Vec3d fromPitchYawVector(Vec2f p_189984_0_)
+    {
+        return fromPitchYaw(p_189984_0_.x, p_189984_0_.y);
+    }
+
+    /**
+     * returns a Vec3d from given pitch and yaw degrees
+     */
+    public static Vec3d fromPitchYaw(float p_189986_0_, float p_189986_1_)
+    {
+        float f = MathHelper.cos(-p_189986_1_ * 0.017453292F - (float)Math.PI);
+        float f1 = MathHelper.sin(-p_189986_1_ * 0.017453292F - (float)Math.PI);
+        float f2 = -MathHelper.cos(-p_189986_0_ * 0.017453292F);
+        float f3 = MathHelper.sin(-p_189986_0_ * 0.017453292F);
+        return new Vec3d((double)(f1 * f2), (double)f3, (double)(f * f2));
+    }
 }

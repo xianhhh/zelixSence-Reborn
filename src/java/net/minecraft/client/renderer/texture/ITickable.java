@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.texture;
 
-public interface ITickable {
-   void func_110550_d();
+public interface ITickable
+{
+    void tick();
 }

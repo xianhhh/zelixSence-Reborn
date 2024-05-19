@@ -2,8 +2,9 @@ package net.minecraft.util.datafix;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public interface IFixableData {
-   int func_188216_a();
+public interface IFixableData
+{
+    int getFixVersion();
 
-   NBTTagCompound func_188217_a(NBTTagCompound var1);
+    NBTTagCompound fixTagCompound(NBTTagCompound compound);
 }

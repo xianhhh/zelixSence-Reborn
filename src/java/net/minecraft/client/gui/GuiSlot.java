@@ -8,376 +8,515 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Mouse;
 
-public abstract class GuiSlot {
-   protected final Minecraft field_148161_k;
-   protected int field_148155_a;
-   protected int field_148158_l;
-   protected int field_148153_b;
-   protected int field_148154_c;
-   protected int field_148151_d;
-   protected int field_148152_e;
-   protected final int field_148149_f;
-   private int field_148159_m;
-   private int field_148156_n;
-   protected int field_148150_g;
-   protected int field_148162_h;
-   protected boolean field_148163_i = true;
-   protected int field_148157_o = -2;
-   protected float field_148170_p;
-   protected float field_148169_q;
-   protected int field_148168_r = -1;
-   protected long field_148167_s;
-   protected boolean field_178041_q = true;
-   protected boolean field_148166_t = true;
-   protected boolean field_148165_u;
-   protected int field_148160_j;
-   private boolean field_148164_v = true;
+public abstract class GuiSlot
+{
+    protected final Minecraft mc;
+    protected int width;
+    protected int height;
 
-   public GuiSlot(Minecraft p_i1052_1_, int p_i1052_2_, int p_i1052_3_, int p_i1052_4_, int p_i1052_5_, int p_i1052_6_) {
-      this.field_148161_k = p_i1052_1_;
-      this.field_148155_a = p_i1052_2_;
-      this.field_148158_l = p_i1052_3_;
-      this.field_148153_b = p_i1052_4_;
-      this.field_148154_c = p_i1052_5_;
-      this.field_148149_f = p_i1052_6_;
-      this.field_148152_e = 0;
-      this.field_148151_d = p_i1052_2_;
-   }
+    /** The top of the slot container. Affects the overlays and scrolling. */
+    protected int top;
 
-   public void func_148122_a(int p_148122_1_, int p_148122_2_, int p_148122_3_, int p_148122_4_) {
-      this.field_148155_a = p_148122_1_;
-      this.field_148158_l = p_148122_2_;
-      this.field_148153_b = p_148122_3_;
-      this.field_148154_c = p_148122_4_;
-      this.field_148152_e = 0;
-      this.field_148151_d = p_148122_1_;
-   }
+    /** The bottom of the slot container. Affects the overlays and scrolling. */
+    protected int bottom;
+    protected int right;
+    protected int left;
 
-   public void func_193651_b(boolean p_193651_1_) {
-      this.field_148166_t = p_193651_1_;
-   }
+    /** The height of a slot. */
+    protected final int slotHeight;
 
-   protected void func_148133_a(boolean p_148133_1_, int p_148133_2_) {
-      this.field_148165_u = p_148133_1_;
-      this.field_148160_j = p_148133_2_;
-      if (!p_148133_1_) {
-         this.field_148160_j = 0;
-      }
+    /** The buttonID of the button used to scroll up */
+    private int scrollUpButtonID;
 
-   }
+    /** The buttonID of the button used to scroll down */
+    private int scrollDownButtonID;
+    protected int mouseX;
+    protected int mouseY;
+    protected boolean centerListVertically = true;
 
-   protected abstract int func_148127_b();
+    /** Where the mouse was in the window when you first clicked to scroll */
+    protected int initialClickY = -2;
 
-   protected abstract void func_148144_a(int var1, boolean var2, int var3, int var4);
+    /**
+     * What to multiply the amount you moved your mouse by (used for slowing down scrolling when over the items and not
+     * on the scroll bar)
+     */
+    protected float scrollMultiplier;
 
-   protected abstract boolean func_148131_a(int var1);
+    /** How far down this slot has been scrolled */
+    protected float amountScrolled;
 
-   protected int func_148138_e() {
-      return this.func_148127_b() * this.field_148149_f + this.field_148160_j;
-   }
+    /** The element in the list that was selected */
+    protected int selectedElement = -1;
 
-   protected abstract void func_148123_a();
+    /** The time when this button was last clicked. */
+    protected long lastClicked;
+    protected boolean visible = true;
 
-   protected void func_192639_a(int p_192639_1_, int p_192639_2_, int p_192639_3_, float p_192639_4_) {
-   }
+    /**
+     * Set to true if a selected element in this gui will show an outline box
+     */
+    protected boolean showSelectionBox = true;
+    protected boolean hasListHeader;
+    protected int headerPadding;
+    private boolean enabled = true;
 
-   protected abstract void func_192637_a(int var1, int var2, int var3, int var4, int var5, int var6, float var7);
+    public GuiSlot(Minecraft mcIn, int width, int height, int topIn, int bottomIn, int slotHeightIn)
+    {
+        this.mc = mcIn;
+        this.width = width;
+        this.height = height;
+        this.top = topIn;
+        this.bottom = bottomIn;
+        this.slotHeight = slotHeightIn;
+        this.left = 0;
+        this.right = width;
+    }
 
-   protected void func_148129_a(int p_148129_1_, int p_148129_2_, Tessellator p_148129_3_) {
-   }
+    public void setDimensions(int widthIn, int heightIn, int topIn, int bottomIn)
+    {
+        this.width = widthIn;
+        this.height = heightIn;
+        this.top = topIn;
+        this.bottom = bottomIn;
+        this.left = 0;
+        this.right = widthIn;
+    }
 
-   protected void func_148132_a(int p_148132_1_, int p_148132_2_) {
-   }
+    public void func_193651_b(boolean p_193651_1_)
+    {
+        this.showSelectionBox = p_193651_1_;
+    }
 
-   protected void func_148142_b(int p_148142_1_, int p_148142_2_) {
-   }
+    /**
+     * Sets hasListHeader and headerHeight. Params: hasListHeader, headerHeight. If hasListHeader is false headerHeight
+     * is set to 0.
+     */
+    protected void setHasListHeader(boolean hasListHeaderIn, int headerPaddingIn)
+    {
+        this.hasListHeader = hasListHeaderIn;
+        this.headerPadding = headerPaddingIn;
 
-   public int func_148124_c(int p_148124_1_, int p_148124_2_) {
-      int i = this.field_148152_e + this.field_148155_a / 2 - this.func_148139_c() / 2;
-      int j = this.field_148152_e + this.field_148155_a / 2 + this.func_148139_c() / 2;
-      int k = p_148124_2_ - this.field_148153_b - this.field_148160_j + (int)this.field_148169_q - 4;
-      int l = k / this.field_148149_f;
-      return p_148124_1_ < this.func_148137_d() && p_148124_1_ >= i && p_148124_1_ <= j && l >= 0 && k >= 0 && l < this.func_148127_b() ? l : -1;
-   }
+        if (!hasListHeaderIn)
+        {
+            this.headerPadding = 0;
+        }
+    }
 
-   public void func_148134_d(int p_148134_1_, int p_148134_2_) {
-      this.field_148159_m = p_148134_1_;
-      this.field_148156_n = p_148134_2_;
-   }
+    protected abstract int getSize();
 
-   protected void func_148121_k() {
-      this.field_148169_q = MathHelper.func_76131_a(this.field_148169_q, 0.0F, (float)this.func_148135_f());
-   }
+    /**
+     * The element in the slot that was clicked, boolean for whether it was double clicked or not
+     */
+    protected abstract void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY);
 
-   public int func_148135_f() {
-      return Math.max(0, this.func_148138_e() - (this.field_148154_c - this.field_148153_b - 4));
-   }
+    /**
+     * Returns true if the element passed in is currently selected
+     */
+    protected abstract boolean isSelected(int slotIndex);
 
-   public int func_148148_g() {
-      return (int)this.field_148169_q;
-   }
+    /**
+     * Return the height of the content being scrolled
+     */
+    protected int getContentHeight()
+    {
+        return this.getSize() * this.slotHeight + this.headerPadding;
+    }
 
-   public boolean func_148141_e(int p_148141_1_) {
-      return p_148141_1_ >= this.field_148153_b && p_148141_1_ <= this.field_148154_c && this.field_148150_g >= this.field_148152_e && this.field_148150_g <= this.field_148151_d;
-   }
+    protected abstract void drawBackground();
 
-   public void func_148145_f(int p_148145_1_) {
-      this.field_148169_q += (float)p_148145_1_;
-      this.func_148121_k();
-      this.field_148157_o = -2;
-   }
+    protected void func_192639_a(int p_192639_1_, int p_192639_2_, int p_192639_3_, float p_192639_4_)
+    {
+    }
 
-   public void func_148147_a(GuiButton p_148147_1_) {
-      if (p_148147_1_.field_146124_l) {
-         if (p_148147_1_.field_146127_k == this.field_148159_m) {
-            this.field_148169_q -= (float)(this.field_148149_f * 2 / 3);
-            this.field_148157_o = -2;
-            this.func_148121_k();
-         } else if (p_148147_1_.field_146127_k == this.field_148156_n) {
-            this.field_148169_q += (float)(this.field_148149_f * 2 / 3);
-            this.field_148157_o = -2;
-            this.func_148121_k();
-         }
+    protected abstract void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_);
 
-      }
-   }
+    /**
+     * Handles drawing a list's header row.
+     */
+    protected void drawListHeader(int insideLeft, int insideTop, Tessellator tessellatorIn)
+    {
+    }
 
-   public void func_148128_a(int p_148128_1_, int p_148128_2_, float p_148128_3_) {
-      if (this.field_178041_q) {
-         this.field_148150_g = p_148128_1_;
-         this.field_148162_h = p_148128_2_;
-         this.func_148123_a();
-         int i = this.func_148137_d();
-         int j = i + 6;
-         this.func_148121_k();
-         GlStateManager.func_179140_f();
-         GlStateManager.func_179106_n();
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         this.field_148161_k.func_110434_K().func_110577_a(Gui.field_110325_k);
-         GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-         float f = 32.0F;
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)this.field_148154_c, 0.0D).func_187315_a((double)((float)this.field_148152_e / 32.0F), (double)((float)(this.field_148154_c + (int)this.field_148169_q) / 32.0F)).func_181669_b(32, 32, 32, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)this.field_148154_c, 0.0D).func_187315_a((double)((float)this.field_148151_d / 32.0F), (double)((float)(this.field_148154_c + (int)this.field_148169_q) / 32.0F)).func_181669_b(32, 32, 32, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)this.field_148153_b, 0.0D).func_187315_a((double)((float)this.field_148151_d / 32.0F), (double)((float)(this.field_148153_b + (int)this.field_148169_q) / 32.0F)).func_181669_b(32, 32, 32, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)this.field_148153_b, 0.0D).func_187315_a((double)((float)this.field_148152_e / 32.0F), (double)((float)(this.field_148153_b + (int)this.field_148169_q) / 32.0F)).func_181669_b(32, 32, 32, 255).func_181675_d();
-         tessellator.func_78381_a();
-         int k = this.field_148152_e + this.field_148155_a / 2 - this.func_148139_c() / 2 + 2;
-         int l = this.field_148153_b + 4 - (int)this.field_148169_q;
-         if (this.field_148165_u) {
-            this.func_148129_a(k, l, tessellator);
-         }
+    protected void clickedHeader(int p_148132_1_, int p_148132_2_)
+    {
+    }
 
-         this.func_192638_a(k, l, p_148128_1_, p_148128_2_, p_148128_3_);
-         GlStateManager.func_179097_i();
-         this.func_148136_c(0, this.field_148153_b, 255, 255);
-         this.func_148136_c(this.field_148154_c, this.field_148158_l, 255, 255);
-         GlStateManager.func_179147_l();
-         GlStateManager.func_187428_a(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-         GlStateManager.func_179118_c();
-         GlStateManager.func_179103_j(7425);
-         GlStateManager.func_179090_x();
-         int i1 = 4;
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)(this.field_148153_b + 4), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(0, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)(this.field_148153_b + 4), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(0, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)this.field_148153_b, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)this.field_148153_b, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-         tessellator.func_78381_a();
-         bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)this.field_148154_c, 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)this.field_148154_c, 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148151_d, (double)(this.field_148154_c - 4), 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(0, 0, 0, 0).func_181675_d();
-         bufferbuilder.func_181662_b((double)this.field_148152_e, (double)(this.field_148154_c - 4), 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(0, 0, 0, 0).func_181675_d();
-         tessellator.func_78381_a();
-         int j1 = this.func_148135_f();
-         if (j1 > 0) {
-            int k1 = (this.field_148154_c - this.field_148153_b) * (this.field_148154_c - this.field_148153_b) / this.func_148138_e();
-            k1 = MathHelper.func_76125_a(k1, 32, this.field_148154_c - this.field_148153_b - 8);
-            int l1 = (int)this.field_148169_q * (this.field_148154_c - this.field_148153_b - k1) / j1 + this.field_148153_b;
-            if (l1 < this.field_148153_b) {
-               l1 = this.field_148153_b;
+    protected void renderDecorations(int mouseXIn, int mouseYIn)
+    {
+    }
+
+    public int getSlotIndexFromScreenCoords(int posX, int posY)
+    {
+        int i = this.left + this.width / 2 - this.getListWidth() / 2;
+        int j = this.left + this.width / 2 + this.getListWidth() / 2;
+        int k = posY - this.top - this.headerPadding + (int)this.amountScrolled - 4;
+        int l = k / this.slotHeight;
+        return posX < this.getScrollBarX() && posX >= i && posX <= j && l >= 0 && k >= 0 && l < this.getSize() ? l : -1;
+    }
+
+    /**
+     * Registers the IDs that can be used for the scrollbar's up/down buttons.
+     */
+    public void registerScrollButtons(int scrollUpButtonIDIn, int scrollDownButtonIDIn)
+    {
+        this.scrollUpButtonID = scrollUpButtonIDIn;
+        this.scrollDownButtonID = scrollDownButtonIDIn;
+    }
+
+    /**
+     * Stop the thing from scrolling out of bounds
+     */
+    protected void bindAmountScrolled()
+    {
+        this.amountScrolled = MathHelper.clamp(this.amountScrolled, 0.0F, (float)this.getMaxScroll());
+    }
+
+    public int getMaxScroll()
+    {
+        return Math.max(0, this.getContentHeight() - (this.bottom - this.top - 4));
+    }
+
+    /**
+     * Returns the amountScrolled field as an integer.
+     */
+    public int getAmountScrolled()
+    {
+        return (int)this.amountScrolled;
+    }
+
+    public boolean isMouseYWithinSlotBounds(int p_148141_1_)
+    {
+        return p_148141_1_ >= this.top && p_148141_1_ <= this.bottom && this.mouseX >= this.left && this.mouseX <= this.right;
+    }
+
+    /**
+     * Scrolls the slot by the given amount. A positive value scrolls down, and a negative value scrolls up.
+     */
+    public void scrollBy(int amount)
+    {
+        this.amountScrolled += (float)amount;
+        this.bindAmountScrolled();
+        this.initialClickY = -2;
+    }
+
+    public void actionPerformed(GuiButton button)
+    {
+        if (button.enabled)
+        {
+            if (button.id == this.scrollUpButtonID)
+            {
+                this.amountScrolled -= (float)(this.slotHeight * 2 / 3);
+                this.initialClickY = -2;
+                this.bindAmountScrolled();
+            }
+            else if (button.id == this.scrollDownButtonID)
+            {
+                this.amountScrolled += (float)(this.slotHeight * 2 / 3);
+                this.initialClickY = -2;
+                this.bindAmountScrolled();
+            }
+        }
+    }
+
+    public void drawScreen(int mouseXIn, int mouseYIn, float partialTicks)
+    {
+        if (this.visible)
+        {
+            this.mouseX = mouseXIn;
+            this.mouseY = mouseYIn;
+            this.drawBackground();
+            int i = this.getScrollBarX();
+            int j = i + 6;
+            this.bindAmountScrolled();
+            GlStateManager.disableLighting();
+            GlStateManager.disableFog();
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
+            this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            float f = 32.0F;
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+            bufferbuilder.pos((double)this.left, (double)this.bottom, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+            bufferbuilder.pos((double)this.right, (double)this.bottom, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+            bufferbuilder.pos((double)this.right, (double)this.top, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+            bufferbuilder.pos((double)this.left, (double)this.top, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+            tessellator.draw();
+            int k = this.left + this.width / 2 - this.getListWidth() / 2 + 2;
+            int l = this.top + 4 - (int)this.amountScrolled;
+
+            if (this.hasListHeader)
+            {
+                this.drawListHeader(k, l, tessellator);
             }
 
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)this.field_148154_c, 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)this.field_148154_c, 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)this.field_148153_b, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)this.field_148153_b, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            tessellator.func_78381_a();
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)(l1 + k1), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)(l1 + k1), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j, (double)l1, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)l1, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            tessellator.func_78381_a();
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i, (double)(l1 + k1 - 1), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j - 1), (double)(l1 + k1 - 1), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j - 1), (double)l1, 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i, (double)l1, 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(192, 192, 192, 255).func_181675_d();
-            tessellator.func_78381_a();
-         }
+            this.func_192638_a(k, l, mouseXIn, mouseYIn, partialTicks);
+            GlStateManager.disableDepth();
+            this.overlayBackground(0, this.top, 255, 255);
+            this.overlayBackground(this.bottom, this.height, 255, 255);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            GlStateManager.disableAlpha();
+            GlStateManager.shadeModel(7425);
+            GlStateManager.disableTexture2D();
+            int i1 = 4;
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+            bufferbuilder.pos((double)this.left, (double)(this.top + 4), 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)this.right, (double)(this.top + 4), 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)this.right, (double)this.top, 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.pos((double)this.left, (double)this.top, 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+            tessellator.draw();
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+            bufferbuilder.pos((double)this.left, (double)this.bottom, 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.pos((double)this.right, (double)this.bottom, 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.pos((double)this.right, (double)(this.bottom - 4), 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 0).endVertex();
+            bufferbuilder.pos((double)this.left, (double)(this.bottom - 4), 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 0).endVertex();
+            tessellator.draw();
+            int j1 = this.getMaxScroll();
 
-         this.func_148142_b(p_148128_1_, p_148128_2_);
-         GlStateManager.func_179098_w();
-         GlStateManager.func_179103_j(7424);
-         GlStateManager.func_179141_d();
-         GlStateManager.func_179084_k();
-      }
-   }
+            if (j1 > 0)
+            {
+                int k1 = (this.bottom - this.top) * (this.bottom - this.top) / this.getContentHeight();
+                k1 = MathHelper.clamp(k1, 32, this.bottom - this.top - 8);
+                int l1 = (int)this.amountScrolled * (this.bottom - this.top - k1) / j1 + this.top;
 
-   public void func_178039_p() {
-      if (this.func_148141_e(this.field_148162_h)) {
-         if (Mouse.getEventButton() == 0 && Mouse.getEventButtonState() && this.field_148162_h >= this.field_148153_b && this.field_148162_h <= this.field_148154_c) {
-            int i = (this.field_148155_a - this.func_148139_c()) / 2;
-            int j = (this.field_148155_a + this.func_148139_c()) / 2;
-            int k = this.field_148162_h - this.field_148153_b - this.field_148160_j + (int)this.field_148169_q - 4;
-            int l = k / this.field_148149_f;
-            if (l < this.func_148127_b() && this.field_148150_g >= i && this.field_148150_g <= j && l >= 0 && k >= 0) {
-               this.func_148144_a(l, false, this.field_148150_g, this.field_148162_h);
-               this.field_148168_r = l;
-            } else if (this.field_148150_g >= i && this.field_148150_g <= j && k < 0) {
-               this.func_148132_a(this.field_148150_g - i, this.field_148162_h - this.field_148153_b + (int)this.field_148169_q - 4);
-            }
-         }
+                if (l1 < this.top)
+                {
+                    l1 = this.top;
+                }
 
-         if (Mouse.isButtonDown(0) && this.func_148125_i()) {
-            if (this.field_148157_o == -1) {
-               boolean flag1 = true;
-               if (this.field_148162_h >= this.field_148153_b && this.field_148162_h <= this.field_148154_c) {
-                  int j2 = (this.field_148155_a - this.func_148139_c()) / 2;
-                  int k2 = (this.field_148155_a + this.func_148139_c()) / 2;
-                  int l2 = this.field_148162_h - this.field_148153_b - this.field_148160_j + (int)this.field_148169_q - 4;
-                  int i1 = l2 / this.field_148149_f;
-                  if (i1 < this.func_148127_b() && this.field_148150_g >= j2 && this.field_148150_g <= k2 && i1 >= 0 && l2 >= 0) {
-                     boolean flag = i1 == this.field_148168_r && Minecraft.func_71386_F() - this.field_148167_s < 250L;
-                     this.func_148144_a(i1, flag, this.field_148150_g, this.field_148162_h);
-                     this.field_148168_r = i1;
-                     this.field_148167_s = Minecraft.func_71386_F();
-                  } else if (this.field_148150_g >= j2 && this.field_148150_g <= k2 && l2 < 0) {
-                     this.func_148132_a(this.field_148150_g - j2, this.field_148162_h - this.field_148153_b + (int)this.field_148169_q - 4);
-                     flag1 = false;
-                  }
-
-                  int i3 = this.func_148137_d();
-                  int j1 = i3 + 6;
-                  if (this.field_148150_g >= i3 && this.field_148150_g <= j1) {
-                     this.field_148170_p = -1.0F;
-                     int k1 = this.func_148135_f();
-                     if (k1 < 1) {
-                        k1 = 1;
-                     }
-
-                     int l1 = (int)((float)((this.field_148154_c - this.field_148153_b) * (this.field_148154_c - this.field_148153_b)) / (float)this.func_148138_e());
-                     l1 = MathHelper.func_76125_a(l1, 32, this.field_148154_c - this.field_148153_b - 8);
-                     this.field_148170_p /= (float)(this.field_148154_c - this.field_148153_b - l1) / (float)k1;
-                  } else {
-                     this.field_148170_p = 1.0F;
-                  }
-
-                  if (flag1) {
-                     this.field_148157_o = this.field_148162_h;
-                  } else {
-                     this.field_148157_o = -2;
-                  }
-               } else {
-                  this.field_148157_o = -2;
-               }
-            } else if (this.field_148157_o >= 0) {
-               this.field_148169_q -= (float)(this.field_148162_h - this.field_148157_o) * this.field_148170_p;
-               this.field_148157_o = this.field_148162_h;
-            }
-         } else {
-            this.field_148157_o = -1;
-         }
-
-         int i2 = Mouse.getEventDWheel();
-         if (i2 != 0) {
-            if (i2 > 0) {
-               i2 = -1;
-            } else if (i2 < 0) {
-               i2 = 1;
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)this.bottom, 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.bottom, 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.top, 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)this.top, 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                tessellator.draw();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(l1 + k1), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)(l1 + k1), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)l1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)l1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                tessellator.draw();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(l1 + k1 - 1), 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)(l1 + k1 - 1), 0.0D).tex(1.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)l1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)l1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                tessellator.draw();
             }
 
-            this.field_148169_q += (float)(i2 * this.field_148149_f / 2);
-         }
+            this.renderDecorations(mouseXIn, mouseYIn);
+            GlStateManager.enableTexture2D();
+            GlStateManager.shadeModel(7424);
+            GlStateManager.enableAlpha();
+            GlStateManager.disableBlend();
+        }
+    }
 
-      }
-   }
+    public void handleMouseInput()
+    {
+        if (this.isMouseYWithinSlotBounds(this.mouseY))
+        {
+            if (Mouse.getEventButton() == 0 && Mouse.getEventButtonState() && this.mouseY >= this.top && this.mouseY <= this.bottom)
+            {
+                int i = (this.width - this.getListWidth()) / 2;
+                int j = (this.width + this.getListWidth()) / 2;
+                int k = this.mouseY - this.top - this.headerPadding + (int)this.amountScrolled - 4;
+                int l = k / this.slotHeight;
 
-   public void func_148143_b(boolean p_148143_1_) {
-      this.field_148164_v = p_148143_1_;
-   }
+                if (l < this.getSize() && this.mouseX >= i && this.mouseX <= j && l >= 0 && k >= 0)
+                {
+                    this.elementClicked(l, false, this.mouseX, this.mouseY);
+                    this.selectedElement = l;
+                }
+                else if (this.mouseX >= i && this.mouseX <= j && k < 0)
+                {
+                    this.clickedHeader(this.mouseX - i, this.mouseY - this.top + (int)this.amountScrolled - 4);
+                }
+            }
 
-   public boolean func_148125_i() {
-      return this.field_148164_v;
-   }
+            if (Mouse.isButtonDown(0) && this.getEnabled())
+            {
+                if (this.initialClickY == -1)
+                {
+                    boolean flag1 = true;
 
-   public int func_148139_c() {
-      return 220;
-   }
+                    if (this.mouseY >= this.top && this.mouseY <= this.bottom)
+                    {
+                        int j2 = (this.width - this.getListWidth()) / 2;
+                        int k2 = (this.width + this.getListWidth()) / 2;
+                        int l2 = this.mouseY - this.top - this.headerPadding + (int)this.amountScrolled - 4;
+                        int i1 = l2 / this.slotHeight;
 
-   protected void func_192638_a(int p_192638_1_, int p_192638_2_, int p_192638_3_, int p_192638_4_, float p_192638_5_) {
-      int i = this.func_148127_b();
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
+                        if (i1 < this.getSize() && this.mouseX >= j2 && this.mouseX <= k2 && i1 >= 0 && l2 >= 0)
+                        {
+                            boolean flag = i1 == this.selectedElement && Minecraft.getSystemTime() - this.lastClicked < 250L;
+                            this.elementClicked(i1, flag, this.mouseX, this.mouseY);
+                            this.selectedElement = i1;
+                            this.lastClicked = Minecraft.getSystemTime();
+                        }
+                        else if (this.mouseX >= j2 && this.mouseX <= k2 && l2 < 0)
+                        {
+                            this.clickedHeader(this.mouseX - j2, this.mouseY - this.top + (int)this.amountScrolled - 4);
+                            flag1 = false;
+                        }
 
-      for(int j = 0; j < i; ++j) {
-         int k = p_192638_2_ + j * this.field_148149_f + this.field_148160_j;
-         int l = this.field_148149_f - 4;
-         if (k > this.field_148154_c || k + l < this.field_148153_b) {
-            this.func_192639_a(j, p_192638_1_, k, p_192638_5_);
-         }
+                        int i3 = this.getScrollBarX();
+                        int j1 = i3 + 6;
 
-         if (this.field_148166_t && this.func_148131_a(j)) {
-            int i1 = this.field_148152_e + (this.field_148155_a / 2 - this.func_148139_c() / 2);
-            int j1 = this.field_148152_e + this.field_148155_a / 2 + this.func_148139_c() / 2;
-            GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.func_179090_x();
-            bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-            bufferbuilder.func_181662_b((double)i1, (double)(k + l + 2), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j1, (double)(k + l + 2), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)j1, (double)(k - 2), 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)i1, (double)(k - 2), 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(128, 128, 128, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(i1 + 1), (double)(k + l + 1), 0.0D).func_187315_a(0.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j1 - 1), (double)(k + l + 1), 0.0D).func_187315_a(1.0D, 1.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(j1 - 1), (double)(k - 1), 0.0D).func_187315_a(1.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            bufferbuilder.func_181662_b((double)(i1 + 1), (double)(k - 1), 0.0D).func_187315_a(0.0D, 0.0D).func_181669_b(0, 0, 0, 255).func_181675_d();
-            tessellator.func_78381_a();
-            GlStateManager.func_179098_w();
-         }
+                        if (this.mouseX >= i3 && this.mouseX <= j1)
+                        {
+                            this.scrollMultiplier = -1.0F;
+                            int k1 = this.getMaxScroll();
 
-         this.func_192637_a(j, p_192638_1_, k, l, p_192638_3_, p_192638_4_, p_192638_5_);
-      }
+                            if (k1 < 1)
+                            {
+                                k1 = 1;
+                            }
 
-   }
+                            int l1 = (int)((float)((this.bottom - this.top) * (this.bottom - this.top)) / (float)this.getContentHeight());
+                            l1 = MathHelper.clamp(l1, 32, this.bottom - this.top - 8);
+                            this.scrollMultiplier /= (float)(this.bottom - this.top - l1) / (float)k1;
+                        }
+                        else
+                        {
+                            this.scrollMultiplier = 1.0F;
+                        }
 
-   protected int func_148137_d() {
-      return this.field_148155_a / 2 + 124;
-   }
+                        if (flag1)
+                        {
+                            this.initialClickY = this.mouseY;
+                        }
+                        else
+                        {
+                            this.initialClickY = -2;
+                        }
+                    }
+                    else
+                    {
+                        this.initialClickY = -2;
+                    }
+                }
+                else if (this.initialClickY >= 0)
+                {
+                    this.amountScrolled -= (float)(this.mouseY - this.initialClickY) * this.scrollMultiplier;
+                    this.initialClickY = this.mouseY;
+                }
+            }
+            else
+            {
+                this.initialClickY = -1;
+            }
 
-   protected void func_148136_c(int p_148136_1_, int p_148136_2_, int p_148136_3_, int p_148136_4_) {
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      this.field_148161_k.func_110434_K().func_110577_a(Gui.field_110325_k);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      float f = 32.0F;
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      bufferbuilder.func_181662_b((double)this.field_148152_e, (double)p_148136_2_, 0.0D).func_187315_a(0.0D, (double)((float)p_148136_2_ / 32.0F)).func_181669_b(64, 64, 64, p_148136_4_).func_181675_d();
-      bufferbuilder.func_181662_b((double)(this.field_148152_e + this.field_148155_a), (double)p_148136_2_, 0.0D).func_187315_a((double)((float)this.field_148155_a / 32.0F), (double)((float)p_148136_2_ / 32.0F)).func_181669_b(64, 64, 64, p_148136_4_).func_181675_d();
-      bufferbuilder.func_181662_b((double)(this.field_148152_e + this.field_148155_a), (double)p_148136_1_, 0.0D).func_187315_a((double)((float)this.field_148155_a / 32.0F), (double)((float)p_148136_1_ / 32.0F)).func_181669_b(64, 64, 64, p_148136_3_).func_181675_d();
-      bufferbuilder.func_181662_b((double)this.field_148152_e, (double)p_148136_1_, 0.0D).func_187315_a(0.0D, (double)((float)p_148136_1_ / 32.0F)).func_181669_b(64, 64, 64, p_148136_3_).func_181675_d();
-      tessellator.func_78381_a();
-   }
+            int i2 = Mouse.getEventDWheel();
 
-   public void func_148140_g(int p_148140_1_) {
-      this.field_148152_e = p_148140_1_;
-      this.field_148151_d = p_148140_1_ + this.field_148155_a;
-   }
+            if (i2 != 0)
+            {
+                if (i2 > 0)
+                {
+                    i2 = -1;
+                }
+                else if (i2 < 0)
+                {
+                    i2 = 1;
+                }
 
-   public int func_148146_j() {
-      return this.field_148149_f;
-   }
+                this.amountScrolled += (float)(i2 * this.slotHeight / 2);
+            }
+        }
+    }
+
+    public void setEnabled(boolean enabledIn)
+    {
+        this.enabled = enabledIn;
+    }
+
+    public boolean getEnabled()
+    {
+        return this.enabled;
+    }
+
+    /**
+     * Gets the width of the list
+     */
+    public int getListWidth()
+    {
+        return 220;
+    }
+
+    protected void func_192638_a(int p_192638_1_, int p_192638_2_, int p_192638_3_, int p_192638_4_, float p_192638_5_)
+    {
+        int i = this.getSize();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        for (int j = 0; j < i; ++j)
+        {
+            int k = p_192638_2_ + j * this.slotHeight + this.headerPadding;
+            int l = this.slotHeight - 4;
+
+            if (k > this.bottom || k + l < this.top)
+            {
+                this.func_192639_a(j, p_192638_1_, k, p_192638_5_);
+            }
+
+            if (this.showSelectionBox && this.isSelected(j))
+            {
+                int i1 = this.left + (this.width / 2 - this.getListWidth() / 2);
+                int j1 = this.left + this.width / 2 + this.getListWidth() / 2;
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GlStateManager.disableTexture2D();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i1, (double)(k + l + 2), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j1, (double)(k + l + 2), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j1, (double)(k - 2), 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)i1, (double)(k - 2), 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)(i1 + 1), (double)(k + l + 1), 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)(j1 - 1), (double)(k + l + 1), 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)(j1 - 1), (double)(k - 1), 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)(i1 + 1), (double)(k - 1), 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                tessellator.draw();
+                GlStateManager.enableTexture2D();
+            }
+
+            this.func_192637_a(j, p_192638_1_, k, l, p_192638_3_, p_192638_4_, p_192638_5_);
+        }
+    }
+
+    protected int getScrollBarX()
+    {
+        return this.width / 2 + 124;
+    }
+
+    /**
+     * Overlays the background to hide scrolled items
+     */
+    protected void overlayBackground(int startY, int endY, int startAlpha, int endAlpha)
+    {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float f = 32.0F;
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos((double)this.left, (double)endY, 0.0D).tex(0.0D, (double)((float)endY / 32.0F)).color(64, 64, 64, endAlpha).endVertex();
+        bufferbuilder.pos((double)(this.left + this.width), (double)endY, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)endY / 32.0F)).color(64, 64, 64, endAlpha).endVertex();
+        bufferbuilder.pos((double)(this.left + this.width), (double)startY, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)startY / 32.0F)).color(64, 64, 64, startAlpha).endVertex();
+        bufferbuilder.pos((double)this.left, (double)startY, 0.0D).tex(0.0D, (double)((float)startY / 32.0F)).color(64, 64, 64, startAlpha).endVertex();
+        tessellator.draw();
+    }
+
+    /**
+     * Sets the left and right bounds of the slot. Param is the left bound, right is calculated as left + width.
+     */
+    public void setSlotXBoundsFromLeft(int leftIn)
+    {
+        this.left = leftIn;
+        this.right = leftIn + this.width;
+    }
+
+    public int getSlotHeight()
+    {
+        return this.slotHeight;
+    }
 }

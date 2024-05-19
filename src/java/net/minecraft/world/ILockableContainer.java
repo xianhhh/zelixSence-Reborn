@@ -2,10 +2,11 @@ package net.minecraft.world;
 
 import net.minecraft.inventory.IInventory;
 
-public interface ILockableContainer extends IInventory, IInteractionObject {
-   boolean func_174893_q_();
+public interface ILockableContainer extends IInventory, IInteractionObject
+{
+    boolean isLocked();
 
-   void func_174892_a(LockCode var1);
+    void setLockCode(LockCode code);
 
-   LockCode func_174891_i();
+    LockCode getLockCode();
 }

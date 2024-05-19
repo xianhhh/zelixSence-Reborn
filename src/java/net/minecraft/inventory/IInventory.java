@@ -4,36 +4,66 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
 
-public interface IInventory extends IWorldNameable {
-   int func_70302_i_();
+public interface IInventory extends IWorldNameable
+{
+    /**
+     * Returns the number of slots in the inventory.
+     */
+    int getSizeInventory();
 
-   boolean func_191420_l();
+    boolean func_191420_l();
 
-   ItemStack func_70301_a(int var1);
+    /**
+     * Returns the stack in the given slot.
+     */
+    ItemStack getStackInSlot(int index);
 
-   ItemStack func_70298_a(int var1, int var2);
+    /**
+     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
+     */
+    ItemStack decrStackSize(int index, int count);
 
-   ItemStack func_70304_b(int var1);
+    /**
+     * Removes a stack from the given slot and returns it.
+     */
+    ItemStack removeStackFromSlot(int index);
 
-   void func_70299_a(int var1, ItemStack var2);
+    /**
+     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
+     */
+    void setInventorySlotContents(int index, ItemStack stack);
 
-   int func_70297_j_();
+    /**
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     */
+    int getInventoryStackLimit();
 
-   void func_70296_d();
+    /**
+     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
+     * hasn't changed and skip it.
+     */
+    void markDirty();
 
-   boolean func_70300_a(EntityPlayer var1);
+    /**
+     * Don't rename this method to canInteractWith due to conflicts with Container
+     */
+    boolean isUsableByPlayer(EntityPlayer player);
 
-   void func_174889_b(EntityPlayer var1);
+    void openInventory(EntityPlayer player);
 
-   void func_174886_c(EntityPlayer var1);
+    void closeInventory(EntityPlayer player);
 
-   boolean func_94041_b(int var1, ItemStack var2);
+    /**
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
+     */
+    boolean isItemValidForSlot(int index, ItemStack stack);
 
-   int func_174887_a_(int var1);
+    int getField(int id);
 
-   void func_174885_b(int var1, int var2);
+    void setField(int id, int value);
 
-   int func_174890_g();
+    int getFieldCount();
 
-   void func_174888_l();
+    void clear();
 }

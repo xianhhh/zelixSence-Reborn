@@ -8,119 +8,195 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
-public class InventoryCrafting implements IInventory {
-   private final NonNullList<ItemStack> field_70466_a;
-   private final int field_70464_b;
-   private final int field_174924_c;
-   private final Container field_70465_c;
+public class InventoryCrafting implements IInventory
+{
+    private final NonNullList<ItemStack> stackList;
 
-   public InventoryCrafting(Container p_i1807_1_, int p_i1807_2_, int p_i1807_3_) {
-      this.field_70466_a = NonNullList.<ItemStack>func_191197_a(p_i1807_2_ * p_i1807_3_, ItemStack.field_190927_a);
-      this.field_70465_c = p_i1807_1_;
-      this.field_70464_b = p_i1807_2_;
-      this.field_174924_c = p_i1807_3_;
-   }
+    /** the width of the crafting inventory */
+    private final int inventoryWidth;
+    private final int inventoryHeight;
 
-   public int func_70302_i_() {
-      return this.field_70466_a.size();
-   }
+    /**
+     * Class containing the callbacks for the events on_GUIClosed and on_CraftMaxtrixChanged.
+     */
+    private final Container eventHandler;
 
-   public boolean func_191420_l() {
-      for(ItemStack itemstack : this.field_70466_a) {
-         if (!itemstack.func_190926_b()) {
-            return false;
-         }
-      }
+    public InventoryCrafting(Container eventHandlerIn, int width, int height)
+    {
+        this.stackList = NonNullList.<ItemStack>func_191197_a(width * height, ItemStack.field_190927_a);
+        this.eventHandler = eventHandlerIn;
+        this.inventoryWidth = width;
+        this.inventoryHeight = height;
+    }
 
-      return true;
-   }
+    /**
+     * Returns the number of slots in the inventory.
+     */
+    public int getSizeInventory()
+    {
+        return this.stackList.size();
+    }
 
-   public ItemStack func_70301_a(int p_70301_1_) {
-      return p_70301_1_ >= this.func_70302_i_() ? ItemStack.field_190927_a : (ItemStack)this.field_70466_a.get(p_70301_1_);
-   }
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.stackList)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
 
-   public ItemStack func_70463_b(int p_70463_1_, int p_70463_2_) {
-      return p_70463_1_ >= 0 && p_70463_1_ < this.field_70464_b && p_70463_2_ >= 0 && p_70463_2_ <= this.field_174924_c ? this.func_70301_a(p_70463_1_ + p_70463_2_ * this.field_70464_b) : ItemStack.field_190927_a;
-   }
+        return true;
+    }
 
-   public String func_70005_c_() {
-      return "container.crafting";
-   }
+    /**
+     * Returns the stack in the given slot.
+     */
+    public ItemStack getStackInSlot(int index)
+    {
+        return index >= this.getSizeInventory() ? ItemStack.field_190927_a : (ItemStack)this.stackList.get(index);
+    }
 
-   public boolean func_145818_k_() {
-      return false;
-   }
+    /**
+     * Gets the ItemStack in the slot specified.
+     */
+    public ItemStack getStackInRowAndColumn(int row, int column)
+    {
+        return row >= 0 && row < this.inventoryWidth && column >= 0 && column <= this.inventoryHeight ? this.getStackInSlot(row + column * this.inventoryWidth) : ItemStack.field_190927_a;
+    }
 
-   public ITextComponent func_145748_c_() {
-      return (ITextComponent)(this.func_145818_k_() ? new TextComponentString(this.func_70005_c_()) : new TextComponentTranslation(this.func_70005_c_(), new Object[0]));
-   }
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        return "container.crafting";
+    }
 
-   public ItemStack func_70304_b(int p_70304_1_) {
-      return ItemStackHelper.func_188383_a(this.field_70466_a, p_70304_1_);
-   }
+    /**
+     * Returns true if this thing is named
+     */
+    public boolean hasCustomName()
+    {
+        return false;
+    }
 
-   public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_) {
-      ItemStack itemstack = ItemStackHelper.func_188382_a(this.field_70466_a, p_70298_1_, p_70298_2_);
-      if (!itemstack.func_190926_b()) {
-         this.field_70465_c.func_75130_a(this);
-      }
+    /**
+     * Get the formatted ChatComponent that will be used for the sender's username in chat
+     */
+    public ITextComponent getDisplayName()
+    {
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
+    }
 
-      return itemstack;
-   }
+    /**
+     * Removes a stack from the given slot and returns it.
+     */
+    public ItemStack removeStackFromSlot(int index)
+    {
+        return ItemStackHelper.getAndRemove(this.stackList, index);
+    }
 
-   public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_) {
-      this.field_70466_a.set(p_70299_1_, p_70299_2_);
-      this.field_70465_c.func_75130_a(this);
-   }
+    /**
+     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
+     */
+    public ItemStack decrStackSize(int index, int count)
+    {
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.stackList, index, count);
 
-   public int func_70297_j_() {
-      return 64;
-   }
+        if (!itemstack.func_190926_b())
+        {
+            this.eventHandler.onCraftMatrixChanged(this);
+        }
 
-   public void func_70296_d() {
-   }
+        return itemstack;
+    }
 
-   public boolean func_70300_a(EntityPlayer p_70300_1_) {
-      return true;
-   }
+    /**
+     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
+     */
+    public void setInventorySlotContents(int index, ItemStack stack)
+    {
+        this.stackList.set(index, stack);
+        this.eventHandler.onCraftMatrixChanged(this);
+    }
 
-   public void func_174889_b(EntityPlayer p_174889_1_) {
-   }
+    /**
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     */
+    public int getInventoryStackLimit()
+    {
+        return 64;
+    }
 
-   public void func_174886_c(EntityPlayer p_174886_1_) {
-   }
+    /**
+     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
+     * hasn't changed and skip it.
+     */
+    public void markDirty()
+    {
+    }
 
-   public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_) {
-      return true;
-   }
+    /**
+     * Don't rename this method to canInteractWith due to conflicts with Container
+     */
+    public boolean isUsableByPlayer(EntityPlayer player)
+    {
+        return true;
+    }
 
-   public int func_174887_a_(int p_174887_1_) {
-      return 0;
-   }
+    public void openInventory(EntityPlayer player)
+    {
+    }
 
-   public void func_174885_b(int p_174885_1_, int p_174885_2_) {
-   }
+    public void closeInventory(EntityPlayer player)
+    {
+    }
 
-   public int func_174890_g() {
-      return 0;
-   }
+    /**
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
+     */
+    public boolean isItemValidForSlot(int index, ItemStack stack)
+    {
+        return true;
+    }
 
-   public void func_174888_l() {
-      this.field_70466_a.clear();
-   }
+    public int getField(int id)
+    {
+        return 0;
+    }
 
-   public int func_174923_h() {
-      return this.field_174924_c;
-   }
+    public void setField(int id, int value)
+    {
+    }
 
-   public int func_174922_i() {
-      return this.field_70464_b;
-   }
+    public int getFieldCount()
+    {
+        return 0;
+    }
 
-   public void func_194018_a(RecipeItemHelper p_194018_1_) {
-      for(ItemStack itemstack : this.field_70466_a) {
-         p_194018_1_.func_194112_a(itemstack);
-      }
+    public void clear()
+    {
+        this.stackList.clear();
+    }
 
-   }
+    public int getHeight()
+    {
+        return this.inventoryHeight;
+    }
+
+    public int getWidth()
+    {
+        return this.inventoryWidth;
+    }
+
+    public void func_194018_a(RecipeItemHelper p_194018_1_)
+    {
+        for (ItemStack itemstack : this.stackList)
+        {
+            p_194018_1_.func_194112_a(itemstack);
+        }
+    }
 }

@@ -8,55 +8,68 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-public class ParticleItemPickup extends Particle {
-   private final Entity field_174840_a;
-   private final Entity field_174843_ax;
-   private int field_70594_ar;
-   private final int field_70593_as;
-   private final float field_174841_aA;
-   private final RenderManager field_174842_aB = Minecraft.func_71410_x().func_175598_ae();
+public class ParticleItemPickup extends Particle
+{
+    private final Entity item;
+    private final Entity target;
+    private int age;
+    private final int maxAge;
+    private final float yOffset;
+    private final RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
 
-   public ParticleItemPickup(World p_i1233_1_, Entity p_i1233_2_, Entity p_i1233_3_, float p_i1233_4_) {
-      super(p_i1233_1_, p_i1233_2_.field_70165_t, p_i1233_2_.field_70163_u, p_i1233_2_.field_70161_v, p_i1233_2_.field_70159_w, p_i1233_2_.field_70181_x, p_i1233_2_.field_70179_y);
-      this.field_174840_a = p_i1233_2_;
-      this.field_174843_ax = p_i1233_3_;
-      this.field_70593_as = 3;
-      this.field_174841_aA = p_i1233_4_;
-   }
+    public ParticleItemPickup(World worldIn, Entity p_i1233_2_, Entity p_i1233_3_, float p_i1233_4_)
+    {
+        super(worldIn, p_i1233_2_.posX, p_i1233_2_.posY, p_i1233_2_.posZ, p_i1233_2_.motionX, p_i1233_2_.motionY, p_i1233_2_.motionZ);
+        this.item = p_i1233_2_;
+        this.target = p_i1233_3_;
+        this.maxAge = 3;
+        this.yOffset = p_i1233_4_;
+    }
 
-   public void func_180434_a(BufferBuilder p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_) {
-      float f = ((float)this.field_70594_ar + p_180434_3_) / (float)this.field_70593_as;
-      f = f * f;
-      double d0 = this.field_174840_a.field_70165_t;
-      double d1 = this.field_174840_a.field_70163_u;
-      double d2 = this.field_174840_a.field_70161_v;
-      double d3 = this.field_174843_ax.field_70142_S + (this.field_174843_ax.field_70165_t - this.field_174843_ax.field_70142_S) * (double)p_180434_3_;
-      double d4 = this.field_174843_ax.field_70137_T + (this.field_174843_ax.field_70163_u - this.field_174843_ax.field_70137_T) * (double)p_180434_3_ + (double)this.field_174841_aA;
-      double d5 = this.field_174843_ax.field_70136_U + (this.field_174843_ax.field_70161_v - this.field_174843_ax.field_70136_U) * (double)p_180434_3_;
-      double d6 = d0 + (d3 - d0) * (double)f;
-      double d7 = d1 + (d4 - d1) * (double)f;
-      double d8 = d2 + (d5 - d2) * (double)f;
-      int i = this.func_189214_a(p_180434_3_);
-      int j = i % 65536;
-      int k = i / 65536;
-      OpenGlHelper.func_77475_a(OpenGlHelper.field_77476_b, (float)j, (float)k);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      d6 = d6 - field_70556_an;
-      d7 = d7 - field_70554_ao;
-      d8 = d8 - field_70555_ap;
-      GlStateManager.func_179145_e();
-      this.field_174842_aB.func_188391_a(this.field_174840_a, d6, d7, d8, this.field_174840_a.field_70177_z, p_180434_3_, false);
-   }
+    /**
+     * Renders the particle
+     */
+    public void renderParticle(BufferBuilder worldRendererIn, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
+    {
+        float f = ((float)this.age + partialTicks) / (float)this.maxAge;
+        f = f * f;
+        double d0 = this.item.posX;
+        double d1 = this.item.posY;
+        double d2 = this.item.posZ;
+        double d3 = this.target.lastTickPosX + (this.target.posX - this.target.lastTickPosX) * (double)partialTicks;
+        double d4 = this.target.lastTickPosY + (this.target.posY - this.target.lastTickPosY) * (double)partialTicks + (double)this.yOffset;
+        double d5 = this.target.lastTickPosZ + (this.target.posZ - this.target.lastTickPosZ) * (double)partialTicks;
+        double d6 = d0 + (d3 - d0) * (double)f;
+        double d7 = d1 + (d4 - d1) * (double)f;
+        double d8 = d2 + (d5 - d2) * (double)f;
+        int i = this.getBrightnessForRender(partialTicks);
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        d6 = d6 - interpPosX;
+        d7 = d7 - interpPosY;
+        d8 = d8 - interpPosZ;
+        GlStateManager.enableLighting();
+        this.renderManager.doRenderEntity(this.item, d6, d7, d8, this.item.rotationYaw, partialTicks, false);
+    }
 
-   public void func_189213_a() {
-      ++this.field_70594_ar;
-      if (this.field_70594_ar == this.field_70593_as) {
-         this.func_187112_i();
-      }
+    public void onUpdate()
+    {
+        ++this.age;
 
-   }
+        if (this.age == this.maxAge)
+        {
+            this.setExpired();
+        }
+    }
 
-   public int func_70537_b() {
-      return 3;
-   }
+    /**
+     * Retrieve what effect layer (what texture) the particle should be rendered with. 0 for the particle sprite sheet,
+     * 1 for the main Texture atlas, and 3 for a custom texture
+     */
+    public int getFXLayer()
+    {
+        return 3;
+    }
 }

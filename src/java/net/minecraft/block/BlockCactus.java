@@ -18,101 +18,145 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockCactus extends Block {
-   public static final PropertyInteger field_176587_a = PropertyInteger.func_177719_a("age", 0, 15);
-   protected static final AxisAlignedBB field_185593_b = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.9375D, 0.9375D);
-   protected static final AxisAlignedBB field_185594_c = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 1.0D, 0.9375D);
+public class BlockCactus extends Block
+{
+    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 15);
+    protected static final AxisAlignedBB CACTUS_COLLISION_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.9375D, 0.9375D);
+    protected static final AxisAlignedBB CACTUS_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 1.0D, 0.9375D);
 
-   protected BlockCactus() {
-      super(Material.field_151570_A);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176587_a, Integer.valueOf(0)));
-      this.func_149675_a(true);
-      this.func_149647_a(CreativeTabs.field_78031_c);
-   }
+    protected BlockCactus()
+    {
+        super(Material.CACTUS);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, Integer.valueOf(0)));
+        this.setTickRandomly(true);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
 
-   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
-      BlockPos blockpos = p_180650_2_.func_177984_a();
-      if (p_180650_1_.func_175623_d(blockpos)) {
-         int i;
-         for(i = 1; p_180650_1_.func_180495_p(p_180650_2_.func_177979_c(i)).func_177230_c() == this; ++i) {
-            ;
-         }
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        BlockPos blockpos = pos.up();
 
-         if (i < 3) {
-            int j = ((Integer)p_180650_3_.func_177229_b(field_176587_a)).intValue();
-            if (j == 15) {
-               p_180650_1_.func_175656_a(blockpos, this.func_176223_P());
-               IBlockState iblockstate = p_180650_3_.func_177226_a(field_176587_a, Integer.valueOf(0));
-               p_180650_1_.func_180501_a(p_180650_2_, iblockstate, 4);
-               iblockstate.func_189546_a(p_180650_1_, blockpos, this, p_180650_2_);
-            } else {
-               p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_.func_177226_a(field_176587_a, Integer.valueOf(j + 1)), 4);
+        if (worldIn.isAirBlock(blockpos))
+        {
+            int i;
+
+            for (i = 1; worldIn.getBlockState(pos.down(i)).getBlock() == this; ++i)
+            {
+                ;
             }
 
-         }
-      }
-   }
+            if (i < 3)
+            {
+                int j = ((Integer)state.getValue(AGE)).intValue();
 
-   public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_) {
-      return field_185593_b;
-   }
+                if (j == 15)
+                {
+                    worldIn.setBlockState(blockpos, this.getDefaultState());
+                    IBlockState iblockstate = state.withProperty(AGE, Integer.valueOf(0));
+                    worldIn.setBlockState(pos, iblockstate, 4);
+                    iblockstate.neighborChanged(worldIn, blockpos, this, pos);
+                }
+                else
+                {
+                    worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(j + 1)), 4);
+                }
+            }
+        }
+    }
 
-   public AxisAlignedBB func_180640_a(IBlockState p_180640_1_, World p_180640_2_, BlockPos p_180640_3_) {
-      return field_185594_c.func_186670_a(p_180640_3_);
-   }
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
+    {
+        return CACTUS_COLLISION_AABB;
+    }
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+    {
+        return CACTUS_AABB.offset(pos);
+    }
 
-   public boolean func_149662_c(IBlockState p_149662_1_) {
-      return false;
-   }
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_) {
-      return super.func_176196_c(p_176196_1_, p_176196_2_) ? this.func_176586_d(p_176196_1_, p_176196_2_) : false;
-   }
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      if (!this.func_176586_d(p_189540_2_, p_189540_3_)) {
-         p_189540_2_.func_175655_b(p_189540_3_, true);
-      }
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return super.canPlaceBlockAt(worldIn, pos) ? this.canBlockStay(worldIn, pos) : false;
+    }
 
-   }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        if (!this.canBlockStay(worldIn, pos))
+        {
+            worldIn.destroyBlock(pos, true);
+        }
+    }
 
-   public boolean func_176586_d(World p_176586_1_, BlockPos p_176586_2_) {
-      for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-         Material material = p_176586_1_.func_180495_p(p_176586_2_.func_177972_a(enumfacing)).func_185904_a();
-         if (material.func_76220_a() || material == Material.field_151587_i) {
-            return false;
-         }
-      }
+    public boolean canBlockStay(World worldIn, BlockPos pos)
+    {
+        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+        {
+            Material material = worldIn.getBlockState(pos.offset(enumfacing)).getMaterial();
 
-      Block block = p_176586_1_.func_180495_p(p_176586_2_.func_177977_b()).func_177230_c();
-      return block == Blocks.field_150434_aF || block == Blocks.field_150354_m && !p_176586_1_.func_180495_p(p_176586_2_.func_177984_a()).func_185904_a().func_76224_d();
-   }
+            if (material.isSolid() || material == Material.LAVA)
+            {
+                return false;
+            }
+        }
 
-   public void func_180634_a(World p_180634_1_, BlockPos p_180634_2_, IBlockState p_180634_3_, Entity p_180634_4_) {
-      p_180634_4_.func_70097_a(DamageSource.field_76367_g, 1.0F);
-   }
+        Block block = worldIn.getBlockState(pos.down()).getBlock();
+        return block == Blocks.CACTUS || block == Blocks.SAND && !worldIn.getBlockState(pos.up()).getMaterial().isLiquid();
+    }
 
-   public BlockRenderLayer func_180664_k() {
-      return BlockRenderLayer.CUTOUT;
-   }
+    /**
+     * Called When an Entity Collided with the Block
+     */
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
+    {
+        entityIn.attackEntityFrom(DamageSource.cactus, 1.0F);
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_176587_a, Integer.valueOf(p_176203_1_));
-   }
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
+    }
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      return ((Integer)p_176201_1_.func_177229_b(field_176587_a)).intValue();
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(AGE, Integer.valueOf(meta));
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176587_a});
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((Integer)state.getValue(AGE)).intValue();
+    }
 
-   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
-      return BlockFaceShape.UNDEFINED;
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {AGE});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 }

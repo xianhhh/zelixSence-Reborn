@@ -5,44 +5,64 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketTimeUpdate implements Packet<INetHandlerPlayClient> {
-   private long field_149369_a;
-   private long field_149368_b;
+public class SPacketTimeUpdate implements Packet<INetHandlerPlayClient>
+{
+    private long totalWorldTime;
+    private long worldTime;
 
-   public SPacketTimeUpdate() {
-   }
+    public SPacketTimeUpdate()
+    {
+    }
 
-   public SPacketTimeUpdate(long p_i46902_1_, long p_i46902_3_, boolean p_i46902_5_) {
-      this.field_149369_a = p_i46902_1_;
-      this.field_149368_b = p_i46902_3_;
-      if (!p_i46902_5_) {
-         this.field_149368_b = -this.field_149368_b;
-         if (this.field_149368_b == 0L) {
-            this.field_149368_b = -1L;
-         }
-      }
+    public SPacketTimeUpdate(long totalWorldTimeIn, long worldTimeIn, boolean p_i46902_5_)
+    {
+        this.totalWorldTime = totalWorldTimeIn;
+        this.worldTime = worldTimeIn;
 
-   }
+        if (!p_i46902_5_)
+        {
+            this.worldTime = -this.worldTime;
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149369_a = p_148837_1_.readLong();
-      this.field_149368_b = p_148837_1_.readLong();
-   }
+            if (this.worldTime == 0L)
+            {
+                this.worldTime = -1L;
+            }
+        }
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeLong(this.field_149369_a);
-      p_148840_1_.writeLong(this.field_149368_b);
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.totalWorldTime = buf.readLong();
+        this.worldTime = buf.readLong();
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147285_a(this);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeLong(this.totalWorldTime);
+        buf.writeLong(this.worldTime);
+    }
 
-   public long func_149366_c() {
-      return this.field_149369_a;
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleTimeUpdate(this);
+    }
 
-   public long func_149365_d() {
-      return this.field_149368_b;
-   }
+    public long getTotalWorldTime()
+    {
+        return this.totalWorldTime;
+    }
+
+    public long getWorldTime()
+    {
+        return this.worldTime;
+    }
 }

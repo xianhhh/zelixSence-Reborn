@@ -34,165 +34,223 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable {
-   private static final AtomicInteger field_147331_b = new AtomicInteger(0);
-   private static final Logger field_147332_c = LogManager.getLogger();
-   private static final Random field_147329_d = new Random();
-   private final byte[] field_147330_e = new byte[4];
-   private final MinecraftServer field_147327_f;
-   public final NetworkManager field_147333_a;
-   private NetHandlerLoginServer.LoginState field_147328_g = NetHandlerLoginServer.LoginState.HELLO;
-   private int field_147336_h;
-   private GameProfile field_147337_i;
-   private final String field_147334_j = "";
-   private SecretKey field_147335_k;
-   private EntityPlayerMP field_181025_l;
+public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
+{
+    private static final AtomicInteger AUTHENTICATOR_THREAD_ID = new AtomicInteger(0);
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Random RANDOM = new Random();
+    private final byte[] verifyToken = new byte[4];
+    private final MinecraftServer server;
+    public final NetworkManager networkManager;
+    private NetHandlerLoginServer.LoginState currentLoginState = NetHandlerLoginServer.LoginState.HELLO;
 
-   public NetHandlerLoginServer(MinecraftServer p_i45298_1_, NetworkManager p_i45298_2_) {
-      this.field_147327_f = p_i45298_1_;
-      this.field_147333_a = p_i45298_2_;
-      field_147329_d.nextBytes(this.field_147330_e);
-   }
+    /** How long has player been trying to login into the server. */
+    private int connectionTimer;
+    private GameProfile loginGameProfile;
+    private final String serverId = "";
+    private SecretKey secretKey;
+    private EntityPlayerMP player;
 
-   public void func_73660_a() {
-      if (this.field_147328_g == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT) {
-         this.func_147326_c();
-      } else if (this.field_147328_g == NetHandlerLoginServer.LoginState.DELAY_ACCEPT) {
-         EntityPlayerMP entityplayermp = this.field_147327_f.func_184103_al().func_177451_a(this.field_147337_i.getId());
-         if (entityplayermp == null) {
-            this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-            this.field_147327_f.func_184103_al().func_72355_a(this.field_147333_a, this.field_181025_l);
-            this.field_181025_l = null;
-         }
-      }
+    public NetHandlerLoginServer(MinecraftServer serverIn, NetworkManager networkManagerIn)
+    {
+        this.server = serverIn;
+        this.networkManager = networkManagerIn;
+        RANDOM.nextBytes(this.verifyToken);
+    }
 
-      if (this.field_147336_h++ == 600) {
-         this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.slow_login", new Object[0]));
-      }
+    /**
+     * Like the old updateEntity(), except more generic.
+     */
+    public void update()
+    {
+        if (this.currentLoginState == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT)
+        {
+            this.tryAcceptPlayer();
+        }
+        else if (this.currentLoginState == NetHandlerLoginServer.LoginState.DELAY_ACCEPT)
+        {
+            EntityPlayerMP entityplayermp = this.server.getPlayerList().getPlayerByUUID(this.loginGameProfile.getId());
 
-   }
+            if (entityplayermp == null)
+            {
+                this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                this.server.getPlayerList().initializeConnectionToPlayer(this.networkManager, this.player);
+                this.player = null;
+            }
+        }
 
-   public void func_194026_b(ITextComponent p_194026_1_) {
-      try {
-         field_147332_c.info("Disconnecting {}: {}", this.func_147317_d(), p_194026_1_.func_150260_c());
-         this.field_147333_a.func_179290_a(new SPacketDisconnect(p_194026_1_));
-         this.field_147333_a.func_150718_a(p_194026_1_);
-      } catch (Exception exception) {
-         field_147332_c.error("Error whilst disconnecting player", (Throwable)exception);
-      }
+        if (this.connectionTimer++ == 600)
+        {
+            this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.slow_login", new Object[0]));
+        }
+    }
 
-   }
+    public void func_194026_b(ITextComponent p_194026_1_)
+    {
+        try
+        {
+            LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), p_194026_1_.getUnformattedText());
+            this.networkManager.sendPacket(new SPacketDisconnect(p_194026_1_));
+            this.networkManager.closeChannel(p_194026_1_);
+        }
+        catch (Exception exception)
+        {
+            LOGGER.error("Error whilst disconnecting player", (Throwable)exception);
+        }
+    }
 
-   public void func_147326_c() {
-      if (!this.field_147337_i.isComplete()) {
-         this.field_147337_i = this.func_152506_a(this.field_147337_i);
-      }
+    public void tryAcceptPlayer()
+    {
+        if (!this.loginGameProfile.isComplete())
+        {
+            this.loginGameProfile = this.getOfflineProfile(this.loginGameProfile);
+        }
 
-      String s = this.field_147327_f.func_184103_al().func_148542_a(this.field_147333_a.func_74430_c(), this.field_147337_i);
-      if (s != null) {
-         this.func_194026_b(new TextComponentTranslation(s, new Object[0]));
-      } else {
-         this.field_147328_g = NetHandlerLoginServer.LoginState.ACCEPTED;
-         if (this.field_147327_f.func_175577_aI() >= 0 && !this.field_147333_a.func_150731_c()) {
-            this.field_147333_a.func_179288_a(new SPacketEnableCompression(this.field_147327_f.func_175577_aI()), new ChannelFutureListener() {
-               public void operationComplete(ChannelFuture p_operationComplete_1_) throws Exception {
-                  NetHandlerLoginServer.this.field_147333_a.func_179289_a(NetHandlerLoginServer.this.field_147327_f.func_175577_aI());
-               }
-            });
-         }
+        String s = this.server.getPlayerList().allowUserToConnect(this.networkManager.getRemoteAddress(), this.loginGameProfile);
 
-         this.field_147333_a.func_179290_a(new SPacketLoginSuccess(this.field_147337_i));
-         EntityPlayerMP entityplayermp = this.field_147327_f.func_184103_al().func_177451_a(this.field_147337_i.getId());
-         if (entityplayermp != null) {
-            this.field_147328_g = NetHandlerLoginServer.LoginState.DELAY_ACCEPT;
-            this.field_181025_l = this.field_147327_f.func_184103_al().func_148545_a(this.field_147337_i);
-         } else {
-            this.field_147327_f.func_184103_al().func_72355_a(this.field_147333_a, this.field_147327_f.func_184103_al().func_148545_a(this.field_147337_i));
-         }
-      }
+        if (s != null)
+        {
+            this.func_194026_b(new TextComponentTranslation(s, new Object[0]));
+        }
+        else
+        {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.ACCEPTED;
 
-   }
-
-   public void func_147231_a(ITextComponent p_147231_1_) {
-      field_147332_c.info("{} lost connection: {}", this.func_147317_d(), p_147231_1_.func_150260_c());
-   }
-
-   public String func_147317_d() {
-      return this.field_147337_i != null ? this.field_147337_i + " (" + this.field_147333_a.func_74430_c() + ")" : String.valueOf((Object)this.field_147333_a.func_74430_c());
-   }
-
-   public void func_147316_a(CPacketLoginStart p_147316_1_) {
-      Validate.validState(this.field_147328_g == NetHandlerLoginServer.LoginState.HELLO, "Unexpected hello packet");
-      this.field_147337_i = p_147316_1_.func_149304_c();
-      if (this.field_147327_f.func_71266_T() && !this.field_147333_a.func_150731_c()) {
-         this.field_147328_g = NetHandlerLoginServer.LoginState.KEY;
-         this.field_147333_a.func_179290_a(new SPacketEncryptionRequest("", this.field_147327_f.func_71250_E().getPublic(), this.field_147330_e));
-      } else {
-         this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-      }
-
-   }
-
-   public void func_147315_a(CPacketEncryptionResponse p_147315_1_) {
-      Validate.validState(this.field_147328_g == NetHandlerLoginServer.LoginState.KEY, "Unexpected key packet");
-      PrivateKey privatekey = this.field_147327_f.func_71250_E().getPrivate();
-      if (!Arrays.equals(this.field_147330_e, p_147315_1_.func_149299_b(privatekey))) {
-         throw new IllegalStateException("Invalid nonce!");
-      } else {
-         this.field_147335_k = p_147315_1_.func_149300_a(privatekey);
-         this.field_147328_g = NetHandlerLoginServer.LoginState.AUTHENTICATING;
-         this.field_147333_a.func_150727_a(this.field_147335_k);
-         (new Thread("User Authenticator #" + field_147331_b.incrementAndGet()) {
-            public void run() {
-               GameProfile gameprofile = NetHandlerLoginServer.this.field_147337_i;
-
-               try {
-                  String s = (new BigInteger(CryptManager.func_75895_a("", NetHandlerLoginServer.this.field_147327_f.func_71250_E().getPublic(), NetHandlerLoginServer.this.field_147335_k))).toString(16);
-                  NetHandlerLoginServer.this.field_147337_i = NetHandlerLoginServer.this.field_147327_f.func_147130_as().hasJoinedServer(new GameProfile((UUID)null, gameprofile.getName()), s, this.func_191235_a());
-                  if (NetHandlerLoginServer.this.field_147337_i != null) {
-                     NetHandlerLoginServer.field_147332_c.info("UUID of player {} is {}", NetHandlerLoginServer.this.field_147337_i.getName(), NetHandlerLoginServer.this.field_147337_i.getId());
-                     NetHandlerLoginServer.this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-                  } else if (NetHandlerLoginServer.this.field_147327_f.func_71264_H()) {
-                     NetHandlerLoginServer.field_147332_c.warn("Failed to verify username but will let them in anyway!");
-                     NetHandlerLoginServer.this.field_147337_i = NetHandlerLoginServer.this.func_152506_a(gameprofile);
-                     NetHandlerLoginServer.this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-                  } else {
-                     NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.unverified_username", new Object[0]));
-                     NetHandlerLoginServer.field_147332_c.error("Username '{}' tried to join with an invalid session", (Object)gameprofile.getName());
-                  }
-               } catch (AuthenticationUnavailableException var3) {
-                  if (NetHandlerLoginServer.this.field_147327_f.func_71264_H()) {
-                     NetHandlerLoginServer.field_147332_c.warn("Authentication servers are down but will let them in anyway!");
-                     NetHandlerLoginServer.this.field_147337_i = NetHandlerLoginServer.this.func_152506_a(gameprofile);
-                     NetHandlerLoginServer.this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-                  } else {
-                     NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.authservers_down", new Object[0]));
-                     NetHandlerLoginServer.field_147332_c.error("Couldn't verify username because servers are unavailable");
-                  }
-               }
-
+            if (this.server.getNetworkCompressionThreshold() >= 0 && !this.networkManager.isLocalChannel())
+            {
+                this.networkManager.sendPacket(new SPacketEnableCompression(this.server.getNetworkCompressionThreshold()), new ChannelFutureListener()
+                {
+                    public void operationComplete(ChannelFuture p_operationComplete_1_) throws Exception
+                    {
+                        NetHandlerLoginServer.this.networkManager.setCompressionThreshold(NetHandlerLoginServer.this.server.getNetworkCompressionThreshold());
+                    }
+                });
             }
 
-            @Nullable
-            private InetAddress func_191235_a() {
-               SocketAddress socketaddress = NetHandlerLoginServer.this.field_147333_a.func_74430_c();
-               return NetHandlerLoginServer.this.field_147327_f.func_190518_ac() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress)socketaddress).getAddress() : null;
+            this.networkManager.sendPacket(new SPacketLoginSuccess(this.loginGameProfile));
+            EntityPlayerMP entityplayermp = this.server.getPlayerList().getPlayerByUUID(this.loginGameProfile.getId());
+
+            if (entityplayermp != null)
+            {
+                this.currentLoginState = NetHandlerLoginServer.LoginState.DELAY_ACCEPT;
+                this.player = this.server.getPlayerList().createPlayerForUser(this.loginGameProfile);
             }
-         }).start();
-      }
-   }
+            else
+            {
+                this.server.getPlayerList().initializeConnectionToPlayer(this.networkManager, this.server.getPlayerList().createPlayerForUser(this.loginGameProfile));
+            }
+        }
+    }
 
-   protected GameProfile func_152506_a(GameProfile p_152506_1_) {
-      UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + p_152506_1_.getName()).getBytes(StandardCharsets.UTF_8));
-      return new GameProfile(uuid, p_152506_1_.getName());
-   }
+    /**
+     * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
+     */
+    public void onDisconnect(ITextComponent reason)
+    {
+        LOGGER.info("{} lost connection: {}", this.getConnectionInfo(), reason.getUnformattedText());
+    }
 
-   static enum LoginState {
-      HELLO,
-      KEY,
-      AUTHENTICATING,
-      READY_TO_ACCEPT,
-      DELAY_ACCEPT,
-      ACCEPTED;
-   }
+    public String getConnectionInfo()
+    {
+        return this.loginGameProfile != null ? this.loginGameProfile + " (" + this.networkManager.getRemoteAddress() + ")" : String.valueOf((Object)this.networkManager.getRemoteAddress());
+    }
+
+    public void processLoginStart(CPacketLoginStart packetIn)
+    {
+        Validate.validState(this.currentLoginState == NetHandlerLoginServer.LoginState.HELLO, "Unexpected hello packet");
+        this.loginGameProfile = packetIn.getProfile();
+
+        if (this.server.isServerInOnlineMode() && !this.networkManager.isLocalChannel())
+        {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.KEY;
+            this.networkManager.sendPacket(new SPacketEncryptionRequest("", this.server.getKeyPair().getPublic(), this.verifyToken));
+        }
+        else
+        {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+        }
+    }
+
+    public void processEncryptionResponse(CPacketEncryptionResponse packetIn)
+    {
+        Validate.validState(this.currentLoginState == NetHandlerLoginServer.LoginState.KEY, "Unexpected key packet");
+        PrivateKey privatekey = this.server.getKeyPair().getPrivate();
+
+        if (!Arrays.equals(this.verifyToken, packetIn.getVerifyToken(privatekey)))
+        {
+            throw new IllegalStateException("Invalid nonce!");
+        }
+        else
+        {
+            this.secretKey = packetIn.getSecretKey(privatekey);
+            this.currentLoginState = NetHandlerLoginServer.LoginState.AUTHENTICATING;
+            this.networkManager.enableEncryption(this.secretKey);
+            (new Thread("User Authenticator #" + AUTHENTICATOR_THREAD_ID.incrementAndGet())
+            {
+                public void run()
+                {
+                    GameProfile gameprofile = NetHandlerLoginServer.this.loginGameProfile;
+
+                    try
+                    {
+                        String s = (new BigInteger(CryptManager.getServerIdHash("", NetHandlerLoginServer.this.server.getKeyPair().getPublic(), NetHandlerLoginServer.this.secretKey))).toString(16);
+                        NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.server.getMinecraftSessionService().hasJoinedServer(new GameProfile((UUID)null, gameprofile.getName()), s, this.func_191235_a());
+
+                        if (NetHandlerLoginServer.this.loginGameProfile != null)
+                        {
+                            NetHandlerLoginServer.LOGGER.info("UUID of player {} is {}", NetHandlerLoginServer.this.loginGameProfile.getName(), NetHandlerLoginServer.this.loginGameProfile.getId());
+                            NetHandlerLoginServer.this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                        }
+                        else if (NetHandlerLoginServer.this.server.isSinglePlayer())
+                        {
+                            NetHandlerLoginServer.LOGGER.warn("Failed to verify username but will let them in anyway!");
+                            NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.getOfflineProfile(gameprofile);
+                            NetHandlerLoginServer.this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                        }
+                        else
+                        {
+                            NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.unverified_username", new Object[0]));
+                            NetHandlerLoginServer.LOGGER.error("Username '{}' tried to join with an invalid session", (Object)gameprofile.getName());
+                        }
+                    }
+                    catch (AuthenticationUnavailableException var3)
+                    {
+                        if (NetHandlerLoginServer.this.server.isSinglePlayer())
+                        {
+                            NetHandlerLoginServer.LOGGER.warn("Authentication servers are down but will let them in anyway!");
+                            NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.getOfflineProfile(gameprofile);
+                            NetHandlerLoginServer.this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                        }
+                        else
+                        {
+                            NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.authservers_down", new Object[0]));
+                            NetHandlerLoginServer.LOGGER.error("Couldn't verify username because servers are unavailable");
+                        }
+                    }
+                }
+                @Nullable
+                private InetAddress func_191235_a()
+                {
+                    SocketAddress socketaddress = NetHandlerLoginServer.this.networkManager.getRemoteAddress();
+                    return NetHandlerLoginServer.this.server.func_190518_ac() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress)socketaddress).getAddress() : null;
+                }
+            }).start();
+        }
+    }
+
+    protected GameProfile getOfflineProfile(GameProfile original)
+    {
+        UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + original.getName()).getBytes(StandardCharsets.UTF_8));
+        return new GameProfile(uuid, original.getName());
+    }
+
+    static enum LoginState
+    {
+        HELLO,
+        KEY,
+        AUTHENTICATING,
+        READY_TO_ACCEPT,
+        DELAY_ACCEPT,
+        ACCEPTED;
+    }
 }

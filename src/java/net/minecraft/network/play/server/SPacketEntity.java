@@ -7,162 +7,201 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.World;
 
-public class SPacketEntity implements Packet<INetHandlerPlayClient> {
-   protected int field_149074_a;
-   protected int field_149072_b;
-   protected int field_149073_c;
-   protected int field_149070_d;
-   protected byte field_149071_e;
-   protected byte field_149068_f;
-   protected boolean field_179743_g;
-   protected boolean field_149069_g;
+public class SPacketEntity implements Packet<INetHandlerPlayClient>
+{
+    protected int entityId;
+    protected int posX;
+    protected int posY;
+    protected int posZ;
+    protected byte yaw;
+    protected byte pitch;
+    protected boolean onGround;
+    protected boolean rotating;
 
-   public SPacketEntity() {
-   }
+    public SPacketEntity()
+    {
+    }
 
-   public SPacketEntity(int p_i46936_1_) {
-      this.field_149074_a = p_i46936_1_;
-   }
+    public SPacketEntity(int entityIdIn)
+    {
+        this.entityId = entityIdIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149074_a = p_148837_1_.func_150792_a();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityId = buf.readVarIntFromBuffer();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_149074_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityId);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147259_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleEntityMovement(this);
+    }
 
-   public String toString() {
-      return "Entity_" + super.toString();
-   }
+    public String toString()
+    {
+        return "Entity_" + super.toString();
+    }
 
-   public Entity func_149065_a(World p_149065_1_) {
-      return p_149065_1_.func_73045_a(this.field_149074_a);
-   }
+    public Entity getEntity(World worldIn)
+    {
+        return worldIn.getEntityByID(this.entityId);
+    }
 
-   public int func_186952_a() {
-      return this.field_149072_b;
-   }
+    public int getX()
+    {
+        return this.posX;
+    }
 
-   public int func_186953_b() {
-      return this.field_149073_c;
-   }
+    public int getY()
+    {
+        return this.posY;
+    }
 
-   public int func_186951_c() {
-      return this.field_149070_d;
-   }
+    public int getZ()
+    {
+        return this.posZ;
+    }
 
-   public byte func_149066_f() {
-      return this.field_149071_e;
-   }
+    public byte getYaw()
+    {
+        return this.yaw;
+    }
 
-   public byte func_149063_g() {
-      return this.field_149068_f;
-   }
+    public byte getPitch()
+    {
+        return this.pitch;
+    }
 
-   public boolean func_149060_h() {
-      return this.field_149069_g;
-   }
+    public boolean isRotating()
+    {
+        return this.rotating;
+    }
 
-   public boolean func_179742_g() {
-      return this.field_179743_g;
-   }
+    public boolean getOnGround()
+    {
+        return this.onGround;
+    }
 
-   public static class S15PacketEntityRelMove extends SPacketEntity {
-      public S15PacketEntityRelMove() {
-      }
+    public static class S15PacketEntityRelMove extends SPacketEntity
+    {
+        public S15PacketEntityRelMove()
+        {
+        }
 
-      public S15PacketEntityRelMove(int p_i47083_1_, long p_i47083_2_, long p_i47083_4_, long p_i47083_6_, boolean p_i47083_8_) {
-         super(p_i47083_1_);
-         this.field_149072_b = (int)p_i47083_2_;
-         this.field_149073_c = (int)p_i47083_4_;
-         this.field_149070_d = (int)p_i47083_6_;
-         this.field_179743_g = p_i47083_8_;
-      }
+        public S15PacketEntityRelMove(int entityIdIn, long xIn, long yIn, long zIn, boolean onGroundIn)
+        {
+            super(entityIdIn);
+            this.posX = (int)xIn;
+            this.posY = (int)yIn;
+            this.posZ = (int)zIn;
+            this.onGround = onGroundIn;
+        }
 
-      public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-         super.func_148837_a(p_148837_1_);
-         this.field_149072_b = p_148837_1_.readShort();
-         this.field_149073_c = p_148837_1_.readShort();
-         this.field_149070_d = p_148837_1_.readShort();
-         this.field_179743_g = p_148837_1_.readBoolean();
-      }
+        public void readPacketData(PacketBuffer buf) throws IOException
+        {
+            super.readPacketData(buf);
+            this.posX = buf.readShort();
+            this.posY = buf.readShort();
+            this.posZ = buf.readShort();
+            this.onGround = buf.readBoolean();
+        }
 
-      public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-         super.func_148840_b(p_148840_1_);
-         p_148840_1_.writeShort(this.field_149072_b);
-         p_148840_1_.writeShort(this.field_149073_c);
-         p_148840_1_.writeShort(this.field_149070_d);
-         p_148840_1_.writeBoolean(this.field_179743_g);
-      }
-   }
+        public void writePacketData(PacketBuffer buf) throws IOException
+        {
+            super.writePacketData(buf);
+            buf.writeShort(this.posX);
+            buf.writeShort(this.posY);
+            buf.writeShort(this.posZ);
+            buf.writeBoolean(this.onGround);
+        }
+    }
 
-   public static class S16PacketEntityLook extends SPacketEntity {
-      public S16PacketEntityLook() {
-         this.field_149069_g = true;
-      }
+    public static class S16PacketEntityLook extends SPacketEntity
+    {
+        public S16PacketEntityLook()
+        {
+            this.rotating = true;
+        }
 
-      public S16PacketEntityLook(int p_i47081_1_, byte p_i47081_2_, byte p_i47081_3_, boolean p_i47081_4_) {
-         super(p_i47081_1_);
-         this.field_149071_e = p_i47081_2_;
-         this.field_149068_f = p_i47081_3_;
-         this.field_149069_g = true;
-         this.field_179743_g = p_i47081_4_;
-      }
+        public S16PacketEntityLook(int entityIdIn, byte yawIn, byte pitchIn, boolean onGroundIn)
+        {
+            super(entityIdIn);
+            this.yaw = yawIn;
+            this.pitch = pitchIn;
+            this.rotating = true;
+            this.onGround = onGroundIn;
+        }
 
-      public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-         super.func_148837_a(p_148837_1_);
-         this.field_149071_e = p_148837_1_.readByte();
-         this.field_149068_f = p_148837_1_.readByte();
-         this.field_179743_g = p_148837_1_.readBoolean();
-      }
+        public void readPacketData(PacketBuffer buf) throws IOException
+        {
+            super.readPacketData(buf);
+            this.yaw = buf.readByte();
+            this.pitch = buf.readByte();
+            this.onGround = buf.readBoolean();
+        }
 
-      public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-         super.func_148840_b(p_148840_1_);
-         p_148840_1_.writeByte(this.field_149071_e);
-         p_148840_1_.writeByte(this.field_149068_f);
-         p_148840_1_.writeBoolean(this.field_179743_g);
-      }
-   }
+        public void writePacketData(PacketBuffer buf) throws IOException
+        {
+            super.writePacketData(buf);
+            buf.writeByte(this.yaw);
+            buf.writeByte(this.pitch);
+            buf.writeBoolean(this.onGround);
+        }
+    }
 
-   public static class S17PacketEntityLookMove extends SPacketEntity {
-      public S17PacketEntityLookMove() {
-         this.field_149069_g = true;
-      }
+    public static class S17PacketEntityLookMove extends SPacketEntity
+    {
+        public S17PacketEntityLookMove()
+        {
+            this.rotating = true;
+        }
 
-      public S17PacketEntityLookMove(int p_i47082_1_, long p_i47082_2_, long p_i47082_4_, long p_i47082_6_, byte p_i47082_8_, byte p_i47082_9_, boolean p_i47082_10_) {
-         super(p_i47082_1_);
-         this.field_149072_b = (int)p_i47082_2_;
-         this.field_149073_c = (int)p_i47082_4_;
-         this.field_149070_d = (int)p_i47082_6_;
-         this.field_149071_e = p_i47082_8_;
-         this.field_149068_f = p_i47082_9_;
-         this.field_179743_g = p_i47082_10_;
-         this.field_149069_g = true;
-      }
+        public S17PacketEntityLookMove(int entityIdIn, long xIn, long yIn, long zIn, byte yawIn, byte pitchIn, boolean onGroundIn)
+        {
+            super(entityIdIn);
+            this.posX = (int)xIn;
+            this.posY = (int)yIn;
+            this.posZ = (int)zIn;
+            this.yaw = yawIn;
+            this.pitch = pitchIn;
+            this.onGround = onGroundIn;
+            this.rotating = true;
+        }
 
-      public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-         super.func_148837_a(p_148837_1_);
-         this.field_149072_b = p_148837_1_.readShort();
-         this.field_149073_c = p_148837_1_.readShort();
-         this.field_149070_d = p_148837_1_.readShort();
-         this.field_149071_e = p_148837_1_.readByte();
-         this.field_149068_f = p_148837_1_.readByte();
-         this.field_179743_g = p_148837_1_.readBoolean();
-      }
+        public void readPacketData(PacketBuffer buf) throws IOException
+        {
+            super.readPacketData(buf);
+            this.posX = buf.readShort();
+            this.posY = buf.readShort();
+            this.posZ = buf.readShort();
+            this.yaw = buf.readByte();
+            this.pitch = buf.readByte();
+            this.onGround = buf.readBoolean();
+        }
 
-      public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-         super.func_148840_b(p_148840_1_);
-         p_148840_1_.writeShort(this.field_149072_b);
-         p_148840_1_.writeShort(this.field_149073_c);
-         p_148840_1_.writeShort(this.field_149070_d);
-         p_148840_1_.writeByte(this.field_149071_e);
-         p_148840_1_.writeByte(this.field_149068_f);
-         p_148840_1_.writeBoolean(this.field_179743_g);
-      }
-   }
+        public void writePacketData(PacketBuffer buf) throws IOException
+        {
+            super.writePacketData(buf);
+            buf.writeShort(this.posX);
+            buf.writeShort(this.posY);
+            buf.writeShort(this.posZ);
+            buf.writeByte(this.yaw);
+            buf.writeByte(this.pitch);
+            buf.writeBoolean(this.onGround);
+        }
+    }
 }

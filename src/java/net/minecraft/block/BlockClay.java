@@ -7,17 +7,27 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 
-public class BlockClay extends Block {
-   public BlockClay() {
-      super(Material.field_151571_B);
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+public class BlockClay extends Block
+{
+    public BlockClay()
+    {
+        super(Material.CLAY);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
-      return Items.field_151119_aD;
-   }
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    {
+        return Items.CLAY_BALL;
+    }
 
-   public int func_149745_a(Random p_149745_1_) {
-      return 4;
-   }
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
+    public int quantityDropped(Random random)
+    {
+        return 4;
+    }
 }

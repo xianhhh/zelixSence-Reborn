@@ -2,45 +2,71 @@ package net.minecraft.client.gui;
 
 import net.minecraft.util.IProgressUpdate;
 
-public class GuiScreenWorking extends GuiScreen implements IProgressUpdate {
-   private String field_146591_a = "";
-   private String field_146589_f = "";
-   private int field_146590_g;
-   private boolean field_146592_h;
+public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
+{
+    private String title = "";
+    private String stage = "";
+    private int progress;
+    private boolean doneWorking;
 
-   public void func_73720_a(String p_73720_1_) {
-      this.func_73721_b(p_73720_1_);
-   }
+    /**
+     * Shows the 'Saving level' string.
+     */
+    public void displaySavingString(String message)
+    {
+        this.resetProgressAndMessage(message);
+    }
 
-   public void func_73721_b(String p_73721_1_) {
-      this.field_146591_a = p_73721_1_;
-      this.func_73719_c("Working...");
-   }
+    /**
+     * this string, followed by "working..." and then the "% complete" are the 3 lines shown. This resets progress to 0,
+     * and the WorkingString to "working...".
+     */
+    public void resetProgressAndMessage(String message)
+    {
+        this.title = message;
+        this.displayLoadingString("Working...");
+    }
 
-   public void func_73719_c(String p_73719_1_) {
-      this.field_146589_f = p_73719_1_;
-      this.func_73718_a(0);
-   }
+    /**
+     * Displays a string on the loading screen supposed to indicate what is being done currently.
+     */
+    public void displayLoadingString(String message)
+    {
+        this.stage = message;
+        this.setLoadingProgress(0);
+    }
 
-   public void func_73718_a(int p_73718_1_) {
-      this.field_146590_g = p_73718_1_;
-   }
+    /**
+     * Updates the progress bar on the loading screen to the specified amount.
+     */
+    public void setLoadingProgress(int progress)
+    {
+        this.progress = progress;
+    }
 
-   public void func_146586_a() {
-      this.field_146592_h = true;
-   }
+    public void setDoneWorking()
+    {
+        this.doneWorking = true;
+    }
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      if (this.field_146592_h) {
-         if (!this.field_146297_k.func_181540_al()) {
-            this.field_146297_k.func_147108_a((GuiScreen)null);
-         }
-
-      } else {
-         this.func_146276_q_();
-         this.func_73732_a(this.field_146289_q, this.field_146591_a, this.field_146294_l / 2, 70, 16777215);
-         this.func_73732_a(this.field_146289_q, this.field_146589_f + " " + this.field_146590_g + "%", this.field_146294_l / 2, 90, 16777215);
-         super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      }
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        if (this.doneWorking)
+        {
+            if (!this.mc.isConnectedToRealms())
+            {
+                this.mc.displayGuiScreen((GuiScreen)null);
+            }
+        }
+        else
+        {
+            this.drawDefaultBackground();
+            this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 70, 16777215);
+            this.drawCenteredString(this.fontRendererObj, this.stage + " " + this.progress + "%", this.width / 2, 90, 16777215);
+            super.drawScreen(mouseX, mouseY, partialTicks);
+        }
+    }
 }

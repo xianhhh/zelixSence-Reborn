@@ -6,35 +6,52 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.EnumDifficulty;
 
-public class SPacketServerDifficulty implements Packet<INetHandlerPlayClient> {
-   private EnumDifficulty field_179833_a;
-   private boolean field_179832_b;
+public class SPacketServerDifficulty implements Packet<INetHandlerPlayClient>
+{
+    private EnumDifficulty difficulty;
+    private boolean difficultyLocked;
 
-   public SPacketServerDifficulty() {
-   }
+    public SPacketServerDifficulty()
+    {
+    }
 
-   public SPacketServerDifficulty(EnumDifficulty p_i46963_1_, boolean p_i46963_2_) {
-      this.field_179833_a = p_i46963_1_;
-      this.field_179832_b = p_i46963_2_;
-   }
+    public SPacketServerDifficulty(EnumDifficulty difficultyIn, boolean difficultyLockedIn)
+    {
+        this.difficulty = difficultyIn;
+        this.difficultyLocked = difficultyLockedIn;
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_175101_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleServerDifficulty(this);
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179833_a = EnumDifficulty.func_151523_a(p_148837_1_.readUnsignedByte());
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.difficulty = EnumDifficulty.getDifficultyEnum(buf.readUnsignedByte());
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeByte(this.field_179833_a.func_151525_a());
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeByte(this.difficulty.getDifficultyId());
+    }
 
-   public boolean func_179830_a() {
-      return this.field_179832_b;
-   }
+    public boolean isDifficultyLocked()
+    {
+        return this.difficultyLocked;
+    }
 
-   public EnumDifficulty func_179831_b() {
-      return this.field_179833_a;
-   }
+    public EnumDifficulty getDifficulty()
+    {
+        return this.difficulty;
+    }
 }

@@ -21,86 +21,127 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-public class ItemPotion extends Item {
-   public ItemPotion() {
-      this.func_77625_d(1);
-      this.func_77637_a(CreativeTabs.field_78038_k);
-   }
+public class ItemPotion extends Item
+{
+    public ItemPotion()
+    {
+        this.setMaxStackSize(1);
+        this.setCreativeTab(CreativeTabs.BREWING);
+    }
 
-   public ItemStack func_190903_i() {
-      return PotionUtils.func_185188_a(super.func_190903_i(), PotionTypes.field_185230_b);
-   }
+    public ItemStack func_190903_i()
+    {
+        return PotionUtils.addPotionToItemStack(super.func_190903_i(), PotionTypes.WATER);
+    }
 
-   public ItemStack func_77654_b(ItemStack p_77654_1_, World p_77654_2_, EntityLivingBase p_77654_3_) {
-      EntityPlayer entityplayer = p_77654_3_ instanceof EntityPlayer ? (EntityPlayer)p_77654_3_ : null;
-      if (entityplayer == null || !entityplayer.field_71075_bZ.field_75098_d) {
-         p_77654_1_.func_190918_g(1);
-      }
+    /**
+     * Called when the player finishes using this Item (E.g. finishes eating.). Not called when the player stops using
+     * the Item before the action is complete.
+     */
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving)
+    {
+        EntityPlayer entityplayer = entityLiving instanceof EntityPlayer ? (EntityPlayer)entityLiving : null;
 
-      if (entityplayer instanceof EntityPlayerMP) {
-         CriteriaTriggers.field_193138_y.func_193148_a((EntityPlayerMP)entityplayer, p_77654_1_);
-      }
+        if (entityplayer == null || !entityplayer.capabilities.isCreativeMode)
+        {
+            stack.func_190918_g(1);
+        }
 
-      if (!p_77654_2_.field_72995_K) {
-         for(PotionEffect potioneffect : PotionUtils.func_185189_a(p_77654_1_)) {
-            if (potioneffect.func_188419_a().func_76403_b()) {
-               potioneffect.func_188419_a().func_180793_a(entityplayer, entityplayer, p_77654_3_, potioneffect.func_76458_c(), 1.0D);
-            } else {
-               p_77654_3_.func_70690_d(new PotionEffect(potioneffect));
+        if (entityplayer instanceof EntityPlayerMP)
+        {
+            CriteriaTriggers.field_193138_y.func_193148_a((EntityPlayerMP)entityplayer, stack);
+        }
+
+        if (!worldIn.isRemote)
+        {
+            for (PotionEffect potioneffect : PotionUtils.getEffectsFromStack(stack))
+            {
+                if (potioneffect.getPotion().isInstant())
+                {
+                    potioneffect.getPotion().affectEntity(entityplayer, entityplayer, entityLiving, potioneffect.getAmplifier(), 1.0D);
+                }
+                else
+                {
+                    entityLiving.addPotionEffect(new PotionEffect(potioneffect));
+                }
             }
-         }
-      }
+        }
 
-      if (entityplayer != null) {
-         entityplayer.func_71029_a(StatList.func_188057_b(this));
-      }
+        if (entityplayer != null)
+        {
+            entityplayer.addStat(StatList.getObjectUseStats(this));
+        }
 
-      if (entityplayer == null || !entityplayer.field_71075_bZ.field_75098_d) {
-         if (p_77654_1_.func_190926_b()) {
-            return new ItemStack(Items.field_151069_bo);
-         }
-
-         if (entityplayer != null) {
-            entityplayer.field_71071_by.func_70441_a(new ItemStack(Items.field_151069_bo));
-         }
-      }
-
-      return p_77654_1_;
-   }
-
-   public int func_77626_a(ItemStack p_77626_1_) {
-      return 32;
-   }
-
-   public EnumAction func_77661_b(ItemStack p_77661_1_) {
-      return EnumAction.DRINK;
-   }
-
-   public ActionResult<ItemStack> func_77659_a(World p_77659_1_, EntityPlayer p_77659_2_, EnumHand p_77659_3_) {
-      p_77659_2_.func_184598_c(p_77659_3_);
-      return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, p_77659_2_.func_184586_b(p_77659_3_));
-   }
-
-   public String func_77653_i(ItemStack p_77653_1_) {
-      return I18n.func_74838_a(PotionUtils.func_185191_c(p_77653_1_).func_185174_b("potion.effect."));
-   }
-
-   public void func_77624_a(ItemStack p_77624_1_, @Nullable World p_77624_2_, List<String> p_77624_3_, ITooltipFlag p_77624_4_) {
-      PotionUtils.func_185182_a(p_77624_1_, p_77624_3_, 1.0F);
-   }
-
-   public boolean func_77636_d(ItemStack p_77636_1_) {
-      return super.func_77636_d(p_77636_1_) || !PotionUtils.func_185189_a(p_77636_1_).isEmpty();
-   }
-
-   public void func_150895_a(CreativeTabs p_150895_1_, NonNullList<ItemStack> p_150895_2_) {
-      if (this.func_194125_a(p_150895_1_)) {
-         for(PotionType potiontype : PotionType.field_185176_a) {
-            if (potiontype != PotionTypes.field_185229_a) {
-               p_150895_2_.add(PotionUtils.func_185188_a(new ItemStack(this), potiontype));
+        if (entityplayer == null || !entityplayer.capabilities.isCreativeMode)
+        {
+            if (stack.func_190926_b())
+            {
+                return new ItemStack(Items.GLASS_BOTTLE);
             }
-         }
-      }
 
-   }
+            if (entityplayer != null)
+            {
+                entityplayer.inventory.addItemStackToInventory(new ItemStack(Items.GLASS_BOTTLE));
+            }
+        }
+
+        return stack;
+    }
+
+    /**
+     * How long it takes to use or consume an item
+     */
+    public int getMaxItemUseDuration(ItemStack stack)
+    {
+        return 32;
+    }
+
+    /**
+     * returns the action that specifies what animation to play when the items is being used
+     */
+    public EnumAction getItemUseAction(ItemStack stack)
+    {
+        return EnumAction.DRINK;
+    }
+
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    {
+        worldIn.setActiveHand(playerIn);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, worldIn.getHeldItem(playerIn));
+    }
+
+    public String getItemStackDisplayName(ItemStack stack)
+    {
+        return I18n.translateToLocal(PotionUtils.getPotionFromItem(stack).getNamePrefixed("potion.effect."));
+    }
+
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    {
+        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
+    }
+
+    public boolean hasEffect(ItemStack stack)
+    {
+        return super.hasEffect(stack) || !PotionUtils.getEffectsFromStack(stack).isEmpty();
+    }
+
+    /**
+     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
+     */
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    {
+        if (this.func_194125_a(itemIn))
+        {
+            for (PotionType potiontype : PotionType.REGISTRY)
+            {
+                if (potiontype != PotionTypes.EMPTY)
+                {
+                    tab.add(PotionUtils.addPotionToItemStack(new ItemStack(this), potiontype));
+                }
+            }
+        }
+    }
 }

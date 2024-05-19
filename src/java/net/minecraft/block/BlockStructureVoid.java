@@ -12,46 +12,67 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockStructureVoid extends Block {
-   private static final AxisAlignedBB field_189875_a = new AxisAlignedBB(0.3D, 0.3D, 0.3D, 0.7D, 0.7D, 0.7D);
+public class BlockStructureVoid extends Block
+{
+    private static final AxisAlignedBB STRUCTURE_VOID_AABB = new AxisAlignedBB(0.3D, 0.3D, 0.3D, 0.7D, 0.7D, 0.7D);
 
-   protected BlockStructureVoid() {
-      super(Material.field_189963_J);
-   }
+    protected BlockStructureVoid()
+    {
+        super(Material.STRUCTURE_VOID);
+    }
 
-   public EnumBlockRenderType func_149645_b(IBlockState p_149645_1_) {
-      return EnumBlockRenderType.INVISIBLE;
-   }
+    /**
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
+     */
+    public EnumBlockRenderType getRenderType(IBlockState state)
+    {
+        return EnumBlockRenderType.INVISIBLE;
+    }
 
-   @Nullable
-   public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_) {
-      return field_185506_k;
-   }
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
+    {
+        return NULL_AABB;
+    }
 
-   public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_) {
-      return field_189875_a;
-   }
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return STRUCTURE_VOID_AABB;
+    }
 
-   public boolean func_149662_c(IBlockState p_149662_1_) {
-      return false;
-   }
+    /**
+     * Used to determine ambient occlusion and culling when rebuilding chunks for render
+     */
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
 
-   public float func_185485_f(IBlockState p_185485_1_) {
-      return 1.0F;
-   }
+    public float getAmbientOcclusionLightValue(IBlockState state)
+    {
+        return 1.0F;
+    }
 
-   public void func_180653_a(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_) {
-   }
+    /**
+     * Spawns this Block's drops into the World as EntityItems.
+     */
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    {
+    }
 
-   public EnumPushReaction func_149656_h(IBlockState p_149656_1_) {
-      return EnumPushReaction.DESTROY;
-   }
+    public EnumPushReaction getMobilityFlag(IBlockState state)
+    {
+        return EnumPushReaction.DESTROY;
+    }
 
-   public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_) {
-      return BlockFaceShape.UNDEFINED;
-   }
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 }

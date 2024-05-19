@@ -2,21 +2,35 @@ package net.minecraft.enchantment;
 
 import net.minecraft.inventory.EntityEquipmentSlot;
 
-public class EnchantmentFishingSpeed extends Enchantment {
-   protected EnchantmentFishingSpeed(Enchantment.Rarity p_i46729_1_, EnumEnchantmentType p_i46729_2_, EntityEquipmentSlot... p_i46729_3_) {
-      super(p_i46729_1_, p_i46729_2_, p_i46729_3_);
-      this.func_77322_b("fishingSpeed");
-   }
+public class EnchantmentFishingSpeed extends Enchantment
+{
+    protected EnchantmentFishingSpeed(Enchantment.Rarity rarityIn, EnumEnchantmentType typeIn, EntityEquipmentSlot... slots)
+    {
+        super(rarityIn, typeIn, slots);
+        this.setName("fishingSpeed");
+    }
 
-   public int func_77321_a(int p_77321_1_) {
-      return 15 + (p_77321_1_ - 1) * 9;
-   }
+    /**
+     * Returns the minimal value of enchantability needed on the enchantment level passed.
+     */
+    public int getMinEnchantability(int enchantmentLevel)
+    {
+        return 15 + (enchantmentLevel - 1) * 9;
+    }
 
-   public int func_77317_b(int p_77317_1_) {
-      return super.func_77321_a(p_77317_1_) + 50;
-   }
+    /**
+     * Returns the maximum value of enchantability nedded on the enchantment level passed.
+     */
+    public int getMaxEnchantability(int enchantmentLevel)
+    {
+        return super.getMinEnchantability(enchantmentLevel) + 50;
+    }
 
-   public int func_77325_b() {
-      return 3;
-   }
+    /**
+     * Returns the maximum level that the enchantment can have.
+     */
+    public int getMaxLevel()
+    {
+        return 3;
+    }
 }

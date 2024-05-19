@@ -10,91 +10,125 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockFalling extends Block {
-   public static boolean field_149832_M;
+public class BlockFalling extends Block
+{
+    public static boolean fallInstantly;
 
-   public BlockFalling() {
-      super(Material.field_151595_p);
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+    public BlockFalling()
+    {
+        super(Material.SAND);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public BlockFalling(Material p_i45405_1_) {
-      super(p_i45405_1_);
-   }
+    public BlockFalling(Material materialIn)
+    {
+        super(materialIn);
+    }
 
-   public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_) {
-      p_176213_1_.func_175684_a(p_176213_2_, this, this.func_149738_a(p_176213_1_));
-   }
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+    }
 
-   public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_) {
-      p_189540_2_.func_175684_a(p_189540_3_, this, this.func_149738_a(p_189540_2_));
-   }
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    {
+        worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+    }
 
-   public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_) {
-      if (!p_180650_1_.field_72995_K) {
-         this.func_176503_e(p_180650_1_, p_180650_2_);
-      }
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        if (!worldIn.isRemote)
+        {
+            this.checkFallable(worldIn, pos);
+        }
+    }
 
-   }
+    private void checkFallable(World worldIn, BlockPos pos)
+    {
+        if (canFallThrough(worldIn.getBlockState(pos.down())) && pos.getY() >= 0)
+        {
+            int i = 32;
 
-   private void func_176503_e(World p_176503_1_, BlockPos p_176503_2_) {
-      if (func_185759_i(p_176503_1_.func_180495_p(p_176503_2_.func_177977_b())) && p_176503_2_.func_177956_o() >= 0) {
-         int i = 32;
-         if (!field_149832_M && p_176503_1_.func_175707_a(p_176503_2_.func_177982_a(-32, -32, -32), p_176503_2_.func_177982_a(32, 32, 32))) {
-            if (!p_176503_1_.field_72995_K) {
-               EntityFallingBlock entityfallingblock = new EntityFallingBlock(p_176503_1_, (double)p_176503_2_.func_177958_n() + 0.5D, (double)p_176503_2_.func_177956_o(), (double)p_176503_2_.func_177952_p() + 0.5D, p_176503_1_.func_180495_p(p_176503_2_));
-               this.func_149829_a(entityfallingblock);
-               p_176503_1_.func_72838_d(entityfallingblock);
+            if (!fallInstantly && worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32)))
+            {
+                if (!worldIn.isRemote)
+                {
+                    EntityFallingBlock entityfallingblock = new EntityFallingBlock(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY(), (double)pos.getZ() + 0.5D, worldIn.getBlockState(pos));
+                    this.onStartFalling(entityfallingblock);
+                    worldIn.spawnEntityInWorld(entityfallingblock);
+                }
             }
-         } else {
-            p_176503_1_.func_175698_g(p_176503_2_);
+            else
+            {
+                worldIn.setBlockToAir(pos);
+                BlockPos blockpos;
 
-            BlockPos blockpos;
-            for(blockpos = p_176503_2_.func_177977_b(); func_185759_i(p_176503_1_.func_180495_p(blockpos)) && blockpos.func_177956_o() > 0; blockpos = blockpos.func_177977_b()) {
-               ;
+                for (blockpos = pos.down(); canFallThrough(worldIn.getBlockState(blockpos)) && blockpos.getY() > 0; blockpos = blockpos.down())
+                {
+                    ;
+                }
+
+                if (blockpos.getY() > 0)
+                {
+                    worldIn.setBlockState(blockpos.up(), this.getDefaultState());
+                }
             }
+        }
+    }
 
-            if (blockpos.func_177956_o() > 0) {
-               p_176503_1_.func_175656_a(blockpos.func_177984_a(), this.func_176223_P());
+    protected void onStartFalling(EntityFallingBlock fallingEntity)
+    {
+    }
+
+    /**
+     * How many world ticks before ticking
+     */
+    public int tickRate(World worldIn)
+    {
+        return 2;
+    }
+
+    public static boolean canFallThrough(IBlockState state)
+    {
+        Block block = state.getBlock();
+        Material material = state.getMaterial();
+        return block == Blocks.FIRE || material == Material.AIR || material == Material.WATER || material == Material.LAVA;
+    }
+
+    public void onEndFalling(World worldIn, BlockPos pos, IBlockState p_176502_3_, IBlockState p_176502_4_)
+    {
+    }
+
+    public void func_190974_b(World p_190974_1_, BlockPos p_190974_2_)
+    {
+    }
+
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        if (rand.nextInt(16) == 0)
+        {
+            BlockPos blockpos = pos.down();
+
+            if (canFallThrough(worldIn.getBlockState(blockpos)))
+            {
+                double d0 = (double)((float)pos.getX() + rand.nextFloat());
+                double d1 = (double)pos.getY() - 0.05D;
+                double d2 = (double)((float)pos.getZ() + rand.nextFloat());
+                worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST, d0, d1, d2, 0.0D, 0.0D, 0.0D, Block.getStateId(stateIn));
             }
-         }
+        }
+    }
 
-      }
-   }
-
-   protected void func_149829_a(EntityFallingBlock p_149829_1_) {
-   }
-
-   public int func_149738_a(World p_149738_1_) {
-      return 2;
-   }
-
-   public static boolean func_185759_i(IBlockState p_185759_0_) {
-      Block block = p_185759_0_.func_177230_c();
-      Material material = p_185759_0_.func_185904_a();
-      return block == Blocks.field_150480_ab || material == Material.field_151579_a || material == Material.field_151586_h || material == Material.field_151587_i;
-   }
-
-   public void func_176502_a_(World p_176502_1_, BlockPos p_176502_2_, IBlockState p_176502_3_, IBlockState p_176502_4_) {
-   }
-
-   public void func_190974_b(World p_190974_1_, BlockPos p_190974_2_) {
-   }
-
-   public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_) {
-      if (p_180655_4_.nextInt(16) == 0) {
-         BlockPos blockpos = p_180655_3_.func_177977_b();
-         if (func_185759_i(p_180655_2_.func_180495_p(blockpos))) {
-            double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
-            double d1 = (double)p_180655_3_.func_177956_o() - 0.05D;
-            double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
-            p_180655_2_.func_175688_a(EnumParticleTypes.FALLING_DUST, d0, d1, d2, 0.0D, 0.0D, 0.0D, Block.func_176210_f(p_180655_1_));
-         }
-      }
-
-   }
-
-   public int func_189876_x(IBlockState p_189876_1_) {
-      return -16777216;
-   }
+    public int getDustColor(IBlockState p_189876_1_)
+    {
+        return -16777216;
+    }
 }

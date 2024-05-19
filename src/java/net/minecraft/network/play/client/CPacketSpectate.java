@@ -9,30 +9,46 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.world.WorldServer;
 
-public class CPacketSpectate implements Packet<INetHandlerPlayServer> {
-   private UUID field_179729_a;
+public class CPacketSpectate implements Packet<INetHandlerPlayServer>
+{
+    private UUID id;
 
-   public CPacketSpectate() {
-   }
+    public CPacketSpectate()
+    {
+    }
 
-   public CPacketSpectate(UUID p_i46859_1_) {
-      this.field_179729_a = p_i46859_1_;
-   }
+    public CPacketSpectate(UUID uniqueIdIn)
+    {
+        this.id = uniqueIdIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_179729_a = p_148837_1_.func_179253_g();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.id = buf.readUuid();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179252_a(this.field_179729_a);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeUuid(this.id);
+    }
 
-   public void func_148833_a(INetHandlerPlayServer p_148833_1_) {
-      p_148833_1_.func_175088_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
+    {
+        handler.handleSpectate(this);
+    }
 
-   @Nullable
-   public Entity func_179727_a(WorldServer p_179727_1_) {
-      return p_179727_1_.func_175733_a(this.field_179729_a);
-   }
+    @Nullable
+    public Entity getEntity(WorldServer worldIn)
+    {
+        return worldIn.getEntityFromUuid(this.id);
+    }
 }

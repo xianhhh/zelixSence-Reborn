@@ -12,68 +12,84 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class Criterion {
-   private final ICriterionInstance field_192147_a;
+public class Criterion
+{
+    private final ICriterionInstance field_192147_a;
 
-   public Criterion(ICriterionInstance p_i47470_1_) {
-      this.field_192147_a = p_i47470_1_;
-   }
+    public Criterion(ICriterionInstance p_i47470_1_)
+    {
+        this.field_192147_a = p_i47470_1_;
+    }
 
-   public Criterion() {
-      this.field_192147_a = null;
-   }
+    public Criterion()
+    {
+        this.field_192147_a = null;
+    }
 
-   public void func_192140_a(PacketBuffer p_192140_1_) {
-   }
+    public void func_192140_a(PacketBuffer p_192140_1_)
+    {
+    }
 
-   public static Criterion func_192145_a(JsonObject p_192145_0_, JsonDeserializationContext p_192145_1_) {
-      ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.func_151200_h(p_192145_0_, "trigger"));
-      ICriterionTrigger<?> icriteriontrigger = CriteriaTriggers.func_192119_a(resourcelocation);
-      if (icriteriontrigger == null) {
-         throw new JsonSyntaxException("Invalid criterion trigger: " + resourcelocation);
-      } else {
-         ICriterionInstance icriterioninstance = icriteriontrigger.func_192166_a(JsonUtils.func_151218_a(p_192145_0_, "conditions", new JsonObject()), p_192145_1_);
-         return new Criterion(icriterioninstance);
-      }
-   }
+    public static Criterion func_192145_a(JsonObject p_192145_0_, JsonDeserializationContext p_192145_1_)
+    {
+        ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(p_192145_0_, "trigger"));
+        ICriterionTrigger<?> icriteriontrigger = CriteriaTriggers.func_192119_a(resourcelocation);
 
-   public static Criterion func_192146_b(PacketBuffer p_192146_0_) {
-      return new Criterion();
-   }
+        if (icriteriontrigger == null)
+        {
+            throw new JsonSyntaxException("Invalid criterion trigger: " + resourcelocation);
+        }
+        else
+        {
+            ICriterionInstance icriterioninstance = icriteriontrigger.func_192166_a(JsonUtils.getJsonObject(p_192145_0_, "conditions", new JsonObject()), p_192145_1_);
+            return new Criterion(icriterioninstance);
+        }
+    }
 
-   public static Map<String, Criterion> func_192144_b(JsonObject p_192144_0_, JsonDeserializationContext p_192144_1_) {
-      Map<String, Criterion> map = Maps.<String, Criterion>newHashMap();
+    public static Criterion func_192146_b(PacketBuffer p_192146_0_)
+    {
+        return new Criterion();
+    }
 
-      for(Entry<String, JsonElement> entry : p_192144_0_.entrySet()) {
-         map.put(entry.getKey(), func_192145_a(JsonUtils.func_151210_l(entry.getValue(), "criterion"), p_192144_1_));
-      }
+    public static Map<String, Criterion> func_192144_b(JsonObject p_192144_0_, JsonDeserializationContext p_192144_1_)
+    {
+        Map<String, Criterion> map = Maps.<String, Criterion>newHashMap();
 
-      return map;
-   }
+        for (Entry<String, JsonElement> entry : p_192144_0_.entrySet())
+        {
+            map.put(entry.getKey(), func_192145_a(JsonUtils.getJsonObject(entry.getValue(), "criterion"), p_192144_1_));
+        }
 
-   public static Map<String, Criterion> func_192142_c(PacketBuffer p_192142_0_) {
-      Map<String, Criterion> map = Maps.<String, Criterion>newHashMap();
-      int i = p_192142_0_.func_150792_a();
+        return map;
+    }
 
-      for(int j = 0; j < i; ++j) {
-         map.put(p_192142_0_.func_150789_c(32767), func_192146_b(p_192142_0_));
-      }
+    public static Map<String, Criterion> func_192142_c(PacketBuffer p_192142_0_)
+    {
+        Map<String, Criterion> map = Maps.<String, Criterion>newHashMap();
+        int i = p_192142_0_.readVarIntFromBuffer();
 
-      return map;
-   }
+        for (int j = 0; j < i; ++j)
+        {
+            map.put(p_192142_0_.readStringFromBuffer(32767), func_192146_b(p_192142_0_));
+        }
 
-   public static void func_192141_a(Map<String, Criterion> p_192141_0_, PacketBuffer p_192141_1_) {
-      p_192141_1_.func_150787_b(p_192141_0_.size());
+        return map;
+    }
 
-      for(Entry<String, Criterion> entry : p_192141_0_.entrySet()) {
-         p_192141_1_.func_180714_a(entry.getKey());
-         ((Criterion)entry.getValue()).func_192140_a(p_192141_1_);
-      }
+    public static void func_192141_a(Map<String, Criterion> p_192141_0_, PacketBuffer p_192141_1_)
+    {
+        p_192141_1_.writeVarIntToBuffer(p_192141_0_.size());
 
-   }
+        for (Entry<String, Criterion> entry : p_192141_0_.entrySet())
+        {
+            p_192141_1_.writeString(entry.getKey());
+            ((Criterion)entry.getValue()).func_192140_a(p_192141_1_);
+        }
+    }
 
-   @Nullable
-   public ICriterionInstance func_192143_a() {
-      return this.field_192147_a;
-   }
+    @Nullable
+    public ICriterionInstance func_192143_a()
+    {
+        return this.field_192147_a;
+    }
 }

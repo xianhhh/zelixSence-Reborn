@@ -5,28 +5,39 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public abstract class WorldGenerator {
-   private final boolean field_76488_a;
+public abstract class WorldGenerator
+{
+    /**
+     * Sets wither or not the generator should notify blocks of blocks it changes. When the world is first generated,
+     * this is false, when saplings grow, this is true.
+     */
+    private final boolean doBlockNotify;
 
-   public WorldGenerator() {
-      this(false);
-   }
+    public WorldGenerator()
+    {
+        this(false);
+    }
 
-   public WorldGenerator(boolean p_i2013_1_) {
-      this.field_76488_a = p_i2013_1_;
-   }
+    public WorldGenerator(boolean notify)
+    {
+        this.doBlockNotify = notify;
+    }
 
-   public abstract boolean func_180709_b(World var1, Random var2, BlockPos var3);
+    public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 
-   public void func_175904_e() {
-   }
+    public void setDecorationDefaults()
+    {
+    }
 
-   protected void func_175903_a(World p_175903_1_, BlockPos p_175903_2_, IBlockState p_175903_3_) {
-      if (this.field_76488_a) {
-         p_175903_1_.func_180501_a(p_175903_2_, p_175903_3_, 3);
-      } else {
-         p_175903_1_.func_180501_a(p_175903_2_, p_175903_3_, 2);
-      }
-
-   }
+    protected void setBlockAndNotifyAdequately(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (this.doBlockNotify)
+        {
+            worldIn.setBlockState(pos, state, 3);
+        }
+        else
+        {
+            worldIn.setBlockState(pos, state, 2);
+        }
+    }
 }

@@ -4,13 +4,20 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderAreaEffectCloud extends Render<EntityAreaEffectCloud> {
-   public RenderAreaEffectCloud(RenderManager p_i46554_1_) {
-      super(p_i46554_1_);
-   }
+public class RenderAreaEffectCloud extends Render<EntityAreaEffectCloud>
+{
+    public RenderAreaEffectCloud(RenderManager manager)
+    {
+        super(manager);
+    }
 
-   @Nullable
-   protected ResourceLocation func_110775_a(EntityAreaEffectCloud p_110775_1_) {
-      return null;
-   }
+    @Nullable
+
+    /**
+     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
+     */
+    protected ResourceLocation getEntityTexture(EntityAreaEffectCloud entity)
+    {
+        return null;
+    }
 }

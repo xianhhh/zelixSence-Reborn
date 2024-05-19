@@ -5,52 +5,81 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
-public class RegistryNamespacedDefaultedByKey<K, V> extends RegistryNamespaced<K, V> {
-   private final K field_148760_d;
-   private V field_148761_e;
+public class RegistryNamespacedDefaultedByKey<K, V> extends RegistryNamespaced<K, V>
+{
+    /** The key of the default value. */
+    private final K defaultValueKey;
 
-   public RegistryNamespacedDefaultedByKey(K p_i46017_1_) {
-      this.field_148760_d = p_i46017_1_;
-   }
+    /**
+     * The default value for this registry, retrurned in the place of a null value.
+     */
+    private V defaultValue;
 
-   public void func_177775_a(int p_177775_1_, K p_177775_2_, V p_177775_3_) {
-      if (this.field_148760_d.equals(p_177775_2_)) {
-         this.field_148761_e = p_177775_3_;
-      }
+    public RegistryNamespacedDefaultedByKey(K defaultValueKeyIn)
+    {
+        this.defaultValueKey = defaultValueKeyIn;
+    }
 
-      super.func_177775_a(p_177775_1_, p_177775_2_, p_177775_3_);
-   }
+    public void register(int id, K key, V value)
+    {
+        if (this.defaultValueKey.equals(key))
+        {
+            this.defaultValue = value;
+        }
 
-   public void func_177776_a() {
-      Validate.notNull(this.field_148761_e, "Missing default of DefaultedMappedRegistry: " + this.field_148760_d);
-   }
+        super.register(id, key, value);
+    }
 
-   public int func_148757_b(V p_148757_1_) {
-      int i = super.func_148757_b(p_148757_1_);
-      return i == -1 ? super.func_148757_b(this.field_148761_e) : i;
-   }
+    /**
+     * validates that this registry's key is non-null
+     */
+    public void validateKey()
+    {
+        Validate.notNull(this.defaultValue, "Missing default of DefaultedMappedRegistry: " + this.defaultValueKey);
+    }
 
-   @Nonnull
-   public K func_177774_c(V p_177774_1_) {
-      K k = (K)super.func_177774_c(p_177774_1_);
-      return (K)(k == null ? this.field_148760_d : k);
-   }
+    /**
+     * Gets the integer ID we use to identify the given object.
+     */
+    public int getIDForObject(V value)
+    {
+        int i = super.getIDForObject(value);
+        return i == -1 ? super.getIDForObject(this.defaultValue) : i;
+    }
 
-   @Nonnull
-   public V func_82594_a(@Nullable K p_82594_1_) {
-      V v = (V)super.func_82594_a(p_82594_1_);
-      return (V)(v == null ? this.field_148761_e : v);
-   }
+    @Nonnull
 
-   @Nonnull
-   public V func_148754_a(int p_148754_1_) {
-      V v = (V)super.func_148754_a(p_148754_1_);
-      return (V)(v == null ? this.field_148761_e : v);
-   }
+    /**
+     * Gets the name we use to identify the given object.
+     */
+    public K getNameForObject(V value)
+    {
+        K k = (K)super.getNameForObject(value);
+        return (K)(k == null ? this.defaultValueKey : k);
+    }
 
-   @Nonnull
-   public V func_186801_a(Random p_186801_1_) {
-      V v = (V)super.func_186801_a(p_186801_1_);
-      return (V)(v == null ? this.field_148761_e : v);
-   }
+    @Nonnull
+    public V getObject(@Nullable K name)
+    {
+        V v = (V)super.getObject(name);
+        return (V)(v == null ? this.defaultValue : v);
+    }
+
+    @Nonnull
+
+    /**
+     * Gets the object identified by the given ID.
+     */
+    public V getObjectById(int id)
+    {
+        V v = (V)super.getObjectById(id);
+        return (V)(v == null ? this.defaultValue : v);
+    }
+
+    @Nonnull
+    public V getRandomObject(Random random)
+    {
+        V v = (V)super.getRandomObject(random);
+        return (V)(v == null ? this.defaultValue : v);
+    }
 }

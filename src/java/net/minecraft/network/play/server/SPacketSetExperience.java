@@ -5,45 +5,63 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class SPacketSetExperience implements Packet<INetHandlerPlayClient> {
-   private float field_149401_a;
-   private int field_149399_b;
-   private int field_149400_c;
+public class SPacketSetExperience implements Packet<INetHandlerPlayClient>
+{
+    private float experienceBar;
+    private int totalExperience;
+    private int level;
 
-   public SPacketSetExperience() {
-   }
+    public SPacketSetExperience()
+    {
+    }
 
-   public SPacketSetExperience(float p_i46912_1_, int p_i46912_2_, int p_i46912_3_) {
-      this.field_149401_a = p_i46912_1_;
-      this.field_149399_b = p_i46912_2_;
-      this.field_149400_c = p_i46912_3_;
-   }
+    public SPacketSetExperience(float experienceBarIn, int totalExperienceIn, int levelIn)
+    {
+        this.experienceBar = experienceBarIn;
+        this.totalExperience = totalExperienceIn;
+        this.level = levelIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149401_a = p_148837_1_.readFloat();
-      this.field_149400_c = p_148837_1_.func_150792_a();
-      this.field_149399_b = p_148837_1_.func_150792_a();
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.experienceBar = buf.readFloat();
+        this.level = buf.readVarIntFromBuffer();
+        this.totalExperience = buf.readVarIntFromBuffer();
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.writeFloat(this.field_149401_a);
-      p_148840_1_.func_150787_b(this.field_149400_c);
-      p_148840_1_.func_150787_b(this.field_149399_b);
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeFloat(this.experienceBar);
+        buf.writeVarIntToBuffer(this.level);
+        buf.writeVarIntToBuffer(this.totalExperience);
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147295_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleSetExperience(this);
+    }
 
-   public float func_149397_c() {
-      return this.field_149401_a;
-   }
+    public float getExperienceBar()
+    {
+        return this.experienceBar;
+    }
 
-   public int func_149396_d() {
-      return this.field_149399_b;
-   }
+    public int getTotalExperience()
+    {
+        return this.totalExperience;
+    }
 
-   public int func_149395_e() {
-      return this.field_149400_c;
-   }
+    public int getLevel()
+    {
+        return this.level;
+    }
 }

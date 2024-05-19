@@ -18,79 +18,86 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public interface IBlockProperties {
-   Material func_185904_a();
+public interface IBlockProperties
+{
+    Material getMaterial();
 
-   boolean func_185913_b();
+    boolean isFullBlock();
 
-   boolean func_189884_a(Entity var1);
+    boolean canEntitySpawn(Entity entityIn);
 
-   int func_185891_c();
+    int getLightOpacity();
 
-   int func_185906_d();
+    int getLightValue();
 
-   boolean func_185895_e();
+    boolean isTranslucent();
 
-   boolean func_185916_f();
+    boolean useNeighborBrightness();
 
-   MapColor func_185909_g(IBlockAccess var1, BlockPos var2);
+    MapColor getMapColor(IBlockAccess p_185909_1_, BlockPos p_185909_2_);
 
-   IBlockState func_185907_a(Rotation var1);
+    /**
+     * Returns the blockstate with the given rotation. If inapplicable, returns itself.
+     */
+    IBlockState withRotation(Rotation rot);
 
-   IBlockState func_185902_a(Mirror var1);
+    /**
+     * Returns the blockstate mirrored in the given way. If inapplicable, returns itself.
+     */
+    IBlockState withMirror(Mirror mirrorIn);
 
-   boolean func_185917_h();
+    boolean isFullCube();
 
-   boolean func_191057_i();
+    boolean func_191057_i();
 
-   EnumBlockRenderType func_185901_i();
+    EnumBlockRenderType getRenderType();
 
-   int func_185889_a(IBlockAccess var1, BlockPos var2);
+    int getPackedLightmapCoords(IBlockAccess source, BlockPos pos);
 
-   float func_185892_j();
+    float getAmbientOcclusionLightValue();
 
-   boolean func_185898_k();
+    boolean isBlockNormalCube();
 
-   boolean func_185915_l();
+    boolean isNormalCube();
 
-   boolean func_185897_m();
+    boolean canProvidePower();
 
-   int func_185911_a(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+    int getWeakPower(IBlockAccess blockAccess, BlockPos pos, EnumFacing side);
 
-   boolean func_185912_n();
+    boolean hasComparatorInputOverride();
 
-   int func_185888_a(World var1, BlockPos var2);
+    int getComparatorInputOverride(World worldIn, BlockPos pos);
 
-   float func_185887_b(World var1, BlockPos var2);
+    float getBlockHardness(World worldIn, BlockPos pos);
 
-   float func_185903_a(EntityPlayer var1, World var2, BlockPos var3);
+    float getPlayerRelativeBlockHardness(EntityPlayer player, World worldIn, BlockPos pos);
 
-   int func_185893_b(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+    int getStrongPower(IBlockAccess blockAccess, BlockPos pos, EnumFacing side);
 
-   EnumPushReaction func_185905_o();
+    EnumPushReaction getMobilityFlag();
 
-   IBlockState func_185899_b(IBlockAccess var1, BlockPos var2);
+    IBlockState getActualState(IBlockAccess blockAccess, BlockPos pos);
 
-   AxisAlignedBB func_185918_c(World var1, BlockPos var2);
+    AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos);
 
-   boolean func_185894_c(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+    boolean shouldSideBeRendered(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing);
 
-   boolean func_185914_p();
+    boolean isOpaqueCube();
 
-   @Nullable
-   AxisAlignedBB func_185890_d(IBlockAccess var1, BlockPos var2);
+    @Nullable
+    AxisAlignedBB getCollisionBoundingBox(IBlockAccess worldIn, BlockPos pos);
 
-   void func_185908_a(World var1, BlockPos var2, AxisAlignedBB var3, List<AxisAlignedBB> var4, @Nullable Entity var5, boolean var6);
+    void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB p_185908_3_, List<AxisAlignedBB> p_185908_4_, Entity p_185908_5_, boolean p_185908_6_);
 
-   AxisAlignedBB func_185900_c(IBlockAccess var1, BlockPos var2);
+    AxisAlignedBB getBoundingBox(IBlockAccess blockAccess, BlockPos pos);
 
-   RayTraceResult func_185910_a(World var1, BlockPos var2, Vec3d var3, Vec3d var4);
+    RayTraceResult collisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end);
 
-   boolean func_185896_q();
+    boolean isFullyOpaque();
 
-   Vec3d func_191059_e(IBlockAccess var1, BlockPos var2);
+    Vec3d func_191059_e(IBlockAccess p_191059_1_, BlockPos p_191059_2_);
 
-   boolean func_191058_s();
+    boolean func_191058_s();
 
-   BlockFaceShape func_193401_d(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+    BlockFaceShape func_193401_d(IBlockAccess p_193401_1_, BlockPos p_193401_2_, EnumFacing p_193401_3_);
 }

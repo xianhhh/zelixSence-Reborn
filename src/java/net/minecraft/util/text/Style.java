@@ -13,453 +13,646 @@ import javax.annotation.Nullable;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
-public class Style {
-   private Style field_150249_a;
-   private TextFormatting field_150247_b;
-   private Boolean field_150248_c;
-   private Boolean field_150245_d;
-   private Boolean field_150246_e;
-   private Boolean field_150243_f;
-   private Boolean field_150244_g;
-   private ClickEvent field_150251_h;
-   private HoverEvent field_150252_i;
-   private String field_179990_j;
-   private static final Style field_150250_j = new Style() {
-      @Nullable
-      public TextFormatting func_150215_a() {
-         return null;
-      }
+public class Style
+{
+    /**
+     * The parent of this ChatStyle.  Used for looking up values that this instance does not override.
+     */
+    private Style parentStyle;
+    private TextFormatting color;
+    private Boolean bold;
+    private Boolean italic;
+    private Boolean underlined;
+    private Boolean strikethrough;
+    private Boolean obfuscated;
+    private ClickEvent clickEvent;
+    private HoverEvent hoverEvent;
+    private String insertion;
 
-      public boolean func_150223_b() {
-         return false;
-      }
+    /**
+     * The base of the ChatStyle hierarchy.  All ChatStyle instances are implicitly children of this.
+     */
+    private static final Style ROOT = new Style()
+    {
+        @Nullable
+        public TextFormatting getColor()
+        {
+            return null;
+        }
+        public boolean getBold()
+        {
+            return false;
+        }
+        public boolean getItalic()
+        {
+            return false;
+        }
+        public boolean getStrikethrough()
+        {
+            return false;
+        }
+        public boolean getUnderlined()
+        {
+            return false;
+        }
+        public boolean getObfuscated()
+        {
+            return false;
+        }
+        @Nullable
+        public ClickEvent getClickEvent()
+        {
+            return null;
+        }
+        @Nullable
+        public HoverEvent getHoverEvent()
+        {
+            return null;
+        }
+        @Nullable
+        public String getInsertion()
+        {
+            return null;
+        }
+        public Style setColor(TextFormatting color)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setBold(Boolean boldIn)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setItalic(Boolean italic)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setStrikethrough(Boolean strikethrough)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setUnderlined(Boolean underlined)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setObfuscated(Boolean obfuscated)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setClickEvent(ClickEvent event)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setHoverEvent(HoverEvent event)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public Style setParentStyle(Style parent)
+        {
+            throw new UnsupportedOperationException();
+        }
+        public String toString()
+        {
+            return "Style.ROOT";
+        }
+        public Style createShallowCopy()
+        {
+            return this;
+        }
+        public Style createDeepCopy()
+        {
+            return this;
+        }
+        public String getFormattingCode()
+        {
+            return "";
+        }
+    };
 
-      public boolean func_150242_c() {
-         return false;
-      }
+    @Nullable
 
-      public boolean func_150236_d() {
-         return false;
-      }
+    /**
+     * Gets the effective color of this ChatStyle.
+     */
+    public TextFormatting getColor()
+    {
+        return this.color == null ? this.getParent().getColor() : this.color;
+    }
 
-      public boolean func_150234_e() {
-         return false;
-      }
+    /**
+     * Whether or not text of this ChatStyle should be in bold.
+     */
+    public boolean getBold()
+    {
+        return this.bold == null ? this.getParent().getBold() : this.bold.booleanValue();
+    }
 
-      public boolean func_150233_f() {
-         return false;
-      }
+    /**
+     * Whether or not text of this ChatStyle should be italicized.
+     */
+    public boolean getItalic()
+    {
+        return this.italic == null ? this.getParent().getItalic() : this.italic.booleanValue();
+    }
 
-      @Nullable
-      public ClickEvent func_150235_h() {
-         return null;
-      }
+    /**
+     * Whether or not to format text of this ChatStyle using strikethrough.
+     */
+    public boolean getStrikethrough()
+    {
+        return this.strikethrough == null ? this.getParent().getStrikethrough() : this.strikethrough.booleanValue();
+    }
 
-      @Nullable
-      public HoverEvent func_150210_i() {
-         return null;
-      }
+    /**
+     * Whether or not text of this ChatStyle should be underlined.
+     */
+    public boolean getUnderlined()
+    {
+        return this.underlined == null ? this.getParent().getUnderlined() : this.underlined.booleanValue();
+    }
 
-      @Nullable
-      public String func_179986_j() {
-         return null;
-      }
+    /**
+     * Whether or not text of this ChatStyle should be obfuscated.
+     */
+    public boolean getObfuscated()
+    {
+        return this.obfuscated == null ? this.getParent().getObfuscated() : this.obfuscated.booleanValue();
+    }
 
-      public Style func_150238_a(TextFormatting p_150238_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * Whether or not this style is empty (inherits everything from the parent).
+     */
+    public boolean isEmpty()
+    {
+        return this.bold == null && this.italic == null && this.strikethrough == null && this.underlined == null && this.obfuscated == null && this.color == null && this.clickEvent == null && this.hoverEvent == null && this.insertion == null;
+    }
 
-      public Style func_150227_a(Boolean p_150227_1_) {
-         throw new UnsupportedOperationException();
-      }
+    @Nullable
 
-      public Style func_150217_b(Boolean p_150217_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * The effective chat click event.
+     */
+    public ClickEvent getClickEvent()
+    {
+        return this.clickEvent == null ? this.getParent().getClickEvent() : this.clickEvent;
+    }
 
-      public Style func_150225_c(Boolean p_150225_1_) {
-         throw new UnsupportedOperationException();
-      }
+    @Nullable
 
-      public Style func_150228_d(Boolean p_150228_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * The effective chat hover event.
+     */
+    public HoverEvent getHoverEvent()
+    {
+        return this.hoverEvent == null ? this.getParent().getHoverEvent() : this.hoverEvent;
+    }
 
-      public Style func_150237_e(Boolean p_150237_1_) {
-         throw new UnsupportedOperationException();
-      }
+    @Nullable
 
-      public Style func_150241_a(ClickEvent p_150241_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * Get the text to be inserted into Chat when the component is shift-clicked
+     */
+    public String getInsertion()
+    {
+        return this.insertion == null ? this.getParent().getInsertion() : this.insertion;
+    }
 
-      public Style func_150209_a(HoverEvent p_150209_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * Sets the color for this ChatStyle to the given value.  Only use color values for this; set other values using the
+     * specific methods.
+     */
+    public Style setColor(TextFormatting color)
+    {
+        this.color = color;
+        return this;
+    }
 
-      public Style func_150221_a(Style p_150221_1_) {
-         throw new UnsupportedOperationException();
-      }
+    /**
+     * Sets whether or not text of this ChatStyle should be in bold.  Set to false if, e.g., the parent style is bold
+     * and you want text of this style to be unbolded.
+     */
+    public Style setBold(Boolean boldIn)
+    {
+        this.bold = boldIn;
+        return this;
+    }
 
-      public String toString() {
-         return "Style.ROOT";
-      }
+    /**
+     * Sets whether or not text of this ChatStyle should be italicized.  Set to false if, e.g., the parent style is
+     * italicized and you want to override that for this style.
+     */
+    public Style setItalic(Boolean italic)
+    {
+        this.italic = italic;
+        return this;
+    }
 
-      public Style func_150232_l() {
-         return this;
-      }
+    /**
+     * Sets whether or not to format text of this ChatStyle using strikethrough.  Set to false if, e.g., the parent
+     * style uses strikethrough and you want to override that for this style.
+     */
+    public Style setStrikethrough(Boolean strikethrough)
+    {
+        this.strikethrough = strikethrough;
+        return this;
+    }
 
-      public Style func_150206_m() {
-         return this;
-      }
+    /**
+     * Sets whether or not text of this ChatStyle should be underlined.  Set to false if, e.g., the parent style is
+     * underlined and you want to override that for this style.
+     */
+    public Style setUnderlined(Boolean underlined)
+    {
+        this.underlined = underlined;
+        return this;
+    }
 
-      public String func_150218_j() {
-         return "";
-      }
-   };
+    /**
+     * Sets whether or not text of this ChatStyle should be obfuscated.  Set to false if, e.g., the parent style is
+     * obfuscated and you want to override that for this style.
+     */
+    public Style setObfuscated(Boolean obfuscated)
+    {
+        this.obfuscated = obfuscated;
+        return this;
+    }
 
-   @Nullable
-   public TextFormatting func_150215_a() {
-      return this.field_150247_b == null ? this.func_150224_n().func_150215_a() : this.field_150247_b;
-   }
+    /**
+     * Sets the event that should be run when text of this ChatStyle is clicked on.
+     */
+    public Style setClickEvent(ClickEvent event)
+    {
+        this.clickEvent = event;
+        return this;
+    }
 
-   public boolean func_150223_b() {
-      return this.field_150248_c == null ? this.func_150224_n().func_150223_b() : this.field_150248_c.booleanValue();
-   }
+    /**
+     * Sets the event that should be run when text of this ChatStyle is hovered over.
+     */
+    public Style setHoverEvent(HoverEvent event)
+    {
+        this.hoverEvent = event;
+        return this;
+    }
 
-   public boolean func_150242_c() {
-      return this.field_150245_d == null ? this.func_150224_n().func_150242_c() : this.field_150245_d.booleanValue();
-   }
+    /**
+     * Set a text to be inserted into Chat when the component is shift-clicked
+     */
+    public Style setInsertion(String insertion)
+    {
+        this.insertion = insertion;
+        return this;
+    }
 
-   public boolean func_150236_d() {
-      return this.field_150243_f == null ? this.func_150224_n().func_150236_d() : this.field_150243_f.booleanValue();
-   }
+    /**
+     * Sets the fallback ChatStyle to use if this ChatStyle does not override some value.  Without a parent, obvious
+     * defaults are used (bold: false, underlined: false, etc).
+     */
+    public Style setParentStyle(Style parent)
+    {
+        this.parentStyle = parent;
+        return this;
+    }
 
-   public boolean func_150234_e() {
-      return this.field_150246_e == null ? this.func_150224_n().func_150234_e() : this.field_150246_e.booleanValue();
-   }
+    /**
+     * Gets the equivalent text formatting code for this style, without the initial section sign (U+00A7) character.
+     */
+    public String getFormattingCode()
+    {
+        if (this.isEmpty())
+        {
+            return this.parentStyle != null ? this.parentStyle.getFormattingCode() : "";
+        }
+        else
+        {
+            StringBuilder stringbuilder = new StringBuilder();
 
-   public boolean func_150233_f() {
-      return this.field_150244_g == null ? this.func_150224_n().func_150233_f() : this.field_150244_g.booleanValue();
-   }
-
-   public boolean func_150229_g() {
-      return this.field_150248_c == null && this.field_150245_d == null && this.field_150243_f == null && this.field_150246_e == null && this.field_150244_g == null && this.field_150247_b == null && this.field_150251_h == null && this.field_150252_i == null && this.field_179990_j == null;
-   }
-
-   @Nullable
-   public ClickEvent func_150235_h() {
-      return this.field_150251_h == null ? this.func_150224_n().func_150235_h() : this.field_150251_h;
-   }
-
-   @Nullable
-   public HoverEvent func_150210_i() {
-      return this.field_150252_i == null ? this.func_150224_n().func_150210_i() : this.field_150252_i;
-   }
-
-   @Nullable
-   public String func_179986_j() {
-      return this.field_179990_j == null ? this.func_150224_n().func_179986_j() : this.field_179990_j;
-   }
-
-   public Style func_150238_a(TextFormatting p_150238_1_) {
-      this.field_150247_b = p_150238_1_;
-      return this;
-   }
-
-   public Style func_150227_a(Boolean p_150227_1_) {
-      this.field_150248_c = p_150227_1_;
-      return this;
-   }
-
-   public Style func_150217_b(Boolean p_150217_1_) {
-      this.field_150245_d = p_150217_1_;
-      return this;
-   }
-
-   public Style func_150225_c(Boolean p_150225_1_) {
-      this.field_150243_f = p_150225_1_;
-      return this;
-   }
-
-   public Style func_150228_d(Boolean p_150228_1_) {
-      this.field_150246_e = p_150228_1_;
-      return this;
-   }
-
-   public Style func_150237_e(Boolean p_150237_1_) {
-      this.field_150244_g = p_150237_1_;
-      return this;
-   }
-
-   public Style func_150241_a(ClickEvent p_150241_1_) {
-      this.field_150251_h = p_150241_1_;
-      return this;
-   }
-
-   public Style func_150209_a(HoverEvent p_150209_1_) {
-      this.field_150252_i = p_150209_1_;
-      return this;
-   }
-
-   public Style func_179989_a(String p_179989_1_) {
-      this.field_179990_j = p_179989_1_;
-      return this;
-   }
-
-   public Style func_150221_a(Style p_150221_1_) {
-      this.field_150249_a = p_150221_1_;
-      return this;
-   }
-
-   public String func_150218_j() {
-      if (this.func_150229_g()) {
-         return this.field_150249_a != null ? this.field_150249_a.func_150218_j() : "";
-      } else {
-         StringBuilder stringbuilder = new StringBuilder();
-         if (this.func_150215_a() != null) {
-            stringbuilder.append((Object)this.func_150215_a());
-         }
-
-         if (this.func_150223_b()) {
-            stringbuilder.append((Object)TextFormatting.BOLD);
-         }
-
-         if (this.func_150242_c()) {
-            stringbuilder.append((Object)TextFormatting.ITALIC);
-         }
-
-         if (this.func_150234_e()) {
-            stringbuilder.append((Object)TextFormatting.UNDERLINE);
-         }
-
-         if (this.func_150233_f()) {
-            stringbuilder.append((Object)TextFormatting.OBFUSCATED);
-         }
-
-         if (this.func_150236_d()) {
-            stringbuilder.append((Object)TextFormatting.STRIKETHROUGH);
-         }
-
-         return stringbuilder.toString();
-      }
-   }
-
-   private Style func_150224_n() {
-      return this.field_150249_a == null ? field_150250_j : this.field_150249_a;
-   }
-
-   public String toString() {
-      return "Style{hasParent=" + (this.field_150249_a != null) + ", color=" + this.field_150247_b + ", bold=" + this.field_150248_c + ", italic=" + this.field_150245_d + ", underlined=" + this.field_150246_e + ", obfuscated=" + this.field_150244_g + ", clickEvent=" + this.func_150235_h() + ", hoverEvent=" + this.func_150210_i() + ", insertion=" + this.func_179986_j() + '}';
-   }
-
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
-         return true;
-      } else if (!(p_equals_1_ instanceof Style)) {
-         return false;
-      } else {
-         boolean flag;
-         label77: {
-            Style style = (Style)p_equals_1_;
-            if (this.func_150223_b() == style.func_150223_b() && this.func_150215_a() == style.func_150215_a() && this.func_150242_c() == style.func_150242_c() && this.func_150233_f() == style.func_150233_f() && this.func_150236_d() == style.func_150236_d() && this.func_150234_e() == style.func_150234_e()) {
-               label71: {
-                  if (this.func_150235_h() != null) {
-                     if (!this.func_150235_h().equals(style.func_150235_h())) {
-                        break label71;
-                     }
-                  } else if (style.func_150235_h() != null) {
-                     break label71;
-                  }
-
-                  if (this.func_150210_i() != null) {
-                     if (!this.func_150210_i().equals(style.func_150210_i())) {
-                        break label71;
-                     }
-                  } else if (style.func_150210_i() != null) {
-                     break label71;
-                  }
-
-                  if (this.func_179986_j() != null) {
-                     if (this.func_179986_j().equals(style.func_179986_j())) {
-                        break label77;
-                     }
-                  } else if (style.func_179986_j() == null) {
-                     break label77;
-                  }
-               }
+            if (this.getColor() != null)
+            {
+                stringbuilder.append((Object)this.getColor());
             }
 
-            flag = false;
+            if (this.getBold())
+            {
+                stringbuilder.append((Object)TextFormatting.BOLD);
+            }
+
+            if (this.getItalic())
+            {
+                stringbuilder.append((Object)TextFormatting.ITALIC);
+            }
+
+            if (this.getUnderlined())
+            {
+                stringbuilder.append((Object)TextFormatting.UNDERLINE);
+            }
+
+            if (this.getObfuscated())
+            {
+                stringbuilder.append((Object)TextFormatting.OBFUSCATED);
+            }
+
+            if (this.getStrikethrough())
+            {
+                stringbuilder.append((Object)TextFormatting.STRIKETHROUGH);
+            }
+
+            return stringbuilder.toString();
+        }
+    }
+
+    /**
+     * Gets the immediate parent of this ChatStyle.
+     */
+    private Style getParent()
+    {
+        return this.parentStyle == null ? ROOT : this.parentStyle;
+    }
+
+    public String toString()
+    {
+        return "Style{hasParent=" + (this.parentStyle != null) + ", color=" + this.color + ", bold=" + this.bold + ", italic=" + this.italic + ", underlined=" + this.underlined + ", obfuscated=" + this.obfuscated + ", clickEvent=" + this.getClickEvent() + ", hoverEvent=" + this.getHoverEvent() + ", insertion=" + this.getInsertion() + '}';
+    }
+
+    public boolean equals(Object p_equals_1_)
+    {
+        if (this == p_equals_1_)
+        {
+            return true;
+        }
+        else if (!(p_equals_1_ instanceof Style))
+        {
+            return false;
+        }
+        else
+        {
+            boolean flag;
+            label77:
+            {
+                Style style = (Style)p_equals_1_;
+
+                if (this.getBold() == style.getBold() && this.getColor() == style.getColor() && this.getItalic() == style.getItalic() && this.getObfuscated() == style.getObfuscated() && this.getStrikethrough() == style.getStrikethrough() && this.getUnderlined() == style.getUnderlined())
+                {
+                    label71:
+                    {
+                        if (this.getClickEvent() != null)
+                        {
+                            if (!this.getClickEvent().equals(style.getClickEvent()))
+                            {
+                                break label71;
+                            }
+                        }
+                        else if (style.getClickEvent() != null)
+                        {
+                            break label71;
+                        }
+
+                        if (this.getHoverEvent() != null)
+                        {
+                            if (!this.getHoverEvent().equals(style.getHoverEvent()))
+                            {
+                                break label71;
+                            }
+                        }
+                        else if (style.getHoverEvent() != null)
+                        {
+                            break label71;
+                        }
+
+                        if (this.getInsertion() != null)
+                        {
+                            if (this.getInsertion().equals(style.getInsertion()))
+                            {
+                                break label77;
+                            }
+                        }
+                        else if (style.getInsertion() == null)
+                        {
+                            break label77;
+                        }
+                    }
+                }
+
+                flag = false;
+                return flag;
+            }
+            flag = true;
             return flag;
-         }
+        }
+    }
 
-         flag = true;
-         return flag;
-      }
-   }
+    public int hashCode()
+    {
+        int i = this.color.hashCode();
+        i = 31 * i + this.bold.hashCode();
+        i = 31 * i + this.italic.hashCode();
+        i = 31 * i + this.underlined.hashCode();
+        i = 31 * i + this.strikethrough.hashCode();
+        i = 31 * i + this.obfuscated.hashCode();
+        i = 31 * i + this.clickEvent.hashCode();
+        i = 31 * i + this.hoverEvent.hashCode();
+        i = 31 * i + this.insertion.hashCode();
+        return i;
+    }
 
-   public int hashCode() {
-      int i = this.field_150247_b.hashCode();
-      i = 31 * i + this.field_150248_c.hashCode();
-      i = 31 * i + this.field_150245_d.hashCode();
-      i = 31 * i + this.field_150246_e.hashCode();
-      i = 31 * i + this.field_150243_f.hashCode();
-      i = 31 * i + this.field_150244_g.hashCode();
-      i = 31 * i + this.field_150251_h.hashCode();
-      i = 31 * i + this.field_150252_i.hashCode();
-      i = 31 * i + this.field_179990_j.hashCode();
-      return i;
-   }
+    /**
+     * Creates a shallow copy of this style.  Changes to this instance's values will not be reflected in the copy, but
+     * changes to the parent style's values WILL be reflected in both this instance and the copy, wherever either does
+     * not override a value.
+     */
+    public Style createShallowCopy()
+    {
+        Style style = new Style();
+        style.bold = this.bold;
+        style.italic = this.italic;
+        style.strikethrough = this.strikethrough;
+        style.underlined = this.underlined;
+        style.obfuscated = this.obfuscated;
+        style.color = this.color;
+        style.clickEvent = this.clickEvent;
+        style.hoverEvent = this.hoverEvent;
+        style.parentStyle = this.parentStyle;
+        style.insertion = this.insertion;
+        return style;
+    }
 
-   public Style func_150232_l() {
-      Style style = new Style();
-      style.field_150248_c = this.field_150248_c;
-      style.field_150245_d = this.field_150245_d;
-      style.field_150243_f = this.field_150243_f;
-      style.field_150246_e = this.field_150246_e;
-      style.field_150244_g = this.field_150244_g;
-      style.field_150247_b = this.field_150247_b;
-      style.field_150251_h = this.field_150251_h;
-      style.field_150252_i = this.field_150252_i;
-      style.field_150249_a = this.field_150249_a;
-      style.field_179990_j = this.field_179990_j;
-      return style;
-   }
+    /**
+     * Creates a deep copy of this style.  No changes to this instance or its parent style will be reflected in the
+     * copy.
+     */
+    public Style createDeepCopy()
+    {
+        Style style = new Style();
+        style.setBold(Boolean.valueOf(this.getBold()));
+        style.setItalic(Boolean.valueOf(this.getItalic()));
+        style.setStrikethrough(Boolean.valueOf(this.getStrikethrough()));
+        style.setUnderlined(Boolean.valueOf(this.getUnderlined()));
+        style.setObfuscated(Boolean.valueOf(this.getObfuscated()));
+        style.setColor(this.getColor());
+        style.setClickEvent(this.getClickEvent());
+        style.setHoverEvent(this.getHoverEvent());
+        style.setInsertion(this.getInsertion());
+        return style;
+    }
 
-   public Style func_150206_m() {
-      Style style = new Style();
-      style.func_150227_a(Boolean.valueOf(this.func_150223_b()));
-      style.func_150217_b(Boolean.valueOf(this.func_150242_c()));
-      style.func_150225_c(Boolean.valueOf(this.func_150236_d()));
-      style.func_150228_d(Boolean.valueOf(this.func_150234_e()));
-      style.func_150237_e(Boolean.valueOf(this.func_150233_f()));
-      style.func_150238_a(this.func_150215_a());
-      style.func_150241_a(this.func_150235_h());
-      style.func_150209_a(this.func_150210_i());
-      style.func_179989_a(this.func_179986_j());
-      return style;
-   }
+    public static class Serializer implements JsonDeserializer<Style>, JsonSerializer<Style>
+    {
+        @Nullable
+        public Style deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException
+        {
+            if (p_deserialize_1_.isJsonObject())
+            {
+                Style style = new Style();
+                JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
 
-   public static class Serializer implements JsonDeserializer<Style>, JsonSerializer<Style> {
-      @Nullable
-      public Style deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-         if (p_deserialize_1_.isJsonObject()) {
-            Style style = new Style();
-            JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-            if (jsonobject == null) {
-               return null;
-            } else {
-               if (jsonobject.has("bold")) {
-                  style.field_150248_c = jsonobject.get("bold").getAsBoolean();
-               }
+                if (jsonobject == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    if (jsonobject.has("bold"))
+                    {
+                        style.bold = jsonobject.get("bold").getAsBoolean();
+                    }
 
-               if (jsonobject.has("italic")) {
-                  style.field_150245_d = jsonobject.get("italic").getAsBoolean();
-               }
+                    if (jsonobject.has("italic"))
+                    {
+                        style.italic = jsonobject.get("italic").getAsBoolean();
+                    }
 
-               if (jsonobject.has("underlined")) {
-                  style.field_150246_e = jsonobject.get("underlined").getAsBoolean();
-               }
+                    if (jsonobject.has("underlined"))
+                    {
+                        style.underlined = jsonobject.get("underlined").getAsBoolean();
+                    }
 
-               if (jsonobject.has("strikethrough")) {
-                  style.field_150243_f = jsonobject.get("strikethrough").getAsBoolean();
-               }
+                    if (jsonobject.has("strikethrough"))
+                    {
+                        style.strikethrough = jsonobject.get("strikethrough").getAsBoolean();
+                    }
 
-               if (jsonobject.has("obfuscated")) {
-                  style.field_150244_g = jsonobject.get("obfuscated").getAsBoolean();
-               }
+                    if (jsonobject.has("obfuscated"))
+                    {
+                        style.obfuscated = jsonobject.get("obfuscated").getAsBoolean();
+                    }
 
-               if (jsonobject.has("color")) {
-                  style.field_150247_b = (TextFormatting)p_deserialize_3_.deserialize(jsonobject.get("color"), TextFormatting.class);
-               }
+                    if (jsonobject.has("color"))
+                    {
+                        style.color = (TextFormatting)p_deserialize_3_.deserialize(jsonobject.get("color"), TextFormatting.class);
+                    }
 
-               if (jsonobject.has("insertion")) {
-                  style.field_179990_j = jsonobject.get("insertion").getAsString();
-               }
+                    if (jsonobject.has("insertion"))
+                    {
+                        style.insertion = jsonobject.get("insertion").getAsString();
+                    }
 
-               if (jsonobject.has("clickEvent")) {
-                  JsonObject jsonobject1 = jsonobject.getAsJsonObject("clickEvent");
-                  if (jsonobject1 != null) {
-                     JsonPrimitive jsonprimitive = jsonobject1.getAsJsonPrimitive("action");
-                     ClickEvent.Action clickevent$action = jsonprimitive == null ? null : ClickEvent.Action.func_150672_a(jsonprimitive.getAsString());
-                     JsonPrimitive jsonprimitive1 = jsonobject1.getAsJsonPrimitive("value");
-                     String s = jsonprimitive1 == null ? null : jsonprimitive1.getAsString();
-                     if (clickevent$action != null && s != null && clickevent$action.func_150674_a()) {
-                        style.field_150251_h = new ClickEvent(clickevent$action, s);
-                     }
-                  }
-               }
+                    if (jsonobject.has("clickEvent"))
+                    {
+                        JsonObject jsonobject1 = jsonobject.getAsJsonObject("clickEvent");
 
-               if (jsonobject.has("hoverEvent")) {
-                  JsonObject jsonobject2 = jsonobject.getAsJsonObject("hoverEvent");
-                  if (jsonobject2 != null) {
-                     JsonPrimitive jsonprimitive2 = jsonobject2.getAsJsonPrimitive("action");
-                     HoverEvent.Action hoverevent$action = jsonprimitive2 == null ? null : HoverEvent.Action.func_150684_a(jsonprimitive2.getAsString());
-                     ITextComponent itextcomponent = (ITextComponent)p_deserialize_3_.deserialize(jsonobject2.get("value"), ITextComponent.class);
-                     if (hoverevent$action != null && itextcomponent != null && hoverevent$action.func_150686_a()) {
-                        style.field_150252_i = new HoverEvent(hoverevent$action, itextcomponent);
-                     }
-                  }
-               }
+                        if (jsonobject1 != null)
+                        {
+                            JsonPrimitive jsonprimitive = jsonobject1.getAsJsonPrimitive("action");
+                            ClickEvent.Action clickevent$action = jsonprimitive == null ? null : ClickEvent.Action.getValueByCanonicalName(jsonprimitive.getAsString());
+                            JsonPrimitive jsonprimitive1 = jsonobject1.getAsJsonPrimitive("value");
+                            String s = jsonprimitive1 == null ? null : jsonprimitive1.getAsString();
 
-               return style;
+                            if (clickevent$action != null && s != null && clickevent$action.shouldAllowInChat())
+                            {
+                                style.clickEvent = new ClickEvent(clickevent$action, s);
+                            }
+                        }
+                    }
+
+                    if (jsonobject.has("hoverEvent"))
+                    {
+                        JsonObject jsonobject2 = jsonobject.getAsJsonObject("hoverEvent");
+
+                        if (jsonobject2 != null)
+                        {
+                            JsonPrimitive jsonprimitive2 = jsonobject2.getAsJsonPrimitive("action");
+                            HoverEvent.Action hoverevent$action = jsonprimitive2 == null ? null : HoverEvent.Action.getValueByCanonicalName(jsonprimitive2.getAsString());
+                            ITextComponent itextcomponent = (ITextComponent)p_deserialize_3_.deserialize(jsonobject2.get("value"), ITextComponent.class);
+
+                            if (hoverevent$action != null && itextcomponent != null && hoverevent$action.shouldAllowInChat())
+                            {
+                                style.hoverEvent = new HoverEvent(hoverevent$action, itextcomponent);
+                            }
+                        }
+                    }
+
+                    return style;
+                }
             }
-         } else {
-            return null;
-         }
-      }
-
-      @Nullable
-      public JsonElement serialize(Style p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
-         if (p_serialize_1_.func_150229_g()) {
-            return null;
-         } else {
-            JsonObject jsonobject = new JsonObject();
-            if (p_serialize_1_.field_150248_c != null) {
-               jsonobject.addProperty("bold", p_serialize_1_.field_150248_c);
+            else
+            {
+                return null;
             }
+        }
 
-            if (p_serialize_1_.field_150245_d != null) {
-               jsonobject.addProperty("italic", p_serialize_1_.field_150245_d);
+        @Nullable
+        public JsonElement serialize(Style p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)
+        {
+            if (p_serialize_1_.isEmpty())
+            {
+                return null;
             }
+            else
+            {
+                JsonObject jsonobject = new JsonObject();
 
-            if (p_serialize_1_.field_150246_e != null) {
-               jsonobject.addProperty("underlined", p_serialize_1_.field_150246_e);
+                if (p_serialize_1_.bold != null)
+                {
+                    jsonobject.addProperty("bold", p_serialize_1_.bold);
+                }
+
+                if (p_serialize_1_.italic != null)
+                {
+                    jsonobject.addProperty("italic", p_serialize_1_.italic);
+                }
+
+                if (p_serialize_1_.underlined != null)
+                {
+                    jsonobject.addProperty("underlined", p_serialize_1_.underlined);
+                }
+
+                if (p_serialize_1_.strikethrough != null)
+                {
+                    jsonobject.addProperty("strikethrough", p_serialize_1_.strikethrough);
+                }
+
+                if (p_serialize_1_.obfuscated != null)
+                {
+                    jsonobject.addProperty("obfuscated", p_serialize_1_.obfuscated);
+                }
+
+                if (p_serialize_1_.color != null)
+                {
+                    jsonobject.add("color", p_serialize_3_.serialize(p_serialize_1_.color));
+                }
+
+                if (p_serialize_1_.insertion != null)
+                {
+                    jsonobject.add("insertion", p_serialize_3_.serialize(p_serialize_1_.insertion));
+                }
+
+                if (p_serialize_1_.clickEvent != null)
+                {
+                    JsonObject jsonobject1 = new JsonObject();
+                    jsonobject1.addProperty("action", p_serialize_1_.clickEvent.getAction().getCanonicalName());
+                    jsonobject1.addProperty("value", p_serialize_1_.clickEvent.getValue());
+                    jsonobject.add("clickEvent", jsonobject1);
+                }
+
+                if (p_serialize_1_.hoverEvent != null)
+                {
+                    JsonObject jsonobject2 = new JsonObject();
+                    jsonobject2.addProperty("action", p_serialize_1_.hoverEvent.getAction().getCanonicalName());
+                    jsonobject2.add("value", p_serialize_3_.serialize(p_serialize_1_.hoverEvent.getValue()));
+                    jsonobject.add("hoverEvent", jsonobject2);
+                }
+
+                return jsonobject;
             }
-
-            if (p_serialize_1_.field_150243_f != null) {
-               jsonobject.addProperty("strikethrough", p_serialize_1_.field_150243_f);
-            }
-
-            if (p_serialize_1_.field_150244_g != null) {
-               jsonobject.addProperty("obfuscated", p_serialize_1_.field_150244_g);
-            }
-
-            if (p_serialize_1_.field_150247_b != null) {
-               jsonobject.add("color", p_serialize_3_.serialize(p_serialize_1_.field_150247_b));
-            }
-
-            if (p_serialize_1_.field_179990_j != null) {
-               jsonobject.add("insertion", p_serialize_3_.serialize(p_serialize_1_.field_179990_j));
-            }
-
-            if (p_serialize_1_.field_150251_h != null) {
-               JsonObject jsonobject1 = new JsonObject();
-               jsonobject1.addProperty("action", p_serialize_1_.field_150251_h.func_150669_a().func_150673_b());
-               jsonobject1.addProperty("value", p_serialize_1_.field_150251_h.func_150668_b());
-               jsonobject.add("clickEvent", jsonobject1);
-            }
-
-            if (p_serialize_1_.field_150252_i != null) {
-               JsonObject jsonobject2 = new JsonObject();
-               jsonobject2.addProperty("action", p_serialize_1_.field_150252_i.func_150701_a().func_150685_b());
-               jsonobject2.add("value", p_serialize_3_.serialize(p_serialize_1_.field_150252_i.func_150702_b()));
-               jsonobject.add("hoverEvent", jsonobject2);
-            }
-
-            return jsonobject;
-         }
-      }
-   }
+        }
+    }
 }

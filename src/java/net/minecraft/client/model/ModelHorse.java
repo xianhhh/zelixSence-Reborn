@@ -7,491 +7,556 @@ import net.minecraft.entity.passive.AbstractChestHorse;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.util.math.MathHelper;
 
-public class ModelHorse extends ModelBase {
-   private final ModelRenderer field_110709_a;
-   private final ModelRenderer field_178711_b;
-   private final ModelRenderer field_178712_c;
-   private final ModelRenderer field_110705_d;
-   private final ModelRenderer field_110706_e;
-   private final ModelRenderer field_110703_f;
-   private final ModelRenderer field_110704_g;
-   private final ModelRenderer field_110716_h;
-   private final ModelRenderer field_110717_i;
-   private final ModelRenderer field_110714_j;
-   private final ModelRenderer field_110715_k;
-   private final ModelRenderer field_110712_l;
-   private final ModelRenderer field_110713_m;
-   private final ModelRenderer field_110710_n;
-   private final ModelRenderer field_110711_o;
-   private final ModelRenderer field_110719_v;
-   private final ModelRenderer field_110718_w;
-   private final ModelRenderer field_110722_x;
-   private final ModelRenderer field_110721_y;
-   private final ModelRenderer field_110720_z;
-   private final ModelRenderer field_110688_A;
-   private final ModelRenderer field_110689_B;
-   private final ModelRenderer field_110690_C;
-   private final ModelRenderer field_110684_D;
-   private final ModelRenderer field_110685_E;
-   private final ModelRenderer field_110686_F;
-   private final ModelRenderer field_110687_G;
-   private final ModelRenderer field_110695_H;
-   private final ModelRenderer field_110696_I;
-   private final ModelRenderer field_110697_J;
-   private final ModelRenderer field_110698_K;
-   private final ModelRenderer field_110691_L;
-   private final ModelRenderer field_110692_M;
-   private final ModelRenderer field_110693_N;
-   private final ModelRenderer field_110694_O;
-   private final ModelRenderer field_110700_P;
-   private final ModelRenderer field_110699_Q;
-   private final ModelRenderer field_110702_R;
-   private final ModelRenderer field_110701_S;
+public class ModelHorse extends ModelBase
+{
+    private final ModelRenderer head;
+    private final ModelRenderer upperMouth;
+    private final ModelRenderer lowerMouth;
+    private final ModelRenderer horseLeftEar;
+    private final ModelRenderer horseRightEar;
 
-   public ModelHorse() {
-      this.field_78090_t = 128;
-      this.field_78089_u = 128;
-      this.field_110715_k = new ModelRenderer(this, 0, 34);
-      this.field_110715_k.func_78789_a(-5.0F, -8.0F, -19.0F, 10, 10, 24);
-      this.field_110715_k.func_78793_a(0.0F, 11.0F, 9.0F);
-      this.field_110712_l = new ModelRenderer(this, 44, 0);
-      this.field_110712_l.func_78789_a(-1.0F, -1.0F, 0.0F, 2, 2, 3);
-      this.field_110712_l.func_78793_a(0.0F, 3.0F, 14.0F);
-      this.field_110712_l.field_78795_f = -1.134464F;
-      this.field_110713_m = new ModelRenderer(this, 38, 7);
-      this.field_110713_m.func_78789_a(-1.5F, -2.0F, 3.0F, 3, 4, 7);
-      this.field_110713_m.func_78793_a(0.0F, 3.0F, 14.0F);
-      this.field_110713_m.field_78795_f = -1.134464F;
-      this.field_110710_n = new ModelRenderer(this, 24, 3);
-      this.field_110710_n.func_78789_a(-1.5F, -4.5F, 9.0F, 3, 4, 7);
-      this.field_110710_n.func_78793_a(0.0F, 3.0F, 14.0F);
-      this.field_110710_n.field_78795_f = -1.3962634F;
-      this.field_110711_o = new ModelRenderer(this, 78, 29);
-      this.field_110711_o.func_78789_a(-2.5F, -2.0F, -2.5F, 4, 9, 5);
-      this.field_110711_o.func_78793_a(4.0F, 9.0F, 11.0F);
-      this.field_110719_v = new ModelRenderer(this, 78, 43);
-      this.field_110719_v.func_78789_a(-2.0F, 0.0F, -1.5F, 3, 5, 3);
-      this.field_110719_v.func_78793_a(4.0F, 16.0F, 11.0F);
-      this.field_110718_w = new ModelRenderer(this, 78, 51);
-      this.field_110718_w.func_78789_a(-2.5F, 5.1F, -2.0F, 4, 3, 4);
-      this.field_110718_w.func_78793_a(4.0F, 16.0F, 11.0F);
-      this.field_110722_x = new ModelRenderer(this, 96, 29);
-      this.field_110722_x.func_78789_a(-1.5F, -2.0F, -2.5F, 4, 9, 5);
-      this.field_110722_x.func_78793_a(-4.0F, 9.0F, 11.0F);
-      this.field_110721_y = new ModelRenderer(this, 96, 43);
-      this.field_110721_y.func_78789_a(-1.0F, 0.0F, -1.5F, 3, 5, 3);
-      this.field_110721_y.func_78793_a(-4.0F, 16.0F, 11.0F);
-      this.field_110720_z = new ModelRenderer(this, 96, 51);
-      this.field_110720_z.func_78789_a(-1.5F, 5.1F, -2.0F, 4, 3, 4);
-      this.field_110720_z.func_78793_a(-4.0F, 16.0F, 11.0F);
-      this.field_110688_A = new ModelRenderer(this, 44, 29);
-      this.field_110688_A.func_78789_a(-1.9F, -1.0F, -2.1F, 3, 8, 4);
-      this.field_110688_A.func_78793_a(4.0F, 9.0F, -8.0F);
-      this.field_110689_B = new ModelRenderer(this, 44, 41);
-      this.field_110689_B.func_78789_a(-1.9F, 0.0F, -1.6F, 3, 5, 3);
-      this.field_110689_B.func_78793_a(4.0F, 16.0F, -8.0F);
-      this.field_110690_C = new ModelRenderer(this, 44, 51);
-      this.field_110690_C.func_78789_a(-2.4F, 5.1F, -2.1F, 4, 3, 4);
-      this.field_110690_C.func_78793_a(4.0F, 16.0F, -8.0F);
-      this.field_110684_D = new ModelRenderer(this, 60, 29);
-      this.field_110684_D.func_78789_a(-1.1F, -1.0F, -2.1F, 3, 8, 4);
-      this.field_110684_D.func_78793_a(-4.0F, 9.0F, -8.0F);
-      this.field_110685_E = new ModelRenderer(this, 60, 41);
-      this.field_110685_E.func_78789_a(-1.1F, 0.0F, -1.6F, 3, 5, 3);
-      this.field_110685_E.func_78793_a(-4.0F, 16.0F, -8.0F);
-      this.field_110686_F = new ModelRenderer(this, 60, 51);
-      this.field_110686_F.func_78789_a(-1.6F, 5.1F, -2.1F, 4, 3, 4);
-      this.field_110686_F.func_78793_a(-4.0F, 16.0F, -8.0F);
-      this.field_110709_a = new ModelRenderer(this, 0, 0);
-      this.field_110709_a.func_78789_a(-2.5F, -10.0F, -1.5F, 5, 5, 7);
-      this.field_110709_a.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110709_a.field_78795_f = 0.5235988F;
-      this.field_178711_b = new ModelRenderer(this, 24, 18);
-      this.field_178711_b.func_78789_a(-2.0F, -10.0F, -7.0F, 4, 3, 6);
-      this.field_178711_b.func_78793_a(0.0F, 3.95F, -10.0F);
-      this.field_178711_b.field_78795_f = 0.5235988F;
-      this.field_178712_c = new ModelRenderer(this, 24, 27);
-      this.field_178712_c.func_78789_a(-2.0F, -7.0F, -6.5F, 4, 2, 5);
-      this.field_178712_c.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_178712_c.field_78795_f = 0.5235988F;
-      this.field_110709_a.func_78792_a(this.field_178711_b);
-      this.field_110709_a.func_78792_a(this.field_178712_c);
-      this.field_110705_d = new ModelRenderer(this, 0, 0);
-      this.field_110705_d.func_78789_a(0.45F, -12.0F, 4.0F, 2, 3, 1);
-      this.field_110705_d.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110705_d.field_78795_f = 0.5235988F;
-      this.field_110706_e = new ModelRenderer(this, 0, 0);
-      this.field_110706_e.func_78789_a(-2.45F, -12.0F, 4.0F, 2, 3, 1);
-      this.field_110706_e.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110706_e.field_78795_f = 0.5235988F;
-      this.field_110703_f = new ModelRenderer(this, 0, 12);
-      this.field_110703_f.func_78789_a(-2.0F, -16.0F, 4.0F, 2, 7, 1);
-      this.field_110703_f.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110703_f.field_78795_f = 0.5235988F;
-      this.field_110703_f.field_78808_h = 0.2617994F;
-      this.field_110704_g = new ModelRenderer(this, 0, 12);
-      this.field_110704_g.func_78789_a(0.0F, -16.0F, 4.0F, 2, 7, 1);
-      this.field_110704_g.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110704_g.field_78795_f = 0.5235988F;
-      this.field_110704_g.field_78808_h = -0.2617994F;
-      this.field_110716_h = new ModelRenderer(this, 0, 12);
-      this.field_110716_h.func_78789_a(-2.05F, -9.8F, -2.0F, 4, 14, 8);
-      this.field_110716_h.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110716_h.field_78795_f = 0.5235988F;
-      this.field_110687_G = new ModelRenderer(this, 0, 34);
-      this.field_110687_G.func_78789_a(-3.0F, 0.0F, 0.0F, 8, 8, 3);
-      this.field_110687_G.func_78793_a(-7.5F, 3.0F, 10.0F);
-      this.field_110687_G.field_78796_g = 1.5707964F;
-      this.field_110695_H = new ModelRenderer(this, 0, 47);
-      this.field_110695_H.func_78789_a(-3.0F, 0.0F, 0.0F, 8, 8, 3);
-      this.field_110695_H.func_78793_a(4.5F, 3.0F, 10.0F);
-      this.field_110695_H.field_78796_g = 1.5707964F;
-      this.field_110696_I = new ModelRenderer(this, 80, 0);
-      this.field_110696_I.func_78789_a(-5.0F, 0.0F, -3.0F, 10, 1, 8);
-      this.field_110696_I.func_78793_a(0.0F, 2.0F, 2.0F);
-      this.field_110697_J = new ModelRenderer(this, 106, 9);
-      this.field_110697_J.func_78789_a(-1.5F, -1.0F, -3.0F, 3, 1, 2);
-      this.field_110697_J.func_78793_a(0.0F, 2.0F, 2.0F);
-      this.field_110698_K = new ModelRenderer(this, 80, 9);
-      this.field_110698_K.func_78789_a(-4.0F, -1.0F, 3.0F, 8, 1, 2);
-      this.field_110698_K.func_78793_a(0.0F, 2.0F, 2.0F);
-      this.field_110692_M = new ModelRenderer(this, 74, 0);
-      this.field_110692_M.func_78789_a(-0.5F, 6.0F, -1.0F, 1, 2, 2);
-      this.field_110692_M.func_78793_a(5.0F, 3.0F, 2.0F);
-      this.field_110691_L = new ModelRenderer(this, 70, 0);
-      this.field_110691_L.func_78789_a(-0.5F, 0.0F, -0.5F, 1, 6, 1);
-      this.field_110691_L.func_78793_a(5.0F, 3.0F, 2.0F);
-      this.field_110694_O = new ModelRenderer(this, 74, 4);
-      this.field_110694_O.func_78789_a(-0.5F, 6.0F, -1.0F, 1, 2, 2);
-      this.field_110694_O.func_78793_a(-5.0F, 3.0F, 2.0F);
-      this.field_110693_N = new ModelRenderer(this, 80, 0);
-      this.field_110693_N.func_78789_a(-0.5F, 0.0F, -0.5F, 1, 6, 1);
-      this.field_110693_N.func_78793_a(-5.0F, 3.0F, 2.0F);
-      this.field_110700_P = new ModelRenderer(this, 74, 13);
-      this.field_110700_P.func_78789_a(1.5F, -8.0F, -4.0F, 1, 2, 2);
-      this.field_110700_P.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110700_P.field_78795_f = 0.5235988F;
-      this.field_110699_Q = new ModelRenderer(this, 74, 13);
-      this.field_110699_Q.func_78789_a(-2.5F, -8.0F, -4.0F, 1, 2, 2);
-      this.field_110699_Q.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110699_Q.field_78795_f = 0.5235988F;
-      this.field_110702_R = new ModelRenderer(this, 44, 10);
-      this.field_110702_R.func_78789_a(2.6F, -6.0F, -6.0F, 0, 3, 16);
-      this.field_110702_R.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110701_S = new ModelRenderer(this, 44, 5);
-      this.field_110701_S.func_78789_a(-2.6F, -6.0F, -6.0F, 0, 3, 16);
-      this.field_110701_S.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110714_j = new ModelRenderer(this, 58, 0);
-      this.field_110714_j.func_78789_a(-1.0F, -11.5F, 5.0F, 2, 16, 4);
-      this.field_110714_j.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110714_j.field_78795_f = 0.5235988F;
-      this.field_110717_i = new ModelRenderer(this, 80, 12);
-      this.field_110717_i.func_78790_a(-2.5F, -10.1F, -7.0F, 5, 5, 12, 0.2F);
-      this.field_110717_i.func_78793_a(0.0F, 4.0F, -10.0F);
-      this.field_110717_i.field_78795_f = 0.5235988F;
-   }
+    /** The left ear box for the mule model. */
+    private final ModelRenderer muleLeftEar;
 
-   public void func_78088_a(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_) {
-      AbstractHorse abstracthorse = (AbstractHorse)p_78088_1_;
-      float f = abstracthorse.func_110258_o(0.0F);
-      boolean flag = abstracthorse.func_70631_g_();
-      boolean flag1 = !flag && abstracthorse.func_110257_ck();
-      boolean flag2 = abstracthorse instanceof AbstractChestHorse;
-      boolean flag3 = !flag && flag2 && ((AbstractChestHorse)abstracthorse).func_190695_dh();
-      float f1 = abstracthorse.func_110254_bY();
-      boolean flag4 = abstracthorse.func_184207_aI();
-      if (flag1) {
-         this.field_110717_i.func_78785_a(p_78088_7_);
-         this.field_110696_I.func_78785_a(p_78088_7_);
-         this.field_110697_J.func_78785_a(p_78088_7_);
-         this.field_110698_K.func_78785_a(p_78088_7_);
-         this.field_110691_L.func_78785_a(p_78088_7_);
-         this.field_110692_M.func_78785_a(p_78088_7_);
-         this.field_110693_N.func_78785_a(p_78088_7_);
-         this.field_110694_O.func_78785_a(p_78088_7_);
-         this.field_110700_P.func_78785_a(p_78088_7_);
-         this.field_110699_Q.func_78785_a(p_78088_7_);
-         if (flag4) {
-            this.field_110702_R.func_78785_a(p_78088_7_);
-            this.field_110701_S.func_78785_a(p_78088_7_);
-         }
-      }
+    /** The right ear box for the mule model. */
+    private final ModelRenderer muleRightEar;
+    private final ModelRenderer neck;
 
-      if (flag) {
-         GlStateManager.func_179094_E();
-         GlStateManager.func_179152_a(f1, 0.5F + f1 * 0.5F, f1);
-         GlStateManager.func_179109_b(0.0F, 0.95F * (1.0F - f1), 0.0F);
-      }
+    /** The box for the horse's ropes on its face. */
+    private final ModelRenderer horseFaceRopes;
+    private final ModelRenderer mane;
+    private final ModelRenderer body;
+    private final ModelRenderer tailBase;
+    private final ModelRenderer tailMiddle;
+    private final ModelRenderer tailTip;
+    private final ModelRenderer backLeftLeg;
+    private final ModelRenderer backLeftShin;
+    private final ModelRenderer backLeftHoof;
+    private final ModelRenderer backRightLeg;
+    private final ModelRenderer backRightShin;
+    private final ModelRenderer backRightHoof;
+    private final ModelRenderer frontLeftLeg;
+    private final ModelRenderer frontLeftShin;
+    private final ModelRenderer frontLeftHoof;
+    private final ModelRenderer frontRightLeg;
+    private final ModelRenderer frontRightShin;
+    private final ModelRenderer frontRightHoof;
 
-      this.field_110711_o.func_78785_a(p_78088_7_);
-      this.field_110719_v.func_78785_a(p_78088_7_);
-      this.field_110718_w.func_78785_a(p_78088_7_);
-      this.field_110722_x.func_78785_a(p_78088_7_);
-      this.field_110721_y.func_78785_a(p_78088_7_);
-      this.field_110720_z.func_78785_a(p_78088_7_);
-      this.field_110688_A.func_78785_a(p_78088_7_);
-      this.field_110689_B.func_78785_a(p_78088_7_);
-      this.field_110690_C.func_78785_a(p_78088_7_);
-      this.field_110684_D.func_78785_a(p_78088_7_);
-      this.field_110685_E.func_78785_a(p_78088_7_);
-      this.field_110686_F.func_78785_a(p_78088_7_);
-      if (flag) {
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179094_E();
-         GlStateManager.func_179152_a(f1, f1, f1);
-         GlStateManager.func_179109_b(0.0F, 1.35F * (1.0F - f1), 0.0F);
-      }
+    /** The left chest box on the mule model. */
+    private final ModelRenderer muleLeftChest;
 
-      this.field_110715_k.func_78785_a(p_78088_7_);
-      this.field_110712_l.func_78785_a(p_78088_7_);
-      this.field_110713_m.func_78785_a(p_78088_7_);
-      this.field_110710_n.func_78785_a(p_78088_7_);
-      this.field_110716_h.func_78785_a(p_78088_7_);
-      this.field_110714_j.func_78785_a(p_78088_7_);
-      if (flag) {
-         GlStateManager.func_179121_F();
-         GlStateManager.func_179094_E();
-         float f2 = 0.5F + f1 * f1 * 0.5F;
-         GlStateManager.func_179152_a(f2, f2, f2);
-         if (f <= 0.0F) {
-            GlStateManager.func_179109_b(0.0F, 1.35F * (1.0F - f1), 0.0F);
-         } else {
-            GlStateManager.func_179109_b(0.0F, 0.9F * (1.0F - f1) * f + 1.35F * (1.0F - f1) * (1.0F - f), 0.15F * (1.0F - f1) * f);
-         }
-      }
+    /** The right chest box on the mule model. */
+    private final ModelRenderer muleRightChest;
+    private final ModelRenderer horseSaddleBottom;
+    private final ModelRenderer horseSaddleFront;
+    private final ModelRenderer horseSaddleBack;
+    private final ModelRenderer horseLeftSaddleRope;
+    private final ModelRenderer horseLeftSaddleMetal;
+    private final ModelRenderer horseRightSaddleRope;
+    private final ModelRenderer horseRightSaddleMetal;
 
-      if (flag2) {
-         this.field_110703_f.func_78785_a(p_78088_7_);
-         this.field_110704_g.func_78785_a(p_78088_7_);
-      } else {
-         this.field_110705_d.func_78785_a(p_78088_7_);
-         this.field_110706_e.func_78785_a(p_78088_7_);
-      }
+    /** The left metal connected to the horse's face ropes. */
+    private final ModelRenderer horseLeftFaceMetal;
 
-      this.field_110709_a.func_78785_a(p_78088_7_);
-      if (flag) {
-         GlStateManager.func_179121_F();
-      }
+    /** The right metal connected to the horse's face ropes. */
+    private final ModelRenderer horseRightFaceMetal;
+    private final ModelRenderer horseLeftRein;
+    private final ModelRenderer horseRightRein;
 
-      if (flag3) {
-         this.field_110687_G.func_78785_a(p_78088_7_);
-         this.field_110695_H.func_78785_a(p_78088_7_);
-      }
+    public ModelHorse()
+    {
+        this.textureWidth = 128;
+        this.textureHeight = 128;
+        this.body = new ModelRenderer(this, 0, 34);
+        this.body.addBox(-5.0F, -8.0F, -19.0F, 10, 10, 24);
+        this.body.setRotationPoint(0.0F, 11.0F, 9.0F);
+        this.tailBase = new ModelRenderer(this, 44, 0);
+        this.tailBase.addBox(-1.0F, -1.0F, 0.0F, 2, 2, 3);
+        this.tailBase.setRotationPoint(0.0F, 3.0F, 14.0F);
+        this.tailBase.rotateAngleX = -1.134464F;
+        this.tailMiddle = new ModelRenderer(this, 38, 7);
+        this.tailMiddle.addBox(-1.5F, -2.0F, 3.0F, 3, 4, 7);
+        this.tailMiddle.setRotationPoint(0.0F, 3.0F, 14.0F);
+        this.tailMiddle.rotateAngleX = -1.134464F;
+        this.tailTip = new ModelRenderer(this, 24, 3);
+        this.tailTip.addBox(-1.5F, -4.5F, 9.0F, 3, 4, 7);
+        this.tailTip.setRotationPoint(0.0F, 3.0F, 14.0F);
+        this.tailTip.rotateAngleX = -1.3962634F;
+        this.backLeftLeg = new ModelRenderer(this, 78, 29);
+        this.backLeftLeg.addBox(-2.5F, -2.0F, -2.5F, 4, 9, 5);
+        this.backLeftLeg.setRotationPoint(4.0F, 9.0F, 11.0F);
+        this.backLeftShin = new ModelRenderer(this, 78, 43);
+        this.backLeftShin.addBox(-2.0F, 0.0F, -1.5F, 3, 5, 3);
+        this.backLeftShin.setRotationPoint(4.0F, 16.0F, 11.0F);
+        this.backLeftHoof = new ModelRenderer(this, 78, 51);
+        this.backLeftHoof.addBox(-2.5F, 5.1F, -2.0F, 4, 3, 4);
+        this.backLeftHoof.setRotationPoint(4.0F, 16.0F, 11.0F);
+        this.backRightLeg = new ModelRenderer(this, 96, 29);
+        this.backRightLeg.addBox(-1.5F, -2.0F, -2.5F, 4, 9, 5);
+        this.backRightLeg.setRotationPoint(-4.0F, 9.0F, 11.0F);
+        this.backRightShin = new ModelRenderer(this, 96, 43);
+        this.backRightShin.addBox(-1.0F, 0.0F, -1.5F, 3, 5, 3);
+        this.backRightShin.setRotationPoint(-4.0F, 16.0F, 11.0F);
+        this.backRightHoof = new ModelRenderer(this, 96, 51);
+        this.backRightHoof.addBox(-1.5F, 5.1F, -2.0F, 4, 3, 4);
+        this.backRightHoof.setRotationPoint(-4.0F, 16.0F, 11.0F);
+        this.frontLeftLeg = new ModelRenderer(this, 44, 29);
+        this.frontLeftLeg.addBox(-1.9F, -1.0F, -2.1F, 3, 8, 4);
+        this.frontLeftLeg.setRotationPoint(4.0F, 9.0F, -8.0F);
+        this.frontLeftShin = new ModelRenderer(this, 44, 41);
+        this.frontLeftShin.addBox(-1.9F, 0.0F, -1.6F, 3, 5, 3);
+        this.frontLeftShin.setRotationPoint(4.0F, 16.0F, -8.0F);
+        this.frontLeftHoof = new ModelRenderer(this, 44, 51);
+        this.frontLeftHoof.addBox(-2.4F, 5.1F, -2.1F, 4, 3, 4);
+        this.frontLeftHoof.setRotationPoint(4.0F, 16.0F, -8.0F);
+        this.frontRightLeg = new ModelRenderer(this, 60, 29);
+        this.frontRightLeg.addBox(-1.1F, -1.0F, -2.1F, 3, 8, 4);
+        this.frontRightLeg.setRotationPoint(-4.0F, 9.0F, -8.0F);
+        this.frontRightShin = new ModelRenderer(this, 60, 41);
+        this.frontRightShin.addBox(-1.1F, 0.0F, -1.6F, 3, 5, 3);
+        this.frontRightShin.setRotationPoint(-4.0F, 16.0F, -8.0F);
+        this.frontRightHoof = new ModelRenderer(this, 60, 51);
+        this.frontRightHoof.addBox(-1.6F, 5.1F, -2.1F, 4, 3, 4);
+        this.frontRightHoof.setRotationPoint(-4.0F, 16.0F, -8.0F);
+        this.head = new ModelRenderer(this, 0, 0);
+        this.head.addBox(-2.5F, -10.0F, -1.5F, 5, 5, 7);
+        this.head.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.head.rotateAngleX = 0.5235988F;
+        this.upperMouth = new ModelRenderer(this, 24, 18);
+        this.upperMouth.addBox(-2.0F, -10.0F, -7.0F, 4, 3, 6);
+        this.upperMouth.setRotationPoint(0.0F, 3.95F, -10.0F);
+        this.upperMouth.rotateAngleX = 0.5235988F;
+        this.lowerMouth = new ModelRenderer(this, 24, 27);
+        this.lowerMouth.addBox(-2.0F, -7.0F, -6.5F, 4, 2, 5);
+        this.lowerMouth.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.lowerMouth.rotateAngleX = 0.5235988F;
+        this.head.addChild(this.upperMouth);
+        this.head.addChild(this.lowerMouth);
+        this.horseLeftEar = new ModelRenderer(this, 0, 0);
+        this.horseLeftEar.addBox(0.45F, -12.0F, 4.0F, 2, 3, 1);
+        this.horseLeftEar.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseLeftEar.rotateAngleX = 0.5235988F;
+        this.horseRightEar = new ModelRenderer(this, 0, 0);
+        this.horseRightEar.addBox(-2.45F, -12.0F, 4.0F, 2, 3, 1);
+        this.horseRightEar.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseRightEar.rotateAngleX = 0.5235988F;
+        this.muleLeftEar = new ModelRenderer(this, 0, 12);
+        this.muleLeftEar.addBox(-2.0F, -16.0F, 4.0F, 2, 7, 1);
+        this.muleLeftEar.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.muleLeftEar.rotateAngleX = 0.5235988F;
+        this.muleLeftEar.rotateAngleZ = 0.2617994F;
+        this.muleRightEar = new ModelRenderer(this, 0, 12);
+        this.muleRightEar.addBox(0.0F, -16.0F, 4.0F, 2, 7, 1);
+        this.muleRightEar.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.muleRightEar.rotateAngleX = 0.5235988F;
+        this.muleRightEar.rotateAngleZ = -0.2617994F;
+        this.neck = new ModelRenderer(this, 0, 12);
+        this.neck.addBox(-2.05F, -9.8F, -2.0F, 4, 14, 8);
+        this.neck.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.neck.rotateAngleX = 0.5235988F;
+        this.muleLeftChest = new ModelRenderer(this, 0, 34);
+        this.muleLeftChest.addBox(-3.0F, 0.0F, 0.0F, 8, 8, 3);
+        this.muleLeftChest.setRotationPoint(-7.5F, 3.0F, 10.0F);
+        this.muleLeftChest.rotateAngleY = ((float)Math.PI / 2F);
+        this.muleRightChest = new ModelRenderer(this, 0, 47);
+        this.muleRightChest.addBox(-3.0F, 0.0F, 0.0F, 8, 8, 3);
+        this.muleRightChest.setRotationPoint(4.5F, 3.0F, 10.0F);
+        this.muleRightChest.rotateAngleY = ((float)Math.PI / 2F);
+        this.horseSaddleBottom = new ModelRenderer(this, 80, 0);
+        this.horseSaddleBottom.addBox(-5.0F, 0.0F, -3.0F, 10, 1, 8);
+        this.horseSaddleBottom.setRotationPoint(0.0F, 2.0F, 2.0F);
+        this.horseSaddleFront = new ModelRenderer(this, 106, 9);
+        this.horseSaddleFront.addBox(-1.5F, -1.0F, -3.0F, 3, 1, 2);
+        this.horseSaddleFront.setRotationPoint(0.0F, 2.0F, 2.0F);
+        this.horseSaddleBack = new ModelRenderer(this, 80, 9);
+        this.horseSaddleBack.addBox(-4.0F, -1.0F, 3.0F, 8, 1, 2);
+        this.horseSaddleBack.setRotationPoint(0.0F, 2.0F, 2.0F);
+        this.horseLeftSaddleMetal = new ModelRenderer(this, 74, 0);
+        this.horseLeftSaddleMetal.addBox(-0.5F, 6.0F, -1.0F, 1, 2, 2);
+        this.horseLeftSaddleMetal.setRotationPoint(5.0F, 3.0F, 2.0F);
+        this.horseLeftSaddleRope = new ModelRenderer(this, 70, 0);
+        this.horseLeftSaddleRope.addBox(-0.5F, 0.0F, -0.5F, 1, 6, 1);
+        this.horseLeftSaddleRope.setRotationPoint(5.0F, 3.0F, 2.0F);
+        this.horseRightSaddleMetal = new ModelRenderer(this, 74, 4);
+        this.horseRightSaddleMetal.addBox(-0.5F, 6.0F, -1.0F, 1, 2, 2);
+        this.horseRightSaddleMetal.setRotationPoint(-5.0F, 3.0F, 2.0F);
+        this.horseRightSaddleRope = new ModelRenderer(this, 80, 0);
+        this.horseRightSaddleRope.addBox(-0.5F, 0.0F, -0.5F, 1, 6, 1);
+        this.horseRightSaddleRope.setRotationPoint(-5.0F, 3.0F, 2.0F);
+        this.horseLeftFaceMetal = new ModelRenderer(this, 74, 13);
+        this.horseLeftFaceMetal.addBox(1.5F, -8.0F, -4.0F, 1, 2, 2);
+        this.horseLeftFaceMetal.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseLeftFaceMetal.rotateAngleX = 0.5235988F;
+        this.horseRightFaceMetal = new ModelRenderer(this, 74, 13);
+        this.horseRightFaceMetal.addBox(-2.5F, -8.0F, -4.0F, 1, 2, 2);
+        this.horseRightFaceMetal.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseRightFaceMetal.rotateAngleX = 0.5235988F;
+        this.horseLeftRein = new ModelRenderer(this, 44, 10);
+        this.horseLeftRein.addBox(2.6F, -6.0F, -6.0F, 0, 3, 16);
+        this.horseLeftRein.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseRightRein = new ModelRenderer(this, 44, 5);
+        this.horseRightRein.addBox(-2.6F, -6.0F, -6.0F, 0, 3, 16);
+        this.horseRightRein.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.mane = new ModelRenderer(this, 58, 0);
+        this.mane.addBox(-1.0F, -11.5F, 5.0F, 2, 16, 4);
+        this.mane.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.mane.rotateAngleX = 0.5235988F;
+        this.horseFaceRopes = new ModelRenderer(this, 80, 12);
+        this.horseFaceRopes.addBox(-2.5F, -10.1F, -7.0F, 5, 5, 12, 0.2F);
+        this.horseFaceRopes.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.horseFaceRopes.rotateAngleX = 0.5235988F;
+    }
 
-   }
+    /**
+     * Sets the models various rotation angles then renders the model.
+     */
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
+    {
+        AbstractHorse abstracthorse = (AbstractHorse)entityIn;
+        float f = abstracthorse.getGrassEatingAmount(0.0F);
+        boolean flag = abstracthorse.isChild();
+        boolean flag1 = !flag && abstracthorse.isHorseSaddled();
+        boolean flag2 = abstracthorse instanceof AbstractChestHorse;
+        boolean flag3 = !flag && flag2 && ((AbstractChestHorse)abstracthorse).func_190695_dh();
+        float f1 = abstracthorse.getHorseSize();
+        boolean flag4 = abstracthorse.isBeingRidden();
 
-   private float func_110683_a(float p_110683_1_, float p_110683_2_, float p_110683_3_) {
-      float f;
-      for(f = p_110683_2_ - p_110683_1_; f < -180.0F; f += 360.0F) {
-         ;
-      }
+        if (flag1)
+        {
+            this.horseFaceRopes.render(scale);
+            this.horseSaddleBottom.render(scale);
+            this.horseSaddleFront.render(scale);
+            this.horseSaddleBack.render(scale);
+            this.horseLeftSaddleRope.render(scale);
+            this.horseLeftSaddleMetal.render(scale);
+            this.horseRightSaddleRope.render(scale);
+            this.horseRightSaddleMetal.render(scale);
+            this.horseLeftFaceMetal.render(scale);
+            this.horseRightFaceMetal.render(scale);
 
-      while(f >= 180.0F) {
-         f -= 360.0F;
-      }
+            if (flag4)
+            {
+                this.horseLeftRein.render(scale);
+                this.horseRightRein.render(scale);
+            }
+        }
 
-      return p_110683_1_ + p_110683_3_ * f;
-   }
+        if (flag)
+        {
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(f1, 0.5F + f1 * 0.5F, f1);
+            GlStateManager.translate(0.0F, 0.95F * (1.0F - f1), 0.0F);
+        }
 
-   public void func_78086_a(EntityLivingBase p_78086_1_, float p_78086_2_, float p_78086_3_, float p_78086_4_) {
-      super.func_78086_a(p_78086_1_, p_78086_2_, p_78086_3_, p_78086_4_);
-      float f = this.func_110683_a(p_78086_1_.field_70760_ar, p_78086_1_.field_70761_aq, p_78086_4_);
-      float f1 = this.func_110683_a(p_78086_1_.field_70758_at, p_78086_1_.field_70759_as, p_78086_4_);
-      float f2 = p_78086_1_.field_70127_C + (p_78086_1_.field_70125_A - p_78086_1_.field_70127_C) * p_78086_4_;
-      float f3 = f1 - f;
-      float f4 = f2 * 0.017453292F;
-      if (f3 > 20.0F) {
-         f3 = 20.0F;
-      }
+        this.backLeftLeg.render(scale);
+        this.backLeftShin.render(scale);
+        this.backLeftHoof.render(scale);
+        this.backRightLeg.render(scale);
+        this.backRightShin.render(scale);
+        this.backRightHoof.render(scale);
+        this.frontLeftLeg.render(scale);
+        this.frontLeftShin.render(scale);
+        this.frontLeftHoof.render(scale);
+        this.frontRightLeg.render(scale);
+        this.frontRightShin.render(scale);
+        this.frontRightHoof.render(scale);
 
-      if (f3 < -20.0F) {
-         f3 = -20.0F;
-      }
+        if (flag)
+        {
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(f1, f1, f1);
+            GlStateManager.translate(0.0F, 1.35F * (1.0F - f1), 0.0F);
+        }
 
-      if (p_78086_3_ > 0.2F) {
-         f4 += MathHelper.func_76134_b(p_78086_2_ * 0.4F) * 0.15F * p_78086_3_;
-      }
+        this.body.render(scale);
+        this.tailBase.render(scale);
+        this.tailMiddle.render(scale);
+        this.tailTip.render(scale);
+        this.neck.render(scale);
+        this.mane.render(scale);
 
-      AbstractHorse abstracthorse = (AbstractHorse)p_78086_1_;
-      float f5 = abstracthorse.func_110258_o(p_78086_4_);
-      float f6 = abstracthorse.func_110223_p(p_78086_4_);
-      float f7 = 1.0F - f6;
-      float f8 = abstracthorse.func_110201_q(p_78086_4_);
-      boolean flag = abstracthorse.field_110278_bp != 0;
-      boolean flag1 = abstracthorse.func_110257_ck();
-      boolean flag2 = abstracthorse.func_184207_aI();
-      float f9 = (float)p_78086_1_.field_70173_aa + p_78086_4_;
-      float f10 = MathHelper.func_76134_b(p_78086_2_ * 0.6662F + 3.1415927F);
-      float f11 = f10 * 0.8F * p_78086_3_;
-      this.field_110709_a.field_78797_d = 4.0F;
-      this.field_110709_a.field_78798_e = -10.0F;
-      this.field_110712_l.field_78797_d = 3.0F;
-      this.field_110713_m.field_78798_e = 14.0F;
-      this.field_110695_H.field_78797_d = 3.0F;
-      this.field_110695_H.field_78798_e = 10.0F;
-      this.field_110715_k.field_78795_f = 0.0F;
-      this.field_110709_a.field_78795_f = 0.5235988F + f4;
-      this.field_110709_a.field_78796_g = f3 * 0.017453292F;
-      this.field_110709_a.field_78795_f = f6 * (0.2617994F + f4) + f5 * 2.1816616F + (1.0F - Math.max(f6, f5)) * this.field_110709_a.field_78795_f;
-      this.field_110709_a.field_78796_g = f6 * f3 * 0.017453292F + (1.0F - Math.max(f6, f5)) * this.field_110709_a.field_78796_g;
-      this.field_110709_a.field_78797_d = f6 * -6.0F + f5 * 11.0F + (1.0F - Math.max(f6, f5)) * this.field_110709_a.field_78797_d;
-      this.field_110709_a.field_78798_e = f6 * -1.0F + f5 * -10.0F + (1.0F - Math.max(f6, f5)) * this.field_110709_a.field_78798_e;
-      this.field_110712_l.field_78797_d = f6 * 9.0F + f7 * this.field_110712_l.field_78797_d;
-      this.field_110713_m.field_78798_e = f6 * 18.0F + f7 * this.field_110713_m.field_78798_e;
-      this.field_110695_H.field_78797_d = f6 * 5.5F + f7 * this.field_110695_H.field_78797_d;
-      this.field_110695_H.field_78798_e = f6 * 15.0F + f7 * this.field_110695_H.field_78798_e;
-      this.field_110715_k.field_78795_f = f6 * -0.7853982F + f7 * this.field_110715_k.field_78795_f;
-      this.field_110705_d.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_110706_e.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_110703_f.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_110704_g.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_110716_h.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_178711_b.field_78797_d = 0.02F;
-      this.field_178712_c.field_78797_d = 0.0F;
-      this.field_110714_j.field_78797_d = this.field_110709_a.field_78797_d;
-      this.field_110705_d.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_110706_e.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_110703_f.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_110704_g.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_110716_h.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_178711_b.field_78798_e = 0.02F - f8;
-      this.field_178712_c.field_78798_e = f8;
-      this.field_110714_j.field_78798_e = this.field_110709_a.field_78798_e;
-      this.field_110705_d.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_110706_e.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_110703_f.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_110704_g.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_110716_h.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_178711_b.field_78795_f = -0.09424778F * f8;
-      this.field_178712_c.field_78795_f = 0.15707964F * f8;
-      this.field_110714_j.field_78795_f = this.field_110709_a.field_78795_f;
-      this.field_110705_d.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_110706_e.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_110703_f.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_110704_g.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_110716_h.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_178711_b.field_78796_g = 0.0F;
-      this.field_178712_c.field_78796_g = 0.0F;
-      this.field_110714_j.field_78796_g = this.field_110709_a.field_78796_g;
-      this.field_110687_G.field_78795_f = f11 / 5.0F;
-      this.field_110695_H.field_78795_f = -f11 / 5.0F;
-      float f12 = 0.2617994F * f6;
-      float f13 = MathHelper.func_76134_b(f9 * 0.6F + 3.1415927F);
-      this.field_110688_A.field_78797_d = -2.0F * f6 + 9.0F * f7;
-      this.field_110688_A.field_78798_e = -2.0F * f6 + -8.0F * f7;
-      this.field_110684_D.field_78797_d = this.field_110688_A.field_78797_d;
-      this.field_110684_D.field_78798_e = this.field_110688_A.field_78798_e;
-      this.field_110719_v.field_78797_d = this.field_110711_o.field_78797_d + MathHelper.func_76126_a(1.5707964F + f12 + f7 * -f10 * 0.5F * p_78086_3_) * 7.0F;
-      this.field_110719_v.field_78798_e = this.field_110711_o.field_78798_e + MathHelper.func_76134_b(-1.5707964F + f12 + f7 * -f10 * 0.5F * p_78086_3_) * 7.0F;
-      this.field_110721_y.field_78797_d = this.field_110722_x.field_78797_d + MathHelper.func_76126_a(1.5707964F + f12 + f7 * f10 * 0.5F * p_78086_3_) * 7.0F;
-      this.field_110721_y.field_78798_e = this.field_110722_x.field_78798_e + MathHelper.func_76134_b(-1.5707964F + f12 + f7 * f10 * 0.5F * p_78086_3_) * 7.0F;
-      float f14 = (-1.0471976F + f13) * f6 + f11 * f7;
-      float f15 = (-1.0471976F - f13) * f6 + -f11 * f7;
-      this.field_110689_B.field_78797_d = this.field_110688_A.field_78797_d + MathHelper.func_76126_a(1.5707964F + f14) * 7.0F;
-      this.field_110689_B.field_78798_e = this.field_110688_A.field_78798_e + MathHelper.func_76134_b(-1.5707964F + f14) * 7.0F;
-      this.field_110685_E.field_78797_d = this.field_110684_D.field_78797_d + MathHelper.func_76126_a(1.5707964F + f15) * 7.0F;
-      this.field_110685_E.field_78798_e = this.field_110684_D.field_78798_e + MathHelper.func_76134_b(-1.5707964F + f15) * 7.0F;
-      this.field_110711_o.field_78795_f = f12 + -f10 * 0.5F * p_78086_3_ * f7;
-      this.field_110719_v.field_78795_f = -0.08726646F * f6 + (-f10 * 0.5F * p_78086_3_ - Math.max(0.0F, f10 * 0.5F * p_78086_3_)) * f7;
-      this.field_110718_w.field_78795_f = this.field_110719_v.field_78795_f;
-      this.field_110722_x.field_78795_f = f12 + f10 * 0.5F * p_78086_3_ * f7;
-      this.field_110721_y.field_78795_f = -0.08726646F * f6 + (f10 * 0.5F * p_78086_3_ - Math.max(0.0F, -f10 * 0.5F * p_78086_3_)) * f7;
-      this.field_110720_z.field_78795_f = this.field_110721_y.field_78795_f;
-      this.field_110688_A.field_78795_f = f14;
-      this.field_110689_B.field_78795_f = (this.field_110688_A.field_78795_f + 3.1415927F * Math.max(0.0F, 0.2F + f13 * 0.2F)) * f6 + (f11 + Math.max(0.0F, f10 * 0.5F * p_78086_3_)) * f7;
-      this.field_110690_C.field_78795_f = this.field_110689_B.field_78795_f;
-      this.field_110684_D.field_78795_f = f15;
-      this.field_110685_E.field_78795_f = (this.field_110684_D.field_78795_f + 3.1415927F * Math.max(0.0F, 0.2F - f13 * 0.2F)) * f6 + (-f11 + Math.max(0.0F, -f10 * 0.5F * p_78086_3_)) * f7;
-      this.field_110686_F.field_78795_f = this.field_110685_E.field_78795_f;
-      this.field_110718_w.field_78797_d = this.field_110719_v.field_78797_d;
-      this.field_110718_w.field_78798_e = this.field_110719_v.field_78798_e;
-      this.field_110720_z.field_78797_d = this.field_110721_y.field_78797_d;
-      this.field_110720_z.field_78798_e = this.field_110721_y.field_78798_e;
-      this.field_110690_C.field_78797_d = this.field_110689_B.field_78797_d;
-      this.field_110690_C.field_78798_e = this.field_110689_B.field_78798_e;
-      this.field_110686_F.field_78797_d = this.field_110685_E.field_78797_d;
-      this.field_110686_F.field_78798_e = this.field_110685_E.field_78798_e;
-      if (flag1) {
-         this.field_110696_I.field_78797_d = f6 * 0.5F + f7 * 2.0F;
-         this.field_110696_I.field_78798_e = f6 * 11.0F + f7 * 2.0F;
-         this.field_110697_J.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110698_K.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110691_L.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110693_N.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110692_M.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110694_O.field_78797_d = this.field_110696_I.field_78797_d;
-         this.field_110687_G.field_78797_d = this.field_110695_H.field_78797_d;
-         this.field_110697_J.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110698_K.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110691_L.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110693_N.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110692_M.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110694_O.field_78798_e = this.field_110696_I.field_78798_e;
-         this.field_110687_G.field_78798_e = this.field_110695_H.field_78798_e;
-         this.field_110696_I.field_78795_f = this.field_110715_k.field_78795_f;
-         this.field_110697_J.field_78795_f = this.field_110715_k.field_78795_f;
-         this.field_110698_K.field_78795_f = this.field_110715_k.field_78795_f;
-         this.field_110702_R.field_78797_d = this.field_110709_a.field_78797_d;
-         this.field_110701_S.field_78797_d = this.field_110709_a.field_78797_d;
-         this.field_110717_i.field_78797_d = this.field_110709_a.field_78797_d;
-         this.field_110700_P.field_78797_d = this.field_110709_a.field_78797_d;
-         this.field_110699_Q.field_78797_d = this.field_110709_a.field_78797_d;
-         this.field_110702_R.field_78798_e = this.field_110709_a.field_78798_e;
-         this.field_110701_S.field_78798_e = this.field_110709_a.field_78798_e;
-         this.field_110717_i.field_78798_e = this.field_110709_a.field_78798_e;
-         this.field_110700_P.field_78798_e = this.field_110709_a.field_78798_e;
-         this.field_110699_Q.field_78798_e = this.field_110709_a.field_78798_e;
-         this.field_110702_R.field_78795_f = f4;
-         this.field_110701_S.field_78795_f = f4;
-         this.field_110717_i.field_78795_f = this.field_110709_a.field_78795_f;
-         this.field_110700_P.field_78795_f = this.field_110709_a.field_78795_f;
-         this.field_110699_Q.field_78795_f = this.field_110709_a.field_78795_f;
-         this.field_110717_i.field_78796_g = this.field_110709_a.field_78796_g;
-         this.field_110700_P.field_78796_g = this.field_110709_a.field_78796_g;
-         this.field_110702_R.field_78796_g = this.field_110709_a.field_78796_g;
-         this.field_110699_Q.field_78796_g = this.field_110709_a.field_78796_g;
-         this.field_110701_S.field_78796_g = this.field_110709_a.field_78796_g;
-         if (flag2) {
-            this.field_110691_L.field_78795_f = -1.0471976F;
-            this.field_110692_M.field_78795_f = -1.0471976F;
-            this.field_110693_N.field_78795_f = -1.0471976F;
-            this.field_110694_O.field_78795_f = -1.0471976F;
-            this.field_110691_L.field_78808_h = 0.0F;
-            this.field_110692_M.field_78808_h = 0.0F;
-            this.field_110693_N.field_78808_h = 0.0F;
-            this.field_110694_O.field_78808_h = 0.0F;
-         } else {
-            this.field_110691_L.field_78795_f = f11 / 3.0F;
-            this.field_110692_M.field_78795_f = f11 / 3.0F;
-            this.field_110693_N.field_78795_f = f11 / 3.0F;
-            this.field_110694_O.field_78795_f = f11 / 3.0F;
-            this.field_110691_L.field_78808_h = f11 / 5.0F;
-            this.field_110692_M.field_78808_h = f11 / 5.0F;
-            this.field_110693_N.field_78808_h = -f11 / 5.0F;
-            this.field_110694_O.field_78808_h = -f11 / 5.0F;
-         }
-      }
+        if (flag)
+        {
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            float f2 = 0.5F + f1 * f1 * 0.5F;
+            GlStateManager.scale(f2, f2, f2);
 
-      f12 = -1.3089969F + p_78086_3_ * 1.5F;
-      if (f12 > 0.0F) {
-         f12 = 0.0F;
-      }
+            if (f <= 0.0F)
+            {
+                GlStateManager.translate(0.0F, 1.35F * (1.0F - f1), 0.0F);
+            }
+            else
+            {
+                GlStateManager.translate(0.0F, 0.9F * (1.0F - f1) * f + 1.35F * (1.0F - f1) * (1.0F - f), 0.15F * (1.0F - f1) * f);
+            }
+        }
 
-      if (flag) {
-         this.field_110712_l.field_78796_g = MathHelper.func_76134_b(f9 * 0.7F);
-         f12 = 0.0F;
-      } else {
-         this.field_110712_l.field_78796_g = 0.0F;
-      }
+        if (flag2)
+        {
+            this.muleLeftEar.render(scale);
+            this.muleRightEar.render(scale);
+        }
+        else
+        {
+            this.horseLeftEar.render(scale);
+            this.horseRightEar.render(scale);
+        }
 
-      this.field_110713_m.field_78796_g = this.field_110712_l.field_78796_g;
-      this.field_110710_n.field_78796_g = this.field_110712_l.field_78796_g;
-      this.field_110713_m.field_78797_d = this.field_110712_l.field_78797_d;
-      this.field_110710_n.field_78797_d = this.field_110712_l.field_78797_d;
-      this.field_110713_m.field_78798_e = this.field_110712_l.field_78798_e;
-      this.field_110710_n.field_78798_e = this.field_110712_l.field_78798_e;
-      this.field_110712_l.field_78795_f = f12;
-      this.field_110713_m.field_78795_f = f12;
-      this.field_110710_n.field_78795_f = -0.2617994F + f12;
-   }
+        this.head.render(scale);
+
+        if (flag)
+        {
+            GlStateManager.popMatrix();
+        }
+
+        if (flag3)
+        {
+            this.muleLeftChest.render(scale);
+            this.muleRightChest.render(scale);
+        }
+    }
+
+    /**
+     * Fixes and offsets a rotation in the ModelHorse class.
+     */
+    private float updateHorseRotation(float p_110683_1_, float p_110683_2_, float p_110683_3_)
+    {
+        float f;
+
+        for (f = p_110683_2_ - p_110683_1_; f < -180.0F; f += 360.0F)
+        {
+            ;
+        }
+
+        while (f >= 180.0F)
+        {
+            f -= 360.0F;
+        }
+
+        return p_110683_1_ + p_110683_3_ * f;
+    }
+
+    /**
+     * Used for easily adding entity-dependent animations. The second and third float params here are the same second
+     * and third as in the setRotationAngles method.
+     */
+    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime)
+    {
+        super.setLivingAnimations(entitylivingbaseIn, p_78086_2_, p_78086_3_, partialTickTime);
+        float f = this.updateHorseRotation(entitylivingbaseIn.prevRenderYawOffset, entitylivingbaseIn.renderYawOffset, partialTickTime);
+        float f1 = this.updateHorseRotation(entitylivingbaseIn.prevRotationYawHead, entitylivingbaseIn.rotationYawHead, partialTickTime);
+        float f2 = entitylivingbaseIn.prevRotationPitch + (entitylivingbaseIn.rotationPitch - entitylivingbaseIn.prevRotationPitch) * partialTickTime;
+        float f3 = f1 - f;
+        float f4 = f2 * 0.017453292F;
+
+        if (f3 > 20.0F)
+        {
+            f3 = 20.0F;
+        }
+
+        if (f3 < -20.0F)
+        {
+            f3 = -20.0F;
+        }
+
+        if (p_78086_3_ > 0.2F)
+        {
+            f4 += MathHelper.cos(p_78086_2_ * 0.4F) * 0.15F * p_78086_3_;
+        }
+
+        AbstractHorse abstracthorse = (AbstractHorse)entitylivingbaseIn;
+        float f5 = abstracthorse.getGrassEatingAmount(partialTickTime);
+        float f6 = abstracthorse.getRearingAmount(partialTickTime);
+        float f7 = 1.0F - f6;
+        float f8 = abstracthorse.getMouthOpennessAngle(partialTickTime);
+        boolean flag = abstracthorse.tailCounter != 0;
+        boolean flag1 = abstracthorse.isHorseSaddled();
+        boolean flag2 = abstracthorse.isBeingRidden();
+        float f9 = (float)entitylivingbaseIn.ticksExisted + partialTickTime;
+        float f10 = MathHelper.cos(p_78086_2_ * 0.6662F + (float)Math.PI);
+        float f11 = f10 * 0.8F * p_78086_3_;
+        this.head.rotationPointY = 4.0F;
+        this.head.rotationPointZ = -10.0F;
+        this.tailBase.rotationPointY = 3.0F;
+        this.tailMiddle.rotationPointZ = 14.0F;
+        this.muleRightChest.rotationPointY = 3.0F;
+        this.muleRightChest.rotationPointZ = 10.0F;
+        this.body.rotateAngleX = 0.0F;
+        this.head.rotateAngleX = 0.5235988F + f4;
+        this.head.rotateAngleY = f3 * 0.017453292F;
+        this.head.rotateAngleX = f6 * (0.2617994F + f4) + f5 * 2.1816616F + (1.0F - Math.max(f6, f5)) * this.head.rotateAngleX;
+        this.head.rotateAngleY = f6 * f3 * 0.017453292F + (1.0F - Math.max(f6, f5)) * this.head.rotateAngleY;
+        this.head.rotationPointY = f6 * -6.0F + f5 * 11.0F + (1.0F - Math.max(f6, f5)) * this.head.rotationPointY;
+        this.head.rotationPointZ = f6 * -1.0F + f5 * -10.0F + (1.0F - Math.max(f6, f5)) * this.head.rotationPointZ;
+        this.tailBase.rotationPointY = f6 * 9.0F + f7 * this.tailBase.rotationPointY;
+        this.tailMiddle.rotationPointZ = f6 * 18.0F + f7 * this.tailMiddle.rotationPointZ;
+        this.muleRightChest.rotationPointY = f6 * 5.5F + f7 * this.muleRightChest.rotationPointY;
+        this.muleRightChest.rotationPointZ = f6 * 15.0F + f7 * this.muleRightChest.rotationPointZ;
+        this.body.rotateAngleX = f6 * -((float)Math.PI / 4F) + f7 * this.body.rotateAngleX;
+        this.horseLeftEar.rotationPointY = this.head.rotationPointY;
+        this.horseRightEar.rotationPointY = this.head.rotationPointY;
+        this.muleLeftEar.rotationPointY = this.head.rotationPointY;
+        this.muleRightEar.rotationPointY = this.head.rotationPointY;
+        this.neck.rotationPointY = this.head.rotationPointY;
+        this.upperMouth.rotationPointY = 0.02F;
+        this.lowerMouth.rotationPointY = 0.0F;
+        this.mane.rotationPointY = this.head.rotationPointY;
+        this.horseLeftEar.rotationPointZ = this.head.rotationPointZ;
+        this.horseRightEar.rotationPointZ = this.head.rotationPointZ;
+        this.muleLeftEar.rotationPointZ = this.head.rotationPointZ;
+        this.muleRightEar.rotationPointZ = this.head.rotationPointZ;
+        this.neck.rotationPointZ = this.head.rotationPointZ;
+        this.upperMouth.rotationPointZ = 0.02F - f8;
+        this.lowerMouth.rotationPointZ = f8;
+        this.mane.rotationPointZ = this.head.rotationPointZ;
+        this.horseLeftEar.rotateAngleX = this.head.rotateAngleX;
+        this.horseRightEar.rotateAngleX = this.head.rotateAngleX;
+        this.muleLeftEar.rotateAngleX = this.head.rotateAngleX;
+        this.muleRightEar.rotateAngleX = this.head.rotateAngleX;
+        this.neck.rotateAngleX = this.head.rotateAngleX;
+        this.upperMouth.rotateAngleX = -0.09424778F * f8;
+        this.lowerMouth.rotateAngleX = 0.15707964F * f8;
+        this.mane.rotateAngleX = this.head.rotateAngleX;
+        this.horseLeftEar.rotateAngleY = this.head.rotateAngleY;
+        this.horseRightEar.rotateAngleY = this.head.rotateAngleY;
+        this.muleLeftEar.rotateAngleY = this.head.rotateAngleY;
+        this.muleRightEar.rotateAngleY = this.head.rotateAngleY;
+        this.neck.rotateAngleY = this.head.rotateAngleY;
+        this.upperMouth.rotateAngleY = 0.0F;
+        this.lowerMouth.rotateAngleY = 0.0F;
+        this.mane.rotateAngleY = this.head.rotateAngleY;
+        this.muleLeftChest.rotateAngleX = f11 / 5.0F;
+        this.muleRightChest.rotateAngleX = -f11 / 5.0F;
+        float f12 = 0.2617994F * f6;
+        float f13 = MathHelper.cos(f9 * 0.6F + (float)Math.PI);
+        this.frontLeftLeg.rotationPointY = -2.0F * f6 + 9.0F * f7;
+        this.frontLeftLeg.rotationPointZ = -2.0F * f6 + -8.0F * f7;
+        this.frontRightLeg.rotationPointY = this.frontLeftLeg.rotationPointY;
+        this.frontRightLeg.rotationPointZ = this.frontLeftLeg.rotationPointZ;
+        this.backLeftShin.rotationPointY = this.backLeftLeg.rotationPointY + MathHelper.sin(((float)Math.PI / 2F) + f12 + f7 * -f10 * 0.5F * p_78086_3_) * 7.0F;
+        this.backLeftShin.rotationPointZ = this.backLeftLeg.rotationPointZ + MathHelper.cos(-((float)Math.PI / 2F) + f12 + f7 * -f10 * 0.5F * p_78086_3_) * 7.0F;
+        this.backRightShin.rotationPointY = this.backRightLeg.rotationPointY + MathHelper.sin(((float)Math.PI / 2F) + f12 + f7 * f10 * 0.5F * p_78086_3_) * 7.0F;
+        this.backRightShin.rotationPointZ = this.backRightLeg.rotationPointZ + MathHelper.cos(-((float)Math.PI / 2F) + f12 + f7 * f10 * 0.5F * p_78086_3_) * 7.0F;
+        float f14 = (-1.0471976F + f13) * f6 + f11 * f7;
+        float f15 = (-1.0471976F - f13) * f6 + -f11 * f7;
+        this.frontLeftShin.rotationPointY = this.frontLeftLeg.rotationPointY + MathHelper.sin(((float)Math.PI / 2F) + f14) * 7.0F;
+        this.frontLeftShin.rotationPointZ = this.frontLeftLeg.rotationPointZ + MathHelper.cos(-((float)Math.PI / 2F) + f14) * 7.0F;
+        this.frontRightShin.rotationPointY = this.frontRightLeg.rotationPointY + MathHelper.sin(((float)Math.PI / 2F) + f15) * 7.0F;
+        this.frontRightShin.rotationPointZ = this.frontRightLeg.rotationPointZ + MathHelper.cos(-((float)Math.PI / 2F) + f15) * 7.0F;
+        this.backLeftLeg.rotateAngleX = f12 + -f10 * 0.5F * p_78086_3_ * f7;
+        this.backLeftShin.rotateAngleX = -0.08726646F * f6 + (-f10 * 0.5F * p_78086_3_ - Math.max(0.0F, f10 * 0.5F * p_78086_3_)) * f7;
+        this.backLeftHoof.rotateAngleX = this.backLeftShin.rotateAngleX;
+        this.backRightLeg.rotateAngleX = f12 + f10 * 0.5F * p_78086_3_ * f7;
+        this.backRightShin.rotateAngleX = -0.08726646F * f6 + (f10 * 0.5F * p_78086_3_ - Math.max(0.0F, -f10 * 0.5F * p_78086_3_)) * f7;
+        this.backRightHoof.rotateAngleX = this.backRightShin.rotateAngleX;
+        this.frontLeftLeg.rotateAngleX = f14;
+        this.frontLeftShin.rotateAngleX = (this.frontLeftLeg.rotateAngleX + (float)Math.PI * Math.max(0.0F, 0.2F + f13 * 0.2F)) * f6 + (f11 + Math.max(0.0F, f10 * 0.5F * p_78086_3_)) * f7;
+        this.frontLeftHoof.rotateAngleX = this.frontLeftShin.rotateAngleX;
+        this.frontRightLeg.rotateAngleX = f15;
+        this.frontRightShin.rotateAngleX = (this.frontRightLeg.rotateAngleX + (float)Math.PI * Math.max(0.0F, 0.2F - f13 * 0.2F)) * f6 + (-f11 + Math.max(0.0F, -f10 * 0.5F * p_78086_3_)) * f7;
+        this.frontRightHoof.rotateAngleX = this.frontRightShin.rotateAngleX;
+        this.backLeftHoof.rotationPointY = this.backLeftShin.rotationPointY;
+        this.backLeftHoof.rotationPointZ = this.backLeftShin.rotationPointZ;
+        this.backRightHoof.rotationPointY = this.backRightShin.rotationPointY;
+        this.backRightHoof.rotationPointZ = this.backRightShin.rotationPointZ;
+        this.frontLeftHoof.rotationPointY = this.frontLeftShin.rotationPointY;
+        this.frontLeftHoof.rotationPointZ = this.frontLeftShin.rotationPointZ;
+        this.frontRightHoof.rotationPointY = this.frontRightShin.rotationPointY;
+        this.frontRightHoof.rotationPointZ = this.frontRightShin.rotationPointZ;
+
+        if (flag1)
+        {
+            this.horseSaddleBottom.rotationPointY = f6 * 0.5F + f7 * 2.0F;
+            this.horseSaddleBottom.rotationPointZ = f6 * 11.0F + f7 * 2.0F;
+            this.horseSaddleFront.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.horseSaddleBack.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.horseLeftSaddleRope.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.horseRightSaddleRope.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.horseLeftSaddleMetal.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.horseRightSaddleMetal.rotationPointY = this.horseSaddleBottom.rotationPointY;
+            this.muleLeftChest.rotationPointY = this.muleRightChest.rotationPointY;
+            this.horseSaddleFront.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.horseSaddleBack.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.horseLeftSaddleRope.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.horseRightSaddleRope.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.horseLeftSaddleMetal.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.horseRightSaddleMetal.rotationPointZ = this.horseSaddleBottom.rotationPointZ;
+            this.muleLeftChest.rotationPointZ = this.muleRightChest.rotationPointZ;
+            this.horseSaddleBottom.rotateAngleX = this.body.rotateAngleX;
+            this.horseSaddleFront.rotateAngleX = this.body.rotateAngleX;
+            this.horseSaddleBack.rotateAngleX = this.body.rotateAngleX;
+            this.horseLeftRein.rotationPointY = this.head.rotationPointY;
+            this.horseRightRein.rotationPointY = this.head.rotationPointY;
+            this.horseFaceRopes.rotationPointY = this.head.rotationPointY;
+            this.horseLeftFaceMetal.rotationPointY = this.head.rotationPointY;
+            this.horseRightFaceMetal.rotationPointY = this.head.rotationPointY;
+            this.horseLeftRein.rotationPointZ = this.head.rotationPointZ;
+            this.horseRightRein.rotationPointZ = this.head.rotationPointZ;
+            this.horseFaceRopes.rotationPointZ = this.head.rotationPointZ;
+            this.horseLeftFaceMetal.rotationPointZ = this.head.rotationPointZ;
+            this.horseRightFaceMetal.rotationPointZ = this.head.rotationPointZ;
+            this.horseLeftRein.rotateAngleX = f4;
+            this.horseRightRein.rotateAngleX = f4;
+            this.horseFaceRopes.rotateAngleX = this.head.rotateAngleX;
+            this.horseLeftFaceMetal.rotateAngleX = this.head.rotateAngleX;
+            this.horseRightFaceMetal.rotateAngleX = this.head.rotateAngleX;
+            this.horseFaceRopes.rotateAngleY = this.head.rotateAngleY;
+            this.horseLeftFaceMetal.rotateAngleY = this.head.rotateAngleY;
+            this.horseLeftRein.rotateAngleY = this.head.rotateAngleY;
+            this.horseRightFaceMetal.rotateAngleY = this.head.rotateAngleY;
+            this.horseRightRein.rotateAngleY = this.head.rotateAngleY;
+
+            if (flag2)
+            {
+                this.horseLeftSaddleRope.rotateAngleX = -1.0471976F;
+                this.horseLeftSaddleMetal.rotateAngleX = -1.0471976F;
+                this.horseRightSaddleRope.rotateAngleX = -1.0471976F;
+                this.horseRightSaddleMetal.rotateAngleX = -1.0471976F;
+                this.horseLeftSaddleRope.rotateAngleZ = 0.0F;
+                this.horseLeftSaddleMetal.rotateAngleZ = 0.0F;
+                this.horseRightSaddleRope.rotateAngleZ = 0.0F;
+                this.horseRightSaddleMetal.rotateAngleZ = 0.0F;
+            }
+            else
+            {
+                this.horseLeftSaddleRope.rotateAngleX = f11 / 3.0F;
+                this.horseLeftSaddleMetal.rotateAngleX = f11 / 3.0F;
+                this.horseRightSaddleRope.rotateAngleX = f11 / 3.0F;
+                this.horseRightSaddleMetal.rotateAngleX = f11 / 3.0F;
+                this.horseLeftSaddleRope.rotateAngleZ = f11 / 5.0F;
+                this.horseLeftSaddleMetal.rotateAngleZ = f11 / 5.0F;
+                this.horseRightSaddleRope.rotateAngleZ = -f11 / 5.0F;
+                this.horseRightSaddleMetal.rotateAngleZ = -f11 / 5.0F;
+            }
+        }
+
+        f12 = -1.3089969F + p_78086_3_ * 1.5F;
+
+        if (f12 > 0.0F)
+        {
+            f12 = 0.0F;
+        }
+
+        if (flag)
+        {
+            this.tailBase.rotateAngleY = MathHelper.cos(f9 * 0.7F);
+            f12 = 0.0F;
+        }
+        else
+        {
+            this.tailBase.rotateAngleY = 0.0F;
+        }
+
+        this.tailMiddle.rotateAngleY = this.tailBase.rotateAngleY;
+        this.tailTip.rotateAngleY = this.tailBase.rotateAngleY;
+        this.tailMiddle.rotationPointY = this.tailBase.rotationPointY;
+        this.tailTip.rotationPointY = this.tailBase.rotationPointY;
+        this.tailMiddle.rotationPointZ = this.tailBase.rotationPointZ;
+        this.tailTip.rotationPointZ = this.tailBase.rotationPointZ;
+        this.tailBase.rotateAngleX = f12;
+        this.tailMiddle.rotateAngleX = f12;
+        this.tailTip.rotateAngleX = -0.2617994F + f12;
+    }
 }

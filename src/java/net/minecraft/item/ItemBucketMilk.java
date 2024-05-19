@@ -12,40 +12,59 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
-public class ItemBucketMilk extends Item {
-   public ItemBucketMilk() {
-      this.func_77625_d(1);
-      this.func_77637_a(CreativeTabs.field_78026_f);
-   }
+public class ItemBucketMilk extends Item
+{
+    public ItemBucketMilk()
+    {
+        this.setMaxStackSize(1);
+        this.setCreativeTab(CreativeTabs.MISC);
+    }
 
-   public ItemStack func_77654_b(ItemStack p_77654_1_, World p_77654_2_, EntityLivingBase p_77654_3_) {
-      if (p_77654_3_ instanceof EntityPlayerMP) {
-         EntityPlayerMP entityplayermp = (EntityPlayerMP)p_77654_3_;
-         CriteriaTriggers.field_193138_y.func_193148_a(entityplayermp, p_77654_1_);
-         entityplayermp.func_71029_a(StatList.func_188057_b(this));
-      }
+    /**
+     * Called when the player finishes using this Item (E.g. finishes eating.). Not called when the player stops using
+     * the Item before the action is complete.
+     */
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving)
+    {
+        if (entityLiving instanceof EntityPlayerMP)
+        {
+            EntityPlayerMP entityplayermp = (EntityPlayerMP)entityLiving;
+            CriteriaTriggers.field_193138_y.func_193148_a(entityplayermp, stack);
+            entityplayermp.addStat(StatList.getObjectUseStats(this));
+        }
 
-      if (p_77654_3_ instanceof EntityPlayer && !((EntityPlayer)p_77654_3_).field_71075_bZ.field_75098_d) {
-         p_77654_1_.func_190918_g(1);
-      }
+        if (entityLiving instanceof EntityPlayer && !((EntityPlayer)entityLiving).capabilities.isCreativeMode)
+        {
+            stack.func_190918_g(1);
+        }
 
-      if (!p_77654_2_.field_72995_K) {
-         p_77654_3_.func_70674_bp();
-      }
+        if (!worldIn.isRemote)
+        {
+            entityLiving.clearActivePotions();
+        }
 
-      return p_77654_1_.func_190926_b() ? new ItemStack(Items.field_151133_ar) : p_77654_1_;
-   }
+        return stack.func_190926_b() ? new ItemStack(Items.BUCKET) : stack;
+    }
 
-   public int func_77626_a(ItemStack p_77626_1_) {
-      return 32;
-   }
+    /**
+     * How long it takes to use or consume an item
+     */
+    public int getMaxItemUseDuration(ItemStack stack)
+    {
+        return 32;
+    }
 
-   public EnumAction func_77661_b(ItemStack p_77661_1_) {
-      return EnumAction.DRINK;
-   }
+    /**
+     * returns the action that specifies what animation to play when the items is being used
+     */
+    public EnumAction getItemUseAction(ItemStack stack)
+    {
+        return EnumAction.DRINK;
+    }
 
-   public ActionResult<ItemStack> func_77659_a(World p_77659_1_, EntityPlayer p_77659_2_, EnumHand p_77659_3_) {
-      p_77659_2_.func_184598_c(p_77659_3_);
-      return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, p_77659_2_.func_184586_b(p_77659_3_));
-   }
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    {
+        worldIn.setActiveHand(playerIn);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, worldIn.getHeldItem(playerIn));
+    }
 }

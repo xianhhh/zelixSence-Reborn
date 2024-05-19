@@ -42,253 +42,376 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityOcelot extends EntityTameable {
-   private static final DataParameter<Integer> field_184757_bz = EntityDataManager.<Integer>func_187226_a(EntityOcelot.class, DataSerializers.field_187192_b);
-   private EntityAIAvoidEntity<EntityPlayer> field_175545_bm;
-   private EntityAITempt field_70914_e;
+public class EntityOcelot extends EntityTameable
+{
+    private static final DataParameter<Integer> OCELOT_VARIANT = EntityDataManager.<Integer>createKey(EntityOcelot.class, DataSerializers.VARINT);
+    private EntityAIAvoidEntity<EntityPlayer> avoidEntity;
 
-   public EntityOcelot(World p_i1688_1_) {
-      super(p_i1688_1_);
-      this.func_70105_a(0.6F, 0.7F);
-   }
+    /**
+     * The tempt AI task for this mob, used to prevent taming while it is fleeing.
+     */
+    private EntityAITempt aiTempt;
 
-   protected void func_184651_r() {
-      this.field_70911_d = new EntityAISit(this);
-      this.field_70914_e = new EntityAITempt(this, 0.6D, Items.field_151115_aP, true);
-      this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
-      this.field_70714_bg.func_75776_a(2, this.field_70911_d);
-      this.field_70714_bg.func_75776_a(3, this.field_70914_e);
-      this.field_70714_bg.func_75776_a(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 5.0F));
-      this.field_70714_bg.func_75776_a(6, new EntityAIOcelotSit(this, 0.8D));
-      this.field_70714_bg.func_75776_a(7, new EntityAILeapAtTarget(this, 0.3F));
-      this.field_70714_bg.func_75776_a(8, new EntityAIOcelotAttack(this));
-      this.field_70714_bg.func_75776_a(9, new EntityAIMate(this, 0.8D));
-      this.field_70714_bg.func_75776_a(10, new EntityAIWanderAvoidWater(this, 0.8D, 1.0000001E-5F));
-      this.field_70714_bg.func_75776_a(11, new EntityAIWatchClosest(this, EntityPlayer.class, 10.0F));
-      this.field_70715_bh.func_75776_a(1, new EntityAITargetNonTamed(this, EntityChicken.class, false, (Predicate)null));
-   }
+    public EntityOcelot(World worldIn)
+    {
+        super(worldIn);
+        this.setSize(0.6F, 0.7F);
+    }
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-      this.field_70180_af.func_187214_a(field_184757_bz, Integer.valueOf(0));
-   }
+    protected void initEntityAI()
+    {
+        this.aiSit = new EntityAISit(this);
+        this.aiTempt = new EntityAITempt(this, 0.6D, Items.FISH, true);
+        this.tasks.addTask(1, new EntityAISwimming(this));
+        this.tasks.addTask(2, this.aiSit);
+        this.tasks.addTask(3, this.aiTempt);
+        this.tasks.addTask(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 5.0F));
+        this.tasks.addTask(6, new EntityAIOcelotSit(this, 0.8D));
+        this.tasks.addTask(7, new EntityAILeapAtTarget(this, 0.3F));
+        this.tasks.addTask(8, new EntityAIOcelotAttack(this));
+        this.tasks.addTask(9, new EntityAIMate(this, 0.8D));
+        this.tasks.addTask(10, new EntityAIWanderAvoidWater(this, 0.8D, 1.0000001E-5F));
+        this.tasks.addTask(11, new EntityAIWatchClosest(this, EntityPlayer.class, 10.0F));
+        this.targetTasks.addTask(1, new EntityAITargetNonTamed(this, EntityChicken.class, false, (Predicate)null));
+    }
 
-   public void func_70619_bc() {
-      if (this.func_70605_aq().func_75640_a()) {
-         double d0 = this.func_70605_aq().func_75638_b();
-         if (d0 == 0.6D) {
-            this.func_70095_a(true);
-            this.func_70031_b(false);
-         } else if (d0 == 1.33D) {
-            this.func_70095_a(false);
-            this.func_70031_b(true);
-         } else {
-            this.func_70095_a(false);
-            this.func_70031_b(false);
-         }
-      } else {
-         this.func_70095_a(false);
-         this.func_70031_b(false);
-      }
+    protected void entityInit()
+    {
+        super.entityInit();
+        this.dataManager.register(OCELOT_VARIANT, Integer.valueOf(0));
+    }
 
-   }
+    public void updateAITasks()
+    {
+        if (this.getMoveHelper().isUpdating())
+        {
+            double d0 = this.getMoveHelper().getSpeed();
 
-   protected boolean func_70692_ba() {
-      return !this.func_70909_n() && this.field_70173_aa > 2400;
-   }
-
-   protected void func_110147_ax() {
-      super.func_110147_ax();
-      this.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(10.0D);
-      this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111128_a(0.30000001192092896D);
-   }
-
-   public void func_180430_e(float p_180430_1_, float p_180430_2_) {
-   }
-
-   public static void func_189787_b(DataFixer p_189787_0_) {
-      EntityLiving.func_189752_a(p_189787_0_, EntityOcelot.class);
-   }
-
-   public void func_70014_b(NBTTagCompound p_70014_1_) {
-      super.func_70014_b(p_70014_1_);
-      p_70014_1_.func_74768_a("CatType", this.func_70913_u());
-   }
-
-   public void func_70037_a(NBTTagCompound p_70037_1_) {
-      super.func_70037_a(p_70037_1_);
-      this.func_70912_b(p_70037_1_.func_74762_e("CatType"));
-   }
-
-   @Nullable
-   protected SoundEvent func_184639_G() {
-      if (this.func_70909_n()) {
-         if (this.func_70880_s()) {
-            return SoundEvents.field_187645_R;
-         } else {
-            return this.field_70146_Z.nextInt(4) == 0 ? SoundEvents.field_187648_S : SoundEvents.field_187636_O;
-         }
-      } else {
-         return null;
-      }
-   }
-
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      return SoundEvents.field_187642_Q;
-   }
-
-   protected SoundEvent func_184615_bR() {
-      return SoundEvents.field_187639_P;
-   }
-
-   protected float func_70599_aP() {
-      return 0.4F;
-   }
-
-   public boolean func_70652_k(Entity p_70652_1_) {
-      return p_70652_1_.func_70097_a(DamageSource.func_76358_a(this), 3.0F);
-   }
-
-   public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_) {
-      if (this.func_180431_b(p_70097_1_)) {
-         return false;
-      } else {
-         if (this.field_70911_d != null) {
-            this.field_70911_d.func_75270_a(false);
-         }
-
-         return super.func_70097_a(p_70097_1_, p_70097_2_);
-      }
-   }
-
-   @Nullable
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_186402_J;
-   }
-
-   public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_) {
-      ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-      if (this.func_70909_n()) {
-         if (this.func_152114_e(p_184645_1_) && !this.field_70170_p.field_72995_K && !this.func_70877_b(itemstack)) {
-            this.field_70911_d.func_75270_a(!this.func_70906_o());
-         }
-      } else if ((this.field_70914_e == null || this.field_70914_e.func_75277_f()) && itemstack.func_77973_b() == Items.field_151115_aP && p_184645_1_.func_70068_e(this) < 9.0D) {
-         if (!p_184645_1_.field_71075_bZ.field_75098_d) {
-            itemstack.func_190918_g(1);
-         }
-
-         if (!this.field_70170_p.field_72995_K) {
-            if (this.field_70146_Z.nextInt(3) == 0) {
-               this.func_193101_c(p_184645_1_);
-               this.func_70912_b(1 + this.field_70170_p.field_73012_v.nextInt(3));
-               this.func_70908_e(true);
-               this.field_70911_d.func_75270_a(true);
-               this.field_70170_p.func_72960_a(this, (byte)7);
-            } else {
-               this.func_70908_e(false);
-               this.field_70170_p.func_72960_a(this, (byte)6);
+            if (d0 == 0.6D)
+            {
+                this.setSneaking(true);
+                this.setSprinting(false);
             }
-         }
+            else if (d0 == 1.33D)
+            {
+                this.setSneaking(false);
+                this.setSprinting(true);
+            }
+            else
+            {
+                this.setSneaking(false);
+                this.setSprinting(false);
+            }
+        }
+        else
+        {
+            this.setSneaking(false);
+            this.setSprinting(false);
+        }
+    }
 
-         return true;
-      }
+    /**
+     * Determines if an entity can be despawned, used on idle far away entities
+     */
+    protected boolean canDespawn()
+    {
+        return !this.isTamed() && this.ticksExisted > 2400;
+    }
 
-      return super.func_184645_a(p_184645_1_, p_184645_2_);
-   }
+    protected void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
+    }
 
-   public EntityOcelot func_90011_a(EntityAgeable p_90011_1_) {
-      EntityOcelot entityocelot = new EntityOcelot(this.field_70170_p);
-      if (this.func_70909_n()) {
-         entityocelot.func_184754_b(this.func_184753_b());
-         entityocelot.func_70903_f(true);
-         entityocelot.func_70912_b(this.func_70913_u());
-      }
+    public void fall(float distance, float damageMultiplier)
+    {
+    }
 
-      return entityocelot;
-   }
+    public static void registerFixesOcelot(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityOcelot.class);
+    }
 
-   public boolean func_70877_b(ItemStack p_70877_1_) {
-      return p_70877_1_.func_77973_b() == Items.field_151115_aP;
-   }
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    public void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("CatType", this.getTameSkin());
+    }
 
-   public boolean func_70878_b(EntityAnimal p_70878_1_) {
-      if (p_70878_1_ == this) {
-         return false;
-      } else if (!this.func_70909_n()) {
-         return false;
-      } else if (!(p_70878_1_ instanceof EntityOcelot)) {
-         return false;
-      } else {
-         EntityOcelot entityocelot = (EntityOcelot)p_70878_1_;
-         if (!entityocelot.func_70909_n()) {
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
+        this.setTameSkin(compound.getInteger("CatType"));
+    }
+
+    @Nullable
+    protected SoundEvent getAmbientSound()
+    {
+        if (this.isTamed())
+        {
+            if (this.isInLove())
+            {
+                return SoundEvents.ENTITY_CAT_PURR;
+            }
+            else
+            {
+                return this.rand.nextInt(4) == 0 ? SoundEvents.ENTITY_CAT_PURREOW : SoundEvents.ENTITY_CAT_AMBIENT;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        return SoundEvents.ENTITY_CAT_HURT;
+    }
+
+    protected SoundEvent getDeathSound()
+    {
+        return SoundEvents.ENTITY_CAT_DEATH;
+    }
+
+    /**
+     * Returns the volume for the sounds this mob makes.
+     */
+    protected float getSoundVolume()
+    {
+        return 0.4F;
+    }
+
+    public boolean attackEntityAsMob(Entity entityIn)
+    {
+        return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
+    }
+
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        if (this.isEntityInvulnerable(source))
+        {
             return false;
-         } else {
-            return this.func_70880_s() && entityocelot.func_70880_s();
-         }
-      }
-   }
+        }
+        else
+        {
+            if (this.aiSit != null)
+            {
+                this.aiSit.setSitting(false);
+            }
 
-   public int func_70913_u() {
-      return ((Integer)this.field_70180_af.func_187225_a(field_184757_bz)).intValue();
-   }
+            return super.attackEntityFrom(source, amount);
+        }
+    }
 
-   public void func_70912_b(int p_70912_1_) {
-      this.field_70180_af.func_187227_b(field_184757_bz, Integer.valueOf(p_70912_1_));
-   }
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_OCELOT;
+    }
 
-   public boolean func_70601_bi() {
-      return this.field_70170_p.field_73012_v.nextInt(3) != 0;
-   }
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    {
+        ItemStack itemstack = player.getHeldItem(hand);
 
-   public boolean func_70058_J() {
-      if (this.field_70170_p.func_72917_a(this.func_174813_aQ(), this) && this.field_70170_p.func_184144_a(this, this.func_174813_aQ()).isEmpty() && !this.field_70170_p.func_72953_d(this.func_174813_aQ())) {
-         BlockPos blockpos = new BlockPos(this.field_70165_t, this.func_174813_aQ().field_72338_b, this.field_70161_v);
-         if (blockpos.func_177956_o() < this.field_70170_p.func_181545_F()) {
-            return false;
-         }
+        if (this.isTamed())
+        {
+            if (this.isOwner(player) && !this.world.isRemote && !this.isBreedingItem(itemstack))
+            {
+                this.aiSit.setSitting(!this.isSitting());
+            }
+        }
+        else if ((this.aiTempt == null || this.aiTempt.isRunning()) && itemstack.getItem() == Items.FISH && player.getDistanceSqToEntity(this) < 9.0D)
+        {
+            if (!player.capabilities.isCreativeMode)
+            {
+                itemstack.func_190918_g(1);
+            }
 
-         IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos.func_177977_b());
-         Block block = iblockstate.func_177230_c();
-         if (block == Blocks.field_150349_c || iblockstate.func_185904_a() == Material.field_151584_j) {
+            if (!this.world.isRemote)
+            {
+                if (this.rand.nextInt(3) == 0)
+                {
+                    this.func_193101_c(player);
+                    this.setTameSkin(1 + this.world.rand.nextInt(3));
+                    this.playTameEffect(true);
+                    this.aiSit.setSitting(true);
+                    this.world.setEntityState(this, (byte)7);
+                }
+                else
+                {
+                    this.playTameEffect(false);
+                    this.world.setEntityState(this, (byte)6);
+                }
+            }
+
             return true;
-         }
-      }
+        }
 
-      return false;
-   }
+        return super.processInteract(player, hand);
+    }
 
-   public String func_70005_c_() {
-      if (this.func_145818_k_()) {
-         return this.func_95999_t();
-      } else {
-         return this.func_70909_n() ? I18n.func_74838_a("entity.Cat.name") : super.func_70005_c_();
-      }
-   }
+    public EntityOcelot createChild(EntityAgeable ageable)
+    {
+        EntityOcelot entityocelot = new EntityOcelot(this.world);
 
-   protected void func_175544_ck() {
-      if (this.field_175545_bm == null) {
-         this.field_175545_bm = new EntityAIAvoidEntity<EntityPlayer>(this, EntityPlayer.class, 16.0F, 0.8D, 1.33D);
-      }
+        if (this.isTamed())
+        {
+            entityocelot.setOwnerId(this.getOwnerId());
+            entityocelot.setTamed(true);
+            entityocelot.setTameSkin(this.getTameSkin());
+        }
 
-      this.field_70714_bg.func_85156_a(this.field_175545_bm);
-      if (!this.func_70909_n()) {
-         this.field_70714_bg.func_75776_a(4, this.field_175545_bm);
-      }
+        return entityocelot;
+    }
 
-   }
+    /**
+     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
+     * the animal type)
+     */
+    public boolean isBreedingItem(ItemStack stack)
+    {
+        return stack.getItem() == Items.FISH;
+    }
 
-   @Nullable
-   public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_) {
-      p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
-      if (this.func_70913_u() == 0 && this.field_70170_p.field_73012_v.nextInt(7) == 0) {
-         for(int i = 0; i < 2; ++i) {
-            EntityOcelot entityocelot = new EntityOcelot(this.field_70170_p);
-            entityocelot.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, 0.0F);
-            entityocelot.func_70873_a(-24000);
-            this.field_70170_p.func_72838_d(entityocelot);
-         }
-      }
+    /**
+     * Returns true if the mob is currently able to mate with the specified mob.
+     */
+    public boolean canMateWith(EntityAnimal otherAnimal)
+    {
+        if (otherAnimal == this)
+        {
+            return false;
+        }
+        else if (!this.isTamed())
+        {
+            return false;
+        }
+        else if (!(otherAnimal instanceof EntityOcelot))
+        {
+            return false;
+        }
+        else
+        {
+            EntityOcelot entityocelot = (EntityOcelot)otherAnimal;
 
-      return p_180482_2_;
-   }
+            if (!entityocelot.isTamed())
+            {
+                return false;
+            }
+            else
+            {
+                return this.isInLove() && entityocelot.isInLove();
+            }
+        }
+    }
+
+    public int getTameSkin()
+    {
+        return ((Integer)this.dataManager.get(OCELOT_VARIANT)).intValue();
+    }
+
+    public void setTameSkin(int skinId)
+    {
+        this.dataManager.set(OCELOT_VARIANT, Integer.valueOf(skinId));
+    }
+
+    /**
+     * Checks if the entity's current position is a valid location to spawn this entity.
+     */
+    public boolean getCanSpawnHere()
+    {
+        return this.world.rand.nextInt(3) != 0;
+    }
+
+    /**
+     * Checks that the entity is not colliding with any blocks / liquids
+     */
+    public boolean isNotColliding()
+    {
+        if (this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this) && this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(this.getEntityBoundingBox()))
+        {
+            BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+
+            if (blockpos.getY() < this.world.getSeaLevel())
+            {
+                return false;
+            }
+
+            IBlockState iblockstate = this.world.getBlockState(blockpos.down());
+            Block block = iblockstate.getBlock();
+
+            if (block == Blocks.GRASS || iblockstate.getMaterial() == Material.LEAVES)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the name of this object. For players this returns their username
+     */
+    public String getName()
+    {
+        if (this.hasCustomName())
+        {
+            return this.getCustomNameTag();
+        }
+        else
+        {
+            return this.isTamed() ? I18n.translateToLocal("entity.Cat.name") : super.getName();
+        }
+    }
+
+    protected void setupTamedAI()
+    {
+        if (this.avoidEntity == null)
+        {
+            this.avoidEntity = new EntityAIAvoidEntity<EntityPlayer>(this, EntityPlayer.class, 16.0F, 0.8D, 1.33D);
+        }
+
+        this.tasks.removeTask(this.avoidEntity);
+
+        if (!this.isTamed())
+        {
+            this.tasks.addTask(4, this.avoidEntity);
+        }
+    }
+
+    @Nullable
+
+    /**
+     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
+     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
+     */
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
+    {
+        livingdata = super.onInitialSpawn(difficulty, livingdata);
+
+        if (this.getTameSkin() == 0 && this.world.rand.nextInt(7) == 0)
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                EntityOcelot entityocelot = new EntityOcelot(this.world);
+                entityocelot.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+                entityocelot.setGrowingAge(-24000);
+                this.world.spawnEntityInWorld(entityocelot);
+            }
+        }
+
+        return livingdata;
+    }
 }

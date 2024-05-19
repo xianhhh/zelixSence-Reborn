@@ -9,36 +9,44 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityMule extends AbstractChestHorse {
-   public EntityMule(World p_i47296_1_) {
-      super(p_i47296_1_);
-   }
+public class EntityMule extends AbstractChestHorse
+{
+    public EntityMule(World p_i47296_1_)
+    {
+        super(p_i47296_1_);
+    }
 
-   public static void func_190700_b(DataFixer p_190700_0_) {
-      AbstractChestHorse.func_190694_b(p_190700_0_, EntityMule.class);
-   }
+    public static void func_190700_b(DataFixer p_190700_0_)
+    {
+        AbstractChestHorse.func_190694_b(p_190700_0_, EntityMule.class);
+    }
 
-   @Nullable
-   protected ResourceLocation func_184647_J() {
-      return LootTableList.field_191191_I;
-   }
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.field_191191_I;
+    }
 
-   protected SoundEvent func_184639_G() {
-      super.func_184639_G();
-      return SoundEvents.field_187786_du;
-   }
+    protected SoundEvent getAmbientSound()
+    {
+        super.getAmbientSound();
+        return SoundEvents.ENTITY_MULE_AMBIENT;
+    }
 
-   protected SoundEvent func_184615_bR() {
-      super.func_184615_bR();
-      return SoundEvents.field_187788_dv;
-   }
+    protected SoundEvent getDeathSound()
+    {
+        super.getDeathSound();
+        return SoundEvents.ENTITY_MULE_DEATH;
+    }
 
-   protected SoundEvent func_184601_bQ(DamageSource p_184601_1_) {
-      super.func_184601_bQ(p_184601_1_);
-      return SoundEvents.field_187790_dw;
-   }
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    {
+        super.getHurtSound(p_184601_1_);
+        return SoundEvents.ENTITY_MULE_HURT;
+    }
 
-   protected void func_190697_dk() {
-      this.func_184185_a(SoundEvents.field_191259_dX, 1.0F, (this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.2F + 1.0F);
-   }
+    protected void func_190697_dk()
+    {
+        this.playSound(SoundEvents.field_191259_dX, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+    }
 }

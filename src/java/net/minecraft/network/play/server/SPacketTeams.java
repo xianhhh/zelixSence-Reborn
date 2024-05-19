@@ -9,151 +9,191 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
 
-public class SPacketTeams implements Packet<INetHandlerPlayClient> {
-   private String field_149320_a = "";
-   private String field_149318_b = "";
-   private String field_149319_c = "";
-   private String field_149316_d = "";
-   private String field_179816_e;
-   private String field_186976_f;
-   private int field_179815_f;
-   private final Collection<String> field_149317_e;
-   private int field_149314_f;
-   private int field_149315_g;
+public class SPacketTeams implements Packet<INetHandlerPlayClient>
+{
+    private String name = "";
+    private String displayName = "";
+    private String prefix = "";
+    private String suffix = "";
+    private String nameTagVisibility;
+    private String collisionRule;
+    private int color;
+    private final Collection<String> players;
+    private int action;
+    private int friendlyFlags;
 
-   public SPacketTeams() {
-      this.field_179816_e = Team.EnumVisible.ALWAYS.field_178830_e;
-      this.field_186976_f = Team.CollisionRule.ALWAYS.field_186693_e;
-      this.field_179815_f = -1;
-      this.field_149317_e = Lists.<String>newArrayList();
-   }
+    public SPacketTeams()
+    {
+        this.nameTagVisibility = Team.EnumVisible.ALWAYS.internalName;
+        this.collisionRule = Team.CollisionRule.ALWAYS.name;
+        this.color = -1;
+        this.players = Lists.<String>newArrayList();
+    }
 
-   public SPacketTeams(ScorePlayerTeam p_i46907_1_, int p_i46907_2_) {
-      this.field_179816_e = Team.EnumVisible.ALWAYS.field_178830_e;
-      this.field_186976_f = Team.CollisionRule.ALWAYS.field_186693_e;
-      this.field_179815_f = -1;
-      this.field_149317_e = Lists.<String>newArrayList();
-      this.field_149320_a = p_i46907_1_.func_96661_b();
-      this.field_149314_f = p_i46907_2_;
-      if (p_i46907_2_ == 0 || p_i46907_2_ == 2) {
-         this.field_149318_b = p_i46907_1_.func_96669_c();
-         this.field_149319_c = p_i46907_1_.func_96668_e();
-         this.field_149316_d = p_i46907_1_.func_96663_f();
-         this.field_149315_g = p_i46907_1_.func_98299_i();
-         this.field_179816_e = p_i46907_1_.func_178770_i().field_178830_e;
-         this.field_186976_f = p_i46907_1_.func_186681_k().field_186693_e;
-         this.field_179815_f = p_i46907_1_.func_178775_l().func_175746_b();
-      }
+    public SPacketTeams(ScorePlayerTeam teamIn, int actionIn)
+    {
+        this.nameTagVisibility = Team.EnumVisible.ALWAYS.internalName;
+        this.collisionRule = Team.CollisionRule.ALWAYS.name;
+        this.color = -1;
+        this.players = Lists.<String>newArrayList();
+        this.name = teamIn.getRegisteredName();
+        this.action = actionIn;
 
-      if (p_i46907_2_ == 0) {
-         this.field_149317_e.addAll(p_i46907_1_.func_96670_d());
-      }
+        if (actionIn == 0 || actionIn == 2)
+        {
+            this.displayName = teamIn.getTeamName();
+            this.prefix = teamIn.getColorPrefix();
+            this.suffix = teamIn.getColorSuffix();
+            this.friendlyFlags = teamIn.getFriendlyFlags();
+            this.nameTagVisibility = teamIn.getNameTagVisibility().internalName;
+            this.collisionRule = teamIn.getCollisionRule().name;
+            this.color = teamIn.getChatFormat().getColorIndex();
+        }
 
-   }
+        if (actionIn == 0)
+        {
+            this.players.addAll(teamIn.getMembershipCollection());
+        }
+    }
 
-   public SPacketTeams(ScorePlayerTeam p_i46908_1_, Collection<String> p_i46908_2_, int p_i46908_3_) {
-      this.field_179816_e = Team.EnumVisible.ALWAYS.field_178830_e;
-      this.field_186976_f = Team.CollisionRule.ALWAYS.field_186693_e;
-      this.field_179815_f = -1;
-      this.field_149317_e = Lists.<String>newArrayList();
-      if (p_i46908_3_ != 3 && p_i46908_3_ != 4) {
-         throw new IllegalArgumentException("Method must be join or leave for player constructor");
-      } else if (p_i46908_2_ != null && !p_i46908_2_.isEmpty()) {
-         this.field_149314_f = p_i46908_3_;
-         this.field_149320_a = p_i46908_1_.func_96661_b();
-         this.field_149317_e.addAll(p_i46908_2_);
-      } else {
-         throw new IllegalArgumentException("Players cannot be null/empty");
-      }
-   }
+    public SPacketTeams(ScorePlayerTeam teamIn, Collection<String> playersIn, int actionIn)
+    {
+        this.nameTagVisibility = Team.EnumVisible.ALWAYS.internalName;
+        this.collisionRule = Team.CollisionRule.ALWAYS.name;
+        this.color = -1;
+        this.players = Lists.<String>newArrayList();
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149320_a = p_148837_1_.func_150789_c(16);
-      this.field_149314_f = p_148837_1_.readByte();
-      if (this.field_149314_f == 0 || this.field_149314_f == 2) {
-         this.field_149318_b = p_148837_1_.func_150789_c(32);
-         this.field_149319_c = p_148837_1_.func_150789_c(16);
-         this.field_149316_d = p_148837_1_.func_150789_c(16);
-         this.field_149315_g = p_148837_1_.readByte();
-         this.field_179816_e = p_148837_1_.func_150789_c(32);
-         this.field_186976_f = p_148837_1_.func_150789_c(32);
-         this.field_179815_f = p_148837_1_.readByte();
-      }
+        if (actionIn != 3 && actionIn != 4)
+        {
+            throw new IllegalArgumentException("Method must be join or leave for player constructor");
+        }
+        else if (playersIn != null && !playersIn.isEmpty())
+        {
+            this.action = actionIn;
+            this.name = teamIn.getRegisteredName();
+            this.players.addAll(playersIn);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Players cannot be null/empty");
+        }
+    }
 
-      if (this.field_149314_f == 0 || this.field_149314_f == 3 || this.field_149314_f == 4) {
-         int i = p_148837_1_.func_150792_a();
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.name = buf.readStringFromBuffer(16);
+        this.action = buf.readByte();
 
-         for(int j = 0; j < i; ++j) {
-            this.field_149317_e.add(p_148837_1_.func_150789_c(40));
-         }
-      }
+        if (this.action == 0 || this.action == 2)
+        {
+            this.displayName = buf.readStringFromBuffer(32);
+            this.prefix = buf.readStringFromBuffer(16);
+            this.suffix = buf.readStringFromBuffer(16);
+            this.friendlyFlags = buf.readByte();
+            this.nameTagVisibility = buf.readStringFromBuffer(32);
+            this.collisionRule = buf.readStringFromBuffer(32);
+            this.color = buf.readByte();
+        }
 
-   }
+        if (this.action == 0 || this.action == 3 || this.action == 4)
+        {
+            int i = buf.readVarIntFromBuffer();
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_180714_a(this.field_149320_a);
-      p_148840_1_.writeByte(this.field_149314_f);
-      if (this.field_149314_f == 0 || this.field_149314_f == 2) {
-         p_148840_1_.func_180714_a(this.field_149318_b);
-         p_148840_1_.func_180714_a(this.field_149319_c);
-         p_148840_1_.func_180714_a(this.field_149316_d);
-         p_148840_1_.writeByte(this.field_149315_g);
-         p_148840_1_.func_180714_a(this.field_179816_e);
-         p_148840_1_.func_180714_a(this.field_186976_f);
-         p_148840_1_.writeByte(this.field_179815_f);
-      }
+            for (int j = 0; j < i; ++j)
+            {
+                this.players.add(buf.readStringFromBuffer(40));
+            }
+        }
+    }
 
-      if (this.field_149314_f == 0 || this.field_149314_f == 3 || this.field_149314_f == 4) {
-         p_148840_1_.func_150787_b(this.field_149317_e.size());
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeString(this.name);
+        buf.writeByte(this.action);
 
-         for(String s : this.field_149317_e) {
-            p_148840_1_.func_180714_a(s);
-         }
-      }
+        if (this.action == 0 || this.action == 2)
+        {
+            buf.writeString(this.displayName);
+            buf.writeString(this.prefix);
+            buf.writeString(this.suffix);
+            buf.writeByte(this.friendlyFlags);
+            buf.writeString(this.nameTagVisibility);
+            buf.writeString(this.collisionRule);
+            buf.writeByte(this.color);
+        }
 
-   }
+        if (this.action == 0 || this.action == 3 || this.action == 4)
+        {
+            buf.writeVarIntToBuffer(this.players.size());
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147247_a(this);
-   }
+            for (String s : this.players)
+            {
+                buf.writeString(s);
+            }
+        }
+    }
 
-   public String func_149312_c() {
-      return this.field_149320_a;
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleTeams(this);
+    }
 
-   public String func_149306_d() {
-      return this.field_149318_b;
-   }
+    public String getName()
+    {
+        return this.name;
+    }
 
-   public String func_149311_e() {
-      return this.field_149319_c;
-   }
+    public String getDisplayName()
+    {
+        return this.displayName;
+    }
 
-   public String func_149309_f() {
-      return this.field_149316_d;
-   }
+    public String getPrefix()
+    {
+        return this.prefix;
+    }
 
-   public Collection<String> func_149310_g() {
-      return this.field_149317_e;
-   }
+    public String getSuffix()
+    {
+        return this.suffix;
+    }
 
-   public int func_149307_h() {
-      return this.field_149314_f;
-   }
+    public Collection<String> getPlayers()
+    {
+        return this.players;
+    }
 
-   public int func_149308_i() {
-      return this.field_149315_g;
-   }
+    public int getAction()
+    {
+        return this.action;
+    }
 
-   public int func_179813_h() {
-      return this.field_179815_f;
-   }
+    public int getFriendlyFlags()
+    {
+        return this.friendlyFlags;
+    }
 
-   public String func_179814_i() {
-      return this.field_179816_e;
-   }
+    public int getColor()
+    {
+        return this.color;
+    }
 
-   public String func_186975_j() {
-      return this.field_186976_f;
-   }
+    public String getNameTagVisibility()
+    {
+        return this.nameTagVisibility;
+    }
+
+    public String getCollisionRule()
+    {
+        return this.collisionRule;
+    }
 }

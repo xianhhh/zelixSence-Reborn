@@ -2,18 +2,30 @@ package net.minecraft.item;
 
 import net.minecraft.block.Block;
 
-public class ItemCloth extends ItemBlock {
-   public ItemCloth(Block p_i45358_1_) {
-      super(p_i45358_1_);
-      this.func_77656_e(0);
-      this.func_77627_a(true);
-   }
+public class ItemCloth extends ItemBlock
+{
+    public ItemCloth(Block block)
+    {
+        super(block);
+        this.setMaxDamage(0);
+        this.setHasSubtypes(true);
+    }
 
-   public int func_77647_b(int p_77647_1_) {
-      return p_77647_1_;
-   }
+    /**
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
+     */
+    public int getMetadata(int damage)
+    {
+        return damage;
+    }
 
-   public String func_77667_c(ItemStack p_77667_1_) {
-      return super.func_77658_a() + "." + EnumDyeColor.func_176764_b(p_77667_1_.func_77960_j()).func_176762_d();
-   }
+    /**
+     * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
+     * different names based on their damage or NBT.
+     */
+    public String getUnlocalizedName(ItemStack stack)
+    {
+        return super.getUnlocalizedName() + "." + EnumDyeColor.byMetadata(stack.getMetadata()).getUnlocalizedName();
+    }
 }

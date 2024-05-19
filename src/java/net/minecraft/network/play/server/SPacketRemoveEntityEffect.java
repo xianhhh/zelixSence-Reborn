@@ -9,39 +9,56 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.Potion;
 import net.minecraft.world.World;
 
-public class SPacketRemoveEntityEffect implements Packet<INetHandlerPlayClient> {
-   private int field_149079_a;
-   private Potion field_149078_b;
+public class SPacketRemoveEntityEffect implements Packet<INetHandlerPlayClient>
+{
+    private int entityId;
+    private Potion effectId;
 
-   public SPacketRemoveEntityEffect() {
-   }
+    public SPacketRemoveEntityEffect()
+    {
+    }
 
-   public SPacketRemoveEntityEffect(int p_i46925_1_, Potion p_i46925_2_) {
-      this.field_149079_a = p_i46925_1_;
-      this.field_149078_b = p_i46925_2_;
-   }
+    public SPacketRemoveEntityEffect(int entityIdIn, Potion potionIn)
+    {
+        this.entityId = entityIdIn;
+        this.effectId = potionIn;
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_149079_a = p_148837_1_.func_150792_a();
-      this.field_149078_b = Potion.func_188412_a(p_148837_1_.readUnsignedByte());
-   }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.entityId = buf.readVarIntFromBuffer();
+        this.effectId = Potion.getPotionById(buf.readUnsignedByte());
+    }
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_150787_b(this.field_149079_a);
-      p_148840_1_.writeByte(Potion.func_188409_a(this.field_149078_b));
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeByte(Potion.getIdFromPotion(this.effectId));
+    }
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_147262_a(this);
-   }
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleRemoveEntityEffect(this);
+    }
 
-   @Nullable
-   public Entity func_186967_a(World p_186967_1_) {
-      return p_186967_1_.func_73045_a(this.field_149079_a);
-   }
+    @Nullable
+    public Entity getEntity(World worldIn)
+    {
+        return worldIn.getEntityByID(this.entityId);
+    }
 
-   @Nullable
-   public Potion func_186968_a() {
-      return this.field_149078_b;
-   }
+    @Nullable
+    public Potion getPotion()
+    {
+        return this.effectId;
+    }
 }

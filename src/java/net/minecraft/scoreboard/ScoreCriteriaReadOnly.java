@@ -1,11 +1,14 @@
 package net.minecraft.scoreboard;
 
-public class ScoreCriteriaReadOnly extends ScoreCriteria {
-   public ScoreCriteriaReadOnly(String p_i46608_1_) {
-      super(p_i46608_1_);
-   }
+public class ScoreCriteriaReadOnly extends ScoreCriteria
+{
+    public ScoreCriteriaReadOnly(String name)
+    {
+        super(name);
+    }
 
-   public boolean func_96637_b() {
-      return true;
-   }
+    public boolean isReadOnly()
+    {
+        return true;
+    }
 }

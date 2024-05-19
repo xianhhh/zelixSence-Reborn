@@ -1,15 +1,25 @@
 package net.minecraft.potion;
 
-public class PotionHealth extends Potion {
-   public PotionHealth(boolean p_i46816_1_, int p_i46816_2_) {
-      super(p_i46816_1_, p_i46816_2_);
-   }
+public class PotionHealth extends Potion
+{
+    public PotionHealth(boolean isBadEffectIn, int liquidColorIn)
+    {
+        super(isBadEffectIn, liquidColorIn);
+    }
 
-   public boolean func_76403_b() {
-      return true;
-   }
+    /**
+     * Returns true if the potion has an instant effect instead of a continuous one (eg Harming)
+     */
+    public boolean isInstant()
+    {
+        return true;
+    }
 
-   public boolean func_76397_a(int p_76397_1_, int p_76397_2_) {
-      return p_76397_1_ >= 1;
-   }
+    /**
+     * checks if Potion effect is ready to be applied this tick.
+     */
+    public boolean isReady(int duration, int amplifier)
+    {
+        return duration >= 1;
+    }
 }

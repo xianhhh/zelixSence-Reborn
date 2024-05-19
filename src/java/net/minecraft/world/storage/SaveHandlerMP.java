@@ -7,40 +7,75 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 
-public class SaveHandlerMP implements ISaveHandler {
-   public WorldInfo func_75757_d() {
-      return null;
-   }
+public class SaveHandlerMP implements ISaveHandler
+{
+    /**
+     * Loads and returns the world info
+     */
+    public WorldInfo loadWorldInfo()
+    {
+        return null;
+    }
 
-   public void func_75762_c() throws MinecraftException {
-   }
+    /**
+     * Checks the session lock to prevent save collisions
+     */
+    public void checkSessionLock() throws MinecraftException
+    {
+    }
 
-   public IChunkLoader func_75763_a(WorldProvider p_75763_1_) {
-      return null;
-   }
+    /**
+     * initializes and returns the chunk loader for the specified world provider
+     */
+    public IChunkLoader getChunkLoader(WorldProvider provider)
+    {
+        return null;
+    }
 
-   public void func_75755_a(WorldInfo p_75755_1_, NBTTagCompound p_75755_2_) {
-   }
+    /**
+     * Saves the given World Info with the given NBTTagCompound as the Player.
+     */
+    public void saveWorldInfoWithPlayer(WorldInfo worldInformation, NBTTagCompound tagCompound)
+    {
+    }
 
-   public void func_75761_a(WorldInfo p_75761_1_) {
-   }
+    /**
+     * used to update level.dat from old format to MCRegion format
+     */
+    public void saveWorldInfo(WorldInfo worldInformation)
+    {
+    }
 
-   public IPlayerFileData func_75756_e() {
-      return null;
-   }
+    public IPlayerFileData getPlayerNBTManager()
+    {
+        return null;
+    }
 
-   public void func_75759_a() {
-   }
+    /**
+     * Called to flush all changes to disk, waiting for them to complete.
+     */
+    public void flush()
+    {
+    }
 
-   public File func_75758_b(String p_75758_1_) {
-      return null;
-   }
+    /**
+     * Gets the file location of the given map
+     */
+    public File getMapFileFromName(String mapName)
+    {
+        return null;
+    }
 
-   public File func_75765_b() {
-      return null;
-   }
+    /**
+     * Gets the File object corresponding to the base directory of this world.
+     */
+    public File getWorldDirectory()
+    {
+        return null;
+    }
 
-   public TemplateManager func_186340_h() {
-      return null;
-   }
+    public TemplateManager getStructureTemplateManager()
+    {
+        return null;
+    }
 }

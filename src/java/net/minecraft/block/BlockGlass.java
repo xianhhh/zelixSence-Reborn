@@ -6,25 +6,34 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BlockGlass extends BlockBreakable {
-   public BlockGlass(Material p_i45408_1_, boolean p_i45408_2_) {
-      super(p_i45408_1_, p_i45408_2_);
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+public class BlockGlass extends BlockBreakable
+{
+    public BlockGlass(Material materialIn, boolean ignoreSimilarity)
+    {
+        super(materialIn, ignoreSimilarity);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public int func_149745_a(Random p_149745_1_) {
-      return 0;
-   }
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
+    public int quantityDropped(Random random)
+    {
+        return 0;
+    }
 
-   public BlockRenderLayer func_180664_k() {
-      return BlockRenderLayer.CUTOUT;
-   }
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
+    }
 
-   public boolean func_149686_d(IBlockState p_149686_1_) {
-      return false;
-   }
+    public boolean isFullCube(IBlockState state)
+    {
+        return false;
+    }
 
-   protected boolean func_149700_E() {
-      return true;
-   }
+    protected boolean canSilkHarvest()
+    {
+        return true;
+    }
 }

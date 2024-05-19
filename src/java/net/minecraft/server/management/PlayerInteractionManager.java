@@ -26,315 +26,463 @@ import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class PlayerInteractionManager {
-   public World field_73092_a;
-   public EntityPlayerMP field_73090_b;
-   private GameType field_73091_c = GameType.NOT_SET;
-   private boolean field_73088_d;
-   private int field_73089_e;
-   private BlockPos field_180240_f = BlockPos.field_177992_a;
-   private int field_73100_i;
-   private boolean field_73097_j;
-   private BlockPos field_180241_i = BlockPos.field_177992_a;
-   private int field_73093_n;
-   private int field_73094_o = -1;
+public class PlayerInteractionManager
+{
+    /** The world object that this object is connected to. */
+    public World theWorld;
 
-   public PlayerInteractionManager(World p_i1524_1_) {
-      this.field_73092_a = p_i1524_1_;
-   }
+    /** The EntityPlayerMP object that this object is connected to. */
+    public EntityPlayerMP thisPlayerMP;
+    private GameType gameType = GameType.NOT_SET;
 
-   public void func_73076_a(GameType p_73076_1_) {
-      this.field_73091_c = p_73076_1_;
-      p_73076_1_.func_77147_a(this.field_73090_b.field_71075_bZ);
-      this.field_73090_b.func_71016_p();
-      this.field_73090_b.field_71133_b.func_184103_al().func_148540_a(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, new EntityPlayerMP[]{this.field_73090_b}));
-      this.field_73092_a.func_72854_c();
-   }
+    /** True if the player is destroying a block */
+    private boolean isDestroyingBlock;
+    private int initialDamage;
+    private BlockPos destroyPos = BlockPos.ORIGIN;
+    private int curblockDamage;
 
-   public GameType func_73081_b() {
-      return this.field_73091_c;
-   }
+    /**
+     * Set to true when the "finished destroying block" packet is received but the block wasn't fully damaged yet. The
+     * block will not be destroyed while this is false.
+     */
+    private boolean receivedFinishDiggingPacket;
+    private BlockPos delayedDestroyPos = BlockPos.ORIGIN;
+    private int initialBlockDamage;
+    private int durabilityRemainingOnBlock = -1;
 
-   public boolean func_180239_c() {
-      return this.field_73091_c.func_77144_e();
-   }
+    public PlayerInteractionManager(World worldIn)
+    {
+        this.theWorld = worldIn;
+    }
 
-   public boolean func_73083_d() {
-      return this.field_73091_c.func_77145_d();
-   }
+    public void setGameType(GameType type)
+    {
+        this.gameType = type;
+        type.configurePlayerCapabilities(this.thisPlayerMP.capabilities);
+        this.thisPlayerMP.sendPlayerAbilities();
+        this.thisPlayerMP.mcServer.getPlayerList().sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, new EntityPlayerMP[] {this.thisPlayerMP}));
+        this.theWorld.updateAllPlayersSleepingFlag();
+    }
 
-   public void func_73077_b(GameType p_73077_1_) {
-      if (this.field_73091_c == GameType.NOT_SET) {
-         this.field_73091_c = p_73077_1_;
-      }
+    public GameType getGameType()
+    {
+        return this.gameType;
+    }
 
-      this.func_73076_a(this.field_73091_c);
-   }
+    public boolean survivalOrAdventure()
+    {
+        return this.gameType.isSurvivalOrAdventure();
+    }
 
-   public void func_73075_a() {
-      ++this.field_73100_i;
-      if (this.field_73097_j) {
-         int i = this.field_73100_i - this.field_73093_n;
-         IBlockState iblockstate = this.field_73092_a.func_180495_p(this.field_180241_i);
-         if (iblockstate.func_185904_a() == Material.field_151579_a) {
-            this.field_73097_j = false;
-         } else {
-            float f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, this.field_180241_i) * (float)(i + 1);
-            int j = (int)(f * 10.0F);
-            if (j != this.field_73094_o) {
-               this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), this.field_180241_i, j);
-               this.field_73094_o = j;
+    /**
+     * Get if we are in creative game mode.
+     */
+    public boolean isCreative()
+    {
+        return this.gameType.isCreative();
+    }
+
+    /**
+     * if the gameType is currently NOT_SET then change it to par1
+     */
+    public void initializeGameType(GameType type)
+    {
+        if (this.gameType == GameType.NOT_SET)
+        {
+            this.gameType = type;
+        }
+
+        this.setGameType(this.gameType);
+    }
+
+    public void updateBlockRemoving()
+    {
+        ++this.curblockDamage;
+
+        if (this.receivedFinishDiggingPacket)
+        {
+            int i = this.curblockDamage - this.initialBlockDamage;
+            IBlockState iblockstate = this.theWorld.getBlockState(this.delayedDestroyPos);
+
+            if (iblockstate.getMaterial() == Material.AIR)
+            {
+                this.receivedFinishDiggingPacket = false;
+            }
+            else
+            {
+                float f = iblockstate.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.world, this.delayedDestroyPos) * (float)(i + 1);
+                int j = (int)(f * 10.0F);
+
+                if (j != this.durabilityRemainingOnBlock)
+                {
+                    this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), this.delayedDestroyPos, j);
+                    this.durabilityRemainingOnBlock = j;
+                }
+
+                if (f >= 1.0F)
+                {
+                    this.receivedFinishDiggingPacket = false;
+                    this.tryHarvestBlock(this.delayedDestroyPos);
+                }
+            }
+        }
+        else if (this.isDestroyingBlock)
+        {
+            IBlockState iblockstate1 = this.theWorld.getBlockState(this.destroyPos);
+
+            if (iblockstate1.getMaterial() == Material.AIR)
+            {
+                this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), this.destroyPos, -1);
+                this.durabilityRemainingOnBlock = -1;
+                this.isDestroyingBlock = false;
+            }
+            else
+            {
+                int k = this.curblockDamage - this.initialDamage;
+                float f1 = iblockstate1.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.world, this.delayedDestroyPos) * (float)(k + 1);
+                int l = (int)(f1 * 10.0F);
+
+                if (l != this.durabilityRemainingOnBlock)
+                {
+                    this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), this.destroyPos, l);
+                    this.durabilityRemainingOnBlock = l;
+                }
+            }
+        }
+    }
+
+    /**
+     * If not creative, it calls sendBlockBreakProgress until the block is broken first. tryHarvestBlock can also be the
+     * result of this call.
+     */
+    public void onBlockClicked(BlockPos pos, EnumFacing side)
+    {
+        if (this.isCreative())
+        {
+            if (!this.theWorld.extinguishFire((EntityPlayer)null, pos, side))
+            {
+                this.tryHarvestBlock(pos);
+            }
+        }
+        else
+        {
+            IBlockState iblockstate = this.theWorld.getBlockState(pos);
+            Block block = iblockstate.getBlock();
+
+            if (this.gameType.isAdventure())
+            {
+                if (this.gameType == GameType.SPECTATOR)
+                {
+                    return;
+                }
+
+                if (!this.thisPlayerMP.isAllowEdit())
+                {
+                    ItemStack itemstack = this.thisPlayerMP.getHeldItemMainhand();
+
+                    if (itemstack.func_190926_b())
+                    {
+                        return;
+                    }
+
+                    if (!itemstack.canDestroy(block))
+                    {
+                        return;
+                    }
+                }
             }
 
-            if (f >= 1.0F) {
-               this.field_73097_j = false;
-               this.func_180237_b(this.field_180241_i);
-            }
-         }
-      } else if (this.field_73088_d) {
-         IBlockState iblockstate1 = this.field_73092_a.func_180495_p(this.field_180240_f);
-         if (iblockstate1.func_185904_a() == Material.field_151579_a) {
-            this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), this.field_180240_f, -1);
-            this.field_73094_o = -1;
-            this.field_73088_d = false;
-         } else {
-            int k = this.field_73100_i - this.field_73089_e;
-            float f1 = iblockstate1.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, this.field_180241_i) * (float)(k + 1);
-            int l = (int)(f1 * 10.0F);
-            if (l != this.field_73094_o) {
-               this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), this.field_180240_f, l);
-               this.field_73094_o = l;
-            }
-         }
-      }
+            this.theWorld.extinguishFire((EntityPlayer)null, pos, side);
+            this.initialDamage = this.curblockDamage;
+            float f = 1.0F;
 
-   }
-
-   public void func_180784_a(BlockPos p_180784_1_, EnumFacing p_180784_2_) {
-      if (this.func_73083_d()) {
-         if (!this.field_73092_a.func_175719_a((EntityPlayer)null, p_180784_1_, p_180784_2_)) {
-            this.func_180237_b(p_180784_1_);
-         }
-
-      } else {
-         IBlockState iblockstate = this.field_73092_a.func_180495_p(p_180784_1_);
-         Block block = iblockstate.func_177230_c();
-         if (this.field_73091_c.func_82752_c()) {
-            if (this.field_73091_c == GameType.SPECTATOR) {
-               return;
+            if (iblockstate.getMaterial() != Material.AIR)
+            {
+                block.onBlockClicked(this.theWorld, pos, this.thisPlayerMP);
+                f = iblockstate.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.world, pos);
             }
 
-            if (!this.field_73090_b.func_175142_cm()) {
-               ItemStack itemstack = this.field_73090_b.func_184614_ca();
-               if (itemstack.func_190926_b()) {
-                  return;
-               }
-
-               if (!itemstack.func_179544_c(block)) {
-                  return;
-               }
+            if (iblockstate.getMaterial() != Material.AIR && f >= 1.0F)
+            {
+                this.tryHarvestBlock(pos);
             }
-         }
-
-         this.field_73092_a.func_175719_a((EntityPlayer)null, p_180784_1_, p_180784_2_);
-         this.field_73089_e = this.field_73100_i;
-         float f = 1.0F;
-         if (iblockstate.func_185904_a() != Material.field_151579_a) {
-            block.func_180649_a(this.field_73092_a, p_180784_1_, this.field_73090_b);
-            f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, p_180784_1_);
-         }
-
-         if (iblockstate.func_185904_a() != Material.field_151579_a && f >= 1.0F) {
-            this.func_180237_b(p_180784_1_);
-         } else {
-            this.field_73088_d = true;
-            this.field_180240_f = p_180784_1_;
-            int i = (int)(f * 10.0F);
-            this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), p_180784_1_, i);
-            this.field_73094_o = i;
-         }
-
-      }
-   }
-
-   public void func_180785_a(BlockPos p_180785_1_) {
-      if (p_180785_1_.equals(this.field_180240_f)) {
-         int i = this.field_73100_i - this.field_73089_e;
-         IBlockState iblockstate = this.field_73092_a.func_180495_p(p_180785_1_);
-         if (iblockstate.func_185904_a() != Material.field_151579_a) {
-            float f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, p_180785_1_) * (float)(i + 1);
-            if (f >= 0.7F) {
-               this.field_73088_d = false;
-               this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), p_180785_1_, -1);
-               this.func_180237_b(p_180785_1_);
-            } else if (!this.field_73097_j) {
-               this.field_73088_d = false;
-               this.field_73097_j = true;
-               this.field_180241_i = p_180785_1_;
-               this.field_73093_n = this.field_73089_e;
+            else
+            {
+                this.isDestroyingBlock = true;
+                this.destroyPos = pos;
+                int i = (int)(f * 10.0F);
+                this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), pos, i);
+                this.durabilityRemainingOnBlock = i;
             }
-         }
-      }
+        }
+    }
 
-   }
+    public void blockRemoving(BlockPos pos)
+    {
+        if (pos.equals(this.destroyPos))
+        {
+            int i = this.curblockDamage - this.initialDamage;
+            IBlockState iblockstate = this.theWorld.getBlockState(pos);
 
-   public void func_180238_e() {
-      this.field_73088_d = false;
-      this.field_73092_a.func_175715_c(this.field_73090_b.func_145782_y(), this.field_180240_f, -1);
-   }
+            if (iblockstate.getMaterial() != Material.AIR)
+            {
+                float f = iblockstate.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.world, pos) * (float)(i + 1);
 
-   private boolean func_180235_c(BlockPos p_180235_1_) {
-      IBlockState iblockstate = this.field_73092_a.func_180495_p(p_180235_1_);
-      iblockstate.func_177230_c().func_176208_a(this.field_73092_a, p_180235_1_, iblockstate, this.field_73090_b);
-      boolean flag = this.field_73092_a.func_175698_g(p_180235_1_);
-      if (flag) {
-         iblockstate.func_177230_c().func_176206_d(this.field_73092_a, p_180235_1_, iblockstate);
-      }
+                if (f >= 0.7F)
+                {
+                    this.isDestroyingBlock = false;
+                    this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), pos, -1);
+                    this.tryHarvestBlock(pos);
+                }
+                else if (!this.receivedFinishDiggingPacket)
+                {
+                    this.isDestroyingBlock = false;
+                    this.receivedFinishDiggingPacket = true;
+                    this.delayedDestroyPos = pos;
+                    this.initialBlockDamage = this.initialDamage;
+                }
+            }
+        }
+    }
 
-      return flag;
-   }
+    /**
+     * Stops the block breaking process
+     */
+    public void cancelDestroyingBlock()
+    {
+        this.isDestroyingBlock = false;
+        this.theWorld.sendBlockBreakProgress(this.thisPlayerMP.getEntityId(), this.destroyPos, -1);
+    }
 
-   public boolean func_180237_b(BlockPos p_180237_1_) {
-      if (this.field_73091_c.func_77145_d() && !this.field_73090_b.func_184614_ca().func_190926_b() && this.field_73090_b.func_184614_ca().func_77973_b() instanceof ItemSword) {
-         return false;
-      } else {
-         IBlockState iblockstate = this.field_73092_a.func_180495_p(p_180237_1_);
-         TileEntity tileentity = this.field_73092_a.func_175625_s(p_180237_1_);
-         Block block = iblockstate.func_177230_c();
-         if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !this.field_73090_b.func_189808_dh()) {
-            this.field_73092_a.func_184138_a(p_180237_1_, iblockstate, iblockstate, 3);
+    /**
+     * Removes a block and triggers the appropriate events
+     */
+    private boolean removeBlock(BlockPos pos)
+    {
+        IBlockState iblockstate = this.theWorld.getBlockState(pos);
+        iblockstate.getBlock().onBlockHarvested(this.theWorld, pos, iblockstate, this.thisPlayerMP);
+        boolean flag = this.theWorld.setBlockToAir(pos);
+
+        if (flag)
+        {
+            iblockstate.getBlock().onBlockDestroyedByPlayer(this.theWorld, pos, iblockstate);
+        }
+
+        return flag;
+    }
+
+    /**
+     * Attempts to harvest a block
+     */
+    public boolean tryHarvestBlock(BlockPos pos)
+    {
+        if (this.gameType.isCreative() && !this.thisPlayerMP.getHeldItemMainhand().func_190926_b() && this.thisPlayerMP.getHeldItemMainhand().getItem() instanceof ItemSword)
+        {
             return false;
-         } else {
-            if (this.field_73091_c.func_82752_c()) {
-               if (this.field_73091_c == GameType.SPECTATOR) {
-                  return false;
-               }
+        }
+        else
+        {
+            IBlockState iblockstate = this.theWorld.getBlockState(pos);
+            TileEntity tileentity = this.theWorld.getTileEntity(pos);
+            Block block = iblockstate.getBlock();
 
-               if (!this.field_73090_b.func_175142_cm()) {
-                  ItemStack itemstack = this.field_73090_b.func_184614_ca();
-                  if (itemstack.func_190926_b()) {
-                     return false;
-                  }
-
-                  if (!itemstack.func_179544_c(block)) {
-                     return false;
-                  }
-               }
+            if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !this.thisPlayerMP.canUseCommandBlock())
+            {
+                this.theWorld.notifyBlockUpdate(pos, iblockstate, iblockstate, 3);
+                return false;
             }
+            else
+            {
+                if (this.gameType.isAdventure())
+                {
+                    if (this.gameType == GameType.SPECTATOR)
+                    {
+                        return false;
+                    }
 
-            this.field_73092_a.func_180498_a(this.field_73090_b, 2001, p_180237_1_, Block.func_176210_f(iblockstate));
-            boolean flag1 = this.func_180235_c(p_180237_1_);
-            if (this.func_73083_d()) {
-               this.field_73090_b.field_71135_a.func_147359_a(new SPacketBlockChange(this.field_73092_a, p_180237_1_));
-            } else {
-               ItemStack itemstack1 = this.field_73090_b.func_184614_ca();
-               ItemStack itemstack2 = itemstack1.func_190926_b() ? ItemStack.field_190927_a : itemstack1.func_77946_l();
-               boolean flag = this.field_73090_b.func_184823_b(iblockstate);
-               if (!itemstack1.func_190926_b()) {
-                  itemstack1.func_179548_a(this.field_73092_a, iblockstate, p_180237_1_, this.field_73090_b);
-               }
+                    if (!this.thisPlayerMP.isAllowEdit())
+                    {
+                        ItemStack itemstack = this.thisPlayerMP.getHeldItemMainhand();
 
-               if (flag1 && flag) {
-                  iblockstate.func_177230_c().func_180657_a(this.field_73092_a, this.field_73090_b, p_180237_1_, iblockstate, tileentity, itemstack2);
-               }
+                        if (itemstack.func_190926_b())
+                        {
+                            return false;
+                        }
+
+                        if (!itemstack.canDestroy(block))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                this.theWorld.playEvent(this.thisPlayerMP, 2001, pos, Block.getStateId(iblockstate));
+                boolean flag1 = this.removeBlock(pos);
+
+                if (this.isCreative())
+                {
+                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
+                }
+                else
+                {
+                    ItemStack itemstack1 = this.thisPlayerMP.getHeldItemMainhand();
+                    ItemStack itemstack2 = itemstack1.func_190926_b() ? ItemStack.field_190927_a : itemstack1.copy();
+                    boolean flag = this.thisPlayerMP.canHarvestBlock(iblockstate);
+
+                    if (!itemstack1.func_190926_b())
+                    {
+                        itemstack1.onBlockDestroyed(this.theWorld, iblockstate, pos, this.thisPlayerMP);
+                    }
+
+                    if (flag1 && flag)
+                    {
+                        iblockstate.getBlock().harvestBlock(this.theWorld, this.thisPlayerMP, pos, iblockstate, tileentity, itemstack2);
+                    }
+                }
+
+                return flag1;
             }
+        }
+    }
 
-            return flag1;
-         }
-      }
-   }
-
-   public EnumActionResult func_187250_a(EntityPlayer p_187250_1_, World p_187250_2_, ItemStack p_187250_3_, EnumHand p_187250_4_) {
-      if (this.field_73091_c == GameType.SPECTATOR) {
-         return EnumActionResult.PASS;
-      } else if (p_187250_1_.func_184811_cZ().func_185141_a(p_187250_3_.func_77973_b())) {
-         return EnumActionResult.PASS;
-      } else {
-         int i = p_187250_3_.func_190916_E();
-         int j = p_187250_3_.func_77960_j();
-         ActionResult<ItemStack> actionresult = p_187250_3_.func_77957_a(p_187250_2_, p_187250_1_, p_187250_4_);
-         ItemStack itemstack = actionresult.func_188398_b();
-         if (itemstack == p_187250_3_ && itemstack.func_190916_E() == i && itemstack.func_77988_m() <= 0 && itemstack.func_77960_j() == j) {
-            return actionresult.func_188397_a();
-         } else if (actionresult.func_188397_a() == EnumActionResult.FAIL && itemstack.func_77988_m() > 0 && !p_187250_1_.func_184587_cr()) {
-            return actionresult.func_188397_a();
-         } else {
-            p_187250_1_.func_184611_a(p_187250_4_, itemstack);
-            if (this.func_73083_d()) {
-               itemstack.func_190920_e(i);
-               if (itemstack.func_77984_f()) {
-                  itemstack.func_77964_b(j);
-               }
-            }
-
-            if (itemstack.func_190926_b()) {
-               p_187250_1_.func_184611_a(p_187250_4_, ItemStack.field_190927_a);
-            }
-
-            if (!p_187250_1_.func_184587_cr()) {
-               ((EntityPlayerMP)p_187250_1_).func_71120_a(p_187250_1_.field_71069_bz);
-            }
-
-            return actionresult.func_188397_a();
-         }
-      }
-   }
-
-   public EnumActionResult func_187251_a(EntityPlayer p_187251_1_, World p_187251_2_, ItemStack p_187251_3_, EnumHand p_187251_4_, BlockPos p_187251_5_, EnumFacing p_187251_6_, float p_187251_7_, float p_187251_8_, float p_187251_9_) {
-      if (this.field_73091_c == GameType.SPECTATOR) {
-         TileEntity tileentity = p_187251_2_.func_175625_s(p_187251_5_);
-         if (tileentity instanceof ILockableContainer) {
-            Block block1 = p_187251_2_.func_180495_p(p_187251_5_).func_177230_c();
-            ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
-            if (ilockablecontainer instanceof TileEntityChest && block1 instanceof BlockChest) {
-               ilockablecontainer = ((BlockChest)block1).func_180676_d(p_187251_2_, p_187251_5_);
-            }
-
-            if (ilockablecontainer != null) {
-               p_187251_1_.func_71007_a(ilockablecontainer);
-               return EnumActionResult.SUCCESS;
-            }
-         } else if (tileentity instanceof IInventory) {
-            p_187251_1_.func_71007_a((IInventory)tileentity);
-            return EnumActionResult.SUCCESS;
-         }
-
-         return EnumActionResult.PASS;
-      } else {
-         if (!p_187251_1_.func_70093_af() || p_187251_1_.func_184614_ca().func_190926_b() && p_187251_1_.func_184592_cb().func_190926_b()) {
-            IBlockState iblockstate = p_187251_2_.func_180495_p(p_187251_5_);
-            if (iblockstate.func_177230_c().func_180639_a(p_187251_2_, p_187251_5_, iblockstate, p_187251_1_, p_187251_4_, p_187251_6_, p_187251_7_, p_187251_8_, p_187251_9_)) {
-               return EnumActionResult.SUCCESS;
-            }
-         }
-
-         if (p_187251_3_.func_190926_b()) {
+    public EnumActionResult processRightClick(EntityPlayer player, World worldIn, ItemStack stack, EnumHand hand)
+    {
+        if (this.gameType == GameType.SPECTATOR)
+        {
             return EnumActionResult.PASS;
-         } else if (p_187251_1_.func_184811_cZ().func_185141_a(p_187251_3_.func_77973_b())) {
+        }
+        else if (player.getCooldownTracker().hasCooldown(stack.getItem()))
+        {
             return EnumActionResult.PASS;
-         } else {
-            if (p_187251_3_.func_77973_b() instanceof ItemBlock && !p_187251_1_.func_189808_dh()) {
-               Block block = ((ItemBlock)p_187251_3_.func_77973_b()).func_179223_d();
-               if (block instanceof BlockCommandBlock || block instanceof BlockStructure) {
-                  return EnumActionResult.FAIL;
-               }
+        }
+        else
+        {
+            int i = stack.func_190916_E();
+            int j = stack.getMetadata();
+            ActionResult<ItemStack> actionresult = stack.useItemRightClick(worldIn, player, hand);
+            ItemStack itemstack = actionresult.getResult();
+
+            if (itemstack == stack && itemstack.func_190916_E() == i && itemstack.getMaxItemUseDuration() <= 0 && itemstack.getMetadata() == j)
+            {
+                return actionresult.getType();
+            }
+            else if (actionresult.getType() == EnumActionResult.FAIL && itemstack.getMaxItemUseDuration() > 0 && !player.isHandActive())
+            {
+                return actionresult.getType();
+            }
+            else
+            {
+                player.setHeldItem(hand, itemstack);
+
+                if (this.isCreative())
+                {
+                    itemstack.func_190920_e(i);
+
+                    if (itemstack.isItemStackDamageable())
+                    {
+                        itemstack.setItemDamage(j);
+                    }
+                }
+
+                if (itemstack.func_190926_b())
+                {
+                    player.setHeldItem(hand, ItemStack.field_190927_a);
+                }
+
+                if (!player.isHandActive())
+                {
+                    ((EntityPlayerMP)player).sendContainerToPlayer(player.inventoryContainer);
+                }
+
+                return actionresult.getType();
+            }
+        }
+    }
+
+    public EnumActionResult processRightClickBlock(EntityPlayer player, World worldIn, ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ)
+    {
+        if (this.gameType == GameType.SPECTATOR)
+        {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
+
+            if (tileentity instanceof ILockableContainer)
+            {
+                Block block1 = worldIn.getBlockState(pos).getBlock();
+                ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
+
+                if (ilockablecontainer instanceof TileEntityChest && block1 instanceof BlockChest)
+                {
+                    ilockablecontainer = ((BlockChest)block1).getLockableContainer(worldIn, pos);
+                }
+
+                if (ilockablecontainer != null)
+                {
+                    player.displayGUIChest(ilockablecontainer);
+                    return EnumActionResult.SUCCESS;
+                }
+            }
+            else if (tileentity instanceof IInventory)
+            {
+                player.displayGUIChest((IInventory)tileentity);
+                return EnumActionResult.SUCCESS;
             }
 
-            if (this.func_73083_d()) {
-               int j = p_187251_3_.func_77960_j();
-               int i = p_187251_3_.func_190916_E();
-               EnumActionResult enumactionresult = p_187251_3_.func_179546_a(p_187251_1_, p_187251_2_, p_187251_5_, p_187251_4_, p_187251_6_, p_187251_7_, p_187251_8_, p_187251_9_);
-               p_187251_3_.func_77964_b(j);
-               p_187251_3_.func_190920_e(i);
-               return enumactionresult;
-            } else {
-               return p_187251_3_.func_179546_a(p_187251_1_, p_187251_2_, p_187251_5_, p_187251_4_, p_187251_6_, p_187251_7_, p_187251_8_, p_187251_9_);
-            }
-         }
-      }
-   }
+            return EnumActionResult.PASS;
+        }
+        else
+        {
+            if (!player.isSneaking() || player.getHeldItemMainhand().func_190926_b() && player.getHeldItemOffhand().func_190926_b())
+            {
+                IBlockState iblockstate = worldIn.getBlockState(pos);
 
-   public void func_73080_a(WorldServer p_73080_1_) {
-      this.field_73092_a = p_73080_1_;
-   }
+                if (iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ))
+                {
+                    return EnumActionResult.SUCCESS;
+                }
+            }
+
+            if (stack.func_190926_b())
+            {
+                return EnumActionResult.PASS;
+            }
+            else if (player.getCooldownTracker().hasCooldown(stack.getItem()))
+            {
+                return EnumActionResult.PASS;
+            }
+            else
+            {
+                if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock())
+                {
+                    Block block = ((ItemBlock)stack.getItem()).getBlock();
+
+                    if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
+                    {
+                        return EnumActionResult.FAIL;
+                    }
+                }
+
+                if (this.isCreative())
+                {
+                    int j = stack.getMetadata();
+                    int i = stack.func_190916_E();
+                    EnumActionResult enumactionresult = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+                    stack.setItemDamage(j);
+                    stack.func_190920_e(i);
+                    return enumactionresult;
+                }
+                else
+                {
+                    return stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the world instance.
+     */
+    public void setWorld(WorldServer serverWorld)
+    {
+        this.theWorld = serverWorld;
+    }
 }

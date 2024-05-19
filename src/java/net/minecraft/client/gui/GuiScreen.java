@@ -39,475 +39,726 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
-   private static final Logger field_175287_a = LogManager.getLogger();
-   private static final Set<String> field_175284_f = Sets.newHashSet("http", "https");
-   private static final Splitter field_175285_g = Splitter.on('\n');
-   protected Minecraft field_146297_k;
-   protected RenderItem field_146296_j;
-   public int field_146294_l;
-   public int field_146295_m;
-   protected List<GuiButton> field_146292_n = Lists.<GuiButton>newArrayList();
-   protected List<GuiLabel> field_146293_o = Lists.<GuiLabel>newArrayList();
-   public boolean field_146291_p;
-   protected FontRenderer field_146289_q;
-   protected GuiButton field_146290_a;
-   private int field_146287_f;
-   private long field_146288_g;
-   private int field_146298_h;
-   private URI field_175286_t;
-   private boolean field_193977_u;
+public abstract class GuiScreen extends Gui implements GuiYesNoCallback
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Set<String> PROTOCOLS = Sets.newHashSet("http", "https");
+    private static final Splitter NEWLINE_SPLITTER = Splitter.on('\n');
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      for(int i = 0; i < this.field_146292_n.size(); ++i) {
-         ((GuiButton)this.field_146292_n.get(i)).func_191745_a(this.field_146297_k, p_73863_1_, p_73863_2_, p_73863_3_);
-      }
+    /** Reference to the Minecraft object. */
+    protected Minecraft mc;
 
-      for(int j = 0; j < this.field_146293_o.size(); ++j) {
-         ((GuiLabel)this.field_146293_o.get(j)).func_146159_a(this.field_146297_k, p_73863_1_, p_73863_2_);
-      }
+    /**
+     * Holds a instance of RenderItem, used to draw the achievement icons on screen (is based on ItemStack)
+     */
+    protected RenderItem itemRender;
 
-   }
+    /** The width of the screen object. */
+    public int width;
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-      if (p_73869_2_ == 1) {
-         this.field_146297_k.func_147108_a((GuiScreen)null);
-         if (this.field_146297_k.field_71462_r == null) {
-            this.field_146297_k.func_71381_h();
-         }
-      }
+    /** The height of the screen object. */
+    public int height;
+    protected List<GuiButton> buttonList = Lists.<GuiButton>newArrayList();
+    protected List<GuiLabel> labelList = Lists.<GuiLabel>newArrayList();
+    public boolean allowUserInput;
 
-   }
+    /** The FontRenderer used by GuiScreen */
+    protected FontRenderer fontRendererObj;
 
-   protected <T extends GuiButton> T func_189646_b(T p_189646_1_) {
-      this.field_146292_n.add(p_189646_1_);
-      return p_189646_1_;
-   }
+    /** The button that was just pressed. */
+    protected GuiButton selectedButton;
+    private int eventButton;
+    private long lastMouseEvent;
 
-   public static String func_146277_j() {
-      try {
-         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents((Object)null);
-         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            return (String)transferable.getTransferData(DataFlavor.stringFlavor);
-         }
-      } catch (Exception var1) {
-         ;
-      }
+    /**
+     * Tracks the number of fingers currently on the screen. Prevents subsequent fingers registering as clicks.
+     */
+    private int touchValue;
+    private URI clickedLinkURI;
+    private boolean field_193977_u;
 
-      return "";
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        for (int i = 0; i < this.buttonList.size(); ++i)
+        {
+            ((GuiButton)this.buttonList.get(i)).func_191745_a(this.mc, mouseX, mouseY, partialTicks);
+        }
 
-   public static void func_146275_d(String p_146275_0_) {
-      if (!StringUtils.isEmpty(p_146275_0_)) {
-         try {
-            StringSelection stringselection = new StringSelection(p_146275_0_);
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, (ClipboardOwner)null);
-         } catch (Exception var2) {
+        for (int j = 0; j < this.labelList.size(); ++j)
+        {
+            ((GuiLabel)this.labelList.get(j)).drawLabel(this.mc, mouseX, mouseY);
+        }
+    }
+
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        if (keyCode == 1)
+        {
+            this.mc.displayGuiScreen((GuiScreen)null);
+
+            if (this.mc.currentScreen == null)
+            {
+                this.mc.setIngameFocus();
+            }
+        }
+    }
+
+    protected <T extends GuiButton> T addButton(T p_189646_1_)
+    {
+        this.buttonList.add(p_189646_1_);
+        return p_189646_1_;
+    }
+
+    /**
+     * Returns a string stored in the system clipboard.
+     */
+    public static String getClipboardString()
+    {
+        try
+        {
+            Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents((Object)null);
+
+            if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+            {
+                return (String)transferable.getTransferData(DataFlavor.stringFlavor);
+            }
+        }
+        catch (Exception var1)
+        {
             ;
-         }
+        }
 
-      }
-   }
+        return "";
+    }
 
-   protected void func_146285_a(ItemStack p_146285_1_, int p_146285_2_, int p_146285_3_) {
-      this.func_146283_a(this.func_191927_a(p_146285_1_), p_146285_2_, p_146285_3_);
-   }
-
-   public List<String> func_191927_a(ItemStack p_191927_1_) {
-      List<String> list = p_191927_1_.func_82840_a(this.field_146297_k.field_71439_g, this.field_146297_k.field_71474_y.field_82882_x ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-
-      for(int i = 0; i < list.size(); ++i) {
-         if (i == 0) {
-            list.set(i, p_191927_1_.func_77953_t().field_77937_e + (String)list.get(i));
-         } else {
-            list.set(i, TextFormatting.GRAY + (String)list.get(i));
-         }
-      }
-
-      return list;
-   }
-
-   public void func_146279_a(String p_146279_1_, int p_146279_2_, int p_146279_3_) {
-      this.func_146283_a(Arrays.asList(p_146279_1_), p_146279_2_, p_146279_3_);
-   }
-
-   public void func_193975_a(boolean p_193975_1_) {
-      this.field_193977_u = p_193975_1_;
-   }
-
-   public boolean func_193976_p() {
-      return this.field_193977_u;
-   }
-
-   public void func_146283_a(List<String> p_146283_1_, int p_146283_2_, int p_146283_3_) {
-      if (!p_146283_1_.isEmpty()) {
-         GlStateManager.func_179101_C();
-         RenderHelper.func_74518_a();
-         GlStateManager.func_179140_f();
-         GlStateManager.func_179097_i();
-         int i = 0;
-
-         for(String s : p_146283_1_) {
-            int j = this.field_146289_q.func_78256_a(s);
-            if (j > i) {
-               i = j;
+    /**
+     * Stores the given string in the system clipboard
+     */
+    public static void setClipboardString(String copyText)
+    {
+        if (!StringUtils.isEmpty(copyText))
+        {
+            try
+            {
+                StringSelection stringselection = new StringSelection(copyText);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, (ClipboardOwner)null);
             }
-         }
-
-         int l1 = p_146283_2_ + 12;
-         int i2 = p_146283_3_ - 12;
-         int k = 8;
-         if (p_146283_1_.size() > 1) {
-            k += 2 + (p_146283_1_.size() - 1) * 10;
-         }
-
-         if (l1 + i > this.field_146294_l) {
-            l1 -= 28 + i;
-         }
-
-         if (i2 + k + 6 > this.field_146295_m) {
-            i2 = this.field_146295_m - k - 6;
-         }
-
-         this.field_73735_i = 300.0F;
-         this.field_146296_j.field_77023_b = 300.0F;
-         int l = -267386864;
-         this.func_73733_a(l1 - 3, i2 - 4, l1 + i + 3, i2 - 3, -267386864, -267386864);
-         this.func_73733_a(l1 - 3, i2 + k + 3, l1 + i + 3, i2 + k + 4, -267386864, -267386864);
-         this.func_73733_a(l1 - 3, i2 - 3, l1 + i + 3, i2 + k + 3, -267386864, -267386864);
-         this.func_73733_a(l1 - 4, i2 - 3, l1 - 3, i2 + k + 3, -267386864, -267386864);
-         this.func_73733_a(l1 + i + 3, i2 - 3, l1 + i + 4, i2 + k + 3, -267386864, -267386864);
-         int i1 = 1347420415;
-         int j1 = 1344798847;
-         this.func_73733_a(l1 - 3, i2 - 3 + 1, l1 - 3 + 1, i2 + k + 3 - 1, 1347420415, 1344798847);
-         this.func_73733_a(l1 + i + 2, i2 - 3 + 1, l1 + i + 3, i2 + k + 3 - 1, 1347420415, 1344798847);
-         this.func_73733_a(l1 - 3, i2 - 3, l1 + i + 3, i2 - 3 + 1, 1347420415, 1347420415);
-         this.func_73733_a(l1 - 3, i2 + k + 2, l1 + i + 3, i2 + k + 3, 1344798847, 1344798847);
-
-         for(int k1 = 0; k1 < p_146283_1_.size(); ++k1) {
-            String s1 = p_146283_1_.get(k1);
-            this.field_146289_q.func_175063_a(s1, (float)l1, (float)i2, -1);
-            if (k1 == 0) {
-               i2 += 2;
+            catch (Exception var2)
+            {
+                ;
             }
+        }
+    }
 
-            i2 += 10;
-         }
+    protected void renderToolTip(ItemStack stack, int x, int y)
+    {
+        this.drawHoveringText(this.func_191927_a(stack), x, y);
+    }
 
-         this.field_73735_i = 0.0F;
-         this.field_146296_j.field_77023_b = 0.0F;
-         GlStateManager.func_179145_e();
-         GlStateManager.func_179126_j();
-         RenderHelper.func_74519_b();
-         GlStateManager.func_179091_B();
-      }
-   }
+    public List<String> func_191927_a(ItemStack p_191927_1_)
+    {
+        List<String> list = p_191927_1_.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
 
-   protected void func_175272_a(ITextComponent p_175272_1_, int p_175272_2_, int p_175272_3_) {
-      if (p_175272_1_ != null && p_175272_1_.func_150256_b().func_150210_i() != null) {
-         HoverEvent hoverevent = p_175272_1_.func_150256_b().func_150210_i();
-         if (hoverevent.func_150701_a() == HoverEvent.Action.SHOW_ITEM) {
-            ItemStack itemstack = ItemStack.field_190927_a;
+        for (int i = 0; i < list.size(); ++i)
+        {
+            if (i == 0)
+            {
+                list.set(i, p_191927_1_.getRarity().rarityColor + (String)list.get(i));
+            }
+            else
+            {
+                list.set(i, TextFormatting.GRAY + (String)list.get(i));
+            }
+        }
 
-            try {
-               NBTBase nbtbase = JsonToNBT.func_180713_a(hoverevent.func_150702_b().func_150260_c());
-               if (nbtbase instanceof NBTTagCompound) {
-                  itemstack = new ItemStack((NBTTagCompound)nbtbase);
-               }
-            } catch (NBTException var9) {
-               ;
+        return list;
+    }
+
+    /**
+     * Draws the text when mouse is over creative inventory tab. Params: current creative tab to be checked, current
+     * mouse x position, current mouse y position.
+     */
+    public void drawCreativeTabHoveringText(String tabName, int mouseX, int mouseY)
+    {
+        this.drawHoveringText(Arrays.asList(tabName), mouseX, mouseY);
+    }
+
+    public void func_193975_a(boolean p_193975_1_)
+    {
+        this.field_193977_u = p_193975_1_;
+    }
+
+    public boolean func_193976_p()
+    {
+        return this.field_193977_u;
+    }
+
+    /**
+     * Draws a List of strings as a tooltip. Every entry is drawn on a seperate line.
+     */
+    public void drawHoveringText(List<String> textLines, int x, int y)
+    {
+        if (!textLines.isEmpty())
+        {
+            GlStateManager.disableRescaleNormal();
+            RenderHelper.disableStandardItemLighting();
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepth();
+            int i = 0;
+
+            for (String s : textLines)
+            {
+                int j = this.fontRendererObj.getStringWidth(s);
+
+                if (j > i)
+                {
+                    i = j;
+                }
             }
 
-            if (itemstack.func_190926_b()) {
-               this.func_146279_a(TextFormatting.RED + "Invalid Item!", p_175272_2_, p_175272_3_);
-            } else {
-               this.func_146285_a(itemstack, p_175272_2_, p_175272_3_);
-            }
-         } else if (hoverevent.func_150701_a() == HoverEvent.Action.SHOW_ENTITY) {
-            if (this.field_146297_k.field_71474_y.field_82882_x) {
-               try {
-                  NBTTagCompound nbttagcompound = JsonToNBT.func_180713_a(hoverevent.func_150702_b().func_150260_c());
-                  List<String> list = Lists.<String>newArrayList();
-                  list.add(nbttagcompound.func_74779_i("name"));
-                  if (nbttagcompound.func_150297_b("type", 8)) {
-                     String s = nbttagcompound.func_74779_i("type");
-                     list.add("Type: " + s);
-                  }
+            int l1 = x + 12;
+            int i2 = y - 12;
+            int k = 8;
 
-                  list.add(nbttagcompound.func_74779_i("id"));
-                  this.func_146283_a(list, p_175272_2_, p_175272_3_);
-               } catch (NBTException var8) {
-                  this.func_146279_a(TextFormatting.RED + "Invalid Entity!", p_175272_2_, p_175272_3_);
-               }
-            }
-         } else if (hoverevent.func_150701_a() == HoverEvent.Action.SHOW_TEXT) {
-            this.func_146283_a(this.field_146297_k.field_71466_p.func_78271_c(hoverevent.func_150702_b().func_150254_d(), Math.max(this.field_146294_l / 2, 200)), p_175272_2_, p_175272_3_);
-         }
-
-         GlStateManager.func_179140_f();
-      }
-   }
-
-   protected void func_175274_a(String p_175274_1_, boolean p_175274_2_) {
-   }
-
-   public boolean func_175276_a(ITextComponent p_175276_1_) {
-      if (p_175276_1_ == null) {
-         return false;
-      } else {
-         ClickEvent clickevent = p_175276_1_.func_150256_b().func_150235_h();
-         if (func_146272_n()) {
-            if (p_175276_1_.func_150256_b().func_179986_j() != null) {
-               this.func_175274_a(p_175276_1_.func_150256_b().func_179986_j(), false);
-            }
-         } else if (clickevent != null) {
-            if (clickevent.func_150669_a() == ClickEvent.Action.OPEN_URL) {
-               if (!this.field_146297_k.field_71474_y.field_74359_p) {
-                  return false;
-               }
-
-               try {
-                  URI uri = new URI(clickevent.func_150668_b());
-                  String s = uri.getScheme();
-                  if (s == null) {
-                     throw new URISyntaxException(clickevent.func_150668_b(), "Missing protocol");
-                  }
-
-                  if (!field_175284_f.contains(s.toLowerCase(Locale.ROOT))) {
-                     throw new URISyntaxException(clickevent.func_150668_b(), "Unsupported protocol: " + s.toLowerCase(Locale.ROOT));
-                  }
-
-                  if (this.field_146297_k.field_71474_y.field_74358_q) {
-                     this.field_175286_t = uri;
-                     this.field_146297_k.func_147108_a(new GuiConfirmOpenLink(this, clickevent.func_150668_b(), 31102009, false));
-                  } else {
-                     this.func_175282_a(uri);
-                  }
-               } catch (URISyntaxException urisyntaxexception) {
-                  field_175287_a.error("Can't open url for {}", clickevent, urisyntaxexception);
-               }
-            } else if (clickevent.func_150669_a() == ClickEvent.Action.OPEN_FILE) {
-               URI uri1 = (new File(clickevent.func_150668_b())).toURI();
-               this.func_175282_a(uri1);
-            } else if (clickevent.func_150669_a() == ClickEvent.Action.SUGGEST_COMMAND) {
-               this.func_175274_a(clickevent.func_150668_b(), true);
-            } else if (clickevent.func_150669_a() == ClickEvent.Action.RUN_COMMAND) {
-               this.func_175281_b(clickevent.func_150668_b(), false);
-            } else {
-               field_175287_a.error("Don't know how to handle {}", (Object)clickevent);
+            if (textLines.size() > 1)
+            {
+                k += 2 + (textLines.size() - 1) * 10;
             }
 
-            return true;
-         }
-
-         return false;
-      }
-   }
-
-   public void func_175275_f(String p_175275_1_) {
-      this.func_175281_b(p_175275_1_, true);
-   }
-
-   public void func_175281_b(String p_175281_1_, boolean p_175281_2_) {
-      if (p_175281_2_) {
-         this.field_146297_k.field_71456_v.func_146158_b().func_146239_a(p_175281_1_);
-      }
-
-      this.field_146297_k.field_71439_g.func_71165_d(p_175281_1_);
-   }
-
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      if (p_73864_3_ == 0) {
-         for(int i = 0; i < this.field_146292_n.size(); ++i) {
-            GuiButton guibutton = this.field_146292_n.get(i);
-            if (guibutton.func_146116_c(this.field_146297_k, p_73864_1_, p_73864_2_)) {
-               this.field_146290_a = guibutton;
-               guibutton.func_146113_a(this.field_146297_k.func_147118_V());
-               this.func_146284_a(guibutton);
+            if (l1 + i > this.width)
+            {
+                l1 -= 28 + i;
             }
-         }
-      }
 
-   }
+            if (i2 + k + 6 > this.height)
+            {
+                i2 = this.height - k - 6;
+            }
 
-   protected void func_146286_b(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
-      if (this.field_146290_a != null && p_146286_3_ == 0) {
-         this.field_146290_a.func_146118_a(p_146286_1_, p_146286_2_);
-         this.field_146290_a = null;
-      }
+            this.zLevel = 300.0F;
+            this.itemRender.zLevel = 300.0F;
+            int l = -267386864;
+            this.drawGradientRect(l1 - 3, i2 - 4, l1 + i + 3, i2 - 3, -267386864, -267386864);
+            this.drawGradientRect(l1 - 3, i2 + k + 3, l1 + i + 3, i2 + k + 4, -267386864, -267386864);
+            this.drawGradientRect(l1 - 3, i2 - 3, l1 + i + 3, i2 + k + 3, -267386864, -267386864);
+            this.drawGradientRect(l1 - 4, i2 - 3, l1 - 3, i2 + k + 3, -267386864, -267386864);
+            this.drawGradientRect(l1 + i + 3, i2 - 3, l1 + i + 4, i2 + k + 3, -267386864, -267386864);
+            int i1 = 1347420415;
+            int j1 = 1344798847;
+            this.drawGradientRect(l1 - 3, i2 - 3 + 1, l1 - 3 + 1, i2 + k + 3 - 1, 1347420415, 1344798847);
+            this.drawGradientRect(l1 + i + 2, i2 - 3 + 1, l1 + i + 3, i2 + k + 3 - 1, 1347420415, 1344798847);
+            this.drawGradientRect(l1 - 3, i2 - 3, l1 + i + 3, i2 - 3 + 1, 1347420415, 1347420415);
+            this.drawGradientRect(l1 - 3, i2 + k + 2, l1 + i + 3, i2 + k + 3, 1344798847, 1344798847);
 
-   }
+            for (int k1 = 0; k1 < textLines.size(); ++k1)
+            {
+                String s1 = textLines.get(k1);
+                this.fontRendererObj.drawStringWithShadow(s1, (float)l1, (float)i2, -1);
 
-   protected void func_146273_a(int p_146273_1_, int p_146273_2_, int p_146273_3_, long p_146273_4_) {
-   }
+                if (k1 == 0)
+                {
+                    i2 += 2;
+                }
 
-   protected void func_146284_a(GuiButton p_146284_1_) throws IOException {
-   }
+                i2 += 10;
+            }
 
-   public void func_146280_a(Minecraft p_146280_1_, int p_146280_2_, int p_146280_3_) {
-      this.field_146297_k = p_146280_1_;
-      this.field_146296_j = p_146280_1_.func_175599_af();
-      this.field_146289_q = p_146280_1_.field_71466_p;
-      this.field_146294_l = p_146280_2_;
-      this.field_146295_m = p_146280_3_;
-      this.field_146292_n.clear();
-      this.func_73866_w_();
-   }
+            this.zLevel = 0.0F;
+            this.itemRender.zLevel = 0.0F;
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepth();
+            RenderHelper.enableStandardItemLighting();
+            GlStateManager.enableRescaleNormal();
+        }
+    }
 
-   public void func_183500_a(int p_183500_1_, int p_183500_2_) {
-      this.field_146294_l = p_183500_1_;
-      this.field_146295_m = p_183500_2_;
-   }
+    /**
+     * Draws the hover event specified by the given chat component
+     */
+    protected void handleComponentHover(ITextComponent component, int x, int y)
+    {
+        if (component != null && component.getStyle().getHoverEvent() != null)
+        {
+            HoverEvent hoverevent = component.getStyle().getHoverEvent();
 
-   public void func_73866_w_() {
-   }
+            if (hoverevent.getAction() == HoverEvent.Action.SHOW_ITEM)
+            {
+                ItemStack itemstack = ItemStack.field_190927_a;
 
-   public void func_146269_k() throws IOException {
-      if (Mouse.isCreated()) {
-         while(Mouse.next()) {
-            this.func_146274_d();
-         }
-      }
+                try
+                {
+                    NBTBase nbtbase = JsonToNBT.getTagFromJson(hoverevent.getValue().getUnformattedText());
 
-      if (Keyboard.isCreated()) {
-         while(Keyboard.next()) {
-            this.func_146282_l();
-         }
-      }
+                    if (nbtbase instanceof NBTTagCompound)
+                    {
+                        itemstack = new ItemStack((NBTTagCompound)nbtbase);
+                    }
+                }
+                catch (NBTException var9)
+                {
+                    ;
+                }
 
-   }
+                if (itemstack.func_190926_b())
+                {
+                    this.drawCreativeTabHoveringText(TextFormatting.RED + "Invalid Item!", x, y);
+                }
+                else
+                {
+                    this.renderToolTip(itemstack, x, y);
+                }
+            }
+            else if (hoverevent.getAction() == HoverEvent.Action.SHOW_ENTITY)
+            {
+                if (this.mc.gameSettings.advancedItemTooltips)
+                {
+                    try
+                    {
+                        NBTTagCompound nbttagcompound = JsonToNBT.getTagFromJson(hoverevent.getValue().getUnformattedText());
+                        List<String> list = Lists.<String>newArrayList();
+                        list.add(nbttagcompound.getString("name"));
 
-   public void func_146274_d() throws IOException {
-      int i = Mouse.getEventX() * this.field_146294_l / this.field_146297_k.field_71443_c;
-      int j = this.field_146295_m - Mouse.getEventY() * this.field_146295_m / this.field_146297_k.field_71440_d - 1;
-      int k = Mouse.getEventButton();
-      if (Mouse.getEventButtonState()) {
-         if (this.field_146297_k.field_71474_y.field_85185_A && this.field_146298_h++ > 0) {
-            return;
-         }
+                        if (nbttagcompound.hasKey("type", 8))
+                        {
+                            String s = nbttagcompound.getString("type");
+                            list.add("Type: " + s);
+                        }
 
-         this.field_146287_f = k;
-         this.field_146288_g = Minecraft.func_71386_F();
-         this.func_73864_a(i, j, this.field_146287_f);
-      } else if (k != -1) {
-         if (this.field_146297_k.field_71474_y.field_85185_A && --this.field_146298_h > 0) {
-            return;
-         }
+                        list.add(nbttagcompound.getString("id"));
+                        this.drawHoveringText(list, x, y);
+                    }
+                    catch (NBTException var8)
+                    {
+                        this.drawCreativeTabHoveringText(TextFormatting.RED + "Invalid Entity!", x, y);
+                    }
+                }
+            }
+            else if (hoverevent.getAction() == HoverEvent.Action.SHOW_TEXT)
+            {
+                this.drawHoveringText(this.mc.fontRendererObj.listFormattedStringToWidth(hoverevent.getValue().getFormattedText(), Math.max(this.width / 2, 200)), x, y);
+            }
 
-         this.field_146287_f = -1;
-         this.func_146286_b(i, j, k);
-      } else if (this.field_146287_f != -1 && this.field_146288_g > 0L) {
-         long l = Minecraft.func_71386_F() - this.field_146288_g;
-         this.func_146273_a(i, j, this.field_146287_f, l);
-      }
+            GlStateManager.disableLighting();
+        }
+    }
 
-   }
+    /**
+     * Sets the text of the chat
+     */
+    protected void setText(String newChatText, boolean shouldOverwrite)
+    {
+    }
 
-   public void func_146282_l() throws IOException {
-      char c0 = Keyboard.getEventCharacter();
-      if (Keyboard.getEventKey() == 0 && c0 >= ' ' || Keyboard.getEventKeyState()) {
-         this.func_73869_a(c0, Keyboard.getEventKey());
-      }
+    /**
+     * Executes the click event specified by the given chat component
+     */
+    public boolean handleComponentClick(ITextComponent component)
+    {
+        if (component == null)
+        {
+            return false;
+        }
+        else
+        {
+            ClickEvent clickevent = component.getStyle().getClickEvent();
 
-      this.field_146297_k.func_152348_aa();
-   }
+            if (isShiftKeyDown())
+            {
+                if (component.getStyle().getInsertion() != null)
+                {
+                    this.setText(component.getStyle().getInsertion(), false);
+                }
+            }
+            else if (clickevent != null)
+            {
+                if (clickevent.getAction() == ClickEvent.Action.OPEN_URL)
+                {
+                    if (!this.mc.gameSettings.chatLinks)
+                    {
+                        return false;
+                    }
 
-   public void func_73876_c() {
-   }
+                    try
+                    {
+                        URI uri = new URI(clickevent.getValue());
+                        String s = uri.getScheme();
 
-   public void func_146281_b() {
-   }
+                        if (s == null)
+                        {
+                            throw new URISyntaxException(clickevent.getValue(), "Missing protocol");
+                        }
 
-   public void func_146276_q_() {
-      this.func_146270_b(0);
-   }
+                        if (!PROTOCOLS.contains(s.toLowerCase(Locale.ROOT)))
+                        {
+                            throw new URISyntaxException(clickevent.getValue(), "Unsupported protocol: " + s.toLowerCase(Locale.ROOT));
+                        }
 
-   public void func_146270_b(int p_146270_1_) {
-      if (this.field_146297_k.field_71441_e != null) {
-         this.func_73733_a(0, 0, this.field_146294_l, this.field_146295_m, -1072689136, -804253680);
-      } else {
-         this.func_146278_c(p_146270_1_);
-      }
+                        if (this.mc.gameSettings.chatLinksPrompt)
+                        {
+                            this.clickedLinkURI = uri;
+                            this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, clickevent.getValue(), 31102009, false));
+                        }
+                        else
+                        {
+                            this.openWebLink(uri);
+                        }
+                    }
+                    catch (URISyntaxException urisyntaxexception)
+                    {
+                        LOGGER.error("Can't open url for {}", clickevent, urisyntaxexception);
+                    }
+                }
+                else if (clickevent.getAction() == ClickEvent.Action.OPEN_FILE)
+                {
+                    URI uri1 = (new File(clickevent.getValue())).toURI();
+                    this.openWebLink(uri1);
+                }
+                else if (clickevent.getAction() == ClickEvent.Action.SUGGEST_COMMAND)
+                {
+                    this.setText(clickevent.getValue(), true);
+                }
+                else if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND)
+                {
+                    this.sendChatMessage(clickevent.getValue(), false);
+                }
+                else
+                {
+                    LOGGER.error("Don't know how to handle {}", (Object)clickevent);
+                }
 
-   }
+                return true;
+            }
 
-   public void func_146278_c(int p_146278_1_) {
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179106_n();
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      this.field_146297_k.func_110434_K().func_110577_a(field_110325_k);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      float f = 32.0F;
-      bufferbuilder.func_181668_a(7, DefaultVertexFormats.field_181709_i);
-      bufferbuilder.func_181662_b(0.0D, (double)this.field_146295_m, 0.0D).func_187315_a(0.0D, (double)((float)this.field_146295_m / 32.0F + (float)p_146278_1_)).func_181669_b(64, 64, 64, 255).func_181675_d();
-      bufferbuilder.func_181662_b((double)this.field_146294_l, (double)this.field_146295_m, 0.0D).func_187315_a((double)((float)this.field_146294_l / 32.0F), (double)((float)this.field_146295_m / 32.0F + (float)p_146278_1_)).func_181669_b(64, 64, 64, 255).func_181675_d();
-      bufferbuilder.func_181662_b((double)this.field_146294_l, 0.0D, 0.0D).func_187315_a((double)((float)this.field_146294_l / 32.0F), (double)p_146278_1_).func_181669_b(64, 64, 64, 255).func_181675_d();
-      bufferbuilder.func_181662_b(0.0D, 0.0D, 0.0D).func_187315_a(0.0D, (double)p_146278_1_).func_181669_b(64, 64, 64, 255).func_181675_d();
-      tessellator.func_78381_a();
-   }
+            return false;
+        }
+    }
 
-   public boolean func_73868_f() {
-      return true;
-   }
+    /**
+     * Used to add chat messages to the client's GuiChat.
+     */
+    public void sendChatMessage(String msg)
+    {
+        this.sendChatMessage(msg, true);
+    }
 
-   public void func_73878_a(boolean p_73878_1_, int p_73878_2_) {
-      if (p_73878_2_ == 31102009) {
-         if (p_73878_1_) {
-            this.func_175282_a(this.field_175286_t);
-         }
+    public void sendChatMessage(String msg, boolean addToChat)
+    {
+        if (addToChat)
+        {
+            this.mc.ingameGUI.getChatGUI().addToSentMessages(msg);
+        }
 
-         this.field_175286_t = null;
-         this.field_146297_k.func_147108_a(this);
-      }
+        this.mc.player.sendChatMessage(msg);
+    }
 
-   }
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        if (mouseButton == 0)
+        {
+            for (int i = 0; i < this.buttonList.size(); ++i)
+            {
+                GuiButton guibutton = this.buttonList.get(i);
 
-   private void func_175282_a(URI p_175282_1_) {
-      try {
-         Class<?> oclass = Class.forName("java.awt.Desktop");
-         Object object = oclass.getMethod("getDesktop").invoke((Object)null);
-         oclass.getMethod("browse", URI.class).invoke(object, p_175282_1_);
-      } catch (Throwable throwable1) {
-         Throwable throwable = throwable1.getCause();
-         field_175287_a.error("Couldn't open link: {}", (Object)(throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
-      }
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY))
+                {
+                    this.selectedButton = guibutton;
+                    guibutton.playPressSound(this.mc.getSoundHandler());
+                    this.actionPerformed(guibutton);
+                }
+            }
+        }
+    }
 
-   }
+    /**
+     * Called when a mouse button is released.
+     */
+    protected void mouseReleased(int mouseX, int mouseY, int state)
+    {
+        if (this.selectedButton != null && state == 0)
+        {
+            this.selectedButton.mouseReleased(mouseX, mouseY);
+            this.selectedButton = null;
+        }
+    }
 
-   public static boolean func_146271_m() {
-      if (Minecraft.field_142025_a) {
-         return Keyboard.isKeyDown(219) || Keyboard.isKeyDown(220);
-      } else {
-         return Keyboard.isKeyDown(29) || Keyboard.isKeyDown(157);
-      }
-   }
+    /**
+     * Called when a mouse button is pressed and the mouse is moved around. Parameters are : mouseX, mouseY,
+     * lastButtonClicked & timeSinceMouseClick.
+     */
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
+    {
+    }
 
-   public static boolean func_146272_n() {
-      return Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54);
-   }
+    /**
+     * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
+     */
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+    }
 
-   public static boolean func_175283_s() {
-      return Keyboard.isKeyDown(56) || Keyboard.isKeyDown(184);
-   }
+    /**
+     * Causes the screen to lay out its subcomponents again. This is the equivalent of the Java call
+     * Container.validate()
+     */
+    public void setWorldAndResolution(Minecraft mc, int width, int height)
+    {
+        this.mc = mc;
+        this.itemRender = mc.getRenderItem();
+        this.fontRendererObj = mc.fontRendererObj;
+        this.width = width;
+        this.height = height;
+        this.buttonList.clear();
+        this.initGui();
+    }
 
-   public static boolean func_175277_d(int p_175277_0_) {
-      return p_175277_0_ == 45 && func_146271_m() && !func_146272_n() && !func_175283_s();
-   }
+    /**
+     * Set the gui to the specified width and height
+     */
+    public void setGuiSize(int w, int h)
+    {
+        this.width = w;
+        this.height = h;
+    }
 
-   public static boolean func_175279_e(int p_175279_0_) {
-      return p_175279_0_ == 47 && func_146271_m() && !func_146272_n() && !func_175283_s();
-   }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+    }
 
-   public static boolean func_175280_f(int p_175280_0_) {
-      return p_175280_0_ == 46 && func_146271_m() && !func_146272_n() && !func_175283_s();
-   }
+    /**
+     * Delegates mouse and keyboard input.
+     */
+    public void handleInput() throws IOException
+    {
+        if (Mouse.isCreated())
+        {
+            while (Mouse.next())
+            {
+                this.handleMouseInput();
+            }
+        }
 
-   public static boolean func_175278_g(int p_175278_0_) {
-      return p_175278_0_ == 30 && func_146271_m() && !func_146272_n() && !func_175283_s();
-   }
+        if (Keyboard.isCreated())
+        {
+            while (Keyboard.next())
+            {
+                this.handleKeyboardInput();
+            }
+        }
+    }
 
-   public void func_175273_b(Minecraft p_175273_1_, int p_175273_2_, int p_175273_3_) {
-      this.func_146280_a(p_175273_1_, p_175273_2_, p_175273_3_);
-   }
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+        int k = Mouse.getEventButton();
+
+        if (Mouse.getEventButtonState())
+        {
+            if (this.mc.gameSettings.touchscreen && this.touchValue++ > 0)
+            {
+                return;
+            }
+
+            this.eventButton = k;
+            this.lastMouseEvent = Minecraft.getSystemTime();
+            this.mouseClicked(i, j, this.eventButton);
+        }
+        else if (k != -1)
+        {
+            if (this.mc.gameSettings.touchscreen && --this.touchValue > 0)
+            {
+                return;
+            }
+
+            this.eventButton = -1;
+            this.mouseReleased(i, j, k);
+        }
+        else if (this.eventButton != -1 && this.lastMouseEvent > 0L)
+        {
+            long l = Minecraft.getSystemTime() - this.lastMouseEvent;
+            this.mouseClickMove(i, j, this.eventButton, l);
+        }
+    }
+
+    /**
+     * Handles keyboard input.
+     */
+    public void handleKeyboardInput() throws IOException
+    {
+        char c0 = Keyboard.getEventCharacter();
+
+        if (Keyboard.getEventKey() == 0 && c0 >= ' ' || Keyboard.getEventKeyState())
+        {
+            this.keyTyped(c0, Keyboard.getEventKey());
+        }
+
+        this.mc.dispatchKeypresses();
+    }
+
+    /**
+     * Called from the main game loop to update the screen.
+     */
+    public void updateScreen()
+    {
+    }
+
+    /**
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
+     */
+    public void onGuiClosed()
+    {
+    }
+
+    /**
+     * Draws either a gradient over the background screen (when it exists) or a flat gradient over background.png
+     */
+    public void drawDefaultBackground()
+    {
+        this.drawWorldBackground(0);
+    }
+
+    public void drawWorldBackground(int tint)
+    {
+        if (this.mc.world != null)
+        {
+            this.drawGradientRect(0, 0, this.width, this.height, -1072689136, -804253680);
+        }
+        else
+        {
+            this.drawBackground(tint);
+        }
+    }
+
+    /**
+     * Draws the background (i is always 0 as of 1.2.2)
+     */
+    public void drawBackground(int tint)
+    {
+        GlStateManager.disableLighting();
+        GlStateManager.disableFog();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        this.mc.getTextureManager().bindTexture(OPTIONS_BACKGROUND);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float f = 32.0F;
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos(0.0D, (double)this.height, 0.0D).tex(0.0D, (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
+        bufferbuilder.pos((double)this.width, (double)this.height, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
+        bufferbuilder.pos((double)this.width, 0.0D, 0.0D).tex((double)((float)this.width / 32.0F), (double)tint).color(64, 64, 64, 255).endVertex();
+        bufferbuilder.pos(0.0D, 0.0D, 0.0D).tex(0.0D, (double)tint).color(64, 64, 64, 255).endVertex();
+        tessellator.draw();
+    }
+
+    /**
+     * Returns true if this GUI should pause the game when it is displayed in single-player
+     */
+    public boolean doesGuiPauseGame()
+    {
+        return true;
+    }
+
+    public void confirmClicked(boolean result, int id)
+    {
+        if (id == 31102009)
+        {
+            if (result)
+            {
+                this.openWebLink(this.clickedLinkURI);
+            }
+
+            this.clickedLinkURI = null;
+            this.mc.displayGuiScreen(this);
+        }
+    }
+
+    private void openWebLink(URI url)
+    {
+        try
+        {
+            Class<?> oclass = Class.forName("java.awt.Desktop");
+            Object object = oclass.getMethod("getDesktop").invoke((Object)null);
+            oclass.getMethod("browse", URI.class).invoke(object, url);
+        }
+        catch (Throwable throwable1)
+        {
+            Throwable throwable = throwable1.getCause();
+            LOGGER.error("Couldn't open link: {}", (Object)(throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
+        }
+    }
+
+    /**
+     * Returns true if either windows ctrl key is down or if either mac meta key is down
+     */
+    public static boolean isCtrlKeyDown()
+    {
+        if (Minecraft.IS_RUNNING_ON_MAC)
+        {
+            return Keyboard.isKeyDown(219) || Keyboard.isKeyDown(220);
+        }
+        else
+        {
+            return Keyboard.isKeyDown(29) || Keyboard.isKeyDown(157);
+        }
+    }
+
+    /**
+     * Returns true if either shift key is down
+     */
+    public static boolean isShiftKeyDown()
+    {
+        return Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54);
+    }
+
+    /**
+     * Returns true if either alt key is down
+     */
+    public static boolean isAltKeyDown()
+    {
+        return Keyboard.isKeyDown(56) || Keyboard.isKeyDown(184);
+    }
+
+    public static boolean isKeyComboCtrlX(int keyID)
+    {
+        return keyID == 45 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
+    }
+
+    public static boolean isKeyComboCtrlV(int keyID)
+    {
+        return keyID == 47 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
+    }
+
+    public static boolean isKeyComboCtrlC(int keyID)
+    {
+        return keyID == 46 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
+    }
+
+    public static boolean isKeyComboCtrlA(int keyID)
+    {
+        return keyID == 30 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
+    }
+
+    /**
+     * Called when the GUI is resized in order to update the world and the resolution
+     */
+    public void onResize(Minecraft mcIn, int w, int h)
+    {
+        this.setWorldAndResolution(mcIn, w, h);
+    }
 }

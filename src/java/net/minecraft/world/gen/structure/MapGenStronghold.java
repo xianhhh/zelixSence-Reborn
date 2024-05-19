@@ -12,162 +12,205 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
-public class MapGenStronghold extends MapGenStructure {
-   private final List<Biome> field_151546_e;
-   private boolean field_75056_f;
-   private ChunkPos[] field_75057_g;
-   private double field_82671_h;
-   private int field_82672_i;
+public class MapGenStronghold extends MapGenStructure
+{
+    private final List<Biome> allowedBiomes;
 
-   public MapGenStronghold() {
-      this.field_75057_g = new ChunkPos[128];
-      this.field_82671_h = 32.0D;
-      this.field_82672_i = 3;
-      this.field_151546_e = Lists.<Biome>newArrayList();
+    /**
+     * is spawned false and set true once the defined BiomeGenBases were compared with the present ones
+     */
+    private boolean ranBiomeCheck;
+    private ChunkPos[] structureCoords;
+    private double distance;
+    private int spread;
 
-      for(Biome biome : Biome.field_185377_q) {
-         if (biome != null && biome.func_185355_j() > 0.0F) {
-            this.field_151546_e.add(biome);
-         }
-      }
+    public MapGenStronghold()
+    {
+        this.structureCoords = new ChunkPos[128];
+        this.distance = 32.0D;
+        this.spread = 3;
+        this.allowedBiomes = Lists.<Biome>newArrayList();
 
-   }
+        for (Biome biome : Biome.REGISTRY)
+        {
+            if (biome != null && biome.getBaseHeight() > 0.0F)
+            {
+                this.allowedBiomes.add(biome);
+            }
+        }
+    }
 
-   public MapGenStronghold(Map<String, String> p_i2068_1_) {
-      this();
+    public MapGenStronghold(Map<String, String> p_i2068_1_)
+    {
+        this();
 
-      for(Entry<String, String> entry : p_i2068_1_.entrySet()) {
-         if (((String)entry.getKey()).equals("distance")) {
-            this.field_82671_h = MathHelper.func_82713_a(entry.getValue(), this.field_82671_h, 1.0D);
-         } else if (((String)entry.getKey()).equals("count")) {
-            this.field_75057_g = new ChunkPos[MathHelper.func_82714_a(entry.getValue(), this.field_75057_g.length, 1)];
-         } else if (((String)entry.getKey()).equals("spread")) {
-            this.field_82672_i = MathHelper.func_82714_a(entry.getValue(), this.field_82672_i, 1);
-         }
-      }
+        for (Entry<String, String> entry : p_i2068_1_.entrySet())
+        {
+            if (((String)entry.getKey()).equals("distance"))
+            {
+                this.distance = MathHelper.getDouble(entry.getValue(), this.distance, 1.0D);
+            }
+            else if (((String)entry.getKey()).equals("count"))
+            {
+                this.structureCoords = new ChunkPos[MathHelper.getInt(entry.getValue(), this.structureCoords.length, 1)];
+            }
+            else if (((String)entry.getKey()).equals("spread"))
+            {
+                this.spread = MathHelper.getInt(entry.getValue(), this.spread, 1);
+            }
+        }
+    }
 
-   }
+    public String getStructureName()
+    {
+        return "Stronghold";
+    }
 
-   public String func_143025_a() {
-      return "Stronghold";
-   }
+    public BlockPos getClosestStrongholdPos(World worldIn, BlockPos pos, boolean p_180706_3_)
+    {
+        if (!this.ranBiomeCheck)
+        {
+            this.generatePositions();
+            this.ranBiomeCheck = true;
+        }
 
-   public BlockPos func_180706_b(World p_180706_1_, BlockPos p_180706_2_, boolean p_180706_3_) {
-      if (!this.field_75056_f) {
-         this.func_189104_c();
-         this.field_75056_f = true;
-      }
+        BlockPos blockpos = null;
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(0, 0, 0);
+        double d0 = Double.MAX_VALUE;
 
-      BlockPos blockpos = null;
-      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(0, 0, 0);
-      double d0 = Double.MAX_VALUE;
+        for (ChunkPos chunkpos : this.structureCoords)
+        {
+            blockpos$mutableblockpos.setPos((chunkpos.chunkXPos << 4) + 8, 32, (chunkpos.chunkZPos << 4) + 8);
+            double d1 = blockpos$mutableblockpos.distanceSq(pos);
 
-      for(ChunkPos chunkpos : this.field_75057_g) {
-         blockpos$mutableblockpos.func_181079_c((chunkpos.field_77276_a << 4) + 8, 32, (chunkpos.field_77275_b << 4) + 8);
-         double d1 = blockpos$mutableblockpos.func_177951_i(p_180706_2_);
-         if (blockpos == null) {
-            blockpos = new BlockPos(blockpos$mutableblockpos);
-            d0 = d1;
-         } else if (d1 < d0) {
-            blockpos = new BlockPos(blockpos$mutableblockpos);
-            d0 = d1;
-         }
-      }
+            if (blockpos == null)
+            {
+                blockpos = new BlockPos(blockpos$mutableblockpos);
+                d0 = d1;
+            }
+            else if (d1 < d0)
+            {
+                blockpos = new BlockPos(blockpos$mutableblockpos);
+                d0 = d1;
+            }
+        }
 
-      return blockpos;
-   }
+        return blockpos;
+    }
 
-   protected boolean func_75047_a(int p_75047_1_, int p_75047_2_) {
-      if (!this.field_75056_f) {
-         this.func_189104_c();
-         this.field_75056_f = true;
-      }
+    protected boolean canSpawnStructureAtCoords(int chunkX, int chunkZ)
+    {
+        if (!this.ranBiomeCheck)
+        {
+            this.generatePositions();
+            this.ranBiomeCheck = true;
+        }
 
-      for(ChunkPos chunkpos : this.field_75057_g) {
-         if (p_75047_1_ == chunkpos.field_77276_a && p_75047_2_ == chunkpos.field_77275_b) {
-            return true;
-         }
-      }
+        for (ChunkPos chunkpos : this.structureCoords)
+        {
+            if (chunkX == chunkpos.chunkXPos && chunkZ == chunkpos.chunkZPos)
+            {
+                return true;
+            }
+        }
 
-      return false;
-   }
+        return false;
+    }
 
-   private void func_189104_c() {
-      this.func_143027_a(this.field_75039_c);
-      int i = 0;
-      ObjectIterator lvt_2_1_ = this.field_75053_d.values().iterator();
+    private void generatePositions()
+    {
+        this.initializeStructureData(this.worldObj);
+        int i = 0;
+        ObjectIterator lvt_2_1_ = this.structureMap.values().iterator();
 
-      while(lvt_2_1_.hasNext()) {
-         StructureStart structurestart = (StructureStart)lvt_2_1_.next();
-         if (i < this.field_75057_g.length) {
-            this.field_75057_g[i++] = new ChunkPos(structurestart.func_143019_e(), structurestart.func_143018_f());
-         }
-      }
+        while (lvt_2_1_.hasNext())
+        {
+            StructureStart structurestart = (StructureStart)lvt_2_1_.next();
 
-      Random random = new Random();
-      random.setSeed(this.field_75039_c.func_72905_C());
-      double d1 = random.nextDouble() * 3.141592653589793D * 2.0D;
-      int j = 0;
-      int k = 0;
-      int l = this.field_75053_d.size();
-      if (l < this.field_75057_g.length) {
-         for(int i1 = 0; i1 < this.field_75057_g.length; ++i1) {
-            double d0 = 4.0D * this.field_82671_h + this.field_82671_h * (double)j * 6.0D + (random.nextDouble() - 0.5D) * this.field_82671_h * 2.5D;
-            int j1 = (int)Math.round(Math.cos(d1) * d0);
-            int k1 = (int)Math.round(Math.sin(d1) * d0);
-            BlockPos blockpos = this.field_75039_c.func_72959_q().func_180630_a((j1 << 4) + 8, (k1 << 4) + 8, 112, this.field_151546_e, random);
-            if (blockpos != null) {
-               j1 = blockpos.func_177958_n() >> 4;
-               k1 = blockpos.func_177952_p() >> 4;
+            if (i < this.structureCoords.length)
+            {
+                this.structureCoords[i++] = new ChunkPos(structurestart.getChunkPosX(), structurestart.getChunkPosZ());
+            }
+        }
+
+        Random random = new Random();
+        random.setSeed(this.worldObj.getSeed());
+        double d1 = random.nextDouble() * Math.PI * 2.0D;
+        int j = 0;
+        int k = 0;
+        int l = this.structureMap.size();
+
+        if (l < this.structureCoords.length)
+        {
+            for (int i1 = 0; i1 < this.structureCoords.length; ++i1)
+            {
+                double d0 = 4.0D * this.distance + this.distance * (double)j * 6.0D + (random.nextDouble() - 0.5D) * this.distance * 2.5D;
+                int j1 = (int)Math.round(Math.cos(d1) * d0);
+                int k1 = (int)Math.round(Math.sin(d1) * d0);
+                BlockPos blockpos = this.worldObj.getBiomeProvider().findBiomePosition((j1 << 4) + 8, (k1 << 4) + 8, 112, this.allowedBiomes, random);
+
+                if (blockpos != null)
+                {
+                    j1 = blockpos.getX() >> 4;
+                    k1 = blockpos.getZ() >> 4;
+                }
+
+                if (i1 >= l)
+                {
+                    this.structureCoords[i1] = new ChunkPos(j1, k1);
+                }
+
+                d1 += (Math.PI * 2D) / (double)this.spread;
+                ++k;
+
+                if (k == this.spread)
+                {
+                    ++j;
+                    k = 0;
+                    this.spread += 2 * this.spread / (j + 1);
+                    this.spread = Math.min(this.spread, this.structureCoords.length - i1);
+                    d1 += random.nextDouble() * Math.PI * 2.0D;
+                }
+            }
+        }
+    }
+
+    protected StructureStart getStructureStart(int chunkX, int chunkZ)
+    {
+        MapGenStronghold.Start mapgenstronghold$start;
+
+        for (mapgenstronghold$start = new MapGenStronghold.Start(this.worldObj, this.rand, chunkX, chunkZ); mapgenstronghold$start.getComponents().isEmpty() || ((StructureStrongholdPieces.Stairs2)mapgenstronghold$start.getComponents().get(0)).strongholdPortalRoom == null; mapgenstronghold$start = new MapGenStronghold.Start(this.worldObj, this.rand, chunkX, chunkZ))
+        {
+            ;
+        }
+
+        return mapgenstronghold$start;
+    }
+
+    public static class Start extends StructureStart
+    {
+        public Start()
+        {
+        }
+
+        public Start(World worldIn, Random random, int chunkX, int chunkZ)
+        {
+            super(chunkX, chunkZ);
+            StructureStrongholdPieces.prepareStructurePieces();
+            StructureStrongholdPieces.Stairs2 structurestrongholdpieces$stairs2 = new StructureStrongholdPieces.Stairs2(0, random, (chunkX << 4) + 2, (chunkZ << 4) + 2);
+            this.components.add(structurestrongholdpieces$stairs2);
+            structurestrongholdpieces$stairs2.buildComponent(structurestrongholdpieces$stairs2, this.components, random);
+            List<StructureComponent> list = structurestrongholdpieces$stairs2.pendingChildren;
+
+            while (!list.isEmpty())
+            {
+                int i = random.nextInt(list.size());
+                StructureComponent structurecomponent = list.remove(i);
+                structurecomponent.buildComponent(structurestrongholdpieces$stairs2, this.components, random);
             }
 
-            if (i1 >= l) {
-               this.field_75057_g[i1] = new ChunkPos(j1, k1);
-            }
-
-            d1 += 6.283185307179586D / (double)this.field_82672_i;
-            ++k;
-            if (k == this.field_82672_i) {
-               ++j;
-               k = 0;
-               this.field_82672_i += 2 * this.field_82672_i / (j + 1);
-               this.field_82672_i = Math.min(this.field_82672_i, this.field_75057_g.length - i1);
-               d1 += random.nextDouble() * 3.141592653589793D * 2.0D;
-            }
-         }
-      }
-
-   }
-
-   protected StructureStart func_75049_b(int p_75049_1_, int p_75049_2_) {
-      MapGenStronghold.Start mapgenstronghold$start;
-      for(mapgenstronghold$start = new MapGenStronghold.Start(this.field_75039_c, this.field_75038_b, p_75049_1_, p_75049_2_); mapgenstronghold$start.func_186161_c().isEmpty() || ((StructureStrongholdPieces.Stairs2)mapgenstronghold$start.func_186161_c().get(0)).field_75025_b == null; mapgenstronghold$start = new MapGenStronghold.Start(this.field_75039_c, this.field_75038_b, p_75049_1_, p_75049_2_)) {
-         ;
-      }
-
-      return mapgenstronghold$start;
-   }
-
-   public static class Start extends StructureStart {
-      public Start() {
-      }
-
-      public Start(World p_i2067_1_, Random p_i2067_2_, int p_i2067_3_, int p_i2067_4_) {
-         super(p_i2067_3_, p_i2067_4_);
-         StructureStrongholdPieces.func_75198_a();
-         StructureStrongholdPieces.Stairs2 structurestrongholdpieces$stairs2 = new StructureStrongholdPieces.Stairs2(0, p_i2067_2_, (p_i2067_3_ << 4) + 2, (p_i2067_4_ << 4) + 2);
-         this.field_75075_a.add(structurestrongholdpieces$stairs2);
-         structurestrongholdpieces$stairs2.func_74861_a(structurestrongholdpieces$stairs2, this.field_75075_a, p_i2067_2_);
-         List<StructureComponent> list = structurestrongholdpieces$stairs2.field_75026_c;
-
-         while(!list.isEmpty()) {
-            int i = p_i2067_2_.nextInt(list.size());
-            StructureComponent structurecomponent = list.remove(i);
-            structurecomponent.func_74861_a(structurestrongholdpieces$stairs2, this.field_75075_a, p_i2067_2_);
-         }
-
-         this.func_75072_c();
-         this.func_75067_a(p_i2067_1_, p_i2067_2_, 10);
-      }
-   }
+            this.updateBoundingBox();
+            this.markAvailableHeight(worldIn, random, 10);
+        }
+    }
 }

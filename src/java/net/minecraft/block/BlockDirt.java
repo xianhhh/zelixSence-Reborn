@@ -16,115 +16,158 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockDirt extends Block {
-   public static final PropertyEnum<BlockDirt.DirtType> field_176386_a = PropertyEnum.<BlockDirt.DirtType>func_177709_a("variant", BlockDirt.DirtType.class);
-   public static final PropertyBool field_176385_b = PropertyBool.func_177716_a("snowy");
+public class BlockDirt extends Block
+{
+    public static final PropertyEnum<BlockDirt.DirtType> VARIANT = PropertyEnum.<BlockDirt.DirtType>create("variant", BlockDirt.DirtType.class);
+    public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 
-   protected BlockDirt() {
-      super(Material.field_151578_c);
-      this.func_180632_j(this.field_176227_L.func_177621_b().func_177226_a(field_176386_a, BlockDirt.DirtType.DIRT).func_177226_a(field_176385_b, Boolean.valueOf(false)));
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+    protected BlockDirt()
+    {
+        super(Material.GROUND);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockDirt.DirtType.DIRT).withProperty(SNOWY, Boolean.valueOf(false)));
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_) {
-      return ((BlockDirt.DirtType)p_180659_1_.func_177229_b(field_176386_a)).func_181066_d();
-   }
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    {
+        return ((BlockDirt.DirtType)state.getValue(VARIANT)).getColor();
+    }
 
-   public IBlockState func_176221_a(IBlockState p_176221_1_, IBlockAccess p_176221_2_, BlockPos p_176221_3_) {
-      if (p_176221_1_.func_177229_b(field_176386_a) == BlockDirt.DirtType.PODZOL) {
-         Block block = p_176221_2_.func_180495_p(p_176221_3_.func_177984_a()).func_177230_c();
-         p_176221_1_ = p_176221_1_.func_177226_a(field_176385_b, Boolean.valueOf(block == Blocks.field_150433_aE || block == Blocks.field_150431_aC));
-      }
+    /**
+     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
+     * metadata, such as fence connections.
+     */
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        if (state.getValue(VARIANT) == BlockDirt.DirtType.PODZOL)
+        {
+            Block block = worldIn.getBlockState(pos.up()).getBlock();
+            state = state.withProperty(SNOWY, Boolean.valueOf(block == Blocks.SNOW || block == Blocks.SNOW_LAYER));
+        }
 
-      return p_176221_1_;
-   }
+        return state;
+    }
 
-   public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_) {
-      p_149666_2_.add(new ItemStack(this, 1, BlockDirt.DirtType.DIRT.func_176925_a()));
-      p_149666_2_.add(new ItemStack(this, 1, BlockDirt.DirtType.COARSE_DIRT.func_176925_a()));
-      p_149666_2_.add(new ItemStack(this, 1, BlockDirt.DirtType.PODZOL.func_176925_a()));
-   }
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    {
+        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.DIRT.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.COARSE_DIRT.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.PODZOL.getMetadata()));
+    }
 
-   public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_) {
-      return new ItemStack(this, 1, ((BlockDirt.DirtType)p_185473_3_.func_177229_b(field_176386_a)).func_176925_a());
-   }
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        return new ItemStack(this, 1, ((BlockDirt.DirtType)state.getValue(VARIANT)).getMetadata());
+    }
 
-   public IBlockState func_176203_a(int p_176203_1_) {
-      return this.func_176223_P().func_177226_a(field_176386_a, BlockDirt.DirtType.func_176924_a(p_176203_1_));
-   }
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(VARIANT, BlockDirt.DirtType.byMetadata(meta));
+    }
 
-   public int func_176201_c(IBlockState p_176201_1_) {
-      return ((BlockDirt.DirtType)p_176201_1_.func_177229_b(field_176386_a)).func_176925_a();
-   }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((BlockDirt.DirtType)state.getValue(VARIANT)).getMetadata();
+    }
 
-   protected BlockStateContainer func_180661_e() {
-      return new BlockStateContainer(this, new IProperty[]{field_176386_a, field_176385_b});
-   }
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {VARIANT, SNOWY});
+    }
 
-   public int func_180651_a(IBlockState p_180651_1_) {
-      BlockDirt.DirtType blockdirt$dirttype = (BlockDirt.DirtType)p_180651_1_.func_177229_b(field_176386_a);
-      if (blockdirt$dirttype == BlockDirt.DirtType.PODZOL) {
-         blockdirt$dirttype = BlockDirt.DirtType.DIRT;
-      }
+    /**
+     * Gets the metadata of the item this Block can drop. This method is called when the block gets destroyed. It
+     * returns the metadata of the dropped item based on the old metadata of the block.
+     */
+    public int damageDropped(IBlockState state)
+    {
+        BlockDirt.DirtType blockdirt$dirttype = (BlockDirt.DirtType)state.getValue(VARIANT);
 
-      return blockdirt$dirttype.func_176925_a();
-   }
+        if (blockdirt$dirttype == BlockDirt.DirtType.PODZOL)
+        {
+            blockdirt$dirttype = BlockDirt.DirtType.DIRT;
+        }
 
-   public static enum DirtType implements IStringSerializable {
-      DIRT(0, "dirt", "default", MapColor.field_151664_l),
-      COARSE_DIRT(1, "coarse_dirt", "coarse", MapColor.field_151664_l),
-      PODZOL(2, "podzol", MapColor.field_151654_J);
+        return blockdirt$dirttype.getMetadata();
+    }
 
-      private static final BlockDirt.DirtType[] field_176930_d = new BlockDirt.DirtType[values().length];
-      private final int field_176931_e;
-      private final String field_176928_f;
-      private final String field_176929_g;
-      private final MapColor field_181067_h;
+    public static enum DirtType implements IStringSerializable
+    {
+        DIRT(0, "dirt", "default", MapColor.DIRT),
+        COARSE_DIRT(1, "coarse_dirt", "coarse", MapColor.DIRT),
+        PODZOL(2, "podzol", MapColor.OBSIDIAN);
 
-      private DirtType(int p_i46396_3_, String p_i46396_4_, MapColor p_i46396_5_) {
-         this(p_i46396_3_, p_i46396_4_, p_i46396_4_, p_i46396_5_);
-      }
+        private static final BlockDirt.DirtType[] METADATA_LOOKUP = new BlockDirt.DirtType[values().length];
+        private final int metadata;
+        private final String name;
+        private final String unlocalizedName;
+        private final MapColor color;
 
-      private DirtType(int p_i46397_3_, String p_i46397_4_, String p_i46397_5_, MapColor p_i46397_6_) {
-         this.field_176931_e = p_i46397_3_;
-         this.field_176928_f = p_i46397_4_;
-         this.field_176929_g = p_i46397_5_;
-         this.field_181067_h = p_i46397_6_;
-      }
+        private DirtType(int metadataIn, String nameIn, MapColor color)
+        {
+            this(metadataIn, nameIn, nameIn, color);
+        }
 
-      public int func_176925_a() {
-         return this.field_176931_e;
-      }
+        private DirtType(int metadataIn, String nameIn, String unlocalizedNameIn, MapColor color)
+        {
+            this.metadata = metadataIn;
+            this.name = nameIn;
+            this.unlocalizedName = unlocalizedNameIn;
+            this.color = color;
+        }
 
-      public String func_176927_c() {
-         return this.field_176929_g;
-      }
+        public int getMetadata()
+        {
+            return this.metadata;
+        }
 
-      public MapColor func_181066_d() {
-         return this.field_181067_h;
-      }
+        public String getUnlocalizedName()
+        {
+            return this.unlocalizedName;
+        }
 
-      public String toString() {
-         return this.field_176928_f;
-      }
+        public MapColor getColor()
+        {
+            return this.color;
+        }
 
-      public static BlockDirt.DirtType func_176924_a(int p_176924_0_) {
-         if (p_176924_0_ < 0 || p_176924_0_ >= field_176930_d.length) {
-            p_176924_0_ = 0;
-         }
+        public String toString()
+        {
+            return this.name;
+        }
 
-         return field_176930_d[p_176924_0_];
-      }
+        public static BlockDirt.DirtType byMetadata(int metadata)
+        {
+            if (metadata < 0 || metadata >= METADATA_LOOKUP.length)
+            {
+                metadata = 0;
+            }
 
-      public String func_176610_l() {
-         return this.field_176928_f;
-      }
+            return METADATA_LOOKUP[metadata];
+        }
 
-      static {
-         for(BlockDirt.DirtType blockdirt$dirttype : values()) {
-            field_176930_d[blockdirt$dirttype.func_176925_a()] = blockdirt$dirttype;
-         }
+        public String getName()
+        {
+            return this.name;
+        }
 
-      }
-   }
+        static {
+            for (BlockDirt.DirtType blockdirt$dirttype : values())
+            {
+                METADATA_LOOKUP[blockdirt$dirttype.getMetadata()] = blockdirt$dirttype;
+            }
+        }
+    }
 }

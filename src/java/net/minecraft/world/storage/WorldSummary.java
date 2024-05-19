@@ -4,82 +4,116 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.GameType;
 
-public class WorldSummary implements Comparable<WorldSummary> {
-   private final String field_75797_a;
-   private final String field_75795_b;
-   private final long field_75796_c;
-   private final long field_75793_d;
-   private final boolean field_75794_e;
-   private final GameType field_75791_f;
-   private final boolean field_75792_g;
-   private final boolean field_75798_h;
-   private final String field_186358_i;
-   private final int field_186359_j;
-   private final boolean field_186360_k;
+public class WorldSummary implements Comparable<WorldSummary>
+{
+    /** the file name of this save */
+    private final String fileName;
 
-   public WorldSummary(WorldInfo p_i46646_1_, String p_i46646_2_, String p_i46646_3_, long p_i46646_4_, boolean p_i46646_6_) {
-      this.field_75797_a = p_i46646_2_;
-      this.field_75795_b = p_i46646_3_;
-      this.field_75796_c = p_i46646_1_.func_76057_l();
-      this.field_75793_d = p_i46646_4_;
-      this.field_75791_f = p_i46646_1_.func_76077_q();
-      this.field_75794_e = p_i46646_6_;
-      this.field_75792_g = p_i46646_1_.func_76093_s();
-      this.field_75798_h = p_i46646_1_.func_76086_u();
-      this.field_186358_i = p_i46646_1_.func_186346_M();
-      this.field_186359_j = p_i46646_1_.func_186344_K();
-      this.field_186360_k = p_i46646_1_.func_186343_L();
-   }
+    /** the displayed name of this save file */
+    private final String displayName;
+    private final long lastTimePlayed;
+    private final long sizeOnDisk;
+    private final boolean requiresConversion;
 
-   public String func_75786_a() {
-      return this.field_75797_a;
-   }
+    /** Instance of EnumGameType. */
+    private final GameType theEnumGameType;
+    private final boolean hardcore;
+    private final boolean cheatsEnabled;
+    private final String versionName;
+    private final int versionId;
+    private final boolean versionSnapshot;
 
-   public String func_75788_b() {
-      return this.field_75795_b;
-   }
+    public WorldSummary(WorldInfo info, String fileNameIn, String displayNameIn, long sizeOnDiskIn, boolean requiresConversionIn)
+    {
+        this.fileName = fileNameIn;
+        this.displayName = displayNameIn;
+        this.lastTimePlayed = info.getLastTimePlayed();
+        this.sizeOnDisk = sizeOnDiskIn;
+        this.theEnumGameType = info.getGameType();
+        this.requiresConversion = requiresConversionIn;
+        this.hardcore = info.isHardcoreModeEnabled();
+        this.cheatsEnabled = info.areCommandsAllowed();
+        this.versionName = info.getVersionName();
+        this.versionId = info.getVersionId();
+        this.versionSnapshot = info.isVersionSnapshot();
+    }
 
-   public long func_154336_c() {
-      return this.field_75793_d;
-   }
+    /**
+     * return the file name
+     */
+    public String getFileName()
+    {
+        return this.fileName;
+    }
 
-   public boolean func_75785_d() {
-      return this.field_75794_e;
-   }
+    /**
+     * return the display name of the save
+     */
+    public String getDisplayName()
+    {
+        return this.displayName;
+    }
 
-   public long func_75784_e() {
-      return this.field_75796_c;
-   }
+    public long getSizeOnDisk()
+    {
+        return this.sizeOnDisk;
+    }
 
-   public int compareTo(WorldSummary p_compareTo_1_) {
-      if (this.field_75796_c < p_compareTo_1_.field_75796_c) {
-         return 1;
-      } else {
-         return this.field_75796_c > p_compareTo_1_.field_75796_c ? -1 : this.field_75797_a.compareTo(p_compareTo_1_.field_75797_a);
-      }
-   }
+    public boolean requiresConversion()
+    {
+        return this.requiresConversion;
+    }
 
-   public GameType func_75790_f() {
-      return this.field_75791_f;
-   }
+    public long getLastTimePlayed()
+    {
+        return this.lastTimePlayed;
+    }
 
-   public boolean func_75789_g() {
-      return this.field_75792_g;
-   }
+    public int compareTo(WorldSummary p_compareTo_1_)
+    {
+        if (this.lastTimePlayed < p_compareTo_1_.lastTimePlayed)
+        {
+            return 1;
+        }
+        else
+        {
+            return this.lastTimePlayed > p_compareTo_1_.lastTimePlayed ? -1 : this.fileName.compareTo(p_compareTo_1_.fileName);
+        }
+    }
 
-   public boolean func_75783_h() {
-      return this.field_75798_h;
-   }
+    /**
+     * Gets the EnumGameType.
+     */
+    public GameType getEnumGameType()
+    {
+        return this.theEnumGameType;
+    }
 
-   public String func_186357_i() {
-      return StringUtils.func_151246_b(this.field_186358_i) ? I18n.func_74838_a("selectWorld.versionUnknown") : this.field_186358_i;
-   }
+    public boolean isHardcoreModeEnabled()
+    {
+        return this.hardcore;
+    }
 
-   public boolean func_186355_l() {
-      return this.func_186356_m();
-   }
+    /**
+     * @return {@code true} if cheats are enabled for this world
+     */
+    public boolean getCheatsEnabled()
+    {
+        return this.cheatsEnabled;
+    }
 
-   public boolean func_186356_m() {
-      return this.field_186359_j > 1139;
-   }
+    public String getVersionName()
+    {
+        return StringUtils.isNullOrEmpty(this.versionName) ? I18n.translateToLocal("selectWorld.versionUnknown") : this.versionName;
+    }
+
+    public boolean markVersionInList()
+    {
+        return this.askToOpenWorld();
+    }
+
+    public boolean askToOpenWorld()
+    {
+        return this.versionId > 1139;
+    }
 }

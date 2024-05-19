@@ -20,140 +20,209 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 
-public class GuiRepair extends GuiContainer implements IContainerListener {
-   private static final ResourceLocation field_147093_u = new ResourceLocation("textures/gui/container/anvil.png");
-   private final ContainerRepair field_147092_v;
-   private GuiTextField field_147091_w;
-   private final InventoryPlayer field_147094_x;
+public class GuiRepair extends GuiContainer implements IContainerListener
+{
+    private static final ResourceLocation ANVIL_RESOURCE = new ResourceLocation("textures/gui/container/anvil.png");
+    private final ContainerRepair anvil;
+    private GuiTextField nameField;
+    private final InventoryPlayer playerInventory;
 
-   public GuiRepair(InventoryPlayer p_i45508_1_, World p_i45508_2_) {
-      super(new ContainerRepair(p_i45508_1_, p_i45508_2_, Minecraft.func_71410_x().field_71439_g));
-      this.field_147094_x = p_i45508_1_;
-      this.field_147092_v = (ContainerRepair)this.field_147002_h;
-   }
+    public GuiRepair(InventoryPlayer inventoryIn, World worldIn)
+    {
+        super(new ContainerRepair(inventoryIn, worldIn, Minecraft.getMinecraft().player));
+        this.playerInventory = inventoryIn;
+        this.anvil = (ContainerRepair)this.inventorySlots;
+    }
 
-   public void func_73866_w_() {
-      super.func_73866_w_();
-      Keyboard.enableRepeatEvents(true);
-      int i = (this.field_146294_l - this.field_146999_f) / 2;
-      int j = (this.field_146295_m - this.field_147000_g) / 2;
-      this.field_147091_w = new GuiTextField(0, this.field_146289_q, i + 62, j + 24, 103, 12);
-      this.field_147091_w.func_146193_g(-1);
-      this.field_147091_w.func_146204_h(-1);
-      this.field_147091_w.func_146185_a(false);
-      this.field_147091_w.func_146203_f(35);
-      this.field_147002_h.func_82847_b(this);
-      this.field_147002_h.func_75132_a(this);
-   }
+    /**
+     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
+     * window resizes, the buttonList is cleared beforehand.
+     */
+    public void initGui()
+    {
+        super.initGui();
+        Keyboard.enableRepeatEvents(true);
+        int i = (this.width - this.xSize) / 2;
+        int j = (this.height - this.ySize) / 2;
+        this.nameField = new GuiTextField(0, this.fontRendererObj, i + 62, j + 24, 103, 12);
+        this.nameField.setTextColor(-1);
+        this.nameField.setDisabledTextColour(-1);
+        this.nameField.setEnableBackgroundDrawing(false);
+        this.nameField.setMaxStringLength(35);
+        this.inventorySlots.removeListener(this);
+        this.inventorySlots.addListener(this);
+    }
 
-   public void func_146281_b() {
-      super.func_146281_b();
-      Keyboard.enableRepeatEvents(false);
-      this.field_147002_h.func_82847_b(this);
-   }
+    /**
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
+     */
+    public void onGuiClosed()
+    {
+        super.onGuiClosed();
+        Keyboard.enableRepeatEvents(false);
+        this.inventorySlots.removeListener(this);
+    }
 
-   protected void func_146979_b(int p_146979_1_, int p_146979_2_) {
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179084_k();
-      this.field_146289_q.func_78276_b(I18n.func_135052_a("container.repair"), 60, 6, 4210752);
-      if (this.field_147092_v.field_82854_e > 0) {
-         int i = 8453920;
-         boolean flag = true;
-         String s = I18n.func_135052_a("container.repair.cost", this.field_147092_v.field_82854_e);
-         if (this.field_147092_v.field_82854_e >= 40 && !this.field_146297_k.field_71439_g.field_71075_bZ.field_75098_d) {
-            s = I18n.func_135052_a("container.repair.expensive");
-            i = 16736352;
-         } else if (!this.field_147092_v.func_75139_a(2).func_75216_d()) {
-            flag = false;
-         } else if (!this.field_147092_v.func_75139_a(2).func_82869_a(this.field_147094_x.field_70458_d)) {
-            i = 16736352;
-         }
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
+     */
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+    {
+        GlStateManager.disableLighting();
+        GlStateManager.disableBlend();
+        this.fontRendererObj.drawString(I18n.format("container.repair"), 60, 6, 4210752);
 
-         if (flag) {
-            int j = -16777216 | (i & 16579836) >> 2 | i & -16777216;
-            int k = this.field_146999_f - 8 - this.field_146289_q.func_78256_a(s);
-            int l = 67;
-            if (this.field_146289_q.func_82883_a()) {
-               func_73734_a(k - 3, 65, this.field_146999_f - 7, 77, -16777216);
-               func_73734_a(k - 2, 66, this.field_146999_f - 8, 76, -12895429);
-            } else {
-               this.field_146289_q.func_78276_b(s, k, 68, j);
-               this.field_146289_q.func_78276_b(s, k + 1, 67, j);
-               this.field_146289_q.func_78276_b(s, k + 1, 68, j);
+        if (this.anvil.maximumCost > 0)
+        {
+            int i = 8453920;
+            boolean flag = true;
+            String s = I18n.format("container.repair.cost", this.anvil.maximumCost);
+
+            if (this.anvil.maximumCost >= 40 && !this.mc.player.capabilities.isCreativeMode)
+            {
+                s = I18n.format("container.repair.expensive");
+                i = 16736352;
+            }
+            else if (!this.anvil.getSlot(2).getHasStack())
+            {
+                flag = false;
+            }
+            else if (!this.anvil.getSlot(2).canTakeStack(this.playerInventory.player))
+            {
+                i = 16736352;
             }
 
-            this.field_146289_q.func_78276_b(s, k, 67, i);
-         }
-      }
+            if (flag)
+            {
+                int j = -16777216 | (i & 16579836) >> 2 | i & -16777216;
+                int k = this.xSize - 8 - this.fontRendererObj.getStringWidth(s);
+                int l = 67;
 
-      GlStateManager.func_179145_e();
-   }
+                if (this.fontRendererObj.getUnicodeFlag())
+                {
+                    drawRect(k - 3, 65, this.xSize - 7, 77, -16777216);
+                    drawRect(k - 2, 66, this.xSize - 8, 76, -12895429);
+                }
+                else
+                {
+                    this.fontRendererObj.drawString(s, k, 68, j);
+                    this.fontRendererObj.drawString(s, k + 1, 67, j);
+                    this.fontRendererObj.drawString(s, k + 1, 68, j);
+                }
 
-   protected void func_73869_a(char p_73869_1_, int p_73869_2_) throws IOException {
-      if (this.field_147091_w.func_146201_a(p_73869_1_, p_73869_2_)) {
-         this.func_147090_g();
-      } else {
-         super.func_73869_a(p_73869_1_, p_73869_2_);
-      }
+                this.fontRendererObj.drawString(s, k, 67, i);
+            }
+        }
 
-   }
+        GlStateManager.enableLighting();
+    }
 
-   private void func_147090_g() {
-      String s = this.field_147091_w.func_146179_b();
-      Slot slot = this.field_147092_v.func_75139_a(0);
-      if (slot != null && slot.func_75216_d() && !slot.func_75211_c().func_82837_s() && s.equals(slot.func_75211_c().func_82833_r())) {
-         s = "";
-      }
+    /**
+     * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
+     */
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        if (this.nameField.textboxKeyTyped(typedChar, keyCode))
+        {
+            this.renameItem();
+        }
+        else
+        {
+            super.keyTyped(typedChar, keyCode);
+        }
+    }
 
-      this.field_147092_v.func_82850_a(s);
-      this.field_146297_k.field_71439_g.field_71174_a.func_147297_a(new CPacketCustomPayload("MC|ItemName", (new PacketBuffer(Unpooled.buffer())).func_180714_a(s)));
-   }
+    private void renameItem()
+    {
+        String s = this.nameField.getText();
+        Slot slot = this.anvil.getSlot(0);
 
-   protected void func_73864_a(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException {
-      super.func_73864_a(p_73864_1_, p_73864_2_, p_73864_3_);
-      this.field_147091_w.func_146192_a(p_73864_1_, p_73864_2_, p_73864_3_);
-   }
+        if (slot != null && slot.getHasStack() && !slot.getStack().hasDisplayName() && s.equals(slot.getStack().getDisplayName()))
+        {
+            s = "";
+        }
 
-   public void func_73863_a(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-      this.func_146276_q_();
-      super.func_73863_a(p_73863_1_, p_73863_2_, p_73863_3_);
-      this.func_191948_b(p_73863_1_, p_73863_2_);
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179084_k();
-      this.field_147091_w.func_146194_f();
-   }
+        this.anvil.updateItemName(s);
+        this.mc.player.connection.sendPacket(new CPacketCustomPayload("MC|ItemName", (new PacketBuffer(Unpooled.buffer())).writeString(s)));
+    }
 
-   protected void func_146976_a(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      this.field_146297_k.func_110434_K().func_110577_a(field_147093_u);
-      int i = (this.field_146294_l - this.field_146999_f) / 2;
-      int j = (this.field_146295_m - this.field_147000_g) / 2;
-      this.func_73729_b(i, j, 0, 0, this.field_146999_f, this.field_147000_g);
-      this.func_73729_b(i + 59, j + 20, 0, this.field_147000_g + (this.field_147092_v.func_75139_a(0).func_75216_d() ? 0 : 16), 110, 16);
-      if ((this.field_147092_v.func_75139_a(0).func_75216_d() || this.field_147092_v.func_75139_a(1).func_75216_d()) && !this.field_147092_v.func_75139_a(2).func_75216_d()) {
-         this.func_73729_b(i + 99, j + 45, this.field_146999_f, 0, 28, 21);
-      }
+    /**
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
+     */
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+    {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.nameField.mouseClicked(mouseX, mouseY, mouseButton);
+    }
 
-   }
+    /**
+     * Draws the screen and all the components in it.
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawDefaultBackground();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+        this.func_191948_b(mouseX, mouseY);
+        GlStateManager.disableLighting();
+        GlStateManager.disableBlend();
+        this.nameField.drawTextBox();
+    }
 
-   public void func_71110_a(Container p_71110_1_, NonNullList<ItemStack> p_71110_2_) {
-      this.func_71111_a(p_71110_1_, 0, p_71110_1_.func_75139_a(0).func_75211_c());
-   }
+    /**
+     * Draws the background layer of this container (behind the items).
+     */
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
+    {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(ANVIL_RESOURCE);
+        int i = (this.width - this.xSize) / 2;
+        int j = (this.height - this.ySize) / 2;
+        this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
+        this.drawTexturedModalRect(i + 59, j + 20, 0, this.ySize + (this.anvil.getSlot(0).getHasStack() ? 0 : 16), 110, 16);
 
-   public void func_71111_a(Container p_71111_1_, int p_71111_2_, ItemStack p_71111_3_) {
-      if (p_71111_2_ == 0) {
-         this.field_147091_w.func_146180_a(p_71111_3_.func_190926_b() ? "" : p_71111_3_.func_82833_r());
-         this.field_147091_w.func_146184_c(!p_71111_3_.func_190926_b());
-         if (!p_71111_3_.func_190926_b()) {
-            this.func_147090_g();
-         }
-      }
+        if ((this.anvil.getSlot(0).getHasStack() || this.anvil.getSlot(1).getHasStack()) && !this.anvil.getSlot(2).getHasStack())
+        {
+            this.drawTexturedModalRect(i + 99, j + 45, this.xSize, 0, 28, 21);
+        }
+    }
 
-   }
+    /**
+     * update the crafting window inventory with the items in the list
+     */
+    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
+    {
+        this.sendSlotContents(containerToSend, 0, containerToSend.getSlot(0).getStack());
+    }
 
-   public void func_71112_a(Container p_71112_1_, int p_71112_2_, int p_71112_3_) {
-   }
+    /**
+     * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
+     * contents of that slot.
+     */
+    public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack)
+    {
+        if (slotInd == 0)
+        {
+            this.nameField.setText(stack.func_190926_b() ? "" : stack.getDisplayName());
+            this.nameField.setEnabled(!stack.func_190926_b());
 
-   public void func_175173_a(Container p_175173_1_, IInventory p_175173_2_) {
-   }
+            if (!stack.func_190926_b())
+            {
+                this.renameItem();
+            }
+        }
+    }
+
+    /**
+     * Sends two ints to the client-side Container. Used for furnace burning time, smelting progress, brewing progress,
+     * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
+     * value. Both are truncated to shorts in non-local SMP.
+     */
+    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
+    {
+    }
+
+    public void sendAllWindowProperties(Container containerIn, IInventory inventory)
+    {
+    }
 }

@@ -2,6 +2,7 @@ package net.minecraft.client.model;
 
 import net.minecraft.entity.Entity;
 
-public interface IMultipassModel {
-   void func_187054_b(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7);
+public interface IMultipassModel
+{
+    void renderMultipass(Entity p_187054_1_, float p_187054_2_, float p_187054_3_, float p_187054_4_, float p_187054_5_, float p_187054_6_, float scale);
 }

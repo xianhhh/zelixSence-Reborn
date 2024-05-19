@@ -9,41 +9,62 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 
-public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer {
-   private final MinecraftServer field_147387_a;
-   private final NetworkManager field_147386_b;
+public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
+{
+    private final MinecraftServer server;
+    private final NetworkManager networkManager;
 
-   public NetHandlerHandshakeTCP(MinecraftServer p_i45295_1_, NetworkManager p_i45295_2_) {
-      this.field_147387_a = p_i45295_1_;
-      this.field_147386_b = p_i45295_2_;
-   }
+    public NetHandlerHandshakeTCP(MinecraftServer serverIn, NetworkManager netManager)
+    {
+        this.server = serverIn;
+        this.networkManager = netManager;
+    }
 
-   public void func_147383_a(C00Handshake p_147383_1_) {
-      switch(p_147383_1_.func_149594_c()) {
-      case LOGIN:
-         this.field_147386_b.func_150723_a(EnumConnectionState.LOGIN);
-         if (p_147383_1_.func_149595_d() > 335) {
-            ITextComponent itextcomponent = new TextComponentTranslation("multiplayer.disconnect.outdated_server", new Object[]{"1.12"});
-            this.field_147386_b.func_179290_a(new SPacketDisconnect(itextcomponent));
-            this.field_147386_b.func_150718_a(itextcomponent);
-         } else if (p_147383_1_.func_149595_d() < 335) {
-            ITextComponent itextcomponent1 = new TextComponentTranslation("multiplayer.disconnect.outdated_client", new Object[]{"1.12"});
-            this.field_147386_b.func_179290_a(new SPacketDisconnect(itextcomponent1));
-            this.field_147386_b.func_150718_a(itextcomponent1);
-         } else {
-            this.field_147386_b.func_150719_a(new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b));
-         }
-         break;
-      case STATUS:
-         this.field_147386_b.func_150723_a(EnumConnectionState.STATUS);
-         this.field_147386_b.func_150719_a(new NetHandlerStatusServer(this.field_147387_a, this.field_147386_b));
-         break;
-      default:
-         throw new UnsupportedOperationException("Invalid intention " + p_147383_1_.func_149594_c());
-      }
+    /**
+     * There are two recognized intentions for initiating a handshake: logging in and acquiring server status. The
+     * NetworkManager's protocol will be reconfigured according to the specified intention, although a login-intention
+     * must pass a versioncheck or receive a disconnect otherwise
+     */
+    public void processHandshake(C00Handshake packetIn)
+    {
+        switch (packetIn.getRequestedState())
+        {
+            case LOGIN:
+                this.networkManager.setConnectionState(EnumConnectionState.LOGIN);
 
-   }
+                if (packetIn.getProtocolVersion() > 335)
+                {
+                    ITextComponent itextcomponent = new TextComponentTranslation("multiplayer.disconnect.outdated_server", new Object[] {"1.12"});
+                    this.networkManager.sendPacket(new SPacketDisconnect(itextcomponent));
+                    this.networkManager.closeChannel(itextcomponent);
+                }
+                else if (packetIn.getProtocolVersion() < 335)
+                {
+                    ITextComponent itextcomponent1 = new TextComponentTranslation("multiplayer.disconnect.outdated_client", new Object[] {"1.12"});
+                    this.networkManager.sendPacket(new SPacketDisconnect(itextcomponent1));
+                    this.networkManager.closeChannel(itextcomponent1);
+                }
+                else
+                {
+                    this.networkManager.setNetHandler(new NetHandlerLoginServer(this.server, this.networkManager));
+                }
 
-   public void func_147231_a(ITextComponent p_147231_1_) {
-   }
+                break;
+
+            case STATUS:
+                this.networkManager.setConnectionState(EnumConnectionState.STATUS);
+                this.networkManager.setNetHandler(new NetHandlerStatusServer(this.server, this.networkManager));
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Invalid intention " + packetIn.getRequestedState());
+        }
+    }
+
+    /**
+     * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
+     */
+    public void onDisconnect(ITextComponent reason)
+    {
+    }
 }

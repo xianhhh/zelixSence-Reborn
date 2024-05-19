@@ -5,17 +5,20 @@ import javax.annotation.Nullable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class BlockRotationProcessor implements ITemplateProcessor {
-   private final float field_189944_a;
-   private final Random field_189945_b;
+public class BlockRotationProcessor implements ITemplateProcessor
+{
+    private final float chance;
+    private final Random random;
 
-   public BlockRotationProcessor(BlockPos p_i47148_1_, PlacementSettings p_i47148_2_) {
-      this.field_189944_a = p_i47148_2_.func_189948_f();
-      this.field_189945_b = p_i47148_2_.func_189947_a(p_i47148_1_);
-   }
+    public BlockRotationProcessor(BlockPos pos, PlacementSettings settings)
+    {
+        this.chance = settings.getIntegrity();
+        this.random = settings.getRandom(pos);
+    }
 
-   @Nullable
-   public Template.BlockInfo func_189943_a(World p_189943_1_, BlockPos p_189943_2_, Template.BlockInfo p_189943_3_) {
-      return this.field_189944_a < 1.0F && this.field_189945_b.nextFloat() > this.field_189944_a ? null : p_189943_3_;
-   }
+    @Nullable
+    public Template.BlockInfo processBlock(World worldIn, BlockPos pos, Template.BlockInfo blockInfoIn)
+    {
+        return this.chance < 1.0F && this.random.nextFloat() > this.chance ? null : blockInfoIn;
+    }
 }

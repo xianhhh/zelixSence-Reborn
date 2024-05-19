@@ -113,353 +113,432 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class RenderManager {
-   private final Map<Class<? extends Entity>, Render<? extends Entity>> field_78729_o = Maps.<Class<? extends Entity>, Render<? extends Entity>>newHashMap();
-   private final Map<String, RenderPlayer> field_178636_l = Maps.<String, RenderPlayer>newHashMap();
-   private final RenderPlayer field_178637_m;
-   private FontRenderer field_78736_p;
-   private double field_78725_b;
-   private double field_78726_c;
-   private double field_78723_d;
-   public TextureManager field_78724_e;
-   public World field_78722_g;
-   public Entity field_78734_h;
-   public Entity field_147941_i;
-   public float field_78735_i;
-   public float field_78732_j;
-   public GameSettings field_78733_k;
-   public double field_78730_l;
-   public double field_78731_m;
-   public double field_78728_n;
-   private boolean field_178639_r;
-   private boolean field_178638_s = true;
-   private boolean field_85095_o;
+public class RenderManager
+{
+    private final Map < Class <? extends Entity > , Render <? extends Entity >> entityRenderMap = Maps. < Class <? extends Entity > , Render <? extends Entity >> newHashMap();
+    private final Map<String, RenderPlayer> skinMap = Maps.<String, RenderPlayer>newHashMap();
+    private final RenderPlayer playerRenderer;
 
-   public RenderManager(TextureManager p_i46180_1_, RenderItem p_i46180_2_) {
-      this.field_78724_e = p_i46180_1_;
-      this.field_78729_o.put(EntityCaveSpider.class, new RenderCaveSpider(this));
-      this.field_78729_o.put(EntitySpider.class, new RenderSpider(this));
-      this.field_78729_o.put(EntityPig.class, new RenderPig(this));
-      this.field_78729_o.put(EntitySheep.class, new RenderSheep(this));
-      this.field_78729_o.put(EntityCow.class, new RenderCow(this));
-      this.field_78729_o.put(EntityMooshroom.class, new RenderMooshroom(this));
-      this.field_78729_o.put(EntityWolf.class, new RenderWolf(this));
-      this.field_78729_o.put(EntityChicken.class, new RenderChicken(this));
-      this.field_78729_o.put(EntityOcelot.class, new RenderOcelot(this));
-      this.field_78729_o.put(EntityRabbit.class, new RenderRabbit(this));
-      this.field_78729_o.put(EntityParrot.class, new RenderParrot(this));
-      this.field_78729_o.put(EntitySilverfish.class, new RenderSilverfish(this));
-      this.field_78729_o.put(EntityEndermite.class, new RenderEndermite(this));
-      this.field_78729_o.put(EntityCreeper.class, new RenderCreeper(this));
-      this.field_78729_o.put(EntityEnderman.class, new RenderEnderman(this));
-      this.field_78729_o.put(EntitySnowman.class, new RenderSnowMan(this));
-      this.field_78729_o.put(EntitySkeleton.class, new RenderSkeleton(this));
-      this.field_78729_o.put(EntityWitherSkeleton.class, new RenderWitherSkeleton(this));
-      this.field_78729_o.put(EntityStray.class, new RenderStray(this));
-      this.field_78729_o.put(EntityWitch.class, new RenderWitch(this));
-      this.field_78729_o.put(EntityBlaze.class, new RenderBlaze(this));
-      this.field_78729_o.put(EntityPigZombie.class, new RenderPigZombie(this));
-      this.field_78729_o.put(EntityZombie.class, new RenderZombie(this));
-      this.field_78729_o.put(EntityZombieVillager.class, new RenderZombieVillager(this));
-      this.field_78729_o.put(EntityHusk.class, new RenderHusk(this));
-      this.field_78729_o.put(EntitySlime.class, new RenderSlime(this));
-      this.field_78729_o.put(EntityMagmaCube.class, new RenderMagmaCube(this));
-      this.field_78729_o.put(EntityGiantZombie.class, new RenderGiantZombie(this, 6.0F));
-      this.field_78729_o.put(EntityGhast.class, new RenderGhast(this));
-      this.field_78729_o.put(EntitySquid.class, new RenderSquid(this));
-      this.field_78729_o.put(EntityVillager.class, new RenderVillager(this));
-      this.field_78729_o.put(EntityIronGolem.class, new RenderIronGolem(this));
-      this.field_78729_o.put(EntityBat.class, new RenderBat(this));
-      this.field_78729_o.put(EntityGuardian.class, new RenderGuardian(this));
-      this.field_78729_o.put(EntityElderGuardian.class, new RenderElderGuardian(this));
-      this.field_78729_o.put(EntityShulker.class, new RenderShulker(this));
-      this.field_78729_o.put(EntityPolarBear.class, new RenderPolarBear(this));
-      this.field_78729_o.put(EntityEvoker.class, new RenderEvoker(this));
-      this.field_78729_o.put(EntityVindicator.class, new RenderVindicator(this));
-      this.field_78729_o.put(EntityVex.class, new RenderVex(this));
-      this.field_78729_o.put(EntityIllusionIllager.class, new RenderIllusionIllager(this));
-      this.field_78729_o.put(EntityDragon.class, new RenderDragon(this));
-      this.field_78729_o.put(EntityEnderCrystal.class, new RenderEnderCrystal(this));
-      this.field_78729_o.put(EntityWither.class, new RenderWither(this));
-      this.field_78729_o.put(Entity.class, new RenderEntity(this));
-      this.field_78729_o.put(EntityPainting.class, new RenderPainting(this));
-      this.field_78729_o.put(EntityItemFrame.class, new RenderItemFrame(this, p_i46180_2_));
-      this.field_78729_o.put(EntityLeashKnot.class, new RenderLeashKnot(this));
-      this.field_78729_o.put(EntityTippedArrow.class, new RenderTippedArrow(this));
-      this.field_78729_o.put(EntitySpectralArrow.class, new RenderSpectralArrow(this));
-      this.field_78729_o.put(EntitySnowball.class, new RenderSnowball(this, Items.field_151126_ay, p_i46180_2_));
-      this.field_78729_o.put(EntityEnderPearl.class, new RenderSnowball(this, Items.field_151079_bi, p_i46180_2_));
-      this.field_78729_o.put(EntityEnderEye.class, new RenderSnowball(this, Items.field_151061_bv, p_i46180_2_));
-      this.field_78729_o.put(EntityEgg.class, new RenderSnowball(this, Items.field_151110_aK, p_i46180_2_));
-      this.field_78729_o.put(EntityPotion.class, new RenderPotion(this, p_i46180_2_));
-      this.field_78729_o.put(EntityExpBottle.class, new RenderSnowball(this, Items.field_151062_by, p_i46180_2_));
-      this.field_78729_o.put(EntityFireworkRocket.class, new RenderSnowball(this, Items.field_151152_bP, p_i46180_2_));
-      this.field_78729_o.put(EntityLargeFireball.class, new RenderFireball(this, 2.0F));
-      this.field_78729_o.put(EntitySmallFireball.class, new RenderFireball(this, 0.5F));
-      this.field_78729_o.put(EntityDragonFireball.class, new RenderDragonFireball(this));
-      this.field_78729_o.put(EntityWitherSkull.class, new RenderWitherSkull(this));
-      this.field_78729_o.put(EntityShulkerBullet.class, new RenderShulkerBullet(this));
-      this.field_78729_o.put(EntityItem.class, new RenderEntityItem(this, p_i46180_2_));
-      this.field_78729_o.put(EntityXPOrb.class, new RenderXPOrb(this));
-      this.field_78729_o.put(EntityTNTPrimed.class, new RenderTNTPrimed(this));
-      this.field_78729_o.put(EntityFallingBlock.class, new RenderFallingBlock(this));
-      this.field_78729_o.put(EntityArmorStand.class, new RenderArmorStand(this));
-      this.field_78729_o.put(EntityEvokerFangs.class, new RenderEvokerFangs(this));
-      this.field_78729_o.put(EntityMinecartTNT.class, new RenderTntMinecart(this));
-      this.field_78729_o.put(EntityMinecartMobSpawner.class, new RenderMinecartMobSpawner(this));
-      this.field_78729_o.put(EntityMinecart.class, new RenderMinecart(this));
-      this.field_78729_o.put(EntityBoat.class, new RenderBoat(this));
-      this.field_78729_o.put(EntityFishHook.class, new RenderFish(this));
-      this.field_78729_o.put(EntityAreaEffectCloud.class, new RenderAreaEffectCloud(this));
-      this.field_78729_o.put(EntityHorse.class, new RenderHorse(this));
-      this.field_78729_o.put(EntitySkeletonHorse.class, new RenderAbstractHorse(this));
-      this.field_78729_o.put(EntityZombieHorse.class, new RenderAbstractHorse(this));
-      this.field_78729_o.put(EntityMule.class, new RenderAbstractHorse(this, 0.92F));
-      this.field_78729_o.put(EntityDonkey.class, new RenderAbstractHorse(this, 0.87F));
-      this.field_78729_o.put(EntityLlama.class, new RenderLlama(this));
-      this.field_78729_o.put(EntityLlamaSpit.class, new RenderLlamaSpit(this));
-      this.field_78729_o.put(EntityLightningBolt.class, new RenderLightningBolt(this));
-      this.field_178637_m = new RenderPlayer(this);
-      this.field_178636_l.put("default", this.field_178637_m);
-      this.field_178636_l.put("slim", new RenderPlayer(this, true));
-   }
+    /** Renders fonts */
+    private FontRenderer textRenderer;
+    private double renderPosX;
+    private double renderPosY;
+    private double renderPosZ;
+    public TextureManager renderEngine;
 
-   public void func_178628_a(double p_178628_1_, double p_178628_3_, double p_178628_5_) {
-      this.field_78725_b = p_178628_1_;
-      this.field_78726_c = p_178628_3_;
-      this.field_78723_d = p_178628_5_;
-   }
+    /** Reference to the World object. */
+    public World worldObj;
 
-   public <T extends Entity> Render<T> func_78715_a(Class<? extends Entity> p_78715_1_) {
-      Render<? extends Entity> render = (Render)this.field_78729_o.get(p_78715_1_);
-      if (render == null && p_78715_1_ != Entity.class) {
-         render = this.<Entity>func_78715_a(p_78715_1_.getSuperclass());
-         this.field_78729_o.put(p_78715_1_, render);
-      }
+    /** RenderManager's field for the renderViewEntity */
+    public Entity renderViewEntity;
+    public Entity pointedEntity;
+    public float playerViewY;
+    public float playerViewX;
 
-      return render;
-   }
+    /** Reference to the GameSettings object. */
+    public GameSettings options;
+    public double viewerPosX;
+    public double viewerPosY;
+    public double viewerPosZ;
+    private boolean renderOutlines;
+    private boolean renderShadow = true;
 
-   @Nullable
-   public <T extends Entity> Render<T> func_78713_a(Entity p_78713_1_) {
-      if (p_78713_1_ instanceof AbstractClientPlayer) {
-         String s = ((AbstractClientPlayer)p_78713_1_).func_175154_l();
-         RenderPlayer renderplayer = this.field_178636_l.get(s);
-         return renderplayer != null ? renderplayer : this.field_178637_m;
-      } else {
-         return this.<T>func_78715_a(p_78713_1_.getClass());
-      }
-   }
+    /** whether bounding box should be rendered or not */
+    private boolean debugBoundingBox;
 
-   public void func_180597_a(World p_180597_1_, FontRenderer p_180597_2_, Entity p_180597_3_, Entity p_180597_4_, GameSettings p_180597_5_, float p_180597_6_) {
-      this.field_78722_g = p_180597_1_;
-      this.field_78733_k = p_180597_5_;
-      this.field_78734_h = p_180597_3_;
-      this.field_147941_i = p_180597_4_;
-      this.field_78736_p = p_180597_2_;
-      if (p_180597_3_ instanceof EntityLivingBase && ((EntityLivingBase)p_180597_3_).func_70608_bn()) {
-         IBlockState iblockstate = p_180597_1_.func_180495_p(new BlockPos(p_180597_3_));
-         Block block = iblockstate.func_177230_c();
-         if (block == Blocks.field_150324_C) {
-            int i = ((EnumFacing)iblockstate.func_177229_b(BlockBed.field_185512_D)).func_176736_b();
-            this.field_78735_i = (float)(i * 90 + 180);
-            this.field_78732_j = 0.0F;
-         }
-      } else {
-         this.field_78735_i = p_180597_3_.field_70126_B + (p_180597_3_.field_70177_z - p_180597_3_.field_70126_B) * p_180597_6_;
-         this.field_78732_j = p_180597_3_.field_70127_C + (p_180597_3_.field_70125_A - p_180597_3_.field_70127_C) * p_180597_6_;
-      }
+    public RenderManager(TextureManager renderEngineIn, RenderItem itemRendererIn)
+    {
+        this.renderEngine = renderEngineIn;
+        this.entityRenderMap.put(EntityCaveSpider.class, new RenderCaveSpider(this));
+        this.entityRenderMap.put(EntitySpider.class, new RenderSpider(this));
+        this.entityRenderMap.put(EntityPig.class, new RenderPig(this));
+        this.entityRenderMap.put(EntitySheep.class, new RenderSheep(this));
+        this.entityRenderMap.put(EntityCow.class, new RenderCow(this));
+        this.entityRenderMap.put(EntityMooshroom.class, new RenderMooshroom(this));
+        this.entityRenderMap.put(EntityWolf.class, new RenderWolf(this));
+        this.entityRenderMap.put(EntityChicken.class, new RenderChicken(this));
+        this.entityRenderMap.put(EntityOcelot.class, new RenderOcelot(this));
+        this.entityRenderMap.put(EntityRabbit.class, new RenderRabbit(this));
+        this.entityRenderMap.put(EntityParrot.class, new RenderParrot(this));
+        this.entityRenderMap.put(EntitySilverfish.class, new RenderSilverfish(this));
+        this.entityRenderMap.put(EntityEndermite.class, new RenderEndermite(this));
+        this.entityRenderMap.put(EntityCreeper.class, new RenderCreeper(this));
+        this.entityRenderMap.put(EntityEnderman.class, new RenderEnderman(this));
+        this.entityRenderMap.put(EntitySnowman.class, new RenderSnowMan(this));
+        this.entityRenderMap.put(EntitySkeleton.class, new RenderSkeleton(this));
+        this.entityRenderMap.put(EntityWitherSkeleton.class, new RenderWitherSkeleton(this));
+        this.entityRenderMap.put(EntityStray.class, new RenderStray(this));
+        this.entityRenderMap.put(EntityWitch.class, new RenderWitch(this));
+        this.entityRenderMap.put(EntityBlaze.class, new RenderBlaze(this));
+        this.entityRenderMap.put(EntityPigZombie.class, new RenderPigZombie(this));
+        this.entityRenderMap.put(EntityZombie.class, new RenderZombie(this));
+        this.entityRenderMap.put(EntityZombieVillager.class, new RenderZombieVillager(this));
+        this.entityRenderMap.put(EntityHusk.class, new RenderHusk(this));
+        this.entityRenderMap.put(EntitySlime.class, new RenderSlime(this));
+        this.entityRenderMap.put(EntityMagmaCube.class, new RenderMagmaCube(this));
+        this.entityRenderMap.put(EntityGiantZombie.class, new RenderGiantZombie(this, 6.0F));
+        this.entityRenderMap.put(EntityGhast.class, new RenderGhast(this));
+        this.entityRenderMap.put(EntitySquid.class, new RenderSquid(this));
+        this.entityRenderMap.put(EntityVillager.class, new RenderVillager(this));
+        this.entityRenderMap.put(EntityIronGolem.class, new RenderIronGolem(this));
+        this.entityRenderMap.put(EntityBat.class, new RenderBat(this));
+        this.entityRenderMap.put(EntityGuardian.class, new RenderGuardian(this));
+        this.entityRenderMap.put(EntityElderGuardian.class, new RenderElderGuardian(this));
+        this.entityRenderMap.put(EntityShulker.class, new RenderShulker(this));
+        this.entityRenderMap.put(EntityPolarBear.class, new RenderPolarBear(this));
+        this.entityRenderMap.put(EntityEvoker.class, new RenderEvoker(this));
+        this.entityRenderMap.put(EntityVindicator.class, new RenderVindicator(this));
+        this.entityRenderMap.put(EntityVex.class, new RenderVex(this));
+        this.entityRenderMap.put(EntityIllusionIllager.class, new RenderIllusionIllager(this));
+        this.entityRenderMap.put(EntityDragon.class, new RenderDragon(this));
+        this.entityRenderMap.put(EntityEnderCrystal.class, new RenderEnderCrystal(this));
+        this.entityRenderMap.put(EntityWither.class, new RenderWither(this));
+        this.entityRenderMap.put(Entity.class, new RenderEntity(this));
+        this.entityRenderMap.put(EntityPainting.class, new RenderPainting(this));
+        this.entityRenderMap.put(EntityItemFrame.class, new RenderItemFrame(this, itemRendererIn));
+        this.entityRenderMap.put(EntityLeashKnot.class, new RenderLeashKnot(this));
+        this.entityRenderMap.put(EntityTippedArrow.class, new RenderTippedArrow(this));
+        this.entityRenderMap.put(EntitySpectralArrow.class, new RenderSpectralArrow(this));
+        this.entityRenderMap.put(EntitySnowball.class, new RenderSnowball(this, Items.SNOWBALL, itemRendererIn));
+        this.entityRenderMap.put(EntityEnderPearl.class, new RenderSnowball(this, Items.ENDER_PEARL, itemRendererIn));
+        this.entityRenderMap.put(EntityEnderEye.class, new RenderSnowball(this, Items.ENDER_EYE, itemRendererIn));
+        this.entityRenderMap.put(EntityEgg.class, new RenderSnowball(this, Items.EGG, itemRendererIn));
+        this.entityRenderMap.put(EntityPotion.class, new RenderPotion(this, itemRendererIn));
+        this.entityRenderMap.put(EntityExpBottle.class, new RenderSnowball(this, Items.EXPERIENCE_BOTTLE, itemRendererIn));
+        this.entityRenderMap.put(EntityFireworkRocket.class, new RenderSnowball(this, Items.FIREWORKS, itemRendererIn));
+        this.entityRenderMap.put(EntityLargeFireball.class, new RenderFireball(this, 2.0F));
+        this.entityRenderMap.put(EntitySmallFireball.class, new RenderFireball(this, 0.5F));
+        this.entityRenderMap.put(EntityDragonFireball.class, new RenderDragonFireball(this));
+        this.entityRenderMap.put(EntityWitherSkull.class, new RenderWitherSkull(this));
+        this.entityRenderMap.put(EntityShulkerBullet.class, new RenderShulkerBullet(this));
+        this.entityRenderMap.put(EntityItem.class, new RenderEntityItem(this, itemRendererIn));
+        this.entityRenderMap.put(EntityXPOrb.class, new RenderXPOrb(this));
+        this.entityRenderMap.put(EntityTNTPrimed.class, new RenderTNTPrimed(this));
+        this.entityRenderMap.put(EntityFallingBlock.class, new RenderFallingBlock(this));
+        this.entityRenderMap.put(EntityArmorStand.class, new RenderArmorStand(this));
+        this.entityRenderMap.put(EntityEvokerFangs.class, new RenderEvokerFangs(this));
+        this.entityRenderMap.put(EntityMinecartTNT.class, new RenderTntMinecart(this));
+        this.entityRenderMap.put(EntityMinecartMobSpawner.class, new RenderMinecartMobSpawner(this));
+        this.entityRenderMap.put(EntityMinecart.class, new RenderMinecart(this));
+        this.entityRenderMap.put(EntityBoat.class, new RenderBoat(this));
+        this.entityRenderMap.put(EntityFishHook.class, new RenderFish(this));
+        this.entityRenderMap.put(EntityAreaEffectCloud.class, new RenderAreaEffectCloud(this));
+        this.entityRenderMap.put(EntityHorse.class, new RenderHorse(this));
+        this.entityRenderMap.put(EntitySkeletonHorse.class, new RenderAbstractHorse(this));
+        this.entityRenderMap.put(EntityZombieHorse.class, new RenderAbstractHorse(this));
+        this.entityRenderMap.put(EntityMule.class, new RenderAbstractHorse(this, 0.92F));
+        this.entityRenderMap.put(EntityDonkey.class, new RenderAbstractHorse(this, 0.87F));
+        this.entityRenderMap.put(EntityLlama.class, new RenderLlama(this));
+        this.entityRenderMap.put(EntityLlamaSpit.class, new RenderLlamaSpit(this));
+        this.entityRenderMap.put(EntityLightningBolt.class, new RenderLightningBolt(this));
+        this.playerRenderer = new RenderPlayer(this);
+        this.skinMap.put("default", this.playerRenderer);
+        this.skinMap.put("slim", new RenderPlayer(this, true));
+    }
 
-      if (p_180597_5_.field_74320_O == 2) {
-         this.field_78735_i += 180.0F;
-      }
+    public void setRenderPosition(double renderPosXIn, double renderPosYIn, double renderPosZIn)
+    {
+        this.renderPosX = renderPosXIn;
+        this.renderPosY = renderPosYIn;
+        this.renderPosZ = renderPosZIn;
+    }
 
-      this.field_78730_l = p_180597_3_.field_70142_S + (p_180597_3_.field_70165_t - p_180597_3_.field_70142_S) * (double)p_180597_6_;
-      this.field_78731_m = p_180597_3_.field_70137_T + (p_180597_3_.field_70163_u - p_180597_3_.field_70137_T) * (double)p_180597_6_;
-      this.field_78728_n = p_180597_3_.field_70136_U + (p_180597_3_.field_70161_v - p_180597_3_.field_70136_U) * (double)p_180597_6_;
-   }
+    public <T extends Entity> Render<T> getEntityClassRenderObject(Class <? extends Entity > entityClass)
+    {
+        Render<T> render = (Render)this.entityRenderMap.get(entityClass);
 
-   public void func_178631_a(float p_178631_1_) {
-      this.field_78735_i = p_178631_1_;
-   }
+        if (render == null && entityClass != Entity.class)
+        {
+            render = this.getEntityClassRenderObject((Class <? extends Entity >)entityClass.getSuperclass());
+            this.entityRenderMap.put(entityClass, render);
+        }
 
-   public boolean func_178627_a() {
-      return this.field_178638_s;
-   }
+        return render;
+    }
 
-   public void func_178633_a(boolean p_178633_1_) {
-      this.field_178638_s = p_178633_1_;
-   }
+    @Nullable
+    public <T extends Entity> Render<T> getEntityRenderObject(Entity entityIn)
+    {
+        if (entityIn instanceof AbstractClientPlayer)
+        {
+            String s = ((AbstractClientPlayer)entityIn).getSkinType();
+            RenderPlayer renderplayer = this.skinMap.get(s);
+            return (Render<T>)(renderplayer != null ? renderplayer : this.playerRenderer);
+        }
+        else
+        {
+            return this.<T>getEntityClassRenderObject(entityIn.getClass());
+        }
+    }
 
-   public void func_178629_b(boolean p_178629_1_) {
-      this.field_85095_o = p_178629_1_;
-   }
+    public void cacheActiveRenderInfo(World worldIn, FontRenderer textRendererIn, Entity livingPlayerIn, Entity pointedEntityIn, GameSettings optionsIn, float partialTicks)
+    {
+        this.worldObj = worldIn;
+        this.options = optionsIn;
+        this.renderViewEntity = livingPlayerIn;
+        this.pointedEntity = pointedEntityIn;
+        this.textRenderer = textRendererIn;
 
-   public boolean func_178634_b() {
-      return this.field_85095_o;
-   }
+        if (livingPlayerIn instanceof EntityLivingBase && ((EntityLivingBase)livingPlayerIn).isPlayerSleeping())
+        {
+            IBlockState iblockstate = worldIn.getBlockState(new BlockPos(livingPlayerIn));
+            Block block = iblockstate.getBlock();
 
-   public boolean func_188390_b(Entity p_188390_1_) {
-      return this.func_78713_a(p_188390_1_).func_188295_H_();
-   }
-
-   public boolean func_178635_a(Entity p_178635_1_, ICamera p_178635_2_, double p_178635_3_, double p_178635_5_, double p_178635_7_) {
-      Render<Entity> render = this.<Entity>func_78713_a(p_178635_1_);
-      return render != null && render.func_177071_a(p_178635_1_, p_178635_2_, p_178635_3_, p_178635_5_, p_178635_7_);
-   }
-
-   public void func_188388_a(Entity p_188388_1_, float p_188388_2_, boolean p_188388_3_) {
-      if (p_188388_1_.field_70173_aa == 0) {
-         p_188388_1_.field_70142_S = p_188388_1_.field_70165_t;
-         p_188388_1_.field_70137_T = p_188388_1_.field_70163_u;
-         p_188388_1_.field_70136_U = p_188388_1_.field_70161_v;
-      }
-
-      double d0 = p_188388_1_.field_70142_S + (p_188388_1_.field_70165_t - p_188388_1_.field_70142_S) * (double)p_188388_2_;
-      double d1 = p_188388_1_.field_70137_T + (p_188388_1_.field_70163_u - p_188388_1_.field_70137_T) * (double)p_188388_2_;
-      double d2 = p_188388_1_.field_70136_U + (p_188388_1_.field_70161_v - p_188388_1_.field_70136_U) * (double)p_188388_2_;
-      float f = p_188388_1_.field_70126_B + (p_188388_1_.field_70177_z - p_188388_1_.field_70126_B) * p_188388_2_;
-      int i = p_188388_1_.func_70070_b();
-      if (p_188388_1_.func_70027_ad()) {
-         i = 15728880;
-      }
-
-      int j = i % 65536;
-      int k = i / 65536;
-      OpenGlHelper.func_77475_a(OpenGlHelper.field_77476_b, (float)j, (float)k);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      this.func_188391_a(p_188388_1_, d0 - this.field_78725_b, d1 - this.field_78726_c, d2 - this.field_78723_d, f, p_188388_2_, p_188388_3_);
-   }
-
-   public void func_188391_a(Entity p_188391_1_, double p_188391_2_, double p_188391_4_, double p_188391_6_, float p_188391_8_, float p_188391_9_, boolean p_188391_10_) {
-      Render<Entity> render = null;
-
-      try {
-         render = this.<Entity>func_78713_a(p_188391_1_);
-         if (render != null && this.field_78724_e != null) {
-            try {
-               render.func_188297_a(this.field_178639_r);
-               render.func_76986_a(p_188391_1_, p_188391_2_, p_188391_4_, p_188391_6_, p_188391_8_, p_188391_9_);
-            } catch (Throwable throwable1) {
-               throw new ReportedException(CrashReport.func_85055_a(throwable1, "Rendering entity in world"));
+            if (block == Blocks.BED)
+            {
+                int i = ((EnumFacing)iblockstate.getValue(BlockBed.FACING)).getHorizontalIndex();
+                this.playerViewY = (float)(i * 90 + 180);
+                this.playerViewX = 0.0F;
             }
+        }
+        else
+        {
+            this.playerViewY = livingPlayerIn.prevRotationYaw + (livingPlayerIn.rotationYaw - livingPlayerIn.prevRotationYaw) * partialTicks;
+            this.playerViewX = livingPlayerIn.prevRotationPitch + (livingPlayerIn.rotationPitch - livingPlayerIn.prevRotationPitch) * partialTicks;
+        }
 
-            try {
-               if (!this.field_178639_r) {
-                  render.func_76979_b(p_188391_1_, p_188391_2_, p_188391_4_, p_188391_6_, p_188391_8_, p_188391_9_);
-               }
-            } catch (Throwable throwable2) {
-               throw new ReportedException(CrashReport.func_85055_a(throwable2, "Post-rendering entity in world"));
+        if (optionsIn.thirdPersonView == 2)
+        {
+            this.playerViewY += 180.0F;
+        }
+
+        this.viewerPosX = livingPlayerIn.lastTickPosX + (livingPlayerIn.posX - livingPlayerIn.lastTickPosX) * (double)partialTicks;
+        this.viewerPosY = livingPlayerIn.lastTickPosY + (livingPlayerIn.posY - livingPlayerIn.lastTickPosY) * (double)partialTicks;
+        this.viewerPosZ = livingPlayerIn.lastTickPosZ + (livingPlayerIn.posZ - livingPlayerIn.lastTickPosZ) * (double)partialTicks;
+    }
+
+    public void setPlayerViewY(float playerViewYIn)
+    {
+        this.playerViewY = playerViewYIn;
+    }
+
+    public boolean isRenderShadow()
+    {
+        return this.renderShadow;
+    }
+
+    public void setRenderShadow(boolean renderShadowIn)
+    {
+        this.renderShadow = renderShadowIn;
+    }
+
+    public void setDebugBoundingBox(boolean debugBoundingBoxIn)
+    {
+        this.debugBoundingBox = debugBoundingBoxIn;
+    }
+
+    public boolean isDebugBoundingBox()
+    {
+        return this.debugBoundingBox;
+    }
+
+    public boolean isRenderMultipass(Entity p_188390_1_)
+    {
+        return this.getEntityRenderObject(p_188390_1_).isMultipass();
+    }
+
+    public boolean shouldRender(Entity entityIn, ICamera camera, double camX, double camY, double camZ)
+    {
+        Render<Entity> render = this.<Entity>getEntityRenderObject(entityIn);
+        return render != null && render.shouldRender(entityIn, camera, camX, camY, camZ);
+    }
+
+    public void renderEntityStatic(Entity entityIn, float partialTicks, boolean p_188388_3_)
+    {
+        if (entityIn.ticksExisted == 0)
+        {
+            entityIn.lastTickPosX = entityIn.posX;
+            entityIn.lastTickPosY = entityIn.posY;
+            entityIn.lastTickPosZ = entityIn.posZ;
+        }
+
+        double d0 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
+        double d1 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
+        double d2 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+        float f = entityIn.prevRotationYaw + (entityIn.rotationYaw - entityIn.prevRotationYaw) * partialTicks;
+        int i = entityIn.getBrightnessForRender();
+
+        if (entityIn.isBurning())
+        {
+            i = 15728880;
+        }
+
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.doRenderEntity(entityIn, d0 - this.renderPosX, d1 - this.renderPosY, d2 - this.renderPosZ, f, partialTicks, p_188388_3_);
+    }
+
+    public void doRenderEntity(Entity entityIn, double x, double y, double z, float yaw, float partialTicks, boolean p_188391_10_)
+    {
+        Render<Entity> render = null;
+
+        try
+        {
+            render = this.<Entity>getEntityRenderObject(entityIn);
+
+            if (render != null && this.renderEngine != null)
+            {
+                try
+                {
+                    render.setRenderOutlines(this.renderOutlines);
+                    render.doRender(entityIn, x, y, z, yaw, partialTicks);
+                }
+                catch (Throwable throwable1)
+                {
+                    throw new ReportedException(CrashReport.makeCrashReport(throwable1, "Rendering entity in world"));
+                }
+
+                try
+                {
+                    if (!this.renderOutlines)
+                    {
+                        render.doRenderShadowAndFire(entityIn, x, y, z, yaw, partialTicks);
+                    }
+                }
+                catch (Throwable throwable2)
+                {
+                    throw new ReportedException(CrashReport.makeCrashReport(throwable2, "Post-rendering entity in world"));
+                }
+
+                if (this.debugBoundingBox && !entityIn.isInvisible() && !p_188391_10_ && !Minecraft.getMinecraft().isReducedDebug())
+                {
+                    try
+                    {
+                        this.renderDebugBoundingBox(entityIn, x, y, z, yaw, partialTicks);
+                    }
+                    catch (Throwable throwable)
+                    {
+                        throw new ReportedException(CrashReport.makeCrashReport(throwable, "Rendering entity hitbox in world"));
+                    }
+                }
             }
+        }
+        catch (Throwable throwable3)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable3, "Rendering entity in world");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being rendered");
+            entityIn.addEntityCrashInfo(crashreportcategory);
+            CrashReportCategory crashreportcategory1 = crashreport.makeCategory("Renderer details");
+            crashreportcategory1.addCrashSection("Assigned renderer", render);
+            crashreportcategory1.addCrashSection("Location", CrashReportCategory.getCoordinateInfo(x, y, z));
+            crashreportcategory1.addCrashSection("Rotation", Float.valueOf(yaw));
+            crashreportcategory1.addCrashSection("Delta", Float.valueOf(partialTicks));
+            throw new ReportedException(crashreport);
+        }
+    }
 
-            if (this.field_85095_o && !p_188391_1_.func_82150_aj() && !p_188391_10_ && !Minecraft.func_71410_x().func_189648_am()) {
-               try {
-                  this.func_85094_b(p_188391_1_, p_188391_2_, p_188391_4_, p_188391_6_, p_188391_8_, p_188391_9_);
-               } catch (Throwable throwable) {
-                  throw new ReportedException(CrashReport.func_85055_a(throwable, "Rendering entity hitbox in world"));
-               }
+    public void renderMultipass(Entity p_188389_1_, float p_188389_2_)
+    {
+        if (p_188389_1_.ticksExisted == 0)
+        {
+            p_188389_1_.lastTickPosX = p_188389_1_.posX;
+            p_188389_1_.lastTickPosY = p_188389_1_.posY;
+            p_188389_1_.lastTickPosZ = p_188389_1_.posZ;
+        }
+
+        double d0 = p_188389_1_.lastTickPosX + (p_188389_1_.posX - p_188389_1_.lastTickPosX) * (double)p_188389_2_;
+        double d1 = p_188389_1_.lastTickPosY + (p_188389_1_.posY - p_188389_1_.lastTickPosY) * (double)p_188389_2_;
+        double d2 = p_188389_1_.lastTickPosZ + (p_188389_1_.posZ - p_188389_1_.lastTickPosZ) * (double)p_188389_2_;
+        float f = p_188389_1_.prevRotationYaw + (p_188389_1_.rotationYaw - p_188389_1_.prevRotationYaw) * p_188389_2_;
+        int i = p_188389_1_.getBrightnessForRender();
+
+        if (p_188389_1_.isBurning())
+        {
+            i = 15728880;
+        }
+
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        Render<Entity> render = this.<Entity>getEntityRenderObject(p_188389_1_);
+
+        if (render != null && this.renderEngine != null)
+        {
+            render.renderMultipass(p_188389_1_, d0 - this.renderPosX, d1 - this.renderPosY, d2 - this.renderPosZ, f, p_188389_2_);
+        }
+    }
+
+    /**
+     * Renders the bounding box around an entity when F3+B is pressed
+     */
+    private void renderDebugBoundingBox(Entity entityIn, double x, double y, double z, float entityYaw, float partialTicks)
+    {
+        GlStateManager.depthMask(false);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.disableBlend();
+        float f = entityIn.width / 2.0F;
+        AxisAlignedBB axisalignedbb = entityIn.getEntityBoundingBox();
+        RenderGlobal.drawBoundingBox(axisalignedbb.minX - entityIn.posX + x, axisalignedbb.minY - entityIn.posY + y, axisalignedbb.minZ - entityIn.posZ + z, axisalignedbb.maxX - entityIn.posX + x, axisalignedbb.maxY - entityIn.posY + y, axisalignedbb.maxZ - entityIn.posZ + z, 1.0F, 1.0F, 1.0F, 1.0F);
+        Entity[] aentity = entityIn.getParts();
+
+        if (aentity != null)
+        {
+            for (Entity entity : aentity)
+            {
+                double d0 = (entity.posX - entity.prevPosX) * (double)partialTicks;
+                double d1 = (entity.posY - entity.prevPosY) * (double)partialTicks;
+                double d2 = (entity.posZ - entity.prevPosZ) * (double)partialTicks;
+                AxisAlignedBB axisalignedbb1 = entity.getEntityBoundingBox();
+                RenderGlobal.drawBoundingBox(axisalignedbb1.minX - this.renderPosX + d0, axisalignedbb1.minY - this.renderPosY + d1, axisalignedbb1.minZ - this.renderPosZ + d2, axisalignedbb1.maxX - this.renderPosX + d0, axisalignedbb1.maxY - this.renderPosY + d1, axisalignedbb1.maxZ - this.renderPosZ + d2, 0.25F, 1.0F, 0.0F, 1.0F);
             }
-         }
+        }
 
-      } catch (Throwable throwable3) {
-         CrashReport crashreport = CrashReport.func_85055_a(throwable3, "Rendering entity in world");
-         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Entity being rendered");
-         p_188391_1_.func_85029_a(crashreportcategory);
-         CrashReportCategory crashreportcategory1 = crashreport.func_85058_a("Renderer details");
-         crashreportcategory1.func_71507_a("Assigned renderer", render);
-         crashreportcategory1.func_71507_a("Location", CrashReportCategory.func_85074_a(p_188391_2_, p_188391_4_, p_188391_6_));
-         crashreportcategory1.func_71507_a("Rotation", Float.valueOf(p_188391_8_));
-         crashreportcategory1.func_71507_a("Delta", Float.valueOf(p_188391_9_));
-         throw new ReportedException(crashreport);
-      }
-   }
+        if (entityIn instanceof EntityLivingBase)
+        {
+            float f1 = 0.01F;
+            RenderGlobal.drawBoundingBox(x - (double)f, y + (double)entityIn.getEyeHeight() - 0.009999999776482582D, z - (double)f, x + (double)f, y + (double)entityIn.getEyeHeight() + 0.009999999776482582D, z + (double)f, 1.0F, 0.0F, 0.0F, 1.0F);
+        }
 
-   public void func_188389_a(Entity p_188389_1_, float p_188389_2_) {
-      if (p_188389_1_.field_70173_aa == 0) {
-         p_188389_1_.field_70142_S = p_188389_1_.field_70165_t;
-         p_188389_1_.field_70137_T = p_188389_1_.field_70163_u;
-         p_188389_1_.field_70136_U = p_188389_1_.field_70161_v;
-      }
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        Vec3d vec3d = entityIn.getLook(partialTicks);
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(x, y + (double)entityIn.getEyeHeight(), z).color(0, 0, 255, 255).endVertex();
+        bufferbuilder.pos(x + vec3d.xCoord * 2.0D, y + (double)entityIn.getEyeHeight() + vec3d.yCoord * 2.0D, z + vec3d.zCoord * 2.0D).color(0, 0, 255, 255).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableLighting();
+        GlStateManager.enableCull();
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
+    }
 
-      double d0 = p_188389_1_.field_70142_S + (p_188389_1_.field_70165_t - p_188389_1_.field_70142_S) * (double)p_188389_2_;
-      double d1 = p_188389_1_.field_70137_T + (p_188389_1_.field_70163_u - p_188389_1_.field_70137_T) * (double)p_188389_2_;
-      double d2 = p_188389_1_.field_70136_U + (p_188389_1_.field_70161_v - p_188389_1_.field_70136_U) * (double)p_188389_2_;
-      float f = p_188389_1_.field_70126_B + (p_188389_1_.field_70177_z - p_188389_1_.field_70126_B) * p_188389_2_;
-      int i = p_188389_1_.func_70070_b();
-      if (p_188389_1_.func_70027_ad()) {
-         i = 15728880;
-      }
+    /**
+     * World sets this RenderManager's worldObj to the world provided
+     */
+    public void set(@Nullable World worldIn)
+    {
+        this.worldObj = worldIn;
 
-      int j = i % 65536;
-      int k = i / 65536;
-      OpenGlHelper.func_77475_a(OpenGlHelper.field_77476_b, (float)j, (float)k);
-      GlStateManager.func_179131_c(1.0F, 1.0F, 1.0F, 1.0F);
-      Render<Entity> render = this.<Entity>func_78713_a(p_188389_1_);
-      if (render != null && this.field_78724_e != null) {
-         render.func_188300_b(p_188389_1_, d0 - this.field_78725_b, d1 - this.field_78726_c, d2 - this.field_78723_d, f, p_188389_2_);
-      }
+        if (worldIn == null)
+        {
+            this.renderViewEntity = null;
+        }
+    }
 
-   }
+    public double getDistanceToCamera(double x, double y, double z)
+    {
+        double d0 = x - this.viewerPosX;
+        double d1 = y - this.viewerPosY;
+        double d2 = z - this.viewerPosZ;
+        return d0 * d0 + d1 * d1 + d2 * d2;
+    }
 
-   private void func_85094_b(Entity p_85094_1_, double p_85094_2_, double p_85094_4_, double p_85094_6_, float p_85094_8_, float p_85094_9_) {
-      GlStateManager.func_179132_a(false);
-      GlStateManager.func_179090_x();
-      GlStateManager.func_179140_f();
-      GlStateManager.func_179129_p();
-      GlStateManager.func_179084_k();
-      float f = p_85094_1_.field_70130_N / 2.0F;
-      AxisAlignedBB axisalignedbb = p_85094_1_.func_174813_aQ();
-      RenderGlobal.func_189694_a(axisalignedbb.field_72340_a - p_85094_1_.field_70165_t + p_85094_2_, axisalignedbb.field_72338_b - p_85094_1_.field_70163_u + p_85094_4_, axisalignedbb.field_72339_c - p_85094_1_.field_70161_v + p_85094_6_, axisalignedbb.field_72336_d - p_85094_1_.field_70165_t + p_85094_2_, axisalignedbb.field_72337_e - p_85094_1_.field_70163_u + p_85094_4_, axisalignedbb.field_72334_f - p_85094_1_.field_70161_v + p_85094_6_, 1.0F, 1.0F, 1.0F, 1.0F);
-      Entity[] aentity = p_85094_1_.func_70021_al();
-      if (aentity != null) {
-         for(Entity entity : aentity) {
-            double d0 = (entity.field_70165_t - entity.field_70169_q) * (double)p_85094_9_;
-            double d1 = (entity.field_70163_u - entity.field_70167_r) * (double)p_85094_9_;
-            double d2 = (entity.field_70161_v - entity.field_70166_s) * (double)p_85094_9_;
-            AxisAlignedBB axisalignedbb1 = entity.func_174813_aQ();
-            RenderGlobal.func_189694_a(axisalignedbb1.field_72340_a - this.field_78725_b + d0, axisalignedbb1.field_72338_b - this.field_78726_c + d1, axisalignedbb1.field_72339_c - this.field_78723_d + d2, axisalignedbb1.field_72336_d - this.field_78725_b + d0, axisalignedbb1.field_72337_e - this.field_78726_c + d1, axisalignedbb1.field_72334_f - this.field_78723_d + d2, 0.25F, 1.0F, 0.0F, 1.0F);
-         }
-      }
+    /**
+     * Returns the font renderer
+     */
+    public FontRenderer getFontRenderer()
+    {
+        return this.textRenderer;
+    }
 
-      if (p_85094_1_ instanceof EntityLivingBase) {
-         float f1 = 0.01F;
-         RenderGlobal.func_189694_a(p_85094_2_ - (double)f, p_85094_4_ + (double)p_85094_1_.func_70047_e() - 0.009999999776482582D, p_85094_6_ - (double)f, p_85094_2_ + (double)f, p_85094_4_ + (double)p_85094_1_.func_70047_e() + 0.009999999776482582D, p_85094_6_ + (double)f, 1.0F, 0.0F, 0.0F, 1.0F);
-      }
-
-      Tessellator tessellator = Tessellator.func_178181_a();
-      BufferBuilder bufferbuilder = tessellator.func_178180_c();
-      Vec3d vec3d = p_85094_1_.func_70676_i(p_85094_9_);
-      bufferbuilder.func_181668_a(3, DefaultVertexFormats.field_181706_f);
-      bufferbuilder.func_181662_b(p_85094_2_, p_85094_4_ + (double)p_85094_1_.func_70047_e(), p_85094_6_).func_181669_b(0, 0, 255, 255).func_181675_d();
-      bufferbuilder.func_181662_b(p_85094_2_ + vec3d.field_72450_a * 2.0D, p_85094_4_ + (double)p_85094_1_.func_70047_e() + vec3d.field_72448_b * 2.0D, p_85094_6_ + vec3d.field_72449_c * 2.0D).func_181669_b(0, 0, 255, 255).func_181675_d();
-      tessellator.func_78381_a();
-      GlStateManager.func_179098_w();
-      GlStateManager.func_179145_e();
-      GlStateManager.func_179089_o();
-      GlStateManager.func_179084_k();
-      GlStateManager.func_179132_a(true);
-   }
-
-   public void func_78717_a(@Nullable World p_78717_1_) {
-      this.field_78722_g = p_78717_1_;
-      if (p_78717_1_ == null) {
-         this.field_78734_h = null;
-      }
-
-   }
-
-   public double func_78714_a(double p_78714_1_, double p_78714_3_, double p_78714_5_) {
-      double d0 = p_78714_1_ - this.field_78730_l;
-      double d1 = p_78714_3_ - this.field_78731_m;
-      double d2 = p_78714_5_ - this.field_78728_n;
-      return d0 * d0 + d1 * d1 + d2 * d2;
-   }
-
-   public FontRenderer func_78716_a() {
-      return this.field_78736_p;
-   }
-
-   public void func_178632_c(boolean p_178632_1_) {
-      this.field_178639_r = p_178632_1_;
-   }
+    public void setRenderOutlines(boolean renderOutlinesIn)
+    {
+        this.renderOutlines = renderOutlinesIn;
+    }
 }

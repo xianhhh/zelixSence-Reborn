@@ -9,28 +9,35 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class EntityOnFire implements EntityProperty {
-   private final boolean field_186659_a;
+public class EntityOnFire implements EntityProperty
+{
+    private final boolean onFire;
 
-   public EntityOnFire(boolean p_i46613_1_) {
-      this.field_186659_a = p_i46613_1_;
-   }
+    public EntityOnFire(boolean onFireIn)
+    {
+        this.onFire = onFireIn;
+    }
 
-   public boolean func_186657_a(Random p_186657_1_, Entity p_186657_2_) {
-      return p_186657_2_.func_70027_ad() == this.field_186659_a;
-   }
+    public boolean testProperty(Random random, Entity entityIn)
+    {
+        return entityIn.isBurning() == this.onFire;
+    }
 
-   public static class Serializer extends EntityProperty.Serializer<EntityOnFire> {
-      protected Serializer() {
-         super(new ResourceLocation("on_fire"), EntityOnFire.class);
-      }
+    public static class Serializer extends EntityProperty.Serializer<EntityOnFire>
+    {
+        protected Serializer()
+        {
+            super(new ResourceLocation("on_fire"), EntityOnFire.class);
+        }
 
-      public JsonElement func_186650_a(EntityOnFire p_186650_1_, JsonSerializationContext p_186650_2_) {
-         return new JsonPrimitive(p_186650_1_.field_186659_a);
-      }
+        public JsonElement serialize(EntityOnFire property, JsonSerializationContext serializationContext)
+        {
+            return new JsonPrimitive(property.onFire);
+        }
 
-      public EntityOnFire func_186652_a(JsonElement p_186652_1_, JsonDeserializationContext p_186652_2_) {
-         return new EntityOnFire(JsonUtils.func_151216_b(p_186652_1_, "on_fire"));
-      }
-   }
+        public EntityOnFire deserialize(JsonElement element, JsonDeserializationContext deserializationContext)
+        {
+            return new EntityOnFire(JsonUtils.getBoolean(element, "on_fire"));
+        }
+    }
 }

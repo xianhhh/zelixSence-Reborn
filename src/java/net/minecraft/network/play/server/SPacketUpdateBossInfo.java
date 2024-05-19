@@ -8,159 +8,202 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
 
-public class SPacketUpdateBossInfo implements Packet<INetHandlerPlayClient> {
-   private UUID field_186911_a;
-   private SPacketUpdateBossInfo.Operation field_186912_b;
-   private ITextComponent field_186913_c;
-   private float field_186914_d;
-   private BossInfo.Color field_186915_e;
-   private BossInfo.Overlay field_186916_f;
-   private boolean field_186917_g;
-   private boolean field_186918_h;
-   private boolean field_186919_i;
+public class SPacketUpdateBossInfo implements Packet<INetHandlerPlayClient>
+{
+    private UUID uniqueId;
+    private SPacketUpdateBossInfo.Operation operation;
+    private ITextComponent name;
+    private float percent;
+    private BossInfo.Color color;
+    private BossInfo.Overlay overlay;
+    private boolean darkenSky;
+    private boolean playEndBossMusic;
+    private boolean createFog;
 
-   public SPacketUpdateBossInfo() {
-   }
+    public SPacketUpdateBossInfo()
+    {
+    }
 
-   public SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation p_i46964_1_, BossInfo p_i46964_2_) {
-      this.field_186912_b = p_i46964_1_;
-      this.field_186911_a = p_i46964_2_.func_186737_d();
-      this.field_186913_c = p_i46964_2_.func_186744_e();
-      this.field_186914_d = p_i46964_2_.func_186738_f();
-      this.field_186915_e = p_i46964_2_.func_186736_g();
-      this.field_186916_f = p_i46964_2_.func_186740_h();
-      this.field_186917_g = p_i46964_2_.func_186734_i();
-      this.field_186918_h = p_i46964_2_.func_186747_j();
-      this.field_186919_i = p_i46964_2_.func_186748_k();
-   }
+    public SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation operationIn, BossInfo data)
+    {
+        this.operation = operationIn;
+        this.uniqueId = data.getUniqueId();
+        this.name = data.getName();
+        this.percent = data.getPercent();
+        this.color = data.getColor();
+        this.overlay = data.getOverlay();
+        this.darkenSky = data.shouldDarkenSky();
+        this.playEndBossMusic = data.shouldPlayEndBossMusic();
+        this.createFog = data.shouldCreateFog();
+    }
 
-   public void func_148837_a(PacketBuffer p_148837_1_) throws IOException {
-      this.field_186911_a = p_148837_1_.func_179253_g();
-      this.field_186912_b = (SPacketUpdateBossInfo.Operation)p_148837_1_.func_179257_a(SPacketUpdateBossInfo.Operation.class);
-      switch(this.field_186912_b) {
-      case ADD:
-         this.field_186913_c = p_148837_1_.func_179258_d();
-         this.field_186914_d = p_148837_1_.readFloat();
-         this.field_186915_e = (BossInfo.Color)p_148837_1_.func_179257_a(BossInfo.Color.class);
-         this.field_186916_f = (BossInfo.Overlay)p_148837_1_.func_179257_a(BossInfo.Overlay.class);
-         this.func_186903_a(p_148837_1_.readUnsignedByte());
-      case REMOVE:
-      default:
-         break;
-      case UPDATE_PCT:
-         this.field_186914_d = p_148837_1_.readFloat();
-         break;
-      case UPDATE_NAME:
-         this.field_186913_c = p_148837_1_.func_179258_d();
-         break;
-      case UPDATE_STYLE:
-         this.field_186915_e = (BossInfo.Color)p_148837_1_.func_179257_a(BossInfo.Color.class);
-         this.field_186916_f = (BossInfo.Overlay)p_148837_1_.func_179257_a(BossInfo.Overlay.class);
-         break;
-      case UPDATE_PROPERTIES:
-         this.func_186903_a(p_148837_1_.readUnsignedByte());
-      }
+    /**
+     * Reads the raw packet data from the data stream.
+     */
+    public void readPacketData(PacketBuffer buf) throws IOException
+    {
+        this.uniqueId = buf.readUuid();
+        this.operation = (SPacketUpdateBossInfo.Operation)buf.readEnumValue(SPacketUpdateBossInfo.Operation.class);
 
-   }
+        switch (this.operation)
+        {
+            case ADD:
+                this.name = buf.readTextComponent();
+                this.percent = buf.readFloat();
+                this.color = (BossInfo.Color)buf.readEnumValue(BossInfo.Color.class);
+                this.overlay = (BossInfo.Overlay)buf.readEnumValue(BossInfo.Overlay.class);
+                this.setFlags(buf.readUnsignedByte());
 
-   private void func_186903_a(int p_186903_1_) {
-      this.field_186917_g = (p_186903_1_ & 1) > 0;
-      this.field_186918_h = (p_186903_1_ & 2) > 0;
-      this.field_186919_i = (p_186903_1_ & 2) > 0;
-   }
+            case REMOVE:
+            default:
+                break;
 
-   public void func_148840_b(PacketBuffer p_148840_1_) throws IOException {
-      p_148840_1_.func_179252_a(this.field_186911_a);
-      p_148840_1_.func_179249_a(this.field_186912_b);
-      switch(this.field_186912_b) {
-      case ADD:
-         p_148840_1_.func_179256_a(this.field_186913_c);
-         p_148840_1_.writeFloat(this.field_186914_d);
-         p_148840_1_.func_179249_a(this.field_186915_e);
-         p_148840_1_.func_179249_a(this.field_186916_f);
-         p_148840_1_.writeByte(this.func_186905_j());
-      case REMOVE:
-      default:
-         break;
-      case UPDATE_PCT:
-         p_148840_1_.writeFloat(this.field_186914_d);
-         break;
-      case UPDATE_NAME:
-         p_148840_1_.func_179256_a(this.field_186913_c);
-         break;
-      case UPDATE_STYLE:
-         p_148840_1_.func_179249_a(this.field_186915_e);
-         p_148840_1_.func_179249_a(this.field_186916_f);
-         break;
-      case UPDATE_PROPERTIES:
-         p_148840_1_.writeByte(this.func_186905_j());
-      }
+            case UPDATE_PCT:
+                this.percent = buf.readFloat();
+                break;
 
-   }
+            case UPDATE_NAME:
+                this.name = buf.readTextComponent();
+                break;
 
-   private int func_186905_j() {
-      int i = 0;
-      if (this.field_186917_g) {
-         i |= 1;
-      }
+            case UPDATE_STYLE:
+                this.color = (BossInfo.Color)buf.readEnumValue(BossInfo.Color.class);
+                this.overlay = (BossInfo.Overlay)buf.readEnumValue(BossInfo.Overlay.class);
+                break;
 
-      if (this.field_186918_h) {
-         i |= 2;
-      }
+            case UPDATE_PROPERTIES:
+                this.setFlags(buf.readUnsignedByte());
+        }
+    }
 
-      if (this.field_186919_i) {
-         i |= 2;
-      }
+    private void setFlags(int flags)
+    {
+        this.darkenSky = (flags & 1) > 0;
+        this.playEndBossMusic = (flags & 2) > 0;
+        this.createFog = (flags & 2) > 0;
+    }
 
-      return i;
-   }
+    /**
+     * Writes the raw packet data to the data stream.
+     */
+    public void writePacketData(PacketBuffer buf) throws IOException
+    {
+        buf.writeUuid(this.uniqueId);
+        buf.writeEnumValue(this.operation);
 
-   public void func_148833_a(INetHandlerPlayClient p_148833_1_) {
-      p_148833_1_.func_184325_a(this);
-   }
+        switch (this.operation)
+        {
+            case ADD:
+                buf.writeTextComponent(this.name);
+                buf.writeFloat(this.percent);
+                buf.writeEnumValue(this.color);
+                buf.writeEnumValue(this.overlay);
+                buf.writeByte(this.getFlags());
 
-   public UUID func_186908_a() {
-      return this.field_186911_a;
-   }
+            case REMOVE:
+            default:
+                break;
 
-   public SPacketUpdateBossInfo.Operation func_186902_b() {
-      return this.field_186912_b;
-   }
+            case UPDATE_PCT:
+                buf.writeFloat(this.percent);
+                break;
 
-   public ITextComponent func_186907_c() {
-      return this.field_186913_c;
-   }
+            case UPDATE_NAME:
+                buf.writeTextComponent(this.name);
+                break;
 
-   public float func_186906_d() {
-      return this.field_186914_d;
-   }
+            case UPDATE_STYLE:
+                buf.writeEnumValue(this.color);
+                buf.writeEnumValue(this.overlay);
+                break;
 
-   public BossInfo.Color func_186900_e() {
-      return this.field_186915_e;
-   }
+            case UPDATE_PROPERTIES:
+                buf.writeByte(this.getFlags());
+        }
+    }
 
-   public BossInfo.Overlay func_186904_f() {
-      return this.field_186916_f;
-   }
+    private int getFlags()
+    {
+        int i = 0;
 
-   public boolean func_186909_g() {
-      return this.field_186917_g;
-   }
+        if (this.darkenSky)
+        {
+            i |= 1;
+        }
 
-   public boolean func_186910_h() {
-      return this.field_186918_h;
-   }
+        if (this.playEndBossMusic)
+        {
+            i |= 2;
+        }
 
-   public boolean func_186901_i() {
-      return this.field_186919_i;
-   }
+        if (this.createFog)
+        {
+            i |= 2;
+        }
 
-   public static enum Operation {
-      ADD,
-      REMOVE,
-      UPDATE_PCT,
-      UPDATE_NAME,
-      UPDATE_STYLE,
-      UPDATE_PROPERTIES;
-   }
+        return i;
+    }
+
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
+    {
+        handler.handleUpdateEntityNBT(this);
+    }
+
+    public UUID getUniqueId()
+    {
+        return this.uniqueId;
+    }
+
+    public SPacketUpdateBossInfo.Operation getOperation()
+    {
+        return this.operation;
+    }
+
+    public ITextComponent getName()
+    {
+        return this.name;
+    }
+
+    public float getPercent()
+    {
+        return this.percent;
+    }
+
+    public BossInfo.Color getColor()
+    {
+        return this.color;
+    }
+
+    public BossInfo.Overlay getOverlay()
+    {
+        return this.overlay;
+    }
+
+    public boolean shouldDarkenSky()
+    {
+        return this.darkenSky;
+    }
+
+    public boolean shouldPlayEndBossMusic()
+    {
+        return this.playEndBossMusic;
+    }
+
+    public boolean shouldCreateFog()
+    {
+        return this.createFog;
+    }
+
+    public static enum Operation
+    {
+        ADD,
+        REMOVE,
+        UPDATE_PCT,
+        UPDATE_NAME,
+        UPDATE_STYLE,
+        UPDATE_PROPERTIES;
+    }
 }

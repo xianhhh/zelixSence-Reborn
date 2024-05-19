@@ -7,71 +7,104 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StringUtils;
 
-public class TextComponentScore extends TextComponentBase {
-   private final String field_179999_b;
-   private final String field_180000_c;
-   private String field_179998_d = "";
+public class TextComponentScore extends TextComponentBase
+{
+    private final String name;
+    private final String objective;
 
-   public TextComponentScore(String p_i45997_1_, String p_i45997_2_) {
-      this.field_179999_b = p_i45997_1_;
-      this.field_180000_c = p_i45997_2_;
-   }
+    /** The value displayed instead of the real score (may be null) */
+    private String value = "";
 
-   public String func_179995_g() {
-      return this.field_179999_b;
-   }
+    public TextComponentScore(String nameIn, String objectiveIn)
+    {
+        this.name = nameIn;
+        this.objective = objectiveIn;
+    }
 
-   public String func_179994_h() {
-      return this.field_180000_c;
-   }
+    public String getName()
+    {
+        return this.name;
+    }
 
-   public void func_179997_b(String p_179997_1_) {
-      this.field_179998_d = p_179997_1_;
-   }
+    public String getObjective()
+    {
+        return this.objective;
+    }
 
-   public String func_150261_e() {
-      return this.field_179998_d;
-   }
+    /**
+     * Sets the value displayed instead of the real score.
+     */
+    public void setValue(String valueIn)
+    {
+        this.value = valueIn;
+    }
 
-   public void func_186876_a(ICommandSender p_186876_1_) {
-      MinecraftServer minecraftserver = p_186876_1_.func_184102_h();
-      if (minecraftserver != null && minecraftserver.func_175578_N() && StringUtils.func_151246_b(this.field_179998_d)) {
-         Scoreboard scoreboard = minecraftserver.func_71218_a(0).func_96441_U();
-         ScoreObjective scoreobjective = scoreboard.func_96518_b(this.field_180000_c);
-         if (scoreboard.func_178819_b(this.field_179999_b, scoreobjective)) {
-            Score score = scoreboard.func_96529_a(this.field_179999_b, scoreobjective);
-            this.func_179997_b(String.format("%d", score.func_96652_c()));
-         } else {
-            this.field_179998_d = "";
-         }
-      }
+    /**
+     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
+     * different methods?
+     */
+    public String getUnformattedComponentText()
+    {
+        return this.value;
+    }
 
-   }
+    public void resolve(ICommandSender sender)
+    {
+        MinecraftServer minecraftserver = sender.getServer();
 
-   public TextComponentScore func_150259_f() {
-      TextComponentScore textcomponentscore = new TextComponentScore(this.field_179999_b, this.field_180000_c);
-      textcomponentscore.func_179997_b(this.field_179998_d);
-      textcomponentscore.func_150255_a(this.func_150256_b().func_150232_l());
+        if (minecraftserver != null && minecraftserver.isAnvilFileSet() && StringUtils.isNullOrEmpty(this.value))
+        {
+            Scoreboard scoreboard = minecraftserver.worldServerForDimension(0).getScoreboard();
+            ScoreObjective scoreobjective = scoreboard.getObjective(this.objective);
 
-      for(ITextComponent itextcomponent : this.func_150253_a()) {
-         textcomponentscore.func_150257_a(itextcomponent.func_150259_f());
-      }
+            if (scoreboard.entityHasObjective(this.name, scoreobjective))
+            {
+                Score score = scoreboard.getOrCreateScore(this.name, scoreobjective);
+                this.setValue(String.format("%d", score.getScorePoints()));
+            }
+            else
+            {
+                this.value = "";
+            }
+        }
+    }
 
-      return textcomponentscore;
-   }
+    /**
+     * Creates a copy of this component.  Almost a deep copy, except the style is shallow-copied.
+     */
+    public TextComponentScore createCopy()
+    {
+        TextComponentScore textcomponentscore = new TextComponentScore(this.name, this.objective);
+        textcomponentscore.setValue(this.value);
+        textcomponentscore.setStyle(this.getStyle().createShallowCopy());
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
-         return true;
-      } else if (!(p_equals_1_ instanceof TextComponentScore)) {
-         return false;
-      } else {
-         TextComponentScore textcomponentscore = (TextComponentScore)p_equals_1_;
-         return this.field_179999_b.equals(textcomponentscore.field_179999_b) && this.field_180000_c.equals(textcomponentscore.field_180000_c) && super.equals(p_equals_1_);
-      }
-   }
+        for (ITextComponent itextcomponent : this.getSiblings())
+        {
+            textcomponentscore.appendSibling(itextcomponent.createCopy());
+        }
 
-   public String toString() {
-      return "ScoreComponent{name='" + this.field_179999_b + '\'' + "objective='" + this.field_180000_c + '\'' + ", siblings=" + this.field_150264_a + ", style=" + this.func_150256_b() + '}';
-   }
+        return textcomponentscore;
+    }
+
+    public boolean equals(Object p_equals_1_)
+    {
+        if (this == p_equals_1_)
+        {
+            return true;
+        }
+        else if (!(p_equals_1_ instanceof TextComponentScore))
+        {
+            return false;
+        }
+        else
+        {
+            TextComponentScore textcomponentscore = (TextComponentScore)p_equals_1_;
+            return this.name.equals(textcomponentscore.name) && this.objective.equals(textcomponentscore.objective) && super.equals(p_equals_1_);
+        }
+    }
+
+    public String toString()
+    {
+        return "ScoreComponent{name='" + this.name + '\'' + "objective='" + this.objective + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+    }
 }

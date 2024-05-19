@@ -13,175 +13,268 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public abstract class EntityAgeable extends EntityCreature {
-   private static final DataParameter<Boolean> field_184751_bv = EntityDataManager.<Boolean>func_187226_a(EntityAgeable.class, DataSerializers.field_187198_h);
-   protected int field_175504_a;
-   protected int field_175502_b;
-   protected int field_175503_c;
-   private float field_98056_d = -1.0F;
-   private float field_98057_e;
+public abstract class EntityAgeable extends EntityCreature
+{
+    private static final DataParameter<Boolean> BABY = EntityDataManager.<Boolean>createKey(EntityAgeable.class, DataSerializers.BOOLEAN);
+    protected int growingAge;
+    protected int forcedAge;
+    protected int forcedAgeTimer;
+    private float ageWidth = -1.0F;
+    private float ageHeight;
 
-   public EntityAgeable(World p_i1578_1_) {
-      super(p_i1578_1_);
-   }
+    public EntityAgeable(World worldIn)
+    {
+        super(worldIn);
+    }
 
-   @Nullable
-   public abstract EntityAgeable func_90011_a(EntityAgeable var1);
+    @Nullable
+    public abstract EntityAgeable createChild(EntityAgeable ageable);
 
-   public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_) {
-      ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-      if (itemstack.func_77973_b() == Items.field_151063_bx) {
-         if (!this.field_70170_p.field_72995_K) {
-            Class<? extends Entity> oclass = (Class)EntityList.field_191308_b.func_82594_a(ItemMonsterPlacer.func_190908_h(itemstack));
-            if (oclass != null && this.getClass() == oclass) {
-               EntityAgeable entityageable = this.func_90011_a(this);
-               if (entityageable != null) {
-                  entityageable.func_70873_a(-24000);
-                  entityageable.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, 0.0F, 0.0F);
-                  this.field_70170_p.func_72838_d(entityageable);
-                  if (itemstack.func_82837_s()) {
-                     entityageable.func_96094_a(itemstack.func_82833_r());
-                  }
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    {
+        ItemStack itemstack = player.getHeldItem(hand);
 
-                  if (!p_184645_1_.field_71075_bZ.field_75098_d) {
-                     itemstack.func_190918_g(1);
-                  }
-               }
-            }
-         }
+        if (itemstack.getItem() == Items.SPAWN_EGG)
+        {
+            if (!this.world.isRemote)
+            {
+                Class <? extends Entity > oclass = (Class)EntityList.field_191308_b.getObject(ItemMonsterPlacer.func_190908_h(itemstack));
 
-         return true;
-      } else {
-         return false;
-      }
-   }
+                if (oclass != null && this.getClass() == oclass)
+                {
+                    EntityAgeable entityageable = this.createChild(this);
 
-   protected boolean func_190669_a(ItemStack p_190669_1_, Class<? extends Entity> p_190669_2_) {
-      if (p_190669_1_.func_77973_b() != Items.field_151063_bx) {
-         return false;
-      } else {
-         Class<? extends Entity> oclass = (Class)EntityList.field_191308_b.func_82594_a(ItemMonsterPlacer.func_190908_h(p_190669_1_));
-         return oclass != null && p_190669_2_ == oclass;
-      }
-   }
+                    if (entityageable != null)
+                    {
+                        entityageable.setGrowingAge(-24000);
+                        entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+                        this.world.spawnEntityInWorld(entityageable);
 
-   protected void func_70088_a() {
-      super.func_70088_a();
-      this.field_70180_af.func_187214_a(field_184751_bv, Boolean.valueOf(false));
-   }
+                        if (itemstack.hasDisplayName())
+                        {
+                            entityageable.setCustomNameTag(itemstack.getDisplayName());
+                        }
 
-   public int func_70874_b() {
-      if (this.field_70170_p.field_72995_K) {
-         return ((Boolean)this.field_70180_af.func_187225_a(field_184751_bv)).booleanValue() ? -1 : 1;
-      } else {
-         return this.field_175504_a;
-      }
-   }
-
-   public void func_175501_a(int p_175501_1_, boolean p_175501_2_) {
-      int i = this.func_70874_b();
-      int j = i;
-      i = i + p_175501_1_ * 20;
-      if (i > 0) {
-         i = 0;
-         if (j < 0) {
-            this.func_175500_n();
-         }
-      }
-
-      int k = i - j;
-      this.func_70873_a(i);
-      if (p_175501_2_) {
-         this.field_175502_b += k;
-         if (this.field_175503_c == 0) {
-            this.field_175503_c = 40;
-         }
-      }
-
-      if (this.func_70874_b() == 0) {
-         this.func_70873_a(this.field_175502_b);
-      }
-
-   }
-
-   public void func_110195_a(int p_110195_1_) {
-      this.func_175501_a(p_110195_1_, false);
-   }
-
-   public void func_70873_a(int p_70873_1_) {
-      this.field_70180_af.func_187227_b(field_184751_bv, Boolean.valueOf(p_70873_1_ < 0));
-      this.field_175504_a = p_70873_1_;
-      this.func_98054_a(this.func_70631_g_());
-   }
-
-   public void func_70014_b(NBTTagCompound p_70014_1_) {
-      super.func_70014_b(p_70014_1_);
-      p_70014_1_.func_74768_a("Age", this.func_70874_b());
-      p_70014_1_.func_74768_a("ForcedAge", this.field_175502_b);
-   }
-
-   public void func_70037_a(NBTTagCompound p_70037_1_) {
-      super.func_70037_a(p_70037_1_);
-      this.func_70873_a(p_70037_1_.func_74762_e("Age"));
-      this.field_175502_b = p_70037_1_.func_74762_e("ForcedAge");
-   }
-
-   public void func_184206_a(DataParameter<?> p_184206_1_) {
-      if (field_184751_bv.equals(p_184206_1_)) {
-         this.func_98054_a(this.func_70631_g_());
-      }
-
-      super.func_184206_a(p_184206_1_);
-   }
-
-   public void func_70636_d() {
-      super.func_70636_d();
-      if (this.field_70170_p.field_72995_K) {
-         if (this.field_175503_c > 0) {
-            if (this.field_175503_c % 4 == 0) {
-               this.field_70170_p.func_175688_a(EnumParticleTypes.VILLAGER_HAPPY, this.field_70165_t + (double)(this.field_70146_Z.nextFloat() * this.field_70130_N * 2.0F) - (double)this.field_70130_N, this.field_70163_u + 0.5D + (double)(this.field_70146_Z.nextFloat() * this.field_70131_O), this.field_70161_v + (double)(this.field_70146_Z.nextFloat() * this.field_70130_N * 2.0F) - (double)this.field_70130_N, 0.0D, 0.0D, 0.0D);
+                        if (!player.capabilities.isCreativeMode)
+                        {
+                            itemstack.func_190918_g(1);
+                        }
+                    }
+                }
             }
 
-            --this.field_175503_c;
-         }
-      } else {
-         int i = this.func_70874_b();
-         if (i < 0) {
-            ++i;
-            this.func_70873_a(i);
-            if (i == 0) {
-               this.func_175500_n();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected boolean func_190669_a(ItemStack p_190669_1_, Class <? extends Entity > p_190669_2_)
+    {
+        if (p_190669_1_.getItem() != Items.SPAWN_EGG)
+        {
+            return false;
+        }
+        else
+        {
+            Class <? extends Entity > oclass = (Class)EntityList.field_191308_b.getObject(ItemMonsterPlacer.func_190908_h(p_190669_1_));
+            return oclass != null && p_190669_2_ == oclass;
+        }
+    }
+
+    protected void entityInit()
+    {
+        super.entityInit();
+        this.dataManager.register(BABY, Boolean.valueOf(false));
+    }
+
+    /**
+     * The age value may be negative or positive or zero. If it's negative, it get's incremented on each tick, if it's
+     * positive, it get's decremented each tick. Don't confuse this with EntityLiving.getAge. With a negative value the
+     * Entity is considered a child.
+     */
+    public int getGrowingAge()
+    {
+        if (this.world.isRemote)
+        {
+            return ((Boolean)this.dataManager.get(BABY)).booleanValue() ? -1 : 1;
+        }
+        else
+        {
+            return this.growingAge;
+        }
+    }
+
+    public void ageUp(int p_175501_1_, boolean p_175501_2_)
+    {
+        int i = this.getGrowingAge();
+        int j = i;
+        i = i + p_175501_1_ * 20;
+
+        if (i > 0)
+        {
+            i = 0;
+
+            if (j < 0)
+            {
+                this.onGrowingAdult();
             }
-         } else if (i > 0) {
-            --i;
-            this.func_70873_a(i);
-         }
-      }
+        }
 
-   }
+        int k = i - j;
+        this.setGrowingAge(i);
 
-   protected void func_175500_n() {
-   }
+        if (p_175501_2_)
+        {
+            this.forcedAge += k;
 
-   public boolean func_70631_g_() {
-      return this.func_70874_b() < 0;
-   }
+            if (this.forcedAgeTimer == 0)
+            {
+                this.forcedAgeTimer = 40;
+            }
+        }
 
-   public void func_98054_a(boolean p_98054_1_) {
-      this.func_98055_j(p_98054_1_ ? 0.5F : 1.0F);
-   }
+        if (this.getGrowingAge() == 0)
+        {
+            this.setGrowingAge(this.forcedAge);
+        }
+    }
 
-   protected final void func_70105_a(float p_70105_1_, float p_70105_2_) {
-      boolean flag = this.field_98056_d > 0.0F;
-      this.field_98056_d = p_70105_1_;
-      this.field_98057_e = p_70105_2_;
-      if (!flag) {
-         this.func_98055_j(1.0F);
-      }
+    /**
+     * "Adds the value of the parameter times 20 to the age of this entity. If the entity is an adult (if the entity's
+     * age is greater than 0), it will have no effect."
+     */
+    public void addGrowth(int growth)
+    {
+        this.ageUp(growth, false);
+    }
 
-   }
+    /**
+     * The age value may be negative or positive or zero. If it's negative, it get's incremented on each tick, if it's
+     * positive, it get's decremented each tick. With a negative value the Entity is considered a child.
+     */
+    public void setGrowingAge(int age)
+    {
+        this.dataManager.set(BABY, Boolean.valueOf(age < 0));
+        this.growingAge = age;
+        this.setScaleForAge(this.isChild());
+    }
 
-   protected final void func_98055_j(float p_98055_1_) {
-      super.func_70105_a(this.field_98056_d * p_98055_1_, this.field_98057_e * p_98055_1_);
-   }
+    /**
+     * (abstract) Protected helper method to write subclass entity data to NBT.
+     */
+    public void writeEntityToNBT(NBTTagCompound compound)
+    {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("Age", this.getGrowingAge());
+        compound.setInteger("ForcedAge", this.forcedAge);
+    }
+
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readEntityFromNBT(NBTTagCompound compound)
+    {
+        super.readEntityFromNBT(compound);
+        this.setGrowingAge(compound.getInteger("Age"));
+        this.forcedAge = compound.getInteger("ForcedAge");
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (BABY.equals(key))
+        {
+            this.setScaleForAge(this.isChild());
+        }
+
+        super.notifyDataManagerChange(key);
+    }
+
+    /**
+     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
+     * use this to react to sunlight and start to burn.
+     */
+    public void onLivingUpdate()
+    {
+        super.onLivingUpdate();
+
+        if (this.world.isRemote)
+        {
+            if (this.forcedAgeTimer > 0)
+            {
+                if (this.forcedAgeTimer % 4 == 0)
+                {
+                    this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D);
+                }
+
+                --this.forcedAgeTimer;
+            }
+        }
+        else
+        {
+            int i = this.getGrowingAge();
+
+            if (i < 0)
+            {
+                ++i;
+                this.setGrowingAge(i);
+
+                if (i == 0)
+                {
+                    this.onGrowingAdult();
+                }
+            }
+            else if (i > 0)
+            {
+                --i;
+                this.setGrowingAge(i);
+            }
+        }
+    }
+
+    /**
+     * This is called when Entity's growing age timer reaches 0 (negative values are considered as a child, positive as
+     * an adult)
+     */
+    protected void onGrowingAdult()
+    {
+    }
+
+    /**
+     * If Animal, checks if the age timer is negative
+     */
+    public boolean isChild()
+    {
+        return this.getGrowingAge() < 0;
+    }
+
+    /**
+     * "Sets the scale for an ageable entity according to the boolean parameter, which says if it's a child."
+     */
+    public void setScaleForAge(boolean child)
+    {
+        this.setScale(child ? 0.5F : 1.0F);
+    }
+
+    /**
+     * Sets the width and height of the entity.
+     */
+    protected final void setSize(float width, float height)
+    {
+        boolean flag = this.ageWidth > 0.0F;
+        this.ageWidth = width;
+        this.ageHeight = height;
+
+        if (!flag)
+        {
+            this.setScale(1.0F);
+        }
+    }
+
+    protected final void setScale(float scale)
+    {
+        super.setSize(this.ageWidth * scale, this.ageHeight * scale);
+    }
 }

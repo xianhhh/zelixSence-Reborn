@@ -8,29 +8,36 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
 
-public class KilledByPlayer implements LootCondition {
-   private final boolean field_186620_a;
+public class KilledByPlayer implements LootCondition
+{
+    private final boolean inverse;
 
-   public KilledByPlayer(boolean p_i46616_1_) {
-      this.field_186620_a = p_i46616_1_;
-   }
+    public KilledByPlayer(boolean inverseIn)
+    {
+        this.inverse = inverseIn;
+    }
 
-   public boolean func_186618_a(Random p_186618_1_, LootContext p_186618_2_) {
-      boolean flag = p_186618_2_.func_186495_b() != null;
-      return flag == !this.field_186620_a;
-   }
+    public boolean testCondition(Random rand, LootContext context)
+    {
+        boolean flag = context.getKillerPlayer() != null;
+        return flag == !this.inverse;
+    }
 
-   public static class Serializer extends LootCondition.Serializer<KilledByPlayer> {
-      protected Serializer() {
-         super(new ResourceLocation("killed_by_player"), KilledByPlayer.class);
-      }
+    public static class Serializer extends LootCondition.Serializer<KilledByPlayer>
+    {
+        protected Serializer()
+        {
+            super(new ResourceLocation("killed_by_player"), KilledByPlayer.class);
+        }
 
-      public void func_186605_a(JsonObject p_186605_1_, KilledByPlayer p_186605_2_, JsonSerializationContext p_186605_3_) {
-         p_186605_1_.addProperty("inverse", Boolean.valueOf(p_186605_2_.field_186620_a));
-      }
+        public void serialize(JsonObject json, KilledByPlayer value, JsonSerializationContext context)
+        {
+            json.addProperty("inverse", Boolean.valueOf(value.inverse));
+        }
 
-      public KilledByPlayer func_186603_b(JsonObject p_186603_1_, JsonDeserializationContext p_186603_2_) {
-         return new KilledByPlayer(JsonUtils.func_151209_a(p_186603_1_, "inverse", false));
-      }
-   }
+        public KilledByPlayer deserialize(JsonObject json, JsonDeserializationContext context)
+        {
+            return new KilledByPlayer(JsonUtils.getBoolean(json, "inverse", false));
+        }
+    }
 }

@@ -8,21 +8,35 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 
-public class BlockMelon extends Block {
-   protected BlockMelon() {
-      super(Material.field_151572_C, MapColor.field_151672_u);
-      this.func_149647_a(CreativeTabs.field_78030_b);
-   }
+public class BlockMelon extends Block
+{
+    protected BlockMelon()
+    {
+        super(Material.GOURD, MapColor.LIME);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    }
 
-   public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_) {
-      return Items.field_151127_ba;
-   }
+    /**
+     * Get the Item that this Block should drop when harvested.
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
+    {
+        return Items.MELON;
+    }
 
-   public int func_149745_a(Random p_149745_1_) {
-      return 3 + p_149745_1_.nextInt(5);
-   }
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
+    public int quantityDropped(Random random)
+    {
+        return 3 + random.nextInt(5);
+    }
 
-   public int func_149679_a(int p_149679_1_, Random p_149679_2_) {
-      return Math.min(9, this.func_149745_a(p_149679_2_) + p_149679_2_.nextInt(1 + p_149679_1_));
-   }
+    /**
+     * Get the quantity dropped based on the given fortune level
+     */
+    public int quantityDroppedWithBonus(int fortune, Random random)
+    {
+        return Math.min(9, this.quantityDropped(random) + random.nextInt(1 + fortune));
+    }
 }

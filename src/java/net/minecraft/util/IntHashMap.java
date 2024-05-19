@@ -2,198 +2,287 @@ package net.minecraft.util;
 
 import javax.annotation.Nullable;
 
-public class IntHashMap<V> {
-   private transient IntHashMap.Entry<V>[] field_76055_a = new IntHashMap.Entry[16];
-   private transient int field_76053_b;
-   private int field_76054_c = 12;
-   private final float field_76051_d = 0.75F;
+public class IntHashMap<V>
+{
+    private transient IntHashMap.Entry<V>[] slots = new IntHashMap.Entry[16];
 
-   private static int func_76044_g(int p_76044_0_) {
-      p_76044_0_ = p_76044_0_ ^ p_76044_0_ >>> 20 ^ p_76044_0_ >>> 12;
-      return p_76044_0_ ^ p_76044_0_ >>> 7 ^ p_76044_0_ >>> 4;
-   }
+    /** The number of items stored in this map */
+    private transient int count;
 
-   private static int func_76043_a(int p_76043_0_, int p_76043_1_) {
-      return p_76043_0_ & p_76043_1_ - 1;
-   }
+    /** The grow threshold */
+    private int threshold = 12;
 
-   @Nullable
-   public V func_76041_a(int p_76041_1_) {
-      int i = func_76044_g(p_76041_1_);
+    /** The scale factor used to determine when to grow the table */
+    private final float growFactor = 0.75F;
 
-      for(IntHashMap.Entry<V> entry = this.field_76055_a[func_76043_a(i, this.field_76055_a.length)]; entry != null; entry = entry.field_76034_c) {
-         if (entry.field_76035_a == p_76041_1_) {
-            return entry.field_76033_b;
-         }
-      }
+    /**
+     * Makes the passed in integer suitable for hashing by a number of shifts
+     */
+    private static int computeHash(int integer)
+    {
+        integer = integer ^ integer >>> 20 ^ integer >>> 12;
+        return integer ^ integer >>> 7 ^ integer >>> 4;
+    }
 
-      return (V)null;
-   }
+    /**
+     * Computes the index of the slot for the hash and slot count passed in.
+     */
+    private static int getSlotIndex(int hash, int slotCount)
+    {
+        return hash & slotCount - 1;
+    }
 
-   public boolean func_76037_b(int p_76037_1_) {
-      return this.func_76045_c(p_76037_1_) != null;
-   }
+    @Nullable
 
-   @Nullable
-   final IntHashMap.Entry<V> func_76045_c(int p_76045_1_) {
-      int i = func_76044_g(p_76045_1_);
+    /**
+     * Returns the object associated to a key
+     */
+    public V lookup(int hashEntry)
+    {
+        int i = computeHash(hashEntry);
 
-      for(IntHashMap.Entry<V> entry = this.field_76055_a[func_76043_a(i, this.field_76055_a.length)]; entry != null; entry = entry.field_76034_c) {
-         if (entry.field_76035_a == p_76045_1_) {
-            return entry;
-         }
-      }
-
-      return null;
-   }
-
-   public void func_76038_a(int p_76038_1_, V p_76038_2_) {
-      int i = func_76044_g(p_76038_1_);
-      int j = func_76043_a(i, this.field_76055_a.length);
-
-      for(IntHashMap.Entry<V> entry = this.field_76055_a[j]; entry != null; entry = entry.field_76034_c) {
-         if (entry.field_76035_a == p_76038_1_) {
-            entry.field_76033_b = p_76038_2_;
-            return;
-         }
-      }
-
-      this.func_76040_a(i, p_76038_1_, p_76038_2_, j);
-   }
-
-   private void func_76047_h(int p_76047_1_) {
-      IntHashMap.Entry<V>[] entry = this.field_76055_a;
-      int i = entry.length;
-      if (i == 1073741824) {
-         this.field_76054_c = Integer.MAX_VALUE;
-      } else {
-         IntHashMap.Entry<V>[] entry1 = new IntHashMap.Entry[p_76047_1_];
-         this.func_76048_a(entry1);
-         this.field_76055_a = entry1;
-         this.field_76054_c = (int)((float)p_76047_1_ * this.field_76051_d);
-      }
-   }
-
-   private void func_76048_a(IntHashMap.Entry<V>[] p_76048_1_) {
-      IntHashMap.Entry<V>[] entry = this.field_76055_a;
-      int i = p_76048_1_.length;
-
-      for(int j = 0; j < entry.length; ++j) {
-         IntHashMap.Entry<V> entry1 = entry[j];
-         if (entry1 != null) {
-            entry[j] = null;
-
-            while(true) {
-               IntHashMap.Entry<V> entry2 = entry1.field_76034_c;
-               int k = func_76043_a(entry1.field_76032_d, i);
-               entry1.field_76034_c = p_76048_1_[k];
-               p_76048_1_[k] = entry1;
-               entry1 = entry2;
-               if (entry2 == null) {
-                  break;
-               }
+        for (IntHashMap.Entry<V> entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry)
+        {
+            if (entry.hashEntry == hashEntry)
+            {
+                return entry.valueEntry;
             }
-         }
-      }
+        }
 
-   }
+        return (V)null;
+    }
 
-   @Nullable
-   public V func_76049_d(int p_76049_1_) {
-      IntHashMap.Entry<V> entry = this.func_76036_e(p_76049_1_);
-      return (V)(entry == null ? null : entry.field_76033_b);
-   }
+    /**
+     * Returns true if this hash table contains the specified item.
+     */
+    public boolean containsItem(int hashEntry)
+    {
+        return this.lookupEntry(hashEntry) != null;
+    }
 
-   @Nullable
-   final IntHashMap.Entry<V> func_76036_e(int p_76036_1_) {
-      int i = func_76044_g(p_76036_1_);
-      int j = func_76043_a(i, this.field_76055_a.length);
-      IntHashMap.Entry<V> entry = this.field_76055_a[j];
+    @Nullable
+    final IntHashMap.Entry<V> lookupEntry(int hashEntry)
+    {
+        int i = computeHash(hashEntry);
 
-      IntHashMap.Entry<V> entry1;
-      IntHashMap.Entry<V> entry2;
-      for(entry1 = entry; entry1 != null; entry1 = entry2) {
-         entry2 = entry1.field_76034_c;
-         if (entry1.field_76035_a == p_76036_1_) {
-            --this.field_76053_b;
-            if (entry == entry1) {
-               this.field_76055_a[j] = entry2;
-            } else {
-               entry.field_76034_c = entry2;
+        for (IntHashMap.Entry<V> entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry)
+        {
+            if (entry.hashEntry == hashEntry)
+            {
+                return entry;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Adds a key and associated value to this map
+     */
+    public void addKey(int hashEntry, V valueEntry)
+    {
+        int i = computeHash(hashEntry);
+        int j = getSlotIndex(i, this.slots.length);
+
+        for (IntHashMap.Entry<V> entry = this.slots[j]; entry != null; entry = entry.nextEntry)
+        {
+            if (entry.hashEntry == hashEntry)
+            {
+                entry.valueEntry = valueEntry;
+                return;
+            }
+        }
+
+        this.insert(i, hashEntry, valueEntry, j);
+    }
+
+    /**
+     * Increases the number of hash slots
+     */
+    private void grow(int p_76047_1_)
+    {
+        IntHashMap.Entry<V>[] entry = this.slots;
+        int i = entry.length;
+
+        if (i == 1073741824)
+        {
+            this.threshold = Integer.MAX_VALUE;
+        }
+        else
+        {
+            IntHashMap.Entry<V>[] entry1 = new IntHashMap.Entry[p_76047_1_];
+            this.copyTo(entry1);
+            this.slots = entry1;
+            this.threshold = (int)((float)p_76047_1_ * this.growFactor);
+        }
+    }
+
+    /**
+     * Copies the hash slots to a new array
+     */
+    private void copyTo(IntHashMap.Entry<V>[] p_76048_1_)
+    {
+        IntHashMap.Entry<V>[] entry = this.slots;
+        int i = p_76048_1_.length;
+
+        for (int j = 0; j < entry.length; ++j)
+        {
+            IntHashMap.Entry<V> entry1 = entry[j];
+
+            if (entry1 != null)
+            {
+                entry[j] = null;
+
+                while (true)
+                {
+                    IntHashMap.Entry<V> entry2 = entry1.nextEntry;
+                    int k = getSlotIndex(entry1.slotHash, i);
+                    entry1.nextEntry = p_76048_1_[k];
+                    p_76048_1_[k] = entry1;
+                    entry1 = entry2;
+
+                    if (entry2 == null)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Nullable
+
+    /**
+     * Removes the specified object from the map and returns it
+     */
+    public V removeObject(int p_76049_1_)
+    {
+        IntHashMap.Entry<V> entry = this.removeEntry(p_76049_1_);
+        return (V)(entry == null ? null : entry.valueEntry);
+    }
+
+    @Nullable
+    final IntHashMap.Entry<V> removeEntry(int p_76036_1_)
+    {
+        int i = computeHash(p_76036_1_);
+        int j = getSlotIndex(i, this.slots.length);
+        IntHashMap.Entry<V> entry = this.slots[j];
+        IntHashMap.Entry<V> entry1;
+        IntHashMap.Entry<V> entry2;
+
+        for (entry1 = entry; entry1 != null; entry1 = entry2)
+        {
+            entry2 = entry1.nextEntry;
+
+            if (entry1.hashEntry == p_76036_1_)
+            {
+                --this.count;
+
+                if (entry == entry1)
+                {
+                    this.slots[j] = entry2;
+                }
+                else
+                {
+                    entry.nextEntry = entry2;
+                }
+
+                return entry1;
             }
 
-            return entry1;
-         }
+            entry = entry1;
+        }
 
-         entry = entry1;
-      }
+        return entry1;
+    }
 
-      return entry1;
-   }
+    /**
+     * Removes all entries from the map
+     */
+    public void clearMap()
+    {
+        IntHashMap.Entry<V>[] entry = this.slots;
 
-   public void func_76046_c() {
-      IntHashMap.Entry<V>[] entry = this.field_76055_a;
+        for (int i = 0; i < entry.length; ++i)
+        {
+            entry[i] = null;
+        }
 
-      for(int i = 0; i < entry.length; ++i) {
-         entry[i] = null;
-      }
+        this.count = 0;
+    }
 
-      this.field_76053_b = 0;
-   }
+    /**
+     * Adds an object to a slot
+     */
+    private void insert(int p_76040_1_, int p_76040_2_, V p_76040_3_, int p_76040_4_)
+    {
+        IntHashMap.Entry<V> entry = this.slots[p_76040_4_];
+        this.slots[p_76040_4_] = new IntHashMap.Entry(p_76040_1_, p_76040_2_, p_76040_3_, entry);
 
-   private void func_76040_a(int p_76040_1_, int p_76040_2_, V p_76040_3_, int p_76040_4_) {
-      IntHashMap.Entry<V> entry = this.field_76055_a[p_76040_4_];
-      this.field_76055_a[p_76040_4_] = new IntHashMap.Entry(p_76040_1_, p_76040_2_, p_76040_3_, entry);
-      if (this.field_76053_b++ >= this.field_76054_c) {
-         this.func_76047_h(2 * this.field_76055_a.length);
-      }
+        if (this.count++ >= this.threshold)
+        {
+            this.grow(2 * this.slots.length);
+        }
+    }
 
-   }
+    static class Entry<V>
+    {
+        final int hashEntry;
+        V valueEntry;
+        IntHashMap.Entry<V> nextEntry;
+        final int slotHash;
 
-   static class Entry<V> {
-      final int field_76035_a;
-      V field_76033_b;
-      IntHashMap.Entry<V> field_76034_c;
-      final int field_76032_d;
+        Entry(int p_i1552_1_, int p_i1552_2_, V p_i1552_3_, IntHashMap.Entry<V> p_i1552_4_)
+        {
+            this.valueEntry = p_i1552_3_;
+            this.nextEntry = p_i1552_4_;
+            this.hashEntry = p_i1552_2_;
+            this.slotHash = p_i1552_1_;
+        }
 
-      Entry(int p_i1552_1_, int p_i1552_2_, V p_i1552_3_, IntHashMap.Entry<V> p_i1552_4_) {
-         this.field_76033_b = p_i1552_3_;
-         this.field_76034_c = p_i1552_4_;
-         this.field_76035_a = p_i1552_2_;
-         this.field_76032_d = p_i1552_1_;
-      }
+        public final int getHash()
+        {
+            return this.hashEntry;
+        }
 
-      public final int func_76031_a() {
-         return this.field_76035_a;
-      }
+        public final V getValue()
+        {
+            return this.valueEntry;
+        }
 
-      public final V func_76030_b() {
-         return this.field_76033_b;
-      }
-
-      public final boolean equals(Object p_equals_1_) {
-         if (!(p_equals_1_ instanceof IntHashMap.Entry)) {
-            return false;
-         } else {
-            IntHashMap.Entry<V> entry = (IntHashMap.Entry)p_equals_1_;
-            if (this.field_76035_a == entry.field_76035_a) {
-               Object object = this.func_76030_b();
-               Object object1 = entry.func_76030_b();
-               if (object == object1 || object != null && object.equals(object1)) {
-                  return true;
-               }
+        public final boolean equals(Object p_equals_1_)
+        {
+            if (!(p_equals_1_ instanceof IntHashMap.Entry))
+            {
+                return false;
             }
+            else
+            {
+                IntHashMap.Entry<V> entry = (IntHashMap.Entry)p_equals_1_;
 
-            return false;
-         }
-      }
+                if (this.hashEntry == entry.hashEntry)
+                {
+                    Object object = this.getValue();
+                    Object object1 = entry.getValue();
 
-      public final int hashCode() {
-         return IntHashMap.func_76044_g(this.field_76035_a);
-      }
+                    if (object == object1 || object != null && object.equals(object1))
+                    {
+                        return true;
+                    }
+                }
 
-      public final String toString() {
-         return this.func_76031_a() + "=" + this.func_76030_b();
-      }
-   }
+                return false;
+            }
+        }
+
+        public final int hashCode()
+        {
+            return IntHashMap.computeHash(this.hashEntry);
+        }
+
+        public final String toString()
+        {
+            return this.getHash() + "=" + this.getValue();
+        }
+    }
 }

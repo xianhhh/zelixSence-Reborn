@@ -14,310 +14,421 @@ import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 
-public class TextureAtlasSprite {
-   private final String field_110984_i;
-   protected List<int[][]> field_110976_a = Lists.<int[][]>newArrayList();
-   protected int[][] field_176605_b;
-   private AnimationMetadataSection field_110982_k;
-   protected boolean field_130222_e;
-   protected int field_110975_c;
-   protected int field_110974_d;
-   protected int field_130223_c;
-   protected int field_130224_d;
-   private float field_110979_l;
-   private float field_110980_m;
-   private float field_110977_n;
-   private float field_110978_o;
-   protected int field_110973_g;
-   protected int field_110983_h;
+public class TextureAtlasSprite
+{
+    private final String iconName;
+    protected List<int[][]> framesTextureData = Lists.<int[][]>newArrayList();
+    protected int[][] interpolatedFrameData;
+    private AnimationMetadataSection animationMetadata;
+    protected boolean rotated;
+    protected int originX;
+    protected int originY;
+    protected int width;
+    protected int height;
+    private float minU;
+    private float maxU;
+    private float minV;
+    private float maxV;
+    protected int frameCounter;
+    protected int tickCounter;
 
-   protected TextureAtlasSprite(String p_i1282_1_) {
-      this.field_110984_i = p_i1282_1_;
-   }
+    protected TextureAtlasSprite(String spriteName)
+    {
+        this.iconName = spriteName;
+    }
 
-   protected static TextureAtlasSprite func_176604_a(ResourceLocation p_176604_0_) {
-      return new TextureAtlasSprite(p_176604_0_.toString());
-   }
+    protected static TextureAtlasSprite makeAtlasSprite(ResourceLocation spriteResourceLocation)
+    {
+        return new TextureAtlasSprite(spriteResourceLocation.toString());
+    }
 
-   public void func_110971_a(int p_110971_1_, int p_110971_2_, int p_110971_3_, int p_110971_4_, boolean p_110971_5_) {
-      this.field_110975_c = p_110971_3_;
-      this.field_110974_d = p_110971_4_;
-      this.field_130222_e = p_110971_5_;
-      float f = (float)(0.009999999776482582D / (double)p_110971_1_);
-      float f1 = (float)(0.009999999776482582D / (double)p_110971_2_);
-      this.field_110979_l = (float)p_110971_3_ / (float)((double)p_110971_1_) + f;
-      this.field_110980_m = (float)(p_110971_3_ + this.field_130223_c) / (float)((double)p_110971_1_) - f;
-      this.field_110977_n = (float)p_110971_4_ / (float)p_110971_2_ + f1;
-      this.field_110978_o = (float)(p_110971_4_ + this.field_130224_d) / (float)p_110971_2_ - f1;
-   }
+    public void initSprite(int inX, int inY, int originInX, int originInY, boolean rotatedIn)
+    {
+        this.originX = originInX;
+        this.originY = originInY;
+        this.rotated = rotatedIn;
+        float f = (float)(0.009999999776482582D / (double)inX);
+        float f1 = (float)(0.009999999776482582D / (double)inY);
+        this.minU = (float)originInX / (float)((double)inX) + f;
+        this.maxU = (float)(originInX + this.width) / (float)((double)inX) - f;
+        this.minV = (float)originInY / (float)inY + f1;
+        this.maxV = (float)(originInY + this.height) / (float)inY - f1;
+    }
 
-   public void func_94217_a(TextureAtlasSprite p_94217_1_) {
-      this.field_110975_c = p_94217_1_.field_110975_c;
-      this.field_110974_d = p_94217_1_.field_110974_d;
-      this.field_130223_c = p_94217_1_.field_130223_c;
-      this.field_130224_d = p_94217_1_.field_130224_d;
-      this.field_130222_e = p_94217_1_.field_130222_e;
-      this.field_110979_l = p_94217_1_.field_110979_l;
-      this.field_110980_m = p_94217_1_.field_110980_m;
-      this.field_110977_n = p_94217_1_.field_110977_n;
-      this.field_110978_o = p_94217_1_.field_110978_o;
-   }
+    public void copyFrom(TextureAtlasSprite atlasSpirit)
+    {
+        this.originX = atlasSpirit.originX;
+        this.originY = atlasSpirit.originY;
+        this.width = atlasSpirit.width;
+        this.height = atlasSpirit.height;
+        this.rotated = atlasSpirit.rotated;
+        this.minU = atlasSpirit.minU;
+        this.maxU = atlasSpirit.maxU;
+        this.minV = atlasSpirit.minV;
+        this.maxV = atlasSpirit.maxV;
+    }
 
-   public int func_130010_a() {
-      return this.field_110975_c;
-   }
+    /**
+     * Returns the X position of this icon on its texture sheet, in pixels.
+     */
+    public int getOriginX()
+    {
+        return this.originX;
+    }
 
-   public int func_110967_i() {
-      return this.field_110974_d;
-   }
+    /**
+     * Returns the Y position of this icon on its texture sheet, in pixels.
+     */
+    public int getOriginY()
+    {
+        return this.originY;
+    }
 
-   public int func_94211_a() {
-      return this.field_130223_c;
-   }
+    /**
+     * Returns the width of the icon, in pixels.
+     */
+    public int getIconWidth()
+    {
+        return this.width;
+    }
 
-   public int func_94216_b() {
-      return this.field_130224_d;
-   }
+    /**
+     * Returns the height of the icon, in pixels.
+     */
+    public int getIconHeight()
+    {
+        return this.height;
+    }
 
-   public float func_94209_e() {
-      return this.field_110979_l;
-   }
+    /**
+     * Returns the minimum U coordinate to use when rendering with this icon.
+     */
+    public float getMinU()
+    {
+        return this.minU;
+    }
 
-   public float func_94212_f() {
-      return this.field_110980_m;
-   }
+    /**
+     * Returns the maximum U coordinate to use when rendering with this icon.
+     */
+    public float getMaxU()
+    {
+        return this.maxU;
+    }
 
-   public float func_94214_a(double p_94214_1_) {
-      float f = this.field_110980_m - this.field_110979_l;
-      return this.field_110979_l + f * (float)p_94214_1_ / 16.0F;
-   }
+    /**
+     * Gets a U coordinate on the icon. 0 returns uMin and 16 returns uMax. Other arguments return in-between values.
+     */
+    public float getInterpolatedU(double u)
+    {
+        float f = this.maxU - this.minU;
+        return this.minU + f * (float)u / 16.0F;
+    }
 
-   public float func_188537_a(float p_188537_1_) {
-      float f = this.field_110980_m - this.field_110979_l;
-      return (p_188537_1_ - this.field_110979_l) / f * 16.0F;
-   }
+    /**
+     * The opposite of getInterpolatedU. Takes the return value of that method and returns the input to it.
+     */
+    public float getUnInterpolatedU(float p_188537_1_)
+    {
+        float f = this.maxU - this.minU;
+        return (p_188537_1_ - this.minU) / f * 16.0F;
+    }
 
-   public float func_94206_g() {
-      return this.field_110977_n;
-   }
+    /**
+     * Returns the minimum V coordinate to use when rendering with this icon.
+     */
+    public float getMinV()
+    {
+        return this.minV;
+    }
 
-   public float func_94210_h() {
-      return this.field_110978_o;
-   }
+    /**
+     * Returns the maximum V coordinate to use when rendering with this icon.
+     */
+    public float getMaxV()
+    {
+        return this.maxV;
+    }
 
-   public float func_94207_b(double p_94207_1_) {
-      float f = this.field_110978_o - this.field_110977_n;
-      return this.field_110977_n + f * (float)p_94207_1_ / 16.0F;
-   }
+    /**
+     * Gets a V coordinate on the icon. 0 returns vMin and 16 returns vMax. Other arguments return in-between values.
+     */
+    public float getInterpolatedV(double v)
+    {
+        float f = this.maxV - this.minV;
+        return this.minV + f * (float)v / 16.0F;
+    }
 
-   public float func_188536_b(float p_188536_1_) {
-      float f = this.field_110978_o - this.field_110977_n;
-      return (p_188536_1_ - this.field_110977_n) / f * 16.0F;
-   }
+    /**
+     * The opposite of getInterpolatedV. Takes the return value of that method and returns the input to it.
+     */
+    public float getUnInterpolatedV(float p_188536_1_)
+    {
+        float f = this.maxV - this.minV;
+        return (p_188536_1_ - this.minV) / f * 16.0F;
+    }
 
-   public String func_94215_i() {
-      return this.field_110984_i;
-   }
+    public String getIconName()
+    {
+        return this.iconName;
+    }
 
-   public void func_94219_l() {
-      ++this.field_110983_h;
-      if (this.field_110983_h >= this.field_110982_k.func_110472_a(this.field_110973_g)) {
-         int i = this.field_110982_k.func_110468_c(this.field_110973_g);
-         int j = this.field_110982_k.func_110473_c() == 0 ? this.field_110976_a.size() : this.field_110982_k.func_110473_c();
-         this.field_110973_g = (this.field_110973_g + 1) % j;
-         this.field_110983_h = 0;
-         int k = this.field_110982_k.func_110468_c(this.field_110973_g);
-         if (i != k && k >= 0 && k < this.field_110976_a.size()) {
-            TextureUtil.func_147955_a(this.field_110976_a.get(k), this.field_130223_c, this.field_130224_d, this.field_110975_c, this.field_110974_d, false, false);
-         }
-      } else if (this.field_110982_k.func_177219_e()) {
-         this.func_180599_n();
-      }
+    public void updateAnimation()
+    {
+        ++this.tickCounter;
 
-   }
+        if (this.tickCounter >= this.animationMetadata.getFrameTimeSingle(this.frameCounter))
+        {
+            int i = this.animationMetadata.getFrameIndex(this.frameCounter);
+            int j = this.animationMetadata.getFrameCount() == 0 ? this.framesTextureData.size() : this.animationMetadata.getFrameCount();
+            this.frameCounter = (this.frameCounter + 1) % j;
+            this.tickCounter = 0;
+            int k = this.animationMetadata.getFrameIndex(this.frameCounter);
 
-   private void func_180599_n() {
-      double d0 = 1.0D - (double)this.field_110983_h / (double)this.field_110982_k.func_110472_a(this.field_110973_g);
-      int i = this.field_110982_k.func_110468_c(this.field_110973_g);
-      int j = this.field_110982_k.func_110473_c() == 0 ? this.field_110976_a.size() : this.field_110982_k.func_110473_c();
-      int k = this.field_110982_k.func_110468_c((this.field_110973_g + 1) % j);
-      if (i != k && k >= 0 && k < this.field_110976_a.size()) {
-         int[][] aint = this.field_110976_a.get(i);
-         int[][] aint1 = this.field_110976_a.get(k);
-         if (this.field_176605_b == null || this.field_176605_b.length != aint.length) {
-            this.field_176605_b = new int[aint.length][];
-         }
+            if (i != k && k >= 0 && k < this.framesTextureData.size())
+            {
+                TextureUtil.uploadTextureMipmap(this.framesTextureData.get(k), this.width, this.height, this.originX, this.originY, false, false);
+            }
+        }
+        else if (this.animationMetadata.isInterpolate())
+        {
+            this.updateAnimationInterpolated();
+        }
+    }
 
-         for(int l = 0; l < aint.length; ++l) {
-            if (this.field_176605_b[l] == null) {
-               this.field_176605_b[l] = new int[aint[l].length];
+    private void updateAnimationInterpolated()
+    {
+        double d0 = 1.0D - (double)this.tickCounter / (double)this.animationMetadata.getFrameTimeSingle(this.frameCounter);
+        int i = this.animationMetadata.getFrameIndex(this.frameCounter);
+        int j = this.animationMetadata.getFrameCount() == 0 ? this.framesTextureData.size() : this.animationMetadata.getFrameCount();
+        int k = this.animationMetadata.getFrameIndex((this.frameCounter + 1) % j);
+
+        if (i != k && k >= 0 && k < this.framesTextureData.size())
+        {
+            int[][] aint = this.framesTextureData.get(i);
+            int[][] aint1 = this.framesTextureData.get(k);
+
+            if (this.interpolatedFrameData == null || this.interpolatedFrameData.length != aint.length)
+            {
+                this.interpolatedFrameData = new int[aint.length][];
             }
 
-            if (l < aint1.length && aint1[l].length == aint[l].length) {
-               for(int i1 = 0; i1 < aint[l].length; ++i1) {
-                  int j1 = aint[l][i1];
-                  int k1 = aint1[l][i1];
-                  int l1 = this.func_188535_a(d0, j1 >> 16 & 255, k1 >> 16 & 255);
-                  int i2 = this.func_188535_a(d0, j1 >> 8 & 255, k1 >> 8 & 255);
-                  int j2 = this.func_188535_a(d0, j1 & 255, k1 & 255);
-                  this.field_176605_b[l][i1] = j1 & -16777216 | l1 << 16 | i2 << 8 | j2;
-               }
-            }
-         }
+            for (int l = 0; l < aint.length; ++l)
+            {
+                if (this.interpolatedFrameData[l] == null)
+                {
+                    this.interpolatedFrameData[l] = new int[aint[l].length];
+                }
 
-         TextureUtil.func_147955_a(this.field_176605_b, this.field_130223_c, this.field_130224_d, this.field_110975_c, this.field_110974_d, false, false);
-      }
-
-   }
-
-   private int func_188535_a(double p_188535_1_, int p_188535_3_, int p_188535_4_) {
-      return (int)(p_188535_1_ * (double)p_188535_3_ + (1.0D - p_188535_1_) * (double)p_188535_4_);
-   }
-
-   public int[][] func_147965_a(int p_147965_1_) {
-      return this.field_110976_a.get(p_147965_1_);
-   }
-
-   public int func_110970_k() {
-      return this.field_110976_a.size();
-   }
-
-   public void func_110966_b(int p_110966_1_) {
-      this.field_130223_c = p_110966_1_;
-   }
-
-   public void func_110969_c(int p_110969_1_) {
-      this.field_130224_d = p_110969_1_;
-   }
-
-   public void func_188538_a(PngSizeInfo p_188538_1_, boolean p_188538_2_) throws IOException {
-      this.func_130102_n();
-      this.field_130223_c = p_188538_1_.field_188533_a;
-      this.field_130224_d = p_188538_1_.field_188534_b;
-      if (p_188538_2_) {
-         this.field_130224_d = this.field_130223_c;
-      } else if (p_188538_1_.field_188534_b != p_188538_1_.field_188533_a) {
-         throw new RuntimeException("broken aspect ratio and not an animation");
-      }
-
-   }
-
-   public void func_188539_a(IResource p_188539_1_, int p_188539_2_) throws IOException {
-      BufferedImage bufferedimage = TextureUtil.func_177053_a(p_188539_1_.func_110527_b());
-      AnimationMetadataSection animationmetadatasection = (AnimationMetadataSection)p_188539_1_.func_110526_a("animation");
-      int[][] aint = new int[p_188539_2_][];
-      aint[0] = new int[bufferedimage.getWidth() * bufferedimage.getHeight()];
-      bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), aint[0], 0, bufferedimage.getWidth());
-      if (animationmetadatasection == null) {
-         this.field_110976_a.add(aint);
-      } else {
-         int i = bufferedimage.getHeight() / this.field_130223_c;
-         if (animationmetadatasection.func_110473_c() > 0) {
-            Iterator lvt_7_1_ = animationmetadatasection.func_130073_e().iterator();
-
-            while(lvt_7_1_.hasNext()) {
-               int j = ((Integer)lvt_7_1_.next()).intValue();
-               if (j >= i) {
-                  throw new RuntimeException("invalid frameindex " + j);
-               }
-
-               this.func_130099_d(j);
-               this.field_110976_a.set(j, func_147962_a(aint, this.field_130223_c, this.field_130223_c, j));
+                if (l < aint1.length && aint1[l].length == aint[l].length)
+                {
+                    for (int i1 = 0; i1 < aint[l].length; ++i1)
+                    {
+                        int j1 = aint[l][i1];
+                        int k1 = aint1[l][i1];
+                        int l1 = this.interpolateColor(d0, j1 >> 16 & 255, k1 >> 16 & 255);
+                        int i2 = this.interpolateColor(d0, j1 >> 8 & 255, k1 >> 8 & 255);
+                        int j2 = this.interpolateColor(d0, j1 & 255, k1 & 255);
+                        this.interpolatedFrameData[l][i1] = j1 & -16777216 | l1 << 16 | i2 << 8 | j2;
+                    }
+                }
             }
 
-            this.field_110982_k = animationmetadatasection;
-         } else {
-            List<AnimationFrame> list = Lists.<AnimationFrame>newArrayList();
+            TextureUtil.uploadTextureMipmap(this.interpolatedFrameData, this.width, this.height, this.originX, this.originY, false, false);
+        }
+    }
 
-            for(int k = 0; k < i; ++k) {
-               this.field_110976_a.add(func_147962_a(aint, this.field_130223_c, this.field_130223_c, k));
-               list.add(new AnimationFrame(k, -1));
+    private int interpolateColor(double p_188535_1_, int p_188535_3_, int p_188535_4_)
+    {
+        return (int)(p_188535_1_ * (double)p_188535_3_ + (1.0D - p_188535_1_) * (double)p_188535_4_);
+    }
+
+    public int[][] getFrameTextureData(int index)
+    {
+        return this.framesTextureData.get(index);
+    }
+
+    public int getFrameCount()
+    {
+        return this.framesTextureData.size();
+    }
+
+    public void setIconWidth(int newWidth)
+    {
+        this.width = newWidth;
+    }
+
+    public void setIconHeight(int newHeight)
+    {
+        this.height = newHeight;
+    }
+
+    public void loadSprite(PngSizeInfo sizeInfo, boolean p_188538_2_) throws IOException
+    {
+        this.resetSprite();
+        this.width = sizeInfo.pngWidth;
+        this.height = sizeInfo.pngHeight;
+
+        if (p_188538_2_)
+        {
+            this.height = this.width;
+        }
+        else if (sizeInfo.pngHeight != sizeInfo.pngWidth)
+        {
+            throw new RuntimeException("broken aspect ratio and not an animation");
+        }
+    }
+
+    public void loadSpriteFrames(IResource resource, int mipmaplevels) throws IOException
+    {
+        BufferedImage bufferedimage = TextureUtil.readBufferedImage(resource.getInputStream());
+        AnimationMetadataSection animationmetadatasection = (AnimationMetadataSection)resource.getMetadata("animation");
+        int[][] aint = new int[mipmaplevels][];
+        aint[0] = new int[bufferedimage.getWidth() * bufferedimage.getHeight()];
+        bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), aint[0], 0, bufferedimage.getWidth());
+
+        if (animationmetadatasection == null)
+        {
+            this.framesTextureData.add(aint);
+        }
+        else
+        {
+            int i = bufferedimage.getHeight() / this.width;
+
+            if (animationmetadatasection.getFrameCount() > 0)
+            {
+                Iterator lvt_7_1_ = animationmetadatasection.getFrameIndexSet().iterator();
+
+                while (lvt_7_1_.hasNext())
+                {
+                    int j = ((Integer)lvt_7_1_.next()).intValue();
+
+                    if (j >= i)
+                    {
+                        throw new RuntimeException("invalid frameindex " + j);
+                    }
+
+                    this.allocateFrameTextureData(j);
+                    this.framesTextureData.set(j, getFrameTextureData(aint, this.width, this.width, j));
+                }
+
+                this.animationMetadata = animationmetadatasection;
             }
+            else
+            {
+                List<AnimationFrame> list = Lists.<AnimationFrame>newArrayList();
 
-            this.field_110982_k = new AnimationMetadataSection(list, this.field_130223_c, this.field_130224_d, animationmetadatasection.func_110469_d(), animationmetadatasection.func_177219_e());
-         }
-      }
+                for (int k = 0; k < i; ++k)
+                {
+                    this.framesTextureData.add(getFrameTextureData(aint, this.width, this.width, k));
+                    list.add(new AnimationFrame(k, -1));
+                }
 
-   }
+                this.animationMetadata = new AnimationMetadataSection(list, this.width, this.height, animationmetadatasection.getFrameTime(), animationmetadatasection.isInterpolate());
+            }
+        }
+    }
 
-   public void func_147963_d(int p_147963_1_) {
-      List<int[][]> list = Lists.<int[][]>newArrayList();
+    public void generateMipmaps(int level)
+    {
+        List<int[][]> list = Lists.<int[][]>newArrayList();
 
-      for(int i = 0; i < this.field_110976_a.size(); ++i) {
-         final int[][] aint = this.field_110976_a.get(i);
-         if (aint != null) {
-            try {
-               list.add(TextureUtil.func_147949_a(p_147963_1_, this.field_130223_c, aint));
-            } catch (Throwable throwable) {
-               CrashReport crashreport = CrashReport.func_85055_a(throwable, "Generating mipmaps for frame");
-               CrashReportCategory crashreportcategory = crashreport.func_85058_a("Frame being iterated");
-               crashreportcategory.func_71507_a("Frame index", Integer.valueOf(i));
-               crashreportcategory.func_189529_a("Frame sizes", new ICrashReportDetail<String>() {
-                  public String call() throws Exception {
-                     StringBuilder stringbuilder = new StringBuilder();
+        for (int i = 0; i < this.framesTextureData.size(); ++i)
+        {
+            final int[][] aint = this.framesTextureData.get(i);
 
-                     for(int[] aint1 : aint) {
-                        if (stringbuilder.length() > 0) {
-                           stringbuilder.append(", ");
+            if (aint != null)
+            {
+                try
+                {
+                    list.add(TextureUtil.generateMipmapData(level, this.width, aint));
+                }
+                catch (Throwable throwable)
+                {
+                    CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Generating mipmaps for frame");
+                    CrashReportCategory crashreportcategory = crashreport.makeCategory("Frame being iterated");
+                    crashreportcategory.addCrashSection("Frame index", Integer.valueOf(i));
+                    crashreportcategory.setDetail("Frame sizes", new ICrashReportDetail<String>()
+                    {
+                        public String call() throws Exception
+                        {
+                            StringBuilder stringbuilder = new StringBuilder();
+
+                            for (int[] aint1 : aint)
+                            {
+                                if (stringbuilder.length() > 0)
+                                {
+                                    stringbuilder.append(", ");
+                                }
+
+                                stringbuilder.append(aint1 == null ? "null" : aint1.length);
+                            }
+
+                            return stringbuilder.toString();
                         }
-
-                        stringbuilder.append(aint1 == null ? "null" : aint1.length);
-                     }
-
-                     return stringbuilder.toString();
-                  }
-               });
-               throw new ReportedException(crashreport);
+                    });
+                    throw new ReportedException(crashreport);
+                }
             }
-         }
-      }
+        }
 
-      this.func_110968_a(list);
-   }
+        this.setFramesTextureData(list);
+    }
 
-   private void func_130099_d(int p_130099_1_) {
-      if (this.field_110976_a.size() <= p_130099_1_) {
-         for(int i = this.field_110976_a.size(); i <= p_130099_1_; ++i) {
-            this.field_110976_a.add((Object)null);
-         }
+    private void allocateFrameTextureData(int index)
+    {
+        if (this.framesTextureData.size() <= index)
+        {
+            for (int i = this.framesTextureData.size(); i <= index; ++i)
+            {
+                this.framesTextureData.add(null);
+            }
+        }
+    }
 
-      }
-   }
+    private static int[][] getFrameTextureData(int[][] data, int rows, int columns, int p_147962_3_)
+    {
+        int[][] aint = new int[data.length][];
 
-   private static int[][] func_147962_a(int[][] p_147962_0_, int p_147962_1_, int p_147962_2_, int p_147962_3_) {
-      int[][] aint = new int[p_147962_0_.length][];
+        for (int i = 0; i < data.length; ++i)
+        {
+            int[] aint1 = data[i];
 
-      for(int i = 0; i < p_147962_0_.length; ++i) {
-         int[] aint1 = p_147962_0_[i];
-         if (aint1 != null) {
-            aint[i] = new int[(p_147962_1_ >> i) * (p_147962_2_ >> i)];
-            System.arraycopy(aint1, p_147962_3_ * aint[i].length, aint[i], 0, aint[i].length);
-         }
-      }
+            if (aint1 != null)
+            {
+                aint[i] = new int[(rows >> i) * (columns >> i)];
+                System.arraycopy(aint1, p_147962_3_ * aint[i].length, aint[i], 0, aint[i].length);
+            }
+        }
 
-      return aint;
-   }
+        return aint;
+    }
 
-   public void func_130103_l() {
-      this.field_110976_a.clear();
-   }
+    public void clearFramesTextureData()
+    {
+        this.framesTextureData.clear();
+    }
 
-   public boolean func_130098_m() {
-      return this.field_110982_k != null;
-   }
+    public boolean hasAnimationMetadata()
+    {
+        return this.animationMetadata != null;
+    }
 
-   public void func_110968_a(List<int[][]> p_110968_1_) {
-      this.field_110976_a = p_110968_1_;
-   }
+    public void setFramesTextureData(List<int[][]> newFramesTextureData)
+    {
+        this.framesTextureData = newFramesTextureData;
+    }
 
-   private void func_130102_n() {
-      this.field_110982_k = null;
-      this.func_110968_a(Lists.newArrayList());
-      this.field_110973_g = 0;
-      this.field_110983_h = 0;
-   }
+    private void resetSprite()
+    {
+        this.animationMetadata = null;
+        this.setFramesTextureData(Lists.newArrayList());
+        this.frameCounter = 0;
+        this.tickCounter = 0;
+    }
 
-   public String toString() {
-      return "TextureAtlasSprite{name='" + this.field_110984_i + '\'' + ", frameCount=" + this.field_110976_a.size() + ", rotated=" + this.field_130222_e + ", x=" + this.field_110975_c + ", y=" + this.field_110974_d + ", height=" + this.field_130224_d + ", width=" + this.field_130223_c + ", u0=" + this.field_110979_l + ", u1=" + this.field_110980_m + ", v0=" + this.field_110977_n + ", v1=" + this.field_110978_o + '}';
-   }
+    public String toString()
+    {
+        return "TextureAtlasSprite{name='" + this.iconName + '\'' + ", frameCount=" + this.framesTextureData.size() + ", rotated=" + this.rotated + ", x=" + this.originX + ", y=" + this.originY + ", height=" + this.height + ", width=" + this.width + ", u0=" + this.minU + ", u1=" + this.maxU + ", v0=" + this.minV + ", v1=" + this.maxV + '}';
+    }
 }

@@ -10,31 +10,42 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 
-public class NetHandlerStatusServer implements INetHandlerStatusServer {
-   private static final ITextComponent field_183007_a = new TextComponentString("Status request has been handled.");
-   private final MinecraftServer field_147314_a;
-   private final NetworkManager field_147313_b;
-   private boolean field_183008_d;
+public class NetHandlerStatusServer implements INetHandlerStatusServer
+{
+    private static final ITextComponent EXIT_MESSAGE = new TextComponentString("Status request has been handled.");
+    private final MinecraftServer server;
+    private final NetworkManager networkManager;
+    private boolean handled;
 
-   public NetHandlerStatusServer(MinecraftServer p_i45299_1_, NetworkManager p_i45299_2_) {
-      this.field_147314_a = p_i45299_1_;
-      this.field_147313_b = p_i45299_2_;
-   }
+    public NetHandlerStatusServer(MinecraftServer serverIn, NetworkManager netManager)
+    {
+        this.server = serverIn;
+        this.networkManager = netManager;
+    }
 
-   public void func_147231_a(ITextComponent p_147231_1_) {
-   }
+    /**
+     * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
+     */
+    public void onDisconnect(ITextComponent reason)
+    {
+    }
 
-   public void func_147312_a(CPacketServerQuery p_147312_1_) {
-      if (this.field_183008_d) {
-         this.field_147313_b.func_150718_a(field_183007_a);
-      } else {
-         this.field_183008_d = true;
-         this.field_147313_b.func_179290_a(new SPacketServerInfo(this.field_147314_a.func_147134_at()));
-      }
-   }
+    public void processServerQuery(CPacketServerQuery packetIn)
+    {
+        if (this.handled)
+        {
+            this.networkManager.closeChannel(EXIT_MESSAGE);
+        }
+        else
+        {
+            this.handled = true;
+            this.networkManager.sendPacket(new SPacketServerInfo(this.server.getServerStatusResponse()));
+        }
+    }
 
-   public void func_147311_a(CPacketPing p_147311_1_) {
-      this.field_147313_b.func_179290_a(new SPacketPong(p_147311_1_.func_149289_c()));
-      this.field_147313_b.func_150718_a(field_183007_a);
-   }
+    public void processPing(CPacketPing packetIn)
+    {
+        this.networkManager.sendPacket(new SPacketPong(packetIn.getClientTime()));
+        this.networkManager.closeChannel(EXIT_MESSAGE);
+    }
 }

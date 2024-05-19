@@ -4,62 +4,74 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import net.minecraft.entity.boss.EntityDragon;
 
-public class PhaseList<T extends IPhase> {
-   private static PhaseList<?>[] field_188752_l = new PhaseList[0];
-   public static final PhaseList<PhaseHoldingPattern> field_188741_a = func_188735_a(PhaseHoldingPattern.class, "HoldingPattern");
-   public static final PhaseList<PhaseStrafePlayer> field_188742_b = func_188735_a(PhaseStrafePlayer.class, "StrafePlayer");
-   public static final PhaseList<PhaseLandingApproach> field_188743_c = func_188735_a(PhaseLandingApproach.class, "LandingApproach");
-   public static final PhaseList<PhaseLanding> field_188744_d = func_188735_a(PhaseLanding.class, "Landing");
-   public static final PhaseList<PhaseTakeoff> field_188745_e = func_188735_a(PhaseTakeoff.class, "Takeoff");
-   public static final PhaseList<PhaseSittingFlaming> field_188746_f = func_188735_a(PhaseSittingFlaming.class, "SittingFlaming");
-   public static final PhaseList<PhaseSittingScanning> field_188747_g = func_188735_a(PhaseSittingScanning.class, "SittingScanning");
-   public static final PhaseList<PhaseSittingAttacking> field_188748_h = func_188735_a(PhaseSittingAttacking.class, "SittingAttacking");
-   public static final PhaseList<PhaseChargingPlayer> field_188749_i = func_188735_a(PhaseChargingPlayer.class, "ChargingPlayer");
-   public static final PhaseList<PhaseDying> field_188750_j = func_188735_a(PhaseDying.class, "Dying");
-   public static final PhaseList<PhaseHover> field_188751_k = func_188735_a(PhaseHover.class, "Hover");
-   private final Class<? extends IPhase> field_188753_m;
-   private final int field_188754_n;
-   private final String field_188755_o;
+public class PhaseList<T extends IPhase>
+{
+    private static PhaseList<?>[] phases = new PhaseList[0];
+    public static final PhaseList<PhaseHoldingPattern> HOLDING_PATTERN = create(PhaseHoldingPattern.class, "HoldingPattern");
+    public static final PhaseList<PhaseStrafePlayer> STRAFE_PLAYER = create(PhaseStrafePlayer.class, "StrafePlayer");
+    public static final PhaseList<PhaseLandingApproach> LANDING_APPROACH = create(PhaseLandingApproach.class, "LandingApproach");
+    public static final PhaseList<PhaseLanding> LANDING = create(PhaseLanding.class, "Landing");
+    public static final PhaseList<PhaseTakeoff> TAKEOFF = create(PhaseTakeoff.class, "Takeoff");
+    public static final PhaseList<PhaseSittingFlaming> SITTING_FLAMING = create(PhaseSittingFlaming.class, "SittingFlaming");
+    public static final PhaseList<PhaseSittingScanning> SITTING_SCANNING = create(PhaseSittingScanning.class, "SittingScanning");
+    public static final PhaseList<PhaseSittingAttacking> SITTING_ATTACKING = create(PhaseSittingAttacking.class, "SittingAttacking");
+    public static final PhaseList<PhaseChargingPlayer> CHARGING_PLAYER = create(PhaseChargingPlayer.class, "ChargingPlayer");
+    public static final PhaseList<PhaseDying> DYING = create(PhaseDying.class, "Dying");
+    public static final PhaseList<PhaseHover> HOVER = create(PhaseHover.class, "Hover");
+    private final Class <? extends IPhase > clazz;
+    private final int id;
+    private final String name;
 
-   private PhaseList(int p_i46782_1_, Class<? extends IPhase> p_i46782_2_, String p_i46782_3_) {
-      this.field_188754_n = p_i46782_1_;
-      this.field_188753_m = p_i46782_2_;
-      this.field_188755_o = p_i46782_3_;
-   }
+    private PhaseList(int idIn, Class <? extends IPhase > clazzIn, String nameIn)
+    {
+        this.id = idIn;
+        this.clazz = clazzIn;
+        this.name = nameIn;
+    }
 
-   public IPhase func_188736_a(EntityDragon p_188736_1_) {
-      try {
-         Constructor<? extends IPhase> constructor = this.func_188737_a();
-         return constructor.newInstance(p_188736_1_);
-      } catch (Exception exception) {
-         throw new Error(exception);
-      }
-   }
+    public IPhase createPhase(EntityDragon dragon)
+    {
+        try
+        {
+            Constructor <? extends IPhase > constructor = this.getConstructor();
+            return constructor.newInstance(dragon);
+        }
+        catch (Exception exception)
+        {
+            throw new Error(exception);
+        }
+    }
 
-   protected Constructor<? extends IPhase> func_188737_a() throws NoSuchMethodException {
-      return this.field_188753_m.getConstructor(EntityDragon.class);
-   }
+    protected Constructor <? extends IPhase > getConstructor() throws NoSuchMethodException
+    {
+        return this.clazz.getConstructor(EntityDragon.class);
+    }
 
-   public int func_188740_b() {
-      return this.field_188754_n;
-   }
+    public int getId()
+    {
+        return this.id;
+    }
 
-   public String toString() {
-      return this.field_188755_o + " (#" + this.field_188754_n + ")";
-   }
+    public String toString()
+    {
+        return this.name + " (#" + this.id + ")";
+    }
 
-   public static PhaseList<?> func_188738_a(int p_188738_0_) {
-      return p_188738_0_ >= 0 && p_188738_0_ < field_188752_l.length ? field_188752_l[p_188738_0_] : field_188741_a;
-   }
+    public static PhaseList<?> getById(int p_188738_0_)
+    {
+        return p_188738_0_ >= 0 && p_188738_0_ < phases.length ? phases[p_188738_0_] : HOLDING_PATTERN;
+    }
 
-   public static int func_188739_c() {
-      return field_188752_l.length;
-   }
+    public static int getTotalPhases()
+    {
+        return phases.length;
+    }
 
-   private static <T extends IPhase> PhaseList<T> func_188735_a(Class<T> p_188735_0_, String p_188735_1_) {
-      PhaseList<T> phaselist = new PhaseList<T>(field_188752_l.length, p_188735_0_, p_188735_1_);
-      field_188752_l = (PhaseList[])Arrays.copyOf(field_188752_l, field_188752_l.length + 1);
-      field_188752_l[phaselist.func_188740_b()] = phaselist;
-      return phaselist;
-   }
+    private static <T extends IPhase> PhaseList<T> create(Class<T> phaseIn, String nameIn)
+    {
+        PhaseList<T> phaselist = new PhaseList<T>(phases.length, phaseIn, nameIn);
+        phases = (PhaseList[])Arrays.copyOf(phases, phases.length + 1);
+        phases[phaselist.getId()] = phaselist;
+        return phaselist;
+    }
 }

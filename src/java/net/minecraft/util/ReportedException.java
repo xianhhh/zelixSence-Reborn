@@ -2,22 +2,31 @@ package net.minecraft.util;
 
 import net.minecraft.crash.CrashReport;
 
-public class ReportedException extends RuntimeException {
-   private final CrashReport field_71576_a;
+public class ReportedException extends RuntimeException
+{
+    /** The crash report associated with this exception */
+    private final CrashReport crashReport;
 
-   public ReportedException(CrashReport p_i1356_1_) {
-      this.field_71576_a = p_i1356_1_;
-   }
+    public ReportedException(CrashReport report)
+    {
+        this.crashReport = report;
+    }
 
-   public CrashReport func_71575_a() {
-      return this.field_71576_a;
-   }
+    /**
+     * Gets the CrashReport wrapped by this exception.
+     */
+    public CrashReport getCrashReport()
+    {
+        return this.crashReport;
+    }
 
-   public Throwable getCause() {
-      return this.field_71576_a.func_71505_b();
-   }
+    public Throwable getCause()
+    {
+        return this.crashReport.getCrashCause();
+    }
 
-   public String getMessage() {
-      return this.field_71576_a.func_71501_a();
-   }
+    public String getMessage()
+    {
+        return this.crashReport.getDescription();
+    }
 }

@@ -17,111 +17,144 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TextureManager implements ITickable, IResourceManagerReloadListener {
-   private static final Logger field_147646_a = LogManager.getLogger();
-   public static final ResourceLocation field_194008_a = new ResourceLocation("");
-   private final Map<ResourceLocation, ITextureObject> field_110585_a = Maps.<ResourceLocation, ITextureObject>newHashMap();
-   private final List<ITickable> field_110583_b = Lists.<ITickable>newArrayList();
-   private final Map<String, Integer> field_110584_c = Maps.<String, Integer>newHashMap();
-   private final IResourceManager field_110582_d;
+public class TextureManager implements ITickable, IResourceManagerReloadListener
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final ResourceLocation field_194008_a = new ResourceLocation("");
+    private final Map<ResourceLocation, ITextureObject> mapTextureObjects = Maps.<ResourceLocation, ITextureObject>newHashMap();
+    private final List<ITickable> listTickables = Lists.<ITickable>newArrayList();
+    private final Map<String, Integer> mapTextureCounters = Maps.<String, Integer>newHashMap();
+    private final IResourceManager theResourceManager;
 
-   public TextureManager(IResourceManager p_i1284_1_) {
-      this.field_110582_d = p_i1284_1_;
-   }
+    public TextureManager(IResourceManager resourceManager)
+    {
+        this.theResourceManager = resourceManager;
+    }
 
-   public void func_110577_a(ResourceLocation p_110577_1_) {
-      ITextureObject itextureobject = this.field_110585_a.get(p_110577_1_);
-      if (itextureobject == null) {
-         itextureobject = new SimpleTexture(p_110577_1_);
-         this.func_110579_a(p_110577_1_, itextureobject);
-      }
+    public void bindTexture(ResourceLocation resource)
+    {
+        ITextureObject itextureobject = this.mapTextureObjects.get(resource);
 
-      TextureUtil.func_94277_a(itextureobject.func_110552_b());
-   }
+        if (itextureobject == null)
+        {
+            itextureobject = new SimpleTexture(resource);
+            this.loadTexture(resource, itextureobject);
+        }
 
-   public boolean func_110580_a(ResourceLocation p_110580_1_, ITickableTextureObject p_110580_2_) {
-      if (this.func_110579_a(p_110580_1_, p_110580_2_)) {
-         this.field_110583_b.add(p_110580_2_);
-         return true;
-      } else {
-         return false;
-      }
-   }
+        TextureUtil.bindTexture(itextureobject.getGlTextureId());
+    }
 
-   public boolean func_110579_a(ResourceLocation p_110579_1_, final ITextureObject p_110579_2_) {
-      boolean flag = true;
+    public boolean loadTickableTexture(ResourceLocation textureLocation, ITickableTextureObject textureObj)
+    {
+        if (this.loadTexture(textureLocation, textureObj))
+        {
+            this.listTickables.add(textureObj);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-      try {
-         p_110579_2_.func_110551_a(this.field_110582_d);
-      } catch (IOException ioexception) {
-         if (p_110579_1_ != field_194008_a) {
-            field_147646_a.warn("Failed to load texture: {}", p_110579_1_, ioexception);
-         }
+    public boolean loadTexture(ResourceLocation textureLocation, ITextureObject textureObj)
+    {
+        boolean flag = true;
 
-         p_110579_2_ = TextureUtil.field_111001_a;
-         this.field_110585_a.put(p_110579_1_, p_110579_2_);
-         flag = false;
-      } catch (Throwable throwable) {
-         CrashReport crashreport = CrashReport.func_85055_a(throwable, "Registering texture");
-         CrashReportCategory crashreportcategory = crashreport.func_85058_a("Resource location being registered");
-         crashreportcategory.func_71507_a("Resource location", p_110579_1_);
-         crashreportcategory.func_189529_a("Texture object class", new ICrashReportDetail<String>() {
-            public String call() throws Exception {
-               return p_110579_2_.getClass().getName();
+        try
+        {
+            textureObj.loadTexture(this.theResourceManager);
+        }
+        catch (IOException ioexception)
+        {
+            if (textureLocation != field_194008_a)
+            {
+                LOGGER.warn("Failed to load texture: {}", textureLocation, ioexception);
             }
-         });
-         throw new ReportedException(crashreport);
-      }
 
-      this.field_110585_a.put(p_110579_1_, p_110579_2_);
-      return flag;
-   }
+            textureObj = TextureUtil.MISSING_TEXTURE;
+            this.mapTextureObjects.put(textureLocation, textureObj);
+            flag = false;
+        }
+        catch (Throwable throwable)
+        {
+            final ITextureObject textureObjf = textureObj;
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Registering texture");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Resource location being registered");
+            crashreportcategory.addCrashSection("Resource location", textureLocation);
+            crashreportcategory.setDetail("Texture object class", new ICrashReportDetail<String>()
+            {
+                public String call() throws Exception
+                {
+                    return textureObjf.getClass().getName();
+                }
+            });
+            throw new ReportedException(crashreport);
+        }
 
-   public ITextureObject func_110581_b(ResourceLocation p_110581_1_) {
-      return this.field_110585_a.get(p_110581_1_);
-   }
+        this.mapTextureObjects.put(textureLocation, textureObj);
+        return flag;
+    }
 
-   public ResourceLocation func_110578_a(String p_110578_1_, DynamicTexture p_110578_2_) {
-      Integer integer = this.field_110584_c.get(p_110578_1_);
-      if (integer == null) {
-         integer = Integer.valueOf(1);
-      } else {
-         integer = integer.intValue() + 1;
-      }
+    public ITextureObject getTexture(ResourceLocation textureLocation)
+    {
+        return this.mapTextureObjects.get(textureLocation);
+    }
 
-      this.field_110584_c.put(p_110578_1_, integer);
-      ResourceLocation resourcelocation = new ResourceLocation(String.format("dynamic/%s_%d", p_110578_1_, integer));
-      this.func_110579_a(resourcelocation, p_110578_2_);
-      return resourcelocation;
-   }
+    public ResourceLocation getDynamicTextureLocation(String name, DynamicTexture texture)
+    {
+        Integer integer = this.mapTextureCounters.get(name);
 
-   public void func_110550_d() {
-      for(ITickable itickable : this.field_110583_b) {
-         itickable.func_110550_d();
-      }
+        if (integer == null)
+        {
+            integer = Integer.valueOf(1);
+        }
+        else
+        {
+            integer = integer.intValue() + 1;
+        }
 
-   }
+        this.mapTextureCounters.put(name, integer);
+        ResourceLocation resourcelocation = new ResourceLocation(String.format("dynamic/%s_%d", name, integer));
+        this.loadTexture(resourcelocation, texture);
+        return resourcelocation;
+    }
 
-   public void func_147645_c(ResourceLocation p_147645_1_) {
-      ITextureObject itextureobject = this.func_110581_b(p_147645_1_);
-      if (itextureobject != null) {
-         TextureUtil.func_147942_a(itextureobject.func_110552_b());
-      }
+    public void tick()
+    {
+        for (ITickable itickable : this.listTickables)
+        {
+            itickable.tick();
+        }
+    }
 
-   }
+    public void deleteTexture(ResourceLocation textureLocation)
+    {
+        ITextureObject itextureobject = this.getTexture(textureLocation);
 
-   public void func_110549_a(IResourceManager p_110549_1_) {
-      Iterator<Entry<ResourceLocation, ITextureObject>> iterator = this.field_110585_a.entrySet().iterator();
+        if (itextureobject != null)
+        {
+            TextureUtil.deleteTexture(itextureobject.getGlTextureId());
+        }
+    }
 
-      while(iterator.hasNext()) {
-         Entry<ResourceLocation, ITextureObject> entry = (Entry)iterator.next();
-         ITextureObject itextureobject = entry.getValue();
-         if (itextureobject == TextureUtil.field_111001_a) {
-            iterator.remove();
-         } else {
-            this.func_110579_a(entry.getKey(), itextureobject);
-         }
-      }
+    public void onResourceManagerReload(IResourceManager resourceManager)
+    {
+        Iterator<Entry<ResourceLocation, ITextureObject>> iterator = this.mapTextureObjects.entrySet().iterator();
 
-   }
+        while (iterator.hasNext())
+        {
+            Entry<ResourceLocation, ITextureObject> entry = (Entry)iterator.next();
+            ITextureObject itextureobject = entry.getValue();
+
+            if (itextureobject == TextureUtil.MISSING_TEXTURE)
+            {
+                iterator.remove();
+            }
+            else
+            {
+                this.loadTexture(entry.getKey(), itextureobject);
+            }
+        }
+    }
 }

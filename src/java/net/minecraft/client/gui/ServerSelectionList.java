@@ -6,71 +6,98 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.client.network.LanServerInfo;
 
-public class ServerSelectionList extends GuiListExtended {
-   private final GuiMultiplayer field_148200_k;
-   private final List<ServerListEntryNormal> field_148198_l = Lists.<ServerListEntryNormal>newArrayList();
-   private final List<ServerListEntryLanDetected> field_148199_m = Lists.<ServerListEntryLanDetected>newArrayList();
-   private final GuiListExtended.IGuiListEntry field_148196_n = new ServerListEntryLanScan();
-   private int field_148197_o = -1;
+public class ServerSelectionList extends GuiListExtended
+{
+    private final GuiMultiplayer owner;
+    private final List<ServerListEntryNormal> serverListInternet = Lists.<ServerListEntryNormal>newArrayList();
+    private final List<ServerListEntryLanDetected> serverListLan = Lists.<ServerListEntryLanDetected>newArrayList();
+    private final GuiListExtended.IGuiListEntry lanScanEntry = new ServerListEntryLanScan();
+    private int selectedSlotIndex = -1;
 
-   public ServerSelectionList(GuiMultiplayer p_i45049_1_, Minecraft p_i45049_2_, int p_i45049_3_, int p_i45049_4_, int p_i45049_5_, int p_i45049_6_, int p_i45049_7_) {
-      super(p_i45049_2_, p_i45049_3_, p_i45049_4_, p_i45049_5_, p_i45049_6_, p_i45049_7_);
-      this.field_148200_k = p_i45049_1_;
-   }
+    public ServerSelectionList(GuiMultiplayer ownerIn, Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
+    {
+        super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
+        this.owner = ownerIn;
+    }
 
-   public GuiListExtended.IGuiListEntry func_148180_b(int p_148180_1_) {
-      if (p_148180_1_ < this.field_148198_l.size()) {
-         return this.field_148198_l.get(p_148180_1_);
-      } else {
-         p_148180_1_ = p_148180_1_ - this.field_148198_l.size();
-         if (p_148180_1_ == 0) {
-            return this.field_148196_n;
-         } else {
-            --p_148180_1_;
-            return this.field_148199_m.get(p_148180_1_);
-         }
-      }
-   }
+    /**
+     * Gets the IGuiListEntry object for the given index
+     */
+    public GuiListExtended.IGuiListEntry getListEntry(int index)
+    {
+        if (index < this.serverListInternet.size())
+        {
+            return this.serverListInternet.get(index);
+        }
+        else
+        {
+            index = index - this.serverListInternet.size();
 
-   protected int func_148127_b() {
-      return this.field_148198_l.size() + 1 + this.field_148199_m.size();
-   }
+            if (index == 0)
+            {
+                return this.lanScanEntry;
+            }
+            else
+            {
+                --index;
+                return this.serverListLan.get(index);
+            }
+        }
+    }
 
-   public void func_148192_c(int p_148192_1_) {
-      this.field_148197_o = p_148192_1_;
-   }
+    protected int getSize()
+    {
+        return this.serverListInternet.size() + 1 + this.serverListLan.size();
+    }
 
-   protected boolean func_148131_a(int p_148131_1_) {
-      return p_148131_1_ == this.field_148197_o;
-   }
+    public void setSelectedSlotIndex(int selectedSlotIndexIn)
+    {
+        this.selectedSlotIndex = selectedSlotIndexIn;
+    }
 
-   public int func_148193_k() {
-      return this.field_148197_o;
-   }
+    /**
+     * Returns true if the element passed in is currently selected
+     */
+    protected boolean isSelected(int slotIndex)
+    {
+        return slotIndex == this.selectedSlotIndex;
+    }
 
-   public void func_148195_a(ServerList p_148195_1_) {
-      this.field_148198_l.clear();
+    public int getSelected()
+    {
+        return this.selectedSlotIndex;
+    }
 
-      for(int i = 0; i < p_148195_1_.func_78856_c(); ++i) {
-         this.field_148198_l.add(new ServerListEntryNormal(this.field_148200_k, p_148195_1_.func_78850_a(i)));
-      }
+    public void updateOnlineServers(ServerList p_148195_1_)
+    {
+        this.serverListInternet.clear();
 
-   }
+        for (int i = 0; i < p_148195_1_.countServers(); ++i)
+        {
+            this.serverListInternet.add(new ServerListEntryNormal(this.owner, p_148195_1_.getServerData(i)));
+        }
+    }
 
-   public void func_148194_a(List<LanServerInfo> p_148194_1_) {
-      this.field_148199_m.clear();
+    public void updateNetworkServers(List<LanServerInfo> p_148194_1_)
+    {
+        this.serverListLan.clear();
 
-      for(LanServerInfo lanserverinfo : p_148194_1_) {
-         this.field_148199_m.add(new ServerListEntryLanDetected(this.field_148200_k, lanserverinfo));
-      }
+        for (LanServerInfo lanserverinfo : p_148194_1_)
+        {
+            this.serverListLan.add(new ServerListEntryLanDetected(this.owner, lanserverinfo));
+        }
+    }
 
-   }
+    protected int getScrollBarX()
+    {
+        return super.getScrollBarX() + 30;
+    }
 
-   protected int func_148137_d() {
-      return super.func_148137_d() + 30;
-   }
-
-   public int func_148139_c() {
-      return super.func_148139_c() + 85;
-   }
+    /**
+     * Gets the width of the list
+     */
+    public int getListWidth()
+    {
+        return super.getListWidth() + 85;
+    }
 }

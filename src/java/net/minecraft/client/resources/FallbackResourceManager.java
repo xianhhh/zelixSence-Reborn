@@ -14,108 +14,135 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FallbackResourceManager implements IResourceManager {
-   private static final Logger field_177246_b = LogManager.getLogger();
-   protected final List<IResourcePack> field_110540_a = Lists.<IResourcePack>newArrayList();
-   private final MetadataSerializer field_110539_b;
+public class FallbackResourceManager implements IResourceManager
+{
+    private static final Logger LOGGER = LogManager.getLogger();
+    protected final List<IResourcePack> resourcePacks = Lists.<IResourcePack>newArrayList();
+    private final MetadataSerializer frmMetadataSerializer;
 
-   public FallbackResourceManager(MetadataSerializer p_i1289_1_) {
-      this.field_110539_b = p_i1289_1_;
-   }
+    public FallbackResourceManager(MetadataSerializer frmMetadataSerializerIn)
+    {
+        this.frmMetadataSerializer = frmMetadataSerializerIn;
+    }
 
-   public void func_110538_a(IResourcePack p_110538_1_) {
-      this.field_110540_a.add(p_110538_1_);
-   }
+    public void addResourcePack(IResourcePack resourcePack)
+    {
+        this.resourcePacks.add(resourcePack);
+    }
 
-   public Set<String> func_135055_a() {
-      return Collections.<String>emptySet();
-   }
+    public Set<String> getResourceDomains()
+    {
+        return Collections.<String>emptySet();
+    }
 
-   public IResource func_110536_a(ResourceLocation p_110536_1_) throws IOException {
-      this.func_188552_d(p_110536_1_);
-      IResourcePack iresourcepack = null;
-      ResourceLocation resourcelocation = func_110537_b(p_110536_1_);
+    public IResource getResource(ResourceLocation location) throws IOException
+    {
+        this.checkResourcePath(location);
+        IResourcePack iresourcepack = null;
+        ResourceLocation resourcelocation = getLocationMcmeta(location);
 
-      for(int i = this.field_110540_a.size() - 1; i >= 0; --i) {
-         IResourcePack iresourcepack1 = this.field_110540_a.get(i);
-         if (iresourcepack == null && iresourcepack1.func_110589_b(resourcelocation)) {
-            iresourcepack = iresourcepack1;
-         }
+        for (int i = this.resourcePacks.size() - 1; i >= 0; --i)
+        {
+            IResourcePack iresourcepack1 = this.resourcePacks.get(i);
 
-         if (iresourcepack1.func_110589_b(p_110536_1_)) {
-            InputStream inputstream = null;
-            if (iresourcepack != null) {
-               inputstream = this.func_177245_a(resourcelocation, iresourcepack);
+            if (iresourcepack == null && iresourcepack1.resourceExists(resourcelocation))
+            {
+                iresourcepack = iresourcepack1;
             }
 
-            return new SimpleResource(iresourcepack1.func_130077_b(), p_110536_1_, this.func_177245_a(p_110536_1_, iresourcepack1), inputstream, this.field_110539_b);
-         }
-      }
+            if (iresourcepack1.resourceExists(location))
+            {
+                InputStream inputstream = null;
 
-      throw new FileNotFoundException(p_110536_1_.toString());
-   }
+                if (iresourcepack != null)
+                {
+                    inputstream = this.getInputStream(resourcelocation, iresourcepack);
+                }
 
-   protected InputStream func_177245_a(ResourceLocation p_177245_1_, IResourcePack p_177245_2_) throws IOException {
-      InputStream inputstream = p_177245_2_.func_110590_a(p_177245_1_);
-      return (InputStream)(field_177246_b.isDebugEnabled() ? new FallbackResourceManager.InputStreamLeakedResourceLogger(inputstream, p_177245_1_, p_177245_2_.func_130077_b()) : inputstream);
-   }
+                return new SimpleResource(iresourcepack1.getPackName(), location, this.getInputStream(location, iresourcepack1), inputstream, this.frmMetadataSerializer);
+            }
+        }
 
-   private void func_188552_d(ResourceLocation p_188552_1_) throws IOException {
-      if (p_188552_1_.func_110623_a().contains("..")) {
-         throw new IOException("Invalid relative path to resource: " + p_188552_1_);
-      }
-   }
+        throw new FileNotFoundException(location.toString());
+    }
 
-   public List<IResource> func_135056_b(ResourceLocation p_135056_1_) throws IOException {
-      this.func_188552_d(p_135056_1_);
-      List<IResource> list = Lists.<IResource>newArrayList();
-      ResourceLocation resourcelocation = func_110537_b(p_135056_1_);
+    protected InputStream getInputStream(ResourceLocation location, IResourcePack resourcePack) throws IOException
+    {
+        InputStream inputstream = resourcePack.getInputStream(location);
+        return (InputStream)(LOGGER.isDebugEnabled() ? new FallbackResourceManager.InputStreamLeakedResourceLogger(inputstream, location, resourcePack.getPackName()) : inputstream);
+    }
 
-      for(IResourcePack iresourcepack : this.field_110540_a) {
-         if (iresourcepack.func_110589_b(p_135056_1_)) {
-            InputStream inputstream = iresourcepack.func_110589_b(resourcelocation) ? this.func_177245_a(resourcelocation, iresourcepack) : null;
-            list.add(new SimpleResource(iresourcepack.func_130077_b(), p_135056_1_, this.func_177245_a(p_135056_1_, iresourcepack), inputstream, this.field_110539_b));
-         }
-      }
+    private void checkResourcePath(ResourceLocation p_188552_1_) throws IOException
+    {
+        if (p_188552_1_.getResourcePath().contains(".."))
+        {
+            throw new IOException("Invalid relative path to resource: " + p_188552_1_);
+        }
+    }
 
-      if (list.isEmpty()) {
-         throw new FileNotFoundException(p_135056_1_.toString());
-      } else {
-         return list;
-      }
-   }
+    public List<IResource> getAllResources(ResourceLocation location) throws IOException
+    {
+        this.checkResourcePath(location);
+        List<IResource> list = Lists.<IResource>newArrayList();
+        ResourceLocation resourcelocation = getLocationMcmeta(location);
 
-   static ResourceLocation func_110537_b(ResourceLocation p_110537_0_) {
-      return new ResourceLocation(p_110537_0_.func_110624_b(), p_110537_0_.func_110623_a() + ".mcmeta");
-   }
+        for (IResourcePack iresourcepack : this.resourcePacks)
+        {
+            if (iresourcepack.resourceExists(location))
+            {
+                InputStream inputstream = iresourcepack.resourceExists(resourcelocation) ? this.getInputStream(resourcelocation, iresourcepack) : null;
+                list.add(new SimpleResource(iresourcepack.getPackName(), location, this.getInputStream(location, iresourcepack), inputstream, this.frmMetadataSerializer));
+            }
+        }
 
-   static class InputStreamLeakedResourceLogger extends InputStream {
-      private final InputStream field_177330_a;
-      private final String field_177328_b;
-      private boolean field_177329_c;
+        if (list.isEmpty())
+        {
+            throw new FileNotFoundException(location.toString());
+        }
+        else
+        {
+            return list;
+        }
+    }
 
-      public InputStreamLeakedResourceLogger(InputStream p_i46093_1_, ResourceLocation p_i46093_2_, String p_i46093_3_) {
-         this.field_177330_a = p_i46093_1_;
-         ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
-         (new Exception()).printStackTrace(new PrintStream(bytearrayoutputstream));
-         this.field_177328_b = "Leaked resource: '" + p_i46093_2_ + "' loaded from pack: '" + p_i46093_3_ + "'\n" + bytearrayoutputstream;
-      }
+    static ResourceLocation getLocationMcmeta(ResourceLocation location)
+    {
+        return new ResourceLocation(location.getResourceDomain(), location.getResourcePath() + ".mcmeta");
+    }
 
-      public void close() throws IOException {
-         this.field_177330_a.close();
-         this.field_177329_c = true;
-      }
+    static class InputStreamLeakedResourceLogger extends InputStream
+    {
+        private final InputStream inputStream;
+        private final String message;
+        private boolean isClosed;
 
-      protected void finalize() throws Throwable {
-         if (!this.field_177329_c) {
-            FallbackResourceManager.field_177246_b.warn(this.field_177328_b);
-         }
+        public InputStreamLeakedResourceLogger(InputStream p_i46093_1_, ResourceLocation location, String resourcePack)
+        {
+            this.inputStream = p_i46093_1_;
+            ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+            (new Exception()).printStackTrace(new PrintStream(bytearrayoutputstream));
+            this.message = "Leaked resource: '" + location + "' loaded from pack: '" + resourcePack + "'\n" + bytearrayoutputstream;
+        }
 
-         super.finalize();
-      }
+        public void close() throws IOException
+        {
+            this.inputStream.close();
+            this.isClosed = true;
+        }
 
-      public int read() throws IOException {
-         return this.field_177330_a.read();
-      }
-   }
+        protected void finalize() throws Throwable
+        {
+            if (!this.isClosed)
+            {
+                FallbackResourceManager.LOGGER.warn(this.message);
+            }
+
+            super.finalize();
+        }
+
+        public int read() throws IOException
+        {
+            return this.inputStream.read();
+        }
+    }
 }
