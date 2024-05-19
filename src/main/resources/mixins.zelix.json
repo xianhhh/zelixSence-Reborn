@@ -1,8 +1,0 @@
-{
-  "compatibilityLevel": "JAVA_8",
-  "package": "zelix.mixins",
-  "refmap": "zelix.refmap.json",
-  "mixins": [],
-  "client": [],
-  "server": []
-}
