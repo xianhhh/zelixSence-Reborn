@@ -65,7 +65,7 @@ public class RenderShulker extends RenderLiving<EntityShulker>
                 Vec3d vec3d = new Vec3d((double)blockpos1.getX(), (double)blockpos1.getY(), (double)blockpos1.getZ());
                 Vec3d vec3d1 = new Vec3d((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
 
-                if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(vec3d1.xCoord, vec3d1.yCoord, vec3d1.zCoord, vec3d.xCoord, vec3d.yCoord, vec3d.zCoord)))
+                if (camera.isBoundingBoxInFrustum(new AxisAlignedBB(vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y, vec3d.z)))
                 {
                     return true;
                 }
@@ -80,12 +80,12 @@ public class RenderShulker extends RenderLiving<EntityShulker>
      */
     protected ResourceLocation getEntityTexture(EntityShulker entity)
     {
-        return SHULKER_ENDERGOLEM_TEXTURE[entity.func_190769_dn().getMetadata()];
+        return SHULKER_ENDERGOLEM_TEXTURE[entity.getColor().getMetadata()];
     }
 
-    protected void rotateCorpse(EntityShulker entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks)
+    protected void applyRotations(EntityShulker entityLiving, float p_77043_2_, float rotationYaw, float partialTicks)
     {
-        super.rotateCorpse(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
+        super.applyRotations(entityLiving, p_77043_2_, rotationYaw, partialTicks);
 
         switch (entityLiving.getAttachmentFacing())
         {
@@ -180,7 +180,7 @@ public class RenderShulker extends RenderLiving<EntityShulker>
             ModelRenderer modelrenderer = RenderShulker.this.getMainModel().head;
             modelrenderer.rotateAngleY = netHeadYaw * 0.017453292F;
             modelrenderer.rotateAngleX = headPitch * 0.017453292F;
-            RenderShulker.this.bindTexture(RenderShulker.SHULKER_ENDERGOLEM_TEXTURE[entitylivingbaseIn.func_190769_dn().getMetadata()]);
+            RenderShulker.this.bindTexture(RenderShulker.SHULKER_ENDERGOLEM_TEXTURE[entitylivingbaseIn.getColor().getMetadata()]);
             modelrenderer.render(scale);
             GlStateManager.popMatrix();
         }

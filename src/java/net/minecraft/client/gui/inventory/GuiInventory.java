@@ -25,10 +25,10 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
 
     /** The old y position of the mouse pointer */
     private float oldMouseY;
-    private GuiButtonImage field_192048_z;
-    private final GuiRecipeBook field_192045_A = new GuiRecipeBook();
-    private boolean field_192046_B;
-    private boolean field_194031_B;
+    private GuiButtonImage recipeButton;
+    private final GuiRecipeBook recipeBookGui = new GuiRecipeBook();
+    private boolean widthTooNarrow;
+    private boolean buttonClicked;
 
     public GuiInventory(EntityPlayer player)
     {
@@ -46,7 +46,7 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
             this.mc.displayGuiScreen(new GuiContainerCreative(this.mc.player));
         }
 
-        this.field_192045_A.func_193957_d();
+        this.recipeBookGui.tick();
     }
 
     /**
@@ -66,11 +66,11 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
             super.initGui();
         }
 
-        this.field_192046_B = this.width < 379;
-        this.field_192045_A.func_191856_a(this.width, this.height, this.mc, this.field_192046_B, this.inventorySlots, ((ContainerPlayer)this.inventorySlots).craftMatrix);
-        this.guiLeft = this.field_192045_A.func_193011_a(this.field_192046_B, this.width, this.xSize);
-        this.field_192048_z = new GuiButtonImage(10, this.guiLeft + 104, this.height / 2 - 22, 20, 18, 178, 0, 19, INVENTORY_BACKGROUND);
-        this.buttonList.add(this.field_192048_z);
+        this.widthTooNarrow = this.width < 379;
+        this.recipeBookGui.init(this.width, this.height, this.mc, this.widthTooNarrow, this.inventorySlots, ((ContainerPlayer)this.inventorySlots).craftMatrix);
+        this.guiLeft = this.recipeBookGui.updateScreenPosition(this.widthTooNarrow, this.width, this.xSize);
+        this.recipeButton = new GuiButtonImage(10, this.guiLeft + 104, this.height / 2 - 22, 20, 18, 178, 0, 19, INVENTORY_BACKGROUND);
+        this.buttonList.add(this.recipeButton);
     }
 
     /**
@@ -78,7 +78,7 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        this.fontRendererObj.drawString(I18n.format("container.crafting"), 97, 8, 4210752);
+        this.fontRenderer.drawString(I18n.format("container.crafting"), 97, 8, 4210752);
     }
 
     /**
@@ -87,22 +87,22 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
-        this.hasActivePotionEffects = !this.field_192045_A.func_191878_b();
+        this.hasActivePotionEffects = !this.recipeBookGui.isVisible();
 
-        if (this.field_192045_A.func_191878_b() && this.field_192046_B)
+        if (this.recipeBookGui.isVisible() && this.widthTooNarrow)
         {
             this.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-            this.field_192045_A.func_191861_a(mouseX, mouseY, partialTicks);
+            this.recipeBookGui.render(mouseX, mouseY, partialTicks);
         }
         else
         {
-            this.field_192045_A.func_191861_a(mouseX, mouseY, partialTicks);
+            this.recipeBookGui.render(mouseX, mouseY, partialTicks);
             super.drawScreen(mouseX, mouseY, partialTicks);
-            this.field_192045_A.func_191864_a(this.guiLeft, this.guiTop, false, partialTicks);
+            this.recipeBookGui.renderGhostRecipe(this.guiLeft, this.guiTop, false, partialTicks);
         }
 
-        this.func_191948_b(mouseX, mouseY);
-        this.field_192045_A.func_191876_c(this.guiLeft, this.guiTop, mouseX, mouseY);
+        this.renderHoveredToolTip(mouseX, mouseY);
+        this.recipeBookGui.renderTooltip(this.guiLeft, this.guiTop, mouseX, mouseY);
         this.oldMouseX = (float)mouseX;
         this.oldMouseY = (float)mouseY;
     }
@@ -169,7 +169,7 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     protected boolean isPointInRegion(int rectX, int rectY, int rectWidth, int rectHeight, int pointX, int pointY)
     {
-        return (!this.field_192046_B || !this.field_192045_A.func_191878_b()) && super.isPointInRegion(rectX, rectY, rectWidth, rectHeight, pointX, pointY);
+        return (!this.widthTooNarrow || !this.recipeBookGui.isVisible()) && super.isPointInRegion(rectX, rectY, rectWidth, rectHeight, pointX, pointY);
     }
 
     /**
@@ -177,9 +177,9 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
-        if (!this.field_192045_A.func_191862_a(mouseX, mouseY, mouseButton))
+        if (!this.recipeBookGui.mouseClicked(mouseX, mouseY, mouseButton))
         {
-            if (!this.field_192046_B || !this.field_192045_A.func_191878_b())
+            if (!this.widthTooNarrow || !this.recipeBookGui.isVisible())
             {
                 super.mouseClicked(mouseX, mouseY, mouseButton);
             }
@@ -191,9 +191,9 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     protected void mouseReleased(int mouseX, int mouseY, int state)
     {
-        if (this.field_194031_B)
+        if (this.buttonClicked)
         {
-            this.field_194031_B = false;
+            this.buttonClicked = false;
         }
         else
         {
@@ -201,10 +201,10 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
         }
     }
 
-    protected boolean func_193983_c(int p_193983_1_, int p_193983_2_, int p_193983_3_, int p_193983_4_)
+    protected boolean hasClickedOutside(int p_193983_1_, int p_193983_2_, int p_193983_3_, int p_193983_4_)
     {
         boolean flag = p_193983_1_ < p_193983_3_ || p_193983_2_ < p_193983_4_ || p_193983_1_ >= p_193983_3_ + this.xSize || p_193983_2_ >= p_193983_4_ + this.ySize;
-        return this.field_192045_A.func_193955_c(p_193983_1_, p_193983_2_, this.guiLeft, this.guiTop, this.xSize, this.ySize) && flag;
+        return this.recipeBookGui.hasClickedOutside(p_193983_1_, p_193983_2_, this.guiLeft, this.guiTop, this.xSize, this.ySize) && flag;
     }
 
     /**
@@ -214,11 +214,11 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
     {
         if (button.id == 10)
         {
-            this.field_192045_A.func_193014_a(this.field_192046_B, ((ContainerPlayer)this.inventorySlots).craftMatrix);
-            this.field_192045_A.func_191866_a();
-            this.guiLeft = this.field_192045_A.func_193011_a(this.field_192046_B, this.width, this.xSize);
-            this.field_192048_z.func_191746_c(this.guiLeft + 104, this.height / 2 - 22);
-            this.field_194031_B = true;
+            this.recipeBookGui.initVisuals(this.widthTooNarrow, ((ContainerPlayer)this.inventorySlots).craftMatrix);
+            this.recipeBookGui.toggleVisibility();
+            this.guiLeft = this.recipeBookGui.updateScreenPosition(this.widthTooNarrow, this.width, this.xSize);
+            this.recipeButton.setPosition(this.guiLeft + 104, this.height / 2 - 22);
+            this.buttonClicked = true;
         }
     }
 
@@ -228,7 +228,7 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
-        if (!this.field_192045_A.func_191859_a(typedChar, keyCode))
+        if (!this.recipeBookGui.keyPressed(typedChar, keyCode))
         {
             super.keyTyped(typedChar, keyCode);
         }
@@ -240,12 +240,12 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
     protected void handleMouseClick(Slot slotIn, int slotId, int mouseButton, ClickType type)
     {
         super.handleMouseClick(slotIn, slotId, mouseButton, type);
-        this.field_192045_A.func_191874_a(slotIn);
+        this.recipeBookGui.slotClicked(slotIn);
     }
 
-    public void func_192043_J_()
+    public void recipesUpdated()
     {
-        this.field_192045_A.func_193948_e();
+        this.recipeBookGui.recipesUpdated();
     }
 
     /**
@@ -253,7 +253,7 @@ public class GuiInventory extends InventoryEffectRenderer implements IRecipeShow
      */
     public void onGuiClosed()
     {
-        this.field_192045_A.func_191871_c();
+        this.recipeBookGui.removed();
         super.onGuiClosed();
     }
 }

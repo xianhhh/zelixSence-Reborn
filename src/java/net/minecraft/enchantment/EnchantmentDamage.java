@@ -11,24 +11,19 @@ import net.minecraft.potion.PotionEffect;
 
 public class EnchantmentDamage extends Enchantment
 {
-    /** Holds the name to be translated of each protection type. */
-    private static final String[] PROTECTION_NAME = new String[] {"all", "undead", "arthropods"};
+    /** None */
+    private static final String[] DAMAGE_NAMES = new String[] {"all", "undead", "arthropods"};
 
     /**
      * Holds the base factor of enchantability needed to be able to use the enchant.
      */
-    private static final int[] BASE_ENCHANTABILITY = new int[] {1, 5, 5};
+    private static final int[] MIN_COST = new int[] {1, 5, 5};
 
-    /**
-     * Holds how much each level increased the enchantability factor to be able to use this enchant.
-     */
-    private static final int[] LEVEL_ENCHANTABILITY = new int[] {11, 8, 8};
+    /** None */
+    private static final int[] LEVEL_COST = new int[] {11, 8, 8};
 
-    /**
-     * Used on the formula of base enchantability, this is the 'window' factor of values to be able to use thing
-     * enchant.
-     */
-    private static final int[] THRESHOLD_ENCHANTABILITY = new int[] {20, 20, 20};
+    /** None */
+    private static final int[] LEVEL_COST_SPAN = new int[] {20, 20, 20};
 
     /**
      * Defines the type of damage of the enchantment, 0 = all, 1 = undead, 3 = arthropods
@@ -46,7 +41,7 @@ public class EnchantmentDamage extends Enchantment
      */
     public int getMinEnchantability(int enchantmentLevel)
     {
-        return BASE_ENCHANTABILITY[this.damageType] + (enchantmentLevel - 1) * LEVEL_ENCHANTABILITY[this.damageType];
+        return MIN_COST[this.damageType] + (enchantmentLevel - 1) * LEVEL_COST[this.damageType];
     }
 
     /**
@@ -54,7 +49,7 @@ public class EnchantmentDamage extends Enchantment
      */
     public int getMaxEnchantability(int enchantmentLevel)
     {
-        return this.getMinEnchantability(enchantmentLevel) + THRESHOLD_ENCHANTABILITY[this.damageType];
+        return this.getMinEnchantability(enchantmentLevel) + LEVEL_COST_SPAN[this.damageType];
     }
 
     /**
@@ -90,7 +85,7 @@ public class EnchantmentDamage extends Enchantment
      */
     public String getName()
     {
-        return "enchantment.damage." + PROTECTION_NAME[this.damageType];
+        return "enchantment.damage." + DAMAGE_NAMES[this.damageType];
     }
 
     /**

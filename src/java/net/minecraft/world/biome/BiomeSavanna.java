@@ -25,12 +25,12 @@ public class BiomeSavanna extends Biome
             this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityLlama.class, 8, 4, 4));
         }
 
-        this.theBiomeDecorator.treesPerChunk = 1;
-        this.theBiomeDecorator.flowersPerChunk = 4;
-        this.theBiomeDecorator.grassPerChunk = 20;
+        this.decorator.treesPerChunk = 1;
+        this.decorator.flowersPerChunk = 4;
+        this.decorator.grassPerChunk = 20;
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         return (WorldGenAbstractTree)(rand.nextInt(5) > 0 ? SAVANNA_TREE : TREE_FEATURE);
     }

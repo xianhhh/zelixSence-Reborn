@@ -12,43 +12,44 @@ import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentPredicate
 {
-    public static final EnchantmentPredicate field_192466_a = new EnchantmentPredicate();
-    private final Enchantment field_192467_b;
-    private final MinMaxBounds field_192468_c;
+    /** The predicate that matches any set of enchantments. */
+    public static final EnchantmentPredicate ANY = new EnchantmentPredicate();
+    private final Enchantment enchantment;
+    private final MinMaxBounds levels;
 
     public EnchantmentPredicate()
     {
-        this.field_192467_b = null;
-        this.field_192468_c = MinMaxBounds.field_192516_a;
+        this.enchantment = null;
+        this.levels = MinMaxBounds.UNBOUNDED;
     }
 
-    public EnchantmentPredicate(@Nullable Enchantment p_i47436_1_, MinMaxBounds p_i47436_2_)
+    public EnchantmentPredicate(@Nullable Enchantment enchantment, MinMaxBounds levels)
     {
-        this.field_192467_b = p_i47436_1_;
-        this.field_192468_c = p_i47436_2_;
+        this.enchantment = enchantment;
+        this.levels = levels;
     }
 
-    public boolean func_192463_a(Map<Enchantment, Integer> p_192463_1_)
+    public boolean test(Map<Enchantment, Integer> enchantmentsIn)
     {
-        if (this.field_192467_b != null)
+        if (this.enchantment != null)
         {
-            if (!p_192463_1_.containsKey(this.field_192467_b))
+            if (!enchantmentsIn.containsKey(this.enchantment))
             {
                 return false;
             }
 
-            int i = ((Integer)p_192463_1_.get(this.field_192467_b)).intValue();
+            int i = ((Integer)enchantmentsIn.get(this.enchantment)).intValue();
 
-            if (this.field_192468_c != null && !this.field_192468_c.func_192514_a((float)i))
+            if (this.levels != null && !this.levels.test((float)i))
             {
                 return false;
             }
         }
-        else if (this.field_192468_c != null)
+        else if (this.levels != null)
         {
-            for (Integer integer : p_192463_1_.values())
+            for (Integer integer : enchantmentsIn.values())
             {
-                if (this.field_192468_c.func_192514_a((float)integer.intValue()))
+                if (this.levels.test((float)integer.intValue()))
                 {
                     return true;
                 }
@@ -60,11 +61,11 @@ public class EnchantmentPredicate
         return true;
     }
 
-    public static EnchantmentPredicate func_192464_a(@Nullable JsonElement p_192464_0_)
+    public static EnchantmentPredicate deserialize(@Nullable JsonElement element)
     {
-        if (p_192464_0_ != null && !p_192464_0_.isJsonNull())
+        if (element != null && !element.isJsonNull())
         {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_192464_0_, "enchantment");
+            JsonObject jsonobject = JsonUtils.getJsonObject(element, "enchantment");
             Enchantment enchantment = null;
 
             if (jsonobject.has("enchantment"))
@@ -78,25 +79,25 @@ public class EnchantmentPredicate
                 }
             }
 
-            MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(jsonobject.get("levels"));
+            MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(jsonobject.get("levels"));
             return new EnchantmentPredicate(enchantment, minmaxbounds);
         }
         else
         {
-            return field_192466_a;
+            return ANY;
         }
     }
 
-    public static EnchantmentPredicate[] func_192465_b(@Nullable JsonElement p_192465_0_)
+    public static EnchantmentPredicate[] deserializeArray(@Nullable JsonElement element)
     {
-        if (p_192465_0_ != null && !p_192465_0_.isJsonNull())
+        if (element != null && !element.isJsonNull())
         {
-            JsonArray jsonarray = JsonUtils.getJsonArray(p_192465_0_, "enchantments");
+            JsonArray jsonarray = JsonUtils.getJsonArray(element, "enchantments");
             EnchantmentPredicate[] aenchantmentpredicate = new EnchantmentPredicate[jsonarray.size()];
 
             for (int i = 0; i < aenchantmentpredicate.length; ++i)
             {
-                aenchantmentpredicate[i] = func_192464_a(jsonarray.get(i));
+                aenchantmentpredicate[i] = deserialize(jsonarray.get(i));
             }
 
             return aenchantmentpredicate;

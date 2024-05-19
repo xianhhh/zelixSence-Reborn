@@ -65,7 +65,7 @@ public class BlockChest extends BlockContainer
         return false;
     }
 
-    public boolean func_190946_v(IBlockState p_190946_1_)
+    public boolean hasCustomBreakingProgress(IBlockState state)
     {
         return true;
     }
@@ -122,7 +122,7 @@ public class BlockChest extends BlockContainer
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing());
     }
@@ -183,7 +183,7 @@ public class BlockChest extends BlockContainer
 
             if (tileentity instanceof TileEntityChest)
             {
-                ((TileEntityChest)tileentity).func_190575_a(stack.getDisplayName());
+                ((TileEntityChest)tileentity).setCustomName(stack.getDisplayName());
             }
         }
     }
@@ -407,9 +407,9 @@ public class BlockChest extends BlockContainer
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
-        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
         if (tileentity instanceof TileEntityChest)
@@ -434,7 +434,10 @@ public class BlockChest extends BlockContainer
         super.breakBlock(worldIn, pos, state);
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
+    /**
+     * Called when the block is right clicked by a player.
+     */
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         if (worldIn.isRemote)
         {
@@ -469,9 +472,9 @@ public class BlockChest extends BlockContainer
     }
 
     @Nullable
-    public ILockableContainer getContainer(World p_189418_1_, BlockPos p_189418_2_, boolean p_189418_3_)
+    public ILockableContainer getContainer(World worldIn, BlockPos pos, boolean allowBlocking)
     {
-        TileEntity tileentity = p_189418_1_.getTileEntity(p_189418_2_);
+        TileEntity tileentity = worldIn.getTileEntity(pos);
 
         if (!(tileentity instanceof TileEntityChest))
         {
@@ -481,7 +484,7 @@ public class BlockChest extends BlockContainer
         {
             ILockableContainer ilockablecontainer = (TileEntityChest)tileentity;
 
-            if (!p_189418_3_ && this.isBlocked(p_189418_1_, p_189418_2_))
+            if (!allowBlocking && this.isBlocked(worldIn, pos))
             {
                 return null;
             }
@@ -489,17 +492,17 @@ public class BlockChest extends BlockContainer
             {
                 for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
                 {
-                    BlockPos blockpos = p_189418_2_.offset(enumfacing);
-                    Block block = p_189418_1_.getBlockState(blockpos).getBlock();
+                    BlockPos blockpos = pos.offset(enumfacing);
+                    Block block = worldIn.getBlockState(blockpos).getBlock();
 
                     if (block == this)
                     {
-                        if (this.isBlocked(p_189418_1_, blockpos))
+                        if (this.isBlocked(worldIn, blockpos))
                         {
                             return null;
                         }
 
-                        TileEntity tileentity1 = p_189418_1_.getTileEntity(blockpos);
+                        TileEntity tileentity1 = worldIn.getTileEntity(blockpos);
 
                         if (tileentity1 instanceof TileEntityChest)
                         {
@@ -642,7 +645,7 @@ public class BlockChest extends BlockContainer
         return new BlockStateContainer(this, new IProperty[] {FACING});
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

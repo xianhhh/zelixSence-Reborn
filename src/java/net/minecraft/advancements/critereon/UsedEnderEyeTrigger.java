@@ -16,113 +16,116 @@ import net.minecraft.util.math.BlockPos;
 
 public class UsedEnderEyeTrigger implements ICriterionTrigger<UsedEnderEyeTrigger.Instance>
 {
-    private static final ResourceLocation field_192242_a = new ResourceLocation("used_ender_eye");
-    private final Map<PlayerAdvancements, UsedEnderEyeTrigger.Listeners> field_192243_b = Maps.<PlayerAdvancements, UsedEnderEyeTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
+    private final Map<PlayerAdvancements, UsedEnderEyeTrigger.Listeners> listeners = Maps.<PlayerAdvancements, UsedEnderEyeTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192242_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener)
     {
-        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.field_192243_b.get(p_192165_1_);
+        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (usedendereyetrigger$listeners == null)
         {
-            usedendereyetrigger$listeners = new UsedEnderEyeTrigger.Listeners(p_192165_1_);
-            this.field_192243_b.put(p_192165_1_, usedendereyetrigger$listeners);
+            usedendereyetrigger$listeners = new UsedEnderEyeTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, usedendereyetrigger$listeners);
         }
 
-        usedendereyetrigger$listeners.func_192546_a(p_192165_2_);
+        usedendereyetrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener)
     {
-        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.field_192243_b.get(p_192164_1_);
+        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (usedendereyetrigger$listeners != null)
         {
-            usedendereyetrigger$listeners.func_192544_b(p_192164_2_);
+            usedendereyetrigger$listeners.remove(listener);
 
-            if (usedendereyetrigger$listeners.func_192545_a())
+            if (usedendereyetrigger$listeners.isEmpty())
             {
-                this.field_192243_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192243_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public UsedEnderEyeTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public UsedEnderEyeTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(p_192166_1_.get("distance"));
+        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(json.get("distance"));
         return new UsedEnderEyeTrigger.Instance(minmaxbounds);
     }
 
-    public void func_192239_a(EntityPlayerMP p_192239_1_, BlockPos p_192239_2_)
+    public void trigger(EntityPlayerMP player, BlockPos pos)
     {
-        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.field_192243_b.get(p_192239_1_.func_192039_O());
+        UsedEnderEyeTrigger.Listeners usedendereyetrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (usedendereyetrigger$listeners != null)
         {
-            double d0 = p_192239_1_.posX - (double)p_192239_2_.getX();
-            double d1 = p_192239_1_.posZ - (double)p_192239_2_.getZ();
-            usedendereyetrigger$listeners.func_192543_a(d0 * d0 + d1 * d1);
+            double d0 = player.posX - (double)pos.getX();
+            double d1 = player.posZ - (double)pos.getZ();
+            usedendereyetrigger$listeners.trigger(d0 * d0 + d1 * d1);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final MinMaxBounds field_192289_a;
+        private final MinMaxBounds distance;
 
-        public Instance(MinMaxBounds p_i47449_1_)
+        public Instance(MinMaxBounds distance)
         {
-            super(UsedEnderEyeTrigger.field_192242_a);
-            this.field_192289_a = p_i47449_1_;
+            super(UsedEnderEyeTrigger.ID);
+            this.distance = distance;
         }
 
-        public boolean func_192288_a(double p_192288_1_)
+        public boolean test(double distanceSq)
         {
-            return this.field_192289_a.func_192513_a(p_192288_1_);
+            return this.distance.testSquare(distanceSq);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192547_a;
-        private final Set<ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance>> field_192548_b = Sets.<ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47450_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192547_a = p_i47450_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192545_a()
+        public boolean isEmpty()
         {
-            return this.field_192548_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192546_a(ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> p_192546_1_)
+        public void add(ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener)
         {
-            this.field_192548_b.add(p_192546_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192544_b(ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> p_192544_1_)
+        public void remove(ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener)
         {
-            this.field_192548_b.remove(p_192544_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192543_a(double p_192543_1_)
+        public void trigger(double distanceSq)
         {
             List<ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener : this.field_192548_b)
+            for (ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener : this.listeners)
             {
-                if (((UsedEnderEyeTrigger.Instance)listener.func_192158_a()).func_192288_a(p_192543_1_))
+                if (((UsedEnderEyeTrigger.Instance)listener.getCriterionInstance()).test(distanceSq))
                 {
                     if (list == null)
                     {
@@ -137,7 +140,7 @@ public class UsedEnderEyeTrigger implements ICriterionTrigger<UsedEnderEyeTrigge
             {
                 for (ICriterionTrigger.Listener<UsedEnderEyeTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192547_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

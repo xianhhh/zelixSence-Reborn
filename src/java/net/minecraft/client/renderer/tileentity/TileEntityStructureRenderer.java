@@ -14,27 +14,27 @@ import net.minecraft.world.World;
 
 public class TileEntityStructureRenderer extends TileEntitySpecialRenderer<TileEntityStructure>
 {
-    public void func_192841_a(TileEntityStructure p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityStructure te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         if (Minecraft.getMinecraft().player.canUseCommandBlock() || Minecraft.getMinecraft().player.isSpectator())
         {
-            super.func_192841_a(p_192841_1_, p_192841_2_, p_192841_4_, p_192841_6_, p_192841_8_, p_192841_9_, p_192841_10_);
-            BlockPos blockpos = p_192841_1_.getPosition();
-            BlockPos blockpos1 = p_192841_1_.getStructureSize();
+            super.render(te, x, y, z, partialTicks, destroyStage, alpha);
+            BlockPos blockpos = te.getPosition();
+            BlockPos blockpos1 = te.getStructureSize();
 
             if (blockpos1.getX() >= 1 && blockpos1.getY() >= 1 && blockpos1.getZ() >= 1)
             {
-                if (p_192841_1_.getMode() == TileEntityStructure.Mode.SAVE || p_192841_1_.getMode() == TileEntityStructure.Mode.LOAD)
+                if (te.getMode() == TileEntityStructure.Mode.SAVE || te.getMode() == TileEntityStructure.Mode.LOAD)
                 {
                     double d0 = 0.01D;
                     double d1 = (double)blockpos.getX();
                     double d2 = (double)blockpos.getZ();
-                    double d6 = p_192841_4_ + (double)blockpos.getY() - 0.01D;
+                    double d6 = y + (double)blockpos.getY() - 0.01D;
                     double d9 = d6 + (double)blockpos1.getY() + 0.02D;
                     double d3;
                     double d4;
 
-                    switch (p_192841_1_.getMirror())
+                    switch (te.getMirror())
                     {
                         case LEFT_RIGHT:
                             d3 = (double)blockpos1.getX() + 0.02D;
@@ -56,32 +56,32 @@ public class TileEntityStructureRenderer extends TileEntitySpecialRenderer<TileE
                     double d8;
                     double d10;
 
-                    switch (p_192841_1_.getRotation())
+                    switch (te.getRotation())
                     {
                         case CLOCKWISE_90:
-                            d5 = p_192841_2_ + (d4 < 0.0D ? d1 - 0.01D : d1 + 1.0D + 0.01D);
-                            d7 = p_192841_6_ + (d3 < 0.0D ? d2 + 1.0D + 0.01D : d2 - 0.01D);
+                            d5 = x + (d4 < 0.0D ? d1 - 0.01D : d1 + 1.0D + 0.01D);
+                            d7 = z + (d3 < 0.0D ? d2 + 1.0D + 0.01D : d2 - 0.01D);
                             d8 = d5 - d4;
                             d10 = d7 + d3;
                             break;
 
                         case CLOCKWISE_180:
-                            d5 = p_192841_2_ + (d3 < 0.0D ? d1 - 0.01D : d1 + 1.0D + 0.01D);
-                            d7 = p_192841_6_ + (d4 < 0.0D ? d2 - 0.01D : d2 + 1.0D + 0.01D);
+                            d5 = x + (d3 < 0.0D ? d1 - 0.01D : d1 + 1.0D + 0.01D);
+                            d7 = z + (d4 < 0.0D ? d2 - 0.01D : d2 + 1.0D + 0.01D);
                             d8 = d5 - d3;
                             d10 = d7 - d4;
                             break;
 
                         case COUNTERCLOCKWISE_90:
-                            d5 = p_192841_2_ + (d4 < 0.0D ? d1 + 1.0D + 0.01D : d1 - 0.01D);
-                            d7 = p_192841_6_ + (d3 < 0.0D ? d2 - 0.01D : d2 + 1.0D + 0.01D);
+                            d5 = x + (d4 < 0.0D ? d1 + 1.0D + 0.01D : d1 - 0.01D);
+                            d7 = z + (d3 < 0.0D ? d2 - 0.01D : d2 + 1.0D + 0.01D);
                             d8 = d5 + d4;
                             d10 = d7 - d3;
                             break;
 
                         default:
-                            d5 = p_192841_2_ + (d3 < 0.0D ? d1 + 1.0D + 0.01D : d1 - 0.01D);
-                            d7 = p_192841_6_ + (d4 < 0.0D ? d2 + 1.0D + 0.01D : d2 - 0.01D);
+                            d5 = x + (d3 < 0.0D ? d1 + 1.0D + 0.01D : d1 - 0.01D);
+                            d7 = z + (d4 < 0.0D ? d2 + 1.0D + 0.01D : d2 - 0.01D);
                             d8 = d5 + d3;
                             d10 = d7 + d4;
                     }
@@ -98,15 +98,15 @@ public class TileEntityStructureRenderer extends TileEntitySpecialRenderer<TileE
                     GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                     this.setLightmapDisabled(true);
 
-                    if (p_192841_1_.getMode() == TileEntityStructure.Mode.SAVE || p_192841_1_.showsBoundingBox())
+                    if (te.getMode() == TileEntityStructure.Mode.SAVE || te.showsBoundingBox())
                     {
                         this.renderBox(tessellator, bufferbuilder, d5, d6, d7, d8, d9, d10, 255, 223, 127);
                     }
 
-                    if (p_192841_1_.getMode() == TileEntityStructure.Mode.SAVE && p_192841_1_.showsAir())
+                    if (te.getMode() == TileEntityStructure.Mode.SAVE && te.showsAir())
                     {
-                        this.renderInvisibleBlocks(p_192841_1_, p_192841_2_, p_192841_4_, p_192841_6_, blockpos, tessellator, bufferbuilder, true);
-                        this.renderInvisibleBlocks(p_192841_1_, p_192841_2_, p_192841_4_, p_192841_6_, blockpos, tessellator, bufferbuilder, false);
+                        this.renderInvisibleBlocks(te, x, y, z, blockpos, tessellator, bufferbuilder, true);
+                        this.renderInvisibleBlocks(te, x, y, z, blockpos, tessellator, bufferbuilder, false);
                     }
 
                     this.setLightmapDisabled(false);

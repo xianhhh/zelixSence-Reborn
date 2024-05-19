@@ -53,8 +53,8 @@ public class EntityShulker extends EntityGolem implements IMob
     protected static final DataParameter<EnumFacing> ATTACHED_FACE = EntityDataManager.<EnumFacing>createKey(EntityShulker.class, DataSerializers.FACING);
     protected static final DataParameter<Optional<BlockPos>> ATTACHED_BLOCK_POS = EntityDataManager.<Optional<BlockPos>>createKey(EntityShulker.class, DataSerializers.OPTIONAL_BLOCK_POS);
     protected static final DataParameter<Byte> PEEK_TICK = EntityDataManager.<Byte>createKey(EntityShulker.class, DataSerializers.BYTE);
-    protected static final DataParameter<Byte> field_190770_bw = EntityDataManager.<Byte>createKey(EntityShulker.class, DataSerializers.BYTE);
-    public static final EnumDyeColor field_190771_bx = EnumDyeColor.PURPLE;
+    protected static final DataParameter<Byte> COLOR = EntityDataManager.<Byte>createKey(EntityShulker.class, DataSerializers.BYTE);
+    public static final EnumDyeColor DEFAULT_COLOR = EnumDyeColor.PURPLE;
     private float prevPeekAmount;
     private float peekAmount;
     private BlockPos currentAttachmentPosition;
@@ -134,7 +134,7 @@ public class EntityShulker extends EntityGolem implements IMob
         return SoundEvents.ENTITY_SHULKER_DEATH;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return this.isClosed() ? SoundEvents.ENTITY_SHULKER_HURT_CLOSED : SoundEvents.ENTITY_SHULKER_HURT;
     }
@@ -145,7 +145,7 @@ public class EntityShulker extends EntityGolem implements IMob
         this.dataManager.register(ATTACHED_FACE, EnumFacing.DOWN);
         this.dataManager.register(ATTACHED_BLOCK_POS, Optional.absent());
         this.dataManager.register(PEEK_TICK, Byte.valueOf((byte)0));
-        this.dataManager.register(field_190770_bw, Byte.valueOf((byte)field_190771_bx.getMetadata()));
+        this.dataManager.register(COLOR, Byte.valueOf((byte)DEFAULT_COLOR.getMetadata()));
     }
 
     protected void applyEntityAttributes()
@@ -172,7 +172,7 @@ public class EntityShulker extends EntityGolem implements IMob
         super.readEntityFromNBT(compound);
         this.dataManager.set(ATTACHED_FACE, EnumFacing.getFront(compound.getByte("AttachFace")));
         this.dataManager.set(PEEK_TICK, Byte.valueOf(compound.getByte("Peek")));
-        this.dataManager.set(field_190770_bw, Byte.valueOf(compound.getByte("Color")));
+        this.dataManager.set(COLOR, Byte.valueOf(compound.getByte("Color")));
 
         if (compound.hasKey("APX"))
         {
@@ -195,7 +195,7 @@ public class EntityShulker extends EntityGolem implements IMob
         super.writeEntityToNBT(compound);
         compound.setByte("AttachFace", (byte)((EnumFacing)this.dataManager.get(ATTACHED_FACE)).getIndex());
         compound.setByte("Peek", ((Byte)this.dataManager.get(PEEK_TICK)).byteValue());
-        compound.setByte("Color", ((Byte)this.dataManager.get(field_190770_bw)).byteValue());
+        compound.setByte("Color", ((Byte)this.dataManager.get(COLOR)).byteValue());
         BlockPos blockpos = this.getAttachmentPos();
 
         if (blockpos != null)
@@ -386,7 +386,7 @@ public class EntityShulker extends EntityGolem implements IMob
                     {
                         if (!(entity instanceof EntityShulker) && !entity.noClip)
                         {
-                            entity.moveEntity(MoverType.SHULKER, d0, d1, d2);
+                            entity.move(MoverType.SHULKER, d0, d1, d2);
                         }
                     }
                 }
@@ -397,15 +397,15 @@ public class EntityShulker extends EntityGolem implements IMob
     /**
      * Tries to move the entity towards the specified location.
      */
-    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
+    public void move(MoverType type, double x, double y, double z)
     {
-        if (x == MoverType.SHULKER_BOX)
+        if (type == MoverType.SHULKER_BOX)
         {
             this.tryTeleportToNewPosition();
         }
         else
         {
-            super.moveEntity(x, p_70091_2_, p_70091_4_, p_70091_6_);
+            super.move(type, x, y, z);
         }
     }
 
@@ -440,7 +440,7 @@ public class EntityShulker extends EntityGolem implements IMob
             {
                 BlockPos blockpos1 = blockpos.add(8 - this.rand.nextInt(17), 8 - this.rand.nextInt(17), 8 - this.rand.nextInt(17));
 
-                if (blockpos1.getY() > 0 && this.world.isAirBlock(blockpos1) && this.world.func_191503_g(this) && this.world.getCollisionBoxes(this, new AxisAlignedBB(blockpos1)).isEmpty())
+                if (blockpos1.getY() > 0 && this.world.isAirBlock(blockpos1) && this.world.isInsideWorldBorder(this) && this.world.getCollisionBoxes(this, new AxisAlignedBB(blockpos1)).isEmpty())
                 {
                     boolean flag = false;
 
@@ -535,7 +535,7 @@ public class EntityShulker extends EntityGolem implements IMob
     {
         if (this.isClosed())
         {
-            Entity entity = source.getSourceOfDamage();
+            Entity entity = source.getImmediateSource();
 
             if (entity instanceof EntityArrow)
             {
@@ -674,9 +674,9 @@ public class EntityShulker extends EntityGolem implements IMob
         return LootTableList.ENTITIES_SHULKER;
     }
 
-    public EnumDyeColor func_190769_dn()
+    public EnumDyeColor getColor()
     {
-        return EnumDyeColor.byMetadata(((Byte)this.dataManager.get(field_190770_bw)).byteValue());
+        return EnumDyeColor.byMetadata(((Byte)this.dataManager.get(COLOR)).byteValue());
     }
 
     class AIAttack extends EntityAIBase
@@ -728,7 +728,7 @@ public class EntityShulker extends EntityGolem implements IMob
                     {
                         this.attackTime = 20 + EntityShulker.this.rand.nextInt(10) * 20 / 2;
                         EntityShulkerBullet entityshulkerbullet = new EntityShulkerBullet(EntityShulker.this.world, EntityShulker.this, entitylivingbase, EntityShulker.this.getAttachmentFacing().getAxis());
-                        EntityShulker.this.world.spawnEntityInWorld(entityshulkerbullet);
+                        EntityShulker.this.world.spawnEntity(entityshulkerbullet);
                         EntityShulker.this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 2.0F, (EntityShulker.this.rand.nextFloat() - EntityShulker.this.rand.nextFloat()) * 0.2F + 1.0F);
                     }
                 }
@@ -760,11 +760,11 @@ public class EntityShulker extends EntityGolem implements IMob
 
             if (enumfacing.getAxis() == EnumFacing.Axis.X)
             {
-                return this.taskOwner.getEntityBoundingBox().expand(4.0D, targetDistance, targetDistance);
+                return this.taskOwner.getEntityBoundingBox().grow(4.0D, targetDistance, targetDistance);
             }
             else
             {
-                return enumfacing.getAxis() == EnumFacing.Axis.Z ? this.taskOwner.getEntityBoundingBox().expand(targetDistance, targetDistance, 4.0D) : this.taskOwner.getEntityBoundingBox().expand(targetDistance, 4.0D, targetDistance);
+                return enumfacing.getAxis() == EnumFacing.Axis.Z ? this.taskOwner.getEntityBoundingBox().grow(targetDistance, targetDistance, 4.0D) : this.taskOwner.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
             }
         }
     }
@@ -793,11 +793,11 @@ public class EntityShulker extends EntityGolem implements IMob
 
             if (enumfacing.getAxis() == EnumFacing.Axis.X)
             {
-                return this.taskOwner.getEntityBoundingBox().expand(4.0D, targetDistance, targetDistance);
+                return this.taskOwner.getEntityBoundingBox().grow(4.0D, targetDistance, targetDistance);
             }
             else
             {
-                return enumfacing.getAxis() == EnumFacing.Axis.Z ? this.taskOwner.getEntityBoundingBox().expand(targetDistance, targetDistance, 4.0D) : this.taskOwner.getEntityBoundingBox().expand(targetDistance, 4.0D, targetDistance);
+                return enumfacing.getAxis() == EnumFacing.Axis.Z ? this.taskOwner.getEntityBoundingBox().grow(targetDistance, targetDistance, 4.0D) : this.taskOwner.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
             }
         }
     }
@@ -815,7 +815,7 @@ public class EntityShulker extends EntityGolem implements IMob
             return EntityShulker.this.getAttackTarget() == null && EntityShulker.this.rand.nextInt(40) == 0;
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
             return EntityShulker.this.getAttackTarget() == null && this.peekTime > 0;
         }
@@ -842,9 +842,9 @@ public class EntityShulker extends EntityGolem implements IMob
 
     class BodyHelper extends EntityBodyHelper
     {
-        public BodyHelper(EntityLivingBase p_i47062_2_)
+        public BodyHelper(EntityLivingBase theEntity)
         {
-            super(p_i47062_2_);
+            super(theEntity);
         }
 
         public void updateRenderAngles()

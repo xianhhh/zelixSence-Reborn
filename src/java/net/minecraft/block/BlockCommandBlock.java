@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 public class BlockCommandBlock extends BlockContainer
 {
-    private static final Logger field_193388_c = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final PropertyDirection FACING = BlockDirectional.FACING;
     public static final PropertyBool CONDITIONAL = PropertyBool.create("conditional");
 
@@ -55,7 +55,7 @@ public class BlockCommandBlock extends BlockContainer
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         if (!worldIn.isRemote)
         {
@@ -100,7 +100,7 @@ public class BlockCommandBlock extends BlockContainer
 
                     if (flag1)
                     {
-                        this.func_193387_a(state, worldIn, pos, commandblockbaselogic, flag);
+                        this.execute(state, worldIn, pos, commandblockbaselogic, flag);
                     }
                     else if (tileentitycommandblock.isConditional())
                     {
@@ -116,7 +116,7 @@ public class BlockCommandBlock extends BlockContainer
                 {
                     if (flag1)
                     {
-                        this.func_193387_a(state, worldIn, pos, commandblockbaselogic, flag);
+                        this.execute(state, worldIn, pos, commandblockbaselogic, flag);
                     }
                     else if (tileentitycommandblock.isConditional())
                     {
@@ -129,7 +129,7 @@ public class BlockCommandBlock extends BlockContainer
         }
     }
 
-    private void func_193387_a(IBlockState p_193387_1_, World p_193387_2_, BlockPos p_193387_3_, CommandBlockBaseLogic p_193387_4_, boolean p_193387_5_)
+    private void execute(IBlockState p_193387_1_, World p_193387_2_, BlockPos p_193387_3_, CommandBlockBaseLogic p_193387_4_, boolean p_193387_5_)
     {
         if (p_193387_5_)
         {
@@ -140,7 +140,7 @@ public class BlockCommandBlock extends BlockContainer
             p_193387_4_.setSuccessCount(0);
         }
 
-        func_193386_c(p_193387_2_, p_193387_3_, (EnumFacing)p_193387_1_.getValue(FACING));
+        executeChain(p_193387_2_, p_193387_3_, (EnumFacing)p_193387_1_.getValue(FACING));
     }
 
     /**
@@ -151,7 +151,10 @@ public class BlockCommandBlock extends BlockContainer
         return 1;
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
+    /**
+     * Called when the block is right clicked by a player.
+     */
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -273,12 +276,12 @@ public class BlockCommandBlock extends BlockContainer
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.func_190914_a(pos, placer)).withProperty(CONDITIONAL, Boolean.valueOf(false));
+        return this.getDefaultState().withProperty(FACING, EnumFacing.getDirectionFromEntityLiving(pos, placer)).withProperty(CONDITIONAL, Boolean.valueOf(false));
     }
 
-    private static void func_193386_c(World p_193386_0_, BlockPos p_193386_1_, EnumFacing p_193386_2_)
+    private static void executeChain(World p_193386_0_, BlockPos p_193386_1_, EnumFacing p_193386_2_)
     {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_193386_1_);
         GameRules gamerules = p_193386_0_.getGameRules();
@@ -333,7 +336,7 @@ public class BlockCommandBlock extends BlockContainer
         if (i <= 0)
         {
             int j = Math.max(gamerules.getInt("maxCommandChainLength"), 0);
-            field_193388_c.warn("Commandblock chain tried to execure more than " + j + " steps!");
+            LOGGER.warn("Commandblock chain tried to execure more than " + j + " steps!");
         }
     }
 }

@@ -15,15 +15,17 @@ import net.minecraft.world.World;
 public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
 {
     /** Villager that is harvesting */
-    private final EntityVillager theVillager;
+    private final EntityVillager villager;
     private boolean hasFarmItem;
     private boolean wantsToReapStuff;
+
+    /** 0 => harvest, 1 => replant, -1 => none */
     private int currentTask;
 
-    public EntityAIHarvestFarmland(EntityVillager theVillagerIn, double speedIn)
+    public EntityAIHarvestFarmland(EntityVillager villagerIn, double speedIn)
     {
-        super(theVillagerIn, speedIn, 16);
-        this.theVillager = theVillagerIn;
+        super(villagerIn, speedIn, 16);
+        this.villager = villagerIn;
     }
 
     /**
@@ -33,14 +35,14 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
     {
         if (this.runDelay <= 0)
         {
-            if (!this.theVillager.world.getGameRules().getBoolean("mobGriefing"))
+            if (!this.villager.world.getGameRules().getBoolean("mobGriefing"))
             {
                 return false;
             }
 
             this.currentTask = -1;
-            this.hasFarmItem = this.theVillager.isFarmItemInInventory();
-            this.wantsToReapStuff = this.theVillager.wantsMoreFood();
+            this.hasFarmItem = this.villager.isFarmItemInInventory();
+            this.wantsToReapStuff = this.villager.wantsMoreFood();
         }
 
         return super.shouldExecute();
@@ -49,22 +51,22 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return this.currentTask >= 0 && super.continueExecuting();
+        return this.currentTask >= 0 && super.shouldContinueExecuting();
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {
         super.updateTask();
-        this.theVillager.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.theVillager.getVerticalFaceSpeed());
+        this.villager.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.villager.getVerticalFaceSpeed());
 
         if (this.getIsAboveDestination())
         {
-            World world = this.theVillager.world;
+            World world = this.villager.world;
             BlockPos blockpos = this.destinationBlock.up();
             IBlockState iblockstate = world.getBlockState(blockpos);
             Block block = iblockstate.getBlock();
@@ -75,14 +77,14 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
             }
             else if (this.currentTask == 1 && iblockstate.getMaterial() == Material.AIR)
             {
-                InventoryBasic inventorybasic = this.theVillager.getVillagerInventory();
+                InventoryBasic inventorybasic = this.villager.getVillagerInventory();
 
                 for (int i = 0; i < inventorybasic.getSizeInventory(); ++i)
                 {
                     ItemStack itemstack = inventorybasic.getStackInSlot(i);
                     boolean flag = false;
 
-                    if (!itemstack.func_190926_b())
+                    if (!itemstack.isEmpty())
                     {
                         if (itemstack.getItem() == Items.WHEAT_SEEDS)
                         {
@@ -108,11 +110,11 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock
 
                     if (flag)
                     {
-                        itemstack.func_190918_g(1);
+                        itemstack.shrink(1);
 
-                        if (itemstack.func_190926_b())
+                        if (itemstack.isEmpty())
                         {
-                            inventorybasic.setInventorySlotContents(i, ItemStack.field_190927_a);
+                            inventorybasic.setInventorySlotContents(i, ItemStack.EMPTY);
                         }
 
                         break;

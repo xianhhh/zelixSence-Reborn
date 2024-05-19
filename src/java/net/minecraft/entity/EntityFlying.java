@@ -20,20 +20,20 @@ public abstract class EntityFlying extends EntityLiving
     {
     }
 
-    public void func_191986_a(float p_191986_1_, float p_191986_2_, float p_191986_3_)
+    public void travel(float p_191986_1_, float p_191986_2_, float p_191986_3_)
     {
         if (this.isInWater())
         {
-            this.func_191958_b(p_191986_1_, p_191986_2_, p_191986_3_, 0.02F);
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.moveRelative(p_191986_1_, p_191986_2_, p_191986_3_, 0.02F);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             this.motionX *= 0.800000011920929D;
             this.motionY *= 0.800000011920929D;
             this.motionZ *= 0.800000011920929D;
         }
         else if (this.isInLava())
         {
-            this.func_191958_b(p_191986_1_, p_191986_2_, p_191986_3_, 0.02F);
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.moveRelative(p_191986_1_, p_191986_2_, p_191986_3_, 0.02F);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             this.motionX *= 0.5D;
             this.motionY *= 0.5D;
             this.motionZ *= 0.5D;
@@ -48,7 +48,7 @@ public abstract class EntityFlying extends EntityLiving
             }
 
             float f1 = 0.16277136F / (f * f * f);
-            this.func_191958_b(p_191986_1_, p_191986_2_, p_191986_3_, this.onGround ? 0.1F * f1 : 0.02F);
+            this.moveRelative(p_191986_1_, p_191986_2_, p_191986_3_, this.onGround ? 0.1F * f1 : 0.02F);
             f = 0.91F;
 
             if (this.onGround)
@@ -56,7 +56,7 @@ public abstract class EntityFlying extends EntityLiving
                 f = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.91F;
             }
 
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             this.motionX *= (double)f;
             this.motionY *= (double)f;
             this.motionZ *= (double)f;
@@ -77,7 +77,8 @@ public abstract class EntityFlying extends EntityLiving
     }
 
     /**
-     * returns true if this entity is by a ladder, false otherwise
+     * Returns true if this entity should move as if it were on a ladder (either because it's actually on a ladder, or
+     * for AI reasons)
      */
     public boolean isOnLadder()
     {

@@ -124,7 +124,7 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable
 
         try
         {
-            map = (Map)JsonUtils.func_193841_a(GSON, new InputStreamReader(stream, StandardCharsets.UTF_8), TYPE);
+            map = (Map)JsonUtils.fromJson(GSON, new InputStreamReader(stream, StandardCharsets.UTF_8), TYPE);
         }
         finally
         {

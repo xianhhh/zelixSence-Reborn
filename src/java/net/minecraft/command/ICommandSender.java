@@ -21,14 +21,14 @@ default ITextComponent getDisplayName()
         return new TextComponentString(this.getName());
     }
 
-default void addChatMessage(ITextComponent component)
+default void sendMessage(ITextComponent component)
     {
     }
 
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    boolean canCommandSenderUseCommand(int permLevel, String commandName);
+    boolean canUseCommand(int permLevel, String commandName);
 
 default BlockPos getPosition()
     {

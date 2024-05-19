@@ -44,7 +44,7 @@ public class GuiWorldEdit extends GuiScreen
         ISaveFormat isaveformat = this.mc.getSaveLoader();
         WorldInfo worldinfo = isaveformat.getWorldInfo(this.worldId);
         String s = worldinfo == null ? "" : worldinfo.getWorldName();
-        this.nameEdit = new GuiTextField(2, this.fontRendererObj, this.width / 2 - 100, 60, 200, 20);
+        this.nameEdit = new GuiTextField(2, this.fontRenderer, this.width / 2 - 100, 60, 200, 20);
         this.nameEdit.setFocused(true);
         this.nameEdit.setText(s);
     }
@@ -118,8 +118,8 @@ public class GuiWorldEdit extends GuiScreen
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, I18n.format("selectWorld.edit.title"), this.width / 2, 20, 16777215);
-        this.drawString(this.fontRendererObj, I18n.format("selectWorld.enterName"), this.width / 2 - 100, 47, 10526880);
+        this.drawCenteredString(this.fontRenderer, I18n.format("selectWorld.edit.title"), this.width / 2, 20, 16777215);
+        this.drawString(this.fontRenderer, I18n.format("selectWorld.enterName"), this.width / 2 - 100, 47, 10526880);
         this.nameEdit.drawTextBox();
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

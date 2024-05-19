@@ -11,9 +11,9 @@ public class CombatRules
         return damage * (1.0F - f1 / 25.0F);
     }
 
-    public static float getDamageAfterMagicAbsorb(float p_188401_0_, float p_188401_1_)
+    public static float getDamageAfterMagicAbsorb(float damage, float enchantModifiers)
     {
-        float f = MathHelper.clamp(p_188401_1_, 0.0F, 20.0F);
-        return p_188401_0_ * (1.0F - f / 25.0F);
+        float f = MathHelper.clamp(enchantModifiers, 0.0F, 20.0F);
+        return damage * (1.0F - f / 25.0F);
     }
 }

@@ -21,60 +21,60 @@ import org.apache.logging.log4j.Logger;
 
 public class FunctionManager implements ITickable
 {
-    private static final Logger field_193067_a = LogManager.getLogger();
-    private final File field_193068_b;
-    private final MinecraftServer field_193069_c;
-    private final Map<ResourceLocation, FunctionObject> field_193070_d = Maps.<ResourceLocation, FunctionObject>newHashMap();
-    private String field_193071_e = "-";
-    private FunctionObject field_193072_f;
-    private final ArrayDeque<FunctionManager.QueuedCommand> field_194020_g = new ArrayDeque<FunctionManager.QueuedCommand>();
-    private boolean field_194021_h = false;
-    private final ICommandSender field_193073_g = new ICommandSender()
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final File functionDir;
+    private final MinecraftServer server;
+    private final Map<ResourceLocation, FunctionObject> functions = Maps.<ResourceLocation, FunctionObject>newHashMap();
+    private String currentGameLoopFunctionId = "-";
+    private FunctionObject gameLoopFunction;
+    private final ArrayDeque<FunctionManager.QueuedCommand> commandQueue = new ArrayDeque<FunctionManager.QueuedCommand>();
+    private boolean isExecuting = false;
+    private final ICommandSender gameLoopFunctionSender = new ICommandSender()
     {
         public String getName()
         {
-            return FunctionManager.this.field_193071_e;
+            return FunctionManager.this.currentGameLoopFunctionId;
         }
-        public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+        public boolean canUseCommand(int permLevel, String commandName)
         {
             return permLevel <= 2;
         }
         public World getEntityWorld()
         {
-            return FunctionManager.this.field_193069_c.worldServers[0];
+            return FunctionManager.this.server.worlds[0];
         }
         public MinecraftServer getServer()
         {
-            return FunctionManager.this.field_193069_c;
+            return FunctionManager.this.server;
         }
     };
 
-    public FunctionManager(@Nullable File p_i47517_1_, MinecraftServer p_i47517_2_)
+    public FunctionManager(@Nullable File functionDirIn, MinecraftServer serverIn)
     {
-        this.field_193068_b = p_i47517_1_;
-        this.field_193069_c = p_i47517_2_;
-        this.func_193059_f();
+        this.functionDir = functionDirIn;
+        this.server = serverIn;
+        this.reload();
     }
 
     @Nullable
-    public FunctionObject func_193058_a(ResourceLocation p_193058_1_)
+    public FunctionObject getFunction(ResourceLocation id)
     {
-        return this.field_193070_d.get(p_193058_1_);
+        return this.functions.get(id);
     }
 
-    public ICommandManager func_193062_a()
+    public ICommandManager getCommandManager()
     {
-        return this.field_193069_c.getCommandManager();
+        return this.server.getCommandManager();
     }
 
-    public int func_193065_c()
+    public int getMaxCommandChainLength()
     {
-        return this.field_193069_c.worldServers[0].getGameRules().getInt("maxCommandChainLength");
+        return this.server.worlds[0].getGameRules().getInt("maxCommandChainLength");
     }
 
-    public Map<ResourceLocation, FunctionObject> func_193066_d()
+    public Map<ResourceLocation, FunctionObject> getFunctions()
     {
-        return this.field_193070_d;
+        return this.functions;
     }
 
     /**
@@ -82,29 +82,29 @@ public class FunctionManager implements ITickable
      */
     public void update()
     {
-        String s = this.field_193069_c.worldServers[0].getGameRules().getString("gameLoopFunction");
+        String s = this.server.worlds[0].getGameRules().getString("gameLoopFunction");
 
-        if (!s.equals(this.field_193071_e))
+        if (!s.equals(this.currentGameLoopFunctionId))
         {
-            this.field_193071_e = s;
-            this.field_193072_f = this.func_193058_a(new ResourceLocation(s));
+            this.currentGameLoopFunctionId = s;
+            this.gameLoopFunction = this.getFunction(new ResourceLocation(s));
         }
 
-        if (this.field_193072_f != null)
+        if (this.gameLoopFunction != null)
         {
-            this.func_194019_a(this.field_193072_f, this.field_193073_g);
+            this.execute(this.gameLoopFunction, this.gameLoopFunctionSender);
         }
     }
 
-    public int func_194019_a(FunctionObject p_194019_1_, ICommandSender p_194019_2_)
+    public int execute(FunctionObject function, ICommandSender sender)
     {
-        int i = this.func_193065_c();
+        int i = this.getMaxCommandChainLength();
 
-        if (this.field_194021_h)
+        if (this.isExecuting)
         {
-            if (this.field_194020_g.size() < i)
+            if (this.commandQueue.size() < i)
             {
-                this.field_194020_g.addFirst(new FunctionManager.QueuedCommand(this, p_194019_2_, new FunctionObject.FunctionEntry(p_194019_1_)));
+                this.commandQueue.addFirst(new FunctionManager.QueuedCommand(this, sender, new FunctionObject.FunctionEntry(function)));
             }
 
             return 0;
@@ -115,24 +115,24 @@ public class FunctionManager implements ITickable
 
             try
             {
-                this.field_194021_h = true;
+                this.isExecuting = true;
                 int j = 0;
-                FunctionObject.Entry[] afunctionobject$entry = p_194019_1_.func_193528_a();
+                FunctionObject.Entry[] afunctionobject$entry = function.getEntries();
 
                 for (int k = afunctionobject$entry.length - 1; k >= 0; --k)
                 {
-                    this.field_194020_g.push(new FunctionManager.QueuedCommand(this, p_194019_2_, afunctionobject$entry[k]));
+                    this.commandQueue.push(new FunctionManager.QueuedCommand(this, sender, afunctionobject$entry[k]));
                 }
 
                 while (true)
                 {
-                    if (this.field_194020_g.isEmpty())
+                    if (this.commandQueue.isEmpty())
                     {
                         l = j;
                         return l;
                     }
 
-                    (this.field_194020_g.removeFirst()).func_194222_a(this.field_194020_g, i);
+                    (this.commandQueue.removeFirst()).execute(this.commandQueue, i);
                     ++j;
 
                     if (j >= i)
@@ -145,31 +145,31 @@ public class FunctionManager implements ITickable
             }
             finally
             {
-                this.field_194020_g.clear();
-                this.field_194021_h = false;
+                this.commandQueue.clear();
+                this.isExecuting = false;
             }
 
             return l;
         }
     }
 
-    public void func_193059_f()
+    public void reload()
     {
-        this.field_193070_d.clear();
-        this.field_193072_f = null;
-        this.field_193071_e = "-";
-        this.func_193061_h();
+        this.functions.clear();
+        this.gameLoopFunction = null;
+        this.currentGameLoopFunctionId = "-";
+        this.loadFunctions();
     }
 
-    private void func_193061_h()
+    private void loadFunctions()
     {
-        if (this.field_193068_b != null)
+        if (this.functionDir != null)
         {
-            this.field_193068_b.mkdirs();
+            this.functionDir.mkdirs();
 
-            for (File file1 : FileUtils.listFiles(this.field_193068_b, new String[] {"mcfunction"}, true))
+            for (File file1 : FileUtils.listFiles(this.functionDir, new String[] {"mcfunction"}, true))
             {
-                String s = FilenameUtils.removeExtension(this.field_193068_b.toURI().relativize(file1.toURI()).toString());
+                String s = FilenameUtils.removeExtension(this.functionDir.toURI().relativize(file1.toURI()).toString());
                 String[] astring = s.split("/", 2);
 
                 if (astring.length == 2)
@@ -178,43 +178,43 @@ public class FunctionManager implements ITickable
 
                     try
                     {
-                        this.field_193070_d.put(resourcelocation, FunctionObject.func_193527_a(this, Files.readLines(file1, StandardCharsets.UTF_8)));
+                        this.functions.put(resourcelocation, FunctionObject.create(this, Files.readLines(file1, StandardCharsets.UTF_8)));
                     }
                     catch (Throwable throwable)
                     {
-                        field_193067_a.error("Couldn't read custom function " + resourcelocation + " from " + file1, throwable);
+                        LOGGER.error("Couldn't read custom function " + resourcelocation + " from " + file1, throwable);
                     }
                 }
             }
 
-            if (!this.field_193070_d.isEmpty())
+            if (!this.functions.isEmpty())
             {
-                field_193067_a.info("Loaded " + this.field_193070_d.size() + " custom command functions");
+                LOGGER.info("Loaded " + this.functions.size() + " custom command functions");
             }
         }
     }
 
     public static class QueuedCommand
     {
-        private final FunctionManager field_194223_a;
-        private final ICommandSender field_194224_b;
-        private final FunctionObject.Entry field_194225_c;
+        private final FunctionManager functionManager;
+        private final ICommandSender sender;
+        private final FunctionObject.Entry entry;
 
-        public QueuedCommand(FunctionManager p_i47603_1_, ICommandSender p_i47603_2_, FunctionObject.Entry p_i47603_3_)
+        public QueuedCommand(FunctionManager functionManagerIn, ICommandSender senderIn, FunctionObject.Entry entryIn)
         {
-            this.field_194223_a = p_i47603_1_;
-            this.field_194224_b = p_i47603_2_;
-            this.field_194225_c = p_i47603_3_;
+            this.functionManager = functionManagerIn;
+            this.sender = senderIn;
+            this.entry = entryIn;
         }
 
-        public void func_194222_a(ArrayDeque<FunctionManager.QueuedCommand> p_194222_1_, int p_194222_2_)
+        public void execute(ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength)
         {
-            this.field_194225_c.func_194145_a(this.field_194223_a, this.field_194224_b, p_194222_1_, p_194222_2_);
+            this.entry.execute(this.functionManager, this.sender, commandQueue, maxCommandChainLength);
         }
 
         public String toString()
         {
-            return this.field_194225_c.toString();
+            return this.entry.toString();
         }
     }
 }

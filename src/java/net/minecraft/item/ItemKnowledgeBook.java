@@ -18,26 +18,26 @@ import org.apache.logging.log4j.Logger;
 
 public class ItemKnowledgeBook extends Item
 {
-    private static final Logger field_194126_a = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public ItemKnowledgeBook()
     {
         this.setMaxStackSize(1);
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        ItemStack itemstack = playerIn.getHeldItem(handIn);
         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
 
-        if (!worldIn.capabilities.isCreativeMode)
+        if (!playerIn.capabilities.isCreativeMode)
         {
-            worldIn.setHeldItem(playerIn, ItemStack.field_190927_a);
+            playerIn.setHeldItem(handIn, ItemStack.EMPTY);
         }
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Recipes", 9))
         {
-            if (!itemStackIn.isRemote)
+            if (!worldIn.isRemote)
             {
                 NBTTagList nbttaglist = nbttagcompound.getTagList("Recipes", 8);
                 List<IRecipe> list = Lists.<IRecipe>newArrayList();
@@ -45,26 +45,26 @@ public class ItemKnowledgeBook extends Item
                 for (int i = 0; i < nbttaglist.tagCount(); ++i)
                 {
                     String s = nbttaglist.getStringTagAt(i);
-                    IRecipe irecipe = CraftingManager.func_193373_a(new ResourceLocation(s));
+                    IRecipe irecipe = CraftingManager.getRecipe(new ResourceLocation(s));
 
                     if (irecipe == null)
                     {
-                        field_194126_a.error("Invalid recipe: " + s);
+                        LOGGER.error("Invalid recipe: " + s);
                         return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
                     }
 
                     list.add(irecipe);
                 }
 
-                worldIn.func_192021_a(list);
-                worldIn.addStat(StatList.getObjectUseStats(this));
+                playerIn.unlockRecipes(list);
+                playerIn.addStat(StatList.getObjectUseStats(this));
             }
 
             return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
         }
         else
         {
-            field_194126_a.error("Tag not valid: " + nbttagcompound);
+            LOGGER.error("Tag not valid: " + nbttagcompound);
             return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
         }
     }

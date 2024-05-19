@@ -21,7 +21,7 @@ public class SPacketMultiBlockChange implements Packet<INetHandlerPlayClient>
 
     public SPacketMultiBlockChange(int p_i46959_1_, short[] p_i46959_2_, Chunk p_i46959_3_)
     {
-        this.chunkPos = new ChunkPos(p_i46959_3_.xPosition, p_i46959_3_.zPosition);
+        this.chunkPos = new ChunkPos(p_i46959_3_.x, p_i46959_3_.z);
         this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[p_i46959_1_];
 
         for (int i = 0; i < this.changedBlocks.length; ++i)
@@ -36,11 +36,11 @@ public class SPacketMultiBlockChange implements Packet<INetHandlerPlayClient>
     public void readPacketData(PacketBuffer buf) throws IOException
     {
         this.chunkPos = new ChunkPos(buf.readInt(), buf.readInt());
-        this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[buf.readVarIntFromBuffer()];
+        this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[buf.readVarInt()];
 
         for (int i = 0; i < this.changedBlocks.length; ++i)
         {
-            this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(buf.readShort(), Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer()));
+            this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(buf.readShort(), Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt()));
         }
     }
 
@@ -49,14 +49,14 @@ public class SPacketMultiBlockChange implements Packet<INetHandlerPlayClient>
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeInt(this.chunkPos.chunkXPos);
-        buf.writeInt(this.chunkPos.chunkZPos);
-        buf.writeVarIntToBuffer(this.changedBlocks.length);
+        buf.writeInt(this.chunkPos.x);
+        buf.writeInt(this.chunkPos.z);
+        buf.writeVarInt(this.changedBlocks.length);
 
         for (SPacketMultiBlockChange.BlockUpdateData spacketmultiblockchange$blockupdatedata : this.changedBlocks)
         {
             buf.writeShort(spacketmultiblockchange$blockupdatedata.getOffset());
-            buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(spacketmultiblockchange$blockupdatedata.getBlockState()));
+            buf.writeVarInt(Block.BLOCK_STATE_IDS.get(spacketmultiblockchange$blockupdatedata.getBlockState()));
         }
     }
 

@@ -136,7 +136,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     /** player Z position as seen by PlayerManager */
     public double managedPosZ;
     private final List<Integer> entityRemoveQueue = Lists.<Integer>newLinkedList();
-    private final PlayerAdvancements field_192042_bX;
+    private final PlayerAdvancements advancements;
     private final StatisticsManagerServer statsFile;
 
     /**
@@ -168,12 +168,16 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     /** The entity the player is currently spectating through. */
     private Entity spectatingEntity;
     private boolean invulnerableDimensionChange;
-    private boolean field_192040_cp;
-    private final RecipeBookServer field_192041_cq = new RecipeBookServer();
-    private Vec3d field_193107_ct;
-    private int field_193108_cu;
-    private boolean field_193109_cv;
-    private Vec3d field_193110_cw;
+    private boolean seenCredits;
+    private final RecipeBookServer recipeBook = new RecipeBookServer();
+
+    /** The position this player started levitating at. */
+    private Vec3d levitationStartPos;
+
+    /** The value of ticksExisted when this player started levitating. */
+    private int levitatingSince;
+    private boolean disconnected;
+    private Vec3d enteredNetherPosition;
 
     /**
      * The currently in use window ID. Incremented every time a window is opened.
@@ -188,19 +192,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     public int ping;
 
     /**
-     * Set when a player beats the ender dragon, used to respawn the player at the spawn point while retaining inventory
-     * and XP
+     * True when the player has left the End using an the exit portal, but has not yet been respawned in the overworld
      */
-    public boolean playerConqueredTheEnd;
+    public boolean queuedEndExit;
 
     public EntityPlayerMP(MinecraftServer server, WorldServer worldIn, GameProfile profile, PlayerInteractionManager interactionManagerIn)
     {
         super(worldIn, profile);
-        interactionManagerIn.thisPlayerMP = this;
+        interactionManagerIn.player = this;
         this.interactionManager = interactionManagerIn;
         BlockPos blockpos = worldIn.getSpawnPoint();
 
-        if (worldIn.provider.func_191066_m() && worldIn.getWorldInfo().getGameType() != GameType.ADVENTURE)
+        if (worldIn.provider.hasSkyLight() && worldIn.getWorldInfo().getGameType() != GameType.ADVENTURE)
         {
             int i = Math.max(0, server.getSpawnRadius(worldIn));
             int j = MathHelper.floor(worldIn.getWorldBorder().getClosestDistance((double)blockpos.getX(), (double)blockpos.getZ()));
@@ -220,7 +223,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         this.mcServer = server;
         this.statsFile = server.getPlayerList().getPlayerStatsFile(this);
-        this.field_192042_bX = server.getPlayerList().func_192054_h(this);
+        this.advancements = server.getPlayerList().getPlayerAdvancements(this);
         this.stepHeight = 1.0F;
         this.moveToBlockPosAndAngles(blockpos, 0.0F, 0.0F);
 
@@ -252,18 +255,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         if (compound.hasKey("enteredNetherPosition", 10))
         {
             NBTTagCompound nbttagcompound = compound.getCompoundTag("enteredNetherPosition");
-            this.field_193110_cw = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
+            this.enteredNetherPosition = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
         }
 
-        this.field_192040_cp = compound.getBoolean("seenCredits");
+        this.seenCredits = compound.getBoolean("seenCredits");
 
         if (compound.hasKey("recipeBook", 10))
         {
-            this.field_192041_cq.func_192825_a(compound.getCompoundTag("recipeBook"));
+            this.recipeBook.read(compound.getCompoundTag("recipeBook"));
         }
     }
 
-    public static void func_191522_a(DataFixer p_191522_0_)
+    public static void registerFixesPlayerMP(DataFixer p_191522_0_)
     {
         p_191522_0_.registerWalker(FixTypes.PLAYER, new IDataWalker()
         {
@@ -291,14 +294,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     {
         super.writeEntityToNBT(compound);
         compound.setInteger("playerGameType", this.interactionManager.getGameType().getID());
-        compound.setBoolean("seenCredits", this.field_192040_cp);
+        compound.setBoolean("seenCredits", this.seenCredits);
 
-        if (this.field_193110_cw != null)
+        if (this.enteredNetherPosition != null)
         {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setDouble("x", this.field_193110_cw.xCoord);
-            nbttagcompound.setDouble("y", this.field_193110_cw.yCoord);
-            nbttagcompound.setDouble("z", this.field_193110_cw.zCoord);
+            nbttagcompound.setDouble("x", this.enteredNetherPosition.x);
+            nbttagcompound.setDouble("y", this.enteredNetherPosition.y);
+            nbttagcompound.setDouble("z", this.enteredNetherPosition.z);
             compound.setTag("enteredNetherPosition", nbttagcompound);
         }
 
@@ -315,7 +318,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
             compound.setTag("RootVehicle", nbttagcompound1);
         }
 
-        compound.setTag("recipeBook", this.field_192041_cq.func_192824_e());
+        compound.setTag("recipeBook", this.recipeBook.write());
     }
 
     /**
@@ -327,9 +330,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         this.lastExperience = -1;
     }
 
-    public void func_192024_a(ItemStack p_192024_1_, int p_192024_2_)
+    public void onEnchant(ItemStack enchantedItem, int cost)
     {
-        super.func_192024_a(p_192024_1_, p_192024_2_);
+        super.onEnchant(enchantedItem, cost);
         this.lastExperience = -1;
     }
 
@@ -356,9 +359,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.END_COMBAT));
     }
 
-    protected void func_191955_a(IBlockState p_191955_1_)
+    protected void onInsideBlock(IBlockState p_191955_1_)
     {
-        CriteriaTriggers.field_192124_d.func_192193_a(this, p_191955_1_);
+        CriteriaTriggers.ENTER_BLOCK.trigger(this, p_191955_1_);
     }
 
     protected CooldownTracker createCooldownTracker()
@@ -423,14 +426,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
             }
         }
 
-        CriteriaTriggers.field_193135_v.func_193182_a(this);
+        CriteriaTriggers.TICK.trigger(this);
 
-        if (this.field_193107_ct != null)
+        if (this.levitationStartPos != null)
         {
-            CriteriaTriggers.field_193133_t.func_193162_a(this, this.field_193107_ct, this.ticksExisted - this.field_193108_cu);
+            CriteriaTriggers.LEVITATION.trigger(this, this.levitationStartPos, this.ticksExisted - this.levitatingSince);
         }
 
-        this.field_192042_bX.func_192741_b(this);
+        this.advancements.flushDirty(this);
     }
 
     public void onUpdateEntity()
@@ -443,7 +446,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
             {
                 ItemStack itemstack = this.inventory.getStackInSlot(i);
 
-                if (!itemstack.func_190926_b() && itemstack.getItem().isMap())
+                if (!itemstack.isEmpty() && itemstack.getItem().isMap())
                 {
                     Packet<?> packet = ((ItemMapBase)itemstack.getItem()).createMapDataPacket(itemstack, this.world, this);
 
@@ -506,7 +509,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
             if (this.ticksExisted % 20 == 0)
             {
-                CriteriaTriggers.field_192135_o.func_192215_a(this);
+                CriteriaTriggers.LOCATION.trigger(this);
             }
         }
         catch (Throwable throwable)
@@ -552,15 +555,15 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
             }
             else
             {
-                this.mcServer.getPlayerList().sendChatMsg(this.getCombatTracker().getDeathMessage());
+                this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
             }
         }
 
-        this.func_192030_dh();
+        this.spawnShoulderEntities();
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator())
         {
-            this.func_190776_cN();
+            this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
 
@@ -574,14 +577,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (entitylivingbase != null)
         {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.func_191301_a(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
             if (entitylist$entityegginfo != null)
             {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.func_191956_a(this, this.scoreValue, cause);
+            entitylivingbase.awardKillScore(this, this.scoreValue, cause);
         }
 
         this.addStat(StatList.DEATHS);
@@ -591,11 +594,11 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         this.getCombatTracker().reset();
     }
 
-    public void func_191956_a(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_)
+    public void awardKillScore(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_)
     {
         if (p_191956_1_ != this)
         {
-            super.func_191956_a(p_191956_1_, p_191956_2_, p_191956_3_);
+            super.awardKillScore(p_191956_1_, p_191956_2_, p_191956_3_);
             this.addScore(p_191956_2_);
             Collection<ScoreObjective> collection = this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.TOTAL_KILL_COUNT);
 
@@ -609,25 +612,25 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
                 this.addStat(StatList.MOB_KILLS);
             }
 
-            collection.addAll(this.func_192038_E(p_191956_1_));
+            collection.addAll(this.awardTeamKillScores(p_191956_1_));
 
             for (ScoreObjective scoreobjective : collection)
             {
                 this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective).incrementScore();
             }
 
-            CriteriaTriggers.field_192122_b.func_192211_a(this, p_191956_1_, p_191956_3_);
+            CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(this, p_191956_1_, p_191956_3_);
         }
     }
 
-    private Collection<ScoreObjective> func_192038_E(Entity p_192038_1_)
+    private Collection<ScoreObjective> awardTeamKillScores(Entity p_192038_1_)
     {
         String s = p_192038_1_ instanceof EntityPlayer ? p_192038_1_.getName() : p_192038_1_.getCachedUniqueIdString();
         ScorePlayerTeam scoreplayerteam = this.getWorldScoreboard().getPlayersTeam(this.getName());
 
         if (scoreplayerteam != null)
         {
-            int i = scoreplayerteam.getChatFormat().getColorIndex();
+            int i = scoreplayerteam.getColor().getColorIndex();
 
             if (i >= 0 && i < IScoreCriteria.KILLED_BY_TEAM.length)
             {
@@ -643,7 +646,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (scoreplayerteam1 != null)
         {
-            int j = scoreplayerteam1.getChatFormat().getColorIndex();
+            int j = scoreplayerteam1.getColor().getColorIndex();
 
             if (j >= 0 && j < IScoreCriteria.TEAM_KILL.length)
             {
@@ -667,7 +670,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         {
             boolean flag = this.mcServer.isDedicatedServer() && this.canPlayersAttack() && "fall".equals(source.damageType);
 
-            if (!flag && this.respawnInvulnerabilityTicks > 0 && source != DamageSource.outOfWorld)
+            if (!flag && this.respawnInvulnerabilityTicks > 0 && source != DamageSource.OUT_OF_WORLD)
             {
                 return false;
             }
@@ -675,7 +678,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
             {
                 if (source instanceof EntityDamageSource)
                 {
-                    Entity entity = source.getEntity();
+                    Entity entity = source.getTrueSource();
 
                     if (entity instanceof EntityPlayer && !this.canAttackPlayer((EntityPlayer)entity))
                     {
@@ -718,22 +721,22 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (this.dimension == 0 && dimensionIn == -1)
         {
-            this.field_193110_cw = new Vec3d(this.posX, this.posY, this.posZ);
+            this.enteredNetherPosition = new Vec3d(this.posX, this.posY, this.posZ);
         }
         else if (this.dimension != -1 && dimensionIn != 0)
         {
-            this.field_193110_cw = null;
+            this.enteredNetherPosition = null;
         }
 
         if (this.dimension == 1 && dimensionIn == 1)
         {
             this.world.removeEntity(this);
 
-            if (!this.playerConqueredTheEnd)
+            if (!this.queuedEndExit)
             {
-                this.playerConqueredTheEnd = true;
-                this.connection.sendPacket(new SPacketChangeGameState(4, this.field_192040_cp ? 0.0F : 1.0F));
-                this.field_192040_cp = true;
+                this.queuedEndExit = true;
+                this.connection.sendPacket(new SPacketChangeGameState(4, this.seenCredits ? 0.0F : 1.0F));
+                this.seenCredits = true;
             }
 
             return this;
@@ -796,10 +799,10 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         {
             this.addStat(StatList.SLEEP_IN_BED);
             Packet<?> packet = new SPacketUseBed(this, bedLocation);
-            this.getServerWorld().getEntityTracker().sendToAllTrackingEntity(this, packet);
+            this.getServerWorld().getEntityTracker().sendToTracking(this, packet);
             this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
             this.connection.sendPacket(packet);
-            CriteriaTriggers.field_192136_p.func_192215_a(this);
+            CriteriaTriggers.SLEPT_IN_BED.trigger(this);
         }
 
         return entityplayer$sleepresult;
@@ -844,6 +847,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         }
     }
 
+    /**
+     * Dismounts this entity from the entity it is riding.
+     */
     public void dismountRidingEntity()
     {
         Entity entity = this.getRidingEntity();
@@ -921,7 +927,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     {
         if (guiOwner instanceof ILootContainer && ((ILootContainer)guiOwner).getLootTable() != null && this.isSpectator())
         {
-            this.addChatComponentMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
+            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
         }
         else
         {
@@ -940,7 +946,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     {
         if (chestInventory instanceof ILootContainer && ((ILootContainer)chestInventory).getLootTable() != null && this.isSpectator())
         {
-            this.addChatComponentMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
+            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
         }
         else
         {
@@ -1041,7 +1047,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         {
             if (containerToSend == this.inventoryContainer)
             {
-                CriteriaTriggers.field_192125_e.func_192208_a(this, this.inventory);
+                CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory);
             }
 
             if (!this.isChangingQuantityOnly)
@@ -1053,13 +1059,13 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
     public void sendContainerToPlayer(Container containerIn)
     {
-        this.updateCraftingInventory(containerIn, containerIn.getInventory());
+        this.sendAllContents(containerIn, containerIn.getInventory());
     }
 
     /**
      * update the crafting window inventory with the items in the list
      */
-    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
+    public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList)
     {
         this.connection.sendPacket(new SPacketWindowItems(containerToSend.windowId, itemsList));
         this.connection.sendPacket(new SPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -1070,7 +1076,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
      * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
      * value. Both are truncated to shorts in non-local SMP.
      */
-    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
+    public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue)
     {
         this.connection.sendPacket(new SPacketWindowProperty(containerIn.windowId, varToUpdate, newValue));
     }
@@ -1123,7 +1129,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
             if (forward >= -1.0F && forward <= 1.0F)
             {
-                this.field_191988_bg = forward;
+                this.moveForward = forward;
             }
 
             this.isJumping = jumping;
@@ -1160,31 +1166,31 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         }
     }
 
-    public void func_192021_a(List<IRecipe> p_192021_1_)
+    public void unlockRecipes(List<IRecipe> p_192021_1_)
     {
-        this.field_192041_cq.func_193835_a(p_192021_1_, this);
+        this.recipeBook.add(p_192021_1_, this);
     }
 
-    public void func_193102_a(ResourceLocation[] p_193102_1_)
+    public void unlockRecipes(ResourceLocation[] p_193102_1_)
     {
         List<IRecipe> list = Lists.<IRecipe>newArrayList();
 
         for (ResourceLocation resourcelocation : p_193102_1_)
         {
-            list.add(CraftingManager.func_193373_a(resourcelocation));
+            list.add(CraftingManager.getRecipe(resourcelocation));
         }
 
-        this.func_192021_a(list);
+        this.unlockRecipes(list);
     }
 
-    public void func_192022_b(List<IRecipe> p_192022_1_)
+    public void resetRecipes(List<IRecipe> p_192022_1_)
     {
-        this.field_192041_cq.func_193834_b(p_192022_1_, this);
+        this.recipeBook.remove(p_192022_1_, this);
     }
 
     public void mountEntityAndWakeUp()
     {
-        this.field_193109_cv = true;
+        this.disconnected = true;
         this.removePassengers();
 
         if (this.sleeping)
@@ -1193,9 +1199,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         }
     }
 
-    public boolean func_193105_t()
+    public boolean hasDisconnected()
     {
-        return this.field_193109_cv;
+        return this.disconnected;
     }
 
     /**
@@ -1207,9 +1213,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         this.lastHealth = -1.0E8F;
     }
 
-    public void addChatComponentMessage(ITextComponent chatComponent, boolean p_146105_2_)
+    public void sendStatusMessage(ITextComponent chatComponent, boolean actionBar)
     {
-        this.connection.sendPacket(new SPacketChat(chatComponent, p_146105_2_ ? ChatType.GAME_INFO : ChatType.CHAT));
+        this.connection.sendPacket(new SPacketChat(chatComponent, actionBar ? ChatType.GAME_INFO : ChatType.CHAT));
     }
 
     /**
@@ -1217,49 +1223,49 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
      */
     protected void onItemUseFinish()
     {
-        if (!this.activeItemStack.func_190926_b() && this.isHandActive())
+        if (!this.activeItemStack.isEmpty() && this.isHandActive())
         {
             this.connection.sendPacket(new SPacketEntityStatus(this, (byte)9));
             super.onItemUseFinish();
         }
     }
 
-    public void func_193104_a(EntityPlayerMP p_193104_1_, boolean p_193104_2_)
+    public void copyFrom(EntityPlayerMP that, boolean keepEverything)
     {
-        if (p_193104_2_)
+        if (keepEverything)
         {
-            this.inventory.copyInventory(p_193104_1_.inventory);
-            this.setHealth(p_193104_1_.getHealth());
-            this.foodStats = p_193104_1_.foodStats;
-            this.experienceLevel = p_193104_1_.experienceLevel;
-            this.experienceTotal = p_193104_1_.experienceTotal;
-            this.experience = p_193104_1_.experience;
-            this.setScore(p_193104_1_.getScore());
-            this.lastPortalPos = p_193104_1_.lastPortalPos;
-            this.lastPortalVec = p_193104_1_.lastPortalVec;
-            this.teleportDirection = p_193104_1_.teleportDirection;
+            this.inventory.copyInventory(that.inventory);
+            this.setHealth(that.getHealth());
+            this.foodStats = that.foodStats;
+            this.experienceLevel = that.experienceLevel;
+            this.experienceTotal = that.experienceTotal;
+            this.experience = that.experience;
+            this.setScore(that.getScore());
+            this.lastPortalPos = that.lastPortalPos;
+            this.lastPortalVec = that.lastPortalVec;
+            this.teleportDirection = that.teleportDirection;
         }
-        else if (this.world.getGameRules().getBoolean("keepInventory") || p_193104_1_.isSpectator())
+        else if (this.world.getGameRules().getBoolean("keepInventory") || that.isSpectator())
         {
-            this.inventory.copyInventory(p_193104_1_.inventory);
-            this.experienceLevel = p_193104_1_.experienceLevel;
-            this.experienceTotal = p_193104_1_.experienceTotal;
-            this.experience = p_193104_1_.experience;
-            this.setScore(p_193104_1_.getScore());
+            this.inventory.copyInventory(that.inventory);
+            this.experienceLevel = that.experienceLevel;
+            this.experienceTotal = that.experienceTotal;
+            this.experience = that.experience;
+            this.setScore(that.getScore());
         }
 
-        this.xpSeed = p_193104_1_.xpSeed;
-        this.theInventoryEnderChest = p_193104_1_.theInventoryEnderChest;
-        this.getDataManager().set(PLAYER_MODEL_FLAG, p_193104_1_.getDataManager().get(PLAYER_MODEL_FLAG));
+        this.xpSeed = that.xpSeed;
+        this.enderChest = that.enderChest;
+        this.getDataManager().set(PLAYER_MODEL_FLAG, that.getDataManager().get(PLAYER_MODEL_FLAG));
         this.lastExperience = -1;
         this.lastHealth = -1.0F;
         this.lastFoodLevel = -1;
-        this.field_192041_cq.func_193824_a(p_193104_1_.field_192041_cq);
-        this.entityRemoveQueue.addAll(p_193104_1_.entityRemoveQueue);
-        this.field_192040_cp = p_193104_1_.field_192040_cp;
-        this.field_193110_cw = p_193104_1_.field_193110_cw;
-        this.func_192029_h(p_193104_1_.func_192023_dk());
-        this.func_192031_i(p_193104_1_.func_192025_dl());
+        this.recipeBook.apply(that.recipeBook);
+        this.entityRemoveQueue.addAll(that.entityRemoveQueue);
+        this.seenCredits = that.seenCredits;
+        this.enteredNetherPosition = that.enteredNetherPosition;
+        this.setLeftShoulderEntity(that.getLeftShoulderEntity());
+        this.setRightShoulderEntity(that.getRightShoulderEntity());
     }
 
     protected void onNewPotionEffect(PotionEffect id)
@@ -1269,18 +1275,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (id.getPotion() == MobEffects.LEVITATION)
         {
-            this.field_193108_cu = this.ticksExisted;
-            this.field_193107_ct = new Vec3d(this.posX, this.posY, this.posZ);
+            this.levitatingSince = this.ticksExisted;
+            this.levitationStartPos = new Vec3d(this.posX, this.posY, this.posZ);
         }
 
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
+        CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
     }
 
     protected void onChangedPotionEffect(PotionEffect id, boolean p_70695_2_)
     {
         super.onChangedPotionEffect(id, p_70695_2_);
         this.connection.sendPacket(new SPacketEntityEffect(this.getEntityId(), id));
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
+        CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
     }
 
     protected void onFinishedPotionEffect(PotionEffect effect)
@@ -1290,10 +1296,10 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (effect.getPotion() == MobEffects.LEVITATION)
         {
-            this.field_193107_ct = null;
+            this.levitationStartPos = null;
         }
 
-        CriteriaTriggers.field_193139_z.func_193153_a(this);
+        CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
     }
 
     /**
@@ -1344,7 +1350,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
 
         if (gameType == GameType.SPECTATOR)
         {
-            this.func_192030_dh();
+            this.spawnShoulderEntities();
             this.dismountRidingEntity();
         }
         else
@@ -1372,7 +1378,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(ITextComponent component)
+    public void sendMessage(ITextComponent component)
     {
         this.connection.sendPacket(new SPacketChat(component));
     }
@@ -1380,7 +1386,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    public boolean canUseCommand(int permLevel, String commandName)
     {
         if ("seed".equals(commandName) && !this.mcServer.isDedicatedServer())
         {
@@ -1464,9 +1470,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         return this.statsFile;
     }
 
-    public RecipeBookServer func_192037_E()
+    public RecipeBookServer getRecipeBook()
     {
-        return this.field_192041_cq;
+        return this.recipeBook;
     }
 
     /**
@@ -1595,14 +1601,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener
         this.setFlag(7, false);
     }
 
-    public PlayerAdvancements func_192039_O()
+    public PlayerAdvancements getAdvancements()
     {
-        return this.field_192042_bX;
+        return this.advancements;
     }
 
     @Nullable
-    public Vec3d func_193106_Q()
+    public Vec3d getEnteredNetherPosition()
     {
-        return this.field_193110_cw;
+        return this.enteredNetherPosition;
     }
 }

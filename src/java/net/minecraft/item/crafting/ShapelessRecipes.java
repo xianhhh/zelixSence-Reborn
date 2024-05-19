@@ -16,18 +16,18 @@ public class ShapelessRecipes implements IRecipe
     /** Is the ItemStack that you get when craft the recipe. */
     private final ItemStack recipeOutput;
     private final NonNullList<Ingredient> recipeItems;
-    private final String field_194138_c;
+    private final String group;
 
-    public ShapelessRecipes(String p_i47500_1_, ItemStack p_i47500_2_, NonNullList<Ingredient> p_i47500_3_)
+    public ShapelessRecipes(String group, ItemStack output, NonNullList<Ingredient> ingredients)
     {
-        this.field_194138_c = p_i47500_1_;
-        this.recipeOutput = p_i47500_2_;
-        this.recipeItems = p_i47500_3_;
+        this.group = group;
+        this.recipeOutput = output;
+        this.recipeItems = ingredients;
     }
 
-    public String func_193358_e()
+    public String getGroup()
     {
-        return this.field_194138_c;
+        return this.group;
     }
 
     public ItemStack getRecipeOutput()
@@ -35,14 +35,14 @@ public class ShapelessRecipes implements IRecipe
         return this.recipeOutput;
     }
 
-    public NonNullList<Ingredient> func_192400_c()
+    public NonNullList<Ingredient> getIngredients()
     {
         return this.recipeItems;
     }
 
     public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
     {
-        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 
         for (int i = 0; i < nonnulllist.size(); ++i)
         {
@@ -70,7 +70,7 @@ public class ShapelessRecipes implements IRecipe
             {
                 ItemStack itemstack = inv.getStackInRowAndColumn(j, i);
 
-                if (!itemstack.func_190926_b())
+                if (!itemstack.isEmpty())
                 {
                     boolean flag = false;
 
@@ -103,10 +103,10 @@ public class ShapelessRecipes implements IRecipe
         return this.recipeOutput.copy();
     }
 
-    public static ShapelessRecipes func_193363_a(JsonObject p_193363_0_)
+    public static ShapelessRecipes deserialize(JsonObject json)
     {
-        String s = JsonUtils.getString(p_193363_0_, "group", "");
-        NonNullList<Ingredient> nonnulllist = func_193364_a(JsonUtils.getJsonArray(p_193363_0_, "ingredients"));
+        String s = JsonUtils.getString(json, "group", "");
+        NonNullList<Ingredient> nonnulllist = deserializeIngredients(JsonUtils.getJsonArray(json, "ingredients"));
 
         if (nonnulllist.isEmpty())
         {
@@ -118,20 +118,20 @@ public class ShapelessRecipes implements IRecipe
         }
         else
         {
-            ItemStack itemstack = ShapedRecipes.func_192405_a(JsonUtils.getJsonObject(p_193363_0_, "result"), true);
+            ItemStack itemstack = ShapedRecipes.deserializeItem(JsonUtils.getJsonObject(json, "result"), true);
             return new ShapelessRecipes(s, itemstack, nonnulllist);
         }
     }
 
-    private static NonNullList<Ingredient> func_193364_a(JsonArray p_193364_0_)
+    private static NonNullList<Ingredient> deserializeIngredients(JsonArray array)
     {
-        NonNullList<Ingredient> nonnulllist = NonNullList.<Ingredient>func_191196_a();
+        NonNullList<Ingredient> nonnulllist = NonNullList.<Ingredient>create();
 
-        for (int i = 0; i < p_193364_0_.size(); ++i)
+        for (int i = 0; i < array.size(); ++i)
         {
-            Ingredient ingredient = ShapedRecipes.func_193361_a(p_193364_0_.get(i));
+            Ingredient ingredient = ShapedRecipes.deserializeIngredient(array.get(i));
 
-            if (ingredient != Ingredient.field_193370_a)
+            if (ingredient != Ingredient.EMPTY)
             {
                 nonnulllist.add(ingredient);
             }
@@ -140,8 +140,11 @@ public class ShapelessRecipes implements IRecipe
         return nonnulllist;
     }
 
-    public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+    /**
+     * Used to determine if this recipe can fit in a grid of the given width/height
+     */
+    public boolean canFit(int width, int height)
     {
-        return p_194133_1_ * p_194133_2_ >= this.recipeItems.size();
+        return width * height >= this.recipeItems.size();
     }
 }

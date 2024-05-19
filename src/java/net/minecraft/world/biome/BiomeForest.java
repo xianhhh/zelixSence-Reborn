@@ -24,14 +24,14 @@ public class BiomeForest extends Biome
     {
         super(properties);
         this.type = typeIn;
-        this.theBiomeDecorator.treesPerChunk = 10;
-        this.theBiomeDecorator.grassPerChunk = 2;
+        this.decorator.treesPerChunk = 10;
+        this.decorator.grassPerChunk = 2;
 
         if (this.type == BiomeForest.Type.FLOWER)
         {
-            this.theBiomeDecorator.treesPerChunk = 6;
-            this.theBiomeDecorator.flowersPerChunk = 100;
-            this.theBiomeDecorator.grassPerChunk = 1;
+            this.decorator.treesPerChunk = 6;
+            this.decorator.flowersPerChunk = 100;
+            this.decorator.grassPerChunk = 1;
             this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityRabbit.class, 4, 2, 3));
         }
 
@@ -42,11 +42,11 @@ public class BiomeForest extends Biome
 
         if (this.type == BiomeForest.Type.ROOFED)
         {
-            this.theBiomeDecorator.treesPerChunk = -999;
+            this.decorator.treesPerChunk = -999;
         }
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         if (this.type == BiomeForest.Type.ROOFED && rand.nextInt(3) > 0)
         {
@@ -111,7 +111,7 @@ public class BiomeForest extends Biome
                 }
                 else
                 {
-                    WorldGenAbstractTree worldgenabstracttree = this.genBigTreeChance(p_185379_2_);
+                    WorldGenAbstractTree worldgenabstracttree = this.getRandomTreeFeature(p_185379_2_);
                     worldgenabstracttree.setDecorationDefaults();
 
                     if (worldgenabstracttree.generate(p_185379_1_, p_185379_2_, blockpos))

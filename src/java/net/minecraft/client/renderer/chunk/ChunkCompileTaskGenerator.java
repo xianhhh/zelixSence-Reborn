@@ -18,11 +18,11 @@ public class ChunkCompileTaskGenerator implements Comparable<ChunkCompileTaskGen
     private ChunkCompileTaskGenerator.Status status = ChunkCompileTaskGenerator.Status.PENDING;
     private boolean finished;
 
-    public ChunkCompileTaskGenerator(RenderChunk p_i46560_1_, ChunkCompileTaskGenerator.Type p_i46560_2_, double p_i46560_3_)
+    public ChunkCompileTaskGenerator(RenderChunk renderChunkIn, ChunkCompileTaskGenerator.Type typeIn, double distanceSqIn)
     {
-        this.renderChunk = p_i46560_1_;
-        this.type = p_i46560_2_;
-        this.distanceSq = p_i46560_3_;
+        this.renderChunk = renderChunkIn;
+        this.type = typeIn;
+        this.distanceSq = distanceSqIn;
     }
 
     public ChunkCompileTaskGenerator.Status getStatus()

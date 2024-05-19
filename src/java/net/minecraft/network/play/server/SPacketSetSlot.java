@@ -10,7 +10,7 @@ public class SPacketSetSlot implements Packet<INetHandlerPlayClient>
 {
     private int windowId;
     private int slot;
-    private ItemStack item = ItemStack.field_190927_a;
+    private ItemStack item = ItemStack.EMPTY;
 
     public SPacketSetSlot()
     {
@@ -38,7 +38,7 @@ public class SPacketSetSlot implements Packet<INetHandlerPlayClient>
     {
         this.windowId = buf.readByte();
         this.slot = buf.readShort();
-        this.item = buf.readItemStackFromBuffer();
+        this.item = buf.readItemStack();
     }
 
     /**
@@ -48,7 +48,7 @@ public class SPacketSetSlot implements Packet<INetHandlerPlayClient>
     {
         buf.writeByte(this.windowId);
         buf.writeShort(this.slot);
-        buf.writeItemStackToBuffer(this.item);
+        buf.writeItemStack(this.item);
     }
 
     public int getWindowId()

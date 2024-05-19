@@ -10,8 +10,9 @@ public class TextComponentString extends TextComponentBase
     }
 
     /**
-     * Gets the text value of this ChatComponentText.  TODO: what are getUnformattedText and getUnformattedTextForChat
-     * missing that made someone decide to create a third equivalent method that only ChatComponentText can implement?
+     * Gets the text value of this component. This is used to access the {@link #text} property, and only should be used
+     * when dealing specifically with instances of {@link TextComponentString} - for other purposes, use {@link
+     * #getUnformattedComponentText()}.
      */
     public String getText()
     {
@@ -19,8 +20,9 @@ public class TextComponentString extends TextComponentBase
     }
 
     /**
-     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
-     * different methods?
+     * Gets the raw content of this component (but not its sibling components), without any formatting codes. For
+     * example, this is the raw text in a {@link TextComponentString}, but it's the translated text for a {@link
+     * TextComponentTranslation} and it's the score value for a {@link TextComponentScore}.
      */
     public String getUnformattedComponentText()
     {

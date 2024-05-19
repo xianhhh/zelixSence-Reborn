@@ -11,7 +11,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderEvoker extends RenderLiving<EntityMob>
 {
-    private static final ResourceLocation field_191338_a = new ResourceLocation("textures/entity/illager/evoker.png");
+    private static final ResourceLocation EVOKER_ILLAGER = new ResourceLocation("textures/entity/illager/evoker.png");
 
     public RenderEvoker(RenderManager p_i47207_1_)
     {
@@ -20,14 +20,14 @@ public class RenderEvoker extends RenderLiving<EntityMob>
         {
             public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
             {
-                if (((EntitySpellcasterIllager)entitylivingbaseIn).func_193082_dl())
+                if (((EntitySpellcasterIllager)entitylivingbaseIn).isSpellcasting())
                 {
                     super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
                 }
             }
-            protected void func_191361_a(EnumHandSide p_191361_1_)
+            protected void translateToHand(EnumHandSide p_191361_1_)
             {
-                ((ModelIllager)this.livingEntityRenderer.getMainModel()).func_191216_a(p_191361_1_).postRender(0.0625F);
+                ((ModelIllager)this.livingEntityRenderer.getMainModel()).getArm(p_191361_1_).postRender(0.0625F);
             }
         });
     }
@@ -37,7 +37,7 @@ public class RenderEvoker extends RenderLiving<EntityMob>
      */
     protected ResourceLocation getEntityTexture(EntityMob entity)
     {
-        return field_191338_a;
+        return EVOKER_ILLAGER;
     }
 
     /**

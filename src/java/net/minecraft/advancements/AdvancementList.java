@@ -15,68 +15,68 @@ import org.apache.logging.log4j.Logger;
 
 public class AdvancementList
 {
-    private static final Logger field_192091_a = LogManager.getLogger();
-    private final Map<ResourceLocation, Advancement> field_192092_b = Maps.<ResourceLocation, Advancement>newHashMap();
-    private final Set<Advancement> field_192093_c = Sets.<Advancement>newLinkedHashSet();
-    private final Set<Advancement> field_192094_d = Sets.<Advancement>newLinkedHashSet();
-    private AdvancementList.Listener field_192095_e;
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Map<ResourceLocation, Advancement> advancements = Maps.<ResourceLocation, Advancement>newHashMap();
+    private final Set<Advancement> roots = Sets.<Advancement>newLinkedHashSet();
+    private final Set<Advancement> nonRoots = Sets.<Advancement>newLinkedHashSet();
+    private AdvancementList.Listener listener;
 
-    private void func_192090_a(Advancement p_192090_1_)
+    private void remove(Advancement advancementIn)
     {
-        for (Advancement advancement : p_192090_1_.func_192069_e())
+        for (Advancement advancement : advancementIn.getChildren())
         {
-            this.func_192090_a(advancement);
+            this.remove(advancement);
         }
 
-        field_192091_a.info("Forgot about advancement " + p_192090_1_.func_192067_g());
-        this.field_192092_b.remove(p_192090_1_.func_192067_g());
+        LOGGER.info("Forgot about advancement " + advancementIn.getId());
+        this.advancements.remove(advancementIn.getId());
 
-        if (p_192090_1_.func_192070_b() == null)
+        if (advancementIn.getParent() == null)
         {
-            this.field_192093_c.remove(p_192090_1_);
+            this.roots.remove(advancementIn);
 
-            if (this.field_192095_e != null)
+            if (this.listener != null)
             {
-                this.field_192095_e.func_191928_b(p_192090_1_);
+                this.listener.rootAdvancementRemoved(advancementIn);
             }
         }
         else
         {
-            this.field_192094_d.remove(p_192090_1_);
+            this.nonRoots.remove(advancementIn);
 
-            if (this.field_192095_e != null)
+            if (this.listener != null)
             {
-                this.field_192095_e.func_191929_d(p_192090_1_);
+                this.listener.nonRootAdvancementRemoved(advancementIn);
             }
         }
     }
 
-    public void func_192085_a(Set<ResourceLocation> p_192085_1_)
+    public void removeAll(Set<ResourceLocation> ids)
     {
-        for (ResourceLocation resourcelocation : p_192085_1_)
+        for (ResourceLocation resourcelocation : ids)
         {
-            Advancement advancement = this.field_192092_b.get(resourcelocation);
+            Advancement advancement = this.advancements.get(resourcelocation);
 
             if (advancement == null)
             {
-                field_192091_a.warn("Told to remove advancement " + resourcelocation + " but I don't know what that is");
+                LOGGER.warn("Told to remove advancement " + resourcelocation + " but I don't know what that is");
             }
             else
             {
-                this.func_192090_a(advancement);
+                this.remove(advancement);
             }
         }
     }
 
-    public void func_192083_a(Map<ResourceLocation, Advancement.Builder> p_192083_1_)
+    public void loadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn)
     {
-        Function<ResourceLocation, Advancement> function = Functions.<ResourceLocation, Advancement>forMap(this.field_192092_b, null);
+        Function<ResourceLocation, Advancement> function = Functions.<ResourceLocation, Advancement>forMap(this.advancements, null);
         label42:
 
-        while (!p_192083_1_.isEmpty())
+        while (!advancementsIn.isEmpty())
         {
             boolean flag = false;
-            Iterator<Entry<ResourceLocation, Advancement.Builder>> iterator = p_192083_1_.entrySet().iterator();
+            Iterator<Entry<ResourceLocation, Advancement.Builder>> iterator = advancementsIn.entrySet().iterator();
 
             while (iterator.hasNext())
             {
@@ -84,29 +84,29 @@ public class AdvancementList
                 ResourceLocation resourcelocation = entry.getKey();
                 Advancement.Builder advancement$builder = entry.getValue();
 
-                if (advancement$builder.func_192058_a(function))
+                if (advancement$builder.resolveParent(function))
                 {
-                    Advancement advancement = advancement$builder.func_192056_a(resourcelocation);
-                    this.field_192092_b.put(resourcelocation, advancement);
+                    Advancement advancement = advancement$builder.build(resourcelocation);
+                    this.advancements.put(resourcelocation, advancement);
                     flag = true;
                     iterator.remove();
 
-                    if (advancement.func_192070_b() == null)
+                    if (advancement.getParent() == null)
                     {
-                        this.field_192093_c.add(advancement);
+                        this.roots.add(advancement);
 
-                        if (this.field_192095_e != null)
+                        if (this.listener != null)
                         {
-                            this.field_192095_e.func_191931_a(advancement);
+                            this.listener.rootAdvancementAdded(advancement);
                         }
                     }
                     else
                     {
-                        this.field_192094_d.add(advancement);
+                        this.nonRoots.add(advancement);
 
-                        if (this.field_192095_e != null)
+                        if (this.listener != null)
                         {
-                            this.field_192095_e.func_191932_c(advancement);
+                            this.listener.nonRootAdvancementAdded(advancement);
                         }
                     }
                 }
@@ -114,7 +114,7 @@ public class AdvancementList
 
             if (!flag)
             {
-                iterator = p_192083_1_.entrySet().iterator();
+                iterator = advancementsIn.entrySet().iterator();
 
                 while (true)
                 {
@@ -124,70 +124,70 @@ public class AdvancementList
                     }
 
                     Entry<ResourceLocation, Advancement.Builder> entry1 = (Entry)iterator.next();
-                    field_192091_a.error("Couldn't load advancement " + entry1.getKey() + ": " + entry1.getValue());
+                    LOGGER.error("Couldn't load advancement " + entry1.getKey() + ": " + entry1.getValue());
                 }
             }
         }
 
-        field_192091_a.info("Loaded " + this.field_192092_b.size() + " advancements");
+        LOGGER.info("Loaded " + this.advancements.size() + " advancements");
     }
 
-    public void func_192087_a()
+    public void clear()
     {
-        this.field_192092_b.clear();
-        this.field_192093_c.clear();
-        this.field_192094_d.clear();
+        this.advancements.clear();
+        this.roots.clear();
+        this.nonRoots.clear();
 
-        if (this.field_192095_e != null)
+        if (this.listener != null)
         {
-            this.field_192095_e.func_191930_a();
+            this.listener.advancementsCleared();
         }
     }
 
-    public Iterable<Advancement> func_192088_b()
+    public Iterable<Advancement> getRoots()
     {
-        return this.field_192093_c;
+        return this.roots;
     }
 
-    public Iterable<Advancement> func_192089_c()
+    public Iterable<Advancement> getAdvancements()
     {
-        return this.field_192092_b.values();
+        return this.advancements.values();
     }
 
     @Nullable
-    public Advancement func_192084_a(ResourceLocation p_192084_1_)
+    public Advancement getAdvancement(ResourceLocation id)
     {
-        return this.field_192092_b.get(p_192084_1_);
+        return this.advancements.get(id);
     }
 
-    public void func_192086_a(@Nullable AdvancementList.Listener p_192086_1_)
+    public void setListener(@Nullable AdvancementList.Listener listenerIn)
     {
-        this.field_192095_e = p_192086_1_;
+        this.listener = listenerIn;
 
-        if (p_192086_1_ != null)
+        if (listenerIn != null)
         {
-            for (Advancement advancement : this.field_192093_c)
+            for (Advancement advancement : this.roots)
             {
-                p_192086_1_.func_191931_a(advancement);
+                listenerIn.rootAdvancementAdded(advancement);
             }
 
-            for (Advancement advancement1 : this.field_192094_d)
+            for (Advancement advancement1 : this.nonRoots)
             {
-                p_192086_1_.func_191932_c(advancement1);
+                listenerIn.nonRootAdvancementAdded(advancement1);
             }
         }
     }
 
     public interface Listener
     {
-        void func_191931_a(Advancement p_191931_1_);
+        void rootAdvancementAdded(Advancement advancementIn);
 
-        void func_191928_b(Advancement p_191928_1_);
+        void rootAdvancementRemoved(Advancement advancementIn);
 
-        void func_191932_c(Advancement p_191932_1_);
+        void nonRootAdvancementAdded(Advancement advancementIn);
 
-        void func_191929_d(Advancement p_191929_1_);
+        void nonRootAdvancementRemoved(Advancement advancementIn);
 
-        void func_191930_a();
+        void advancementsCleared();
     }
 }

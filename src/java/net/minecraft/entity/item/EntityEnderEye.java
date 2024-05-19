@@ -84,7 +84,7 @@ public class EntityEnderEye extends Entity
     }
 
     /**
-     * Updates the velocity of the entity to a new value.
+     * Updates the entity motion clientside, called by packets from the server
      */
     public void setVelocity(double x, double y, double z)
     {
@@ -188,12 +188,12 @@ public class EntityEnderEye extends Entity
 
             if (this.despawnTimer > 80 && !this.world.isRemote)
             {
-                this.playSound(SoundEvents.field_193777_bb, 1.0F, 1.0F);
+                this.playSound(SoundEvents.ENTITY_ENDEREYE_DEATH, 1.0F, 1.0F);
                 this.setDead();
 
                 if (this.shatterOrDrop)
                 {
-                    this.world.spawnEntityInWorld(new EntityItem(this.world, this.posX, this.posY, this.posZ, new ItemStack(Items.ENDER_EYE)));
+                    this.world.spawnEntity(new EntityItem(this.world, this.posX, this.posY, this.posZ, new ItemStack(Items.ENDER_EYE)));
                 }
                 else
                 {

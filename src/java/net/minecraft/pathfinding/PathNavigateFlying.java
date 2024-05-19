@@ -26,12 +26,12 @@ public class PathNavigateFlying extends PathNavigate
      */
     protected boolean canNavigate()
     {
-        return this.func_192880_g() && this.isInLiquid() || !this.theEntity.isRiding();
+        return this.canFloat() && this.isInLiquid() || !this.entity.isRiding();
     }
 
     protected Vec3d getEntityPosition()
     {
-        return new Vec3d(this.theEntity.posX, this.theEntity.posY, this.theEntity.posZ);
+        return new Vec3d(this.entity.posX, this.entity.posY, this.entity.posZ);
     }
 
     /**
@@ -59,20 +59,20 @@ public class PathNavigateFlying extends PathNavigate
             }
             else if (this.currentPath != null && this.currentPath.getCurrentPathIndex() < this.currentPath.getCurrentPathLength())
             {
-                Vec3d vec3d = this.currentPath.getVectorFromIndex(this.theEntity, this.currentPath.getCurrentPathIndex());
+                Vec3d vec3d = this.currentPath.getVectorFromIndex(this.entity, this.currentPath.getCurrentPathIndex());
 
-                if (MathHelper.floor(this.theEntity.posX) == MathHelper.floor(vec3d.xCoord) && MathHelper.floor(this.theEntity.posY) == MathHelper.floor(vec3d.yCoord) && MathHelper.floor(this.theEntity.posZ) == MathHelper.floor(vec3d.zCoord))
+                if (MathHelper.floor(this.entity.posX) == MathHelper.floor(vec3d.x) && MathHelper.floor(this.entity.posY) == MathHelper.floor(vec3d.y) && MathHelper.floor(this.entity.posZ) == MathHelper.floor(vec3d.z))
                 {
                     this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
                 }
             }
 
-            this.func_192876_m();
+            this.debugPathFinding();
 
             if (!this.noPath())
             {
-                Vec3d vec3d1 = this.currentPath.getPosition(this.theEntity);
-                this.theEntity.getMoveHelper().setMoveTo(vec3d1.xCoord, vec3d1.yCoord, vec3d1.zCoord, this.speed);
+                Vec3d vec3d1 = this.currentPath.getPosition(this.entity);
+                this.entity.getMoveHelper().setMoveTo(vec3d1.x, vec3d1.y, vec3d1.z, this.speed);
             }
         }
     }
@@ -82,12 +82,12 @@ public class PathNavigateFlying extends PathNavigate
      */
     protected boolean isDirectPathBetweenPoints(Vec3d posVec31, Vec3d posVec32, int sizeX, int sizeY, int sizeZ)
     {
-        int i = MathHelper.floor(posVec31.xCoord);
-        int j = MathHelper.floor(posVec31.yCoord);
-        int k = MathHelper.floor(posVec31.zCoord);
-        double d0 = posVec32.xCoord - posVec31.xCoord;
-        double d1 = posVec32.yCoord - posVec31.yCoord;
-        double d2 = posVec32.zCoord - posVec31.zCoord;
+        int i = MathHelper.floor(posVec31.x);
+        int j = MathHelper.floor(posVec31.y);
+        int k = MathHelper.floor(posVec31.z);
+        double d0 = posVec32.x - posVec31.x;
+        double d1 = posVec32.y - posVec31.y;
+        double d2 = posVec32.z - posVec31.z;
         double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
         if (d3 < 1.0E-8D)
@@ -103,9 +103,9 @@ public class PathNavigateFlying extends PathNavigate
             double d5 = 1.0D / Math.abs(d0);
             double d6 = 1.0D / Math.abs(d1);
             double d7 = 1.0D / Math.abs(d2);
-            double d8 = (double)i - posVec31.xCoord;
-            double d9 = (double)j - posVec31.yCoord;
-            double d10 = (double)k - posVec31.zCoord;
+            double d8 = (double)i - posVec31.x;
+            double d9 = (double)j - posVec31.y;
+            double d10 = (double)k - posVec31.z;
 
             if (d0 >= 0.0D)
             {
@@ -128,9 +128,9 @@ public class PathNavigateFlying extends PathNavigate
             int l = d0 < 0.0D ? -1 : 1;
             int i1 = d1 < 0.0D ? -1 : 1;
             int j1 = d2 < 0.0D ? -1 : 1;
-            int k1 = MathHelper.floor(posVec32.xCoord);
-            int l1 = MathHelper.floor(posVec32.yCoord);
-            int i2 = MathHelper.floor(posVec32.zCoord);
+            int k1 = MathHelper.floor(posVec32.x);
+            int l1 = MathHelper.floor(posVec32.y);
+            int i2 = MathHelper.floor(posVec32.z);
             int j2 = k1 - i;
             int k2 = l1 - j;
             int l2 = i2 - k;
@@ -161,28 +161,28 @@ public class PathNavigateFlying extends PathNavigate
         }
     }
 
-    public void func_192879_a(boolean p_192879_1_)
+    public void setCanOpenDoors(boolean p_192879_1_)
     {
-        this.nodeProcessor.setCanBreakDoors(p_192879_1_);
+        this.nodeProcessor.setCanOpenDoors(p_192879_1_);
     }
 
-    public void func_192878_b(boolean p_192878_1_)
+    public void setCanEnterDoors(boolean p_192878_1_)
     {
         this.nodeProcessor.setCanEnterDoors(p_192878_1_);
     }
 
-    public void func_192877_c(boolean p_192877_1_)
+    public void setCanFloat(boolean p_192877_1_)
     {
         this.nodeProcessor.setCanSwim(p_192877_1_);
     }
 
-    public boolean func_192880_g()
+    public boolean canFloat()
     {
         return this.nodeProcessor.getCanSwim();
     }
 
     public boolean canEntityStandOnPos(BlockPos pos)
     {
-        return this.worldObj.getBlockState(pos).isFullyOpaque();
+        return this.world.getBlockState(pos).isTopSolid();
     }
 }

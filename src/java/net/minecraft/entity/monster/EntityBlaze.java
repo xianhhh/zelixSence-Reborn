@@ -84,7 +84,7 @@ public class EntityBlaze extends EntityMob
         return SoundEvents.ENTITY_BLAZE_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_BLAZE_HURT;
     }
@@ -138,7 +138,7 @@ public class EntityBlaze extends EntityMob
     {
         if (this.isWet())
         {
-            this.attackEntityFrom(DamageSource.drown, 1.0F);
+            this.attackEntityFrom(DamageSource.DROWN, 1.0F);
         }
 
         --this.heightOffsetUpdateTime;
@@ -251,7 +251,7 @@ public class EntityBlaze extends EntityMob
 
                 this.blaze.getMoveHelper().setMoveTo(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ, 1.0D);
             }
-            else if (d0 < this.func_191523_f() * this.func_191523_f())
+            else if (d0 < this.getFollowDistance() * this.getFollowDistance())
             {
                 double d1 = entitylivingbase.posX - this.blaze.posX;
                 double d2 = entitylivingbase.getEntityBoundingBox().minY + (double)(entitylivingbase.height / 2.0F) - (this.blaze.posY + (double)(this.blaze.height / 2.0F));
@@ -286,7 +286,7 @@ public class EntityBlaze extends EntityMob
                         {
                             EntitySmallFireball entitysmallfireball = new EntitySmallFireball(this.blaze.world, this.blaze, d1 + this.blaze.getRNG().nextGaussian() * (double)f, d2, d3 + this.blaze.getRNG().nextGaussian() * (double)f);
                             entitysmallfireball.posY = this.blaze.posY + (double)(this.blaze.height / 2.0F) + 0.5D;
-                            this.blaze.world.spawnEntityInWorld(entitysmallfireball);
+                            this.blaze.world.spawnEntity(entitysmallfireball);
                         }
                     }
                 }
@@ -302,7 +302,7 @@ public class EntityBlaze extends EntityMob
             super.updateTask();
         }
 
-        private double func_191523_f()
+        private double getFollowDistance()
         {
             IAttributeInstance iattributeinstance = this.blaze.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
             return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();

@@ -13,7 +13,7 @@ public class SlotCrafting extends Slot
     private final InventoryCrafting craftMatrix;
 
     /** The player that is using the GUI where this slot resides. */
-    private final EntityPlayer thePlayer;
+    private final EntityPlayer player;
 
     /**
      * The number of items that have been crafted so far. Gets passed to ItemStack.onCrafting before being reset.
@@ -23,7 +23,7 @@ public class SlotCrafting extends Slot
     public SlotCrafting(EntityPlayer player, InventoryCrafting craftingInventory, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition)
     {
         super(inventoryIn, slotIndex, xPosition, yPosition);
-        this.thePlayer = player;
+        this.player = player;
         this.craftMatrix = craftingInventory;
     }
 
@@ -43,7 +43,7 @@ public class SlotCrafting extends Slot
     {
         if (this.getHasStack())
         {
-            this.amountCrafted += Math.min(amount, this.getStack().func_190916_E());
+            this.amountCrafted += Math.min(amount, this.getStack().getCount());
         }
 
         return super.decrStackSize(amount);
@@ -59,7 +59,7 @@ public class SlotCrafting extends Slot
         this.onCrafting(stack);
     }
 
-    protected void func_190900_b(int p_190900_1_)
+    protected void onSwapCraft(int p_190900_1_)
     {
         this.amountCrafted += p_190900_1_;
     }
@@ -71,54 +71,54 @@ public class SlotCrafting extends Slot
     {
         if (this.amountCrafted > 0)
         {
-            stack.onCrafting(this.thePlayer.world, this.thePlayer, this.amountCrafted);
+            stack.onCrafting(this.player.world, this.player, this.amountCrafted);
         }
 
         this.amountCrafted = 0;
         InventoryCraftResult inventorycraftresult = (InventoryCraftResult)this.inventory;
-        IRecipe irecipe = inventorycraftresult.func_193055_i();
+        IRecipe irecipe = inventorycraftresult.getRecipeUsed();
 
-        if (irecipe != null && !irecipe.func_192399_d())
+        if (irecipe != null && !irecipe.isHidden())
         {
-            this.thePlayer.func_192021_a(Lists.newArrayList(irecipe));
-            inventorycraftresult.func_193056_a((IRecipe)null);
+            this.player.unlockRecipes(Lists.newArrayList(irecipe));
+            inventorycraftresult.setRecipeUsed((IRecipe)null);
         }
     }
 
-    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
+    public ItemStack onTake(EntityPlayer thePlayer, ItemStack stack)
     {
-        this.onCrafting(p_190901_2_);
-        NonNullList<ItemStack> nonnulllist = CraftingManager.getRemainingItems(this.craftMatrix, p_190901_1_.world);
+        this.onCrafting(stack);
+        NonNullList<ItemStack> nonnulllist = CraftingManager.getRemainingItems(this.craftMatrix, thePlayer.world);
 
         for (int i = 0; i < nonnulllist.size(); ++i)
         {
             ItemStack itemstack = this.craftMatrix.getStackInSlot(i);
             ItemStack itemstack1 = nonnulllist.get(i);
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 this.craftMatrix.decrStackSize(i, 1);
                 itemstack = this.craftMatrix.getStackInSlot(i);
             }
 
-            if (!itemstack1.func_190926_b())
+            if (!itemstack1.isEmpty())
             {
-                if (itemstack.func_190926_b())
+                if (itemstack.isEmpty())
                 {
                     this.craftMatrix.setInventorySlotContents(i, itemstack1);
                 }
                 else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
                 {
-                    itemstack1.func_190917_f(itemstack.func_190916_E());
+                    itemstack1.grow(itemstack.getCount());
                     this.craftMatrix.setInventorySlotContents(i, itemstack1);
                 }
-                else if (!this.thePlayer.inventory.addItemStackToInventory(itemstack1))
+                else if (!this.player.inventory.addItemStackToInventory(itemstack1))
                 {
-                    this.thePlayer.dropItem(itemstack1, false);
+                    this.player.dropItem(itemstack1, false);
                 }
             }
         }
 
-        return p_190901_2_;
+        return stack;
     }
 }

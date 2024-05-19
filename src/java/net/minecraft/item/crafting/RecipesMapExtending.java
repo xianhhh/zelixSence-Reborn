@@ -13,7 +13,7 @@ public class RecipesMapExtending extends ShapedRecipes
 {
     public RecipesMapExtending()
     {
-        super("", 3, 3, NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193367_a(Items.FILLED_MAP), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER)), new ItemStack(Items.MAP));
+        super("", 3, 3, NonNullList.from(Ingredient.EMPTY, Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER), Ingredient.fromItem(Items.FILLED_MAP), Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER), Ingredient.fromItems(Items.PAPER)), new ItemStack(Items.MAP));
     }
 
     /**
@@ -27,9 +27,9 @@ public class RecipesMapExtending extends ShapedRecipes
         }
         else
         {
-            ItemStack itemstack = ItemStack.field_190927_a;
+            ItemStack itemstack = ItemStack.EMPTY;
 
-            for (int i = 0; i < inv.getSizeInventory() && itemstack.func_190926_b(); ++i)
+            for (int i = 0; i < inv.getSizeInventory() && itemstack.isEmpty(); ++i)
             {
                 ItemStack itemstack1 = inv.getStackInSlot(i);
 
@@ -39,7 +39,7 @@ public class RecipesMapExtending extends ShapedRecipes
                 }
             }
 
-            if (itemstack.func_190926_b())
+            if (itemstack.isEmpty())
             {
                 return false;
             }
@@ -51,7 +51,7 @@ public class RecipesMapExtending extends ShapedRecipes
                 {
                     return false;
                 }
-                else if (this.func_190934_a(mapdata))
+                else if (this.isExplorationMap(mapdata))
                 {
                     return false;
                 }
@@ -63,13 +63,13 @@ public class RecipesMapExtending extends ShapedRecipes
         }
     }
 
-    private boolean func_190934_a(MapData p_190934_1_)
+    private boolean isExplorationMap(MapData p_190934_1_)
     {
         if (p_190934_1_.mapDecorations != null)
         {
             for (MapDecoration mapdecoration : p_190934_1_.mapDecorations.values())
             {
-                if (mapdecoration.func_191179_b() == MapDecoration.Type.MANSION || mapdecoration.func_191179_b() == MapDecoration.Type.MONUMENT)
+                if (mapdecoration.getType() == MapDecoration.Type.MANSION || mapdecoration.getType() == MapDecoration.Type.MONUMENT)
                 {
                     return true;
                 }
@@ -84,9 +84,9 @@ public class RecipesMapExtending extends ShapedRecipes
      */
     public ItemStack getCraftingResult(InventoryCrafting inv)
     {
-        ItemStack itemstack = ItemStack.field_190927_a;
+        ItemStack itemstack = ItemStack.EMPTY;
 
-        for (int i = 0; i < inv.getSizeInventory() && itemstack.func_190926_b(); ++i)
+        for (int i = 0; i < inv.getSizeInventory() && itemstack.isEmpty(); ++i)
         {
             ItemStack itemstack1 = inv.getStackInSlot(i);
 
@@ -97,7 +97,7 @@ public class RecipesMapExtending extends ShapedRecipes
         }
 
         itemstack = itemstack.copy();
-        itemstack.func_190920_e(1);
+        itemstack.setCount(1);
 
         if (itemstack.getTagCompound() == null)
         {
@@ -108,7 +108,7 @@ public class RecipesMapExtending extends ShapedRecipes
         return itemstack;
     }
 
-    public boolean func_192399_d()
+    public boolean isHidden()
     {
         return true;
     }

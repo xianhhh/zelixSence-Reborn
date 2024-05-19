@@ -41,20 +41,23 @@ public class BlockSnow extends Block
         return SNOW_AABB[((Integer)state.getValue(LAYERS)).intValue()];
     }
 
+    /**
+     * Determines if an entity can path through this block
+     */
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
     {
         return ((Integer)worldIn.getBlockState(pos).getValue(LAYERS)).intValue() < 5;
     }
 
     /**
-     * Checks if an IBlockState represents a block that is opaque and a full cube.
+     * Determines if the block is solid enough on the top side to support other blocks, like redstone components.
      */
-    public boolean isFullyOpaque(IBlockState state)
+    public boolean isTopSolid(IBlockState state)
     {
         return ((Integer)state.getValue(LAYERS)).intValue() == 8;
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }
@@ -88,7 +91,7 @@ public class BlockSnow extends Block
 
         if (block != Blocks.ICE && block != Blocks.PACKED_ICE && block != Blocks.BARRIER)
         {
-            BlockFaceShape blockfaceshape = iblockstate.func_193401_d(worldIn, pos.down(), EnumFacing.UP);
+            BlockFaceShape blockfaceshape = iblockstate.getBlockFaceShape(worldIn, pos.down(), EnumFacing.UP);
             return blockfaceshape == BlockFaceShape.SOLID || iblockstate.getMaterial() == Material.LEAVES || block == this && ((Integer)iblockstate.getValue(LAYERS)).intValue() == 8;
         }
         else
@@ -102,7 +105,7 @@ public class BlockSnow extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         this.checkAndDropBlock(worldIn, pos, state);
     }
@@ -121,6 +124,10 @@ public class BlockSnow extends Block
         }
     }
 
+    /**
+     * Spawns the block's drops in the world. By the time this is called the Block has possibly been set to air via
+     * Block.removedByPlayer
+     */
     public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
         spawnAsEntity(worldIn, pos, new ItemStack(Items.SNOWBALL, ((Integer)state.getValue(LAYERS)).intValue() + 1, 0));

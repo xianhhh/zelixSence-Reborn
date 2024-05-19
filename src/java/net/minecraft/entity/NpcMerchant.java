@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 public class NpcMerchant implements IMerchant
 {
     /** Instance of Merchants Inventory. */
-    private final InventoryMerchant theMerchantInventory;
+    private final InventoryMerchant merchantInventory;
 
     /** This merchant's current player customer. */
     private final EntityPlayer customer;
@@ -27,7 +27,7 @@ public class NpcMerchant implements IMerchant
     {
         this.customer = customerIn;
         this.name = nameIn;
-        this.theMerchantInventory = new InventoryMerchant(customerIn, this);
+        this.merchantInventory = new InventoryMerchant(customerIn, this);
     }
 
     @Nullable
@@ -72,12 +72,12 @@ public class NpcMerchant implements IMerchant
         return (ITextComponent)(this.name != null ? this.name : new TextComponentTranslation("entity.Villager.name", new Object[0]));
     }
 
-    public World func_190670_t_()
+    public World getWorld()
     {
         return this.customer.world;
     }
 
-    public BlockPos func_190671_u_()
+    public BlockPos getPos()
     {
         return new BlockPos(this.customer);
     }

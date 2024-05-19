@@ -25,17 +25,17 @@ public class GuiWinGame extends GuiScreen
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation VIGNETTE_TEXTURE = new ResourceLocation("textures/misc/vignette.png");
-    private final boolean field_193980_h;
-    private final Runnable field_193981_i;
+    private final boolean poem;
+    private final Runnable onFinished;
     private float time;
     private List<String> lines;
     private int totalScrollLength;
     private final float scrollSpeed = 0.5F;
 
-    public GuiWinGame(boolean p_i47590_1_, Runnable p_i47590_2_)
+    public GuiWinGame(boolean poemIn, Runnable onFinishedIn)
     {
-        this.field_193980_h = p_i47590_1_;
-        this.field_193981_i = p_i47590_2_;
+        this.poem = poemIn;
+        this.onFinished = onFinishedIn;
     }
 
     /**
@@ -67,7 +67,7 @@ public class GuiWinGame extends GuiScreen
 
     private void sendRespawnPacket()
     {
-        this.field_193981_i.run();
+        this.onFinished.run();
         this.mc.displayGuiScreen((GuiScreen)null);
     }
 
@@ -95,7 +95,7 @@ public class GuiWinGame extends GuiScreen
                 String s = "" + TextFormatting.WHITE + TextFormatting.OBFUSCATED + TextFormatting.GREEN + TextFormatting.AQUA;
                 int i = 274;
 
-                if (this.field_193980_h)
+                if (this.poem)
                 {
                     iresource = this.mc.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
                     InputStream inputstream = iresource.getInputStream();
@@ -115,7 +115,7 @@ public class GuiWinGame extends GuiScreen
                             s3 = s1.substring(j + s.length());
                         }
 
-                        this.lines.addAll(this.mc.fontRendererObj.listFormattedStringToWidth(s1, 274));
+                        this.lines.addAll(this.mc.fontRenderer.listFormattedStringToWidth(s1, 274));
                         this.lines.add("");
                     }
 
@@ -135,7 +135,7 @@ public class GuiWinGame extends GuiScreen
                 {
                     s4 = s4.replaceAll("PLAYERNAME", this.mc.getSession().getUsername());
                     s4 = s4.replaceAll("\t", "    ");
-                    this.lines.addAll(this.mc.fontRendererObj.listFormattedStringToWidth(s4, 274));
+                    this.lines.addAll(this.mc.fontRenderer.listFormattedStringToWidth(s4, 274));
                     this.lines.add("");
                 }
 
@@ -227,12 +227,12 @@ public class GuiWinGame extends GuiScreen
 
                 if (s.startsWith("[C]"))
                 {
-                    this.fontRendererObj.drawStringWithShadow(s.substring(3), (float)(j + (274 - this.fontRendererObj.getStringWidth(s.substring(3))) / 2), (float)l, 16777215);
+                    this.fontRenderer.drawStringWithShadow(s.substring(3), (float)(j + (274 - this.fontRenderer.getStringWidth(s.substring(3))) / 2), (float)l, 16777215);
                 }
                 else
                 {
-                    this.fontRendererObj.fontRandom.setSeed((long)((float)((long)i1 * 4238972211L) + this.time / 4.0F));
-                    this.fontRendererObj.drawStringWithShadow(s, (float)j, (float)l, 16777215);
+                    this.fontRenderer.fontRandom.setSeed((long)((float)((long)i1 * 4238972211L) + this.time / 4.0F));
+                    this.fontRenderer.drawStringWithShadow(s, (float)j, (float)l, 16777215);
                 }
             }
 

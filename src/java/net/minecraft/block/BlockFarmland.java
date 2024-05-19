@@ -61,7 +61,7 @@ public class BlockFarmland extends Block
             }
             else if (!this.hasCrops(worldIn, pos))
             {
-                this.func_190970_b(worldIn, pos);
+                this.turnToDirt(worldIn, pos);
             }
         }
         else if (i < 7)
@@ -77,19 +77,19 @@ public class BlockFarmland extends Block
     {
         if (!worldIn.isRemote && worldIn.rand.nextFloat() < fallDistance - 0.5F && entityIn instanceof EntityLivingBase && (entityIn instanceof EntityPlayer || worldIn.getGameRules().getBoolean("mobGriefing")) && entityIn.width * entityIn.width * entityIn.height > 0.512F)
         {
-            this.func_190970_b(worldIn, pos);
+            this.turnToDirt(worldIn, pos);
         }
 
         super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
     }
 
-    private void func_190970_b(World p_190970_1_, BlockPos p_190970_2_)
+    private void turnToDirt(World worldIn, BlockPos pos)
     {
         IBlockState iblockstate = Blocks.DIRT.getDefaultState();
-        p_190970_1_.setBlockState(p_190970_2_, iblockstate);
-        AxisAlignedBB axisalignedbb = iblockstate.getCollisionBoundingBox(p_190970_1_, p_190970_2_).offset(p_190970_2_);
+        worldIn.setBlockState(pos, iblockstate);
+        AxisAlignedBB axisalignedbb = iblockstate.getCollisionBoundingBox(worldIn, pos).offset(pos);
 
-        for (Entity entity : p_190970_1_.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb))
+        for (Entity entity : worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb))
         {
             entity.setPosition(entity.posX, axisalignedbb.maxY, entity.posZ);
         }
@@ -119,13 +119,13 @@ public class BlockFarmland extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
-        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 
         if (worldIn.getBlockState(pos.up()).getMaterial().isSolid())
         {
-            this.func_190970_b(worldIn, pos);
+            this.turnToDirt(worldIn, pos);
         }
     }
 
@@ -138,7 +138,7 @@ public class BlockFarmland extends Block
 
         if (worldIn.getBlockState(pos.up()).getMaterial().isSolid())
         {
-            this.func_190970_b(worldIn, pos);
+            this.turnToDirt(worldIn, pos);
         }
     }
 
@@ -191,7 +191,7 @@ public class BlockFarmland extends Block
         return new BlockStateContainer(this, new IProperty[] {MOISTURE});
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }

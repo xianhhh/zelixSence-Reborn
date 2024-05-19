@@ -32,39 +32,39 @@ import net.minecraft.world.storage.loot.LootTableList;
 public class EntityZombieVillager extends EntityZombie
 {
     private static final DataParameter<Boolean> CONVERTING = EntityDataManager.<Boolean>createKey(EntityZombieVillager.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> field_190739_c = EntityDataManager.<Integer>createKey(EntityZombieVillager.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> PROFESSION = EntityDataManager.<Integer>createKey(EntityZombieVillager.class, DataSerializers.VARINT);
 
     /**
      * Ticker used to determine the time remaining for this zombie to convert into a villager when cured.
      */
     private int conversionTime;
-    private UUID field_191992_by;
+    private UUID converstionStarter;
 
-    public EntityZombieVillager(World p_i47277_1_)
+    public EntityZombieVillager(World worldIn)
     {
-        super(p_i47277_1_);
+        super(worldIn);
     }
 
     protected void entityInit()
     {
         super.entityInit();
         this.dataManager.register(CONVERTING, Boolean.valueOf(false));
-        this.dataManager.register(field_190739_c, Integer.valueOf(0));
+        this.dataManager.register(PROFESSION, Integer.valueOf(0));
     }
 
-    public void func_190733_a(int p_190733_1_)
+    public void setProfession(int profession)
     {
-        this.dataManager.set(field_190739_c, Integer.valueOf(p_190733_1_));
+        this.dataManager.set(PROFESSION, Integer.valueOf(profession));
     }
 
-    public int func_190736_dl()
+    public int getProfession()
     {
-        return Math.max(((Integer)this.dataManager.get(field_190739_c)).intValue() % 6, 0);
+        return Math.max(((Integer)this.dataManager.get(PROFESSION)).intValue() % 6, 0);
     }
 
-    public static void func_190737_b(DataFixer p_190737_0_)
+    public static void registerFixesZombieVillager(DataFixer fixer)
     {
-        EntityLiving.registerFixesMob(p_190737_0_, EntityZombieVillager.class);
+        EntityLiving.registerFixesMob(fixer, EntityZombieVillager.class);
     }
 
     /**
@@ -73,12 +73,12 @@ public class EntityZombieVillager extends EntityZombie
     public void writeEntityToNBT(NBTTagCompound compound)
     {
         super.writeEntityToNBT(compound);
-        compound.setInteger("Profession", this.func_190736_dl());
+        compound.setInteger("Profession", this.getProfession());
         compound.setInteger("ConversionTime", this.isConverting() ? this.conversionTime : -1);
 
-        if (this.field_191992_by != null)
+        if (this.converstionStarter != null)
         {
-            compound.setUniqueId("ConversionPlayer", this.field_191992_by);
+            compound.setUniqueId("ConversionPlayer", this.converstionStarter);
         }
     }
 
@@ -88,11 +88,11 @@ public class EntityZombieVillager extends EntityZombie
     public void readEntityFromNBT(NBTTagCompound compound)
     {
         super.readEntityFromNBT(compound);
-        this.func_190733_a(compound.getInteger("Profession"));
+        this.setProfession(compound.getInteger("Profession"));
 
         if (compound.hasKey("ConversionTime", 99) && compound.getInteger("ConversionTime") > -1)
         {
-            this.func_191991_a(compound.hasUniqueId("ConversionPlayer") ? compound.getUniqueId("ConversionPlayer") : null, compound.getInteger("ConversionTime"));
+            this.startConverting(compound.hasUniqueId("ConversionPlayer") ? compound.getUniqueId("ConversionPlayer") : null, compound.getInteger("ConversionTime"));
         }
     }
 
@@ -104,7 +104,7 @@ public class EntityZombieVillager extends EntityZombie
      */
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
     {
-        this.func_190733_a(this.world.rand.nextInt(6));
+        this.setProfession(this.world.rand.nextInt(6));
         return super.onInitialSpawn(difficulty, livingdata);
     }
 
@@ -115,12 +115,12 @@ public class EntityZombieVillager extends EntityZombie
     {
         if (!this.world.isRemote && this.isConverting())
         {
-            int i = this.func_190735_dq();
+            int i = this.getConversionProgress();
             this.conversionTime -= i;
 
             if (this.conversionTime <= 0)
             {
-                this.func_190738_dp();
+                this.finishConversion();
             }
         }
 
@@ -135,12 +135,12 @@ public class EntityZombieVillager extends EntityZombie
         {
             if (!player.capabilities.isCreativeMode)
             {
-                itemstack.func_190918_g(1);
+                itemstack.shrink(1);
             }
 
             if (!this.world.isRemote)
             {
-                this.func_191991_a(player.getUniqueID(), this.rand.nextInt(2401) + 3600);
+                this.startConverting(player.getUniqueID(), this.rand.nextInt(2401) + 3600);
             }
 
             return true;
@@ -167,9 +167,9 @@ public class EntityZombieVillager extends EntityZombie
         return ((Boolean)this.getDataManager().get(CONVERTING)).booleanValue();
     }
 
-    protected void func_191991_a(@Nullable UUID p_191991_1_, int p_191991_2_)
+    protected void startConverting(@Nullable UUID p_191991_1_, int p_191991_2_)
     {
-        this.field_191992_by = p_191991_1_;
+        this.converstionStarter = p_191991_1_;
         this.conversionTime = p_191991_2_;
         this.getDataManager().set(CONVERTING, Boolean.valueOf(true));
         this.removePotionEffect(MobEffects.WEAKNESS);
@@ -177,6 +177,9 @@ public class EntityZombieVillager extends EntityZombie
         this.world.setEntityState(this, (byte)16);
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 16)
@@ -192,12 +195,12 @@ public class EntityZombieVillager extends EntityZombie
         }
     }
 
-    protected void func_190738_dp()
+    protected void finishConversion()
     {
         EntityVillager entityvillager = new EntityVillager(this.world);
         entityvillager.copyLocationAndAnglesFrom(this);
-        entityvillager.setProfession(this.func_190736_dl());
-        entityvillager.func_190672_a(this.world.getDifficultyForLocation(new BlockPos(entityvillager)), (IEntityLivingData)null, false);
+        entityvillager.setProfession(this.getProfession());
+        entityvillager.finalizeMobSpawn(this.world.getDifficultyForLocation(new BlockPos(entityvillager)), (IEntityLivingData)null, false);
         entityvillager.setLookingForHome();
 
         if (this.isChild())
@@ -214,15 +217,15 @@ public class EntityZombieVillager extends EntityZombie
             entityvillager.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
         }
 
-        this.world.spawnEntityInWorld(entityvillager);
+        this.world.spawnEntity(entityvillager);
 
-        if (this.field_191992_by != null)
+        if (this.converstionStarter != null)
         {
-            EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.field_191992_by);
+            EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.converstionStarter);
 
             if (entityplayer instanceof EntityPlayerMP)
             {
-                CriteriaTriggers.field_192137_q.func_192183_a((EntityPlayerMP)entityplayer, this, entityvillager);
+                CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((EntityPlayerMP)entityplayer, this, entityvillager);
             }
         }
 
@@ -230,7 +233,7 @@ public class EntityZombieVillager extends EntityZombie
         this.world.playEvent((EntityPlayer)null, 1027, new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ), 0);
     }
 
-    protected int func_190735_dq()
+    protected int getConversionProgress()
     {
         int i = 1;
 
@@ -277,7 +280,7 @@ public class EntityZombieVillager extends EntityZombie
         return SoundEvents.ENTITY_ZOMBIE_VILLAGER_AMBIENT;
     }
 
-    public SoundEvent getHurtSound(DamageSource p_184601_1_)
+    public SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_ZOMBIE_VILLAGER_HURT;
     }
@@ -287,7 +290,7 @@ public class EntityZombieVillager extends EntityZombie
         return SoundEvents.ENTITY_ZOMBIE_VILLAGER_DEATH;
     }
 
-    public SoundEvent func_190731_di()
+    public SoundEvent getStepSound()
     {
         return SoundEvents.ENTITY_ZOMBIE_VILLAGER_STEP;
     }
@@ -295,11 +298,11 @@ public class EntityZombieVillager extends EntityZombie
     @Nullable
     protected ResourceLocation getLootTable()
     {
-        return LootTableList.field_191183_as;
+        return LootTableList.ENTITIES_ZOMBIE_VILLAGER;
     }
 
-    protected ItemStack func_190732_dj()
+    protected ItemStack getSkullDrop()
     {
-        return ItemStack.field_190927_a;
+        return ItemStack.EMPTY;
     }
 }

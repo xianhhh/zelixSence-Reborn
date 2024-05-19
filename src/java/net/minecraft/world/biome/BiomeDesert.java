@@ -20,10 +20,10 @@ public class BiomeDesert extends Biome
         this.spawnableCreatureList.clear();
         this.topBlock = Blocks.SAND.getDefaultState();
         this.fillerBlock = Blocks.SAND.getDefaultState();
-        this.theBiomeDecorator.treesPerChunk = -999;
-        this.theBiomeDecorator.deadBushPerChunk = 2;
-        this.theBiomeDecorator.reedsPerChunk = 50;
-        this.theBiomeDecorator.cactiPerChunk = 10;
+        this.decorator.treesPerChunk = -999;
+        this.decorator.deadBushPerChunk = 2;
+        this.decorator.reedsPerChunk = 50;
+        this.decorator.cactiPerChunk = 10;
         this.spawnableCreatureList.clear();
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityRabbit.class, 4, 2, 3));
         Iterator<Biome.SpawnListEntry> iterator = this.spawnableMonsterList.iterator();

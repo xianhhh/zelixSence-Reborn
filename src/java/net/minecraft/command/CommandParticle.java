@@ -16,7 +16,7 @@ public class CommandParticle extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "particle";
     }
@@ -32,7 +32,7 @@ public class CommandParticle extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.particle.usage";
     }
@@ -59,9 +59,9 @@ public class CommandParticle extends CommandBase
             {
                 String s = args[0];
                 Vec3d vec3d = sender.getPositionVector();
-                double d0 = (double)((float)parseDouble(vec3d.xCoord, args[1], true));
-                double d1 = (double)((float)parseDouble(vec3d.yCoord, args[2], true));
-                double d2 = (double)((float)parseDouble(vec3d.zCoord, args[3], true));
+                double d0 = (double)((float)parseDouble(vec3d.x, args[1], true));
+                double d1 = (double)((float)parseDouble(vec3d.y, args[2], true));
+                double d2 = (double)((float)parseDouble(vec3d.z, args[3], true));
                 double d3 = (double)((float)parseDouble(args[4]));
                 double d4 = (double)((float)parseDouble(args[5]));
                 double d5 = (double)((float)parseDouble(args[6]));
@@ -129,7 +129,7 @@ public class CommandParticle extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
@@ -137,7 +137,7 @@ public class CommandParticle extends CommandBase
         }
         else if (args.length > 1 && args.length <= 4)
         {
-            return getTabCompletionCoordinate(args, 1, pos);
+            return getTabCompletionCoordinate(args, 1, targetPos);
         }
         else if (args.length == 10)
         {
@@ -145,7 +145,7 @@ public class CommandParticle extends CommandBase
         }
         else
         {
-            return args.length == 11 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+            return args.length == 11 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
         }
     }
 

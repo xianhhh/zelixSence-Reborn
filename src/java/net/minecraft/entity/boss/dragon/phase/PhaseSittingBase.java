@@ -23,9 +23,9 @@ public abstract class PhaseSittingBase extends PhaseBase
      */
     public float getAdjustedDamage(MultiPartEntityPart pt, DamageSource src, float damage)
     {
-        if (src.getSourceOfDamage() instanceof EntityArrow)
+        if (src.getImmediateSource() instanceof EntityArrow)
         {
-            src.getSourceOfDamage().setFire(1);
+            src.getImmediateSource().setFire(1);
             return 0.0F;
         }
         else

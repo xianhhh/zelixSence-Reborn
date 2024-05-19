@@ -27,7 +27,7 @@ public class RConConsoleSource implements ICommandSender
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(ITextComponent component)
+    public void sendMessage(ITextComponent component)
     {
         this.buffer.append(component.getUnformattedText());
     }
@@ -35,7 +35,7 @@ public class RConConsoleSource implements ICommandSender
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    public boolean canUseCommand(int permLevel, String commandName)
     {
         return true;
     }

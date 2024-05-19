@@ -19,96 +19,107 @@ import net.minecraft.world.GameType;
 
 public class FindTreeStep implements ITutorialStep
 {
-    private static final Set<Block> field_193268_a = Sets.newHashSet(Blocks.LOG, Blocks.LOG2, Blocks.LEAVES, Blocks.LEAVES2);
-    private static final ITextComponent field_193269_b = new TextComponentTranslation("tutorial.find_tree.title", new Object[0]);
-    private static final ITextComponent field_193270_c = new TextComponentTranslation("tutorial.find_tree.description", new Object[0]);
-    private final Tutorial field_193271_d;
-    private TutorialToast field_193272_e;
-    private int field_193273_f;
+    private static final Set<Block> TREE_BLOCKS = Sets.newHashSet(Blocks.LOG, Blocks.LOG2, Blocks.LEAVES, Blocks.LEAVES2);
+    private static final ITextComponent TITLE = new TextComponentTranslation("tutorial.find_tree.title", new Object[0]);
+    private static final ITextComponent DESCRIPTION = new TextComponentTranslation("tutorial.find_tree.description", new Object[0]);
+    private final Tutorial tutorial;
+    private TutorialToast toast;
+    private int timeWaiting;
 
-    public FindTreeStep(Tutorial p_i47582_1_)
+    public FindTreeStep(Tutorial tutorial)
     {
-        this.field_193271_d = p_i47582_1_;
+        this.tutorial = tutorial;
     }
 
-    public void func_193245_a()
+    public void update()
     {
-        ++this.field_193273_f;
+        ++this.timeWaiting;
 
-        if (this.field_193271_d.func_194072_f() != GameType.SURVIVAL)
+        if (this.tutorial.getGameType() != GameType.SURVIVAL)
         {
-            this.field_193271_d.func_193292_a(TutorialSteps.NONE);
+            this.tutorial.setStep(TutorialSteps.NONE);
         }
         else
         {
-            if (this.field_193273_f == 1)
+            if (this.timeWaiting == 1)
             {
-                EntityPlayerSP entityplayersp = this.field_193271_d.func_193295_e().player;
+                EntityPlayerSP entityplayersp = this.tutorial.getMinecraft().player;
 
                 if (entityplayersp != null)
                 {
-                    for (Block block : field_193268_a)
+                    for (Block block : TREE_BLOCKS)
                     {
                         if (entityplayersp.inventory.hasItemStack(new ItemStack(block)))
                         {
-                            this.field_193271_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                            this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                             return;
                         }
                     }
 
-                    if (func_194070_a(entityplayersp))
+                    if (hasPunchedTreesPreviously(entityplayersp))
                     {
-                        this.field_193271_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                        this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                         return;
                     }
                 }
             }
 
-            if (this.field_193273_f >= 6000 && this.field_193272_e == null)
+            if (this.timeWaiting >= 6000 && this.toast == null)
             {
-                this.field_193272_e = new TutorialToast(TutorialToast.Icons.TREE, field_193269_b, field_193270_c, false);
-                this.field_193271_d.func_193295_e().func_193033_an().func_192988_a(this.field_193272_e);
+                this.toast = new TutorialToast(TutorialToast.Icons.TREE, TITLE, DESCRIPTION, false);
+                this.tutorial.getMinecraft().getToastGui().add(this.toast);
             }
         }
     }
 
-    public void func_193248_b()
+    public void onStop()
     {
-        if (this.field_193272_e != null)
+        if (this.toast != null)
         {
-            this.field_193272_e.func_193670_a();
-            this.field_193272_e = null;
+            this.toast.hide();
+            this.toast = null;
         }
     }
 
-    public void func_193246_a(WorldClient p_193246_1_, RayTraceResult p_193246_2_)
+    /**
+     * Handles blocks and entities hovering
+     *  
+     * @param worldIn The world on the client side, can be null
+     * @param result The result of the ray trace
+     */
+    public void onMouseHover(WorldClient worldIn, RayTraceResult result)
     {
-        if (p_193246_2_.typeOfHit == RayTraceResult.Type.BLOCK && p_193246_2_.getBlockPos() != null)
+        if (result.typeOfHit == RayTraceResult.Type.BLOCK && result.getBlockPos() != null)
         {
-            IBlockState iblockstate = p_193246_1_.getBlockState(p_193246_2_.getBlockPos());
+            IBlockState iblockstate = worldIn.getBlockState(result.getBlockPos());
 
-            if (field_193268_a.contains(iblockstate.getBlock()))
+            if (TREE_BLOCKS.contains(iblockstate.getBlock()))
             {
-                this.field_193271_d.func_193292_a(TutorialSteps.PUNCH_TREE);
+                this.tutorial.setStep(TutorialSteps.PUNCH_TREE);
             }
         }
     }
 
-    public void func_193252_a(ItemStack p_193252_1_)
+    /**
+     * Called when the player pick up an ItemStack
+     *  
+     * @param stack The ItemStack
+     */
+    public void handleSetSlot(ItemStack stack)
     {
-        for (Block block : field_193268_a)
+        for (Block block : TREE_BLOCKS)
         {
-            if (p_193252_1_.getItem() == Item.getItemFromBlock(block))
+            if (stack.getItem() == Item.getItemFromBlock(block))
             {
-                this.field_193271_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                 return;
             }
         }
     }
 
-    public static boolean func_194070_a(EntityPlayerSP p_194070_0_)
+    public static boolean hasPunchedTreesPreviously(EntityPlayerSP p_194070_0_)
     {
-        for (Block block : field_193268_a)
+        for (Block block : TREE_BLOCKS)
         {
             StatBase statbase = StatList.getBlockStats(block);
 

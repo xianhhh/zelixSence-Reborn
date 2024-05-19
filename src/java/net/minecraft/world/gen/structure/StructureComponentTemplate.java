@@ -26,18 +26,18 @@ public abstract class StructureComponentTemplate extends StructureComponent
         this.placeSettings = DEFAULT_PLACE_SETTINGS.setIgnoreEntities(true).setReplacedBlock(Blocks.AIR);
     }
 
-    public StructureComponentTemplate(int p_i46662_1_)
+    public StructureComponentTemplate(int type)
     {
-        super(p_i46662_1_);
+        super(type);
         this.placeSettings = DEFAULT_PLACE_SETTINGS.setIgnoreEntities(true).setReplacedBlock(Blocks.AIR);
     }
 
-    protected void setup(Template p_186173_1_, BlockPos p_186173_2_, PlacementSettings p_186173_3_)
+    protected void setup(Template templateIn, BlockPos pos, PlacementSettings settings)
     {
-        this.template = p_186173_1_;
+        this.template = templateIn;
         this.setCoordBaseMode(EnumFacing.NORTH);
-        this.templatePosition = p_186173_2_;
-        this.placeSettings = p_186173_3_;
+        this.templatePosition = pos;
+        this.placeSettings = settings;
         this.setBoundingBoxFromTemplate();
     }
 
@@ -78,7 +78,7 @@ public abstract class StructureComponentTemplate extends StructureComponent
         return true;
     }
 
-    protected abstract void handleDataMarker(String p_186175_1_, BlockPos p_186175_2_, World p_186175_3_, Random p_186175_4_, StructureBoundingBox p_186175_5_);
+    protected abstract void handleDataMarker(String function, BlockPos pos, World worldIn, Random rand, StructureBoundingBox sbb);
 
     private void setBoundingBoxFromTemplate()
     {

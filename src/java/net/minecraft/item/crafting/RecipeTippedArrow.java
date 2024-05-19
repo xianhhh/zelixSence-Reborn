@@ -23,7 +23,7 @@ public class RecipeTippedArrow implements IRecipe
                 {
                     ItemStack itemstack = inv.getStackInRowAndColumn(i, j);
 
-                    if (itemstack.func_190926_b())
+                    if (itemstack.isEmpty())
                     {
                         return false;
                     }
@@ -61,7 +61,7 @@ public class RecipeTippedArrow implements IRecipe
 
         if (itemstack.getItem() != Items.LINGERING_POTION)
         {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
         }
         else
         {
@@ -74,21 +74,24 @@ public class RecipeTippedArrow implements IRecipe
 
     public ItemStack getRecipeOutput()
     {
-        return ItemStack.field_190927_a;
+        return ItemStack.EMPTY;
     }
 
     public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
     {
-        return NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+        return NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
     }
 
-    public boolean func_192399_d()
+    public boolean isHidden()
     {
         return true;
     }
 
-    public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+    /**
+     * Used to determine if this recipe can fit in a grid of the given width/height
+     */
+    public boolean canFit(int width, int height)
     {
-        return p_194133_1_ >= 2 && p_194133_2_ >= 2;
+        return width >= 2 && height >= 2;
     }
 }

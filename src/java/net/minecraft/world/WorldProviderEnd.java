@@ -16,18 +16,21 @@ public class WorldProviderEnd extends WorldProvider
     private DragonFightManager dragonFightManager;
 
     /**
-     * creates a new world chunk manager for WorldProvider
+     * Creates a new {@link BiomeProvider} for the WorldProvider, and also sets the values of {@link #hasSkylight} and
+     * {@link #hasNoSky} appropriately.
+     *  
+     * Note that subclasses generally override this method without calling the parent version.
      */
-    public void createBiomeProvider()
+    public void init()
     {
         this.biomeProvider = new BiomeProviderSingle(Biomes.SKY);
-        NBTTagCompound nbttagcompound = this.worldObj.getWorldInfo().getDimensionData(DimensionType.THE_END);
-        this.dragonFightManager = this.worldObj instanceof WorldServer ? new DragonFightManager((WorldServer)this.worldObj, nbttagcompound.getCompoundTag("DragonFight")) : null;
+        NBTTagCompound nbttagcompound = this.world.getWorldInfo().getDimensionData(DimensionType.THE_END);
+        this.dragonFightManager = this.world instanceof WorldServer ? new DragonFightManager((WorldServer)this.world, nbttagcompound.getCompoundTag("DragonFight")) : null;
     }
 
     public IChunkGenerator createChunkGenerator()
     {
-        return new ChunkGeneratorEnd(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed(), this.getSpawnCoordinate());
+        return new ChunkGeneratorEnd(this.world, this.world.getWorldInfo().isMapFeaturesEnabled(), this.world.getSeed(), this.getSpawnCoordinate());
     }
 
     /**
@@ -99,7 +102,7 @@ public class WorldProviderEnd extends WorldProvider
      */
     public boolean canCoordinateBeSpawn(int x, int z)
     {
-        return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
+        return this.world.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
     }
 
     public BlockPos getSpawnCoordinate()
@@ -138,7 +141,7 @@ public class WorldProviderEnd extends WorldProvider
             nbttagcompound.setTag("DragonFight", this.dragonFightManager.getCompound());
         }
 
-        this.worldObj.getWorldInfo().setDimensionData(DimensionType.THE_END, nbttagcompound);
+        this.world.getWorldInfo().setDimensionData(DimensionType.THE_END, nbttagcompound);
     }
 
     /**

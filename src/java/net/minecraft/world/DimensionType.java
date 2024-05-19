@@ -75,7 +75,7 @@ public enum DimensionType
         throw new IllegalArgumentException("Invalid dimension id " + id);
     }
 
-    public static DimensionType func_193417_a(String p_193417_0_)
+    public static DimensionType byName(String p_193417_0_)
     {
         for (DimensionType dimensiontype : values())
         {

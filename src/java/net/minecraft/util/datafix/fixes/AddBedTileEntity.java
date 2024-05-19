@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 public class AddBedTileEntity implements IFixableData
 {
-    private static final Logger field_193842_a = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public int getFixVersion()
     {
@@ -52,7 +52,7 @@ public class AddBedTileEntity implements IFixableData
         }
         catch (Exception var17)
         {
-            field_193842_a.warn("Unable to datafix Bed blocks, level format may be missing tags.");
+            LOGGER.warn("Unable to datafix Bed blocks, level format may be missing tags.");
         }
 
         return compound;

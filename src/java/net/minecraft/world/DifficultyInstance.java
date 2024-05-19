@@ -20,7 +20,7 @@ public class DifficultyInstance
         return this.additionalDifficulty;
     }
 
-    public boolean func_193845_a(float p_193845_1_)
+    public boolean isHarderThan(float p_193845_1_)
     {
         return this.additionalDifficulty > p_193845_1_;
     }

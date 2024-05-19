@@ -44,7 +44,7 @@ public class PhaseSittingFlaming extends PhaseSittingBase
 
                 for (int j = 0; j < 6; ++j)
                 {
-                    this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.xCoord * 0.07999999821186066D * (double)j, -vec3d.yCoord * 0.6000000238418579D, -vec3d.zCoord * 0.07999999821186066D * (double)j);
+                    this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.x * 0.07999999821186066D * (double)j, -vec3d.y * 0.6000000238418579D, -vec3d.z * 0.07999999821186066D * (double)j);
                 }
 
                 vec3d.rotateYaw(0.19634955F);
@@ -75,8 +75,8 @@ public class PhaseSittingFlaming extends PhaseSittingBase
         {
             Vec3d vec3d = (new Vec3d(this.dragon.dragonPartHead.posX - this.dragon.posX, 0.0D, this.dragon.dragonPartHead.posZ - this.dragon.posZ)).normalize();
             float f = 5.0F;
-            double d0 = this.dragon.dragonPartHead.posX + vec3d.xCoord * 5.0D / 2.0D;
-            double d1 = this.dragon.dragonPartHead.posZ + vec3d.zCoord * 5.0D / 2.0D;
+            double d0 = this.dragon.dragonPartHead.posX + vec3d.x * 5.0D / 2.0D;
+            double d1 = this.dragon.dragonPartHead.posZ + vec3d.z * 5.0D / 2.0D;
             double d2 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(MathHelper.floor(d0), MathHelper.floor(d2), MathHelper.floor(d1));
 
@@ -93,7 +93,7 @@ public class PhaseSittingFlaming extends PhaseSittingBase
             this.areaEffectCloud.setDuration(200);
             this.areaEffectCloud.setParticle(EnumParticleTypes.DRAGON_BREATH);
             this.areaEffectCloud.addEffect(new PotionEffect(MobEffects.INSTANT_DAMAGE));
-            this.dragon.world.spawnEntityInWorld(this.areaEffectCloud);
+            this.dragon.world.spawnEntity(this.areaEffectCloud);
         }
     }
 

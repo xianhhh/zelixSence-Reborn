@@ -22,29 +22,29 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
     private int availableSections;
     private byte[] buffer;
     private List<NBTTagCompound> tileEntityTags;
-    private boolean loadChunk;
+    private boolean fullChunk;
 
     public SPacketChunkData()
     {
     }
 
-    public SPacketChunkData(Chunk p_i47124_1_, int p_i47124_2_)
+    public SPacketChunkData(Chunk chunkIn, int changedSectionFilter)
     {
-        this.chunkX = p_i47124_1_.xPosition;
-        this.chunkZ = p_i47124_1_.zPosition;
-        this.loadChunk = p_i47124_2_ == 65535;
-        boolean flag = p_i47124_1_.getWorld().provider.func_191066_m();
-        this.buffer = new byte[this.calculateChunkSize(p_i47124_1_, flag, p_i47124_2_)];
-        this.availableSections = this.extractChunkData(new PacketBuffer(this.getWriteBuffer()), p_i47124_1_, flag, p_i47124_2_);
+        this.chunkX = chunkIn.x;
+        this.chunkZ = chunkIn.z;
+        this.fullChunk = changedSectionFilter == 65535;
+        boolean flag = chunkIn.getWorld().provider.hasSkyLight();
+        this.buffer = new byte[this.calculateChunkSize(chunkIn, flag, changedSectionFilter)];
+        this.availableSections = this.extractChunkData(new PacketBuffer(this.getWriteBuffer()), chunkIn, flag, changedSectionFilter);
         this.tileEntityTags = Lists.<NBTTagCompound>newArrayList();
 
-        for (Entry<BlockPos, TileEntity> entry : p_i47124_1_.getTileEntityMap().entrySet())
+        for (Entry<BlockPos, TileEntity> entry : chunkIn.getTileEntityMap().entrySet())
         {
             BlockPos blockpos = entry.getKey();
             TileEntity tileentity = entry.getValue();
             int i = blockpos.getY() >> 4;
 
-            if (this.doChunkLoad() || (p_i47124_2_ & 1 << i) != 0)
+            if (this.isFullChunk() || (changedSectionFilter & 1 << i) != 0)
             {
                 NBTTagCompound nbttagcompound = tileentity.getUpdateTag();
                 this.tileEntityTags.add(nbttagcompound);
@@ -59,9 +59,9 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
     {
         this.chunkX = buf.readInt();
         this.chunkZ = buf.readInt();
-        this.loadChunk = buf.readBoolean();
-        this.availableSections = buf.readVarIntFromBuffer();
-        int i = buf.readVarIntFromBuffer();
+        this.fullChunk = buf.readBoolean();
+        this.availableSections = buf.readVarInt();
+        int i = buf.readVarInt();
 
         if (i > 2097152)
         {
@@ -71,12 +71,12 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
         {
             this.buffer = new byte[i];
             buf.readBytes(this.buffer);
-            int j = buf.readVarIntFromBuffer();
+            int j = buf.readVarInt();
             this.tileEntityTags = Lists.<NBTTagCompound>newArrayList();
 
             for (int k = 0; k < j; ++k)
             {
-                this.tileEntityTags.add(buf.readNBTTagCompoundFromBuffer());
+                this.tileEntityTags.add(buf.readCompoundTag());
             }
         }
     }
@@ -88,15 +88,15 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
     {
         buf.writeInt(this.chunkX);
         buf.writeInt(this.chunkZ);
-        buf.writeBoolean(this.loadChunk);
-        buf.writeVarIntToBuffer(this.availableSections);
-        buf.writeVarIntToBuffer(this.buffer.length);
+        buf.writeBoolean(this.fullChunk);
+        buf.writeVarInt(this.availableSections);
+        buf.writeVarInt(this.buffer.length);
         buf.writeBytes(this.buffer);
-        buf.writeVarIntToBuffer(this.tileEntityTags.size());
+        buf.writeVarInt(this.tileEntityTags.size());
 
         for (NBTTagCompound nbttagcompound : this.tileEntityTags)
         {
-            buf.writeNBTTagCompoundToBuffer(nbttagcompound);
+            buf.writeCompoundTag(nbttagcompound);
         }
     }
 
@@ -120,32 +120,32 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
         return bytebuf;
     }
 
-    public int extractChunkData(PacketBuffer p_189555_1_, Chunk p_189555_2_, boolean p_189555_3_, int p_189555_4_)
+    public int extractChunkData(PacketBuffer buf, Chunk chunkIn, boolean writeSkylight, int changedSectionFilter)
     {
         int i = 0;
-        ExtendedBlockStorage[] aextendedblockstorage = p_189555_2_.getBlockStorageArray();
+        ExtendedBlockStorage[] aextendedblockstorage = chunkIn.getBlockStorageArray();
         int j = 0;
 
         for (int k = aextendedblockstorage.length; j < k; ++j)
         {
             ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
 
-            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189555_4_ & 1 << j) != 0)
+            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !extendedblockstorage.isEmpty()) && (changedSectionFilter & 1 << j) != 0)
             {
                 i |= 1 << j;
-                extendedblockstorage.getData().write(p_189555_1_);
-                p_189555_1_.writeBytes(extendedblockstorage.getBlocklightArray().getData());
+                extendedblockstorage.getData().write(buf);
+                buf.writeBytes(extendedblockstorage.getBlockLight().getData());
 
-                if (p_189555_3_)
+                if (writeSkylight)
                 {
-                    p_189555_1_.writeBytes(extendedblockstorage.getSkylightArray().getData());
+                    buf.writeBytes(extendedblockstorage.getSkyLight().getData());
                 }
             }
         }
 
-        if (this.doChunkLoad())
+        if (this.isFullChunk())
         {
-            p_189555_1_.writeBytes(p_189555_2_.getBiomeArray());
+            buf.writeBytes(chunkIn.getBiomeArray());
         }
 
         return i;
@@ -161,19 +161,19 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
         {
             ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
 
-            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189556_3_ & 1 << j) != 0)
+            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !extendedblockstorage.isEmpty()) && (p_189556_3_ & 1 << j) != 0)
             {
                 i = i + extendedblockstorage.getData().getSerializedSize();
-                i = i + extendedblockstorage.getBlocklightArray().getData().length;
+                i = i + extendedblockstorage.getBlockLight().getData().length;
 
                 if (p_189556_2_)
                 {
-                    i += extendedblockstorage.getSkylightArray().getData().length;
+                    i += extendedblockstorage.getSkyLight().getData().length;
                 }
             }
         }
 
-        if (this.doChunkLoad())
+        if (this.isFullChunk())
         {
             i += chunkIn.getBiomeArray().length;
         }
@@ -196,9 +196,9 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient>
         return this.availableSections;
     }
 
-    public boolean doChunkLoad()
+    public boolean isFullChunk()
     {
-        return this.loadChunk;
+        return this.fullChunk;
     }
 
     public List<NBTTagCompound> getTileEntityTags()

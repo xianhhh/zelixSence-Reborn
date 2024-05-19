@@ -16,111 +16,114 @@ import net.minecraft.util.ResourceLocation;
 
 public class TameAnimalTrigger implements ICriterionTrigger<TameAnimalTrigger.Instance>
 {
-    private static final ResourceLocation field_193179_a = new ResourceLocation("tame_animal");
-    private final Map<PlayerAdvancements, TameAnimalTrigger.Listeners> field_193180_b = Maps.<PlayerAdvancements, TameAnimalTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("tame_animal");
+    private final Map<PlayerAdvancements, TameAnimalTrigger.Listeners> listeners = Maps.<PlayerAdvancements, TameAnimalTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193179_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<TameAnimalTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener)
     {
-        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.field_193180_b.get(p_192165_1_);
+        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (tameanimaltrigger$listeners == null)
         {
-            tameanimaltrigger$listeners = new TameAnimalTrigger.Listeners(p_192165_1_);
-            this.field_193180_b.put(p_192165_1_, tameanimaltrigger$listeners);
+            tameanimaltrigger$listeners = new TameAnimalTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, tameanimaltrigger$listeners);
         }
 
-        tameanimaltrigger$listeners.func_193496_a(p_192165_2_);
+        tameanimaltrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<TameAnimalTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener)
     {
-        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.field_193180_b.get(p_192164_1_);
+        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (tameanimaltrigger$listeners != null)
         {
-            tameanimaltrigger$listeners.func_193494_b(p_192164_2_);
+            tameanimaltrigger$listeners.remove(listener);
 
-            if (tameanimaltrigger$listeners.func_193495_a())
+            if (tameanimaltrigger$listeners.isEmpty())
             {
-                this.field_193180_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193180_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public TameAnimalTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public TameAnimalTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("entity"));
+        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("entity"));
         return new TameAnimalTrigger.Instance(entitypredicate);
     }
 
-    public void func_193178_a(EntityPlayerMP p_193178_1_, EntityAnimal p_193178_2_)
+    public void trigger(EntityPlayerMP player, EntityAnimal entity)
     {
-        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.field_193180_b.get(p_193178_1_.func_192039_O());
+        TameAnimalTrigger.Listeners tameanimaltrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (tameanimaltrigger$listeners != null)
         {
-            tameanimaltrigger$listeners.func_193497_a(p_193178_1_, p_193178_2_);
+            tameanimaltrigger$listeners.trigger(player, entity);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final EntityPredicate field_193217_a;
+        private final EntityPredicate entity;
 
-        public Instance(EntityPredicate p_i47513_1_)
+        public Instance(EntityPredicate entity)
         {
-            super(TameAnimalTrigger.field_193179_a);
-            this.field_193217_a = p_i47513_1_;
+            super(TameAnimalTrigger.ID);
+            this.entity = entity;
         }
 
-        public boolean func_193216_a(EntityPlayerMP p_193216_1_, EntityAnimal p_193216_2_)
+        public boolean test(EntityPlayerMP player, EntityAnimal entity)
         {
-            return this.field_193217_a.func_192482_a(p_193216_1_, p_193216_2_);
+            return this.entity.test(player, entity);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193498_a;
-        private final Set<ICriterionTrigger.Listener<TameAnimalTrigger.Instance>> field_193499_b = Sets.<ICriterionTrigger.Listener<TameAnimalTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<TameAnimalTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<TameAnimalTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47514_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193498_a = p_i47514_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193495_a()
+        public boolean isEmpty()
         {
-            return this.field_193499_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193496_a(ICriterionTrigger.Listener<TameAnimalTrigger.Instance> p_193496_1_)
+        public void add(ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener)
         {
-            this.field_193499_b.add(p_193496_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193494_b(ICriterionTrigger.Listener<TameAnimalTrigger.Instance> p_193494_1_)
+        public void remove(ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener)
         {
-            this.field_193499_b.remove(p_193494_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193497_a(EntityPlayerMP p_193497_1_, EntityAnimal p_193497_2_)
+        public void trigger(EntityPlayerMP player, EntityAnimal entity)
         {
             List<ICriterionTrigger.Listener<TameAnimalTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener : this.field_193499_b)
+            for (ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener : this.listeners)
             {
-                if (((TameAnimalTrigger.Instance)listener.func_192158_a()).func_193216_a(p_193497_1_, p_193497_2_))
+                if (((TameAnimalTrigger.Instance)listener.getCriterionInstance()).test(player, entity))
                 {
                     if (list == null)
                     {
@@ -135,7 +138,7 @@ public class TameAnimalTrigger implements ICriterionTrigger<TameAnimalTrigger.In
             {
                 for (ICriterionTrigger.Listener<TameAnimalTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193498_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

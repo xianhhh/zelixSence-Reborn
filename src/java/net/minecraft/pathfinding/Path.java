@@ -89,9 +89,9 @@ public class Path
      */
     public Vec3d getVectorFromIndex(Entity entityIn, int index)
     {
-        double d0 = (double)this.points[index].xCoord + (double)((int)(entityIn.width + 1.0F)) * 0.5D;
-        double d1 = (double)this.points[index].yCoord;
-        double d2 = (double)this.points[index].zCoord + (double)((int)(entityIn.width + 1.0F)) * 0.5D;
+        double d0 = (double)this.points[index].x + (double)((int)(entityIn.width + 1.0F)) * 0.5D;
+        double d1 = (double)this.points[index].y;
+        double d2 = (double)this.points[index].z + (double)((int)(entityIn.width + 1.0F)) * 0.5D;
         return new Vec3d(d0, d1, d2);
     }
 
@@ -106,7 +106,7 @@ public class Path
     public Vec3d getCurrentPos()
     {
         PathPoint pathpoint = this.points[this.currentPathIndex];
-        return new Vec3d((double)pathpoint.xCoord, (double)pathpoint.yCoord, (double)pathpoint.zCoord);
+        return new Vec3d((double)pathpoint.x, (double)pathpoint.y, (double)pathpoint.z);
     }
 
     /**
@@ -126,7 +126,7 @@ public class Path
         {
             for (int i = 0; i < this.points.length; ++i)
             {
-                if (this.points[i].xCoord != pathentityIn.points[i].xCoord || this.points[i].yCoord != pathentityIn.points[i].yCoord || this.points[i].zCoord != pathentityIn.points[i].zCoord)
+                if (this.points[i].x != pathentityIn.points[i].x || this.points[i].y != pathentityIn.points[i].y || this.points[i].z != pathentityIn.points[i].z)
                 {
                     return false;
                 }

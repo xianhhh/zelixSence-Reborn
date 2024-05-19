@@ -47,8 +47,8 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
     private static final DataParameter<Boolean> IS_AGGRESSIVE = EntityDataManager.<Boolean>createKey(EntityWitch.class, DataSerializers.BOOLEAN);
 
     /**
-     * Timer used as interval for a witch's attack, decremented every tick if aggressive and when reaches zero the witch
-     * will throw a potion at the target entity.
+     * A timer that counts down until a witch finishes drinking a potion, at which time the held item (if it is a
+     * potion) will have its effects applied. Set to {@link ItemStack#getMaxItemUseDuration()}.
      */
     private int witchAttackTimer;
 
@@ -85,7 +85,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         return SoundEvents.ENTITY_WITCH_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_WITCH_HURT;
     }
@@ -129,7 +129,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
                 {
                     this.setAggressive(false);
                     ItemStack itemstack = this.getHeldItemMainhand();
-                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.field_190927_a);
+                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.EMPTY);
 
                     if (itemstack.getItem() == Items.POTIONITEM)
                     {
@@ -189,6 +189,9 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         super.onLivingUpdate();
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 15)
@@ -211,7 +214,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
     {
         damage = super.applyPotionDamageCalculations(source, damage);
 
-        if (source.getEntity() == this)
+        if (source.getTrueSource() == this)
         {
             damage = 0.0F;
         }
@@ -232,8 +235,6 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
 
     /**
      * Attack the specified entity using a ranged attack.
-     *  
-     * @param distanceFactor How far the target is, normalized and clamped between 0.1 and 1.0
      */
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor)
     {
@@ -263,7 +264,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
             entitypotion.rotationPitch -= -20.0F;
             entitypotion.setThrowableHeading(d1, d2 + (double)(f * 0.2F), d3, 0.75F, 8.0F);
             this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.rand.nextFloat() * 0.4F);
-            this.world.spawnEntityInWorld(entitypotion);
+            this.world.spawnEntity(entitypotion);
         }
     }
 

@@ -2,23 +2,23 @@ package net.minecraft.client.util;
 
 public interface ITooltipFlag
 {
-    boolean func_194127_a();
+    boolean isAdvanced();
 
     public static enum TooltipFlags implements ITooltipFlag
     {
         NORMAL(false),
         ADVANCED(true);
 
-        final boolean field_194131_c;
+        final boolean isAdvanced;
 
-        private TooltipFlags(boolean p_i47611_3_)
+        private TooltipFlags(boolean advanced)
         {
-            this.field_194131_c = p_i47611_3_;
+            this.isAdvanced = advanced;
         }
 
-        public boolean func_194127_a()
+        public boolean isAdvanced()
         {
-            return this.field_194131_c;
+            return this.isAdvanced;
         }
     }
 }

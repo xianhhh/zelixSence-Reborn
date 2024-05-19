@@ -74,7 +74,7 @@ public class EntityEndermite extends EntityMob
         return SoundEvents.ENTITY_ENDERMITE_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_ENDERMITE_HURT;
     }

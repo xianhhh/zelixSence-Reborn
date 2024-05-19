@@ -15,6 +15,14 @@ public class ItemAppleGold extends ItemFood
         this.setHasSubtypes(true);
     }
 
+    /**
+     * Returns true if this item has an enchantment glint. By default, this returns
+     * <code>stack.isItemEnchanted()</code>, but other items can override it (for instance, written books always return
+     * true).
+     *  
+     * Note that if you override this method, you generally want to also call the super version (on {@link Item}) to get
+     * the glint for enchanted items. Of course, that is unnecessary if the overwritten version always returns true.
+     */
     public boolean hasEffect(ItemStack stack)
     {
         return super.hasEffect(stack) || stack.getMetadata() > 0;
@@ -50,12 +58,12 @@ public class ItemAppleGold extends ItemFood
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.func_194125_a(itemIn))
+        if (this.isInCreativeTab(tab))
         {
-            tab.add(new ItemStack(this));
-            tab.add(new ItemStack(this, 1, 1));
+            items.add(new ItemStack(this));
+            items.add(new ItemStack(this, 1, 1));
         }
     }
 }

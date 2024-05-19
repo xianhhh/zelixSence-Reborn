@@ -12,10 +12,10 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette
     private final IBlockStatePaletteResizer paletteResizer;
     private final int bits;
 
-    public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer p_i47089_2_)
+    public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer paletteResizerIn)
     {
         this.bits = bitsIn;
-        this.paletteResizer = p_i47089_2_;
+        this.paletteResizer = paletteResizerIn;
         this.statePaletteMap = new IntIdentityHashBiMap<IBlockState>(1 << bitsIn);
     }
 
@@ -49,26 +49,26 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette
     public void read(PacketBuffer buf)
     {
         this.statePaletteMap.clear();
-        int i = buf.readVarIntFromBuffer();
+        int i = buf.readVarInt();
 
         for (int j = 0; j < i; ++j)
         {
-            this.statePaletteMap.add(Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer()));
+            this.statePaletteMap.add(Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt()));
         }
     }
 
     public void write(PacketBuffer buf)
     {
         int i = this.statePaletteMap.size();
-        buf.writeVarIntToBuffer(i);
+        buf.writeVarInt(i);
 
         for (int j = 0; j < i; ++j)
         {
-            buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
+            buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
         }
     }
 
-    public int getSerializedState()
+    public int getSerializedSize()
     {
         int i = PacketBuffer.getVarIntSize(this.statePaletteMap.size());
 

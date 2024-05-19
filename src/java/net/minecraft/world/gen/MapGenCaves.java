@@ -198,7 +198,7 @@ public class MapGenCaves extends MapGenBase
                                                     if (flag1 && p_180702_5_.getBlockState(j3, j2 - 1, i2).getBlock() == Blocks.DIRT)
                                                     {
                                                         blockpos$mutableblockpos.setPos(j3 + p_180702_3_ * 16, 0, i2 + p_180702_4_ * 16);
-                                                        p_180702_5_.setBlockState(j3, j2 - 1, i2, this.worldObj.getBiome(blockpos$mutableblockpos).topBlock.getBlock().getDefaultState());
+                                                        p_180702_5_.setBlockState(j3, j2 - 1, i2, this.world.getBiome(blockpos$mutableblockpos).topBlock.getBlock().getDefaultState());
                                                     }
                                                 }
                                             }
@@ -265,7 +265,7 @@ public class MapGenCaves extends MapGenBase
     /**
      * Recursively called by generate()
      */
-    protected void recursiveGenerate(World worldIn, int chunkX, int chunkZ, int p_180701_4_, int p_180701_5_, ChunkPrimer chunkPrimerIn)
+    protected void recursiveGenerate(World worldIn, int chunkX, int chunkZ, int originalX, int originalZ, ChunkPrimer chunkPrimerIn)
     {
         int i = this.rand.nextInt(this.rand.nextInt(this.rand.nextInt(15) + 1) + 1);
 
@@ -283,7 +283,7 @@ public class MapGenCaves extends MapGenBase
 
             if (this.rand.nextInt(4) == 0)
             {
-                this.addRoom(this.rand.nextLong(), p_180701_4_, p_180701_5_, chunkPrimerIn, d0, d1, d2);
+                this.addRoom(this.rand.nextLong(), originalX, originalZ, chunkPrimerIn, d0, d1, d2);
                 k += this.rand.nextInt(4);
             }
 
@@ -298,7 +298,7 @@ public class MapGenCaves extends MapGenBase
                     f2 *= this.rand.nextFloat() * this.rand.nextFloat() * 3.0F + 1.0F;
                 }
 
-                this.addTunnel(this.rand.nextLong(), p_180701_4_, p_180701_5_, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 1.0D);
+                this.addTunnel(this.rand.nextLong(), originalX, originalZ, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 1.0D);
             }
         }
     }

@@ -35,7 +35,7 @@ public class EntityAILookIdle extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
         return this.idleTime >= 0;
     }
@@ -52,7 +52,7 @@ public class EntityAILookIdle extends EntityAIBase
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {

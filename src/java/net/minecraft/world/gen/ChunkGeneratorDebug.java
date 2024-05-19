@@ -28,7 +28,10 @@ public class ChunkGeneratorDebug implements IChunkGenerator
         this.world = worldIn;
     }
 
-    public Chunk provideChunk(int x, int z)
+    /**
+     * Generates the chunk at the specified position, from scratch
+     */
+    public Chunk generateChunk(int x, int z)
     {
         ChunkPrimer chunkprimer = new ChunkPrimer();
 
@@ -85,10 +88,16 @@ public class ChunkGeneratorDebug implements IChunkGenerator
         return iblockstate;
     }
 
+    /**
+     * Generate initial structures in this chunk, e.g. mineshafts, temples, lakes, and dungeons
+     */
     public void populate(int x, int z)
     {
     }
 
+    /**
+     * Called to generate additional structures after initial worldgen, used by ocean monuments
+     */
     public boolean generateStructures(Chunk chunkIn, int x, int z)
     {
         return false;
@@ -101,16 +110,21 @@ public class ChunkGeneratorDebug implements IChunkGenerator
     }
 
     @Nullable
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_)
+    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean findUnexplored)
     {
         return null;
     }
 
-    public boolean func_193414_a(World p_193414_1_, String p_193414_2_, BlockPos p_193414_3_)
+    public boolean isInsideStructure(World worldIn, String structureName, BlockPos pos)
     {
         return false;
     }
 
+    /**
+     * Recreates data about structures intersecting given chunk (used for example by getPossibleCreatures), without
+     * placing any blocks. When called for the first time before any chunk is generated - also initializes the internal
+     * state needed by getPossibleCreatures.
+     */
     public void recreateStructures(Chunk chunkIn, int x, int z)
     {
     }

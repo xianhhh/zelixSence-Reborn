@@ -42,7 +42,7 @@ public class EnchantmentHelper
      */
     public static int getEnchantmentLevel(Enchantment enchID, ItemStack stack)
     {
-        if (stack.func_190926_b())
+        if (stack.isEmpty())
         {
             return 0;
         }
@@ -126,7 +126,7 @@ public class EnchantmentHelper
      */
     private static void applyEnchantmentModifier(EnchantmentHelper.IModifier modifier, ItemStack stack)
     {
-        if (!stack.func_190926_b())
+        if (!stack.isEmpty())
         {
             NBTTagList nbttaglist = stack.getEnchantmentTagList();
 
@@ -173,10 +173,10 @@ public class EnchantmentHelper
         return ENCHANTMENT_MODIFIER_LIVING.livingModifier;
     }
 
-    public static float func_191527_a(EntityLivingBase p_191527_0_)
+    public static float getSweepingDamageRatio(EntityLivingBase p_191527_0_)
     {
-        int i = getMaxEnchantmentLevel(Enchantments.field_191530_r, p_191527_0_);
-        return i > 0 ? EnchantmentSweepingEdge.func_191526_e(i) : 0.0F;
+        int i = getMaxEnchantmentLevel(Enchantments.SWEEPING, p_191527_0_);
+        return i > 0 ? EnchantmentSweepingEdge.getSweepingDamageRatio(i) : 0.0F;
     }
 
     public static void applyThornEnchantments(EntityLivingBase p_151384_0_, Entity p_151384_1_)
@@ -268,12 +268,12 @@ public class EnchantmentHelper
         return getMaxEnchantmentLevel(Enchantments.EFFICIENCY, p_185293_0_);
     }
 
-    public static int func_191529_b(ItemStack p_191529_0_)
+    public static int getFishingLuckBonus(ItemStack p_191529_0_)
     {
         return getEnchantmentLevel(Enchantments.LUCK_OF_THE_SEA, p_191529_0_);
     }
 
-    public static int func_191528_c(ItemStack p_191528_0_)
+    public static int getFishingSpeedBonus(ItemStack p_191528_0_)
     {
         return getEnchantmentLevel(Enchantments.LURE, p_191528_0_);
     }
@@ -291,22 +291,20 @@ public class EnchantmentHelper
     /**
      * Checks if the player has any armor enchanted with the frost walker enchantment.
      *  @return If player has equipment with frost walker
-     *  
-     * @param player The player to check enchantment for
      */
     public static boolean hasFrostWalkerEnchantment(EntityLivingBase player)
     {
         return getMaxEnchantmentLevel(Enchantments.FROST_WALKER, player) > 0;
     }
 
-    public static boolean func_190938_b(ItemStack p_190938_0_)
+    public static boolean hasBindingCurse(ItemStack p_190938_0_)
     {
-        return getEnchantmentLevel(Enchantments.field_190941_k, p_190938_0_) > 0;
+        return getEnchantmentLevel(Enchantments.BINDING_CURSE, p_190938_0_) > 0;
     }
 
-    public static boolean func_190939_c(ItemStack p_190939_0_)
+    public static boolean hasVanishingCurse(ItemStack p_190939_0_)
     {
-        return getEnchantmentLevel(Enchantments.field_190940_C, p_190939_0_) > 0;
+        return getEnchantmentLevel(Enchantments.VANISHING_CURSE, p_190939_0_) > 0;
     }
 
     public static ItemStack getEnchantedItem(Enchantment p_92099_0_, EntityLivingBase p_92099_1_)
@@ -315,7 +313,7 @@ public class EnchantmentHelper
 
         if (list.isEmpty())
         {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
         }
         else
         {
@@ -323,13 +321,13 @@ public class EnchantmentHelper
 
             for (ItemStack itemstack : list)
             {
-                if (!itemstack.func_190926_b() && getEnchantmentLevel(p_92099_0_, itemstack) > 0)
+                if (!itemstack.isEmpty() && getEnchantmentLevel(p_92099_0_, itemstack) > 0)
                 {
                     list1.add(itemstack);
                 }
             }
 
-            return list1.isEmpty() ? ItemStack.field_190927_a : (ItemStack)list1.get(p_92099_1_.getRNG().nextInt(list1.size()));
+            return list1.isEmpty() ? ItemStack.EMPTY : (ItemStack)list1.get(p_92099_1_.getRNG().nextInt(list1.size()));
         }
     }
 
@@ -369,32 +367,32 @@ public class EnchantmentHelper
     /**
      * Applys a random enchantment to the specified item.
      */
-    public static ItemStack addRandomEnchantment(Random random, ItemStack p_77504_1_, int p_77504_2_, boolean allowTreasure)
+    public static ItemStack addRandomEnchantment(Random random, ItemStack stack, int level, boolean allowTreasure)
     {
-        List<EnchantmentData> list = buildEnchantmentList(random, p_77504_1_, p_77504_2_, allowTreasure);
-        boolean flag = p_77504_1_.getItem() == Items.BOOK;
+        List<EnchantmentData> list = buildEnchantmentList(random, stack, level, allowTreasure);
+        boolean flag = stack.getItem() == Items.BOOK;
 
         if (flag)
         {
-            p_77504_1_ = new ItemStack(Items.ENCHANTED_BOOK);
+            stack = new ItemStack(Items.ENCHANTED_BOOK);
         }
 
         for (EnchantmentData enchantmentdata : list)
         {
             if (flag)
             {
-                ItemEnchantedBook.addEnchantment(p_77504_1_, enchantmentdata);
+                ItemEnchantedBook.addEnchantment(stack, enchantmentdata);
             }
             else
             {
-                p_77504_1_.addEnchantment(enchantmentdata.enchantmentobj, enchantmentdata.enchantmentLevel);
+                stack.addEnchantment(enchantmentdata.enchantment, enchantmentdata.enchantmentLevel);
             }
         }
 
-        return p_77504_1_;
+        return stack;
     }
 
-    public static List<EnchantmentData> buildEnchantmentList(Random randomIn, ItemStack itemStackIn, int p_77513_2_, boolean allowTreasure)
+    public static List<EnchantmentData> buildEnchantmentList(Random randomIn, ItemStack itemStackIn, int level, boolean allowTreasure)
     {
         List<EnchantmentData> list = Lists.<EnchantmentData>newArrayList();
         Item item = itemStackIn.getItem();
@@ -406,16 +404,16 @@ public class EnchantmentHelper
         }
         else
         {
-            p_77513_2_ = p_77513_2_ + 1 + randomIn.nextInt(i / 4 + 1) + randomIn.nextInt(i / 4 + 1);
+            level = level + 1 + randomIn.nextInt(i / 4 + 1) + randomIn.nextInt(i / 4 + 1);
             float f = (randomIn.nextFloat() + randomIn.nextFloat() - 1.0F) * 0.15F;
-            p_77513_2_ = MathHelper.clamp(Math.round((float)p_77513_2_ + (float)p_77513_2_ * f), 1, Integer.MAX_VALUE);
-            List<EnchantmentData> list1 = getEnchantmentDatas(p_77513_2_, itemStackIn, allowTreasure);
+            level = MathHelper.clamp(Math.round((float)level + (float)level * f), 1, Integer.MAX_VALUE);
+            List<EnchantmentData> list1 = getEnchantmentDatas(level, itemStackIn, allowTreasure);
 
             if (!list1.isEmpty())
             {
                 list.add(WeightedRandom.getRandomItem(randomIn, list1));
 
-                while (randomIn.nextInt(50) <= p_77513_2_)
+                while (randomIn.nextInt(50) <= level)
                 {
                     removeIncompatible(list1, (EnchantmentData)Util.getLastElement(list));
 
@@ -425,7 +423,7 @@ public class EnchantmentHelper
                     }
 
                     list.add(WeightedRandom.getRandomItem(randomIn, list1));
-                    p_77513_2_ /= 2;
+                    level /= 2;
                 }
             }
 
@@ -439,7 +437,7 @@ public class EnchantmentHelper
 
         while (iterator.hasNext())
         {
-            if (!p_185282_1_.enchantmentobj.func_191560_c((iterator.next()).enchantmentobj))
+            if (!p_185282_1_.enchantment.isCompatibleWith((iterator.next()).enchantment))
             {
                 iterator.remove();
             }

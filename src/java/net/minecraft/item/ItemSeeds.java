@@ -28,20 +28,20 @@ public class ItemSeeds extends Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        ItemStack itemstack = stack.getHeldItem(pos);
+        ItemStack itemstack = player.getHeldItem(hand);
 
-        if (hand == EnumFacing.UP && stack.canPlayerEdit(worldIn.offset(hand), hand, itemstack) && playerIn.getBlockState(worldIn).getBlock() == this.soilBlockID && playerIn.isAirBlock(worldIn.up()))
+        if (facing == EnumFacing.UP && player.canPlayerEdit(pos.offset(facing), facing, itemstack) && worldIn.getBlockState(pos).getBlock() == this.soilBlockID && worldIn.isAirBlock(pos.up()))
         {
-            playerIn.setBlockState(worldIn.up(), this.crops.getDefaultState());
+            worldIn.setBlockState(pos.up(), this.crops.getDefaultState());
 
-            if (stack instanceof EntityPlayerMP)
+            if (player instanceof EntityPlayerMP)
             {
-                CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn.up(), itemstack);
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, pos.up(), itemstack);
             }
 
-            itemstack.func_190918_g(1);
+            itemstack.shrink(1);
             return EnumActionResult.SUCCESS;
         }
         else

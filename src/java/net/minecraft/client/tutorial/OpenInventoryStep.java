@@ -7,46 +7,49 @@ import net.minecraft.world.GameType;
 
 public class OpenInventoryStep implements ITutorialStep
 {
-    private static final ITextComponent field_193281_a = new TextComponentTranslation("tutorial.open_inventory.title", new Object[0]);
-    private static final ITextComponent field_193282_b = new TextComponentTranslation("tutorial.open_inventory.description", new Object[] {Tutorial.func_193291_a("inventory")});
-    private final Tutorial field_193283_c;
-    private TutorialToast field_193284_d;
-    private int field_193285_e;
+    private static final ITextComponent TITLE = new TextComponentTranslation("tutorial.open_inventory.title", new Object[0]);
+    private static final ITextComponent DESCRIPTION = new TextComponentTranslation("tutorial.open_inventory.description", new Object[] {Tutorial.createKeybindComponent("inventory")});
+    private final Tutorial tutorial;
+    private TutorialToast toast;
+    private int timeWaiting;
 
-    public OpenInventoryStep(Tutorial p_i47580_1_)
+    public OpenInventoryStep(Tutorial tutorial)
     {
-        this.field_193283_c = p_i47580_1_;
+        this.tutorial = tutorial;
     }
 
-    public void func_193245_a()
+    public void update()
     {
-        ++this.field_193285_e;
+        ++this.timeWaiting;
 
-        if (this.field_193283_c.func_194072_f() != GameType.SURVIVAL)
+        if (this.tutorial.getGameType() != GameType.SURVIVAL)
         {
-            this.field_193283_c.func_193292_a(TutorialSteps.NONE);
+            this.tutorial.setStep(TutorialSteps.NONE);
         }
         else
         {
-            if (this.field_193285_e >= 600 && this.field_193284_d == null)
+            if (this.timeWaiting >= 600 && this.toast == null)
             {
-                this.field_193284_d = new TutorialToast(TutorialToast.Icons.RECIPE_BOOK, field_193281_a, field_193282_b, false);
-                this.field_193283_c.func_193295_e().func_193033_an().func_192988_a(this.field_193284_d);
+                this.toast = new TutorialToast(TutorialToast.Icons.RECIPE_BOOK, TITLE, DESCRIPTION, false);
+                this.tutorial.getMinecraft().getToastGui().add(this.toast);
             }
         }
     }
 
-    public void func_193248_b()
+    public void onStop()
     {
-        if (this.field_193284_d != null)
+        if (this.toast != null)
         {
-            this.field_193284_d.func_193670_a();
-            this.field_193284_d = null;
+            this.toast.hide();
+            this.toast = null;
         }
     }
 
-    public void func_193251_c()
+    /**
+     * Called when the player opens his inventory
+     */
+    public void openInventory()
     {
-        this.field_193283_c.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+        this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
     }
 }

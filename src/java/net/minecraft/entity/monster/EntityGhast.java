@@ -90,7 +90,7 @@ public class EntityGhast extends EntityFlying implements IMob
         {
             return false;
         }
-        else if (source.getSourceOfDamage() instanceof EntityLargeFireball && source.getEntity() instanceof EntityPlayer)
+        else if (source.getImmediateSource() instanceof EntityLargeFireball && source.getTrueSource() instanceof EntityPlayer)
         {
             super.attackEntityFrom(source, 1000.0F);
             return true;
@@ -124,7 +124,7 @@ public class EntityGhast extends EntityFlying implements IMob
         return SoundEvents.ENTITY_GHAST_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_GHAST_HURT;
     }
@@ -240,16 +240,16 @@ public class EntityGhast extends EntityFlying implements IMob
                 {
                     double d1 = 4.0D;
                     Vec3d vec3d = this.parentEntity.getLook(1.0F);
-                    double d2 = entitylivingbase.posX - (this.parentEntity.posX + vec3d.xCoord * 4.0D);
+                    double d2 = entitylivingbase.posX - (this.parentEntity.posX + vec3d.x * 4.0D);
                     double d3 = entitylivingbase.getEntityBoundingBox().minY + (double)(entitylivingbase.height / 2.0F) - (0.5D + this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F));
-                    double d4 = entitylivingbase.posZ - (this.parentEntity.posZ + vec3d.zCoord * 4.0D);
+                    double d4 = entitylivingbase.posZ - (this.parentEntity.posZ + vec3d.z * 4.0D);
                     world.playEvent((EntityPlayer)null, 1016, new BlockPos(this.parentEntity), 0);
                     EntityLargeFireball entitylargefireball = new EntityLargeFireball(world, this.parentEntity, d2, d3, d4);
                     entitylargefireball.explosionPower = this.parentEntity.getFireballStrength();
-                    entitylargefireball.posX = this.parentEntity.posX + vec3d.xCoord * 4.0D;
+                    entitylargefireball.posX = this.parentEntity.posX + vec3d.x * 4.0D;
                     entitylargefireball.posY = this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F) + 0.5D;
-                    entitylargefireball.posZ = this.parentEntity.posZ + vec3d.zCoord * 4.0D;
-                    world.spawnEntityInWorld(entitylargefireball);
+                    entitylargefireball.posZ = this.parentEntity.posZ + vec3d.z * 4.0D;
+                    world.spawnEntity(entitylargefireball);
                     this.attackTimer = -40;
                 }
             }
@@ -328,7 +328,7 @@ public class EntityGhast extends EntityFlying implements IMob
             }
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
             return false;
         }

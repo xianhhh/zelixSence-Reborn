@@ -39,9 +39,9 @@ public class LayerWitherAura implements LayerRenderer<EntityWither>
             GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
             this.witherModel.setLivingAnimations(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks);
             this.witherModel.setModelAttributes(this.witherRenderer.getMainModel());
-            Minecraft.getMinecraft().entityRenderer.func_191514_d(true);
+            Minecraft.getMinecraft().entityRenderer.setupFogColor(true);
             this.witherModel.render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
-            Minecraft.getMinecraft().entityRenderer.func_191514_d(false);
+            Minecraft.getMinecraft().entityRenderer.setupFogColor(false);
             GlStateManager.matrixMode(5890);
             GlStateManager.loadIdentity();
             GlStateManager.matrixMode(5888);

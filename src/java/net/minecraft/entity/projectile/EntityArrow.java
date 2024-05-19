@@ -168,7 +168,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
     }
 
     /**
-     * Updates the velocity of the entity to a new value.
+     * Updates the entity motion clientside, called by packets from the server
      */
     public void setVelocity(double x, double y, double z)
     {
@@ -212,7 +212,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
         {
             AxisAlignedBB axisalignedbb = iblockstate.getCollisionBoundingBox(this.world, blockpos);
 
-            if (axisalignedbb != Block.NULL_AABB && axisalignedbb.offset(blockpos).isVecInside(new Vec3d(this.posX, this.posY, this.posZ)))
+            if (axisalignedbb != Block.NULL_AABB && axisalignedbb.offset(blockpos).contains(new Vec3d(this.posX, this.posY, this.posZ)))
             {
                 this.inGround = true;
             }
@@ -227,7 +227,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
         {
             int j = block.getMetaFromState(iblockstate);
 
-            if ((block != this.inTile || j != this.inData) && !this.world.collidesWithAnyBlock(this.getEntityBoundingBox().expandXyz(0.05D)))
+            if ((block != this.inTile || j != this.inData) && !this.world.collidesWithAnyBlock(this.getEntityBoundingBox().grow(0.05D)))
             {
                 this.inGround = false;
                 this.motionX *= (double)(this.rand.nextFloat() * 0.2F);
@@ -260,7 +260,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
 
             if (raytraceresult != null)
             {
-                vec3d = new Vec3d(raytraceresult.hitVec.xCoord, raytraceresult.hitVec.yCoord, raytraceresult.hitVec.zCoord);
+                vec3d = new Vec3d(raytraceresult.hitVec.x, raytraceresult.hitVec.y, raytraceresult.hitVec.z);
             }
 
             Entity entity = this.findEntityOnPath(vec3d1, vec3d);
@@ -458,9 +458,9 @@ public abstract class EntityArrow extends Entity implements IProjectile
             IBlockState iblockstate = this.world.getBlockState(blockpos);
             this.inTile = iblockstate.getBlock();
             this.inData = this.inTile.getMetaFromState(iblockstate);
-            this.motionX = (double)((float)(raytraceResultIn.hitVec.xCoord - this.posX));
-            this.motionY = (double)((float)(raytraceResultIn.hitVec.yCoord - this.posY));
-            this.motionZ = (double)((float)(raytraceResultIn.hitVec.zCoord - this.posZ));
+            this.motionX = (double)((float)(raytraceResultIn.hitVec.x - this.posX));
+            this.motionY = (double)((float)(raytraceResultIn.hitVec.y - this.posY));
+            this.motionZ = (double)((float)(raytraceResultIn.hitVec.z - this.posZ));
             float f2 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
             this.posX -= this.motionX / (double)f2 * 0.05000000074505806D;
             this.posY -= this.motionY / (double)f2 * 0.05000000074505806D;
@@ -480,9 +480,9 @@ public abstract class EntityArrow extends Entity implements IProjectile
     /**
      * Tries to move the entity towards the specified location.
      */
-    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
+    public void move(MoverType type, double x, double y, double z)
     {
-        super.moveEntity(x, p_70091_2_, p_70091_4_, p_70091_6_);
+        super.move(type, x, y, z);
 
         if (this.inGround)
         {
@@ -500,7 +500,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
     protected Entity findEntityOnPath(Vec3d start, Vec3d end)
     {
         Entity entity = null;
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D), ARROW_TARGETS);
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1.0D), ARROW_TARGETS);
         double d0 = 0.0D;
 
         for (int i = 0; i < list.size(); ++i)
@@ -509,7 +509,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
 
             if (entity1 != this.shootingEntity || this.ticksInAir >= 5)
             {
-                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expandXyz(0.30000001192092896D);
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(0.30000001192092896D);
                 RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
 
                 if (raytraceresult != null)
@@ -686,7 +686,7 @@ public abstract class EntityArrow extends Entity implements IProjectile
         return (b0 & 1) != 0;
     }
 
-    public void func_190547_a(EntityLivingBase p_190547_1_, float p_190547_2_)
+    public void setEnchantmentEffectsFromEntity(EntityLivingBase p_190547_1_, float p_190547_2_)
     {
         int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, p_190547_1_);
         int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, p_190547_1_);

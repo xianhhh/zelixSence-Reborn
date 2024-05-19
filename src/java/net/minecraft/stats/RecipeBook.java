@@ -6,76 +6,78 @@ import net.minecraft.item.crafting.IRecipe;
 
 public class RecipeBook
 {
-    protected final BitSet field_194077_a = new BitSet();
-    protected final BitSet field_194078_b = new BitSet();
-    protected boolean field_192818_b;
-    protected boolean field_192819_c;
+    protected final BitSet recipes = new BitSet();
 
-    public void func_193824_a(RecipeBook p_193824_1_)
+    /** Recipes the player has not yet seen, so the GUI can play an animation */
+    protected final BitSet unseenRecipes = new BitSet();
+    protected boolean isGuiOpen;
+    protected boolean isFilteringCraftable;
+
+    public void apply(RecipeBook that)
     {
-        this.field_194077_a.clear();
-        this.field_194078_b.clear();
-        this.field_194077_a.or(p_193824_1_.field_194077_a);
-        this.field_194078_b.or(p_193824_1_.field_194078_b);
+        this.recipes.clear();
+        this.unseenRecipes.clear();
+        this.recipes.or(that.recipes);
+        this.unseenRecipes.or(that.unseenRecipes);
     }
 
-    public void func_194073_a(IRecipe p_194073_1_)
+    public void setRecipes(IRecipe recipe)
     {
-        if (!p_194073_1_.func_192399_d())
+        if (!recipe.isHidden())
         {
-            this.field_194077_a.set(func_194075_d(p_194073_1_));
+            this.recipes.set(getRecipeId(recipe));
         }
     }
 
-    public boolean func_193830_f(IRecipe p_193830_1_)
+    public boolean containsRecipe(IRecipe recipe)
     {
-        return this.field_194077_a.get(func_194075_d(p_193830_1_));
+        return this.recipes.get(getRecipeId(recipe));
     }
 
-    public void func_193831_b(IRecipe p_193831_1_)
+    public void removeRecipe(IRecipe recipe)
     {
-        int i = func_194075_d(p_193831_1_);
-        this.field_194077_a.clear(i);
-        this.field_194078_b.clear(i);
+        int i = getRecipeId(recipe);
+        this.recipes.clear(i);
+        this.unseenRecipes.clear(i);
     }
 
-    protected static int func_194075_d(IRecipe p_194075_0_)
+    protected static int getRecipeId(IRecipe recipe)
     {
-        return CraftingManager.field_193380_a.getIDForObject(p_194075_0_);
+        return CraftingManager.REGISTRY.getIDForObject(recipe);
     }
 
-    public boolean func_194076_e(IRecipe p_194076_1_)
+    public boolean isRecipeUnseen(IRecipe recipe)
     {
-        return this.field_194078_b.get(func_194075_d(p_194076_1_));
+        return this.unseenRecipes.get(getRecipeId(recipe));
     }
 
-    public void func_194074_f(IRecipe p_194074_1_)
+    public void setRecipeSeen(IRecipe recipe)
     {
-        this.field_194078_b.clear(func_194075_d(p_194074_1_));
+        this.unseenRecipes.clear(getRecipeId(recipe));
     }
 
-    public void func_193825_e(IRecipe p_193825_1_)
+    public void addDisplayedRecipe(IRecipe recipe)
     {
-        this.field_194078_b.set(func_194075_d(p_193825_1_));
+        this.unseenRecipes.set(getRecipeId(recipe));
     }
 
-    public boolean func_192812_b()
+    public boolean isGuiOpen()
     {
-        return this.field_192818_b;
+        return this.isGuiOpen;
     }
 
-    public void func_192813_a(boolean p_192813_1_)
+    public void setGuiOpen(boolean open)
     {
-        this.field_192818_b = p_192813_1_;
+        this.isGuiOpen = open;
     }
 
-    public boolean func_192815_c()
+    public boolean isFilteringCraftable()
     {
-        return this.field_192819_c;
+        return this.isFilteringCraftable;
     }
 
-    public void func_192810_b(boolean p_192810_1_)
+    public void setFilteringCraftable(boolean shouldFilter)
     {
-        this.field_192819_c = p_192810_1_;
+        this.isFilteringCraftable = shouldFilter;
     }
 }

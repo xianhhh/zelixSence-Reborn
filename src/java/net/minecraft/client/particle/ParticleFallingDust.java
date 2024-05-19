@@ -40,12 +40,12 @@ public class ParticleFallingDust extends Particle
     /**
      * Renders the particle
      */
-    public void renderParticle(BufferBuilder worldRendererIn, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
+    public void renderParticle(BufferBuilder buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
     {
         float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge * 32.0F;
         f = MathHelper.clamp(f, 0.0F, 1.0F);
         this.particleScale = this.oSize * f;
-        super.renderParticle(worldRendererIn, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+        super.renderParticle(buffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
     }
 
     public void onUpdate()
@@ -62,13 +62,13 @@ public class ParticleFallingDust extends Particle
         this.prevParticleAngle = this.particleAngle;
         this.particleAngle += (float)Math.PI * this.rotSpeed * 2.0F;
 
-        if (this.isCollided)
+        if (this.onGround)
         {
             this.prevParticleAngle = this.particleAngle = 0.0F;
         }
 
         this.setParticleTextureIndex(7 - this.particleAge * 8 / this.particleMaxAge);
-        this.moveEntity(this.motionX, this.motionY, this.motionZ);
+        this.move(this.motionX, this.motionY, this.motionZ);
         this.motionY -= 0.003000000026077032D;
         this.motionY = Math.max(this.motionY, -0.14000000059604645D);
     }

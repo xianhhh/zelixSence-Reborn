@@ -15,111 +15,114 @@ import net.minecraft.util.ResourceLocation;
 
 public class EffectsChangedTrigger implements ICriterionTrigger<EffectsChangedTrigger.Instance>
 {
-    private static final ResourceLocation field_193154_a = new ResourceLocation("effects_changed");
-    private final Map<PlayerAdvancements, EffectsChangedTrigger.Listeners> field_193155_b = Maps.<PlayerAdvancements, EffectsChangedTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("effects_changed");
+    private final Map<PlayerAdvancements, EffectsChangedTrigger.Listeners> listeners = Maps.<PlayerAdvancements, EffectsChangedTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193154_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener)
     {
-        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.field_193155_b.get(p_192165_1_);
+        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (effectschangedtrigger$listeners == null)
         {
-            effectschangedtrigger$listeners = new EffectsChangedTrigger.Listeners(p_192165_1_);
-            this.field_193155_b.put(p_192165_1_, effectschangedtrigger$listeners);
+            effectschangedtrigger$listeners = new EffectsChangedTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, effectschangedtrigger$listeners);
         }
 
-        effectschangedtrigger$listeners.func_193431_a(p_192165_2_);
+        effectschangedtrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener)
     {
-        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.field_193155_b.get(p_192164_1_);
+        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (effectschangedtrigger$listeners != null)
         {
-            effectschangedtrigger$listeners.func_193429_b(p_192164_2_);
+            effectschangedtrigger$listeners.remove(listener);
 
-            if (effectschangedtrigger$listeners.func_193430_a())
+            if (effectschangedtrigger$listeners.isEmpty())
             {
-                this.field_193155_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193155_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public EffectsChangedTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public EffectsChangedTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        MobEffectsPredicate mobeffectspredicate = MobEffectsPredicate.func_193471_a(p_192166_1_.get("effects"));
+        MobEffectsPredicate mobeffectspredicate = MobEffectsPredicate.deserialize(json.get("effects"));
         return new EffectsChangedTrigger.Instance(mobeffectspredicate);
     }
 
-    public void func_193153_a(EntityPlayerMP p_193153_1_)
+    public void trigger(EntityPlayerMP player)
     {
-        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.field_193155_b.get(p_193153_1_.func_192039_O());
+        EffectsChangedTrigger.Listeners effectschangedtrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (effectschangedtrigger$listeners != null)
         {
-            effectschangedtrigger$listeners.func_193432_a(p_193153_1_);
+            effectschangedtrigger$listeners.trigger(player);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final MobEffectsPredicate field_193196_a;
+        private final MobEffectsPredicate effects;
 
-        public Instance(MobEffectsPredicate p_i47545_1_)
+        public Instance(MobEffectsPredicate effects)
         {
-            super(EffectsChangedTrigger.field_193154_a);
-            this.field_193196_a = p_i47545_1_;
+            super(EffectsChangedTrigger.ID);
+            this.effects = effects;
         }
 
-        public boolean func_193195_a(EntityPlayerMP p_193195_1_)
+        public boolean test(EntityPlayerMP player)
         {
-            return this.field_193196_a.func_193472_a(p_193195_1_);
+            return this.effects.test(player);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193433_a;
-        private final Set<ICriterionTrigger.Listener<EffectsChangedTrigger.Instance>> field_193434_b = Sets.<ICriterionTrigger.Listener<EffectsChangedTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<EffectsChangedTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<EffectsChangedTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47546_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193433_a = p_i47546_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193430_a()
+        public boolean isEmpty()
         {
-            return this.field_193434_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193431_a(ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> p_193431_1_)
+        public void add(ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener)
         {
-            this.field_193434_b.add(p_193431_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193429_b(ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> p_193429_1_)
+        public void remove(ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener)
         {
-            this.field_193434_b.remove(p_193429_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193432_a(EntityPlayerMP p_193432_1_)
+        public void trigger(EntityPlayerMP player)
         {
             List<ICriterionTrigger.Listener<EffectsChangedTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener : this.field_193434_b)
+            for (ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener : this.listeners)
             {
-                if (((EffectsChangedTrigger.Instance)listener.func_192158_a()).func_193195_a(p_193432_1_))
+                if (((EffectsChangedTrigger.Instance)listener.getCriterionInstance()).test(player))
                 {
                     if (list == null)
                     {
@@ -134,7 +137,7 @@ public class EffectsChangedTrigger implements ICriterionTrigger<EffectsChangedTr
             {
                 for (ICriterionTrigger.Listener<EffectsChangedTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193433_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

@@ -208,7 +208,7 @@ public class EntityDataManager
                         list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
                     }
 
-                    list.add(dataentry.func_192735_d());
+                    list.add(dataentry.copy());
                 }
             }
 
@@ -245,7 +245,7 @@ public class EntityDataManager
                 list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
             }
 
-            list.add(dataentry.func_192735_d());
+            list.add(dataentry.copy());
         }
 
         this.lock.readLock().unlock();
@@ -264,7 +264,7 @@ public class EntityDataManager
         else
         {
             buf.writeByte(dataparameter.getId());
-            buf.writeVarIntToBuffer(i);
+            buf.writeVarInt(i);
             dataparameter.getSerializer().write(buf, entry.getValue());
         }
     }
@@ -282,7 +282,7 @@ public class EntityDataManager
                 list = Lists. < EntityDataManager.DataEntry<? >> newArrayList();
             }
 
-            int j = buf.readVarIntFromBuffer();
+            int j = buf.readVarInt();
             DataSerializer<?> dataserializer = DataSerializers.getSerializer(j);
 
             if (dataserializer == null)
@@ -376,9 +376,9 @@ public class EntityDataManager
             this.dirty = dirtyIn;
         }
 
-        public EntityDataManager.DataEntry<T> func_192735_d()
+        public EntityDataManager.DataEntry<T> copy()
         {
-            return new EntityDataManager.DataEntry<T>(this.key, this.key.getSerializer().func_192717_a(this.value));
+            return new EntityDataManager.DataEntry<T>(this.key, this.key.getSerializer().copyValue(this.value));
         }
     }
 }

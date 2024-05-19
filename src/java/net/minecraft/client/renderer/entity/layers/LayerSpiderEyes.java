@@ -5,7 +5,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderSpider;
 import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.src.Config;
 import net.minecraft.util.ResourceLocation;
+import shadersmod.client.Shaders;
 
 public class LayerSpiderEyes<T extends EntitySpider> implements LayerRenderer<T>
 {
@@ -38,9 +40,23 @@ public class LayerSpiderEyes<T extends EntitySpider> implements LayerRenderer<T>
         int k = i / 65536;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getMinecraft().entityRenderer.func_191514_d(true);
+        Minecraft.getMinecraft().entityRenderer.setupFogColor(true);
+
+        if (Config.isShaders())
+        {
+            Shaders.beginSpiderEyes();
+        }
+
+        Config.getRenderGlobal().renderOverlayEyes = true;
         this.spiderRenderer.getMainModel().render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
-        Minecraft.getMinecraft().entityRenderer.func_191514_d(false);
+        Config.getRenderGlobal().renderOverlayEyes = false;
+
+        if (Config.isShaders())
+        {
+            Shaders.endSpiderEyes();
+        }
+
+        Minecraft.getMinecraft().entityRenderer.setupFogColor(false);
         i = entitylivingbaseIn.getBrightnessForRender();
         j = i % 65536;
         k = i / 65536;

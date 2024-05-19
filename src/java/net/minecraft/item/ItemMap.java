@@ -32,17 +32,17 @@ public class ItemMap extends ItemMapBase
         this.setHasSubtypes(true);
     }
 
-    public static ItemStack func_190906_a(World p_190906_0_, double p_190906_1_, double p_190906_3_, byte p_190906_5_, boolean p_190906_6_, boolean p_190906_7_)
+    public static ItemStack setupNewMap(World worldIn, double worldX, double worldZ, byte scale, boolean trackingPosition, boolean unlimitedTracking)
     {
-        ItemStack itemstack = new ItemStack(Items.FILLED_MAP, 1, p_190906_0_.getUniqueDataId("map"));
+        ItemStack itemstack = new ItemStack(Items.FILLED_MAP, 1, worldIn.getUniqueDataId("map"));
         String s = "map_" + itemstack.getMetadata();
         MapData mapdata = new MapData(s);
-        p_190906_0_.setItemData(s, mapdata);
-        mapdata.scale = p_190906_5_;
-        mapdata.calculateMapCenter(p_190906_1_, p_190906_3_, mapdata.scale);
-        mapdata.dimension = (byte)p_190906_0_.provider.getDimensionType().getId();
-        mapdata.trackingPosition = p_190906_6_;
-        mapdata.field_191096_f = p_190906_7_;
+        worldIn.setData(s, mapdata);
+        mapdata.scale = scale;
+        mapdata.calculateMapCenter(worldX, worldZ, mapdata.scale);
+        mapdata.dimension = (byte)worldIn.provider.getDimensionType().getId();
+        mapdata.trackingPosition = trackingPosition;
+        mapdata.unlimitedTracking = unlimitedTracking;
         mapdata.markDirty();
         return itemstack;
     }
@@ -51,14 +51,14 @@ public class ItemMap extends ItemMapBase
     public static MapData loadMapData(int mapId, World worldIn)
     {
         String s = "map_" + mapId;
-        return (MapData)worldIn.loadItemData(MapData.class, s);
+        return (MapData)worldIn.loadData(MapData.class, s);
     }
 
     @Nullable
     public MapData getMapData(ItemStack stack, World worldIn)
     {
         String s = "map_" + stack.getMetadata();
-        MapData mapdata = (MapData)worldIn.loadItemData(MapData.class, s);
+        MapData mapdata = (MapData)worldIn.loadData(MapData.class, s);
 
         if (mapdata == null && !worldIn.isRemote)
         {
@@ -69,7 +69,7 @@ public class ItemMap extends ItemMapBase
             mapdata.calculateMapCenter((double)worldIn.getWorldInfo().getSpawnX(), (double)worldIn.getWorldInfo().getSpawnZ(), mapdata.scale);
             mapdata.dimension = (byte)worldIn.provider.getDimensionType().getId();
             mapdata.markDirty();
-            worldIn.setItemData(s, mapdata);
+            worldIn.setData(s, mapdata);
         }
 
         return mapdata;
@@ -86,7 +86,7 @@ public class ItemMap extends ItemMapBase
             int i1 = MathHelper.floor(viewer.posZ - (double)k) / i + 64;
             int j1 = 128 / i;
 
-            if (worldIn.provider.getHasNoSky())
+            if (worldIn.provider.isNether())
             {
                 j1 /= 2;
             }
@@ -121,7 +121,7 @@ public class ItemMap extends ItemMapBase
                                 int k3 = 0;
                                 double d1 = 0.0D;
 
-                                if (worldIn.provider.getHasNoSky())
+                                if (worldIn.provider.isNether())
                                 {
                                     int l3 = k2 + l2 * 231871;
                                     l3 = l3 * l3 * 31287121 + l3 * 11;
@@ -160,7 +160,7 @@ public class ItemMap extends ItemMapBase
                                                     {
                                                         --k4;
                                                         iblockstate = chunk.getBlockState(i4 + i3, k4, j4 + j3);
-                                                        blockpos$mutableblockpos.setPos((chunk.xPosition << 4) + i4 + i3, k4, (chunk.zPosition << 4) + j4 + j3);
+                                                        blockpos$mutableblockpos.setPos((chunk.x << 4) + i4 + i3, k4, (chunk.z << 4) + j4 + j3);
 
                                                         if (iblockstate.getMapColor(worldIn, blockpos$mutableblockpos) != MapColor.AIR || k4 <= 0)
                                                         {
@@ -246,20 +246,23 @@ public class ItemMap extends ItemMapBase
         }
     }
 
-    public static void func_190905_a(World p_190905_0_, ItemStack p_190905_1_)
+    /**
+     * Draws ambiguous landmasses representing unexplored terrain onto a treasure map
+     */
+    public static void renderBiomePreviewMap(World worldIn, ItemStack map)
     {
-        if (p_190905_1_.getItem() == Items.FILLED_MAP)
+        if (map.getItem() == Items.FILLED_MAP)
         {
-            MapData mapdata = Items.FILLED_MAP.getMapData(p_190905_1_, p_190905_0_);
+            MapData mapdata = Items.FILLED_MAP.getMapData(map, worldIn);
 
             if (mapdata != null)
             {
-                if (p_190905_0_.provider.getDimensionType().getId() == mapdata.dimension)
+                if (worldIn.provider.getDimensionType().getId() == mapdata.dimension)
                 {
                     int i = 1 << mapdata.scale;
                     int j = mapdata.xCenter;
                     int k = mapdata.zCenter;
-                    Biome[] abiome = p_190905_0_.getBiomeProvider().getBiomes((Biome[])null, (j / i - 64) * i, (k / i - 64) * i, 128 * i, 128 * i, false);
+                    Biome[] abiome = worldIn.getBiomeProvider().getBiomes((Biome[])null, (j / i - 64) * i, (k / i - 64) * i, 128 * i, 128 * i, false);
 
                     for (int l = 0; l < 128; ++l)
                     {
@@ -439,7 +442,7 @@ public class ItemMap extends ItemMapBase
             mapdata1.calculateMapCenter((double)mapdata.xCenter, (double)mapdata.zCenter, mapdata1.scale);
             mapdata1.dimension = mapdata.dimension;
             mapdata1.markDirty();
-            p_185063_1_.setItemData("map_" + p_185063_0_.getMetadata(), mapdata1);
+            p_185063_1_.setData("map_" + p_185063_0_.getMetadata(), mapdata1);
         }
     }
 
@@ -457,18 +460,18 @@ public class ItemMap extends ItemMapBase
             mapdata1.scale = mapdata.scale;
             mapdata1.dimension = mapdata.dimension;
             mapdata1.markDirty();
-            p_185064_1_.setItemData("map_" + p_185064_0_.getMetadata(), mapdata1);
+            p_185064_1_.setData("map_" + p_185064_0_.getMetadata(), mapdata1);
         }
     }
 
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
-        if (advanced.func_194127_a())
+        if (flagIn.isAdvanced())
         {
-            MapData mapdata = playerIn == null ? null : this.getMapData(stack, playerIn);
+            MapData mapdata = worldIn == null ? null : this.getMapData(stack, worldIn);
 
             if (mapdata != null)
             {
@@ -482,7 +485,7 @@ public class ItemMap extends ItemMapBase
         }
     }
 
-    public static int func_190907_h(ItemStack p_190907_0_)
+    public static int getColor(ItemStack p_190907_0_)
     {
         NBTTagCompound nbttagcompound = p_190907_0_.getSubCompound("display");
 

@@ -17,21 +17,21 @@ import net.minecraft.world.World;
 
 public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
 {
-    private final Minecraft field_193851_a;
+    private final Minecraft minecraft;
 
-    public DebugRendererSolidFace(Minecraft p_i47478_1_)
+    public DebugRendererSolidFace(Minecraft minecraftIn)
     {
-        this.field_193851_a = p_i47478_1_;
+        this.minecraft = minecraftIn;
     }
 
-    public void render(float p_190060_1_, long p_190060_2_)
+    public void render(float partialTicks, long finishTimeNano)
     {
-        EntityPlayer entityplayer = this.field_193851_a.player;
-        double d0 = entityplayer.lastTickPosX + (entityplayer.posX - entityplayer.lastTickPosX) * (double)p_190060_1_;
-        double d1 = entityplayer.lastTickPosY + (entityplayer.posY - entityplayer.lastTickPosY) * (double)p_190060_1_;
-        double d2 = entityplayer.lastTickPosZ + (entityplayer.posZ - entityplayer.lastTickPosZ) * (double)p_190060_1_;
-        World world = this.field_193851_a.player.world;
-        Iterable<BlockPos> iterable = BlockPos.func_191532_a(MathHelper.floor(entityplayer.posX - 6.0D), MathHelper.floor(entityplayer.posY - 6.0D), MathHelper.floor(entityplayer.posZ - 6.0D), MathHelper.floor(entityplayer.posX + 6.0D), MathHelper.floor(entityplayer.posY + 6.0D), MathHelper.floor(entityplayer.posZ + 6.0D));
+        EntityPlayer entityplayer = this.minecraft.player;
+        double d0 = entityplayer.lastTickPosX + (entityplayer.posX - entityplayer.lastTickPosX) * (double)partialTicks;
+        double d1 = entityplayer.lastTickPosY + (entityplayer.posY - entityplayer.lastTickPosY) * (double)partialTicks;
+        double d2 = entityplayer.lastTickPosZ + (entityplayer.posZ - entityplayer.lastTickPosZ) * (double)partialTicks;
+        World world = this.minecraft.player.world;
+        Iterable<BlockPos> iterable = BlockPos.getAllInBox(MathHelper.floor(entityplayer.posX - 6.0D), MathHelper.floor(entityplayer.posY - 6.0D), MathHelper.floor(entityplayer.posZ - 6.0D), MathHelper.floor(entityplayer.posX + 6.0D), MathHelper.floor(entityplayer.posY + 6.0D), MathHelper.floor(entityplayer.posZ + 6.0D));
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.glLineWidth(2.0F);
@@ -44,7 +44,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
 
             if (iblockstate.getBlock() != Blocks.AIR)
             {
-                AxisAlignedBB axisalignedbb = iblockstate.getSelectedBoundingBox(world, blockpos).expandXyz(0.002D).offset(-d0, -d1, -d2);
+                AxisAlignedBB axisalignedbb = iblockstate.getSelectedBoundingBox(world, blockpos).grow(0.002D).offset(-d0, -d1, -d2);
                 double d3 = axisalignedbb.minX;
                 double d4 = axisalignedbb.minY;
                 double d5 = axisalignedbb.minZ;
@@ -56,7 +56,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                 float f2 = 0.0F;
                 float f3 = 0.5F;
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.WEST) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.WEST) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator = Tessellator.getInstance();
                     BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -68,7 +68,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                     tessellator.draw();
                 }
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.SOUTH) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.SOUTH) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator1 = Tessellator.getInstance();
                     BufferBuilder bufferbuilder1 = tessellator1.getBuffer();
@@ -80,7 +80,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                     tessellator1.draw();
                 }
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.EAST) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.EAST) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator2 = Tessellator.getInstance();
                     BufferBuilder bufferbuilder2 = tessellator2.getBuffer();
@@ -92,7 +92,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                     tessellator2.draw();
                 }
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.NORTH) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.NORTH) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator3 = Tessellator.getInstance();
                     BufferBuilder bufferbuilder3 = tessellator3.getBuffer();
@@ -104,7 +104,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                     tessellator3.draw();
                 }
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.DOWN) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.DOWN) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator4 = Tessellator.getInstance();
                     BufferBuilder bufferbuilder4 = tessellator4.getBuffer();
@@ -116,7 +116,7 @@ public class DebugRendererSolidFace implements DebugRenderer.IDebugRenderer
                     tessellator4.draw();
                 }
 
-                if (iblockstate.func_193401_d(world, blockpos, EnumFacing.UP) == BlockFaceShape.SOLID)
+                if (iblockstate.getBlockFaceShape(world, blockpos, EnumFacing.UP) == BlockFaceShape.SOLID)
                 {
                     Tessellator tessellator5 = Tessellator.getInstance();
                     BufferBuilder bufferbuilder5 = tessellator5.getBuffer();

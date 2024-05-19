@@ -113,9 +113,9 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
      * returns whether or not a tree can grow at a specific position.
      * If it can, it generates surrounding dirt underneath.
      */
-    protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int p_175929_4_)
+    protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int height)
     {
-        return this.isSpaceAt(worldIn, treePos, p_175929_4_) && this.ensureDirtsUnderneath(treePos, worldIn);
+        return this.isSpaceAt(worldIn, treePos, height) && this.ensureDirtsUnderneath(treePos, worldIn);
     }
 
     /**

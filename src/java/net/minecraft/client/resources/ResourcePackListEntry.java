@@ -27,29 +27,29 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
         this.mc = Minecraft.getMinecraft();
     }
 
-    public void func_192634_a(int p_192634_1_, int p_192634_2_, int p_192634_3_, int p_192634_4_, int p_192634_5_, int p_192634_6_, int p_192634_7_, boolean p_192634_8_, float p_192634_9_)
+    public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks)
     {
         int i = this.getResourcePackFormat();
 
         if (i != 3)
         {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            Gui.drawRect(p_192634_2_ - 1, p_192634_3_ - 1, p_192634_2_ + p_192634_4_ - 9, p_192634_3_ + p_192634_5_ + 1, -8978432);
+            Gui.drawRect(x - 1, y - 1, x + listWidth - 9, y + slotHeight + 1, -8978432);
         }
 
         this.bindResourcePackIcon();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
+        Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
         String s = this.getResourcePackName();
         String s1 = this.getResourcePackDescription();
 
-        if (this.showHoverOverlay() && (this.mc.gameSettings.touchscreen || p_192634_8_))
+        if (this.showHoverOverlay() && (this.mc.gameSettings.touchscreen || isSelected))
         {
             this.mc.getTextureManager().bindTexture(RESOURCE_PACKS_TEXTURE);
-            Gui.drawRect(p_192634_2_, p_192634_3_, p_192634_2_ + 32, p_192634_3_ + 32, -1601138544);
+            Gui.drawRect(x, y, x + 32, y + 32, -1601138544);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            int j = p_192634_6_ - p_192634_2_;
-            int k = p_192634_7_ - p_192634_3_;
+            int j = mouseX - x;
+            int k = mouseY - y;
 
             if (i < 3)
             {
@@ -66,11 +66,11 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
             {
                 if (j < 32)
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                 }
                 else
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                 }
             }
             else
@@ -79,11 +79,11 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
                 {
                     if (j < 16)
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 32.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 32.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                     }
                     else
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 32.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 32.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                     }
                 }
 
@@ -91,11 +91,11 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
                 {
                     if (j < 32 && j > 16 && k < 16)
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 96.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 96.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                     }
                     else
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 96.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 96.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                     }
                 }
 
@@ -103,29 +103,29 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
                 {
                     if (j < 32 && j > 16 && k > 16)
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 64.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 64.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                     }
                     else
                     {
-                        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 64.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                        Gui.drawModalRectWithCustomSizedTexture(x, y, 64.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                     }
                 }
             }
         }
 
-        int i1 = this.mc.fontRendererObj.getStringWidth(s);
+        int i1 = this.mc.fontRenderer.getStringWidth(s);
 
         if (i1 > 157)
         {
-            s = this.mc.fontRendererObj.trimStringToWidth(s, 157 - this.mc.fontRendererObj.getStringWidth("...")) + "...";
+            s = this.mc.fontRenderer.trimStringToWidth(s, 157 - this.mc.fontRenderer.getStringWidth("...")) + "...";
         }
 
-        this.mc.fontRendererObj.drawStringWithShadow(s, (float)(p_192634_2_ + 32 + 2), (float)(p_192634_3_ + 1), 16777215);
-        List<String> list = this.mc.fontRendererObj.listFormattedStringToWidth(s1, 157);
+        this.mc.fontRenderer.drawStringWithShadow(s, (float)(x + 32 + 2), (float)(y + 1), 16777215);
+        List<String> list = this.mc.fontRenderer.listFormattedStringToWidth(s1, 157);
 
         for (int l = 0; l < 2 && l < list.size(); ++l)
         {
-            this.mc.fontRendererObj.drawStringWithShadow(list.get(l), (float)(p_192634_2_ + 32 + 2), (float)(p_192634_3_ + 12 + 10 * l), 8421504);
+            this.mc.fontRenderer.drawStringWithShadow(list.get(l), (float)(x + 32 + 2), (float)(y + 12 + 10 * l), 8421504);
         }
     }
 
@@ -240,7 +240,7 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
         return false;
     }
 
-    public void func_192633_a(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
+    public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
     {
     }
 

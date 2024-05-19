@@ -15,19 +15,19 @@ public class WorldType
     public static final WorldType LARGE_BIOMES = new WorldType(2, "largeBiomes");
 
     /** amplified world type */
-    public static final WorldType AMPLIFIED = (new WorldType(3, "amplified")).setNotificationData();
+    public static final WorldType AMPLIFIED = (new WorldType(3, "amplified")).enableInfoNotice();
     public static final WorldType CUSTOMIZED = new WorldType(4, "customized");
-    public static final WorldType DEBUG_WORLD = new WorldType(5, "debug_all_block_states");
+    public static final WorldType DEBUG_ALL_BLOCK_STATES = new WorldType(5, "debug_all_block_states");
 
     /** Default (1.1) world type. */
     public static final WorldType DEFAULT_1_1 = (new WorldType(8, "default_1_1", 0)).setCanBeCreated(false);
 
     /** ID for this world type. */
-    private final int worldTypeId;
-    private final String worldType;
+    private final int id;
+    private final String name;
 
     /** The int version of the ChunkProvider that generated this world. */
-    private final int generatorVersion;
+    private final int version;
 
     /**
      * Whether this world type can be generated. Normally true; set to false for out-of-date generator versions.
@@ -35,8 +35,8 @@ public class WorldType
     private boolean canBeCreated;
 
     /** Whether this WorldType has a version or not. */
-    private boolean isWorldTypeVersioned;
-    private boolean hasNotificationData;
+    private boolean versioned;
+    private boolean hasInfoNotice;
 
     private WorldType(int id, String name)
     {
@@ -45,40 +45,40 @@ public class WorldType
 
     private WorldType(int id, String name, int version)
     {
-        this.worldType = name;
-        this.generatorVersion = version;
+        this.name = name;
+        this.version = version;
         this.canBeCreated = true;
-        this.worldTypeId = id;
+        this.id = id;
         WORLD_TYPES[id] = this;
     }
 
-    public String getWorldTypeName()
+    public String getName()
     {
-        return this.worldType;
+        return this.name;
     }
 
     /**
      * Gets the translation key for the name of this world type.
      */
-    public String getTranslateName()
+    public String getTranslationKey()
     {
-        return "generator." + this.worldType;
+        return "generator." + this.name;
     }
 
     /**
      * Gets the translation key for the info text for this world type.
      */
-    public String getTranslatedInfo()
+    public String getInfoTranslationKey()
     {
-        return this.getTranslateName() + ".info";
+        return this.getTranslationKey() + ".info";
     }
 
     /**
      * Returns generatorVersion.
      */
-    public int getGeneratorVersion()
+    public int getVersion()
     {
-        return this.generatorVersion;
+        return this.version;
     }
 
     public WorldType getWorldTypeForGeneratorVersion(int version)
@@ -98,7 +98,7 @@ public class WorldType
     /**
      * Gets whether this WorldType can be used to generate a new world.
      */
-    public boolean getCanBeCreated()
+    public boolean canBeCreated()
     {
         return this.canBeCreated;
     }
@@ -108,7 +108,7 @@ public class WorldType
      */
     private WorldType setVersioned()
     {
-        this.isWorldTypeVersioned = true;
+        this.versioned = true;
         return this;
     }
 
@@ -117,14 +117,14 @@ public class WorldType
      */
     public boolean isVersioned()
     {
-        return this.isWorldTypeVersioned;
+        return this.versioned;
     }
 
     public static WorldType parseWorldType(String type)
     {
         for (WorldType worldtype : WORLD_TYPES)
         {
-            if (worldtype != null && worldtype.worldType.equalsIgnoreCase(type))
+            if (worldtype != null && worldtype.name.equalsIgnoreCase(type))
             {
                 return worldtype;
             }
@@ -133,26 +133,26 @@ public class WorldType
         return null;
     }
 
-    public int getWorldTypeID()
+    public int getId()
     {
-        return this.worldTypeId;
+        return this.id;
     }
 
     /**
      * returns true if selecting this worldtype from the customize menu should display the generator.[worldtype].info
      * message
      */
-    public boolean showWorldInfoNotice()
+    public boolean hasInfoNotice()
     {
-        return this.hasNotificationData;
+        return this.hasInfoNotice;
     }
 
     /**
      * enables the display of generator.[worldtype].info message on the customize world menu
      */
-    private WorldType setNotificationData()
+    private WorldType enableInfoNotice()
     {
-        this.hasNotificationData = true;
+        this.hasInfoNotice = true;
         return this;
     }
 }

@@ -104,7 +104,7 @@ public class VillageDoorInfo
         return this.insideDirection.getFrontOffsetZ() * 2;
     }
 
-    public int getInsidePosY()
+    public int getLastActivityTimestamp()
     {
         return this.lastActivityTimestamp;
     }

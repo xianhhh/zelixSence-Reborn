@@ -22,7 +22,7 @@ public class ShulkerBoxRecipes
             {
                 ItemStack itemstack = inv.getStackInSlot(k);
 
-                if (!itemstack.func_190926_b())
+                if (!itemstack.isEmpty())
                 {
                     if (Block.getBlockFromItem(itemstack.getItem()) instanceof BlockShulkerBox)
                     {
@@ -50,14 +50,14 @@ public class ShulkerBoxRecipes
 
         public ItemStack getCraftingResult(InventoryCrafting inv)
         {
-            ItemStack itemstack = ItemStack.field_190927_a;
-            ItemStack itemstack1 = ItemStack.field_190927_a;
+            ItemStack itemstack = ItemStack.EMPTY;
+            ItemStack itemstack1 = ItemStack.EMPTY;
 
             for (int i = 0; i < inv.getSizeInventory(); ++i)
             {
                 ItemStack itemstack2 = inv.getStackInSlot(i);
 
-                if (!itemstack2.func_190926_b())
+                if (!itemstack2.isEmpty())
                 {
                     if (Block.getBlockFromItem(itemstack2.getItem()) instanceof BlockShulkerBox)
                     {
@@ -70,7 +70,7 @@ public class ShulkerBoxRecipes
                 }
             }
 
-            ItemStack itemstack3 = BlockShulkerBox.func_190953_b(EnumDyeColor.byDyeDamage(itemstack1.getMetadata()));
+            ItemStack itemstack3 = BlockShulkerBox.getColoredItemStack(EnumDyeColor.byDyeDamage(itemstack1.getMetadata()));
 
             if (itemstack.hasTagCompound())
             {
@@ -82,12 +82,12 @@ public class ShulkerBoxRecipes
 
         public ItemStack getRecipeOutput()
         {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
         }
 
         public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
         {
-            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 
             for (int i = 0; i < nonnulllist.size(); ++i)
             {
@@ -102,14 +102,14 @@ public class ShulkerBoxRecipes
             return nonnulllist;
         }
 
-        public boolean func_192399_d()
+        public boolean isHidden()
         {
             return true;
         }
 
-        public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+        public boolean canFit(int width, int height)
         {
-            return p_194133_1_ * p_194133_2_ >= 2;
+            return width * height >= 2;
         }
     }
 }

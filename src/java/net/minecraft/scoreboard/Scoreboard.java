@@ -298,7 +298,7 @@ public class Scoreboard
      */
     public void removeTeam(ScorePlayerTeam playerTeam)
     {
-        this.teams.remove(playerTeam.getRegisteredName());
+        this.teams.remove(playerTeam.getName());
 
         for (String s : playerTeam.getMembershipCollection())
         {
@@ -359,7 +359,7 @@ public class Scoreboard
     {
         if (this.getPlayersTeam(username) != playerTeam)
         {
-            throw new IllegalStateException("Player is either on another team or not on any team. Cannot remove from team '" + playerTeam.getRegisteredName() + "'.");
+            throw new IllegalStateException("Player is either on another team or not on any team. Cannot remove from team '" + playerTeam.getName() + "'.");
         }
         else
         {

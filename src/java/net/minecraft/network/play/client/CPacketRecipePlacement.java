@@ -10,10 +10,10 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 
 public class CPacketRecipePlacement implements Packet<INetHandlerPlayServer>
 {
-    private int field_192616_a;
-    private short field_192617_b;
-    private List<CPacketRecipePlacement.ItemMove> field_192618_c;
-    private List<CPacketRecipePlacement.ItemMove> field_192619_d;
+    private int containerId;
+    private short uid;
+    private List<CPacketRecipePlacement.ItemMove> moveItemsFromGrid;
+    private List<CPacketRecipePlacement.ItemMove> moveItemsToGrid;
 
     public CPacketRecipePlacement()
     {
@@ -21,20 +21,20 @@ public class CPacketRecipePlacement implements Packet<INetHandlerPlayServer>
 
     public CPacketRecipePlacement(int p_i47425_1_, List<CPacketRecipePlacement.ItemMove> p_i47425_2_, List<CPacketRecipePlacement.ItemMove> p_i47425_3_, short p_i47425_4_)
     {
-        this.field_192616_a = p_i47425_1_;
-        this.field_192617_b = p_i47425_4_;
-        this.field_192618_c = p_i47425_2_;
-        this.field_192619_d = p_i47425_3_;
+        this.containerId = p_i47425_1_;
+        this.uid = p_i47425_4_;
+        this.moveItemsFromGrid = p_i47425_2_;
+        this.moveItemsToGrid = p_i47425_3_;
     }
 
-    public int func_192613_a()
+    public int getContainerId()
     {
-        return this.field_192616_a;
+        return this.containerId;
     }
 
-    public short func_192614_b()
+    public short getUid()
     {
-        return this.field_192617_b;
+        return this.uid;
     }
 
     /**
@@ -42,20 +42,20 @@ public class CPacketRecipePlacement implements Packet<INetHandlerPlayServer>
      */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
-        this.field_192616_a = buf.readByte();
-        this.field_192617_b = buf.readShort();
-        this.field_192618_c = this.func_192611_c(buf);
-        this.field_192619_d = this.func_192611_c(buf);
+        this.containerId = buf.readByte();
+        this.uid = buf.readShort();
+        this.moveItemsFromGrid = this.readMoveItems(buf);
+        this.moveItemsToGrid = this.readMoveItems(buf);
     }
 
-    private List<CPacketRecipePlacement.ItemMove> func_192611_c(PacketBuffer p_192611_1_) throws IOException
+    private List<CPacketRecipePlacement.ItemMove> readMoveItems(PacketBuffer p_192611_1_) throws IOException
     {
         int i = p_192611_1_.readShort();
         List<CPacketRecipePlacement.ItemMove> list = Lists.<CPacketRecipePlacement.ItemMove>newArrayListWithCapacity(i);
 
         for (int j = 0; j < i; ++j)
         {
-            ItemStack itemstack = p_192611_1_.readItemStackFromBuffer();
+            ItemStack itemstack = p_192611_1_.readItemStack();
             byte b0 = p_192611_1_.readByte();
             byte b1 = p_192611_1_.readByte();
             list.add(new CPacketRecipePlacement.ItemMove(itemstack, b0, b1));
@@ -69,21 +69,21 @@ public class CPacketRecipePlacement implements Packet<INetHandlerPlayServer>
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeByte(this.field_192616_a);
-        buf.writeShort(this.field_192617_b);
-        this.func_192612_a(buf, this.field_192618_c);
-        this.func_192612_a(buf, this.field_192619_d);
+        buf.writeByte(this.containerId);
+        buf.writeShort(this.uid);
+        this.writeMoveItems(buf, this.moveItemsFromGrid);
+        this.writeMoveItems(buf, this.moveItemsToGrid);
     }
 
-    private void func_192612_a(PacketBuffer p_192612_1_, List<CPacketRecipePlacement.ItemMove> p_192612_2_)
+    private void writeMoveItems(PacketBuffer buffer, List<CPacketRecipePlacement.ItemMove> p_192612_2_)
     {
-        p_192612_1_.writeShort(p_192612_2_.size());
+        buffer.writeShort(p_192612_2_.size());
 
         for (CPacketRecipePlacement.ItemMove cpacketrecipeplacement$itemmove : p_192612_2_)
         {
-            p_192612_1_.writeItemStackToBuffer(cpacketrecipeplacement$itemmove.field_192673_a);
-            p_192612_1_.writeByte(cpacketrecipeplacement$itemmove.field_192674_b);
-            p_192612_1_.writeByte(cpacketrecipeplacement$itemmove.field_192675_c);
+            buffer.writeItemStack(cpacketrecipeplacement$itemmove.stack);
+            buffer.writeByte(cpacketrecipeplacement$itemmove.srcSlot);
+            buffer.writeByte(cpacketrecipeplacement$itemmove.destSlot);
         }
     }
 
@@ -92,30 +92,30 @@ public class CPacketRecipePlacement implements Packet<INetHandlerPlayServer>
      */
     public void processPacket(INetHandlerPlayServer handler)
     {
-        handler.func_191985_a(this);
+        handler.handleRecipePlacement(this);
     }
 
-    public List<CPacketRecipePlacement.ItemMove> func_192615_c()
+    public List<CPacketRecipePlacement.ItemMove> getMoveItemsToGrid()
     {
-        return this.field_192619_d;
+        return this.moveItemsToGrid;
     }
 
-    public List<CPacketRecipePlacement.ItemMove> func_192610_d()
+    public List<CPacketRecipePlacement.ItemMove> getMoveItemsFromGrid()
     {
-        return this.field_192618_c;
+        return this.moveItemsFromGrid;
     }
 
     public static class ItemMove
     {
-        public ItemStack field_192673_a;
-        public int field_192674_b;
-        public int field_192675_c;
+        public ItemStack stack;
+        public int srcSlot;
+        public int destSlot;
 
         public ItemMove(ItemStack p_i47401_1_, int p_i47401_2_, int p_i47401_3_)
         {
-            this.field_192673_a = p_i47401_1_.copy();
-            this.field_192674_b = p_i47401_2_;
-            this.field_192675_c = p_i47401_3_;
+            this.stack = p_i47401_1_.copy();
+            this.srcSlot = p_i47401_2_;
+            this.destSlot = p_i47401_3_;
         }
     }
 }

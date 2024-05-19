@@ -14,7 +14,7 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class BiomeHills extends Biome
 {
-    private final WorldGenerator theWorldGenerator = new WorldGenMinable(Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE), 9);
+    private final WorldGenerator silverfishSpawner = new WorldGenMinable(Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE), 9);
     private final WorldGenTaiga2 spruceGenerator = new WorldGenTaiga2(false);
     private final BiomeHills.Type type;
 
@@ -24,16 +24,16 @@ public class BiomeHills extends Biome
 
         if (p_i46710_1_ == BiomeHills.Type.EXTRA_TREES)
         {
-            this.theBiomeDecorator.treesPerChunk = 3;
+            this.decorator.treesPerChunk = 3;
         }
 
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityLlama.class, 5, 4, 6));
         this.type = p_i46710_1_;
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
-        return (WorldGenAbstractTree)(rand.nextInt(3) > 0 ? this.spruceGenerator : super.genBigTreeChance(rand));
+        return (WorldGenAbstractTree)(rand.nextInt(3) > 0 ? this.spruceGenerator : super.getRandomTreeFeature(rand));
     }
 
     public void decorate(World worldIn, Random rand, BlockPos pos)
@@ -59,7 +59,7 @@ public class BiomeHills extends Biome
             int k1 = rand.nextInt(16);
             int l1 = rand.nextInt(64);
             int i2 = rand.nextInt(16);
-            this.theWorldGenerator.generate(worldIn, rand, pos.add(k1, l1, i2));
+            this.silverfishSpawner.generate(worldIn, rand, pos.add(k1, l1, i2));
         }
     }
 

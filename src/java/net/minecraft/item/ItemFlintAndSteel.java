@@ -26,29 +26,29 @@ public class ItemFlintAndSteel extends Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        worldIn = worldIn.offset(hand);
-        ItemStack itemstack = stack.getHeldItem(pos);
+        pos = pos.offset(facing);
+        ItemStack itemstack = player.getHeldItem(hand);
 
-        if (!stack.canPlayerEdit(worldIn, hand, itemstack))
+        if (!player.canPlayerEdit(pos, facing, itemstack))
         {
             return EnumActionResult.FAIL;
         }
         else
         {
-            if (playerIn.getBlockState(worldIn).getMaterial() == Material.AIR)
+            if (worldIn.getBlockState(pos).getMaterial() == Material.AIR)
             {
-                playerIn.playSound(stack, worldIn, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
-                playerIn.setBlockState(worldIn, Blocks.FIRE.getDefaultState(), 11);
+                worldIn.playSound(player, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
+                worldIn.setBlockState(pos, Blocks.FIRE.getDefaultState(), 11);
             }
 
-            if (stack instanceof EntityPlayerMP)
+            if (player instanceof EntityPlayerMP)
             {
-                CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, pos, itemstack);
             }
 
-            itemstack.damageItem(1, stack);
+            itemstack.damageItem(1, player);
             return EnumActionResult.SUCCESS;
         }
     }

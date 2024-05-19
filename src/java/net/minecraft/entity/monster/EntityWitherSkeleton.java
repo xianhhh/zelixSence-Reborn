@@ -23,16 +23,16 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityWitherSkeleton extends AbstractSkeleton
 {
-    public EntityWitherSkeleton(World p_i47278_1_)
+    public EntityWitherSkeleton(World worldIn)
     {
-        super(p_i47278_1_);
+        super(worldIn);
         this.setSize(0.7F, 2.4F);
         this.isImmuneToFire = true;
     }
 
-    public static void func_190729_b(DataFixer p_190729_0_)
+    public static void registerFixesWitherSkeleton(DataFixer fixer)
     {
-        EntityLiving.registerFixesMob(p_190729_0_, EntityWitherSkeleton.class);
+        EntityLiving.registerFixesMob(fixer, EntityWitherSkeleton.class);
     }
 
     @Nullable
@@ -46,7 +46,7 @@ public class EntityWitherSkeleton extends AbstractSkeleton
         return SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_WITHER_SKELETON_HURT;
     }
@@ -56,7 +56,7 @@ public class EntityWitherSkeleton extends AbstractSkeleton
         return SoundEvents.ENTITY_WITHER_SKELETON_DEATH;
     }
 
-    SoundEvent func_190727_o()
+    SoundEvent getStepSound()
     {
         return SoundEvents.ENTITY_WITHER_SKELETON_STEP;
     }
@@ -68,11 +68,11 @@ public class EntityWitherSkeleton extends AbstractSkeleton
     {
         super.onDeath(cause);
 
-        if (cause.getEntity() instanceof EntityCreeper)
+        if (cause.getTrueSource() instanceof EntityCreeper)
         {
-            EntityCreeper entitycreeper = (EntityCreeper)cause.getEntity();
+            EntityCreeper entitycreeper = (EntityCreeper)cause.getTrueSource();
 
-            if (entitycreeper.getPowered() && entitycreeper.isAIEnabled())
+            if (entitycreeper.getPowered() && entitycreeper.ableToCauseSkullDrop())
             {
                 entitycreeper.incrementDroppedSkulls();
                 this.entityDropItem(new ItemStack(Items.SKULL, 1, 1), 0.0F);
@@ -131,9 +131,9 @@ public class EntityWitherSkeleton extends AbstractSkeleton
         }
     }
 
-    protected EntityArrow func_190726_a(float p_190726_1_)
+    protected EntityArrow getArrow(float p_190726_1_)
     {
-        EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
+        EntityArrow entityarrow = super.getArrow(p_190726_1_);
         entityarrow.setFire(100);
         return entityarrow;
     }

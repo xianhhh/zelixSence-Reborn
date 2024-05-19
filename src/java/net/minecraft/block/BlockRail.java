@@ -19,11 +19,11 @@ public class BlockRail extends BlockRailBase
         this.setDefaultState(this.blockState.getBaseState().withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH));
     }
 
-    protected void updateState(IBlockState p_189541_1_, World p_189541_2_, BlockPos p_189541_3_, Block p_189541_4_)
+    protected void updateState(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
     {
-        if (p_189541_4_.getDefaultState().canProvidePower() && (new BlockRailBase.Rail(p_189541_2_, p_189541_3_, p_189541_1_)).countAdjacentRails() == 3)
+        if (blockIn.getDefaultState().canProvidePower() && (new BlockRailBase.Rail(worldIn, pos, state)).countAdjacentRails() == 3)
         {
-            this.updateDir(p_189541_2_, p_189541_3_, p_189541_1_, false);
+            this.updateDir(worldIn, pos, state, false);
         }
     }
 

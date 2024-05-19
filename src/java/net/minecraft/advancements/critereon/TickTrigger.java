@@ -14,59 +14,62 @@ import net.minecraft.util.ResourceLocation;
 
 public class TickTrigger implements ICriterionTrigger<TickTrigger.Instance>
 {
-    public static final ResourceLocation field_193183_a = new ResourceLocation("tick");
-    private final Map<PlayerAdvancements, TickTrigger.Listeners> field_193184_b = Maps.<PlayerAdvancements, TickTrigger.Listeners>newHashMap();
+    public static final ResourceLocation ID = new ResourceLocation("tick");
+    private final Map<PlayerAdvancements, TickTrigger.Listeners> listeners = Maps.<PlayerAdvancements, TickTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193183_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<TickTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<TickTrigger.Instance> listener)
     {
-        TickTrigger.Listeners ticktrigger$listeners = this.field_193184_b.get(p_192165_1_);
+        TickTrigger.Listeners ticktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (ticktrigger$listeners == null)
         {
-            ticktrigger$listeners = new TickTrigger.Listeners(p_192165_1_);
-            this.field_193184_b.put(p_192165_1_, ticktrigger$listeners);
+            ticktrigger$listeners = new TickTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, ticktrigger$listeners);
         }
 
-        ticktrigger$listeners.func_193502_a(p_192165_2_);
+        ticktrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<TickTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<TickTrigger.Instance> listener)
     {
-        TickTrigger.Listeners ticktrigger$listeners = this.field_193184_b.get(p_192164_1_);
+        TickTrigger.Listeners ticktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (ticktrigger$listeners != null)
         {
-            ticktrigger$listeners.func_193500_b(p_192164_2_);
+            ticktrigger$listeners.remove(listener);
 
-            if (ticktrigger$listeners.func_193501_a())
+            if (ticktrigger$listeners.isEmpty())
             {
-                this.field_193184_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193184_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public TickTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public TickTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
         return new TickTrigger.Instance();
     }
 
-    public void func_193182_a(EntityPlayerMP p_193182_1_)
+    public void trigger(EntityPlayerMP player)
     {
-        TickTrigger.Listeners ticktrigger$listeners = this.field_193184_b.get(p_193182_1_.func_192039_O());
+        TickTrigger.Listeners ticktrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (ticktrigger$listeners != null)
         {
-            ticktrigger$listeners.func_193503_b();
+            ticktrigger$listeners.trigger();
         }
     }
 
@@ -74,40 +77,40 @@ public class TickTrigger implements ICriterionTrigger<TickTrigger.Instance>
     {
         public Instance()
         {
-            super(TickTrigger.field_193183_a);
+            super(TickTrigger.ID);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193504_a;
-        private final Set<ICriterionTrigger.Listener<TickTrigger.Instance>> field_193505_b = Sets.<ICriterionTrigger.Listener<TickTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<TickTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<TickTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47496_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193504_a = p_i47496_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193501_a()
+        public boolean isEmpty()
         {
-            return this.field_193505_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193502_a(ICriterionTrigger.Listener<TickTrigger.Instance> p_193502_1_)
+        public void add(ICriterionTrigger.Listener<TickTrigger.Instance> listener)
         {
-            this.field_193505_b.add(p_193502_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193500_b(ICriterionTrigger.Listener<TickTrigger.Instance> p_193500_1_)
+        public void remove(ICriterionTrigger.Listener<TickTrigger.Instance> listener)
         {
-            this.field_193505_b.remove(p_193500_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193503_b()
+        public void trigger()
         {
-            for (ICriterionTrigger.Listener<TickTrigger.Instance> listener : Lists.newArrayList(this.field_193505_b))
+            for (ICriterionTrigger.Listener<TickTrigger.Instance> listener : Lists.newArrayList(this.listeners))
             {
-                listener.func_192159_a(this.field_193504_a);
+                listener.grantCriterion(this.playerAdvancements);
             }
         }
     }

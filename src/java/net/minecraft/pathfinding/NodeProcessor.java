@@ -14,7 +14,7 @@ public abstract class NodeProcessor
     protected int entitySizeY;
     protected int entitySizeZ;
     protected boolean canEnterDoors;
-    protected boolean canBreakDoors;
+    protected boolean canOpenDoors;
     protected boolean canSwim;
 
     public void initProcessor(IBlockAccess sourceIn, EntityLiving mob)
@@ -73,9 +73,9 @@ public abstract class NodeProcessor
         this.canEnterDoors = canEnterDoorsIn;
     }
 
-    public void setCanBreakDoors(boolean canBreakDoorsIn)
+    public void setCanOpenDoors(boolean canOpenDoorsIn)
     {
-        this.canBreakDoors = canBreakDoorsIn;
+        this.canOpenDoors = canOpenDoorsIn;
     }
 
     public void setCanSwim(boolean canSwimIn)
@@ -88,9 +88,9 @@ public abstract class NodeProcessor
         return this.canEnterDoors;
     }
 
-    public boolean getCanBreakDoors()
+    public boolean getCanOpenDoors()
     {
-        return this.canBreakDoors;
+        return this.canOpenDoors;
     }
 
     public boolean getCanSwim()

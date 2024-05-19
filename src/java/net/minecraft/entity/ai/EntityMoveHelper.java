@@ -15,7 +15,7 @@ public class EntityMoveHelper
     protected double posY;
     protected double posZ;
 
-    /** The speed at which the entity should move */
+    /** Multiplier for the entity's speed attribute value */
     protected double speed;
     protected float moveForward;
     protected float moveStrafe;
@@ -104,7 +104,7 @@ public class EntityMoveHelper
             }
 
             this.entity.setAIMoveSpeed(f1);
-            this.entity.func_191989_p(this.moveForward);
+            this.entity.setMoveForward(this.moveForward);
             this.entity.setMoveStrafing(this.moveStrafe);
             this.action = EntityMoveHelper.Action.WAIT;
         }
@@ -118,7 +118,7 @@ public class EntityMoveHelper
 
             if (d3 < 2.500000277905201E-7D)
             {
-                this.entity.func_191989_p(0.0F);
+                this.entity.setMoveForward(0.0F);
                 return;
             }
 
@@ -143,28 +143,29 @@ public class EntityMoveHelper
         }
         else
         {
-            this.entity.func_191989_p(0.0F);
+            this.entity.setMoveForward(0.0F);
         }
     }
 
     /**
-     * Limits the given angle to a upper and lower limit.
+     * Attempt to rotate the first angle to become the second angle, but only allow overall direction change to at max
+     * be third parameter
      */
-    protected float limitAngle(float p_75639_1_, float p_75639_2_, float p_75639_3_)
+    protected float limitAngle(float sourceAngle, float targetAngle, float maximumChange)
     {
-        float f = MathHelper.wrapDegrees(p_75639_2_ - p_75639_1_);
+        float f = MathHelper.wrapDegrees(targetAngle - sourceAngle);
 
-        if (f > p_75639_3_)
+        if (f > maximumChange)
         {
-            f = p_75639_3_;
+            f = maximumChange;
         }
 
-        if (f < -p_75639_3_)
+        if (f < -maximumChange)
         {
-            f = -p_75639_3_;
+            f = -maximumChange;
         }
 
-        float f1 = p_75639_1_ + f;
+        float f1 = sourceAngle + f;
 
         if (f1 < 0.0F)
         {

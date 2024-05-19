@@ -32,28 +32,28 @@ public class DataSerializers
         {
             return new DataParameter<Byte>(id, this);
         }
-        public Byte func_192717_a(Byte p_192717_1_)
+        public Byte copyValue(Byte value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Integer> VARINT = new DataSerializer<Integer>()
     {
         public void write(PacketBuffer buf, Integer value)
         {
-            buf.writeVarIntToBuffer(value.intValue());
+            buf.writeVarInt(value.intValue());
         }
         public Integer read(PacketBuffer buf) throws IOException
         {
-            return buf.readVarIntFromBuffer();
+            return buf.readVarInt();
         }
         public DataParameter<Integer> createKey(int id)
         {
             return new DataParameter<Integer>(id, this);
         }
-        public Integer func_192717_a(Integer p_192717_1_)
+        public Integer copyValue(Integer value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Float> FLOAT = new DataSerializer<Float>()
@@ -70,9 +70,9 @@ public class DataSerializers
         {
             return new DataParameter<Float>(id, this);
         }
-        public Float func_192717_a(Float p_192717_1_)
+        public Float copyValue(Float value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<String> STRING = new DataSerializer<String>()
@@ -83,15 +83,15 @@ public class DataSerializers
         }
         public String read(PacketBuffer buf) throws IOException
         {
-            return buf.readStringFromBuffer(32767);
+            return buf.readString(32767);
         }
         public DataParameter<String> createKey(int id)
         {
             return new DataParameter<String>(id, this);
         }
-        public String func_192717_a(String p_192717_1_)
+        public String copyValue(String value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<ITextComponent> TEXT_COMPONENT = new DataSerializer<ITextComponent>()
@@ -108,28 +108,28 @@ public class DataSerializers
         {
             return new DataParameter<ITextComponent>(id, this);
         }
-        public ITextComponent func_192717_a(ITextComponent p_192717_1_)
+        public ITextComponent copyValue(ITextComponent value)
         {
-            return p_192717_1_.createCopy();
+            return value.createCopy();
         }
     };
-    public static final DataSerializer<ItemStack> OPTIONAL_ITEM_STACK = new DataSerializer<ItemStack>()
+    public static final DataSerializer<ItemStack> ITEM_STACK = new DataSerializer<ItemStack>()
     {
         public void write(PacketBuffer buf, ItemStack value)
         {
-            buf.writeItemStackToBuffer(value);
+            buf.writeItemStack(value);
         }
         public ItemStack read(PacketBuffer buf) throws IOException
         {
-            return buf.readItemStackFromBuffer();
+            return buf.readItemStack();
         }
         public DataParameter<ItemStack> createKey(int id)
         {
             return new DataParameter<ItemStack>(id, this);
         }
-        public ItemStack func_192717_a(ItemStack p_192717_1_)
+        public ItemStack copyValue(ItemStack value)
         {
-            return p_192717_1_.copy();
+            return value.copy();
         }
     };
     public static final DataSerializer<Optional<IBlockState>> OPTIONAL_BLOCK_STATE = new DataSerializer<Optional<IBlockState>>()
@@ -138,25 +138,25 @@ public class DataSerializers
         {
             if (value.isPresent())
             {
-                buf.writeVarIntToBuffer(Block.getStateId(value.get()));
+                buf.writeVarInt(Block.getStateId(value.get()));
             }
             else
             {
-                buf.writeVarIntToBuffer(0);
+                buf.writeVarInt(0);
             }
         }
         public Optional<IBlockState> read(PacketBuffer buf) throws IOException
         {
-            int i = buf.readVarIntFromBuffer();
+            int i = buf.readVarInt();
             return i == 0 ? Optional.absent() : Optional.of(Block.getStateById(i));
         }
         public DataParameter<Optional<IBlockState>> createKey(int id)
         {
             return new DataParameter<Optional<IBlockState>>(id, this);
         }
-        public Optional<IBlockState> func_192717_a(Optional<IBlockState> p_192717_1_)
+        public Optional<IBlockState> copyValue(Optional<IBlockState> value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Boolean> BOOLEAN = new DataSerializer<Boolean>()
@@ -173,9 +173,9 @@ public class DataSerializers
         {
             return new DataParameter<Boolean>(id, this);
         }
-        public Boolean func_192717_a(Boolean p_192717_1_)
+        public Boolean copyValue(Boolean value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Rotations> ROTATIONS = new DataSerializer<Rotations>()
@@ -194,9 +194,9 @@ public class DataSerializers
         {
             return new DataParameter<Rotations>(id, this);
         }
-        public Rotations func_192717_a(Rotations p_192717_1_)
+        public Rotations copyValue(Rotations value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<BlockPos> BLOCK_POS = new DataSerializer<BlockPos>()
@@ -213,9 +213,9 @@ public class DataSerializers
         {
             return new DataParameter<BlockPos>(id, this);
         }
-        public BlockPos func_192717_a(BlockPos p_192717_1_)
+        public BlockPos copyValue(BlockPos value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = new DataSerializer<Optional<BlockPos>>()
@@ -237,9 +237,9 @@ public class DataSerializers
         {
             return new DataParameter<Optional<BlockPos>>(id, this);
         }
-        public Optional<BlockPos> func_192717_a(Optional<BlockPos> p_192717_1_)
+        public Optional<BlockPos> copyValue(Optional<BlockPos> value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<EnumFacing> FACING = new DataSerializer<EnumFacing>()
@@ -256,9 +256,9 @@ public class DataSerializers
         {
             return new DataParameter<EnumFacing>(id, this);
         }
-        public EnumFacing func_192717_a(EnumFacing p_192717_1_)
+        public EnumFacing copyValue(EnumFacing value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
     public static final DataSerializer<Optional<UUID>> OPTIONAL_UNIQUE_ID = new DataSerializer<Optional<UUID>>()
@@ -269,39 +269,39 @@ public class DataSerializers
 
             if (value.isPresent())
             {
-                buf.writeUuid(value.get());
+                buf.writeUniqueId(value.get());
             }
         }
         public Optional<UUID> read(PacketBuffer buf) throws IOException
         {
-            return !buf.readBoolean() ? Optional.absent() : Optional.of(buf.readUuid());
+            return !buf.readBoolean() ? Optional.absent() : Optional.of(buf.readUniqueId());
         }
         public DataParameter<Optional<UUID>> createKey(int id)
         {
             return new DataParameter<Optional<UUID>>(id, this);
         }
-        public Optional<UUID> func_192717_a(Optional<UUID> p_192717_1_)
+        public Optional<UUID> copyValue(Optional<UUID> value)
         {
-            return p_192717_1_;
+            return value;
         }
     };
-    public static final DataSerializer<NBTTagCompound> field_192734_n = new DataSerializer<NBTTagCompound>()
+    public static final DataSerializer<NBTTagCompound> COMPOUND_TAG = new DataSerializer<NBTTagCompound>()
     {
         public void write(PacketBuffer buf, NBTTagCompound value)
         {
-            buf.writeNBTTagCompoundToBuffer(value);
+            buf.writeCompoundTag(value);
         }
         public NBTTagCompound read(PacketBuffer buf) throws IOException
         {
-            return buf.readNBTTagCompoundFromBuffer();
+            return buf.readCompoundTag();
         }
         public DataParameter<NBTTagCompound> createKey(int id)
         {
             return new DataParameter<NBTTagCompound>(id, this);
         }
-        public NBTTagCompound func_192717_a(NBTTagCompound p_192717_1_)
+        public NBTTagCompound copyValue(NBTTagCompound value)
         {
-            return p_192717_1_.copy();
+            return value.copy();
         }
     };
 
@@ -328,7 +328,7 @@ public class DataSerializers
         registerSerializer(FLOAT);
         registerSerializer(STRING);
         registerSerializer(TEXT_COMPONENT);
-        registerSerializer(OPTIONAL_ITEM_STACK);
+        registerSerializer(ITEM_STACK);
         registerSerializer(BOOLEAN);
         registerSerializer(ROTATIONS);
         registerSerializer(BLOCK_POS);
@@ -336,6 +336,6 @@ public class DataSerializers
         registerSerializer(FACING);
         registerSerializer(OPTIONAL_UNIQUE_ID);
         registerSerializer(OPTIONAL_BLOCK_STATE);
-        registerSerializer(field_192734_n);
+        registerSerializer(COMPOUND_TAG);
     }
 }

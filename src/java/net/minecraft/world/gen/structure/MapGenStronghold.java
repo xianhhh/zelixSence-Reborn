@@ -66,7 +66,7 @@ public class MapGenStronghold extends MapGenStructure
         return "Stronghold";
     }
 
-    public BlockPos getClosestStrongholdPos(World worldIn, BlockPos pos, boolean p_180706_3_)
+    public BlockPos getNearestStructurePos(World worldIn, BlockPos pos, boolean findUnexplored)
     {
         if (!this.ranBiomeCheck)
         {
@@ -80,7 +80,7 @@ public class MapGenStronghold extends MapGenStructure
 
         for (ChunkPos chunkpos : this.structureCoords)
         {
-            blockpos$mutableblockpos.setPos((chunkpos.chunkXPos << 4) + 8, 32, (chunkpos.chunkZPos << 4) + 8);
+            blockpos$mutableblockpos.setPos((chunkpos.x << 4) + 8, 32, (chunkpos.z << 4) + 8);
             double d1 = blockpos$mutableblockpos.distanceSq(pos);
 
             if (blockpos == null)
@@ -108,7 +108,7 @@ public class MapGenStronghold extends MapGenStructure
 
         for (ChunkPos chunkpos : this.structureCoords)
         {
-            if (chunkX == chunkpos.chunkXPos && chunkZ == chunkpos.chunkZPos)
+            if (chunkX == chunkpos.x && chunkZ == chunkpos.z)
             {
                 return true;
             }
@@ -119,7 +119,7 @@ public class MapGenStronghold extends MapGenStructure
 
     private void generatePositions()
     {
-        this.initializeStructureData(this.worldObj);
+        this.initializeStructureData(this.world);
         int i = 0;
         ObjectIterator lvt_2_1_ = this.structureMap.values().iterator();
 
@@ -134,7 +134,7 @@ public class MapGenStronghold extends MapGenStructure
         }
 
         Random random = new Random();
-        random.setSeed(this.worldObj.getSeed());
+        random.setSeed(this.world.getSeed());
         double d1 = random.nextDouble() * Math.PI * 2.0D;
         int j = 0;
         int k = 0;
@@ -147,7 +147,7 @@ public class MapGenStronghold extends MapGenStructure
                 double d0 = 4.0D * this.distance + this.distance * (double)j * 6.0D + (random.nextDouble() - 0.5D) * this.distance * 2.5D;
                 int j1 = (int)Math.round(Math.cos(d1) * d0);
                 int k1 = (int)Math.round(Math.sin(d1) * d0);
-                BlockPos blockpos = this.worldObj.getBiomeProvider().findBiomePosition((j1 << 4) + 8, (k1 << 4) + 8, 112, this.allowedBiomes, random);
+                BlockPos blockpos = this.world.getBiomeProvider().findBiomePosition((j1 << 4) + 8, (k1 << 4) + 8, 112, this.allowedBiomes, random);
 
                 if (blockpos != null)
                 {
@@ -179,7 +179,7 @@ public class MapGenStronghold extends MapGenStructure
     {
         MapGenStronghold.Start mapgenstronghold$start;
 
-        for (mapgenstronghold$start = new MapGenStronghold.Start(this.worldObj, this.rand, chunkX, chunkZ); mapgenstronghold$start.getComponents().isEmpty() || ((StructureStrongholdPieces.Stairs2)mapgenstronghold$start.getComponents().get(0)).strongholdPortalRoom == null; mapgenstronghold$start = new MapGenStronghold.Start(this.worldObj, this.rand, chunkX, chunkZ))
+        for (mapgenstronghold$start = new MapGenStronghold.Start(this.world, this.rand, chunkX, chunkZ); mapgenstronghold$start.getComponents().isEmpty() || ((StructureStrongholdPieces.Stairs2)mapgenstronghold$start.getComponents().get(0)).strongholdPortalRoom == null; mapgenstronghold$start = new MapGenStronghold.Start(this.world, this.rand, chunkX, chunkZ))
         {
             ;
         }

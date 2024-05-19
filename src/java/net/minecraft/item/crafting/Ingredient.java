@@ -11,24 +11,24 @@ import net.minecraft.item.ItemStack;
 
 public class Ingredient implements Predicate<ItemStack>
 {
-    public static final Ingredient field_193370_a = new Ingredient(new ItemStack[0])
+    public static final Ingredient EMPTY = new Ingredient(new ItemStack[0])
     {
         public boolean apply(@Nullable ItemStack p_apply_1_)
         {
-            return p_apply_1_.func_190926_b();
+            return p_apply_1_.isEmpty();
         }
     };
-    private final ItemStack[] field_193371_b;
-    private IntList field_194140_c;
+    private final ItemStack[] matchingStacks;
+    private IntList matchingStacksPacked;
 
     private Ingredient(ItemStack... p_i47503_1_)
     {
-        this.field_193371_b = p_i47503_1_;
+        this.matchingStacks = p_i47503_1_;
     }
 
-    public ItemStack[] func_193365_a()
+    public ItemStack[] getMatchingStacks()
     {
-        return this.field_193371_b;
+        return this.matchingStacks;
     }
 
     public boolean apply(@Nullable ItemStack p_apply_1_)
@@ -39,7 +39,7 @@ public class Ingredient implements Predicate<ItemStack>
         }
         else
         {
-            for (ItemStack itemstack : this.field_193371_b)
+            for (ItemStack itemstack : this.matchingStacks)
             {
                 if (itemstack.getItem() == p_apply_1_.getItem())
                 {
@@ -56,53 +56,53 @@ public class Ingredient implements Predicate<ItemStack>
         }
     }
 
-    public IntList func_194139_b()
+    public IntList getValidItemStacksPacked()
     {
-        if (this.field_194140_c == null)
+        if (this.matchingStacksPacked == null)
         {
-            this.field_194140_c = new IntArrayList(this.field_193371_b.length);
+            this.matchingStacksPacked = new IntArrayList(this.matchingStacks.length);
 
-            for (ItemStack itemstack : this.field_193371_b)
+            for (ItemStack itemstack : this.matchingStacks)
             {
-                this.field_194140_c.add(RecipeItemHelper.func_194113_b(itemstack));
+                this.matchingStacksPacked.add(RecipeItemHelper.pack(itemstack));
             }
 
-            this.field_194140_c.sort(IntComparators.NATURAL_COMPARATOR);
+            this.matchingStacksPacked.sort(IntComparators.NATURAL_COMPARATOR);
         }
 
-        return this.field_194140_c;
+        return this.matchingStacksPacked;
     }
 
-    public static Ingredient func_193367_a(Item p_193367_0_)
+    public static Ingredient fromItem(Item p_193367_0_)
     {
-        return func_193369_a(new ItemStack(p_193367_0_, 1, 32767));
+        return fromStacks(new ItemStack(p_193367_0_, 1, 32767));
     }
 
-    public static Ingredient func_193368_a(Item... p_193368_0_)
+    public static Ingredient fromItems(Item... items)
     {
-        ItemStack[] aitemstack = new ItemStack[p_193368_0_.length];
+        ItemStack[] aitemstack = new ItemStack[items.length];
 
-        for (int i = 0; i < p_193368_0_.length; ++i)
+        for (int i = 0; i < items.length; ++i)
         {
-            aitemstack[i] = new ItemStack(p_193368_0_[i]);
+            aitemstack[i] = new ItemStack(items[i]);
         }
 
-        return func_193369_a(aitemstack);
+        return fromStacks(aitemstack);
     }
 
-    public static Ingredient func_193369_a(ItemStack... p_193369_0_)
+    public static Ingredient fromStacks(ItemStack... stacks)
     {
-        if (p_193369_0_.length > 0)
+        if (stacks.length > 0)
         {
-            for (ItemStack itemstack : p_193369_0_)
+            for (ItemStack itemstack : stacks)
             {
-                if (!itemstack.func_190926_b())
+                if (!itemstack.isEmpty())
                 {
-                    return new Ingredient(p_193369_0_);
+                    return new Ingredient(stacks);
                 }
             }
         }
 
-        return field_193370_a;
+        return EMPTY;
     }
 }

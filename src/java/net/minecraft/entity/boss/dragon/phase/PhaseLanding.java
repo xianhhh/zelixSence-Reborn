@@ -33,7 +33,7 @@ public class PhaseLanding extends PhaseBase
             double d3 = d0 + this.dragon.getRNG().nextGaussian() / 2.0D;
             double d4 = d1 + this.dragon.getRNG().nextGaussian() / 2.0D;
             double d5 = d2 + this.dragon.getRNG().nextGaussian() / 2.0D;
-            this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.xCoord * 0.07999999821186066D + this.dragon.motionX, -vec3d.yCoord * 0.30000001192092896D + this.dragon.motionY, -vec3d.zCoord * 0.07999999821186066D + this.dragon.motionZ);
+            this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.x * 0.07999999821186066D + this.dragon.motionX, -vec3d.y * 0.30000001192092896D + this.dragon.motionY, -vec3d.z * 0.07999999821186066D + this.dragon.motionZ);
             vec3d.rotateYaw(0.19634955F);
         }
     }

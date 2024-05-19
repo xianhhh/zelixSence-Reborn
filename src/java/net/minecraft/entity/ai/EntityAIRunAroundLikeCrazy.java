@@ -35,9 +35,9 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase
             }
             else
             {
-                this.targetX = vec3d.xCoord;
-                this.targetY = vec3d.yCoord;
-                this.targetZ = vec3d.zCoord;
+                this.targetX = vec3d.x;
+                this.targetY = vec3d.y;
+                this.targetZ = vec3d.z;
                 return true;
             }
         }
@@ -58,13 +58,13 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
         return !this.horseHost.isTame() && !this.horseHost.getNavigator().noPath() && this.horseHost.isBeingRidden();
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {
@@ -80,7 +80,7 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase
             if (entity instanceof EntityPlayer)
             {
                 int i = this.horseHost.getTemper();
-                int j = this.horseHost.func_190676_dC();
+                int j = this.horseHost.getMaxTemper();
 
                 if (j > 0 && this.horseHost.getRNG().nextInt(j) < i)
                 {
@@ -92,7 +92,7 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase
             }
 
             this.horseHost.removePassengers();
-            this.horseHost.func_190687_dF();
+            this.horseHost.makeMad();
             this.horseHost.world.setEntityState(this.horseHost, (byte)6);
         }
     }

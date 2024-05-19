@@ -49,14 +49,14 @@ public class BlockGrassPath extends Block
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
         super.onBlockAdded(worldIn, pos, state);
-        this.func_190971_b(worldIn, pos);
+        this.updateBlockState(worldIn, pos);
     }
 
-    private void func_190971_b(World p_190971_1_, BlockPos p_190971_2_)
+    private void updateBlockState(World worldIn, BlockPos pos)
     {
-        if (p_190971_1_.getBlockState(p_190971_2_.up()).getMaterial().isSolid())
+        if (worldIn.getBlockState(pos.up()).getMaterial().isSolid())
         {
-            p_190971_1_.setBlockState(p_190971_2_, Blocks.DIRT.getDefaultState());
+            worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
         }
     }
 
@@ -96,13 +96,13 @@ public class BlockGrassPath extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
-        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
-        this.func_190971_b(worldIn, pos);
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+        this.updateBlockState(worldIn, pos);
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }

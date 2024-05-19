@@ -8,37 +8,38 @@ import net.minecraft.util.math.MathHelper;
 
 public class DistancePredicate
 {
-    public static final DistancePredicate field_193423_a = new DistancePredicate(MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a, MinMaxBounds.field_192516_a);
-    private final MinMaxBounds field_193424_b;
-    private final MinMaxBounds field_193425_c;
-    private final MinMaxBounds field_193426_d;
-    private final MinMaxBounds field_193427_e;
-    private final MinMaxBounds field_193428_f;
+    /** The predicate that matches any distance. */
+    public static final DistancePredicate ANY = new DistancePredicate(MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED);
+    private final MinMaxBounds x;
+    private final MinMaxBounds y;
+    private final MinMaxBounds z;
+    private final MinMaxBounds horizontal;
+    private final MinMaxBounds absolute;
 
-    public DistancePredicate(MinMaxBounds p_i47542_1_, MinMaxBounds p_i47542_2_, MinMaxBounds p_i47542_3_, MinMaxBounds p_i47542_4_, MinMaxBounds p_i47542_5_)
+    public DistancePredicate(MinMaxBounds x, MinMaxBounds y, MinMaxBounds z, MinMaxBounds horizontal, MinMaxBounds absolute)
     {
-        this.field_193424_b = p_i47542_1_;
-        this.field_193425_c = p_i47542_2_;
-        this.field_193426_d = p_i47542_3_;
-        this.field_193427_e = p_i47542_4_;
-        this.field_193428_f = p_i47542_5_;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.horizontal = horizontal;
+        this.absolute = absolute;
     }
 
-    public boolean func_193422_a(double p_193422_1_, double p_193422_3_, double p_193422_5_, double p_193422_7_, double p_193422_9_, double p_193422_11_)
+    public boolean test(double x1, double y1, double z1, double x2, double y2, double z2)
     {
-        float f = (float)(p_193422_1_ - p_193422_7_);
-        float f1 = (float)(p_193422_3_ - p_193422_9_);
-        float f2 = (float)(p_193422_5_ - p_193422_11_);
+        float f = (float)(x1 - x2);
+        float f1 = (float)(y1 - y2);
+        float f2 = (float)(z1 - z2);
 
-        if (this.field_193424_b.func_192514_a(MathHelper.abs(f)) && this.field_193425_c.func_192514_a(MathHelper.abs(f1)) && this.field_193426_d.func_192514_a(MathHelper.abs(f2)))
+        if (this.x.test(MathHelper.abs(f)) && this.y.test(MathHelper.abs(f1)) && this.z.test(MathHelper.abs(f2)))
         {
-            if (!this.field_193427_e.func_192513_a((double)(f * f + f2 * f2)))
+            if (!this.horizontal.testSquare((double)(f * f + f2 * f2)))
             {
                 return false;
             }
             else
             {
-                return this.field_193428_f.func_192513_a((double)(f * f + f1 * f1 + f2 * f2));
+                return this.absolute.testSquare((double)(f * f + f1 * f1 + f2 * f2));
             }
         }
         else
@@ -47,21 +48,21 @@ public class DistancePredicate
         }
     }
 
-    public static DistancePredicate func_193421_a(@Nullable JsonElement p_193421_0_)
+    public static DistancePredicate deserialize(@Nullable JsonElement element)
     {
-        if (p_193421_0_ != null && !p_193421_0_.isJsonNull())
+        if (element != null && !element.isJsonNull())
         {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_193421_0_, "distance");
-            MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(jsonobject.get("x"));
-            MinMaxBounds minmaxbounds1 = MinMaxBounds.func_192515_a(jsonobject.get("y"));
-            MinMaxBounds minmaxbounds2 = MinMaxBounds.func_192515_a(jsonobject.get("z"));
-            MinMaxBounds minmaxbounds3 = MinMaxBounds.func_192515_a(jsonobject.get("horizontal"));
-            MinMaxBounds minmaxbounds4 = MinMaxBounds.func_192515_a(jsonobject.get("absolute"));
+            JsonObject jsonobject = JsonUtils.getJsonObject(element, "distance");
+            MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(jsonobject.get("x"));
+            MinMaxBounds minmaxbounds1 = MinMaxBounds.deserialize(jsonobject.get("y"));
+            MinMaxBounds minmaxbounds2 = MinMaxBounds.deserialize(jsonobject.get("z"));
+            MinMaxBounds minmaxbounds3 = MinMaxBounds.deserialize(jsonobject.get("horizontal"));
+            MinMaxBounds minmaxbounds4 = MinMaxBounds.deserialize(jsonobject.get("absolute"));
             return new DistancePredicate(minmaxbounds, minmaxbounds1, minmaxbounds2, minmaxbounds3, minmaxbounds4);
         }
         else
         {
-            return field_193423_a;
+            return ANY;
         }
     }
 }

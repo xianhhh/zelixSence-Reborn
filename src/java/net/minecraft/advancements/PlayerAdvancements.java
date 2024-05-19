@@ -32,102 +32,102 @@ import org.apache.logging.log4j.Logger;
 
 public class PlayerAdvancements
 {
-    private static final Logger field_192753_a = LogManager.getLogger();
-    private static final Gson field_192754_b = (new GsonBuilder()).registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer()).registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer()).setPrettyPrinting().create();
-    private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> field_192755_c = new TypeToken<Map<ResourceLocation, AdvancementProgress>>()
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer()).registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer()).setPrettyPrinting().create();
+    private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> MAP_TOKEN = new TypeToken<Map<ResourceLocation, AdvancementProgress>>()
     {
     };
-    private final MinecraftServer field_192756_d;
-    private final File field_192757_e;
-    private final Map<Advancement, AdvancementProgress> field_192758_f = Maps.<Advancement, AdvancementProgress>newLinkedHashMap();
-    private final Set<Advancement> field_192759_g = Sets.<Advancement>newLinkedHashSet();
-    private final Set<Advancement> field_192760_h = Sets.<Advancement>newLinkedHashSet();
-    private final Set<Advancement> field_192761_i = Sets.<Advancement>newLinkedHashSet();
-    private EntityPlayerMP field_192762_j;
+    private final MinecraftServer server;
+    private final File progressFile;
+    private final Map<Advancement, AdvancementProgress> progress = Maps.<Advancement, AdvancementProgress>newLinkedHashMap();
+    private final Set<Advancement> visible = Sets.<Advancement>newLinkedHashSet();
+    private final Set<Advancement> visibilityChanged = Sets.<Advancement>newLinkedHashSet();
+    private final Set<Advancement> progressChanged = Sets.<Advancement>newLinkedHashSet();
+    private EntityPlayerMP player;
     @Nullable
-    private Advancement field_194221_k;
-    private boolean field_192763_k = true;
+    private Advancement lastSelectedTab;
+    private boolean isFirstPacket = true;
 
-    public PlayerAdvancements(MinecraftServer p_i47422_1_, File p_i47422_2_, EntityPlayerMP p_i47422_3_)
+    public PlayerAdvancements(MinecraftServer server, File p_i47422_2_, EntityPlayerMP player)
     {
-        this.field_192756_d = p_i47422_1_;
-        this.field_192757_e = p_i47422_2_;
-        this.field_192762_j = p_i47422_3_;
-        this.func_192740_f();
+        this.server = server;
+        this.progressFile = p_i47422_2_;
+        this.player = player;
+        this.load();
     }
 
-    public void func_192739_a(EntityPlayerMP p_192739_1_)
+    public void setPlayer(EntityPlayerMP player)
     {
-        this.field_192762_j = p_192739_1_;
+        this.player = player;
     }
 
-    public void func_192745_a()
+    public void dispose()
     {
-        for (ICriterionTrigger<?> icriteriontrigger : CriteriaTriggers.func_192120_a())
+        for (ICriterionTrigger<?> icriteriontrigger : CriteriaTriggers.getAll())
         {
-            icriteriontrigger.func_192167_a(this);
+            icriteriontrigger.removeAllListeners(this);
         }
     }
 
-    public void func_193766_b()
+    public void reload()
     {
-        this.func_192745_a();
-        this.field_192758_f.clear();
-        this.field_192759_g.clear();
-        this.field_192760_h.clear();
-        this.field_192761_i.clear();
-        this.field_192763_k = true;
-        this.field_194221_k = null;
-        this.func_192740_f();
+        this.dispose();
+        this.progress.clear();
+        this.visible.clear();
+        this.visibilityChanged.clear();
+        this.progressChanged.clear();
+        this.isFirstPacket = true;
+        this.lastSelectedTab = null;
+        this.load();
     }
 
-    private void func_192751_c()
+    private void registerListeners()
     {
-        for (Advancement advancement : this.field_192756_d.func_191949_aK().func_192780_b())
+        for (Advancement advancement : this.server.getAdvancementManager().getAdvancements())
         {
-            this.func_193764_b(advancement);
+            this.registerListeners(advancement);
         }
     }
 
-    private void func_192752_d()
+    private void ensureAllVisible()
     {
         List<Advancement> list = Lists.<Advancement>newArrayList();
 
-        for (Entry<Advancement, AdvancementProgress> entry : this.field_192758_f.entrySet())
+        for (Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet())
         {
-            if (((AdvancementProgress)entry.getValue()).func_192105_a())
+            if (((AdvancementProgress)entry.getValue()).isDone())
             {
                 list.add(entry.getKey());
-                this.field_192761_i.add(entry.getKey());
+                this.progressChanged.add(entry.getKey());
             }
         }
 
         for (Advancement advancement : list)
         {
-            this.func_192742_b(advancement);
+            this.ensureVisibility(advancement);
         }
     }
 
-    private void func_192748_e()
+    private void checkForAutomaticTriggers()
     {
-        for (Advancement advancement : this.field_192756_d.func_191949_aK().func_192780_b())
+        for (Advancement advancement : this.server.getAdvancementManager().getAdvancements())
         {
-            if (advancement.func_192073_f().isEmpty())
+            if (advancement.getCriteria().isEmpty())
             {
-                this.func_192750_a(advancement, "");
-                advancement.func_192072_d().func_192113_a(this.field_192762_j);
+                this.grantCriterion(advancement, "");
+                advancement.getRewards().apply(this.player);
             }
         }
     }
 
-    private void func_192740_f()
+    private void load()
     {
-        if (this.field_192757_e.isFile())
+        if (this.progressFile.isFile())
         {
             try
             {
-                String s = Files.toString(this.field_192757_e, StandardCharsets.UTF_8);
-                Map<ResourceLocation, AdvancementProgress> map = (Map)JsonUtils.func_193840_a(field_192754_b, s, field_192755_c.getType());
+                String s = Files.toString(this.progressFile, StandardCharsets.UTF_8);
+                Map<ResourceLocation, AdvancementProgress> map = (Map)JsonUtils.gsonDeserialize(GSON, s, MAP_TOKEN.getType());
 
                 if (map == null)
                 {
@@ -138,134 +138,134 @@ public class PlayerAdvancements
 
                 for (Entry<ResourceLocation, AdvancementProgress> entry : stream.collect(Collectors.toList()))
                 {
-                    Advancement advancement = this.field_192756_d.func_191949_aK().func_192778_a(entry.getKey());
+                    Advancement advancement = this.server.getAdvancementManager().getAdvancement(entry.getKey());
 
                     if (advancement == null)
                     {
-                        field_192753_a.warn("Ignored advancement '" + entry.getKey() + "' in progress file " + this.field_192757_e + " - it doesn't exist anymore?");
+                        LOGGER.warn("Ignored advancement '" + entry.getKey() + "' in progress file " + this.progressFile + " - it doesn't exist anymore?");
                     }
                     else
                     {
-                        this.func_192743_a(advancement, entry.getValue());
+                        this.startProgress(advancement, entry.getValue());
                     }
                 }
             }
             catch (JsonParseException jsonparseexception)
             {
-                field_192753_a.error("Couldn't parse player advancements in " + this.field_192757_e, (Throwable)jsonparseexception);
+                LOGGER.error("Couldn't parse player advancements in " + this.progressFile, (Throwable)jsonparseexception);
             }
             catch (IOException ioexception)
             {
-                field_192753_a.error("Couldn't access player advancements in " + this.field_192757_e, (Throwable)ioexception);
+                LOGGER.error("Couldn't access player advancements in " + this.progressFile, (Throwable)ioexception);
             }
         }
 
-        this.func_192748_e();
-        this.func_192752_d();
-        this.func_192751_c();
+        this.checkForAutomaticTriggers();
+        this.ensureAllVisible();
+        this.registerListeners();
     }
 
-    public void func_192749_b()
+    public void save()
     {
         Map<ResourceLocation, AdvancementProgress> map = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
 
-        for (Entry<Advancement, AdvancementProgress> entry : this.field_192758_f.entrySet())
+        for (Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet())
         {
             AdvancementProgress advancementprogress = entry.getValue();
 
-            if (advancementprogress.func_192108_b())
+            if (advancementprogress.hasProgress())
             {
-                map.put(((Advancement)entry.getKey()).func_192067_g(), advancementprogress);
+                map.put(((Advancement)entry.getKey()).getId(), advancementprogress);
             }
         }
 
-        if (this.field_192757_e.getParentFile() != null)
+        if (this.progressFile.getParentFile() != null)
         {
-            this.field_192757_e.getParentFile().mkdirs();
+            this.progressFile.getParentFile().mkdirs();
         }
 
         try
         {
-            Files.write(field_192754_b.toJson(map), this.field_192757_e, StandardCharsets.UTF_8);
+            Files.write(GSON.toJson(map), this.progressFile, StandardCharsets.UTF_8);
         }
         catch (IOException ioexception)
         {
-            field_192753_a.error("Couldn't save player advancements to " + this.field_192757_e, (Throwable)ioexception);
+            LOGGER.error("Couldn't save player advancements to " + this.progressFile, (Throwable)ioexception);
         }
     }
 
-    public boolean func_192750_a(Advancement p_192750_1_, String p_192750_2_)
+    public boolean grantCriterion(Advancement p_192750_1_, String p_192750_2_)
     {
         boolean flag = false;
-        AdvancementProgress advancementprogress = this.func_192747_a(p_192750_1_);
-        boolean flag1 = advancementprogress.func_192105_a();
+        AdvancementProgress advancementprogress = this.getProgress(p_192750_1_);
+        boolean flag1 = advancementprogress.isDone();
 
-        if (advancementprogress.func_192109_a(p_192750_2_))
+        if (advancementprogress.grantCriterion(p_192750_2_))
         {
-            this.func_193765_c(p_192750_1_);
-            this.field_192761_i.add(p_192750_1_);
+            this.unregisterListeners(p_192750_1_);
+            this.progressChanged.add(p_192750_1_);
             flag = true;
 
-            if (!flag1 && advancementprogress.func_192105_a())
+            if (!flag1 && advancementprogress.isDone())
             {
-                p_192750_1_.func_192072_d().func_192113_a(this.field_192762_j);
+                p_192750_1_.getRewards().apply(this.player);
 
-                if (p_192750_1_.func_192068_c() != null && p_192750_1_.func_192068_c().func_193220_i() && this.field_192762_j.world.getGameRules().getBoolean("announceAdvancements"))
+                if (p_192750_1_.getDisplay() != null && p_192750_1_.getDisplay().shouldAnnounceToChat() && this.player.world.getGameRules().getBoolean("announceAdvancements"))
                 {
-                    this.field_192756_d.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.advancement." + p_192750_1_.func_192068_c().func_192291_d().func_192307_a(), new Object[] {this.field_192762_j.getDisplayName(), p_192750_1_.func_193123_j()}));
+                    this.server.getPlayerList().sendMessage(new TextComponentTranslation("chat.type.advancement." + p_192750_1_.getDisplay().getFrame().getName(), new Object[] {this.player.getDisplayName(), p_192750_1_.getDisplayText()}));
                 }
             }
         }
 
-        if (advancementprogress.func_192105_a())
+        if (advancementprogress.isDone())
         {
-            this.func_192742_b(p_192750_1_);
+            this.ensureVisibility(p_192750_1_);
         }
 
         return flag;
     }
 
-    public boolean func_192744_b(Advancement p_192744_1_, String p_192744_2_)
+    public boolean revokeCriterion(Advancement p_192744_1_, String p_192744_2_)
     {
         boolean flag = false;
-        AdvancementProgress advancementprogress = this.func_192747_a(p_192744_1_);
+        AdvancementProgress advancementprogress = this.getProgress(p_192744_1_);
 
-        if (advancementprogress.func_192101_b(p_192744_2_))
+        if (advancementprogress.revokeCriterion(p_192744_2_))
         {
-            this.func_193764_b(p_192744_1_);
-            this.field_192761_i.add(p_192744_1_);
+            this.registerListeners(p_192744_1_);
+            this.progressChanged.add(p_192744_1_);
             flag = true;
         }
 
-        if (!advancementprogress.func_192108_b())
+        if (!advancementprogress.hasProgress())
         {
-            this.func_192742_b(p_192744_1_);
+            this.ensureVisibility(p_192744_1_);
         }
 
         return flag;
     }
 
-    private void func_193764_b(Advancement p_193764_1_)
+    private void registerListeners(Advancement p_193764_1_)
     {
-        AdvancementProgress advancementprogress = this.func_192747_a(p_193764_1_);
+        AdvancementProgress advancementprogress = this.getProgress(p_193764_1_);
 
-        if (!advancementprogress.func_192105_a())
+        if (!advancementprogress.isDone())
         {
-            for (Entry<String, Criterion> entry : p_193764_1_.func_192073_f().entrySet())
+            for (Entry<String, Criterion> entry : p_193764_1_.getCriteria().entrySet())
             {
-                CriterionProgress criterionprogress = advancementprogress.func_192106_c(entry.getKey());
+                CriterionProgress criterionprogress = advancementprogress.getCriterionProgress(entry.getKey());
 
-                if (criterionprogress != null && !criterionprogress.func_192151_a())
+                if (criterionprogress != null && !criterionprogress.isObtained())
                 {
-                    ICriterionInstance icriterioninstance = ((Criterion)entry.getValue()).func_192143_a();
+                    ICriterionInstance icriterioninstance = ((Criterion)entry.getValue()).getCriterionInstance();
 
                     if (icriterioninstance != null)
                     {
-                        ICriterionTrigger<ICriterionInstance> icriteriontrigger = CriteriaTriggers.<ICriterionInstance>func_192119_a(icriterioninstance.func_192244_a());
+                        ICriterionTrigger<ICriterionInstance> icriteriontrigger = CriteriaTriggers.<ICriterionInstance>get(icriterioninstance.getId());
 
                         if (icriteriontrigger != null)
                         {
-                            icriteriontrigger.func_192165_a(this, new ICriterionTrigger.Listener(icriterioninstance, p_193764_1_, entry.getKey()));
+                            icriteriontrigger.addListener(this, new ICriterionTrigger.Listener(icriterioninstance, p_193764_1_, entry.getKey()));
                         }
                     }
                 }
@@ -273,185 +273,185 @@ public class PlayerAdvancements
         }
     }
 
-    private void func_193765_c(Advancement p_193765_1_)
+    private void unregisterListeners(Advancement p_193765_1_)
     {
-        AdvancementProgress advancementprogress = this.func_192747_a(p_193765_1_);
+        AdvancementProgress advancementprogress = this.getProgress(p_193765_1_);
 
-        for (Entry<String, Criterion> entry : p_193765_1_.func_192073_f().entrySet())
+        for (Entry<String, Criterion> entry : p_193765_1_.getCriteria().entrySet())
         {
-            CriterionProgress criterionprogress = advancementprogress.func_192106_c(entry.getKey());
+            CriterionProgress criterionprogress = advancementprogress.getCriterionProgress(entry.getKey());
 
-            if (criterionprogress != null && (criterionprogress.func_192151_a() || advancementprogress.func_192105_a()))
+            if (criterionprogress != null && (criterionprogress.isObtained() || advancementprogress.isDone()))
             {
-                ICriterionInstance icriterioninstance = ((Criterion)entry.getValue()).func_192143_a();
+                ICriterionInstance icriterioninstance = ((Criterion)entry.getValue()).getCriterionInstance();
 
                 if (icriterioninstance != null)
                 {
-                    ICriterionTrigger<ICriterionInstance> icriteriontrigger = CriteriaTriggers.<ICriterionInstance>func_192119_a(icriterioninstance.func_192244_a());
+                    ICriterionTrigger<ICriterionInstance> icriteriontrigger = CriteriaTriggers.<ICriterionInstance>get(icriterioninstance.getId());
 
                     if (icriteriontrigger != null)
                     {
-                        icriteriontrigger.func_192164_b(this, new ICriterionTrigger.Listener(icriterioninstance, p_193765_1_, entry.getKey()));
+                        icriteriontrigger.removeListener(this, new ICriterionTrigger.Listener(icriterioninstance, p_193765_1_, entry.getKey()));
                     }
                 }
             }
         }
     }
 
-    public void func_192741_b(EntityPlayerMP p_192741_1_)
+    public void flushDirty(EntityPlayerMP p_192741_1_)
     {
-        if (!this.field_192760_h.isEmpty() || !this.field_192761_i.isEmpty())
+        if (!this.visibilityChanged.isEmpty() || !this.progressChanged.isEmpty())
         {
             Map<ResourceLocation, AdvancementProgress> map = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
             Set<Advancement> set = Sets.<Advancement>newLinkedHashSet();
             Set<ResourceLocation> set1 = Sets.<ResourceLocation>newLinkedHashSet();
 
-            for (Advancement advancement : this.field_192761_i)
+            for (Advancement advancement : this.progressChanged)
             {
-                if (this.field_192759_g.contains(advancement))
+                if (this.visible.contains(advancement))
                 {
-                    map.put(advancement.func_192067_g(), this.field_192758_f.get(advancement));
+                    map.put(advancement.getId(), this.progress.get(advancement));
                 }
             }
 
-            for (Advancement advancement1 : this.field_192760_h)
+            for (Advancement advancement1 : this.visibilityChanged)
             {
-                if (this.field_192759_g.contains(advancement1))
+                if (this.visible.contains(advancement1))
                 {
                     set.add(advancement1);
                 }
                 else
                 {
-                    set1.add(advancement1.func_192067_g());
+                    set1.add(advancement1.getId());
                 }
             }
 
             if (!map.isEmpty() || !set.isEmpty() || !set1.isEmpty())
             {
-                p_192741_1_.connection.sendPacket(new SPacketAdvancementInfo(this.field_192763_k, set, set1, map));
-                this.field_192760_h.clear();
-                this.field_192761_i.clear();
+                p_192741_1_.connection.sendPacket(new SPacketAdvancementInfo(this.isFirstPacket, set, set1, map));
+                this.visibilityChanged.clear();
+                this.progressChanged.clear();
             }
         }
 
-        this.field_192763_k = false;
+        this.isFirstPacket = false;
     }
 
-    public void func_194220_a(@Nullable Advancement p_194220_1_)
+    public void setSelectedTab(@Nullable Advancement p_194220_1_)
     {
-        Advancement advancement = this.field_194221_k;
+        Advancement advancement = this.lastSelectedTab;
 
-        if (p_194220_1_ != null && p_194220_1_.func_192070_b() == null && p_194220_1_.func_192068_c() != null)
+        if (p_194220_1_ != null && p_194220_1_.getParent() == null && p_194220_1_.getDisplay() != null)
         {
-            this.field_194221_k = p_194220_1_;
+            this.lastSelectedTab = p_194220_1_;
         }
         else
         {
-            this.field_194221_k = null;
+            this.lastSelectedTab = null;
         }
 
-        if (advancement != this.field_194221_k)
+        if (advancement != this.lastSelectedTab)
         {
-            this.field_192762_j.connection.sendPacket(new SPacketSelectAdvancementsTab(this.field_194221_k == null ? null : this.field_194221_k.func_192067_g()));
+            this.player.connection.sendPacket(new SPacketSelectAdvancementsTab(this.lastSelectedTab == null ? null : this.lastSelectedTab.getId()));
         }
     }
 
-    public AdvancementProgress func_192747_a(Advancement p_192747_1_)
+    public AdvancementProgress getProgress(Advancement advancementIn)
     {
-        AdvancementProgress advancementprogress = this.field_192758_f.get(p_192747_1_);
+        AdvancementProgress advancementprogress = this.progress.get(advancementIn);
 
         if (advancementprogress == null)
         {
             advancementprogress = new AdvancementProgress();
-            this.func_192743_a(p_192747_1_, advancementprogress);
+            this.startProgress(advancementIn, advancementprogress);
         }
 
         return advancementprogress;
     }
 
-    private void func_192743_a(Advancement p_192743_1_, AdvancementProgress p_192743_2_)
+    private void startProgress(Advancement p_192743_1_, AdvancementProgress p_192743_2_)
     {
-        p_192743_2_.func_192099_a(p_192743_1_.func_192073_f(), p_192743_1_.func_192074_h());
-        this.field_192758_f.put(p_192743_1_, p_192743_2_);
+        p_192743_2_.update(p_192743_1_.getCriteria(), p_192743_1_.getRequirements());
+        this.progress.put(p_192743_1_, p_192743_2_);
     }
 
-    private void func_192742_b(Advancement p_192742_1_)
+    private void ensureVisibility(Advancement p_192742_1_)
     {
-        boolean flag = this.func_192738_c(p_192742_1_);
-        boolean flag1 = this.field_192759_g.contains(p_192742_1_);
+        boolean flag = this.shouldBeVisible(p_192742_1_);
+        boolean flag1 = this.visible.contains(p_192742_1_);
 
         if (flag && !flag1)
         {
-            this.field_192759_g.add(p_192742_1_);
-            this.field_192760_h.add(p_192742_1_);
+            this.visible.add(p_192742_1_);
+            this.visibilityChanged.add(p_192742_1_);
 
-            if (this.field_192758_f.containsKey(p_192742_1_))
+            if (this.progress.containsKey(p_192742_1_))
             {
-                this.field_192761_i.add(p_192742_1_);
+                this.progressChanged.add(p_192742_1_);
             }
         }
         else if (!flag && flag1)
         {
-            this.field_192759_g.remove(p_192742_1_);
-            this.field_192760_h.add(p_192742_1_);
+            this.visible.remove(p_192742_1_);
+            this.visibilityChanged.add(p_192742_1_);
         }
 
-        if (flag != flag1 && p_192742_1_.func_192070_b() != null)
+        if (flag != flag1 && p_192742_1_.getParent() != null)
         {
-            this.func_192742_b(p_192742_1_.func_192070_b());
+            this.ensureVisibility(p_192742_1_.getParent());
         }
 
-        for (Advancement advancement : p_192742_1_.func_192069_e())
+        for (Advancement advancement : p_192742_1_.getChildren())
         {
-            this.func_192742_b(advancement);
+            this.ensureVisibility(advancement);
         }
     }
 
-    private boolean func_192738_c(Advancement p_192738_1_)
+    private boolean shouldBeVisible(Advancement p_192738_1_)
     {
         for (int i = 0; p_192738_1_ != null && i <= 2; ++i)
         {
-            if (i == 0 && this.func_192746_d(p_192738_1_))
+            if (i == 0 && this.hasCompletedChildrenOrSelf(p_192738_1_))
             {
                 return true;
             }
 
-            if (p_192738_1_.func_192068_c() == null)
+            if (p_192738_1_.getDisplay() == null)
             {
                 return false;
             }
 
-            AdvancementProgress advancementprogress = this.func_192747_a(p_192738_1_);
+            AdvancementProgress advancementprogress = this.getProgress(p_192738_1_);
 
-            if (advancementprogress.func_192105_a())
+            if (advancementprogress.isDone())
             {
                 return true;
             }
 
-            if (p_192738_1_.func_192068_c().func_193224_j())
+            if (p_192738_1_.getDisplay().isHidden())
             {
                 return false;
             }
 
-            p_192738_1_ = p_192738_1_.func_192070_b();
+            p_192738_1_ = p_192738_1_.getParent();
         }
 
         return false;
     }
 
-    private boolean func_192746_d(Advancement p_192746_1_)
+    private boolean hasCompletedChildrenOrSelf(Advancement p_192746_1_)
     {
-        AdvancementProgress advancementprogress = this.func_192747_a(p_192746_1_);
+        AdvancementProgress advancementprogress = this.getProgress(p_192746_1_);
 
-        if (advancementprogress.func_192105_a())
+        if (advancementprogress.isDone())
         {
             return true;
         }
         else
         {
-            for (Advancement advancement : p_192746_1_.func_192069_e())
+            for (Advancement advancement : p_192746_1_.getChildren())
             {
-                if (this.func_192746_d(advancement))
+                if (this.hasCompletedChildrenOrSelf(advancement))
                 {
                     return true;
                 }

@@ -43,7 +43,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
 
         if (f > 0.5F)
         {
-            this.entityAge += 2;
+            this.idleTime += 2;
         }
 
         super.onLivingUpdate();
@@ -80,7 +80,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
         return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_HOSTILE_HURT;
     }
@@ -128,9 +128,9 @@ public abstract class EntityMob extends EntityCreature implements IMob
             {
                 EntityPlayer entityplayer = (EntityPlayer)entityIn;
                 ItemStack itemstack = this.getHeldItemMainhand();
-                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.field_190927_a;
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.EMPTY;
 
-                if (!itemstack.func_190926_b() && !itemstack1.func_190926_b() && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD)
+                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD)
                 {
                     float f1 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
 
@@ -202,7 +202,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
         return true;
     }
 
-    public boolean func_191990_c(EntityPlayer p_191990_1_)
+    public boolean isPreventingPlayerRest(EntityPlayer playerIn)
     {
         return true;
     }

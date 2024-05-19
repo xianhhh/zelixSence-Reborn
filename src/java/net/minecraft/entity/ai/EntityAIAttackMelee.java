@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 
 public class EntityAIAttackMelee extends EntityAIBase
 {
-    World worldObj;
+    World world;
     protected EntityCreature attacker;
 
     /**
@@ -37,7 +37,7 @@ public class EntityAIAttackMelee extends EntityAIBase
     public EntityAIAttackMelee(EntityCreature creature, double speedIn, boolean useLongMemory)
     {
         this.attacker = creature;
-        this.worldObj = creature.world;
+        this.world = creature.world;
         this.speedTowardsTarget = speedIn;
         this.longMemory = useLongMemory;
         this.setMutexBits(3);
@@ -76,7 +76,7 @@ public class EntityAIAttackMelee extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
@@ -112,7 +112,7 @@ public class EntityAIAttackMelee extends EntityAIBase
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
@@ -127,7 +127,7 @@ public class EntityAIAttackMelee extends EntityAIBase
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {

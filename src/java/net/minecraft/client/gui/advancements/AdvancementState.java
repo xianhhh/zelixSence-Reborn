@@ -5,15 +5,15 @@ public enum AdvancementState
     OBTAINED(0),
     UNOBTAINED(1);
 
-    private final int field_192671_d;
+    private final int id;
 
-    private AdvancementState(int p_i47384_3_)
+    private AdvancementState(int id)
     {
-        this.field_192671_d = p_i47384_3_;
+        this.id = id;
     }
 
-    public int func_192667_a()
+    public int getId()
     {
-        return this.field_192671_d;
+        return this.id;
     }
 }

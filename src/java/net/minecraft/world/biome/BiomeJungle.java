@@ -38,15 +38,15 @@ public class BiomeJungle extends Biome
 
         if (isEdgeIn)
         {
-            this.theBiomeDecorator.treesPerChunk = 2;
+            this.decorator.treesPerChunk = 2;
         }
         else
         {
-            this.theBiomeDecorator.treesPerChunk = 50;
+            this.decorator.treesPerChunk = 50;
         }
 
-        this.theBiomeDecorator.grassPerChunk = 25;
-        this.theBiomeDecorator.flowersPerChunk = 4;
+        this.decorator.grassPerChunk = 25;
+        this.decorator.flowersPerChunk = 4;
 
         if (!isEdgeIn)
         {
@@ -57,7 +57,7 @@ public class BiomeJungle extends Biome
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityChicken.class, 10, 4, 4));
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         if (rand.nextInt(10) == 0)
         {

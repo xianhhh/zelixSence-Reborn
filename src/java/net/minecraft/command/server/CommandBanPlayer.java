@@ -20,7 +20,7 @@ public class CommandBanPlayer extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "ban";
     }
@@ -36,7 +36,7 @@ public class CommandBanPlayer extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.ban.usage";
     }
@@ -77,7 +77,7 @@ public class CommandBanPlayer extends CommandBase
 
                 if (entityplayermp != null)
                 {
-                    entityplayermp.connection.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
+                    entityplayermp.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
                 }
 
                 notifyCommandListener(sender, this, "commands.ban.success", new Object[] {args[0]});
@@ -89,8 +89,8 @@ public class CommandBanPlayer extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
-        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
     }
 }

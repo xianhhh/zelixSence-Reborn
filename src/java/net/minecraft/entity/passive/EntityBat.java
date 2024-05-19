@@ -63,7 +63,7 @@ public class EntityBat extends EntityAmbientCreature
         return this.getIsBatHanging() && this.rand.nextInt(4) != 0 ? null : SoundEvents.ENTITY_BAT_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_BAT_HURT;
     }
@@ -181,7 +181,7 @@ public class EntityBat extends EntityAmbientCreature
             this.motionZ += (Math.signum(d2) * 0.5D - this.motionZ) * 0.10000000149011612D;
             float f = (float)(MathHelper.atan2(this.motionZ, this.motionX) * (180D / Math.PI)) - 90.0F;
             float f1 = MathHelper.wrapDegrees(f - this.rotationYaw);
-            this.field_191988_bg = 0.5F;
+            this.moveForward = 0.5F;
             this.rotationYaw += f1;
 
             if (this.rand.nextInt(100) == 0 && this.world.getBlockState(blockpos1).isNormalCube())

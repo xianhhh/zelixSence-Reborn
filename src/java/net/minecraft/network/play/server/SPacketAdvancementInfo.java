@@ -16,10 +16,10 @@ import net.minecraft.util.ResourceLocation;
 
 public class SPacketAdvancementInfo implements Packet<INetHandlerPlayClient>
 {
-    private boolean field_192605_a;
-    private Map<ResourceLocation, Advancement.Builder> field_192606_b;
-    private Set<ResourceLocation> field_192607_c;
-    private Map<ResourceLocation, AdvancementProgress> field_192608_d;
+    private boolean firstSync;
+    private Map<ResourceLocation, Advancement.Builder> advancementsToAdd;
+    private Set<ResourceLocation> advancementsToRemove;
+    private Map<ResourceLocation, AdvancementProgress> progressUpdates;
 
     public SPacketAdvancementInfo()
     {
@@ -27,16 +27,16 @@ public class SPacketAdvancementInfo implements Packet<INetHandlerPlayClient>
 
     public SPacketAdvancementInfo(boolean p_i47519_1_, Collection<Advancement> p_i47519_2_, Set<ResourceLocation> p_i47519_3_, Map<ResourceLocation, AdvancementProgress> p_i47519_4_)
     {
-        this.field_192605_a = p_i47519_1_;
-        this.field_192606_b = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
+        this.firstSync = p_i47519_1_;
+        this.advancementsToAdd = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
 
         for (Advancement advancement : p_i47519_2_)
         {
-            this.field_192606_b.put(advancement.func_192067_g(), advancement.func_192075_a());
+            this.advancementsToAdd.put(advancement.getId(), advancement.copy());
         }
 
-        this.field_192607_c = p_i47519_3_;
-        this.field_192608_d = Maps.<ResourceLocation, AdvancementProgress>newHashMap(p_i47519_4_);
+        this.advancementsToRemove = p_i47519_3_;
+        this.progressUpdates = Maps.<ResourceLocation, AdvancementProgress>newHashMap(p_i47519_4_);
     }
 
     /**
@@ -44,7 +44,7 @@ public class SPacketAdvancementInfo implements Packet<INetHandlerPlayClient>
      */
     public void processPacket(INetHandlerPlayClient handler)
     {
-        handler.func_191981_a(this);
+        handler.handleAdvancementInfo(this);
     }
 
     /**
@@ -52,33 +52,33 @@ public class SPacketAdvancementInfo implements Packet<INetHandlerPlayClient>
      */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
-        this.field_192605_a = buf.readBoolean();
-        this.field_192606_b = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
-        this.field_192607_c = Sets.<ResourceLocation>newLinkedHashSet();
-        this.field_192608_d = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
-        int i = buf.readVarIntFromBuffer();
+        this.firstSync = buf.readBoolean();
+        this.advancementsToAdd = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
+        this.advancementsToRemove = Sets.<ResourceLocation>newLinkedHashSet();
+        this.progressUpdates = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
+        int i = buf.readVarInt();
 
         for (int j = 0; j < i; ++j)
         {
-            ResourceLocation resourcelocation = buf.func_192575_l();
-            Advancement.Builder advancement$builder = Advancement.Builder.func_192060_b(buf);
-            this.field_192606_b.put(resourcelocation, advancement$builder);
+            ResourceLocation resourcelocation = buf.readResourceLocation();
+            Advancement.Builder advancement$builder = Advancement.Builder.readFrom(buf);
+            this.advancementsToAdd.put(resourcelocation, advancement$builder);
         }
 
-        i = buf.readVarIntFromBuffer();
+        i = buf.readVarInt();
 
         for (int k = 0; k < i; ++k)
         {
-            ResourceLocation resourcelocation1 = buf.func_192575_l();
-            this.field_192607_c.add(resourcelocation1);
+            ResourceLocation resourcelocation1 = buf.readResourceLocation();
+            this.advancementsToRemove.add(resourcelocation1);
         }
 
-        i = buf.readVarIntFromBuffer();
+        i = buf.readVarInt();
 
         for (int l = 0; l < i; ++l)
         {
-            ResourceLocation resourcelocation2 = buf.func_192575_l();
-            this.field_192608_d.put(resourcelocation2, AdvancementProgress.func_192100_b(buf));
+            ResourceLocation resourcelocation2 = buf.readResourceLocation();
+            this.progressUpdates.put(resourcelocation2, AdvancementProgress.fromNetwork(buf));
         }
     }
 
@@ -87,50 +87,50 @@ public class SPacketAdvancementInfo implements Packet<INetHandlerPlayClient>
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeBoolean(this.field_192605_a);
-        buf.writeVarIntToBuffer(this.field_192606_b.size());
+        buf.writeBoolean(this.firstSync);
+        buf.writeVarInt(this.advancementsToAdd.size());
 
-        for (Entry<ResourceLocation, Advancement.Builder> entry : this.field_192606_b.entrySet())
+        for (Entry<ResourceLocation, Advancement.Builder> entry : this.advancementsToAdd.entrySet())
         {
             ResourceLocation resourcelocation = entry.getKey();
             Advancement.Builder advancement$builder = entry.getValue();
-            buf.func_192572_a(resourcelocation);
-            advancement$builder.func_192057_a(buf);
+            buf.writeResourceLocation(resourcelocation);
+            advancement$builder.writeTo(buf);
         }
 
-        buf.writeVarIntToBuffer(this.field_192607_c.size());
+        buf.writeVarInt(this.advancementsToRemove.size());
 
-        for (ResourceLocation resourcelocation1 : this.field_192607_c)
+        for (ResourceLocation resourcelocation1 : this.advancementsToRemove)
         {
-            buf.func_192572_a(resourcelocation1);
+            buf.writeResourceLocation(resourcelocation1);
         }
 
-        buf.writeVarIntToBuffer(this.field_192608_d.size());
+        buf.writeVarInt(this.progressUpdates.size());
 
-        for (Entry<ResourceLocation, AdvancementProgress> entry1 : this.field_192608_d.entrySet())
+        for (Entry<ResourceLocation, AdvancementProgress> entry1 : this.progressUpdates.entrySet())
         {
-            buf.func_192572_a(entry1.getKey());
-            ((AdvancementProgress)entry1.getValue()).func_192104_a(buf);
+            buf.writeResourceLocation(entry1.getKey());
+            ((AdvancementProgress)entry1.getValue()).serializeToNetwork(buf);
         }
     }
 
-    public Map<ResourceLocation, Advancement.Builder> func_192603_a()
+    public Map<ResourceLocation, Advancement.Builder> getAdvancementsToAdd()
     {
-        return this.field_192606_b;
+        return this.advancementsToAdd;
     }
 
-    public Set<ResourceLocation> func_192600_b()
+    public Set<ResourceLocation> getAdvancementsToRemove()
     {
-        return this.field_192607_c;
+        return this.advancementsToRemove;
     }
 
-    public Map<ResourceLocation, AdvancementProgress> func_192604_c()
+    public Map<ResourceLocation, AdvancementProgress> getProgressUpdates()
     {
-        return this.field_192608_d;
+        return this.progressUpdates;
     }
 
-    public boolean func_192602_d()
+    public boolean isFirstSync()
     {
-        return this.field_192605_a;
+        return this.firstSync;
     }
 }

@@ -49,15 +49,15 @@ public class ItemFishFood extends ItemFood
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.func_194125_a(itemIn))
+        if (this.isInCreativeTab(tab))
         {
             for (ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values())
             {
                 if (!this.cooked || itemfishfood$fishtype.canCook())
                 {
-                    tab.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
+                    items.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
                 }
             }
         }

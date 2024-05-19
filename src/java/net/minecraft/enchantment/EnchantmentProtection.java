@@ -66,7 +66,7 @@ public class EnchantmentProtection extends Enchantment
         {
             return level * 2;
         }
-        else if (this.protectionType == EnchantmentProtection.Type.FALL && source == DamageSource.fall)
+        else if (this.protectionType == EnchantmentProtection.Type.FALL && source == DamageSource.FALL)
         {
             return level * 3;
         }

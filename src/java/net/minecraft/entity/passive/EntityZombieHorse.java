@@ -17,14 +17,14 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityZombieHorse extends AbstractHorse
 {
-    public EntityZombieHorse(World p_i47293_1_)
+    public EntityZombieHorse(World worldIn)
     {
-        super(p_i47293_1_);
+        super(worldIn);
     }
 
-    public static void func_190693_b(DataFixer p_190693_0_)
+    public static void registerFixesZombieHorse(DataFixer fixer)
     {
-        AbstractHorse.func_190683_c(p_190693_0_, EntityZombieHorse.class);
+        AbstractHorse.registerFixesAbstractHorse(fixer, EntityZombieHorse.class);
     }
 
     protected void applyEntityAttributes()
@@ -55,9 +55,9 @@ public class EntityZombieHorse extends AbstractHorse
         return SoundEvents.ENTITY_ZOMBIE_HORSE_DEATH;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
-        super.getHurtSound(p_184601_1_);
+        super.getHurtSound(damageSourceIn);
         return SoundEvents.ENTITY_ZOMBIE_HORSE_HURT;
     }
 
@@ -70,7 +70,7 @@ public class EntityZombieHorse extends AbstractHorse
     public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
         ItemStack itemstack = player.getHeldItem(hand);
-        boolean flag = !itemstack.func_190926_b();
+        boolean flag = !itemstack.isEmpty();
 
         if (flag && itemstack.getItem() == Items.SPAWN_EGG)
         {

@@ -13,11 +13,11 @@ public class GuiListButton extends GuiButton
     /** The GuiResponder Object reference. */
     private final GuiPageButtonList.GuiResponder guiResponder;
 
-    public GuiListButton(GuiPageButtonList.GuiResponder responder, int p_i45539_2_, int p_i45539_3_, int p_i45539_4_, String p_i45539_5_, boolean p_i45539_6_)
+    public GuiListButton(GuiPageButtonList.GuiResponder responder, int buttonId, int x, int y, String localizationStrIn, boolean valueIn)
     {
-        super(p_i45539_2_, p_i45539_3_, p_i45539_4_, 150, 20, "");
-        this.localizationStr = p_i45539_5_;
-        this.value = p_i45539_6_;
+        super(buttonId, x, y, 150, 20, "");
+        this.localizationStr = localizationStrIn;
+        this.value = valueIn;
         this.displayString = this.buildDisplayString();
         this.guiResponder = responder;
     }
@@ -30,11 +30,11 @@ public class GuiListButton extends GuiButton
         return I18n.format(this.localizationStr) + ": " + I18n.format(this.value ? "gui.yes" : "gui.no");
     }
 
-    public void setValue(boolean p_175212_1_)
+    public void setValue(boolean valueIn)
     {
-        this.value = p_175212_1_;
+        this.value = valueIn;
         this.displayString = this.buildDisplayString();
-        this.guiResponder.setEntryValue(this.id, p_175212_1_);
+        this.guiResponder.setEntryValue(this.id, valueIn);
     }
 
     /**

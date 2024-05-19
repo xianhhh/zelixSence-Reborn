@@ -18,103 +18,103 @@ import org.apache.logging.log4j.Logger;
 
 public class ClientAdvancementManager
 {
-    private static final Logger field_192800_a = LogManager.getLogger();
-    private final Minecraft field_192801_b;
-    private final AdvancementList field_192802_c = new AdvancementList();
-    private final Map<Advancement, AdvancementProgress> field_192803_d = Maps.<Advancement, AdvancementProgress>newHashMap();
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Minecraft mc;
+    private final AdvancementList advancementList = new AdvancementList();
+    private final Map<Advancement, AdvancementProgress> advancementToProgress = Maps.<Advancement, AdvancementProgress>newHashMap();
     @Nullable
-    private ClientAdvancementManager.IListener field_192804_e;
+    private ClientAdvancementManager.IListener listener;
     @Nullable
-    private Advancement field_194231_f;
+    private Advancement selectedTab;
 
     public ClientAdvancementManager(Minecraft p_i47380_1_)
     {
-        this.field_192801_b = p_i47380_1_;
+        this.mc = p_i47380_1_;
     }
 
-    public void func_192799_a(SPacketAdvancementInfo p_192799_1_)
+    public void read(SPacketAdvancementInfo p_192799_1_)
     {
-        if (p_192799_1_.func_192602_d())
+        if (p_192799_1_.isFirstSync())
         {
-            this.field_192802_c.func_192087_a();
-            this.field_192803_d.clear();
+            this.advancementList.clear();
+            this.advancementToProgress.clear();
         }
 
-        this.field_192802_c.func_192085_a(p_192799_1_.func_192600_b());
-        this.field_192802_c.func_192083_a(p_192799_1_.func_192603_a());
+        this.advancementList.removeAll(p_192799_1_.getAdvancementsToRemove());
+        this.advancementList.loadAdvancements(p_192799_1_.getAdvancementsToAdd());
 
-        for (Entry<ResourceLocation, AdvancementProgress> entry : p_192799_1_.func_192604_c().entrySet())
+        for (Entry<ResourceLocation, AdvancementProgress> entry : p_192799_1_.getProgressUpdates().entrySet())
         {
-            Advancement advancement = this.field_192802_c.func_192084_a(entry.getKey());
+            Advancement advancement = this.advancementList.getAdvancement(entry.getKey());
 
             if (advancement != null)
             {
                 AdvancementProgress advancementprogress = entry.getValue();
-                advancementprogress.func_192099_a(advancement.func_192073_f(), advancement.func_192074_h());
-                this.field_192803_d.put(advancement, advancementprogress);
+                advancementprogress.update(advancement.getCriteria(), advancement.getRequirements());
+                this.advancementToProgress.put(advancement, advancementprogress);
 
-                if (this.field_192804_e != null)
+                if (this.listener != null)
                 {
-                    this.field_192804_e.func_191933_a(advancement, advancementprogress);
+                    this.listener.onUpdateAdvancementProgress(advancement, advancementprogress);
                 }
 
-                if (!p_192799_1_.func_192602_d() && advancementprogress.func_192105_a() && advancement.func_192068_c() != null && advancement.func_192068_c().func_193223_h())
+                if (!p_192799_1_.isFirstSync() && advancementprogress.isDone() && advancement.getDisplay() != null && advancement.getDisplay().shouldShowToast())
                 {
-                    this.field_192801_b.func_193033_an().func_192988_a(new AdvancementToast(advancement));
+                    this.mc.getToastGui().add(new AdvancementToast(advancement));
                 }
             }
             else
             {
-                field_192800_a.warn("Server informed client about progress for unknown advancement " + entry.getKey());
+                LOGGER.warn("Server informed client about progress for unknown advancement " + entry.getKey());
             }
         }
     }
 
-    public AdvancementList func_194229_a()
+    public AdvancementList getAdvancementList()
     {
-        return this.field_192802_c;
+        return this.advancementList;
     }
 
-    public void func_194230_a(@Nullable Advancement p_194230_1_, boolean p_194230_2_)
+    public void setSelectedTab(@Nullable Advancement p_194230_1_, boolean tellServer)
     {
-        NetHandlerPlayClient nethandlerplayclient = this.field_192801_b.getConnection();
+        NetHandlerPlayClient nethandlerplayclient = this.mc.getConnection();
 
-        if (nethandlerplayclient != null && p_194230_1_ != null && p_194230_2_)
+        if (nethandlerplayclient != null && p_194230_1_ != null && tellServer)
         {
-            nethandlerplayclient.sendPacket(CPacketSeenAdvancements.func_194163_a(p_194230_1_));
+            nethandlerplayclient.sendPacket(CPacketSeenAdvancements.openedTab(p_194230_1_));
         }
 
-        if (this.field_194231_f != p_194230_1_)
+        if (this.selectedTab != p_194230_1_)
         {
-            this.field_194231_f = p_194230_1_;
+            this.selectedTab = p_194230_1_;
 
-            if (this.field_192804_e != null)
+            if (this.listener != null)
             {
-                this.field_192804_e.func_193982_e(p_194230_1_);
+                this.listener.setSelectedTab(p_194230_1_);
             }
         }
     }
 
-    public void func_192798_a(@Nullable ClientAdvancementManager.IListener p_192798_1_)
+    public void setListener(@Nullable ClientAdvancementManager.IListener p_192798_1_)
     {
-        this.field_192804_e = p_192798_1_;
-        this.field_192802_c.func_192086_a(p_192798_1_);
+        this.listener = p_192798_1_;
+        this.advancementList.setListener(p_192798_1_);
 
         if (p_192798_1_ != null)
         {
-            for (Entry<Advancement, AdvancementProgress> entry : this.field_192803_d.entrySet())
+            for (Entry<Advancement, AdvancementProgress> entry : this.advancementToProgress.entrySet())
             {
-                p_192798_1_.func_191933_a(entry.getKey(), entry.getValue());
+                p_192798_1_.onUpdateAdvancementProgress(entry.getKey(), entry.getValue());
             }
 
-            p_192798_1_.func_193982_e(this.field_194231_f);
+            p_192798_1_.setSelectedTab(this.selectedTab);
         }
     }
 
     public interface IListener extends AdvancementList.Listener
     {
-        void func_191933_a(Advancement p_191933_1_, AdvancementProgress p_191933_2_);
+        void onUpdateAdvancementProgress(Advancement p_191933_1_, AdvancementProgress p_191933_2_);
 
-        void func_193982_e(Advancement p_193982_1_);
+        void setSelectedTab(Advancement p_193982_1_);
     }
 }

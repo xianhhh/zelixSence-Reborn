@@ -87,7 +87,7 @@ public class GuiControls extends GuiScreen
         }
         else if (button.id < 100 && button instanceof GuiOptionButton)
         {
-            this.options.setOptionValue(((GuiOptionButton)button).returnEnumOptions(), 1);
+            this.options.setOptionValue(((GuiOptionButton)button).getOption(), 1);
             button.displayString = this.options.getKeyBinding(GameSettings.Options.getEnumOptions(button.id));
         }
     }
@@ -158,7 +158,7 @@ public class GuiControls extends GuiScreen
     {
         this.drawDefaultBackground();
         this.keyBindingList.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 8, 16777215);
+        this.drawCenteredString(this.fontRenderer, this.screenTitle, this.width / 2, 8, 16777215);
         boolean flag = false;
 
         for (KeyBinding keybinding : this.options.keyBindings)

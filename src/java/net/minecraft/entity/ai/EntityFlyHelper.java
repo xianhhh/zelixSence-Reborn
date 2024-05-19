@@ -24,8 +24,8 @@ public class EntityFlyHelper extends EntityMoveHelper
 
             if (d3 < 2.500000277905201E-7D)
             {
+                this.entity.setMoveVertical(0.0F);
                 this.entity.setMoveForward(0.0F);
-                this.entity.func_191989_p(0.0F);
                 return;
             }
 
@@ -39,20 +39,20 @@ public class EntityFlyHelper extends EntityMoveHelper
             }
             else
             {
-                f1 = (float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.field_193334_e).getAttributeValue());
+                f1 = (float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.FLYING_SPEED).getAttributeValue());
             }
 
             this.entity.setAIMoveSpeed(f1);
             double d4 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
             float f2 = (float)(-(MathHelper.atan2(d1, d4) * (180D / Math.PI)));
             this.entity.rotationPitch = this.limitAngle(this.entity.rotationPitch, f2, 10.0F);
-            this.entity.setMoveForward(d1 > 0.0D ? f1 : -f1);
+            this.entity.setMoveVertical(d1 > 0.0D ? f1 : -f1);
         }
         else
         {
             this.entity.setNoGravity(false);
+            this.entity.setMoveVertical(0.0F);
             this.entity.setMoveForward(0.0F);
-            this.entity.func_191989_p(0.0F);
         }
     }
 }

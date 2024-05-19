@@ -18,7 +18,7 @@ public class EnchantmentNameParts
     /**
      * Randomly generates a new name built up of 3 or 4 randomly selected words.
      */
-    public String generateNewRandomName(FontRenderer p_148334_1_, int p_148334_2_)
+    public String generateNewRandomName(FontRenderer fontRendererIn, int length)
     {
         int i = this.rand.nextInt(2) + 3;
         String s = "";
@@ -33,7 +33,7 @@ public class EnchantmentNameParts
             s = s + this.namePartsArray[this.rand.nextInt(this.namePartsArray.length)];
         }
 
-        List<String> list = p_148334_1_.listFormattedStringToWidth(s, p_148334_2_);
+        List<String> list = fontRendererIn.listFormattedStringToWidth(s, length);
         return org.apache.commons.lang3.StringUtils.join((Iterable)(list.size() >= 2 ? list.subList(0, 2) : list), " ");
     }
 

@@ -11,75 +11,75 @@ import net.minecraft.stats.RecipeBook;
 
 public class RecipeBookPage
 {
-    private List<GuiButtonRecipe> field_193743_h = Lists.<GuiButtonRecipe>newArrayListWithCapacity(20);
-    private GuiButtonRecipe field_194201_b;
-    private GuiRecipeOverlay field_194202_c = new GuiRecipeOverlay();
-    private Minecraft field_193754_s;
-    private List<IRecipeUpdateListener> field_193757_v = Lists.<IRecipeUpdateListener>newArrayList();
-    private List<RecipeList> field_194203_f;
-    private GuiButtonToggle field_193740_e;
-    private GuiButtonToggle field_193741_f;
-    private int field_193737_b;
-    private int field_193738_c;
-    private RecipeBook field_194204_k;
-    private IRecipe field_194205_l;
-    private RecipeList field_194206_m;
+    private List<GuiButtonRecipe> buttons = Lists.<GuiButtonRecipe>newArrayListWithCapacity(20);
+    private GuiButtonRecipe hoveredButton;
+    private GuiRecipeOverlay overlay = new GuiRecipeOverlay();
+    private Minecraft minecraft;
+    private List<IRecipeUpdateListener> listeners = Lists.<IRecipeUpdateListener>newArrayList();
+    private List<RecipeList> recipeLists;
+    private GuiButtonToggle forwardButton;
+    private GuiButtonToggle backButton;
+    private int totalPages;
+    private int currentPage;
+    private RecipeBook recipeBook;
+    private IRecipe lastClickedRecipe;
+    private RecipeList lastClickedRecipeList;
 
     public RecipeBookPage()
     {
         for (int i = 0; i < 20; ++i)
         {
-            this.field_193743_h.add(new GuiButtonRecipe());
+            this.buttons.add(new GuiButtonRecipe());
         }
     }
 
-    public void func_194194_a(Minecraft p_194194_1_, int p_194194_2_, int p_194194_3_)
+    public void init(Minecraft p_194194_1_, int p_194194_2_, int p_194194_3_)
     {
-        this.field_193754_s = p_194194_1_;
-        this.field_194204_k = p_194194_1_.player.func_192035_E();
+        this.minecraft = p_194194_1_;
+        this.recipeBook = p_194194_1_.player.getRecipeBook();
 
-        for (int i = 0; i < this.field_193743_h.size(); ++i)
+        for (int i = 0; i < this.buttons.size(); ++i)
         {
-            ((GuiButtonRecipe)this.field_193743_h.get(i)).func_191770_c(p_194194_2_ + 11 + 25 * (i % 5), p_194194_3_ + 31 + 25 * (i / 5));
+            ((GuiButtonRecipe)this.buttons.get(i)).setPosition(p_194194_2_ + 11 + 25 * (i % 5), p_194194_3_ + 31 + 25 * (i / 5));
         }
 
-        this.field_193740_e = new GuiButtonToggle(0, p_194194_2_ + 93, p_194194_3_ + 137, 12, 17, false);
-        this.field_193740_e.func_191751_a(1, 208, 13, 18, GuiRecipeBook.field_191894_a);
-        this.field_193741_f = new GuiButtonToggle(0, p_194194_2_ + 38, p_194194_3_ + 137, 12, 17, true);
-        this.field_193741_f.func_191751_a(1, 208, 13, 18, GuiRecipeBook.field_191894_a);
+        this.forwardButton = new GuiButtonToggle(0, p_194194_2_ + 93, p_194194_3_ + 137, 12, 17, false);
+        this.forwardButton.initTextureValues(1, 208, 13, 18, GuiRecipeBook.RECIPE_BOOK);
+        this.backButton = new GuiButtonToggle(0, p_194194_2_ + 38, p_194194_3_ + 137, 12, 17, true);
+        this.backButton.initTextureValues(1, 208, 13, 18, GuiRecipeBook.RECIPE_BOOK);
     }
 
-    public void func_193732_a(GuiRecipeBook p_193732_1_)
+    public void addListener(GuiRecipeBook p_193732_1_)
     {
-        this.field_193757_v.remove(p_193732_1_);
-        this.field_193757_v.add(p_193732_1_);
+        this.listeners.remove(p_193732_1_);
+        this.listeners.add(p_193732_1_);
     }
 
-    public void func_194192_a(List<RecipeList> p_194192_1_, boolean p_194192_2_)
+    public void updateLists(List<RecipeList> p_194192_1_, boolean p_194192_2_)
     {
-        this.field_194203_f = p_194192_1_;
-        this.field_193737_b = (int)Math.ceil((double)p_194192_1_.size() / 20.0D);
+        this.recipeLists = p_194192_1_;
+        this.totalPages = (int)Math.ceil((double)p_194192_1_.size() / 20.0D);
 
-        if (this.field_193737_b <= this.field_193738_c || p_194192_2_)
+        if (this.totalPages <= this.currentPage || p_194192_2_)
         {
-            this.field_193738_c = 0;
+            this.currentPage = 0;
         }
 
-        this.func_194198_d();
+        this.updateButtonsForPage();
     }
 
-    private void func_194198_d()
+    private void updateButtonsForPage()
     {
-        int i = 20 * this.field_193738_c;
+        int i = 20 * this.currentPage;
 
-        for (int j = 0; j < this.field_193743_h.size(); ++j)
+        for (int j = 0; j < this.buttons.size(); ++j)
         {
-            GuiButtonRecipe guibuttonrecipe = this.field_193743_h.get(j);
+            GuiButtonRecipe guibuttonrecipe = this.buttons.get(j);
 
-            if (i + j < this.field_194203_f.size())
+            if (i + j < this.recipeLists.size())
             {
-                RecipeList recipelist = this.field_194203_f.get(i + j);
-                guibuttonrecipe.func_193928_a(recipelist, this, this.field_194204_k);
+                RecipeList recipelist = this.recipeLists.get(i + j);
+                guibuttonrecipe.init(recipelist, this, this.recipeBook);
                 guibuttonrecipe.visible = true;
             }
             else
@@ -88,116 +88,116 @@ public class RecipeBookPage
             }
         }
 
-        this.func_194197_e();
+        this.updateArrowButtons();
     }
 
-    private void func_194197_e()
+    private void updateArrowButtons()
     {
-        this.field_193740_e.visible = this.field_193737_b > 1 && this.field_193738_c < this.field_193737_b - 1;
-        this.field_193741_f.visible = this.field_193737_b > 1 && this.field_193738_c > 0;
+        this.forwardButton.visible = this.totalPages > 1 && this.currentPage < this.totalPages - 1;
+        this.backButton.visible = this.totalPages > 1 && this.currentPage > 0;
     }
 
-    public void func_194191_a(int p_194191_1_, int p_194191_2_, int p_194191_3_, int p_194191_4_, float p_194191_5_)
+    public void render(int p_194191_1_, int p_194191_2_, int p_194191_3_, int p_194191_4_, float p_194191_5_)
     {
-        if (this.field_193737_b > 1)
+        if (this.totalPages > 1)
         {
-            String s = this.field_193738_c + 1 + "/" + this.field_193737_b;
-            int i = this.field_193754_s.fontRendererObj.getStringWidth(s);
-            this.field_193754_s.fontRendererObj.drawString(s, p_194191_1_ - i / 2 + 73, p_194191_2_ + 141, -1);
+            String s = this.currentPage + 1 + "/" + this.totalPages;
+            int i = this.minecraft.fontRenderer.getStringWidth(s);
+            this.minecraft.fontRenderer.drawString(s, p_194191_1_ - i / 2 + 73, p_194191_2_ + 141, -1);
         }
 
         RenderHelper.disableStandardItemLighting();
-        this.field_194201_b = null;
+        this.hoveredButton = null;
 
-        for (GuiButtonRecipe guibuttonrecipe : this.field_193743_h)
+        for (GuiButtonRecipe guibuttonrecipe : this.buttons)
         {
-            guibuttonrecipe.func_191745_a(this.field_193754_s, p_194191_3_, p_194191_4_, p_194191_5_);
+            guibuttonrecipe.drawButton(this.minecraft, p_194191_3_, p_194191_4_, p_194191_5_);
 
             if (guibuttonrecipe.visible && guibuttonrecipe.isMouseOver())
             {
-                this.field_194201_b = guibuttonrecipe;
+                this.hoveredButton = guibuttonrecipe;
             }
         }
 
-        this.field_193741_f.func_191745_a(this.field_193754_s, p_194191_3_, p_194191_4_, p_194191_5_);
-        this.field_193740_e.func_191745_a(this.field_193754_s, p_194191_3_, p_194191_4_, p_194191_5_);
-        this.field_194202_c.func_191842_a(p_194191_3_, p_194191_4_, p_194191_5_);
+        this.backButton.drawButton(this.minecraft, p_194191_3_, p_194191_4_, p_194191_5_);
+        this.forwardButton.drawButton(this.minecraft, p_194191_3_, p_194191_4_, p_194191_5_);
+        this.overlay.render(p_194191_3_, p_194191_4_, p_194191_5_);
     }
 
-    public void func_193721_a(int p_193721_1_, int p_193721_2_)
+    public void renderTooltip(int p_193721_1_, int p_193721_2_)
     {
-        if (this.field_193754_s.currentScreen != null && this.field_194201_b != null && !this.field_194202_c.func_191839_a())
+        if (this.minecraft.currentScreen != null && this.hoveredButton != null && !this.overlay.isVisible())
         {
-            this.field_193754_s.currentScreen.drawHoveringText(this.field_194201_b.func_191772_a(this.field_193754_s.currentScreen), p_193721_1_, p_193721_2_);
+            this.minecraft.currentScreen.drawHoveringText(this.hoveredButton.getToolTipText(this.minecraft.currentScreen), p_193721_1_, p_193721_2_);
         }
     }
 
     @Nullable
-    public IRecipe func_194193_a()
+    public IRecipe getLastClickedRecipe()
     {
-        return this.field_194205_l;
+        return this.lastClickedRecipe;
     }
 
     @Nullable
-    public RecipeList func_194199_b()
+    public RecipeList getLastClickedRecipeList()
     {
-        return this.field_194206_m;
+        return this.lastClickedRecipeList;
     }
 
-    public void func_194200_c()
+    public void setInvisible()
     {
-        this.field_194202_c.func_192999_a(false);
+        this.overlay.setVisible(false);
     }
 
-    public boolean func_194196_a(int p_194196_1_, int p_194196_2_, int p_194196_3_, int p_194196_4_, int p_194196_5_, int p_194196_6_, int p_194196_7_)
+    public boolean mouseClicked(int p_194196_1_, int p_194196_2_, int p_194196_3_, int p_194196_4_, int p_194196_5_, int p_194196_6_, int p_194196_7_)
     {
-        this.field_194205_l = null;
-        this.field_194206_m = null;
+        this.lastClickedRecipe = null;
+        this.lastClickedRecipeList = null;
 
-        if (this.field_194202_c.func_191839_a())
+        if (this.overlay.isVisible())
         {
-            if (this.field_194202_c.func_193968_a(p_194196_1_, p_194196_2_, p_194196_3_))
+            if (this.overlay.buttonClicked(p_194196_1_, p_194196_2_, p_194196_3_))
             {
-                this.field_194205_l = this.field_194202_c.func_193967_b();
-                this.field_194206_m = this.field_194202_c.func_193971_a();
+                this.lastClickedRecipe = this.overlay.getLastRecipeClicked();
+                this.lastClickedRecipeList = this.overlay.getRecipeList();
             }
             else
             {
-                this.field_194202_c.func_192999_a(false);
+                this.overlay.setVisible(false);
             }
 
             return true;
         }
-        else if (this.field_193740_e.mousePressed(this.field_193754_s, p_194196_1_, p_194196_2_) && p_194196_3_ == 0)
+        else if (this.forwardButton.mousePressed(this.minecraft, p_194196_1_, p_194196_2_) && p_194196_3_ == 0)
         {
-            this.field_193740_e.playPressSound(this.field_193754_s.getSoundHandler());
-            ++this.field_193738_c;
-            this.func_194198_d();
+            this.forwardButton.playPressSound(this.minecraft.getSoundHandler());
+            ++this.currentPage;
+            this.updateButtonsForPage();
             return true;
         }
-        else if (this.field_193741_f.mousePressed(this.field_193754_s, p_194196_1_, p_194196_2_) && p_194196_3_ == 0)
+        else if (this.backButton.mousePressed(this.minecraft, p_194196_1_, p_194196_2_) && p_194196_3_ == 0)
         {
-            this.field_193741_f.playPressSound(this.field_193754_s.getSoundHandler());
-            --this.field_193738_c;
-            this.func_194198_d();
+            this.backButton.playPressSound(this.minecraft.getSoundHandler());
+            --this.currentPage;
+            this.updateButtonsForPage();
             return true;
         }
         else
         {
-            for (GuiButtonRecipe guibuttonrecipe : this.field_193743_h)
+            for (GuiButtonRecipe guibuttonrecipe : this.buttons)
             {
-                if (guibuttonrecipe.mousePressed(this.field_193754_s, p_194196_1_, p_194196_2_))
+                if (guibuttonrecipe.mousePressed(this.minecraft, p_194196_1_, p_194196_2_))
                 {
-                    guibuttonrecipe.playPressSound(this.field_193754_s.getSoundHandler());
+                    guibuttonrecipe.playPressSound(this.minecraft.getSoundHandler());
 
                     if (p_194196_3_ == 0)
                     {
-                        this.field_194205_l = guibuttonrecipe.func_193760_e();
-                        this.field_194206_m = guibuttonrecipe.func_191771_c();
+                        this.lastClickedRecipe = guibuttonrecipe.getRecipe();
+                        this.lastClickedRecipeList = guibuttonrecipe.getList();
                     }
-                    else if (!this.field_194202_c.func_191839_a() && !guibuttonrecipe.func_193929_d())
+                    else if (!this.overlay.isVisible() && !guibuttonrecipe.isOnlyOption())
                     {
-                        this.field_194202_c.func_191845_a(this.field_193754_s, guibuttonrecipe.func_191771_c(), guibuttonrecipe.xPosition, guibuttonrecipe.yPosition, p_194196_4_ + p_194196_6_ / 2, p_194196_5_ + 13 + p_194196_7_ / 2, (float)guibuttonrecipe.getButtonWidth(), this.field_194204_k);
+                        this.overlay.init(this.minecraft, guibuttonrecipe.getList(), guibuttonrecipe.x, guibuttonrecipe.y, p_194196_4_ + p_194196_6_ / 2, p_194196_5_ + 13 + p_194196_7_ / 2, (float)guibuttonrecipe.getButtonWidth(), this.recipeBook);
                     }
 
                     return true;
@@ -208,11 +208,11 @@ public class RecipeBookPage
         }
     }
 
-    public void func_194195_a(List<IRecipe> p_194195_1_)
+    public void recipesShown(List<IRecipe> p_194195_1_)
     {
-        for (IRecipeUpdateListener irecipeupdatelistener : this.field_193757_v)
+        for (IRecipeUpdateListener irecipeupdatelistener : this.listeners)
         {
-            irecipeupdatelistener.func_193001_a(p_194195_1_);
+            irecipeupdatelistener.recipesShown(p_194195_1_);
         }
     }
 }

@@ -26,7 +26,7 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
 
 public class ChunkGeneratorFlat implements IChunkGenerator
 {
-    private final World worldObj;
+    private final World world;
     private final Random random;
     private final IBlockState[] cachedBlockIDs = new IBlockState[256];
     private final FlatGeneratorInfo flatWorldGenInfo;
@@ -38,7 +38,7 @@ public class ChunkGeneratorFlat implements IChunkGenerator
 
     public ChunkGeneratorFlat(World worldIn, long seed, boolean generateStructures, String flatGeneratorSettings)
     {
-        this.worldObj = worldIn;
+        this.world = worldIn;
         this.random = new Random(seed);
         this.flatWorldGenInfo = FlatGeneratorInfo.createFlatGeneratorFromString(flatGeneratorSettings);
 
@@ -122,7 +122,10 @@ public class ChunkGeneratorFlat implements IChunkGenerator
         this.hasDecoration = flag && this.flatWorldGenInfo.getBiome() != Biome.getIdForBiome(Biomes.VOID) ? false : this.flatWorldGenInfo.getWorldFeatures().containsKey("decoration");
     }
 
-    public Chunk provideChunk(int x, int z)
+    /**
+     * Generates the chunk at the specified position, from scratch
+     */
+    public Chunk generateChunk(int x, int z)
     {
         ChunkPrimer chunkprimer = new ChunkPrimer();
 
@@ -144,11 +147,11 @@ public class ChunkGeneratorFlat implements IChunkGenerator
 
         for (MapGenBase mapgenbase : this.structureGenerators.values())
         {
-            mapgenbase.generate(this.worldObj, x, z, chunkprimer);
+            mapgenbase.generate(this.world, x, z, chunkprimer);
         }
 
-        Chunk chunk = new Chunk(this.worldObj, chunkprimer, x, z);
-        Biome[] abiome = this.worldObj.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
+        Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
+        Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
         byte[] abyte = chunk.getBiomeArray();
 
         for (int l = 0; l < abyte.length; ++l)
@@ -160,22 +163,25 @@ public class ChunkGeneratorFlat implements IChunkGenerator
         return chunk;
     }
 
+    /**
+     * Generate initial structures in this chunk, e.g. mineshafts, temples, lakes, and dungeons
+     */
     public void populate(int x, int z)
     {
         int i = x * 16;
         int j = z * 16;
         BlockPos blockpos = new BlockPos(i, 0, j);
-        Biome biome = this.worldObj.getBiome(new BlockPos(i + 16, 0, j + 16));
+        Biome biome = this.world.getBiome(new BlockPos(i + 16, 0, j + 16));
         boolean flag = false;
-        this.random.setSeed(this.worldObj.getSeed());
+        this.random.setSeed(this.world.getSeed());
         long k = this.random.nextLong() / 2L * 2L + 1L;
         long l = this.random.nextLong() / 2L * 2L + 1L;
-        this.random.setSeed((long)x * k + (long)z * l ^ this.worldObj.getSeed());
+        this.random.setSeed((long)x * k + (long)z * l ^ this.world.getSeed());
         ChunkPos chunkpos = new ChunkPos(x, z);
 
         for (MapGenStructure mapgenstructure : this.structureGenerators.values())
         {
-            boolean flag1 = mapgenstructure.generateStructure(this.worldObj, this.random, chunkpos);
+            boolean flag1 = mapgenstructure.generateStructure(this.world, this.random, chunkpos);
 
             if (mapgenstructure instanceof MapGenVillage)
             {
@@ -185,16 +191,16 @@ public class ChunkGeneratorFlat implements IChunkGenerator
 
         if (this.waterLakeGenerator != null && !flag && this.random.nextInt(4) == 0)
         {
-            this.waterLakeGenerator.generate(this.worldObj, this.random, blockpos.add(this.random.nextInt(16) + 8, this.random.nextInt(256), this.random.nextInt(16) + 8));
+            this.waterLakeGenerator.generate(this.world, this.random, blockpos.add(this.random.nextInt(16) + 8, this.random.nextInt(256), this.random.nextInt(16) + 8));
         }
 
         if (this.lavaLakeGenerator != null && !flag && this.random.nextInt(8) == 0)
         {
             BlockPos blockpos1 = blockpos.add(this.random.nextInt(16) + 8, this.random.nextInt(this.random.nextInt(248) + 8), this.random.nextInt(16) + 8);
 
-            if (blockpos1.getY() < this.worldObj.getSeaLevel() || this.random.nextInt(10) == 0)
+            if (blockpos1.getY() < this.world.getSeaLevel() || this.random.nextInt(10) == 0)
             {
-                this.lavaLakeGenerator.generate(this.worldObj, this.random, blockpos1);
+                this.lavaLakeGenerator.generate(this.world, this.random, blockpos1);
             }
         }
 
@@ -202,16 +208,19 @@ public class ChunkGeneratorFlat implements IChunkGenerator
         {
             for (int i1 = 0; i1 < 8; ++i1)
             {
-                (new WorldGenDungeons()).generate(this.worldObj, this.random, blockpos.add(this.random.nextInt(16) + 8, this.random.nextInt(256), this.random.nextInt(16) + 8));
+                (new WorldGenDungeons()).generate(this.world, this.random, blockpos.add(this.random.nextInt(16) + 8, this.random.nextInt(256), this.random.nextInt(16) + 8));
             }
         }
 
         if (this.hasDecoration)
         {
-            biome.decorate(this.worldObj, this.random, blockpos);
+            biome.decorate(this.world, this.random, blockpos);
         }
     }
 
+    /**
+     * Called to generate additional structures after initial worldgen, used by ocean monuments
+     */
     public boolean generateStructures(Chunk chunkIn, int x, int z)
     {
         return false;
@@ -219,28 +228,33 @@ public class ChunkGeneratorFlat implements IChunkGenerator
 
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos)
     {
-        Biome biome = this.worldObj.getBiome(pos);
+        Biome biome = this.world.getBiome(pos);
         return biome.getSpawnableList(creatureType);
     }
 
     @Nullable
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_)
+    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean findUnexplored)
     {
         MapGenStructure mapgenstructure = this.structureGenerators.get(structureName);
-        return mapgenstructure != null ? mapgenstructure.getClosestStrongholdPos(worldIn, position, p_180513_4_) : null;
+        return mapgenstructure != null ? mapgenstructure.getNearestStructurePos(worldIn, position, findUnexplored) : null;
     }
 
-    public boolean func_193414_a(World p_193414_1_, String p_193414_2_, BlockPos p_193414_3_)
+    public boolean isInsideStructure(World worldIn, String structureName, BlockPos pos)
     {
-        MapGenStructure mapgenstructure = this.structureGenerators.get(p_193414_2_);
-        return mapgenstructure != null ? mapgenstructure.isInsideStructure(p_193414_3_) : false;
+        MapGenStructure mapgenstructure = this.structureGenerators.get(structureName);
+        return mapgenstructure != null ? mapgenstructure.isInsideStructure(pos) : false;
     }
 
+    /**
+     * Recreates data about structures intersecting given chunk (used for example by getPossibleCreatures), without
+     * placing any blocks. When called for the first time before any chunk is generated - also initializes the internal
+     * state needed by getPossibleCreatures.
+     */
     public void recreateStructures(Chunk chunkIn, int x, int z)
     {
         for (MapGenStructure mapgenstructure : this.structureGenerators.values())
         {
-            mapgenstructure.generate(this.worldObj, x, z, (ChunkPrimer)null);
+            mapgenstructure.generate(this.world, x, z, (ChunkPrimer)null);
         }
     }
 }

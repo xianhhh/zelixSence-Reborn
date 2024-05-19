@@ -6,14 +6,14 @@ import net.minecraft.util.DamageSource;
 public class MultiPartEntityPart extends Entity
 {
     /** The dragon entity this dragon part belongs to */
-    public final IEntityMultiPart entityDragonObj;
+    public final IEntityMultiPart parent;
     public final String partName;
 
-    public MultiPartEntityPart(IEntityMultiPart parent, String partName, float base, float sizeHeight)
+    public MultiPartEntityPart(IEntityMultiPart parent, String partName, float width, float height)
     {
         super(parent.getWorld());
-        this.setSize(base, sizeHeight);
-        this.entityDragonObj = parent;
+        this.setSize(width, height);
+        this.parent = parent;
         this.partName = partName;
     }
 
@@ -48,7 +48,7 @@ public class MultiPartEntityPart extends Entity
      */
     public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        return this.isEntityInvulnerable(source) ? false : this.entityDragonObj.attackEntityFromPart(this, source, amount);
+        return this.isEntityInvulnerable(source) ? false : this.parent.attackEntityFromPart(this, source, amount);
     }
 
     /**
@@ -56,6 +56,6 @@ public class MultiPartEntityPart extends Entity
      */
     public boolean isEntityEqual(Entity entityIn)
     {
-        return this == entityIn || this.entityDragonObj == entityIn;
+        return this == entityIn || this.parent == entityIn;
     }
 }

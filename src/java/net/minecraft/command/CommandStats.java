@@ -19,7 +19,7 @@ public class CommandStats extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "stats";
     }
@@ -35,7 +35,7 @@ public class CommandStats extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.stats.usage";
     }
@@ -190,7 +190,7 @@ public class CommandStats extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
@@ -198,11 +198,11 @@ public class CommandStats extends CommandBase
         }
         else if (args.length == 2 && "entity".equals(args[0]))
         {
-            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
         else if (args.length >= 2 && args.length <= 4 && "block".equals(args[0]))
         {
-            return getTabCompletionCoordinate(args, 1, pos);
+            return getTabCompletionCoordinate(args, 1, targetPos);
         }
         else if ((args.length != 3 || !"entity".equals(args[0])) && (args.length != 5 || !"block".equals(args[0])))
         {
@@ -223,7 +223,7 @@ public class CommandStats extends CommandBase
 
     protected List<String> getObjectiveNames(MinecraftServer server)
     {
-        Collection<ScoreObjective> collection = server.worldServerForDimension(0).getScoreboard().getScoreObjectives();
+        Collection<ScoreObjective> collection = server.getWorld(0).getScoreboard().getScoreObjectives();
         List<String> list = Lists.<String>newArrayList();
 
         for (ScoreObjective scoreobjective : collection)

@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class EntityAIMoveTowardsRestriction extends EntityAIBase
 {
-    private final EntityCreature theEntity;
+    private final EntityCreature creature;
     private double movePosX;
     private double movePosY;
     private double movePosZ;
@@ -14,7 +14,7 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
 
     public EntityAIMoveTowardsRestriction(EntityCreature creatureIn, double speedIn)
     {
-        this.theEntity = creatureIn;
+        this.creature = creatureIn;
         this.movementSpeed = speedIn;
         this.setMutexBits(1);
     }
@@ -24,14 +24,14 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        if (this.theEntity.isWithinHomeDistanceCurrentPosition())
+        if (this.creature.isWithinHomeDistanceCurrentPosition())
         {
             return false;
         }
         else
         {
-            BlockPos blockpos = this.theEntity.getHomePosition();
-            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, new Vec3d((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()));
+            BlockPos blockpos = this.creature.getHomePosition();
+            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.creature, 16, 7, new Vec3d((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()));
 
             if (vec3d == null)
             {
@@ -39,9 +39,9 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
             }
             else
             {
-                this.movePosX = vec3d.xCoord;
-                this.movePosY = vec3d.yCoord;
-                this.movePosZ = vec3d.zCoord;
+                this.movePosX = vec3d.x;
+                this.movePosY = vec3d.y;
+                this.movePosZ = vec3d.z;
                 return true;
             }
         }
@@ -50,9 +50,9 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return !this.theEntity.getNavigator().noPath();
+        return !this.creature.getNavigator().noPath();
     }
 
     /**
@@ -60,6 +60,6 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theEntity.getNavigator().tryMoveToXYZ(this.movePosX, this.movePosY, this.movePosZ, this.movementSpeed);
+        this.creature.getNavigator().tryMoveToXYZ(this.movePosX, this.movePosY, this.movePosZ, this.movementSpeed);
     }
 }

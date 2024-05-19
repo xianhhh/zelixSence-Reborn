@@ -17,20 +17,20 @@ public class ChunkCache implements IBlockAccess
     protected Chunk[][] chunkArray;
 
     /** set by !chunk.getAreLevelsEmpty */
-    protected boolean hasExtendedLevels;
+    protected boolean empty;
 
     /** Reference to the World object. */
-    protected World worldObj;
+    protected World world;
 
     public ChunkCache(World worldIn, BlockPos posFromIn, BlockPos posToIn, int subIn)
     {
-        this.worldObj = worldIn;
+        this.world = worldIn;
         this.chunkX = posFromIn.getX() - subIn >> 4;
         this.chunkZ = posFromIn.getZ() - subIn >> 4;
         int i = posToIn.getX() + subIn >> 4;
         int j = posToIn.getZ() + subIn >> 4;
         this.chunkArray = new Chunk[i - this.chunkX + 1][j - this.chunkZ + 1];
-        this.hasExtendedLevels = true;
+        this.empty = true;
 
         for (int k = this.chunkX; k <= i; ++k)
         {
@@ -46,9 +46,9 @@ public class ChunkCache implements IBlockAccess
             {
                 Chunk chunk = this.chunkArray[i1 - this.chunkX][j1 - this.chunkZ];
 
-                if (chunk != null && !chunk.getAreLevelsEmpty(posFromIn.getY(), posToIn.getY()))
+                if (chunk != null && !chunk.isEmptyBetween(posFromIn.getY(), posToIn.getY()))
                 {
-                    this.hasExtendedLevels = false;
+                    this.empty = false;
                 }
             }
         }
@@ -57,9 +57,9 @@ public class ChunkCache implements IBlockAccess
     /**
      * set by !chunk.getAreLevelsEmpty
      */
-    public boolean extendedLevelsInChunkCache()
+    public boolean isEmpty()
     {
-        return this.hasExtendedLevels;
+        return this.empty;
     }
 
     @Nullable
@@ -69,11 +69,11 @@ public class ChunkCache implements IBlockAccess
     }
 
     @Nullable
-    public TileEntity getTileEntity(BlockPos p_190300_1_, Chunk.EnumCreateEntityType p_190300_2_)
+    public TileEntity getTileEntity(BlockPos pos, Chunk.EnumCreateEntityType p_190300_2_)
     {
-        int i = (p_190300_1_.getX() >> 4) - this.chunkX;
-        int j = (p_190300_1_.getZ() >> 4) - this.chunkZ;
-        return this.chunkArray[i][j].getTileEntity(p_190300_1_, p_190300_2_);
+        int i = (pos.getX() >> 4) - this.chunkX;
+        int j = (pos.getZ() >> 4) - this.chunkZ;
+        return this.chunkArray[i][j].getTileEntity(pos, p_190300_2_);
     }
 
     public int getCombinedLight(BlockPos pos, int lightValue)
@@ -114,12 +114,12 @@ public class ChunkCache implements IBlockAccess
     {
         int i = (pos.getX() >> 4) - this.chunkX;
         int j = (pos.getZ() >> 4) - this.chunkZ;
-        return this.chunkArray[i][j].getBiome(pos, this.worldObj.getBiomeProvider());
+        return this.chunkArray[i][j].getBiome(pos, this.world.getBiomeProvider());
     }
 
     private int getLightForExt(EnumSkyBlock type, BlockPos pos)
     {
-        if (type == EnumSkyBlock.SKY && !this.worldObj.provider.func_191066_m())
+        if (type == EnumSkyBlock.SKY && !this.world.provider.hasSkyLight())
         {
             return 0;
         }
@@ -168,17 +168,17 @@ public class ChunkCache implements IBlockAccess
         return this.getBlockState(pos).getMaterial() == Material.AIR;
     }
 
-    public int getLightFor(EnumSkyBlock p_175628_1_, BlockPos pos)
+    public int getLightFor(EnumSkyBlock type, BlockPos pos)
     {
         if (pos.getY() >= 0 && pos.getY() < 256)
         {
             int i = (pos.getX() >> 4) - this.chunkX;
             int j = (pos.getZ() >> 4) - this.chunkZ;
-            return this.chunkArray[i][j].getLightFor(p_175628_1_, pos);
+            return this.chunkArray[i][j].getLightFor(type, pos);
         }
         else
         {
-            return p_175628_1_.defaultLightValue;
+            return type.defaultLightValue;
         }
     }
 
@@ -189,6 +189,6 @@ public class ChunkCache implements IBlockAccess
 
     public WorldType getWorldType()
     {
-        return this.worldObj.getWorldType();
+        return this.world.getWorldType();
     }
 }

@@ -110,7 +110,7 @@ public class GuiSpectator extends Gui implements ISpectatorMenuRecipient
 
             if (i > 3 && p_175266_5_.isEnabled())
             {
-                this.mc.fontRendererObj.drawStringWithShadow(s, (float)(p_175266_2_ + 19 - 2 - this.mc.fontRendererObj.getStringWidth(s)), p_175266_3_ + 6.0F + 3.0F, 16777215 + (i << 24));
+                this.mc.fontRenderer.drawStringWithShadow(s, (float)(p_175266_2_ + 19 - 2 - this.mc.fontRenderer.getStringWidth(s)), p_175266_3_ + 6.0F + 3.0F, 16777215 + (i << 24));
             }
         }
     }
@@ -126,19 +126,19 @@ public class GuiSpectator extends Gui implements ISpectatorMenuRecipient
 
             if (s != null)
             {
-                int j = (p_175263_1_.getScaledWidth() - this.mc.fontRendererObj.getStringWidth(s)) / 2;
+                int j = (p_175263_1_.getScaledWidth() - this.mc.fontRenderer.getStringWidth(s)) / 2;
                 int k = p_175263_1_.getScaledHeight() - 35;
                 GlStateManager.pushMatrix();
                 GlStateManager.enableBlend();
                 GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-                this.mc.fontRendererObj.drawStringWithShadow(s, (float)j, (float)k, 16777215 + (i << 24));
+                this.mc.fontRenderer.drawStringWithShadow(s, (float)j, (float)k, 16777215 + (i << 24));
                 GlStateManager.disableBlend();
                 GlStateManager.popMatrix();
             }
         }
     }
 
-    public void onSpectatorMenuClosed(SpectatorMenu p_175257_1_)
+    public void onSpectatorMenuClosed(SpectatorMenu menu)
     {
         this.menu = null;
         this.lastSelectionTime = 0L;

@@ -15,7 +15,7 @@ public class BiomeEnd extends Biome
         this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityEnderman.class, 10, 4, 4));
         this.topBlock = Blocks.DIRT.getDefaultState();
         this.fillerBlock = Blocks.DIRT.getDefaultState();
-        this.theBiomeDecorator = new BiomeEndDecorator();
+        this.decorator = new BiomeEndDecorator();
     }
 
     /**

@@ -18,18 +18,18 @@ public class ServerListEntryLanDetected implements GuiListExtended.IGuiListEntry
         this.mc = Minecraft.getMinecraft();
     }
 
-    public void func_192634_a(int p_192634_1_, int p_192634_2_, int p_192634_3_, int p_192634_4_, int p_192634_5_, int p_192634_6_, int p_192634_7_, boolean p_192634_8_, float p_192634_9_)
+    public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks)
     {
-        this.mc.fontRendererObj.drawString(I18n.format("lanServer.title"), p_192634_2_ + 32 + 3, p_192634_3_ + 1, 16777215);
-        this.mc.fontRendererObj.drawString(this.serverData.getServerMotd(), p_192634_2_ + 32 + 3, p_192634_3_ + 12, 8421504);
+        this.mc.fontRenderer.drawString(I18n.format("lanServer.title"), x + 32 + 3, y + 1, 16777215);
+        this.mc.fontRenderer.drawString(this.serverData.getServerMotd(), x + 32 + 3, y + 12, 8421504);
 
         if (this.mc.gameSettings.hideServerAddress)
         {
-            this.mc.fontRendererObj.drawString(I18n.format("selectServer.hiddenAddress"), p_192634_2_ + 32 + 3, p_192634_3_ + 12 + 11, 3158064);
+            this.mc.fontRenderer.drawString(I18n.format("selectServer.hiddenAddress"), x + 32 + 3, y + 12 + 11, 3158064);
         }
         else
         {
-            this.mc.fontRendererObj.drawString(this.serverData.getServerIpPort(), p_192634_2_ + 32 + 3, p_192634_3_ + 12 + 11, 3158064);
+            this.mc.fontRenderer.drawString(this.serverData.getServerIpPort(), x + 32 + 3, y + 12 + 11, 3158064);
         }
     }
 
@@ -50,7 +50,7 @@ public class ServerListEntryLanDetected implements GuiListExtended.IGuiListEntry
         return false;
     }
 
-    public void func_192633_a(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
+    public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
     {
     }
 

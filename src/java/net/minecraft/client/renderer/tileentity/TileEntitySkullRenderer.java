@@ -31,11 +31,11 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer<TileEntit
     private final ModelSkeletonHead skeletonHead = new ModelSkeletonHead(0, 0, 64, 32);
     private final ModelSkeletonHead humanoidHead = new ModelHumanoidHead();
 
-    public void func_192841_a(TileEntitySkull p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntitySkull te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(p_192841_1_.getBlockMetadata() & 7);
-        float f = p_192841_1_.getAnimationProgress(p_192841_8_);
-        this.renderSkull((float)p_192841_2_, (float)p_192841_4_, (float)p_192841_6_, enumfacing, (float)(p_192841_1_.getSkullRotation() * 360) / 16.0F, p_192841_1_.getSkullType(), p_192841_1_.getPlayerProfile(), p_192841_9_, f);
+        EnumFacing enumfacing = EnumFacing.getFront(te.getBlockMetadata() & 7);
+        float f = te.getAnimationProgress(partialTicks);
+        this.renderSkull((float)x, (float)y, (float)z, enumfacing, (float)(te.getSkullRotation() * 360) / 16.0F, te.getSkullType(), te.getPlayerProfile(), destroyStage, f);
     }
 
     public void setRendererDispatcher(TileEntityRendererDispatcher rendererDispatcherIn)
@@ -44,7 +44,7 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer<TileEntit
         instance = this;
     }
 
-    public void renderSkull(float x, float y, float z, EnumFacing facing, float p_188190_5_, int skullType, @Nullable GameProfile profile, int destroyStage, float animateTicks)
+    public void renderSkull(float x, float y, float z, EnumFacing facing, float rotationIn, int skullType, @Nullable GameProfile profile, int destroyStage, float animateTicks)
     {
         ModelBase modelbase = this.skeletonHead;
 
@@ -125,18 +125,18 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer<TileEntit
 
                 case SOUTH:
                     GlStateManager.translate(x + 0.5F, y + 0.25F, z + 0.26F);
-                    p_188190_5_ = 180.0F;
+                    rotationIn = 180.0F;
                     break;
 
                 case WEST:
                     GlStateManager.translate(x + 0.74F, y + 0.25F, z + 0.5F);
-                    p_188190_5_ = 270.0F;
+                    rotationIn = 270.0F;
                     break;
 
                 case EAST:
                 default:
                     GlStateManager.translate(x + 0.26F, y + 0.25F, z + 0.5F);
-                    p_188190_5_ = 90.0F;
+                    rotationIn = 90.0F;
             }
         }
 
@@ -150,7 +150,7 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer<TileEntit
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
         }
 
-        modelbase.render((Entity)null, animateTicks, 0.0F, 0.0F, p_188190_5_, 0.0F, 0.0625F);
+        modelbase.render((Entity)null, animateTicks, 0.0F, 0.0F, rotationIn, 0.0F, 0.0625F);
         GlStateManager.popMatrix();
 
         if (destroyStage >= 0)

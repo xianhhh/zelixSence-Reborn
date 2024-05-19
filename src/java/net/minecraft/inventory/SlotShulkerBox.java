@@ -6,9 +6,9 @@ import net.minecraft.item.ItemStack;
 
 public class SlotShulkerBox extends Slot
 {
-    public SlotShulkerBox(IInventory p_i47265_1_, int p_i47265_2_, int p_i47265_3_, int p_i47265_4_)
+    public SlotShulkerBox(IInventory p_i47265_1_, int slotIndexIn, int xPosition, int yPosition)
     {
-        super(p_i47265_1_, p_i47265_2_, p_i47265_3_, p_i47265_4_);
+        super(p_i47265_1_, slotIndexIn, xPosition, yPosition);
     }
 
     /**

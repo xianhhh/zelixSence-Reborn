@@ -17,136 +17,136 @@ import org.apache.logging.log4j.Logger;
 
 public class RecipeBookServer extends RecipeBook
 {
-    private static final Logger field_192828_d = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    public void func_193835_a(List<IRecipe> p_193835_1_, EntityPlayerMP p_193835_2_)
+    public void add(List<IRecipe> recipesIn, EntityPlayerMP player)
     {
         List<IRecipe> list = Lists.<IRecipe>newArrayList();
 
-        for (IRecipe irecipe : p_193835_1_)
+        for (IRecipe irecipe : recipesIn)
         {
-            if (!this.field_194077_a.get(func_194075_d(irecipe)) && !irecipe.func_192399_d())
+            if (!this.recipes.get(getRecipeId(irecipe)) && !irecipe.isHidden())
             {
-                this.func_194073_a(irecipe);
-                this.func_193825_e(irecipe);
+                this.setRecipes(irecipe);
+                this.addDisplayedRecipe(irecipe);
                 list.add(irecipe);
-                CriteriaTriggers.field_192126_f.func_192225_a(p_193835_2_, irecipe);
+                CriteriaTriggers.RECIPE_UNLOCKED.trigger(player, irecipe);
             }
         }
 
-        this.func_194081_a(SPacketRecipeBook.State.ADD, p_193835_2_, list);
+        this.sendPacket(SPacketRecipeBook.State.ADD, player, list);
     }
 
-    public void func_193834_b(List<IRecipe> p_193834_1_, EntityPlayerMP p_193834_2_)
+    public void remove(List<IRecipe> recipesIn, EntityPlayerMP player)
     {
         List<IRecipe> list = Lists.<IRecipe>newArrayList();
 
-        for (IRecipe irecipe : p_193834_1_)
+        for (IRecipe irecipe : recipesIn)
         {
-            if (this.field_194077_a.get(func_194075_d(irecipe)))
+            if (this.recipes.get(getRecipeId(irecipe)))
             {
-                this.func_193831_b(irecipe);
+                this.removeRecipe(irecipe);
                 list.add(irecipe);
             }
         }
 
-        this.func_194081_a(SPacketRecipeBook.State.REMOVE, p_193834_2_, list);
+        this.sendPacket(SPacketRecipeBook.State.REMOVE, player, list);
     }
 
-    private void func_194081_a(SPacketRecipeBook.State p_194081_1_, EntityPlayerMP p_194081_2_, List<IRecipe> p_194081_3_)
+    private void sendPacket(SPacketRecipeBook.State state, EntityPlayerMP player, List<IRecipe> recipesIn)
     {
-        p_194081_2_.connection.sendPacket(new SPacketRecipeBook(p_194081_1_, p_194081_3_, Collections.emptyList(), this.field_192818_b, this.field_192819_c));
+        player.connection.sendPacket(new SPacketRecipeBook(state, recipesIn, Collections.emptyList(), this.isGuiOpen, this.isFilteringCraftable));
     }
 
-    public NBTTagCompound func_192824_e()
+    public NBTTagCompound write()
     {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setBoolean("isGuiOpen", this.field_192818_b);
-        nbttagcompound.setBoolean("isFilteringCraftable", this.field_192819_c);
+        nbttagcompound.setBoolean("isGuiOpen", this.isGuiOpen);
+        nbttagcompound.setBoolean("isFilteringCraftable", this.isFilteringCraftable);
         NBTTagList nbttaglist = new NBTTagList();
 
-        for (IRecipe irecipe : this.func_194079_d())
+        for (IRecipe irecipe : this.getRecipes())
         {
-            nbttaglist.appendTag(new NBTTagString(((ResourceLocation)CraftingManager.field_193380_a.getNameForObject(irecipe)).toString()));
+            nbttaglist.appendTag(new NBTTagString(((ResourceLocation)CraftingManager.REGISTRY.getNameForObject(irecipe)).toString()));
         }
 
         nbttagcompound.setTag("recipes", nbttaglist);
         NBTTagList nbttaglist1 = new NBTTagList();
 
-        for (IRecipe irecipe1 : this.func_194080_e())
+        for (IRecipe irecipe1 : this.getDisplayedRecipes())
         {
-            nbttaglist1.appendTag(new NBTTagString(((ResourceLocation)CraftingManager.field_193380_a.getNameForObject(irecipe1)).toString()));
+            nbttaglist1.appendTag(new NBTTagString(((ResourceLocation)CraftingManager.REGISTRY.getNameForObject(irecipe1)).toString()));
         }
 
         nbttagcompound.setTag("toBeDisplayed", nbttaglist1);
         return nbttagcompound;
     }
 
-    public void func_192825_a(NBTTagCompound p_192825_1_)
+    public void read(NBTTagCompound tag)
     {
-        this.field_192818_b = p_192825_1_.getBoolean("isGuiOpen");
-        this.field_192819_c = p_192825_1_.getBoolean("isFilteringCraftable");
-        NBTTagList nbttaglist = p_192825_1_.getTagList("recipes", 8);
+        this.isGuiOpen = tag.getBoolean("isGuiOpen");
+        this.isFilteringCraftable = tag.getBoolean("isFilteringCraftable");
+        NBTTagList nbttaglist = tag.getTagList("recipes", 8);
 
         for (int i = 0; i < nbttaglist.tagCount(); ++i)
         {
             ResourceLocation resourcelocation = new ResourceLocation(nbttaglist.getStringTagAt(i));
-            IRecipe irecipe = CraftingManager.func_193373_a(resourcelocation);
+            IRecipe irecipe = CraftingManager.getRecipe(resourcelocation);
 
             if (irecipe == null)
             {
-                field_192828_d.info("Tried to load unrecognized recipe: {} removed now.", (Object)resourcelocation);
+                LOGGER.info("Tried to load unrecognized recipe: {} removed now.", (Object)resourcelocation);
             }
             else
             {
-                this.func_194073_a(irecipe);
+                this.setRecipes(irecipe);
             }
         }
 
-        NBTTagList nbttaglist1 = p_192825_1_.getTagList("toBeDisplayed", 8);
+        NBTTagList nbttaglist1 = tag.getTagList("toBeDisplayed", 8);
 
         for (int j = 0; j < nbttaglist1.tagCount(); ++j)
         {
             ResourceLocation resourcelocation1 = new ResourceLocation(nbttaglist1.getStringTagAt(j));
-            IRecipe irecipe1 = CraftingManager.func_193373_a(resourcelocation1);
+            IRecipe irecipe1 = CraftingManager.getRecipe(resourcelocation1);
 
             if (irecipe1 == null)
             {
-                field_192828_d.info("Tried to load unrecognized recipe: {} removed now.", (Object)resourcelocation1);
+                LOGGER.info("Tried to load unrecognized recipe: {} removed now.", (Object)resourcelocation1);
             }
             else
             {
-                this.func_193825_e(irecipe1);
+                this.addDisplayedRecipe(irecipe1);
             }
         }
     }
 
-    private List<IRecipe> func_194079_d()
+    private List<IRecipe> getRecipes()
     {
         List<IRecipe> list = Lists.<IRecipe>newArrayList();
 
-        for (int i = this.field_194077_a.nextSetBit(0); i >= 0; i = this.field_194077_a.nextSetBit(i + 1))
+        for (int i = this.recipes.nextSetBit(0); i >= 0; i = this.recipes.nextSetBit(i + 1))
         {
-            list.add(CraftingManager.field_193380_a.getObjectById(i));
+            list.add(CraftingManager.REGISTRY.getObjectById(i));
         }
 
         return list;
     }
 
-    private List<IRecipe> func_194080_e()
+    private List<IRecipe> getDisplayedRecipes()
     {
         List<IRecipe> list = Lists.<IRecipe>newArrayList();
 
-        for (int i = this.field_194078_b.nextSetBit(0); i >= 0; i = this.field_194078_b.nextSetBit(i + 1))
+        for (int i = this.unseenRecipes.nextSetBit(0); i >= 0; i = this.unseenRecipes.nextSetBit(i + 1))
         {
-            list.add(CraftingManager.field_193380_a.getObjectById(i));
+            list.add(CraftingManager.REGISTRY.getObjectById(i));
         }
 
         return list;
     }
 
-    public void func_192826_c(EntityPlayerMP p_192826_1_)
+    public void init(EntityPlayerMP player)
     {
-        p_192826_1_.connection.sendPacket(new SPacketRecipeBook(SPacketRecipeBook.State.INIT, this.func_194079_d(), this.func_194080_e(), this.field_192818_b, this.field_192819_c));
+        player.connection.sendPacket(new SPacketRecipeBook(SPacketRecipeBook.State.INIT, this.getRecipes(), this.getDisplayedRecipes(), this.isGuiOpen, this.isFilteringCraftable));
     }
 }

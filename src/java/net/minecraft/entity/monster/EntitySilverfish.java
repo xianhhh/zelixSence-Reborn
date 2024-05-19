@@ -88,7 +88,7 @@ public class EntitySilverfish extends EntityMob
         return SoundEvents.ENTITY_SILVERFISH_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_SILVERFISH_HURT;
     }
@@ -114,7 +114,7 @@ public class EntitySilverfish extends EntityMob
         }
         else
         {
-            if ((source instanceof EntityDamageSource || source == DamageSource.magic) && this.summonSilverfish != null)
+            if ((source instanceof EntityDamageSource || source == DamageSource.MAGIC) && this.summonSilverfish != null)
             {
                 this.summonSilverfish.notifyHurt();
             }
@@ -227,9 +227,9 @@ public class EntitySilverfish extends EntityMob
             }
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
-            return this.doMerge ? false : super.continueExecuting();
+            return this.doMerge ? false : super.shouldContinueExecuting();
         }
 
         public void startExecuting()

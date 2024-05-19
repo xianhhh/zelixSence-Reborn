@@ -65,42 +65,42 @@ public class BlockLadder extends Block
     }
 
     /**
-     * Check whether this Block can be placed on the given side
+     * Check whether this Block can be placed at pos, while aiming at the specified side of an adjacent block
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
-        if (this.func_193392_c(worldIn, pos.west(), side))
+        if (this.canAttachTo(worldIn, pos.west(), side))
         {
             return true;
         }
-        else if (this.func_193392_c(worldIn, pos.east(), side))
+        else if (this.canAttachTo(worldIn, pos.east(), side))
         {
             return true;
         }
-        else if (this.func_193392_c(worldIn, pos.north(), side))
+        else if (this.canAttachTo(worldIn, pos.north(), side))
         {
             return true;
         }
         else
         {
-            return this.func_193392_c(worldIn, pos.south(), side);
+            return this.canAttachTo(worldIn, pos.south(), side);
         }
     }
 
-    private boolean func_193392_c(World p_193392_1_, BlockPos p_193392_2_, EnumFacing p_193392_3_)
+    private boolean canAttachTo(World p_193392_1_, BlockPos p_193392_2_, EnumFacing p_193392_3_)
     {
         IBlockState iblockstate = p_193392_1_.getBlockState(p_193392_2_);
-        boolean flag = func_193382_c(iblockstate.getBlock());
-        return !flag && iblockstate.func_193401_d(p_193392_1_, p_193392_2_, p_193392_3_) == BlockFaceShape.SOLID && !iblockstate.canProvidePower();
+        boolean flag = isExceptBlockForAttachWithPiston(iblockstate.getBlock());
+        return !flag && iblockstate.getBlockFaceShape(p_193392_1_, p_193392_2_, p_193392_3_) == BlockFaceShape.SOLID && !iblockstate.canProvidePower();
     }
 
     /**
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        if (facing.getAxis().isHorizontal() && this.func_193392_c(worldIn, pos.offset(facing.getOpposite()), facing))
+        if (facing.getAxis().isHorizontal() && this.canAttachTo(worldIn, pos.offset(facing.getOpposite()), facing))
         {
             return this.getDefaultState().withProperty(FACING, facing);
         }
@@ -108,7 +108,7 @@ public class BlockLadder extends Block
         {
             for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
             {
-                if (this.func_193392_c(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
+                if (this.canAttachTo(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
                 {
                     return this.getDefaultState().withProperty(FACING, enumfacing);
                 }
@@ -123,17 +123,17 @@ public class BlockLadder extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
-        if (!this.func_193392_c(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
+        if (!this.canAttachTo(worldIn, pos.offset(enumfacing.getOpposite()), enumfacing))
         {
             this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);
         }
 
-        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
     }
 
     public BlockRenderLayer getBlockLayer()
@@ -187,7 +187,7 @@ public class BlockLadder extends Block
         return new BlockStateContainer(this, new IProperty[] {FACING});
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

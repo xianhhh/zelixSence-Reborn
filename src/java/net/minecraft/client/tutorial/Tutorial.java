@@ -15,126 +15,140 @@ import net.minecraft.world.GameType;
 
 public class Tutorial
 {
-    private final Minecraft field_193304_a;
+    private final Minecraft minecraft;
     @Nullable
-    private ITutorialStep field_193305_b;
+    private ITutorialStep tutorialStep;
 
-    public Tutorial(Minecraft p_i47578_1_)
+    public Tutorial(Minecraft minecraft)
     {
-        this.field_193304_a = p_i47578_1_;
+        this.minecraft = minecraft;
     }
 
-    public void func_193293_a(MovementInput p_193293_1_)
+    public void handleMovement(MovementInput p_193293_1_)
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193247_a(p_193293_1_);
+            this.tutorialStep.handleMovement(p_193293_1_);
         }
     }
 
-    public void func_193299_a(MouseHelper p_193299_1_)
+    public void handleMouse(MouseHelper p_193299_1_)
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193249_a(p_193299_1_);
+            this.tutorialStep.handleMouse(p_193299_1_);
         }
     }
 
-    public void func_193297_a(@Nullable WorldClient p_193297_1_, @Nullable RayTraceResult p_193297_2_)
+    public void onMouseHover(@Nullable WorldClient worldIn, @Nullable RayTraceResult result)
     {
-        if (this.field_193305_b != null && p_193297_2_ != null && p_193297_1_ != null)
+        if (this.tutorialStep != null && result != null && worldIn != null)
         {
-            this.field_193305_b.func_193246_a(p_193297_1_, p_193297_2_);
+            this.tutorialStep.onMouseHover(worldIn, result);
         }
     }
 
-    public void func_193294_a(WorldClient p_193294_1_, BlockPos p_193294_2_, IBlockState p_193294_3_, float p_193294_4_)
+    public void onHitBlock(WorldClient worldIn, BlockPos pos, IBlockState state, float diggingStage)
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193250_a(p_193294_1_, p_193294_2_, p_193294_3_, p_193294_4_);
+            this.tutorialStep.onHitBlock(worldIn, pos, state, diggingStage);
         }
     }
 
-    public void func_193296_a()
+    /**
+     * Called when the player opens his inventory
+     */
+    public void openInventory()
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193251_c();
+            this.tutorialStep.openInventory();
         }
     }
 
-    public void func_193301_a(ItemStack p_193301_1_)
+    /**
+     * Called when the player pick up an ItemStack
+     *  
+     * @param stack The ItemStack
+     */
+    public void handleSetSlot(ItemStack stack)
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193252_a(p_193301_1_);
+            this.tutorialStep.handleSetSlot(stack);
         }
     }
 
-    public void func_193300_b()
+    public void stop()
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193248_b();
-            this.field_193305_b = null;
+            this.tutorialStep.onStop();
+            this.tutorialStep = null;
         }
     }
 
-    public void func_193302_c()
+    /**
+     * Reloads the tutorial step from the game settings
+     */
+    public void reload()
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.func_193300_b();
+            this.stop();
         }
 
-        this.field_193305_b = this.field_193304_a.gameSettings.field_193631_S.func_193309_a(this);
+        this.tutorialStep = this.minecraft.gameSettings.tutorialStep.create(this);
     }
 
-    public void func_193303_d()
+    public void update()
     {
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            if (this.field_193304_a.world != null)
+            if (this.minecraft.world != null)
             {
-                this.field_193305_b.func_193245_a();
+                this.tutorialStep.update();
             }
             else
             {
-                this.func_193300_b();
+                this.stop();
             }
         }
-        else if (this.field_193304_a.world != null)
+        else if (this.minecraft.world != null)
         {
-            this.func_193302_c();
+            this.reload();
         }
     }
 
-    public void func_193292_a(TutorialSteps p_193292_1_)
+    /**
+     * Sets a new step to the tutorial
+     */
+    public void setStep(TutorialSteps step)
     {
-        this.field_193304_a.gameSettings.field_193631_S = p_193292_1_;
-        this.field_193304_a.gameSettings.saveOptions();
+        this.minecraft.gameSettings.tutorialStep = step;
+        this.minecraft.gameSettings.saveOptions();
 
-        if (this.field_193305_b != null)
+        if (this.tutorialStep != null)
         {
-            this.field_193305_b.func_193248_b();
-            this.field_193305_b = p_193292_1_.func_193309_a(this);
+            this.tutorialStep.onStop();
+            this.tutorialStep = step.create(this);
         }
     }
 
-    public Minecraft func_193295_e()
+    public Minecraft getMinecraft()
     {
-        return this.field_193304_a;
+        return this.minecraft;
     }
 
-    public GameType func_194072_f()
+    public GameType getGameType()
     {
-        return this.field_193304_a.playerController == null ? GameType.NOT_SET : this.field_193304_a.playerController.getCurrentGameType();
+        return this.minecraft.playerController == null ? GameType.NOT_SET : this.minecraft.playerController.getCurrentGameType();
     }
 
-    public static ITextComponent func_193291_a(String p_193291_0_)
+    public static ITextComponent createKeybindComponent(String keybind)
     {
-        TextComponentKeybind textcomponentkeybind = new TextComponentKeybind("key." + p_193291_0_);
+        TextComponentKeybind textcomponentkeybind = new TextComponentKeybind("key." + keybind);
         textcomponentkeybind.getStyle().setBold(Boolean.valueOf(true));
         return textcomponentkeybind;
     }

@@ -25,54 +25,57 @@ import net.minecraft.util.ResourceLocation;
 
 public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.Instance>
 {
-    private static final ResourceLocation field_192196_a = new ResourceLocation("enter_block");
-    private final Map<PlayerAdvancements, EnterBlockTrigger.Listeners> field_192197_b = Maps.<PlayerAdvancements, EnterBlockTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("enter_block");
+    private final Map<PlayerAdvancements, EnterBlockTrigger.Listeners> listeners = Maps.<PlayerAdvancements, EnterBlockTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192196_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<EnterBlockTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener)
     {
-        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.field_192197_b.get(p_192165_1_);
+        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (enterblocktrigger$listeners == null)
         {
-            enterblocktrigger$listeners = new EnterBlockTrigger.Listeners(p_192165_1_);
-            this.field_192197_b.put(p_192165_1_, enterblocktrigger$listeners);
+            enterblocktrigger$listeners = new EnterBlockTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, enterblocktrigger$listeners);
         }
 
-        enterblocktrigger$listeners.func_192472_a(p_192165_2_);
+        enterblocktrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<EnterBlockTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener)
     {
-        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.field_192197_b.get(p_192164_1_);
+        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (enterblocktrigger$listeners != null)
         {
-            enterblocktrigger$listeners.func_192469_b(p_192164_2_);
+            enterblocktrigger$listeners.remove(listener);
 
-            if (enterblocktrigger$listeners.func_192470_a())
+            if (enterblocktrigger$listeners.isEmpty())
             {
-                this.field_192197_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192197_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public EnterBlockTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public EnterBlockTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
         Block block = null;
 
-        if (p_192166_1_.has("block"))
+        if (json.has("block"))
         {
-            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(p_192166_1_, "block"));
+            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(json, "block"));
 
             if (!Block.REGISTRY.containsKey(resourcelocation))
             {
@@ -84,7 +87,7 @@ public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.In
 
         Map < IProperty<?>, Object > map = null;
 
-        if (p_192166_1_.has("state"))
+        if (json.has("state"))
         {
             if (block == null)
             {
@@ -93,7 +96,7 @@ public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.In
 
             BlockStateContainer blockstatecontainer = block.getBlockState();
 
-            for (Entry<String, JsonElement> entry : JsonUtils.getJsonObject(p_192166_1_, "state").entrySet())
+            for (Entry<String, JsonElement> entry : JsonUtils.getJsonObject(json, "state").entrySet())
             {
                 IProperty<?> iproperty = blockstatecontainer.getProperty(entry.getKey());
 
@@ -122,41 +125,41 @@ public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.In
         return new EnterBlockTrigger.Instance(block, map);
     }
 
-    public void func_192193_a(EntityPlayerMP p_192193_1_, IBlockState p_192193_2_)
+    public void trigger(EntityPlayerMP player, IBlockState state)
     {
-        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.field_192197_b.get(p_192193_1_.func_192039_O());
+        EnterBlockTrigger.Listeners enterblocktrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (enterblocktrigger$listeners != null)
         {
-            enterblocktrigger$listeners.func_192471_a(p_192193_2_);
+            enterblocktrigger$listeners.trigger(state);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final Block field_192261_a;
-        private final Map < IProperty<?>, Object > field_192262_b;
+        private final Block block;
+        private final Map < IProperty<?>, Object > properties;
 
-        public Instance(@Nullable Block p_i47451_1_, @Nullable Map < IProperty<?>, Object > p_i47451_2_)
+        public Instance(@Nullable Block blockIn, @Nullable Map < IProperty<?>, Object > propertiesIn)
         {
-            super(EnterBlockTrigger.field_192196_a);
-            this.field_192261_a = p_i47451_1_;
-            this.field_192262_b = p_i47451_2_;
+            super(EnterBlockTrigger.ID);
+            this.block = blockIn;
+            this.properties = propertiesIn;
         }
 
-        public boolean func_192260_a(IBlockState p_192260_1_)
+        public boolean test(IBlockState state)
         {
-            if (this.field_192261_a != null && p_192260_1_.getBlock() != this.field_192261_a)
+            if (this.block != null && state.getBlock() != this.block)
             {
                 return false;
             }
             else
             {
-                if (this.field_192262_b != null)
+                if (this.properties != null)
                 {
-                    for (Entry < IProperty<?>, Object > entry : this.field_192262_b.entrySet())
+                    for (Entry < IProperty<?>, Object > entry : this.properties.entrySet())
                     {
-                        if (p_192260_1_.getValue(entry.getKey()) != entry.getValue())
+                        if (state.getValue(entry.getKey()) != entry.getValue())
                         {
                             return false;
                         }
@@ -170,36 +173,36 @@ public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.In
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192473_a;
-        private final Set<ICriterionTrigger.Listener<EnterBlockTrigger.Instance>> field_192474_b = Sets.<ICriterionTrigger.Listener<EnterBlockTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<EnterBlockTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<EnterBlockTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47452_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192473_a = p_i47452_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192470_a()
+        public boolean isEmpty()
         {
-            return this.field_192474_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192472_a(ICriterionTrigger.Listener<EnterBlockTrigger.Instance> p_192472_1_)
+        public void add(ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener)
         {
-            this.field_192474_b.add(p_192472_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192469_b(ICriterionTrigger.Listener<EnterBlockTrigger.Instance> p_192469_1_)
+        public void remove(ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener)
         {
-            this.field_192474_b.remove(p_192469_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192471_a(IBlockState p_192471_1_)
+        public void trigger(IBlockState state)
         {
             List<ICriterionTrigger.Listener<EnterBlockTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener : this.field_192474_b)
+            for (ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener : this.listeners)
             {
-                if (((EnterBlockTrigger.Instance)listener.func_192158_a()).func_192260_a(p_192471_1_))
+                if (((EnterBlockTrigger.Instance)listener.getCriterionInstance()).test(state))
                 {
                     if (list == null)
                     {
@@ -214,7 +217,7 @@ public class EnterBlockTrigger implements ICriterionTrigger<EnterBlockTrigger.In
             {
                 for (ICriterionTrigger.Listener<EnterBlockTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192473_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

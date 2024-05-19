@@ -32,43 +32,43 @@ import net.minecraft.world.storage.loot.LootContext;
 
 public class AdvancementRewards
 {
-    public static final AdvancementRewards field_192114_a = new AdvancementRewards(0, new ResourceLocation[0], new ResourceLocation[0], FunctionObject.CacheableFunction.field_193519_a);
-    private final int field_192115_b;
-    private final ResourceLocation[] field_192116_c;
-    private final ResourceLocation[] field_192117_d;
-    private final FunctionObject.CacheableFunction field_193129_e;
+    public static final AdvancementRewards EMPTY = new AdvancementRewards(0, new ResourceLocation[0], new ResourceLocation[0], FunctionObject.CacheableFunction.EMPTY);
+    private final int experience;
+    private final ResourceLocation[] loot;
+    private final ResourceLocation[] recipes;
+    private final FunctionObject.CacheableFunction function;
 
-    public AdvancementRewards(int p_i47587_1_, ResourceLocation[] p_i47587_2_, ResourceLocation[] p_i47587_3_, FunctionObject.CacheableFunction p_i47587_4_)
+    public AdvancementRewards(int experience, ResourceLocation[] loot, ResourceLocation[] recipes, FunctionObject.CacheableFunction function)
     {
-        this.field_192115_b = p_i47587_1_;
-        this.field_192116_c = p_i47587_2_;
-        this.field_192117_d = p_i47587_3_;
-        this.field_193129_e = p_i47587_4_;
+        this.experience = experience;
+        this.loot = loot;
+        this.recipes = recipes;
+        this.function = function;
     }
 
-    public void func_192113_a(final EntityPlayerMP p_192113_1_)
+    public void apply(final EntityPlayerMP player)
     {
-        p_192113_1_.addExperience(this.field_192115_b);
-        LootContext lootcontext = (new LootContext.Builder(p_192113_1_.getServerWorld())).withLootedEntity(p_192113_1_).build();
+        player.addExperience(this.experience);
+        LootContext lootcontext = (new LootContext.Builder(player.getServerWorld())).withLootedEntity(player).build();
         boolean flag = false;
 
-        for (ResourceLocation resourcelocation : this.field_192116_c)
+        for (ResourceLocation resourcelocation : this.loot)
         {
-            for (ItemStack itemstack : p_192113_1_.world.getLootTableManager().getLootTableFromLocation(resourcelocation).generateLootForPools(p_192113_1_.getRNG(), lootcontext))
+            for (ItemStack itemstack : player.world.getLootTableManager().getLootTableFromLocation(resourcelocation).generateLootForPools(player.getRNG(), lootcontext))
             {
-                if (p_192113_1_.func_191521_c(itemstack))
+                if (player.addItemStackToInventory(itemstack))
                 {
-                    p_192113_1_.world.playSound((EntityPlayer)null, p_192113_1_.posX, p_192113_1_.posY, p_192113_1_.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((p_192113_1_.getRNG().nextFloat() - p_192113_1_.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    player.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRNG().nextFloat() - player.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
                     flag = true;
                 }
                 else
                 {
-                    EntityItem entityitem = p_192113_1_.dropItem(itemstack, false);
+                    EntityItem entityitem = player.dropItem(itemstack, false);
 
                     if (entityitem != null)
                     {
                         entityitem.setNoPickupDelay();
-                        entityitem.setOwner(p_192113_1_.getName());
+                        entityitem.setOwner(player.getName());
                     }
                 }
             }
@@ -76,16 +76,16 @@ public class AdvancementRewards
 
         if (flag)
         {
-            p_192113_1_.inventoryContainer.detectAndSendChanges();
+            player.inventoryContainer.detectAndSendChanges();
         }
 
-        if (this.field_192117_d.length > 0)
+        if (this.recipes.length > 0)
         {
-            p_192113_1_.func_193102_a(this.field_192117_d);
+            player.unlockRecipes(this.recipes);
         }
 
-        final MinecraftServer minecraftserver = p_192113_1_.mcServer;
-        FunctionObject functionobject = this.field_193129_e.func_193518_a(minecraftserver.func_193030_aL());
+        final MinecraftServer minecraftserver = player.mcServer;
+        FunctionObject functionobject = this.function.get(minecraftserver.getFunctionManager());
 
         if (functionobject != null)
         {
@@ -93,55 +93,55 @@ public class AdvancementRewards
             {
                 public String getName()
                 {
-                    return p_192113_1_.getName();
+                    return player.getName();
                 }
                 public ITextComponent getDisplayName()
                 {
-                    return p_192113_1_.getDisplayName();
+                    return player.getDisplayName();
                 }
-                public void addChatMessage(ITextComponent component)
+                public void sendMessage(ITextComponent component)
                 {
                 }
-                public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+                public boolean canUseCommand(int permLevel, String commandName)
                 {
                     return permLevel <= 2;
                 }
                 public BlockPos getPosition()
                 {
-                    return p_192113_1_.getPosition();
+                    return player.getPosition();
                 }
                 public Vec3d getPositionVector()
                 {
-                    return p_192113_1_.getPositionVector();
+                    return player.getPositionVector();
                 }
                 public World getEntityWorld()
                 {
-                    return p_192113_1_.world;
+                    return player.world;
                 }
                 public Entity getCommandSenderEntity()
                 {
-                    return p_192113_1_;
+                    return player;
                 }
                 public boolean sendCommandFeedback()
                 {
-                    return minecraftserver.worldServers[0].getGameRules().getBoolean("commandBlockOutput");
+                    return minecraftserver.worlds[0].getGameRules().getBoolean("commandBlockOutput");
                 }
                 public void setCommandStat(CommandResultStats.Type type, int amount)
                 {
-                    p_192113_1_.setCommandStat(type, amount);
+                    player.setCommandStat(type, amount);
                 }
                 public MinecraftServer getServer()
                 {
-                    return p_192113_1_.getServer();
+                    return player.getServer();
                 }
             };
-            minecraftserver.func_193030_aL().func_194019_a(functionobject, icommandsender);
+            minecraftserver.getFunctionManager().execute(functionobject, icommandsender);
         }
     }
 
     public String toString()
     {
-        return "AdvancementRewards{experience=" + this.field_192115_b + ", loot=" + Arrays.toString((Object[])this.field_192116_c) + ", recipes=" + Arrays.toString((Object[])this.field_192117_d) + ", function=" + this.field_193129_e + '}';
+        return "AdvancementRewards{experience=" + this.experience + ", loot=" + Arrays.toString((Object[])this.loot) + ", recipes=" + Arrays.toString((Object[])this.recipes) + ", function=" + this.function + '}';
     }
 
     public static class Deserializer implements JsonDeserializer<AdvancementRewards>
@@ -164,7 +164,7 @@ public class AdvancementRewards
             for (int k = 0; k < aresourcelocation1.length; ++k)
             {
                 aresourcelocation1[k] = new ResourceLocation(JsonUtils.getString(jsonarray1.get(k), "recipes[" + k + "]"));
-                IRecipe irecipe = CraftingManager.func_193373_a(aresourcelocation1[k]);
+                IRecipe irecipe = CraftingManager.getRecipe(aresourcelocation1[k]);
 
                 if (irecipe == null)
                 {
@@ -180,7 +180,7 @@ public class AdvancementRewards
             }
             else
             {
-                functionobject$cacheablefunction = FunctionObject.CacheableFunction.field_193519_a;
+                functionobject$cacheablefunction = FunctionObject.CacheableFunction.EMPTY;
             }
 
             return new AdvancementRewards(i, aresourcelocation, aresourcelocation1, functionobject$cacheablefunction);

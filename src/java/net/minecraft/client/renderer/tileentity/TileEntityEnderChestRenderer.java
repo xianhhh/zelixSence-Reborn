@@ -10,18 +10,18 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
     private static final ResourceLocation ENDER_CHEST_TEXTURE = new ResourceLocation("textures/entity/chest/ender.png");
     private final ModelChest modelChest = new ModelChest();
 
-    public void func_192841_a(TileEntityEnderChest p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityEnderChest te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         int i = 0;
 
-        if (p_192841_1_.hasWorldObj())
+        if (te.hasWorld())
         {
-            i = p_192841_1_.getBlockMetadata();
+            i = te.getBlockMetadata();
         }
 
-        if (p_192841_9_ >= 0)
+        if (destroyStage >= 0)
         {
-            this.bindTexture(DESTROY_STAGES[p_192841_9_]);
+            this.bindTexture(DESTROY_STAGES[destroyStage]);
             GlStateManager.matrixMode(5890);
             GlStateManager.pushMatrix();
             GlStateManager.scale(4.0F, 4.0F, 1.0F);
@@ -35,8 +35,8 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
 
         GlStateManager.pushMatrix();
         GlStateManager.enableRescaleNormal();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, p_192841_10_);
-        GlStateManager.translate((float)p_192841_2_, (float)p_192841_4_ + 1.0F, (float)p_192841_6_ + 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, alpha);
+        GlStateManager.translate((float)x, (float)y + 1.0F, (float)z + 1.0F);
         GlStateManager.scale(1.0F, -1.0F, -1.0F);
         GlStateManager.translate(0.5F, 0.5F, 0.5F);
         int j = 0;
@@ -63,7 +63,7 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
 
         GlStateManager.rotate((float)j, 0.0F, 1.0F, 0.0F);
         GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-        float f = p_192841_1_.prevLidAngle + (p_192841_1_.lidAngle - p_192841_1_.prevLidAngle) * p_192841_8_;
+        float f = te.prevLidAngle + (te.lidAngle - te.prevLidAngle) * partialTicks;
         f = 1.0F - f;
         f = 1.0F - f * f * f;
         this.modelChest.chestLid.rotateAngleX = -(f * ((float)Math.PI / 2F));
@@ -72,7 +72,7 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
         GlStateManager.popMatrix();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        if (p_192841_9_ >= 0)
+        if (destroyStage >= 0)
         {
             GlStateManager.matrixMode(5890);
             GlStateManager.popMatrix();

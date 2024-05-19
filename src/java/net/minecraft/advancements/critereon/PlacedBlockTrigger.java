@@ -28,54 +28,57 @@ import net.minecraft.world.WorldServer;
 
 public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.Instance>
 {
-    private static final ResourceLocation field_193174_a = new ResourceLocation("placed_block");
-    private final Map<PlayerAdvancements, PlacedBlockTrigger.Listeners> field_193175_b = Maps.<PlayerAdvancements, PlacedBlockTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("placed_block");
+    private final Map<PlayerAdvancements, PlacedBlockTrigger.Listeners> listeners = Maps.<PlayerAdvancements, PlacedBlockTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193174_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener)
     {
-        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.field_193175_b.get(p_192165_1_);
+        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (placedblocktrigger$listeners == null)
         {
-            placedblocktrigger$listeners = new PlacedBlockTrigger.Listeners(p_192165_1_);
-            this.field_193175_b.put(p_192165_1_, placedblocktrigger$listeners);
+            placedblocktrigger$listeners = new PlacedBlockTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, placedblocktrigger$listeners);
         }
 
-        placedblocktrigger$listeners.func_193490_a(p_192165_2_);
+        placedblocktrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener)
     {
-        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.field_193175_b.get(p_192164_1_);
+        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (placedblocktrigger$listeners != null)
         {
-            placedblocktrigger$listeners.func_193487_b(p_192164_2_);
+            placedblocktrigger$listeners.remove(listener);
 
-            if (placedblocktrigger$listeners.func_193488_a())
+            if (placedblocktrigger$listeners.isEmpty())
             {
-                this.field_193175_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193175_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public PlacedBlockTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public PlacedBlockTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
         Block block = null;
 
-        if (p_192166_1_.has("block"))
+        if (json.has("block"))
         {
-            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(p_192166_1_, "block"));
+            ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(json, "block"));
 
             if (!Block.REGISTRY.containsKey(resourcelocation))
             {
@@ -87,7 +90,7 @@ public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.
 
         Map < IProperty<?>, Object > map = null;
 
-        if (p_192166_1_.has("state"))
+        if (json.has("state"))
         {
             if (block == null)
             {
@@ -96,7 +99,7 @@ public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.
 
             BlockStateContainer blockstatecontainer = block.getBlockState();
 
-            for (Entry<String, JsonElement> entry : JsonUtils.getJsonObject(p_192166_1_, "state").entrySet())
+            for (Entry<String, JsonElement> entry : JsonUtils.getJsonObject(json, "state").entrySet())
             {
                 IProperty<?> iproperty = blockstatecontainer.getProperty(entry.getKey());
 
@@ -122,64 +125,64 @@ public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.
             }
         }
 
-        LocationPredicate locationpredicate = LocationPredicate.func_193454_a(p_192166_1_.get("location"));
-        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
+        LocationPredicate locationpredicate = LocationPredicate.deserialize(json.get("location"));
+        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
         return new PlacedBlockTrigger.Instance(block, map, locationpredicate, itempredicate);
     }
 
-    public void func_193173_a(EntityPlayerMP p_193173_1_, BlockPos p_193173_2_, ItemStack p_193173_3_)
+    public void trigger(EntityPlayerMP player, BlockPos pos, ItemStack item)
     {
-        IBlockState iblockstate = p_193173_1_.world.getBlockState(p_193173_2_);
-        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.field_193175_b.get(p_193173_1_.func_192039_O());
+        IBlockState iblockstate = player.world.getBlockState(pos);
+        PlacedBlockTrigger.Listeners placedblocktrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (placedblocktrigger$listeners != null)
         {
-            placedblocktrigger$listeners.func_193489_a(iblockstate, p_193173_2_, p_193173_1_.getServerWorld(), p_193173_3_);
+            placedblocktrigger$listeners.trigger(iblockstate, pos, player.getServerWorld(), item);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final Block field_193211_a;
-        private final Map < IProperty<?>, Object > field_193212_b;
-        private final LocationPredicate field_193213_c;
-        private final ItemPredicate field_193214_d;
+        private final Block block;
+        private final Map < IProperty<?>, Object > properties;
+        private final LocationPredicate location;
+        private final ItemPredicate item;
 
-        public Instance(@Nullable Block p_i47566_1_, @Nullable Map < IProperty<?>, Object > p_i47566_2_, LocationPredicate p_i47566_3_, ItemPredicate p_i47566_4_)
+        public Instance(@Nullable Block block, @Nullable Map < IProperty<?>, Object > propertiesIn, LocationPredicate locationIn, ItemPredicate itemIn)
         {
-            super(PlacedBlockTrigger.field_193174_a);
-            this.field_193211_a = p_i47566_1_;
-            this.field_193212_b = p_i47566_2_;
-            this.field_193213_c = p_i47566_3_;
-            this.field_193214_d = p_i47566_4_;
+            super(PlacedBlockTrigger.ID);
+            this.block = block;
+            this.properties = propertiesIn;
+            this.location = locationIn;
+            this.item = itemIn;
         }
 
-        public boolean func_193210_a(IBlockState p_193210_1_, BlockPos p_193210_2_, WorldServer p_193210_3_, ItemStack p_193210_4_)
+        public boolean test(IBlockState state, BlockPos pos, WorldServer world, ItemStack item)
         {
-            if (this.field_193211_a != null && p_193210_1_.getBlock() != this.field_193211_a)
+            if (this.block != null && state.getBlock() != this.block)
             {
                 return false;
             }
             else
             {
-                if (this.field_193212_b != null)
+                if (this.properties != null)
                 {
-                    for (Entry < IProperty<?>, Object > entry : this.field_193212_b.entrySet())
+                    for (Entry < IProperty<?>, Object > entry : this.properties.entrySet())
                     {
-                        if (p_193210_1_.getValue(entry.getKey()) != entry.getValue())
+                        if (state.getValue(entry.getKey()) != entry.getValue())
                         {
                             return false;
                         }
                     }
                 }
 
-                if (!this.field_193213_c.func_193453_a(p_193210_3_, (float)p_193210_2_.getX(), (float)p_193210_2_.getY(), (float)p_193210_2_.getZ()))
+                if (!this.location.test(world, (float)pos.getX(), (float)pos.getY(), (float)pos.getZ()))
                 {
                     return false;
                 }
                 else
                 {
-                    return this.field_193214_d.func_192493_a(p_193210_4_);
+                    return this.item.test(item);
                 }
             }
         }
@@ -187,36 +190,36 @@ public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193491_a;
-        private final Set<ICriterionTrigger.Listener<PlacedBlockTrigger.Instance>> field_193492_b = Sets.<ICriterionTrigger.Listener<PlacedBlockTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<PlacedBlockTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<PlacedBlockTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47567_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193491_a = p_i47567_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193488_a()
+        public boolean isEmpty()
         {
-            return this.field_193492_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193490_a(ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> p_193490_1_)
+        public void add(ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener)
         {
-            this.field_193492_b.add(p_193490_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193487_b(ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> p_193487_1_)
+        public void remove(ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener)
         {
-            this.field_193492_b.remove(p_193487_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193489_a(IBlockState p_193489_1_, BlockPos p_193489_2_, WorldServer p_193489_3_, ItemStack p_193489_4_)
+        public void trigger(IBlockState state, BlockPos pos, WorldServer world, ItemStack item)
         {
             List<ICriterionTrigger.Listener<PlacedBlockTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener : this.field_193492_b)
+            for (ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener : this.listeners)
             {
-                if (((PlacedBlockTrigger.Instance)listener.func_192158_a()).func_193210_a(p_193489_1_, p_193489_2_, p_193489_3_, p_193489_4_))
+                if (((PlacedBlockTrigger.Instance)listener.getCriterionInstance()).test(state, pos, world, item))
                 {
                     if (list == null)
                     {
@@ -231,7 +234,7 @@ public class PlacedBlockTrigger implements ICriterionTrigger<PlacedBlockTrigger.
             {
                 for (ICriterionTrigger.Listener<PlacedBlockTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193491_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

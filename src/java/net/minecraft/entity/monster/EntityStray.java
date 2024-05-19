@@ -17,14 +17,14 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityStray extends AbstractSkeleton
 {
-    public EntityStray(World p_i47281_1_)
+    public EntityStray(World worldIn)
     {
-        super(p_i47281_1_);
+        super(worldIn);
     }
 
-    public static void func_190728_b(DataFixer p_190728_0_)
+    public static void registerFixesStray(DataFixer fixer)
     {
-        EntityLiving.registerFixesMob(p_190728_0_, EntityStray.class);
+        EntityLiving.registerFixesMob(fixer, EntityStray.class);
     }
 
     /**
@@ -46,7 +46,7 @@ public class EntityStray extends AbstractSkeleton
         return SoundEvents.ENTITY_STRAY_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_STRAY_HURT;
     }
@@ -56,14 +56,14 @@ public class EntityStray extends AbstractSkeleton
         return SoundEvents.ENTITY_STRAY_DEATH;
     }
 
-    SoundEvent func_190727_o()
+    SoundEvent getStepSound()
     {
         return SoundEvents.ENTITY_STRAY_STEP;
     }
 
-    protected EntityArrow func_190726_a(float p_190726_1_)
+    protected EntityArrow getArrow(float p_190726_1_)
     {
-        EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
+        EntityArrow entityarrow = super.getArrow(p_190726_1_);
 
         if (entityarrow instanceof EntityTippedArrow)
         {

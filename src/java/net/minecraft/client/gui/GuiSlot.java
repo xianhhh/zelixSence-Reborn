@@ -83,9 +83,9 @@ public abstract class GuiSlot
         this.right = widthIn;
     }
 
-    public void func_193651_b(boolean p_193651_1_)
+    public void setShowSelectionBox(boolean showSelectionBoxIn)
     {
-        this.showSelectionBox = p_193651_1_;
+        this.showSelectionBox = showSelectionBoxIn;
     }
 
     /**
@@ -125,11 +125,11 @@ public abstract class GuiSlot
 
     protected abstract void drawBackground();
 
-    protected void func_192639_a(int p_192639_1_, int p_192639_2_, int p_192639_3_, float p_192639_4_)
+    protected void updateItemPos(int entryID, int insideLeft, int yPos, float partialTicks)
     {
     }
 
-    protected abstract void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_);
+    protected abstract void drawSlot(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_);
 
     /**
      * Handles drawing a list's header row.
@@ -233,15 +233,7 @@ public abstract class GuiSlot
             GlStateManager.disableFog();
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
-            this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            float f = 32.0F;
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-            bufferbuilder.pos((double)this.left, (double)this.bottom, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
-            bufferbuilder.pos((double)this.right, (double)this.bottom, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
-            bufferbuilder.pos((double)this.right, (double)this.top, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
-            bufferbuilder.pos((double)this.left, (double)this.top, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
-            tessellator.draw();
+            this.drawContainerBackground(tessellator);
             int k = this.left + this.width / 2 - this.getListWidth() / 2 + 2;
             int l = this.top + 4 - (int)this.amountScrolled;
 
@@ -250,7 +242,7 @@ public abstract class GuiSlot
                 this.drawListHeader(k, l, tessellator);
             }
 
-            this.func_192638_a(k, l, mouseXIn, mouseYIn, partialTicks);
+            this.drawSelectionBox(k, l, mouseXIn, mouseYIn, partialTicks);
             GlStateManager.disableDepth();
             this.overlayBackground(0, this.top, 255, 255);
             this.overlayBackground(this.bottom, this.height, 255, 255);
@@ -337,7 +329,15 @@ public abstract class GuiSlot
 
             if (Mouse.isButtonDown(0) && this.getEnabled())
             {
-                if (this.initialClickY == -1)
+                if (this.initialClickY != -1)
+                {
+                    if (this.initialClickY >= 0)
+                    {
+                        this.amountScrolled -= (float)(this.mouseY - this.initialClickY) * this.scrollMultiplier;
+                        this.initialClickY = this.mouseY;
+                    }
+                }
+                else
                 {
                     boolean flag1 = true;
 
@@ -397,11 +397,6 @@ public abstract class GuiSlot
                         this.initialClickY = -2;
                     }
                 }
-                else if (this.initialClickY >= 0)
-                {
-                    this.amountScrolled -= (float)(this.mouseY - this.initialClickY) * this.scrollMultiplier;
-                    this.initialClickY = this.mouseY;
-                }
             }
             else
             {
@@ -444,7 +439,10 @@ public abstract class GuiSlot
         return 220;
     }
 
-    protected void func_192638_a(int p_192638_1_, int p_192638_2_, int p_192638_3_, int p_192638_4_, float p_192638_5_)
+    /**
+     * Draws the selection box around the selected slot element.
+     */
+    protected void drawSelectionBox(int insideLeft, int insideTop, int mouseXIn, int mouseYIn, float partialTicks)
     {
         int i = this.getSize();
         Tessellator tessellator = Tessellator.getInstance();
@@ -452,12 +450,12 @@ public abstract class GuiSlot
 
         for (int j = 0; j < i; ++j)
         {
-            int k = p_192638_2_ + j * this.slotHeight + this.headerPadding;
+            int k = insideTop + j * this.slotHeight + this.headerPadding;
             int l = this.slotHeight - 4;
 
             if (k > this.bottom || k + l < this.top)
             {
-                this.func_192639_a(j, p_192638_1_, k, p_192638_5_);
+                this.updateItemPos(j, insideLeft, k, partialTicks);
             }
 
             if (this.showSelectionBox && this.isSelected(j))
@@ -479,7 +477,10 @@ public abstract class GuiSlot
                 GlStateManager.enableTexture2D();
             }
 
-            this.func_192637_a(j, p_192638_1_, k, l, p_192638_3_, p_192638_4_, p_192638_5_);
+            if (k >= this.top - this.slotHeight && k <= this.bottom)
+            {
+                this.drawSlot(j, insideLeft, k, l, mouseXIn, mouseYIn, partialTicks);
+            }
         }
     }
 
@@ -518,5 +519,19 @@ public abstract class GuiSlot
     public int getSlotHeight()
     {
         return this.slotHeight;
+    }
+
+    protected void drawContainerBackground(Tessellator p_drawContainerBackground_1_)
+    {
+        BufferBuilder bufferbuilder = p_drawContainerBackground_1_.getBuffer();
+        this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float f = 32.0F;
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos((double)this.left, (double)this.bottom, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.pos((double)this.right, (double)this.bottom, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.bottom + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.pos((double)this.right, (double)this.top, 0.0D).tex((double)((float)this.right / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.pos((double)this.left, (double)this.top, 0.0D).tex((double)((float)this.left / 32.0F), (double)((float)(this.top + (int)this.amountScrolled) / 32.0F)).color(32, 32, 32, 255).endVertex();
+        p_drawContainerBackground_1_.draw();
     }
 }

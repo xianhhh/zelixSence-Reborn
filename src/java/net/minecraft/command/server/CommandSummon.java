@@ -27,7 +27,7 @@ public class CommandSummon extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "summon";
     }
@@ -43,7 +43,7 @@ public class CommandSummon extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.summon.usage";
     }
@@ -62,9 +62,9 @@ public class CommandSummon extends CommandBase
             String s = args[0];
             BlockPos blockpos = sender.getPosition();
             Vec3d vec3d = sender.getPositionVector();
-            double d0 = vec3d.xCoord;
-            double d1 = vec3d.yCoord;
-            double d2 = vec3d.zCoord;
+            double d0 = vec3d.x;
+            double d1 = vec3d.y;
+            double d2 = vec3d.z;
 
             if (args.length >= 4)
             {
@@ -80,7 +80,7 @@ public class CommandSummon extends CommandBase
             {
                 throw new CommandException("commands.summon.outOfWorld", new Object[0]);
             }
-            else if (EntityList.field_191307_a.equals(new ResourceLocation(s)))
+            else if (EntityList.LIGHTNING_BOLT.equals(new ResourceLocation(s)))
             {
                 world.addWeatherEffect(new EntityLightningBolt(world, d0, d1, d2, false));
                 notifyCommandListener(sender, this, "commands.summon.success", new Object[0]);
@@ -127,7 +127,7 @@ public class CommandSummon extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
@@ -135,7 +135,7 @@ public class CommandSummon extends CommandBase
         }
         else
         {
-            return args.length > 1 && args.length <= 4 ? getTabCompletionCoordinate(args, 1, pos) : Collections.emptyList();
+            return args.length > 1 && args.length <= 4 ? getTabCompletionCoordinate(args, 1, targetPos) : Collections.emptyList();
         }
     }
 }

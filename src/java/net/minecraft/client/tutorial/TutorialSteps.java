@@ -11,30 +11,30 @@ public enum TutorialSteps
     CRAFT_PLANKS("craft_planks", CraftPlanksStep::new),
     NONE("none", CompletedTutorialStep::new);
 
-    private final String field_193316_g;
-    private final Function < Tutorial, ? extends ITutorialStep > field_193317_h;
+    private final String name;
+    private final Function < Tutorial, ? extends ITutorialStep > tutorial;
 
-    private <T extends ITutorialStep> TutorialSteps(String p_i47577_3_, Function<Tutorial, T> p_i47577_4_)
+    private <T extends ITutorialStep> TutorialSteps(String nameIn, Function<Tutorial, T> constructor)
     {
-        this.field_193316_g = p_i47577_3_;
-        this.field_193317_h = p_i47577_4_;
+        this.name = nameIn;
+        this.tutorial = constructor;
     }
 
-    public ITutorialStep func_193309_a(Tutorial p_193309_1_)
+    public ITutorialStep create(Tutorial tutorial)
     {
-        return this.field_193317_h.apply(p_193309_1_);
+        return this.tutorial.apply(tutorial);
     }
 
-    public String func_193308_a()
+    public String getName()
     {
-        return this.field_193316_g;
+        return this.name;
     }
 
-    public static TutorialSteps func_193307_a(String p_193307_0_)
+    public static TutorialSteps getTutorial(String tutorialName)
     {
         for (TutorialSteps tutorialsteps : values())
         {
-            if (tutorialsteps.field_193316_g.equals(p_193307_0_))
+            if (tutorialsteps.name.equals(tutorialName))
             {
                 return tutorialsteps;
             }

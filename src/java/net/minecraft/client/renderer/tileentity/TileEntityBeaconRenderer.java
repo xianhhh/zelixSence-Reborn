@@ -13,25 +13,25 @@ public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer<TileEnti
 {
     public static final ResourceLocation TEXTURE_BEACON_BEAM = new ResourceLocation("textures/entity/beacon_beam.png");
 
-    public void func_192841_a(TileEntityBeacon p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityBeacon te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        this.renderBeacon(p_192841_2_, p_192841_4_, p_192841_6_, (double)p_192841_8_, (double)p_192841_1_.shouldBeamRender(), p_192841_1_.getBeamSegments(), (double)p_192841_1_.getWorld().getTotalWorldTime());
+        this.renderBeacon(x, y, z, (double)partialTicks, (double)te.shouldBeamRender(), te.getBeamSegments(), (double)te.getWorld().getTotalWorldTime());
     }
 
-    public void renderBeacon(double p_188206_1_, double p_188206_3_, double p_188206_5_, double p_188206_7_, double p_188206_9_, List<TileEntityBeacon.BeamSegment> p_188206_11_, double p_188206_12_)
+    public void renderBeacon(double x, double y, double z, double partialTicks, double textureScale, List<TileEntityBeacon.BeamSegment> beamSegments, double totalWorldTime)
     {
         GlStateManager.alphaFunc(516, 0.1F);
         this.bindTexture(TEXTURE_BEACON_BEAM);
 
-        if (p_188206_9_ > 0.0D)
+        if (textureScale > 0.0D)
         {
             GlStateManager.disableFog();
             int i = 0;
 
-            for (int j = 0; j < p_188206_11_.size(); ++j)
+            for (int j = 0; j < beamSegments.size(); ++j)
             {
-                TileEntityBeacon.BeamSegment tileentitybeacon$beamsegment = p_188206_11_.get(j);
-                renderBeamSegment(p_188206_1_, p_188206_3_, p_188206_5_, p_188206_7_, p_188206_9_, p_188206_12_, i, tileentitybeacon$beamsegment.getHeight(), tileentitybeacon$beamsegment.getColors());
+                TileEntityBeacon.BeamSegment tileentitybeacon$beamsegment = beamSegments.get(j);
+                renderBeamSegment(x, y, z, partialTicks, textureScale, totalWorldTime, i, tileentitybeacon$beamsegment.getHeight(), tileentitybeacon$beamsegment.getColors());
                 i += tileentitybeacon$beamsegment.getHeight();
             }
 

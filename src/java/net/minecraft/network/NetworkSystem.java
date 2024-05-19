@@ -198,7 +198,7 @@ public class NetworkSystem
                             {
                                 CrashReport crashreport = CrashReport.makeCrashReport(exception, "Ticking memory connection");
                                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Ticking connection");
-                                crashreportcategory.setDetail("Connection", new ICrashReportDetail<String>()
+                                crashreportcategory.addDetail("Connection", new ICrashReportDetail<String>()
                                 {
                                     public String call() throws Exception
                                     {

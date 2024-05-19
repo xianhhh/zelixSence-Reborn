@@ -24,12 +24,12 @@ public class ItemCoal extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.func_194125_a(itemIn))
+        if (this.isInCreativeTab(tab))
         {
-            tab.add(new ItemStack(this, 1, 0));
-            tab.add(new ItemStack(this, 1, 1));
+            items.add(new ItemStack(this, 1, 0));
+            items.add(new ItemStack(this, 1, 1));
         }
     }
 }

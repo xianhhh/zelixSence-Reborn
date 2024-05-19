@@ -33,22 +33,22 @@ public class BiomeTaiga extends Biome
         this.type = typeIn;
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityWolf.class, 8, 4, 4));
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityRabbit.class, 4, 2, 3));
-        this.theBiomeDecorator.treesPerChunk = 10;
+        this.decorator.treesPerChunk = 10;
 
         if (typeIn != BiomeTaiga.Type.MEGA && typeIn != BiomeTaiga.Type.MEGA_SPRUCE)
         {
-            this.theBiomeDecorator.grassPerChunk = 1;
-            this.theBiomeDecorator.mushroomsPerChunk = 1;
+            this.decorator.grassPerChunk = 1;
+            this.decorator.mushroomsPerChunk = 1;
         }
         else
         {
-            this.theBiomeDecorator.grassPerChunk = 7;
-            this.theBiomeDecorator.deadBushPerChunk = 1;
-            this.theBiomeDecorator.mushroomsPerChunk = 3;
+            this.decorator.grassPerChunk = 7;
+            this.decorator.deadBushPerChunk = 1;
+            this.decorator.mushroomsPerChunk = 3;
         }
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         if ((this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) && rand.nextInt(3) == 0)
         {

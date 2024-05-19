@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class RenderIllusionIllager extends RenderLiving<EntityMob>
 {
-    private static final ResourceLocation field_193121_a = new ResourceLocation("textures/entity/illager/illusionist.png");
+    private static final ResourceLocation ILLUSIONIST = new ResourceLocation("textures/entity/illager/illusionist.png");
 
     public RenderIllusionIllager(RenderManager p_i47477_1_)
     {
@@ -22,17 +22,17 @@ public class RenderIllusionIllager extends RenderLiving<EntityMob>
         {
             public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
             {
-                if (((EntityIllusionIllager)entitylivingbaseIn).func_193082_dl() || ((EntityIllusionIllager)entitylivingbaseIn).func_193096_dj())
+                if (((EntityIllusionIllager)entitylivingbaseIn).isSpellcasting() || ((EntityIllusionIllager)entitylivingbaseIn).isAggressive())
                 {
                     super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
                 }
             }
-            protected void func_191361_a(EnumHandSide p_191361_1_)
+            protected void translateToHand(EnumHandSide p_191361_1_)
             {
-                ((ModelIllager)this.livingEntityRenderer.getMainModel()).func_191216_a(p_191361_1_).postRender(0.0625F);
+                ((ModelIllager)this.livingEntityRenderer.getMainModel()).getArm(p_191361_1_).postRender(0.0625F);
             }
         });
-        ((ModelIllager)this.getMainModel()).field_193775_b.showModel = true;
+        ((ModelIllager)this.getMainModel()).hat.showModel = true;
     }
 
     /**
@@ -40,7 +40,7 @@ public class RenderIllusionIllager extends RenderLiving<EntityMob>
      */
     protected ResourceLocation getEntityTexture(EntityMob entity)
     {
-        return field_193121_a;
+        return ILLUSIONIST;
     }
 
     /**
@@ -59,12 +59,12 @@ public class RenderIllusionIllager extends RenderLiving<EntityMob>
     {
         if (entity.isInvisible())
         {
-            Vec3d[] avec3d = ((EntityIllusionIllager)entity).func_193098_a(partialTicks);
+            Vec3d[] avec3d = ((EntityIllusionIllager)entity).getRenderLocations(partialTicks);
             float f = this.handleRotationFloat(entity, partialTicks);
 
             for (int i = 0; i < avec3d.length; ++i)
             {
-                super.doRender(entity, x + avec3d[i].xCoord + (double)MathHelper.cos((float)i + f * 0.5F) * 0.025D, y + avec3d[i].yCoord + (double)MathHelper.cos((float)i + f * 0.75F) * 0.0125D, z + avec3d[i].zCoord + (double)MathHelper.cos((float)i + f * 0.7F) * 0.025D, entityYaw, partialTicks);
+                super.doRender(entity, x + avec3d[i].x + (double)MathHelper.cos((float)i + f * 0.5F) * 0.025D, y + avec3d[i].y + (double)MathHelper.cos((float)i + f * 0.75F) * 0.0125D, z + avec3d[i].z + (double)MathHelper.cos((float)i + f * 0.7F) * 0.025D, entityYaw, partialTicks);
             }
         }
         else
@@ -78,7 +78,7 @@ public class RenderIllusionIllager extends RenderLiving<EntityMob>
         super.renderName(entity, x, y, z);
     }
 
-    protected boolean func_193115_c(EntityMob p_193115_1_)
+    protected boolean isVisible(EntityMob p_193115_1_)
     {
         return true;
     }

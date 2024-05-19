@@ -18,6 +18,6 @@ public class BiomeHell extends Biome
         this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityPigZombie.class, 100, 4, 4));
         this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityMagmaCube.class, 2, 4, 4));
         this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityEnderman.class, 1, 4, 4));
-        this.theBiomeDecorator = new BiomeHellDecorator();
+        this.decorator = new BiomeHellDecorator();
     }
 }

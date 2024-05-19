@@ -63,7 +63,7 @@ public class EntityCow extends EntityAnimal
         return SoundEvents.ENTITY_COW_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_COW_HURT;
     }
@@ -99,9 +99,9 @@ public class EntityCow extends EntityAnimal
         if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild())
         {
             player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
-            itemstack.func_190918_g(1);
+            itemstack.shrink(1);
 
-            if (itemstack.func_190926_b())
+            if (itemstack.isEmpty())
             {
                 player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
             }

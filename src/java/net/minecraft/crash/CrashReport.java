@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import net.minecraft.src.CrashReporter;
+import net.minecraft.src.Reflector;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.gen.layer.IntCache;
 import org.apache.commons.io.IOUtils;
@@ -31,7 +33,7 @@ public class CrashReport
     private final Throwable cause;
 
     /** Category of crash */
-    private final CrashReportCategory theReportCategory = new CrashReportCategory(this, "System Details");
+    private final CrashReportCategory systemDetailsCategory = new CrashReportCategory(this, "System Details");
     private final List<CrashReportCategory> crashReportSections = Lists.<CrashReportCategory>newArrayList();
 
     /** File of crash report. */
@@ -40,6 +42,7 @@ public class CrashReport
     /** Is true when the current category is the first in the crash report */
     private boolean firstCategoryInCrashReport = true;
     private StackTraceElement[] stacktrace = new StackTraceElement[0];
+    private boolean reported = false;
 
     public CrashReport(String descriptionIn, Throwable causeThrowable)
     {
@@ -54,35 +57,35 @@ public class CrashReport
      */
     private void populateEnvironment()
     {
-        this.theReportCategory.setDetail("Minecraft Version", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("Minecraft Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return "1.12";
             }
         });
-        this.theReportCategory.setDetail("Operating System", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("Operating System", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version");
             }
         });
-        this.theReportCategory.setDetail("Java Version", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("Java Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("java.version") + ", " + System.getProperty("java.vendor");
             }
         });
-        this.theReportCategory.setDetail("Java VM Version", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("Java VM Version", new ICrashReportDetail<String>()
         {
             public String call()
             {
                 return System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor");
             }
         });
-        this.theReportCategory.setDetail("Memory", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("Memory", new ICrashReportDetail<String>()
         {
             public String call()
             {
@@ -96,7 +99,7 @@ public class CrashReport
                 return k + " bytes (" + j1 + " MB) / " + j + " bytes (" + i1 + " MB) up to " + i + " bytes (" + l + " MB)";
             }
         });
-        this.theReportCategory.setDetail("JVM Flags", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("JVM Flags", new ICrashReportDetail<String>()
         {
             public String call()
             {
@@ -121,13 +124,19 @@ public class CrashReport
                 return String.format("%d total; %s", i, stringbuilder.toString());
             }
         });
-        this.theReportCategory.setDetail("IntCache", new ICrashReportDetail<String>()
+        this.systemDetailsCategory.addDetail("IntCache", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
                 return IntCache.getCacheSizes();
             }
         });
+
+        if (Reflector.FMLCommonHandler_enhanceCrashReport.exists())
+        {
+            Object object = Reflector.call(Reflector.FMLCommonHandler_instance);
+            Reflector.callString(object, Reflector.FMLCommonHandler_enhanceCrashReport, this, this.systemDetailsCategory);
+        }
     }
 
     /**
@@ -177,7 +186,7 @@ public class CrashReport
             builder.append("\n\n");
         }
 
-        this.theReportCategory.appendToStringBuilder(builder);
+        this.systemDetailsCategory.appendToStringBuilder(builder);
     }
 
     /**
@@ -230,8 +239,16 @@ public class CrashReport
      */
     public String getCompleteReport()
     {
+        if (!this.reported)
+        {
+            this.reported = true;
+            CrashReporter.onCrashReport(this, this.systemDetailsCategory);
+        }
+
         StringBuilder stringbuilder = new StringBuilder();
         stringbuilder.append("---- Minecraft Crash Report ----\n");
+        Reflector.call(Reflector.BlamingTransformer_onCrash, stringbuilder);
+        Reflector.call(Reflector.CoreModManager_onCrash, stringbuilder);
         stringbuilder.append("// ");
         stringbuilder.append(getWittyComment());
         stringbuilder.append("\n\n");
@@ -279,33 +296,34 @@ public class CrashReport
             }
 
             Writer writer = null;
-            boolean flag1;
+            boolean flag;
 
             try
             {
                 writer = new OutputStreamWriter(new FileOutputStream(toFile), StandardCharsets.UTF_8);
                 writer.write(this.getCompleteReport());
                 this.crashReportFile = toFile;
-                boolean lvt_3_1_ = true;
-                return lvt_3_1_;
+                boolean flag1 = true;
+                boolean flag2 = flag1;
+                return flag2;
             }
-            catch (Throwable throwable)
+            catch (Throwable throwable1)
             {
-                LOGGER.error("Could not save crash report to {}", toFile, throwable);
-                flag1 = false;
+                LOGGER.error("Could not save crash report to {}", toFile, throwable1);
+                flag = false;
             }
             finally
             {
                 IOUtils.closeQuietly(writer);
             }
 
-            return flag1;
+            return flag;
         }
     }
 
     public CrashReportCategory getCategory()
     {
-        return this.theReportCategory;
+        return this.systemDetailsCategory;
     }
 
     /**

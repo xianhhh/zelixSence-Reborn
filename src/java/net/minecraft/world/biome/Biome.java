@@ -109,7 +109,7 @@ public abstract class Biome
     public IBlockState fillerBlock = Blocks.DIRT.getDefaultState();
 
     /** The biome decorator. */
-    public BiomeDecorator theBiomeDecorator;
+    public BiomeDecorator decorator;
     protected List<Biome.SpawnListEntry> spawnableMonsterList = Lists.<Biome.SpawnListEntry>newArrayList();
     protected List<Biome.SpawnListEntry> spawnableCreatureList = Lists.<Biome.SpawnListEntry>newArrayList();
     protected List<Biome.SpawnListEntry> spawnableWaterCreatureList = Lists.<Biome.SpawnListEntry>newArrayList();
@@ -143,7 +143,7 @@ public abstract class Biome
         this.enableSnow = properties.enableSnow;
         this.enableRain = properties.enableRain;
         this.baseBiomeRegName = properties.baseBiomeRegName;
-        this.theBiomeDecorator = this.createBiomeDecorator();
+        this.decorator = this.createBiomeDecorator();
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntitySheep.class, 12, 4, 4));
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityPig.class, 10, 4, 4));
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityChicken.class, 10, 4, 4));
@@ -173,7 +173,7 @@ public abstract class Biome
         return this.baseBiomeRegName != null;
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         return (WorldGenAbstractTree)(rand.nextInt(10) == 0 ? BIG_TREE_FEATURE : TREE_FEATURE);
     }
@@ -272,7 +272,7 @@ public abstract class Biome
 
     public void decorate(World worldIn, Random rand, BlockPos pos)
     {
-        this.theBiomeDecorator.decorate(worldIn, rand, this, pos);
+        this.decorator.decorate(worldIn, rand, this, pos);
     }
 
     public int getGrassColorAtPos(BlockPos pos)

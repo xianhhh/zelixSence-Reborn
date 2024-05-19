@@ -68,9 +68,9 @@ public class EntitySheep extends EntityAnimal
     private int sheepTimer;
     private EntityAIEatGrass entityAIEatGrass;
 
-    private static float[] func_192020_c(EnumDyeColor p_192020_0_)
+    private static float[] createSheepColor(EnumDyeColor p_192020_0_)
     {
-        float[] afloat = p_192020_0_.func_193349_f();
+        float[] afloat = p_192020_0_.getColorComponentValues();
         float f = 0.75F;
         return new float[] {afloat[0] * 0.75F, afloat[1] * 0.75F, afloat[2] * 0.75F};
     }
@@ -198,6 +198,9 @@ public class EntitySheep extends EntityAnimal
         }
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 10)
@@ -296,7 +299,7 @@ public class EntitySheep extends EntityAnimal
         return SoundEvents.ENTITY_SHEEP_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_SHEEP_HURT;
     }
@@ -426,7 +429,7 @@ public class EntitySheep extends EntityAnimal
         int j = ((EntitySheep)mother).getFleeceColor().getDyeDamage();
         this.inventoryCrafting.getStackInSlot(0).setItemDamage(i);
         this.inventoryCrafting.getStackInSlot(1).setItemDamage(j);
-        ItemStack itemstack = CraftingManager.findMatchingRecipe(this.inventoryCrafting, ((EntitySheep)father).world);
+        ItemStack itemstack = CraftingManager.findMatchingResult(this.inventoryCrafting, ((EntitySheep)father).world);
         int k;
 
         if (itemstack.getItem() == Items.DYE)
@@ -450,7 +453,7 @@ public class EntitySheep extends EntityAnimal
     {
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
-            DYE_TO_RGB.put(enumdyecolor, func_192020_c(enumdyecolor));
+            DYE_TO_RGB.put(enumdyecolor, createSheepColor(enumdyecolor));
         }
 
         DYE_TO_RGB.put(EnumDyeColor.WHITE, new float[] {0.9019608F, 0.9019608F, 0.9019608F});

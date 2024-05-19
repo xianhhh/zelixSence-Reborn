@@ -51,7 +51,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
         }
 
         BlockPos blockpos1 = new BlockPos(this.entity);
-        PathNodeType pathnodetype1 = this.func_192558_a(this.entity, blockpos1.getX(), i, blockpos1.getZ());
+        PathNodeType pathnodetype1 = this.getPathNodeType(this.entity, blockpos1.getX(), i, blockpos1.getZ());
 
         if (this.entity.getPathPriority(pathnodetype1) < 0.0F)
         {
@@ -63,7 +63,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
             for (BlockPos blockpos : set)
             {
-                PathNodeType pathnodetype = this.func_192559_a(this.entity, blockpos);
+                PathNodeType pathnodetype = this.getPathNodeType(this.entity, blockpos);
 
                 if (this.entity.getPathPriority(pathnodetype) >= 0.0F)
                 {
@@ -86,12 +86,12 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance)
     {
         int i = 0;
-        PathPoint pathpoint = this.openPoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord + 1);
-        PathPoint pathpoint1 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord);
-        PathPoint pathpoint2 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord);
-        PathPoint pathpoint3 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord - 1);
-        PathPoint pathpoint4 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord);
-        PathPoint pathpoint5 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord);
+        PathPoint pathpoint = this.openPoint(currentPoint.x, currentPoint.y, currentPoint.z + 1);
+        PathPoint pathpoint1 = this.openPoint(currentPoint.x - 1, currentPoint.y, currentPoint.z);
+        PathPoint pathpoint2 = this.openPoint(currentPoint.x + 1, currentPoint.y, currentPoint.z);
+        PathPoint pathpoint3 = this.openPoint(currentPoint.x, currentPoint.y, currentPoint.z - 1);
+        PathPoint pathpoint4 = this.openPoint(currentPoint.x, currentPoint.y + 1, currentPoint.z);
+        PathPoint pathpoint5 = this.openPoint(currentPoint.x, currentPoint.y - 1, currentPoint.z);
 
         if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
         {
@@ -132,7 +132,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag && flag3)
         {
-            PathPoint pathpoint6 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord - 1);
+            PathPoint pathpoint6 = this.openPoint(currentPoint.x - 1, currentPoint.y, currentPoint.z - 1);
 
             if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceTo(targetPoint) < maxDistance)
             {
@@ -142,7 +142,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag && flag2)
         {
-            PathPoint pathpoint7 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord - 1);
+            PathPoint pathpoint7 = this.openPoint(currentPoint.x + 1, currentPoint.y, currentPoint.z - 1);
 
             if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceTo(targetPoint) < maxDistance)
             {
@@ -152,7 +152,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag1 && flag3)
         {
-            PathPoint pathpoint8 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord + 1);
+            PathPoint pathpoint8 = this.openPoint(currentPoint.x - 1, currentPoint.y, currentPoint.z + 1);
 
             if (pathpoint8 != null && !pathpoint8.visited && pathpoint8.distanceTo(targetPoint) < maxDistance)
             {
@@ -162,7 +162,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag1 && flag2)
         {
-            PathPoint pathpoint9 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord + 1);
+            PathPoint pathpoint9 = this.openPoint(currentPoint.x + 1, currentPoint.y, currentPoint.z + 1);
 
             if (pathpoint9 != null && !pathpoint9.visited && pathpoint9.distanceTo(targetPoint) < maxDistance)
             {
@@ -172,7 +172,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag && flag4)
         {
-            PathPoint pathpoint10 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord - 1);
+            PathPoint pathpoint10 = this.openPoint(currentPoint.x, currentPoint.y + 1, currentPoint.z - 1);
 
             if (pathpoint10 != null && !pathpoint10.visited && pathpoint10.distanceTo(targetPoint) < maxDistance)
             {
@@ -182,7 +182,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag1 && flag4)
         {
-            PathPoint pathpoint11 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord + 1);
+            PathPoint pathpoint11 = this.openPoint(currentPoint.x, currentPoint.y + 1, currentPoint.z + 1);
 
             if (pathpoint11 != null && !pathpoint11.visited && pathpoint11.distanceTo(targetPoint) < maxDistance)
             {
@@ -192,7 +192,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag2 && flag4)
         {
-            PathPoint pathpoint12 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord + 1, currentPoint.zCoord);
+            PathPoint pathpoint12 = this.openPoint(currentPoint.x + 1, currentPoint.y + 1, currentPoint.z);
 
             if (pathpoint12 != null && !pathpoint12.visited && pathpoint12.distanceTo(targetPoint) < maxDistance)
             {
@@ -202,7 +202,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag3 && flag4)
         {
-            PathPoint pathpoint13 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord + 1, currentPoint.zCoord);
+            PathPoint pathpoint13 = this.openPoint(currentPoint.x - 1, currentPoint.y + 1, currentPoint.z);
 
             if (pathpoint13 != null && !pathpoint13.visited && pathpoint13.distanceTo(targetPoint) < maxDistance)
             {
@@ -212,7 +212,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag && flag5)
         {
-            PathPoint pathpoint14 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord - 1);
+            PathPoint pathpoint14 = this.openPoint(currentPoint.x, currentPoint.y - 1, currentPoint.z - 1);
 
             if (pathpoint14 != null && !pathpoint14.visited && pathpoint14.distanceTo(targetPoint) < maxDistance)
             {
@@ -222,7 +222,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag1 && flag5)
         {
-            PathPoint pathpoint15 = this.openPoint(currentPoint.xCoord, currentPoint.yCoord - 1, currentPoint.zCoord + 1);
+            PathPoint pathpoint15 = this.openPoint(currentPoint.x, currentPoint.y - 1, currentPoint.z + 1);
 
             if (pathpoint15 != null && !pathpoint15.visited && pathpoint15.distanceTo(targetPoint) < maxDistance)
             {
@@ -232,7 +232,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag2 && flag5)
         {
-            PathPoint pathpoint16 = this.openPoint(currentPoint.xCoord + 1, currentPoint.yCoord - 1, currentPoint.zCoord);
+            PathPoint pathpoint16 = this.openPoint(currentPoint.x + 1, currentPoint.y - 1, currentPoint.z);
 
             if (pathpoint16 != null && !pathpoint16.visited && pathpoint16.distanceTo(targetPoint) < maxDistance)
             {
@@ -242,7 +242,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
 
         if (flag3 && flag5)
         {
-            PathPoint pathpoint17 = this.openPoint(currentPoint.xCoord - 1, currentPoint.yCoord - 1, currentPoint.zCoord);
+            PathPoint pathpoint17 = this.openPoint(currentPoint.x - 1, currentPoint.y - 1, currentPoint.z);
 
             if (pathpoint17 != null && !pathpoint17.visited && pathpoint17.distanceTo(targetPoint) < maxDistance)
             {
@@ -261,7 +261,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
     protected PathPoint openPoint(int x, int y, int z)
     {
         PathPoint pathpoint = null;
-        PathNodeType pathnodetype = this.func_192558_a(this.entity, x, y, z);
+        PathNodeType pathnodetype = this.getPathNodeType(this.entity, x, y, z);
         float f = this.entity.getPathPriority(pathnodetype);
 
         if (f >= 0.0F)
@@ -284,7 +284,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
         EnumSet<PathNodeType> enumset = EnumSet.<PathNodeType>noneOf(PathNodeType.class);
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         BlockPos blockpos = new BlockPos(entitylivingIn);
-        pathnodetype = this.func_193577_a(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
+        pathnodetype = this.getPathNodeType(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
 
         if (enumset.contains(PathNodeType.FENCE))
         {
@@ -344,17 +344,17 @@ public class FlyingNodeProcessor extends WalkNodeProcessor
             }
         }
 
-        pathnodetype = this.func_193578_a(blockaccessIn, x, y, z, pathnodetype);
+        pathnodetype = this.checkNeighborBlocks(blockaccessIn, x, y, z, pathnodetype);
         return pathnodetype;
     }
 
-    private PathNodeType func_192559_a(EntityLiving p_192559_1_, BlockPos p_192559_2_)
+    private PathNodeType getPathNodeType(EntityLiving p_192559_1_, BlockPos p_192559_2_)
     {
-        return this.func_192558_a(p_192559_1_, p_192559_2_.getX(), p_192559_2_.getY(), p_192559_2_.getZ());
+        return this.getPathNodeType(p_192559_1_, p_192559_2_.getX(), p_192559_2_.getY(), p_192559_2_.getZ());
     }
 
-    private PathNodeType func_192558_a(EntityLiving p_192558_1_, int p_192558_2_, int p_192558_3_, int p_192558_4_)
+    private PathNodeType getPathNodeType(EntityLiving p_192558_1_, int p_192558_2_, int p_192558_3_, int p_192558_4_)
     {
-        return this.getPathNodeType(this.blockaccess, p_192558_2_, p_192558_3_, p_192558_4_, p_192558_1_, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanBreakDoors(), this.getCanEnterDoors());
+        return this.getPathNodeType(this.blockaccess, p_192558_2_, p_192558_3_, p_192558_4_, p_192558_1_, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 }

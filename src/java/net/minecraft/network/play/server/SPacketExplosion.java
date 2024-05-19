@@ -34,9 +34,9 @@ public class SPacketExplosion implements Packet<INetHandlerPlayClient>
 
         if (motion != null)
         {
-            this.motionX = (float)motion.xCoord;
-            this.motionY = (float)motion.yCoord;
-            this.motionZ = (float)motion.zCoord;
+            this.motionX = (float)motion.x;
+            this.motionY = (float)motion.y;
+            this.motionZ = (float)motion.z;
         }
     }
 

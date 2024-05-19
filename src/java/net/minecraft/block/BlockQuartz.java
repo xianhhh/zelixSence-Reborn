@@ -33,7 +33,7 @@ public class BlockQuartz extends Block
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         if (meta == BlockQuartz.EnumType.LINES_Y.getMetadata())
         {
@@ -72,17 +72,17 @@ public class BlockQuartz extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
-        tab.add(new ItemStack(this, 1, BlockQuartz.EnumType.DEFAULT.getMetadata()));
-        tab.add(new ItemStack(this, 1, BlockQuartz.EnumType.CHISELED.getMetadata()));
-        tab.add(new ItemStack(this, 1, BlockQuartz.EnumType.LINES_Y.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockQuartz.EnumType.DEFAULT.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockQuartz.EnumType.CHISELED.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockQuartz.EnumType.LINES_Y.getMetadata()));
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return MapColor.QUARTZ;
     }

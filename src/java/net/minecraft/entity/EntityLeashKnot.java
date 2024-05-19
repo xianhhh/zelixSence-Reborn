@@ -89,8 +89,8 @@ public class EntityLeashKnot extends EntityHanging
 
     /**
      * Either write this entity to the NBT tag given and return true, or return false without doing anything. If this
-     * returns false the entity is not saved on disk. Ridden entities return false here as they are saved with their
-     * rider.
+     * returns false the entity is not saved on disk. Riding entities return false here as they are saved with their
+     * mount.
      */
     public boolean writeToNBTOptional(NBTTagCompound compound)
     {
@@ -111,7 +111,7 @@ public class EntityLeashKnot extends EntityHanging
     {
     }
 
-    public boolean processInitialInteract(EntityPlayer player, EnumHand stack)
+    public boolean processInitialInteract(EntityPlayer player, EnumHand hand)
     {
         if (this.world.isRemote)
         {
@@ -163,7 +163,7 @@ public class EntityLeashKnot extends EntityHanging
     public static EntityLeashKnot createKnot(World worldIn, BlockPos fence)
     {
         EntityLeashKnot entityleashknot = new EntityLeashKnot(worldIn, fence);
-        worldIn.spawnEntityInWorld(entityleashknot);
+        worldIn.spawnEntity(entityleashknot);
         entityleashknot.playPlaceSound();
         return entityleashknot;
     }

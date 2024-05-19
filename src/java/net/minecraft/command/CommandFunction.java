@@ -12,7 +12,7 @@ public class CommandFunction extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "function";
     }
@@ -28,7 +28,7 @@ public class CommandFunction extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.function.usage";
     }
@@ -45,7 +45,7 @@ public class CommandFunction extends CommandBase
         else
         {
             ResourceLocation resourcelocation = new ResourceLocation(args[0]);
-            FunctionObject functionobject = server.func_193030_aL().func_193058_a(resourcelocation);
+            FunctionObject functionobject = server.getFunctionManager().getFunction(resourcelocation);
 
             if (functionobject == null)
             {
@@ -89,17 +89,17 @@ public class CommandFunction extends CommandBase
                     }
                 }
 
-                int i = server.func_193030_aL().func_194019_a(functionobject, CommandSenderWrapper.func_193998_a(sender).func_194000_i().func_193999_a(2).func_194001_a(false));
+                int i = server.getFunctionManager().execute(functionobject, CommandSenderWrapper.create(sender).computePositionVector().withPermissionLevel(2).withSendCommandFeedback(false));
                 notifyCommandListener(sender, this, "commands.function.success", new Object[] {resourcelocation, i});
             }
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
-            return getListOfStringsMatchingLastWord(args, server.func_193030_aL().func_193066_d().keySet());
+            return getListOfStringsMatchingLastWord(args, server.getFunctionManager().getFunctions().keySet());
         }
         else if (args.length == 2)
         {
@@ -107,7 +107,7 @@ public class CommandFunction extends CommandBase
         }
         else
         {
-            return args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+            return args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
         }
     }
 }

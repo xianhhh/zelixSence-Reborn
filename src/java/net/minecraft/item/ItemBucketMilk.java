@@ -29,13 +29,13 @@ public class ItemBucketMilk extends Item
         if (entityLiving instanceof EntityPlayerMP)
         {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityLiving;
-            CriteriaTriggers.field_193138_y.func_193148_a(entityplayermp, stack);
+            CriteriaTriggers.CONSUME_ITEM.trigger(entityplayermp, stack);
             entityplayermp.addStat(StatList.getObjectUseStats(this));
         }
 
         if (entityLiving instanceof EntityPlayer && !((EntityPlayer)entityLiving).capabilities.isCreativeMode)
         {
-            stack.func_190918_g(1);
+            stack.shrink(1);
         }
 
         if (!worldIn.isRemote)
@@ -43,7 +43,7 @@ public class ItemBucketMilk extends Item
             entityLiving.clearActivePotions();
         }
 
-        return stack.func_190926_b() ? new ItemStack(Items.BUCKET) : stack;
+        return stack.isEmpty() ? new ItemStack(Items.BUCKET) : stack;
     }
 
     /**
@@ -62,9 +62,9 @@ public class ItemBucketMilk extends Item
         return EnumAction.DRINK;
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        worldIn.setActiveHand(playerIn);
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, worldIn.getHeldItem(playerIn));
+        playerIn.setActiveHand(handIn);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
     }
 }

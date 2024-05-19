@@ -177,7 +177,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
                 this.setRollingAmplitude(10);
                 this.setBeenAttacked();
                 this.setDamage(this.getDamage() + amount * 10.0F);
-                boolean flag = source.getEntity() instanceof EntityPlayer && ((EntityPlayer)source.getEntity()).capabilities.isCreativeMode;
+                boolean flag = source.getTrueSource() instanceof EntityPlayer && ((EntityPlayer)source.getTrueSource()).capabilities.isCreativeMode;
 
                 if (flag || this.getDamage() > 40.0F)
                 {
@@ -263,12 +263,12 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
 
         if (this.posY < -64.0D)
         {
-            this.kill();
+            this.outOfWorld();
         }
 
         if (!this.world.isRemote && this.world instanceof WorldServer)
         {
-            this.world.theProfiler.startSection("portal");
+            this.world.profiler.startSection("portal");
             MinecraftServer minecraftserver = this.world.getMinecraftServer();
             int i = this.getMaxInPortalTime();
 
@@ -315,7 +315,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
                 --this.timeUntilPortal;
             }
 
-            this.world.theProfiler.endSection();
+            this.world.profiler.endSection();
         }
 
         if (this.world.isRemote)
@@ -402,7 +402,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
 
             if (this.getType() == EntityMinecart.Type.RIDEABLE && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D)
             {
-                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
+                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
 
                 if (!list.isEmpty())
                 {
@@ -423,7 +423,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
             }
             else
             {
-                for (Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D)))
+                for (Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D)))
                 {
                     if (!this.isPassenger(entity) && entity.canBePushed() && entity instanceof EntityMinecart)
                     {
@@ -467,7 +467,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
             this.motionZ *= 0.5D;
         }
 
-        this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
         if (!this.onGround)
         {
@@ -543,7 +543,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
 
         if (entity instanceof EntityLivingBase)
         {
-            double d6 = (double)((EntityLivingBase)entity).field_191988_bg;
+            double d6 = (double)((EntityLivingBase)entity).moveForward;
 
             if (d6 > 0.0D)
             {
@@ -618,7 +618,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
         double d13 = this.getMaximumSpeed();
         d22 = MathHelper.clamp(d22, -d13, d13);
         d23 = MathHelper.clamp(d23, -d13, d13);
-        this.moveEntity(MoverType.SELF, d22, 0.0D, d23);
+        this.move(MoverType.SELF, d22, 0.0D, d23);
 
         if (aint[0][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[0][2])
         {
@@ -634,7 +634,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
 
         if (vec3d1 != null && vec3d != null)
         {
-            double d14 = (vec3d.yCoord - vec3d1.yCoord) * 0.05D;
+            double d14 = (vec3d.y - vec3d1.y) * 0.05D;
             d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 
             if (d5 > 0.0D)
@@ -643,7 +643,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
                 this.motionZ = this.motionZ / d5 * (d5 + d14);
             }
 
-            this.setPosition(this.posX, vec3d1.yCoord, this.posZ);
+            this.setPosition(this.posX, vec3d1.y, this.posZ);
         }
 
         int j = MathHelper.floor(this.posX);
@@ -843,7 +843,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
     public AxisAlignedBB getRenderBoundingBox()
     {
         AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
-        return this.hasDisplayTile() ? axisalignedbb.expandXyz((double)Math.abs(this.getDisplayTileOffset()) / 16.0D) : axisalignedbb;
+        return this.hasDisplayTile() ? axisalignedbb.grow((double)Math.abs(this.getDisplayTileOffset()) / 16.0D) : axisalignedbb;
     }
 
     public static void registerFixesMinecart(DataFixer fixer, Class<?> name)
@@ -998,7 +998,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
     }
 
     /**
-     * Updates the velocity of the entity to a new value.
+     * Updates the entity motion clientside, called by packets from the server
      */
     public void setVelocity(double x, double y, double z)
     {

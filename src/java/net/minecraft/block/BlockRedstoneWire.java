@@ -107,7 +107,7 @@ public class BlockRedstoneWire extends Block
 
             if (!iblockstate1.isNormalCube())
             {
-                boolean flag = worldIn.getBlockState(blockpos).isFullyOpaque() || worldIn.getBlockState(blockpos).getBlock() == Blocks.GLOWSTONE;
+                boolean flag = worldIn.getBlockState(blockpos).isTopSolid() || worldIn.getBlockState(blockpos).getBlock() == Blocks.GLOWSTONE;
 
                 if (flag && canConnectUpwardsTo(worldIn.getBlockState(blockpos.up())))
                 {
@@ -149,7 +149,7 @@ public class BlockRedstoneWire extends Block
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return worldIn.getBlockState(pos.down()).isFullyOpaque() || worldIn.getBlockState(pos.down()).getBlock() == Blocks.GLOWSTONE;
+        return worldIn.getBlockState(pos.down()).isTopSolid() || worldIn.getBlockState(pos.down()).getBlock() == Blocks.GLOWSTONE;
     }
 
     private IBlockState updateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state)
@@ -351,7 +351,7 @@ public class BlockRedstoneWire extends Block
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         if (!worldIn.isRemote)
         {
@@ -474,7 +474,7 @@ public class BlockRedstoneWire extends Block
             EnumFacing enumfacing = (EnumFacing)blockState.getValue(BlockRedstoneRepeater.FACING);
             return enumfacing == side || enumfacing.getOpposite() == side;
         }
-        else if (Blocks.field_190976_dk == blockState.getBlock())
+        else if (Blocks.OBSERVER == blockState.getBlock())
         {
             return side == blockState.getValue(BlockObserver.FACING);
         }
@@ -610,7 +610,7 @@ public class BlockRedstoneWire extends Block
         return new BlockStateContainer(this, new IProperty[] {NORTH, EAST, SOUTH, WEST, POWER});
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }

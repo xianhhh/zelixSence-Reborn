@@ -19,20 +19,20 @@ public class BiomeSwamp extends Biome
     protected BiomeSwamp(Biome.BiomeProperties properties)
     {
         super(properties);
-        this.theBiomeDecorator.treesPerChunk = 2;
-        this.theBiomeDecorator.flowersPerChunk = 1;
-        this.theBiomeDecorator.deadBushPerChunk = 1;
-        this.theBiomeDecorator.mushroomsPerChunk = 8;
-        this.theBiomeDecorator.reedsPerChunk = 10;
-        this.theBiomeDecorator.clayPerChunk = 1;
-        this.theBiomeDecorator.waterlilyPerChunk = 4;
-        this.theBiomeDecorator.sandPerChunk2 = 0;
-        this.theBiomeDecorator.sandPerChunk = 0;
-        this.theBiomeDecorator.grassPerChunk = 5;
+        this.decorator.treesPerChunk = 2;
+        this.decorator.flowersPerChunk = 1;
+        this.decorator.deadBushPerChunk = 1;
+        this.decorator.mushroomsPerChunk = 8;
+        this.decorator.reedsPerChunk = 10;
+        this.decorator.clayPerChunk = 1;
+        this.decorator.waterlilyPerChunk = 4;
+        this.decorator.sandPatchesPerChunk = 0;
+        this.decorator.gravelPatchesPerChunk = 0;
+        this.decorator.grassPerChunk = 5;
         this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntitySlime.class, 1, 1, 1));
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         return SWAMP_FEATURE;
     }

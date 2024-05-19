@@ -37,16 +37,16 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
     private DynamicTexture icon;
     private long lastClickTime;
 
-    protected ServerListEntryNormal(GuiMultiplayer p_i45048_1_, ServerData serverIn)
+    protected ServerListEntryNormal(GuiMultiplayer ownerIn, ServerData serverIn)
     {
-        this.owner = p_i45048_1_;
+        this.owner = ownerIn;
         this.server = serverIn;
         this.mc = Minecraft.getMinecraft();
         this.serverIcon = new ResourceLocation("servers/" + serverIn.serverIP + "/icon");
         this.icon = (DynamicTexture)this.mc.getTextureManager().getTexture(this.serverIcon);
     }
 
-    public void func_192634_a(int p_192634_1_, int p_192634_2_, int p_192634_3_, int p_192634_4_, int p_192634_5_, int p_192634_6_, int p_192634_7_, boolean p_192634_8_, float p_192634_9_)
+    public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks)
     {
         if (!this.server.pinged)
         {
@@ -79,17 +79,17 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
         boolean flag = this.server.version > 335;
         boolean flag1 = this.server.version < 335;
         boolean flag2 = flag || flag1;
-        this.mc.fontRendererObj.drawString(this.server.serverName, p_192634_2_ + 32 + 3, p_192634_3_ + 1, 16777215);
-        List<String> list = this.mc.fontRendererObj.listFormattedStringToWidth(this.server.serverMOTD, p_192634_4_ - 32 - 2);
+        this.mc.fontRenderer.drawString(this.server.serverName, x + 32 + 3, y + 1, 16777215);
+        List<String> list = this.mc.fontRenderer.listFormattedStringToWidth(this.server.serverMOTD, listWidth - 32 - 2);
 
         for (int i = 0; i < Math.min(list.size(), 2); ++i)
         {
-            this.mc.fontRendererObj.drawString(list.get(i), p_192634_2_ + 32 + 3, p_192634_3_ + 12 + this.mc.fontRendererObj.FONT_HEIGHT * i, 8421504);
+            this.mc.fontRenderer.drawString(list.get(i), x + 32 + 3, y + 12 + this.mc.fontRenderer.FONT_HEIGHT * i, 8421504);
         }
 
         String s2 = flag2 ? TextFormatting.DARK_RED + this.server.gameVersion : this.server.populationInfo;
-        int j = this.mc.fontRendererObj.getStringWidth(s2);
-        this.mc.fontRendererObj.drawString(s2, p_192634_2_ + p_192634_4_ - j - 15 - 2, p_192634_3_ + 1, 8421504);
+        int j = this.mc.fontRenderer.getStringWidth(s2);
+        this.mc.fontRenderer.drawString(s2, x + listWidth - j - 15 - 2, y + 1, 8421504);
         int k = 0;
         String s = null;
         int l;
@@ -141,7 +141,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
         else
         {
             k = 1;
-            l = (int)(Minecraft.getSystemTime() / 100L + (long)(p_192634_1_ * 2) & 7L);
+            l = (int)(Minecraft.getSystemTime() / 100L + (long)(slotIndex * 2) & 7L);
 
             if (l > 4)
             {
@@ -153,7 +153,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_ + p_192634_4_ - 15, p_192634_3_, (float)(k * 10), (float)(176 + l * 8), 10, 8, 256.0F, 256.0F);
+        Gui.drawModalRectWithCustomSizedTexture(x + listWidth - 15, y, (float)(k * 10), (float)(176 + l * 8), 10, 8, 256.0F, 256.0F);
 
         if (this.server.getBase64EncodedIconData() != null && !this.server.getBase64EncodedIconData().equals(this.lastIconB64))
         {
@@ -164,66 +164,66 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
 
         if (this.icon != null)
         {
-            this.drawTextureAt(p_192634_2_, p_192634_3_, this.serverIcon);
+            this.drawTextureAt(x, y, this.serverIcon);
         }
         else
         {
-            this.drawTextureAt(p_192634_2_, p_192634_3_, UNKNOWN_SERVER);
+            this.drawTextureAt(x, y, UNKNOWN_SERVER);
         }
 
-        int i1 = p_192634_6_ - p_192634_2_;
-        int j1 = p_192634_7_ - p_192634_3_;
+        int i1 = mouseX - x;
+        int j1 = mouseY - y;
 
-        if (i1 >= p_192634_4_ - 15 && i1 <= p_192634_4_ - 5 && j1 >= 0 && j1 <= 8)
+        if (i1 >= listWidth - 15 && i1 <= listWidth - 5 && j1 >= 0 && j1 <= 8)
         {
             this.owner.setHoveringText(s1);
         }
-        else if (i1 >= p_192634_4_ - j - 15 - 2 && i1 <= p_192634_4_ - 15 - 2 && j1 >= 0 && j1 <= 8)
+        else if (i1 >= listWidth - j - 15 - 2 && i1 <= listWidth - 15 - 2 && j1 >= 0 && j1 <= 8)
         {
             this.owner.setHoveringText(s);
         }
 
-        if (this.mc.gameSettings.touchscreen || p_192634_8_)
+        if (this.mc.gameSettings.touchscreen || isSelected)
         {
             this.mc.getTextureManager().bindTexture(SERVER_SELECTION_BUTTONS);
-            Gui.drawRect(p_192634_2_, p_192634_3_, p_192634_2_ + 32, p_192634_3_ + 32, -1601138544);
+            Gui.drawRect(x, y, x + 32, y + 32, -1601138544);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            int k1 = p_192634_6_ - p_192634_2_;
-            int l1 = p_192634_7_ - p_192634_3_;
+            int k1 = mouseX - x;
+            int l1 = mouseY - y;
 
             if (this.canJoin())
             {
                 if (k1 < 32 && k1 > 16)
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                 }
                 else
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                 }
             }
 
-            if (this.owner.canMoveUp(this, p_192634_1_))
+            if (this.owner.canMoveUp(this, slotIndex))
             {
                 if (k1 < 16 && l1 < 16)
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 96.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 96.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                 }
                 else
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 96.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 96.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                 }
             }
 
-            if (this.owner.canMoveDown(this, p_192634_1_))
+            if (this.owner.canMoveDown(this, slotIndex))
             {
                 if (k1 < 16 && l1 > 16)
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 64.0F, 32.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 64.0F, 32.0F, 32, 32, 256.0F, 256.0F);
                 }
                 else
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 64.0F, 0.0F, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 64.0F, 0.0F, 32, 32, 256.0F, 256.0F);
                 }
             }
         }
@@ -332,7 +332,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry
         return false;
     }
 
-    public void func_192633_a(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
+    public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
     {
     }
 

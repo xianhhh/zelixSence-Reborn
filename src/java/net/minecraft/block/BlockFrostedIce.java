@@ -53,7 +53,7 @@ public class BlockFrostedIce extends BlockIce
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
      * block, etc.
      */
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         if (blockIn == this)
         {
@@ -66,13 +66,13 @@ public class BlockFrostedIce extends BlockIce
         }
     }
 
-    private int countNeighbors(World p_185680_1_, BlockPos p_185680_2_)
+    private int countNeighbors(World worldIn, BlockPos pos)
     {
         int i = 0;
 
         for (EnumFacing enumfacing : EnumFacing.values())
         {
-            if (p_185680_1_.getBlockState(p_185680_2_.offset(enumfacing)).getBlock() == this)
+            if (worldIn.getBlockState(pos.offset(enumfacing)).getBlock() == this)
             {
                 ++i;
 
@@ -86,29 +86,29 @@ public class BlockFrostedIce extends BlockIce
         return i;
     }
 
-    protected void slightlyMelt(World p_185681_1_, BlockPos p_185681_2_, IBlockState p_185681_3_, Random p_185681_4_, boolean p_185681_5_)
+    protected void slightlyMelt(World worldIn, BlockPos pos, IBlockState state, Random rand, boolean meltNeighbors)
     {
-        int i = ((Integer)p_185681_3_.getValue(AGE)).intValue();
+        int i = ((Integer)state.getValue(AGE)).intValue();
 
         if (i < 3)
         {
-            p_185681_1_.setBlockState(p_185681_2_, p_185681_3_.withProperty(AGE, Integer.valueOf(i + 1)), 2);
-            p_185681_1_.scheduleUpdate(p_185681_2_, this, MathHelper.getInt(p_185681_4_, 20, 40));
+            worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(i + 1)), 2);
+            worldIn.scheduleUpdate(pos, this, MathHelper.getInt(rand, 20, 40));
         }
         else
         {
-            this.turnIntoWater(p_185681_1_, p_185681_2_);
+            this.turnIntoWater(worldIn, pos);
 
-            if (p_185681_5_)
+            if (meltNeighbors)
             {
                 for (EnumFacing enumfacing : EnumFacing.values())
                 {
-                    BlockPos blockpos = p_185681_2_.offset(enumfacing);
-                    IBlockState iblockstate = p_185681_1_.getBlockState(blockpos);
+                    BlockPos blockpos = pos.offset(enumfacing);
+                    IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
                     if (iblockstate.getBlock() == this)
                     {
-                        this.slightlyMelt(p_185681_1_, blockpos, iblockstate, p_185681_4_, false);
+                        this.slightlyMelt(worldIn, blockpos, iblockstate, rand, false);
                     }
                 }
             }
@@ -122,6 +122,6 @@ public class BlockFrostedIce extends BlockIce
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return ItemStack.field_190927_a;
+        return ItemStack.EMPTY;
     }
 }

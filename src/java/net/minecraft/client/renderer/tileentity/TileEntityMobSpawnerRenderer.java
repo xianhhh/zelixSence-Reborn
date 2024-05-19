@@ -8,11 +8,11 @@ import net.minecraft.tileentity.TileEntityMobSpawner;
 
 public class TileEntityMobSpawnerRenderer extends TileEntitySpecialRenderer<TileEntityMobSpawner>
 {
-    public void func_192841_a(TileEntityMobSpawner p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityMobSpawner te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float)p_192841_2_ + 0.5F, (float)p_192841_4_, (float)p_192841_6_ + 0.5F);
-        renderMob(p_192841_1_.getSpawnerBaseLogic(), p_192841_2_, p_192841_4_, p_192841_6_, p_192841_8_);
+        GlStateManager.translate((float)x + 0.5F, (float)y, (float)z + 0.5F);
+        renderMob(te.getSpawnerBaseLogic(), x, y, z, partialTicks);
         GlStateManager.popMatrix();
     }
 

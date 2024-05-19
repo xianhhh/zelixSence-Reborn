@@ -15,7 +15,7 @@ public class CommandEnchant extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "enchant";
     }
@@ -31,7 +31,7 @@ public class CommandEnchant extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.enchant.usage";
     }
@@ -69,7 +69,7 @@ public class CommandEnchant extends CommandBase
                 int i = 1;
                 ItemStack itemstack = entitylivingbase.getHeldItemMainhand();
 
-                if (itemstack.func_190926_b())
+                if (itemstack.isEmpty())
                 {
                     throw new CommandException("commands.enchant.noItem", new Object[0]);
                 }
@@ -96,7 +96,7 @@ public class CommandEnchant extends CommandBase
                             {
                                 Enchantment enchantment1 = Enchantment.getEnchantmentByID(k);
 
-                                if (!enchantment.func_191560_c(enchantment1))
+                                if (!enchantment.isCompatibleWith(enchantment1))
                                 {
                                     throw new CommandException("commands.enchant.cantCombine", new Object[] {enchantment.getTranslatedName(i), enchantment1.getTranslatedName(nbttaglist.getCompoundTagAt(j).getShort("lvl"))});
                                 }
@@ -112,11 +112,11 @@ public class CommandEnchant extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
-            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
         else
         {

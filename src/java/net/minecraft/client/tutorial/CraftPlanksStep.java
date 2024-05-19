@@ -13,75 +13,85 @@ import net.minecraft.world.GameType;
 
 public class CraftPlanksStep implements ITutorialStep
 {
-    private static final ITextComponent field_193286_a = new TextComponentTranslation("tutorial.craft_planks.title", new Object[0]);
-    private static final ITextComponent field_193287_b = new TextComponentTranslation("tutorial.craft_planks.description", new Object[0]);
-    private final Tutorial field_193288_c;
-    private TutorialToast field_193289_d;
-    private int field_193290_e;
+    private static final ITextComponent TITLE = new TextComponentTranslation("tutorial.craft_planks.title", new Object[0]);
+    private static final ITextComponent DESCRIPTION = new TextComponentTranslation("tutorial.craft_planks.description", new Object[0]);
+    private final Tutorial tutorial;
+    private TutorialToast toast;
+    private int timeWaiting;
 
-    public CraftPlanksStep(Tutorial p_i47583_1_)
+    public CraftPlanksStep(Tutorial tutorial)
     {
-        this.field_193288_c = p_i47583_1_;
+        this.tutorial = tutorial;
     }
 
-    public void func_193245_a()
+    public void update()
     {
-        ++this.field_193290_e;
+        ++this.timeWaiting;
 
-        if (this.field_193288_c.func_194072_f() != GameType.SURVIVAL)
+        if (this.tutorial.getGameType() != GameType.SURVIVAL)
         {
-            this.field_193288_c.func_193292_a(TutorialSteps.NONE);
+            this.tutorial.setStep(TutorialSteps.NONE);
         }
         else
         {
-            if (this.field_193290_e == 1)
+            if (this.timeWaiting == 1)
             {
-                EntityPlayerSP entityplayersp = this.field_193288_c.func_193295_e().player;
+                EntityPlayerSP entityplayersp = this.tutorial.getMinecraft().player;
 
                 if (entityplayersp != null)
                 {
                     if (entityplayersp.inventory.hasItemStack(new ItemStack(Blocks.PLANKS)))
                     {
-                        this.field_193288_c.func_193292_a(TutorialSteps.NONE);
+                        this.tutorial.setStep(TutorialSteps.NONE);
                         return;
                     }
 
-                    if (func_194071_a(entityplayersp))
+                    if (didPlayerCraftedPlanks(entityplayersp))
                     {
-                        this.field_193288_c.func_193292_a(TutorialSteps.NONE);
+                        this.tutorial.setStep(TutorialSteps.NONE);
                         return;
                     }
                 }
             }
 
-            if (this.field_193290_e >= 1200 && this.field_193289_d == null)
+            if (this.timeWaiting >= 1200 && this.toast == null)
             {
-                this.field_193289_d = new TutorialToast(TutorialToast.Icons.WOODEN_PLANKS, field_193286_a, field_193287_b, false);
-                this.field_193288_c.func_193295_e().func_193033_an().func_192988_a(this.field_193289_d);
+                this.toast = new TutorialToast(TutorialToast.Icons.WOODEN_PLANKS, TITLE, DESCRIPTION, false);
+                this.tutorial.getMinecraft().getToastGui().add(this.toast);
             }
         }
     }
 
-    public void func_193248_b()
+    public void onStop()
     {
-        if (this.field_193289_d != null)
+        if (this.toast != null)
         {
-            this.field_193289_d.func_193670_a();
-            this.field_193289_d = null;
+            this.toast.hide();
+            this.toast = null;
         }
     }
 
-    public void func_193252_a(ItemStack p_193252_1_)
+    /**
+     * Called when the player pick up an ItemStack
+     *  
+     * @param stack The ItemStack
+     */
+    public void handleSetSlot(ItemStack stack)
     {
-        if (p_193252_1_.getItem() == Item.getItemFromBlock(Blocks.PLANKS))
+        if (stack.getItem() == Item.getItemFromBlock(Blocks.PLANKS))
         {
-            this.field_193288_c.func_193292_a(TutorialSteps.NONE);
+            this.tutorial.setStep(TutorialSteps.NONE);
         }
     }
 
-    public static boolean func_194071_a(EntityPlayerSP p_194071_0_)
+    /**
+     * Indicates if the players crafted at least one time planks.
+     *  
+     * @param player The player
+     */
+    public static boolean didPlayerCraftedPlanks(EntityPlayerSP player)
     {
         StatBase statbase = StatList.getCraftStats(Item.getItemFromBlock(Blocks.PLANKS));
-        return statbase != null && p_194071_0_.getStatFileWriter().readStat(statbase) > 0;
+        return statbase != null && player.getStatFileWriter().readStat(statbase) > 0;
     }
 }

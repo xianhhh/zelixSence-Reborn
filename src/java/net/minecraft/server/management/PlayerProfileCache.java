@@ -239,7 +239,7 @@ public class PlayerProfileCache
         try
         {
             bufferedreader = Files.newReader(this.usercacheFile, StandardCharsets.UTF_8);
-            List<PlayerProfileCache.ProfileEntry> list = (List)JsonUtils.func_193841_a(this.gson, bufferedreader, TYPE);
+            List<PlayerProfileCache.ProfileEntry> list = (List)JsonUtils.fromJson(this.gson, bufferedreader, TYPE);
             this.usernameToProfileEntryMap.clear();
             this.uuidToProfileEntryMap.clear();
             this.gameProfiles.clear();

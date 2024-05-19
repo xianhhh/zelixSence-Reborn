@@ -11,59 +11,59 @@ import net.minecraft.item.crafting.IRecipe;
 
 public class RecipeToast implements IToast
 {
-    private final List<ItemStack> field_193666_c = Lists.<ItemStack>newArrayList();
-    private long field_193667_d;
-    private boolean field_193668_e;
+    private final List<ItemStack> recipesOutputs = Lists.<ItemStack>newArrayList();
+    private long firstDrawTime;
+    private boolean hasNewOutputs;
 
     public RecipeToast(ItemStack p_i47489_1_)
     {
-        this.field_193666_c.add(p_i47489_1_);
+        this.recipesOutputs.add(p_i47489_1_);
     }
 
-    public IToast.Visibility func_193653_a(GuiToast p_193653_1_, long p_193653_2_)
+    public IToast.Visibility draw(GuiToast toastGui, long delta)
     {
-        if (this.field_193668_e)
+        if (this.hasNewOutputs)
         {
-            this.field_193667_d = p_193653_2_;
-            this.field_193668_e = false;
+            this.firstDrawTime = delta;
+            this.hasNewOutputs = false;
         }
 
-        if (this.field_193666_c.isEmpty())
+        if (this.recipesOutputs.isEmpty())
         {
             return IToast.Visibility.HIDE;
         }
         else
         {
-            p_193653_1_.func_192989_b().getTextureManager().bindTexture(field_193654_a);
+            toastGui.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
             GlStateManager.color(1.0F, 1.0F, 1.0F);
-            p_193653_1_.drawTexturedModalRect(0, 0, 0, 32, 160, 32);
-            p_193653_1_.func_192989_b().fontRendererObj.drawString(I18n.format("recipe.toast.title"), 30, 7, -11534256);
-            p_193653_1_.func_192989_b().fontRendererObj.drawString(I18n.format("recipe.toast.description"), 30, 18, -16777216);
+            toastGui.drawTexturedModalRect(0, 0, 0, 32, 160, 32);
+            toastGui.getMinecraft().fontRenderer.drawString(I18n.format("recipe.toast.title"), 30, 7, -11534256);
+            toastGui.getMinecraft().fontRenderer.drawString(I18n.format("recipe.toast.description"), 30, 18, -16777216);
             RenderHelper.enableGUIStandardItemLighting();
-            p_193653_1_.func_192989_b().getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.field_193666_c.get((int)(p_193653_2_ / (5000L / (long)this.field_193666_c.size()) % (long)this.field_193666_c.size())), 8, 8);
-            return p_193653_2_ - this.field_193667_d >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
+            toastGui.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.recipesOutputs.get((int)(delta / (5000L / (long)this.recipesOutputs.size()) % (long)this.recipesOutputs.size())), 8, 8);
+            return delta - this.firstDrawTime >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
         }
     }
 
-    public void func_193664_a(ItemStack p_193664_1_)
+    public void addRecipeOutput(ItemStack output)
     {
-        if (this.field_193666_c.add(p_193664_1_))
+        if (this.recipesOutputs.add(output))
         {
-            this.field_193668_e = true;
+            this.hasNewOutputs = true;
         }
     }
 
-    public static void func_193665_a(GuiToast p_193665_0_, IRecipe p_193665_1_)
+    public static void addOrUpdate(GuiToast p_193665_0_, IRecipe p_193665_1_)
     {
-        RecipeToast recipetoast = (RecipeToast)p_193665_0_.func_192990_a(RecipeToast.class, field_193655_b);
+        RecipeToast recipetoast = (RecipeToast)p_193665_0_.getToast(RecipeToast.class, NO_TOKEN);
 
         if (recipetoast == null)
         {
-            p_193665_0_.func_192988_a(new RecipeToast(p_193665_1_.getRecipeOutput()));
+            p_193665_0_.add(new RecipeToast(p_193665_1_.getRecipeOutput()));
         }
         else
         {
-            recipetoast.func_193664_a(p_193665_1_.getRecipeOutput());
+            recipetoast.addRecipeOutput(p_193665_1_.getRecipeOutput());
         }
     }
 }

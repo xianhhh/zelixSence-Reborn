@@ -73,9 +73,9 @@ public class ActiveRenderInfo
         double d0 = entityIn.prevPosX + (entityIn.posX - entityIn.prevPosX) * p_178806_1_;
         double d1 = entityIn.prevPosY + (entityIn.posY - entityIn.prevPosY) * p_178806_1_;
         double d2 = entityIn.prevPosZ + (entityIn.posZ - entityIn.prevPosZ) * p_178806_1_;
-        double d3 = d0 + position.xCoord;
-        double d4 = d1 + position.yCoord;
-        double d5 = d2 + position.zCoord;
+        double d3 = d0 + position.x;
+        double d4 = d1 + position.y;
+        double d5 = d2 + position.z;
         return new Vec3d(d3, d4, d5);
     }
 
@@ -96,7 +96,7 @@ public class ActiveRenderInfo
 
             float f1 = (float)(blockpos.getY() + 1) - f;
 
-            if (vec3d.yCoord >= (double)f1)
+            if (vec3d.y >= (double)f1)
             {
                 iblockstate = worldIn.getBlockState(blockpos.up());
             }

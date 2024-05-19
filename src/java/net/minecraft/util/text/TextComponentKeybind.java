@@ -5,32 +5,33 @@ import java.util.function.Supplier;
 
 public class TextComponentKeybind extends TextComponentBase
 {
-    public static Function<String, Supplier<String>> field_193637_b = (p_193635_0_) ->
+    public static Function<String, Supplier<String>> displaySupplierFunction = (p_193635_0_) ->
     {
         return () -> {
             return p_193635_0_;
         };
     };
-    private final String field_193638_c;
-    private Supplier<String> field_193639_d;
+    private final String keybind;
+    private Supplier<String> displaySupplier;
 
-    public TextComponentKeybind(String p_i47521_1_)
+    public TextComponentKeybind(String keybind)
     {
-        this.field_193638_c = p_i47521_1_;
+        this.keybind = keybind;
     }
 
     /**
-     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
-     * different methods?
+     * Gets the raw content of this component (but not its sibling components), without any formatting codes. For
+     * example, this is the raw text in a {@link TextComponentString}, but it's the translated text for a {@link
+     * TextComponentTranslation} and it's the score value for a {@link TextComponentScore}.
      */
     public String getUnformattedComponentText()
     {
-        if (this.field_193639_d == null)
+        if (this.displaySupplier == null)
         {
-            this.field_193639_d = (Supplier)field_193637_b.apply(this.field_193638_c);
+            this.displaySupplier = (Supplier)displaySupplierFunction.apply(this.keybind);
         }
 
-        return this.field_193639_d.get();
+        return this.displaySupplier.get();
     }
 
     /**
@@ -38,7 +39,7 @@ public class TextComponentKeybind extends TextComponentBase
      */
     public TextComponentKeybind createCopy()
     {
-        TextComponentKeybind textcomponentkeybind = new TextComponentKeybind(this.field_193638_c);
+        TextComponentKeybind textcomponentkeybind = new TextComponentKeybind(this.keybind);
         textcomponentkeybind.setStyle(this.getStyle().createShallowCopy());
 
         for (ITextComponent itextcomponent : this.getSiblings())
@@ -62,17 +63,17 @@ public class TextComponentKeybind extends TextComponentBase
         else
         {
             TextComponentKeybind textcomponentkeybind = (TextComponentKeybind)p_equals_1_;
-            return this.field_193638_c.equals(textcomponentkeybind.field_193638_c) && super.equals(p_equals_1_);
+            return this.keybind.equals(textcomponentkeybind.keybind) && super.equals(p_equals_1_);
         }
     }
 
     public String toString()
     {
-        return "KeybindComponent{keybind='" + this.field_193638_c + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        return "KeybindComponent{keybind='" + this.keybind + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
     }
 
-    public String func_193633_h()
+    public String getKeybind()
     {
-        return this.field_193638_c;
+        return this.keybind;
     }
 }

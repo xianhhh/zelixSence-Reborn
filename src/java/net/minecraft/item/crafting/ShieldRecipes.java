@@ -13,18 +13,18 @@ public class ShieldRecipes
     {
         public boolean matches(InventoryCrafting inv, World worldIn)
         {
-            ItemStack itemstack = ItemStack.field_190927_a;
-            ItemStack itemstack1 = ItemStack.field_190927_a;
+            ItemStack itemstack = ItemStack.EMPTY;
+            ItemStack itemstack1 = ItemStack.EMPTY;
 
             for (int i = 0; i < inv.getSizeInventory(); ++i)
             {
                 ItemStack itemstack2 = inv.getStackInSlot(i);
 
-                if (!itemstack2.func_190926_b())
+                if (!itemstack2.isEmpty())
                 {
                     if (itemstack2.getItem() == Items.BANNER)
                     {
-                        if (!itemstack1.func_190926_b())
+                        if (!itemstack1.isEmpty())
                         {
                             return false;
                         }
@@ -38,7 +38,7 @@ public class ShieldRecipes
                             return false;
                         }
 
-                        if (!itemstack.func_190926_b())
+                        if (!itemstack.isEmpty())
                         {
                             return false;
                         }
@@ -53,7 +53,7 @@ public class ShieldRecipes
                 }
             }
 
-            if (!itemstack.func_190926_b() && !itemstack1.func_190926_b())
+            if (!itemstack.isEmpty() && !itemstack1.isEmpty())
             {
                 return true;
             }
@@ -65,14 +65,14 @@ public class ShieldRecipes
 
         public ItemStack getCraftingResult(InventoryCrafting inv)
         {
-            ItemStack itemstack = ItemStack.field_190927_a;
-            ItemStack itemstack1 = ItemStack.field_190927_a;
+            ItemStack itemstack = ItemStack.EMPTY;
+            ItemStack itemstack1 = ItemStack.EMPTY;
 
             for (int i = 0; i < inv.getSizeInventory(); ++i)
             {
                 ItemStack itemstack2 = inv.getStackInSlot(i);
 
-                if (!itemstack2.func_190926_b())
+                if (!itemstack2.isEmpty())
                 {
                     if (itemstack2.getItem() == Items.BANNER)
                     {
@@ -85,7 +85,7 @@ public class ShieldRecipes
                 }
             }
 
-            if (itemstack1.func_190926_b())
+            if (itemstack1.isEmpty())
             {
                 return itemstack1;
             }
@@ -101,12 +101,12 @@ public class ShieldRecipes
 
         public ItemStack getRecipeOutput()
         {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
         }
 
         public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
         {
-            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+            NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 
             for (int i = 0; i < nonnulllist.size(); ++i)
             {
@@ -121,14 +121,14 @@ public class ShieldRecipes
             return nonnulllist;
         }
 
-        public boolean func_192399_d()
+        public boolean isHidden()
         {
             return true;
         }
 
-        public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+        public boolean canFit(int width, int height)
         {
-            return p_194133_1_ * p_194133_2_ >= 2;
+            return width * height >= 2;
         }
     }
 }

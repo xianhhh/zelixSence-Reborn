@@ -21,8 +21,8 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
 {
     /** The formatting for the timestamp on commands run. */
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("HH:mm:ss");
-    private long field_193041_b = -1L;
-    private boolean field_193042_c = true;
+    private long lastExecution = -1L;
+    private boolean updateLastExecution = true;
 
     /** The number of successful commands run. (used for redstone output) */
     private int successCount;
@@ -71,11 +71,11 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
             p_189510_1_.setString("LastOutput", ITextComponent.Serializer.componentToJson(this.lastOutput));
         }
 
-        p_189510_1_.setBoolean("UpdateLastExecution", this.field_193042_c);
+        p_189510_1_.setBoolean("UpdateLastExecution", this.updateLastExecution);
 
-        if (this.field_193042_c && this.field_193041_b > 0L)
+        if (this.updateLastExecution && this.lastExecution > 0L)
         {
-            p_189510_1_.setLong("LastExecution", this.field_193041_b);
+            p_189510_1_.setLong("LastExecution", this.lastExecution);
         }
 
         this.resultStats.writeStatsToNBT(p_189510_1_);
@@ -118,16 +118,16 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
 
         if (nbt.hasKey("UpdateLastExecution"))
         {
-            this.field_193042_c = nbt.getBoolean("UpdateLastExecution");
+            this.updateLastExecution = nbt.getBoolean("UpdateLastExecution");
         }
 
-        if (this.field_193042_c && nbt.hasKey("LastExecution"))
+        if (this.updateLastExecution && nbt.hasKey("LastExecution"))
         {
-            this.field_193041_b = nbt.getLong("LastExecution");
+            this.lastExecution = nbt.getLong("LastExecution");
         }
         else
         {
-            this.field_193041_b = -1L;
+            this.lastExecution = -1L;
         }
 
         this.resultStats.readStatsFromNBT(nbt);
@@ -136,7 +136,7 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    public boolean canUseCommand(int permLevel, String commandName)
     {
         return permLevel <= 2;
     }
@@ -160,7 +160,7 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
 
     public boolean trigger(World worldIn)
     {
-        if (!worldIn.isRemote && worldIn.getTotalWorldTime() != this.field_193041_b)
+        if (!worldIn.isRemote && worldIn.getTotalWorldTime() != this.lastExecution)
         {
             if ("Searge".equalsIgnoreCase(this.commandStored))
             {
@@ -183,14 +183,14 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
                     {
                         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Executing command block");
                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Command to be executed");
-                        crashreportcategory.setDetail("Command", new ICrashReportDetail<String>()
+                        crashreportcategory.addDetail("Command", new ICrashReportDetail<String>()
                         {
                             public String call() throws Exception
                             {
                                 return CommandBlockBaseLogic.this.getCommand();
                             }
                         });
-                        crashreportcategory.setDetail("Name", new ICrashReportDetail<String>()
+                        crashreportcategory.addDetail("Name", new ICrashReportDetail<String>()
                         {
                             public String call() throws Exception
                             {
@@ -205,13 +205,13 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
                     this.successCount = 0;
                 }
 
-                if (this.field_193042_c)
+                if (this.updateLastExecution)
                 {
-                    this.field_193041_b = worldIn.getTotalWorldTime();
+                    this.lastExecution = worldIn.getTotalWorldTime();
                 }
                 else
                 {
-                    this.field_193041_b = -1L;
+                    this.lastExecution = -1L;
                 }
 
                 return true;
@@ -239,7 +239,7 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(ITextComponent component)
+    public void sendMessage(ITextComponent component)
     {
         if (this.trackOutput && this.getEntityWorld() != null && !this.getEntityWorld().isRemote)
         {
@@ -254,7 +254,7 @@ public abstract class CommandBlockBaseLogic implements ICommandSender
     public boolean sendCommandFeedback()
     {
         MinecraftServer minecraftserver = this.getServer();
-        return minecraftserver == null || !minecraftserver.isAnvilFileSet() || minecraftserver.worldServers[0].getGameRules().getBoolean("commandBlockOutput");
+        return minecraftserver == null || !minecraftserver.isAnvilFileSet() || minecraftserver.worlds[0].getGameRules().getBoolean("commandBlockOutput");
     }
 
     public void setCommandStat(CommandResultStats.Type type, int amount)

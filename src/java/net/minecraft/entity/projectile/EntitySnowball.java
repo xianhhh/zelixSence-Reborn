@@ -30,6 +30,9 @@ public class EntitySnowball extends EntityThrowable
         EntityThrowable.registerFixesThrowable(fixer, "Snowball");
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 3)

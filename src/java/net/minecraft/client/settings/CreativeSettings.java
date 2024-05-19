@@ -9,29 +9,29 @@ import org.apache.logging.log4j.Logger;
 
 public class CreativeSettings
 {
-    private static final Logger field_192566_b = LogManager.getLogger();
-    protected Minecraft field_192565_a;
-    private final File field_192567_c;
-    private final HotbarSnapshot[] field_192568_d = new HotbarSnapshot[9];
+    private static final Logger LOGGER = LogManager.getLogger();
+    protected Minecraft minecraft;
+    private final File dataFile;
+    private final HotbarSnapshot[] hotbarSnapshots = new HotbarSnapshot[9];
 
-    public CreativeSettings(Minecraft p_i47395_1_, File p_i47395_2_)
+    public CreativeSettings(Minecraft minecraftIn, File dataDir)
     {
-        this.field_192565_a = p_i47395_1_;
-        this.field_192567_c = new File(p_i47395_2_, "hotbar.nbt");
+        this.minecraft = minecraftIn;
+        this.dataFile = new File(dataDir, "hotbar.nbt");
 
         for (int i = 0; i < 9; ++i)
         {
-            this.field_192568_d[i] = new HotbarSnapshot();
+            this.hotbarSnapshots[i] = new HotbarSnapshot();
         }
 
-        this.func_192562_a();
+        this.read();
     }
 
-    public void func_192562_a()
+    public void read()
     {
         try
         {
-            NBTTagCompound nbttagcompound = CompressedStreamTools.read(this.field_192567_c);
+            NBTTagCompound nbttagcompound = CompressedStreamTools.read(this.dataFile);
 
             if (nbttagcompound == null)
             {
@@ -40,16 +40,16 @@ public class CreativeSettings
 
             for (int i = 0; i < 9; ++i)
             {
-                this.field_192568_d[i].func_192833_a(nbttagcompound.getTagList(String.valueOf(i), 10));
+                this.hotbarSnapshots[i].fromTag(nbttagcompound.getTagList(String.valueOf(i), 10));
             }
         }
         catch (Exception exception)
         {
-            field_192566_b.error("Failed to load creative mode options", (Throwable)exception);
+            LOGGER.error("Failed to load creative mode options", (Throwable)exception);
         }
     }
 
-    public void func_192564_b()
+    public void write()
     {
         try
         {
@@ -57,19 +57,19 @@ public class CreativeSettings
 
             for (int i = 0; i < 9; ++i)
             {
-                nbttagcompound.setTag(String.valueOf(i), this.field_192568_d[i].func_192834_a());
+                nbttagcompound.setTag(String.valueOf(i), this.hotbarSnapshots[i].createTag());
             }
 
-            CompressedStreamTools.write(nbttagcompound, this.field_192567_c);
+            CompressedStreamTools.write(nbttagcompound, this.dataFile);
         }
         catch (Exception exception)
         {
-            field_192566_b.error("Failed to save creative mode options", (Throwable)exception);
+            LOGGER.error("Failed to save creative mode options", (Throwable)exception);
         }
     }
 
-    public HotbarSnapshot func_192563_a(int p_192563_1_)
+    public HotbarSnapshot getHotbarSnapshot(int p_192563_1_)
     {
-        return this.field_192568_d[p_192563_1_];
+        return this.hotbarSnapshots[p_192563_1_];
     }
 }

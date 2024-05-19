@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class EntityAIPanic extends EntityAIBase
 {
-    protected final EntityCreature theEntityCreature;
+    protected final EntityCreature creature;
     protected double speed;
     protected double randPosX;
     protected double randPosY;
@@ -19,7 +19,7 @@ public class EntityAIPanic extends EntityAIBase
 
     public EntityAIPanic(EntityCreature creature, double speedIn)
     {
-        this.theEntityCreature = creature;
+        this.creature = creature;
         this.speed = speedIn;
         this.setMutexBits(1);
     }
@@ -29,15 +29,15 @@ public class EntityAIPanic extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        if (this.theEntityCreature.getAITarget() == null && !this.theEntityCreature.isBurning())
+        if (this.creature.getRevengeTarget() == null && !this.creature.isBurning())
         {
             return false;
         }
         else
         {
-            if (this.theEntityCreature.isBurning())
+            if (this.creature.isBurning())
             {
-                BlockPos blockpos = this.getRandPos(this.theEntityCreature.world, this.theEntityCreature, 5, 4);
+                BlockPos blockpos = this.getRandPos(this.creature.world, this.creature, 5, 4);
 
                 if (blockpos != null)
                 {
@@ -48,13 +48,13 @@ public class EntityAIPanic extends EntityAIBase
                 }
             }
 
-            return this.func_190863_f();
+            return this.findRandomPosition();
         }
     }
 
-    protected boolean func_190863_f()
+    protected boolean findRandomPosition()
     {
-        Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.theEntityCreature, 5, 4);
+        Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.creature, 5, 4);
 
         if (vec3d == null)
         {
@@ -62,9 +62,9 @@ public class EntityAIPanic extends EntityAIBase
         }
         else
         {
-            this.randPosX = vec3d.xCoord;
-            this.randPosY = vec3d.yCoord;
-            this.randPosZ = vec3d.zCoord;
+            this.randPosX = vec3d.x;
+            this.randPosY = vec3d.y;
+            this.randPosZ = vec3d.z;
             return true;
         }
     }
@@ -74,15 +74,15 @@ public class EntityAIPanic extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theEntityCreature.getNavigator().tryMoveToXYZ(this.randPosX, this.randPosY, this.randPosZ, this.speed);
+        this.creature.getNavigator().tryMoveToXYZ(this.randPosX, this.randPosY, this.randPosZ, this.speed);
     }
 
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return !this.theEntityCreature.getNavigator().noPath();
+        return !this.creature.getNavigator().noPath();
     }
 
     @Nullable

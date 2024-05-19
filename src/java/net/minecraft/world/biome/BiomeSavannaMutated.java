@@ -12,9 +12,9 @@ public class BiomeSavannaMutated extends BiomeSavanna
     public BiomeSavannaMutated(Biome.BiomeProperties properties)
     {
         super(properties);
-        this.theBiomeDecorator.treesPerChunk = 2;
-        this.theBiomeDecorator.flowersPerChunk = 2;
-        this.theBiomeDecorator.grassPerChunk = 5;
+        this.decorator.treesPerChunk = 2;
+        this.decorator.flowersPerChunk = 2;
+        this.decorator.grassPerChunk = 5;
     }
 
     public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z, double noiseVal)
@@ -37,6 +37,6 @@ public class BiomeSavannaMutated extends BiomeSavanna
 
     public void decorate(World worldIn, Random rand, BlockPos pos)
     {
-        this.theBiomeDecorator.decorate(worldIn, rand, this, pos);
+        this.decorator.decorate(worldIn, rand, this, pos);
     }
 }

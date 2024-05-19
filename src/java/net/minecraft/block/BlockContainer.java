@@ -59,6 +59,10 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
         worldIn.removeTileEntity(pos);
     }
 
+    /**
+     * Spawns the block's drops in the world. By the time this is called the Block has possibly been set to air via
+     * Block.removedByPlayer
+     */
     public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
         if (te instanceof IWorldNameable && ((IWorldNameable)te).hasCustomName())
@@ -74,7 +78,7 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
             int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
             Item item = this.getItemDropped(state, worldIn.rand, i);
 
-            if (item == Items.field_190931_a)
+            if (item == Items.AIR)
             {
                 return;
             }
@@ -90,10 +94,9 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
     }
 
     /**
-     * Called on both Client and Server when World#addBlockEvent is called. On the Server, this may perform additional
-     * changes to the world, like pistons replacing the block with an extended base. On the client, the update may
-     * involve replacing tile entities, playing sounds, or performing other visual actions to reflect the server side
-     * changes.
+     * Called on server when World#addBlockEvent is called. If server returns true, then also called on the client. On
+     * the Server, this may perform additional changes to the world, like pistons replacing the block with an extended
+     * base. On the client, the update may involve replacing tile entities or effects such as sounds or particles
      */
     public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
     {

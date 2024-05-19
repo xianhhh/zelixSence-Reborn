@@ -123,6 +123,9 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         }
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 7)
@@ -194,14 +197,14 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(p_184754_1_));
     }
 
-    public void func_193101_c(EntityPlayer p_193101_1_)
+    public void setTamedBy(EntityPlayer player)
     {
         this.setTamed(true);
-        this.setOwnerId(p_193101_1_.getUniqueID());
+        this.setOwnerId(player.getUniqueID());
 
-        if (p_193101_1_ instanceof EntityPlayerMP)
+        if (player instanceof EntityPlayerMP)
         {
-            CriteriaTriggers.field_193136_w.func_193178_a((EntityPlayerMP)p_193101_1_, this);
+            CriteriaTriggers.TAME_ANIMAL.trigger((EntityPlayerMP)player, this);
         }
     }
 
@@ -232,7 +235,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         return this.aiSit;
     }
 
-    public boolean shouldAttackEntity(EntityLivingBase p_142018_1_, EntityLivingBase p_142018_2_)
+    public boolean shouldAttackEntity(EntityLivingBase target, EntityLivingBase owner)
     {
         return true;
     }
@@ -282,7 +285,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     {
         if (!this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP)
         {
-            this.getOwner().addChatMessage(this.getCombatTracker().getDeathMessage());
+            this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
         }
 
         super.onDeath(cause);

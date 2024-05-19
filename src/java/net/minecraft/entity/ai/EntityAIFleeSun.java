@@ -10,18 +10,18 @@ import net.minecraft.world.World;
 
 public class EntityAIFleeSun extends EntityAIBase
 {
-    private final EntityCreature theCreature;
+    private final EntityCreature creature;
     private double shelterX;
     private double shelterY;
     private double shelterZ;
     private final double movementSpeed;
-    private final World theWorld;
+    private final World world;
 
     public EntityAIFleeSun(EntityCreature theCreatureIn, double movementSpeedIn)
     {
-        this.theCreature = theCreatureIn;
+        this.creature = theCreatureIn;
         this.movementSpeed = movementSpeedIn;
-        this.theWorld = theCreatureIn.world;
+        this.world = theCreatureIn.world;
         this.setMutexBits(1);
     }
 
@@ -30,19 +30,19 @@ public class EntityAIFleeSun extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        if (!this.theWorld.isDaytime())
+        if (!this.world.isDaytime())
         {
             return false;
         }
-        else if (!this.theCreature.isBurning())
+        else if (!this.creature.isBurning())
         {
             return false;
         }
-        else if (!this.theWorld.canSeeSky(new BlockPos(this.theCreature.posX, this.theCreature.getEntityBoundingBox().minY, this.theCreature.posZ)))
+        else if (!this.world.canSeeSky(new BlockPos(this.creature.posX, this.creature.getEntityBoundingBox().minY, this.creature.posZ)))
         {
             return false;
         }
-        else if (!this.theCreature.getItemStackFromSlot(EntityEquipmentSlot.HEAD).func_190926_b())
+        else if (!this.creature.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
         {
             return false;
         }
@@ -56,9 +56,9 @@ public class EntityAIFleeSun extends EntityAIBase
             }
             else
             {
-                this.shelterX = vec3d.xCoord;
-                this.shelterY = vec3d.yCoord;
-                this.shelterZ = vec3d.zCoord;
+                this.shelterX = vec3d.x;
+                this.shelterY = vec3d.y;
+                this.shelterZ = vec3d.z;
                 return true;
             }
         }
@@ -67,9 +67,9 @@ public class EntityAIFleeSun extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return !this.theCreature.getNavigator().noPath();
+        return !this.creature.getNavigator().noPath();
     }
 
     /**
@@ -77,20 +77,20 @@ public class EntityAIFleeSun extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theCreature.getNavigator().tryMoveToXYZ(this.shelterX, this.shelterY, this.shelterZ, this.movementSpeed);
+        this.creature.getNavigator().tryMoveToXYZ(this.shelterX, this.shelterY, this.shelterZ, this.movementSpeed);
     }
 
     @Nullable
     private Vec3d findPossibleShelter()
     {
-        Random random = this.theCreature.getRNG();
-        BlockPos blockpos = new BlockPos(this.theCreature.posX, this.theCreature.getEntityBoundingBox().minY, this.theCreature.posZ);
+        Random random = this.creature.getRNG();
+        BlockPos blockpos = new BlockPos(this.creature.posX, this.creature.getEntityBoundingBox().minY, this.creature.posZ);
 
         for (int i = 0; i < 10; ++i)
         {
             BlockPos blockpos1 = blockpos.add(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
 
-            if (!this.theWorld.canSeeSky(blockpos1) && this.theCreature.getBlockPathWeight(blockpos1) < 0.0F)
+            if (!this.world.canSeeSky(blockpos1) && this.creature.getBlockPathWeight(blockpos1) < 0.0F)
             {
                 return new Vec3d((double)blockpos1.getX(), (double)blockpos1.getY(), (double)blockpos1.getZ());
             }

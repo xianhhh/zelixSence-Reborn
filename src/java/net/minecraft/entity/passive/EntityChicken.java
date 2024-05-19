@@ -121,7 +121,7 @@ public class EntityChicken extends EntityAnimal
         return SoundEvents.ENTITY_CHICKEN_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_CHICKEN_HURT;
     }

@@ -14,12 +14,12 @@ public class SPacketTimeUpdate implements Packet<INetHandlerPlayClient>
     {
     }
 
-    public SPacketTimeUpdate(long totalWorldTimeIn, long worldTimeIn, boolean p_i46902_5_)
+    public SPacketTimeUpdate(long totalWorldTimeIn, long worldTimeIn, boolean doDaylightCycle)
     {
         this.totalWorldTime = totalWorldTimeIn;
         this.worldTime = worldTimeIn;
 
-        if (!p_i46902_5_)
+        if (!doDaylightCycle)
         {
             this.worldTime = -this.worldTime;
 

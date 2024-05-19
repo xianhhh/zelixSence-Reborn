@@ -25,7 +25,7 @@ public class CommandTestForBlock extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "testforblock";
     }
@@ -41,7 +41,7 @@ public class CommandTestForBlock extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.testforblock.usage";
     }
@@ -100,7 +100,7 @@ public class CommandTestForBlock extends CommandBase
                     {
                         throw new CommandException("commands.testforblock.failed.tile", new Object[] {blockpos.getX(), blockpos.getY(), blockpos.getZ(), block1.getLocalizedName(), block.getLocalizedName()});
                     }
-                    else if (args.length >= 5 && !CommandBase.func_190791_b(block, args[4]).apply(iblockstate))
+                    else if (args.length >= 5 && !CommandBase.convertArgToBlockStatePredicate(block, args[4]).apply(iblockstate))
                     {
                         try
                         {
@@ -139,11 +139,11 @@ public class CommandTestForBlock extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length > 0 && args.length <= 3)
         {
-            return getTabCompletionCoordinate(args, 0, pos);
+            return getTabCompletionCoordinate(args, 0, targetPos);
         }
         else
         {

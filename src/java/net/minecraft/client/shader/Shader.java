@@ -43,7 +43,7 @@ public class Shader
         this.listAuxHeights.add(this.listAuxHeights.size(), Integer.valueOf(height));
     }
 
-    private void preLoadShader()
+    private void preRender()
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableBlend();
@@ -61,9 +61,9 @@ public class Shader
         this.projectionMatrix = projectionMatrixIn;
     }
 
-    public void loadShader(float p_148042_1_)
+    public void render(float partialTicks)
     {
-        this.preLoadShader();
+        this.preRender();
         this.framebufferIn.unbindFramebuffer();
         float f = (float)this.framebufferOut.framebufferTextureWidth;
         float f1 = (float)this.framebufferOut.framebufferTextureHeight;
@@ -79,7 +79,7 @@ public class Shader
         this.manager.getShaderUniformOrDefault("ProjMat").set(this.projectionMatrix);
         this.manager.getShaderUniformOrDefault("InSize").set((float)this.framebufferIn.framebufferTextureWidth, (float)this.framebufferIn.framebufferTextureHeight);
         this.manager.getShaderUniformOrDefault("OutSize").set(f, f1);
-        this.manager.getShaderUniformOrDefault("Time").set(p_148042_1_);
+        this.manager.getShaderUniformOrDefault("Time").set(partialTicks);
         Minecraft minecraft = Minecraft.getMinecraft();
         this.manager.getShaderUniformOrDefault("ScreenSize").set((float)minecraft.displayWidth, (float)minecraft.displayHeight);
         this.manager.useShader();

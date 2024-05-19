@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 
 public class Village
 {
-    private World worldObj;
+    private World world;
     private final List<VillageDoorInfo> villageDoorInfoList = Lists.<VillageDoorInfo>newArrayList();
 
     /**
@@ -56,12 +56,12 @@ public class Village
 
     public Village(World worldIn)
     {
-        this.worldObj = worldIn;
+        this.world = worldIn;
     }
 
     public void setWorld(World worldIn)
     {
-        this.worldObj = worldIn;
+        this.world = worldIn;
     }
 
     /**
@@ -85,15 +85,15 @@ public class Village
 
         int i = this.numVillagers / 10;
 
-        if (this.numIronGolems < i && this.villageDoorInfoList.size() > 20 && this.worldObj.rand.nextInt(7000) == 0)
+        if (this.numIronGolems < i && this.villageDoorInfoList.size() > 20 && this.world.rand.nextInt(7000) == 0)
         {
             Vec3d vec3d = this.findRandomSpawnPos(this.center, 2, 4, 2);
 
             if (vec3d != null)
             {
-                EntityIronGolem entityirongolem = new EntityIronGolem(this.worldObj);
-                entityirongolem.setPosition(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
-                this.worldObj.spawnEntityInWorld(entityirongolem);
+                EntityIronGolem entityirongolem = new EntityIronGolem(this.world);
+                entityirongolem.setPosition(vec3d.x, vec3d.y, vec3d.z);
+                this.world.spawnEntity(entityirongolem);
                 ++this.numIronGolems;
             }
         }
@@ -103,7 +103,7 @@ public class Village
     {
         for (int i = 0; i < 10; ++i)
         {
-            BlockPos blockpos = pos.add(this.worldObj.rand.nextInt(16) - 8, this.worldObj.rand.nextInt(6) - 3, this.worldObj.rand.nextInt(16) - 8);
+            BlockPos blockpos = pos.add(this.world.rand.nextInt(16) - 8, this.world.rand.nextInt(6) - 3, this.world.rand.nextInt(16) - 8);
 
             if (this.isBlockPosWithinSqVillageRadius(blockpos) && this.isAreaClearAround(new BlockPos(x, y, z), blockpos))
             {
@@ -119,7 +119,7 @@ public class Village
      */
     private boolean isAreaClearAround(BlockPos blockSize, BlockPos blockLocation)
     {
-        if (!this.worldObj.getBlockState(blockLocation.down()).isFullyOpaque())
+        if (!this.world.getBlockState(blockLocation.down()).isTopSolid())
         {
             return false;
         }
@@ -134,7 +134,7 @@ public class Village
                 {
                     for (int i1 = j; i1 < j + blockSize.getZ(); ++i1)
                     {
-                        if (this.worldObj.getBlockState(new BlockPos(k, l, i1)).isNormalCube())
+                        if (this.world.getBlockState(new BlockPos(k, l, i1)).isNormalCube())
                         {
                             return false;
                         }
@@ -148,13 +148,13 @@ public class Village
 
     private void updateNumIronGolems()
     {
-        List<EntityIronGolem> list = this.worldObj.<EntityIronGolem>getEntitiesWithinAABB(EntityIronGolem.class, new AxisAlignedBB((double)(this.center.getX() - this.villageRadius), (double)(this.center.getY() - 4), (double)(this.center.getZ() - this.villageRadius), (double)(this.center.getX() + this.villageRadius), (double)(this.center.getY() + 4), (double)(this.center.getZ() + this.villageRadius)));
+        List<EntityIronGolem> list = this.world.<EntityIronGolem>getEntitiesWithinAABB(EntityIronGolem.class, new AxisAlignedBB((double)(this.center.getX() - this.villageRadius), (double)(this.center.getY() - 4), (double)(this.center.getZ() - this.villageRadius), (double)(this.center.getX() + this.villageRadius), (double)(this.center.getY() + 4), (double)(this.center.getZ() + this.villageRadius)));
         this.numIronGolems = list.size();
     }
 
     private void updateNumVillagers()
     {
-        List<EntityVillager> list = this.worldObj.<EntityVillager>getEntitiesWithinAABB(EntityVillager.class, new AxisAlignedBB((double)(this.center.getX() - this.villageRadius), (double)(this.center.getY() - 4), (double)(this.center.getZ() - this.villageRadius), (double)(this.center.getX() + this.villageRadius), (double)(this.center.getY() + 4), (double)(this.center.getZ() + this.villageRadius)));
+        List<EntityVillager> list = this.world.<EntityVillager>getEntitiesWithinAABB(EntityVillager.class, new AxisAlignedBB((double)(this.center.getX() - this.villageRadius), (double)(this.center.getY() - 4), (double)(this.center.getZ() - this.villageRadius), (double)(this.center.getX() + this.villageRadius), (double)(this.center.getY() + 4), (double)(this.center.getZ() + this.villageRadius)));
         this.numVillagers = list.size();
 
         if (this.numVillagers == 0)
@@ -251,7 +251,7 @@ public class Village
                 BlockPos blockpos = villagedoorinfo1.getDoorBlockPos();
                 EnumFacing enumfacing = villagedoorinfo1.getInsideDirection();
 
-                if (this.worldObj.getBlockState(blockpos.offset(enumfacing, 1)).getBlock().isPassable(this.worldObj, blockpos.offset(enumfacing, 1)) && this.worldObj.getBlockState(blockpos.offset(enumfacing, -1)).getBlock().isPassable(this.worldObj, blockpos.offset(enumfacing, -1)) && this.worldObj.getBlockState(blockpos.up().offset(enumfacing, 1)).getBlock().isPassable(this.worldObj, blockpos.up().offset(enumfacing, 1)) && this.worldObj.getBlockState(blockpos.up().offset(enumfacing, -1)).getBlock().isPassable(this.worldObj, blockpos.up().offset(enumfacing, -1)))
+                if (this.world.getBlockState(blockpos.offset(enumfacing, 1)).getBlock().isPassable(this.world, blockpos.offset(enumfacing, 1)) && this.world.getBlockState(blockpos.offset(enumfacing, -1)).getBlock().isPassable(this.world, blockpos.offset(enumfacing, -1)) && this.world.getBlockState(blockpos.up().offset(enumfacing, 1)).getBlock().isPassable(this.world, blockpos.up().offset(enumfacing, 1)) && this.world.getBlockState(blockpos.up().offset(enumfacing, -1)).getBlock().isPassable(this.world, blockpos.up().offset(enumfacing, -1)))
                 {
                     villagedoorinfo = villagedoorinfo1;
                     i = j;
@@ -292,7 +292,7 @@ public class Village
         this.villageDoorInfoList.add(doorInfo);
         this.centerHelper = this.centerHelper.add(doorInfo.getDoorBlockPos());
         this.updateVillageRadiusAndCenter();
-        this.lastAddDoorTimestamp = doorInfo.getInsidePosY();
+        this.lastAddDoorTimestamp = doorInfo.getLastActivityTimestamp();
     }
 
     /**
@@ -347,7 +347,7 @@ public class Village
         {
             if (this.isPlayerReputationTooLow(s))
             {
-                EntityPlayer entityplayer1 = this.worldObj.getPlayerEntityByName(s);
+                EntityPlayer entityplayer1 = this.world.getPlayerEntityByName(s);
 
                 if (entityplayer1 != null)
                 {
@@ -383,7 +383,7 @@ public class Village
     private void removeDeadAndOutOfRangeDoors()
     {
         boolean flag = false;
-        boolean flag1 = this.worldObj.rand.nextInt(50) == 0;
+        boolean flag1 = this.world.rand.nextInt(50) == 0;
         Iterator<VillageDoorInfo> iterator = this.villageDoorInfoList.iterator();
 
         while (iterator.hasNext())
@@ -395,7 +395,7 @@ public class Village
                 villagedoorinfo.resetDoorOpeningRestrictionCounter();
             }
 
-            if (!this.isWoodDoor(villagedoorinfo.getDoorBlockPos()) || Math.abs(this.tickCounter - villagedoorinfo.getInsidePosY()) > 1200)
+            if (!this.isWoodDoor(villagedoorinfo.getDoorBlockPos()) || Math.abs(this.tickCounter - villagedoorinfo.getLastActivityTimestamp()) > 1200)
             {
                 this.centerHelper = this.centerHelper.subtract(villagedoorinfo.getDoorBlockPos());
                 flag = true;
@@ -412,7 +412,7 @@ public class Village
 
     private boolean isWoodDoor(BlockPos pos)
     {
-        IBlockState iblockstate = this.worldObj.getBlockState(pos);
+        IBlockState iblockstate = this.world.getBlockState(pos);
         Block block = iblockstate.getBlock();
 
         if (block instanceof BlockDoor)
@@ -505,9 +505,9 @@ public class Village
         {
             NBTTagCompound nbttagcompound1 = nbttaglist1.getCompoundTagAt(j);
 
-            if (nbttagcompound1.hasKey("UUID") && this.worldObj != null && this.worldObj.getMinecraftServer() != null)
+            if (nbttagcompound1.hasKey("UUID") && this.world != null && this.world.getMinecraftServer() != null)
             {
-                PlayerProfileCache playerprofilecache = this.worldObj.getMinecraftServer().getPlayerProfileCache();
+                PlayerProfileCache playerprofilecache = this.world.getMinecraftServer().getPlayerProfileCache();
                 GameProfile gameprofile = playerprofilecache.getProfileByUUID(UUID.fromString(nbttagcompound1.getString("UUID")));
 
                 if (gameprofile != null)
@@ -549,7 +549,7 @@ public class Village
             nbttagcompound.setInteger("Z", villagedoorinfo.getDoorBlockPos().getZ());
             nbttagcompound.setInteger("IDX", villagedoorinfo.getInsideOffsetX());
             nbttagcompound.setInteger("IDZ", villagedoorinfo.getInsideOffsetZ());
-            nbttagcompound.setInteger("TS", villagedoorinfo.getInsidePosY());
+            nbttagcompound.setInteger("TS", villagedoorinfo.getLastActivityTimestamp());
             nbttaglist.appendTag(nbttagcompound);
         }
 
@@ -559,7 +559,7 @@ public class Village
         for (String s : this.playerReputation.keySet())
         {
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-            PlayerProfileCache playerprofilecache = this.worldObj.getMinecraftServer().getPlayerProfileCache();
+            PlayerProfileCache playerprofilecache = this.world.getMinecraftServer().getPlayerProfileCache();
 
             try
             {

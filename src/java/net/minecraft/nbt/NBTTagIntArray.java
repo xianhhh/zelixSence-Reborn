@@ -22,10 +22,10 @@ public class NBTTagIntArray extends NBTBase
 
     public NBTTagIntArray(List<Integer> p_i47528_1_)
     {
-        this(func_193584_a(p_i47528_1_));
+        this(toArray(p_i47528_1_));
     }
 
-    private static int[] func_193584_a(List<Integer> p_193584_0_)
+    private static int[] toArray(List<Integer> p_193584_0_)
     {
         int[] aint = new int[p_193584_0_.size()];
 

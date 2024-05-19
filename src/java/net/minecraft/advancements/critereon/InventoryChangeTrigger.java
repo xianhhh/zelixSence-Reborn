@@ -19,95 +19,98 @@ import net.minecraft.util.ResourceLocation;
 
 public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChangeTrigger.Instance>
 {
-    private static final ResourceLocation field_192209_a = new ResourceLocation("inventory_changed");
-    private final Map<PlayerAdvancements, InventoryChangeTrigger.Listeners> field_192210_b = Maps.<PlayerAdvancements, InventoryChangeTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("inventory_changed");
+    private final Map<PlayerAdvancements, InventoryChangeTrigger.Listeners> listeners = Maps.<PlayerAdvancements, InventoryChangeTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192209_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener)
     {
-        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.field_192210_b.get(p_192165_1_);
+        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (inventorychangetrigger$listeners == null)
         {
-            inventorychangetrigger$listeners = new InventoryChangeTrigger.Listeners(p_192165_1_);
-            this.field_192210_b.put(p_192165_1_, inventorychangetrigger$listeners);
+            inventorychangetrigger$listeners = new InventoryChangeTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, inventorychangetrigger$listeners);
         }
 
-        inventorychangetrigger$listeners.func_192489_a(p_192165_2_);
+        inventorychangetrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener)
     {
-        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.field_192210_b.get(p_192164_1_);
+        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (inventorychangetrigger$listeners != null)
         {
-            inventorychangetrigger$listeners.func_192487_b(p_192164_2_);
+            inventorychangetrigger$listeners.remove(listener);
 
-            if (inventorychangetrigger$listeners.func_192488_a())
+            if (inventorychangetrigger$listeners.isEmpty())
             {
-                this.field_192210_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192210_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public InventoryChangeTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public InventoryChangeTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        JsonObject jsonobject = JsonUtils.getJsonObject(p_192166_1_, "slots", new JsonObject());
-        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(jsonobject.get("occupied"));
-        MinMaxBounds minmaxbounds1 = MinMaxBounds.func_192515_a(jsonobject.get("full"));
-        MinMaxBounds minmaxbounds2 = MinMaxBounds.func_192515_a(jsonobject.get("empty"));
-        ItemPredicate[] aitempredicate = ItemPredicate.func_192494_b(p_192166_1_.get("items"));
+        JsonObject jsonobject = JsonUtils.getJsonObject(json, "slots", new JsonObject());
+        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(jsonobject.get("occupied"));
+        MinMaxBounds minmaxbounds1 = MinMaxBounds.deserialize(jsonobject.get("full"));
+        MinMaxBounds minmaxbounds2 = MinMaxBounds.deserialize(jsonobject.get("empty"));
+        ItemPredicate[] aitempredicate = ItemPredicate.deserializeArray(json.get("items"));
         return new InventoryChangeTrigger.Instance(minmaxbounds, minmaxbounds1, minmaxbounds2, aitempredicate);
     }
 
-    public void func_192208_a(EntityPlayerMP p_192208_1_, InventoryPlayer p_192208_2_)
+    public void trigger(EntityPlayerMP player, InventoryPlayer inventory)
     {
-        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.field_192210_b.get(p_192208_1_.func_192039_O());
+        InventoryChangeTrigger.Listeners inventorychangetrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (inventorychangetrigger$listeners != null)
         {
-            inventorychangetrigger$listeners.func_192486_a(p_192208_2_);
+            inventorychangetrigger$listeners.trigger(inventory);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final MinMaxBounds field_192266_a;
-        private final MinMaxBounds field_192267_b;
-        private final MinMaxBounds field_192268_c;
-        private final ItemPredicate[] field_192269_d;
+        private final MinMaxBounds occupied;
+        private final MinMaxBounds full;
+        private final MinMaxBounds empty;
+        private final ItemPredicate[] items;
 
-        public Instance(MinMaxBounds p_i47390_1_, MinMaxBounds p_i47390_2_, MinMaxBounds p_i47390_3_, ItemPredicate[] p_i47390_4_)
+        public Instance(MinMaxBounds occupied, MinMaxBounds full, MinMaxBounds empty, ItemPredicate[] items)
         {
-            super(InventoryChangeTrigger.field_192209_a);
-            this.field_192266_a = p_i47390_1_;
-            this.field_192267_b = p_i47390_2_;
-            this.field_192268_c = p_i47390_3_;
-            this.field_192269_d = p_i47390_4_;
+            super(InventoryChangeTrigger.ID);
+            this.occupied = occupied;
+            this.full = full;
+            this.empty = empty;
+            this.items = items;
         }
 
-        public boolean func_192265_a(InventoryPlayer p_192265_1_)
+        public boolean test(InventoryPlayer inventory)
         {
             int i = 0;
             int j = 0;
             int k = 0;
-            List<ItemPredicate> list = Lists.newArrayList(this.field_192269_d);
+            List<ItemPredicate> list = Lists.newArrayList(this.items);
 
-            for (int l = 0; l < p_192265_1_.getSizeInventory(); ++l)
+            for (int l = 0; l < inventory.getSizeInventory(); ++l)
             {
-                ItemStack itemstack = p_192265_1_.getStackInSlot(l);
+                ItemStack itemstack = inventory.getStackInSlot(l);
 
-                if (itemstack.func_190926_b())
+                if (itemstack.isEmpty())
                 {
                     ++j;
                 }
@@ -115,7 +118,7 @@ public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChange
                 {
                     ++k;
 
-                    if (itemstack.func_190916_E() >= itemstack.getMaxStackSize())
+                    if (itemstack.getCount() >= itemstack.getMaxStackSize())
                     {
                         ++i;
                     }
@@ -126,7 +129,7 @@ public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChange
                     {
                         ItemPredicate itempredicate = iterator.next();
 
-                        if (itempredicate.func_192493_a(itemstack))
+                        if (itempredicate.test(itemstack))
                         {
                             iterator.remove();
                         }
@@ -134,15 +137,15 @@ public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChange
                 }
             }
 
-            if (!this.field_192267_b.func_192514_a((float)i))
+            if (!this.full.test((float)i))
             {
                 return false;
             }
-            else if (!this.field_192268_c.func_192514_a((float)j))
+            else if (!this.empty.test((float)j))
             {
                 return false;
             }
-            else if (!this.field_192266_a.func_192514_a((float)k))
+            else if (!this.occupied.test((float)k))
             {
                 return false;
             }
@@ -159,36 +162,36 @@ public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChange
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192490_a;
-        private final Set<ICriterionTrigger.Listener<InventoryChangeTrigger.Instance>> field_192491_b = Sets.<ICriterionTrigger.Listener<InventoryChangeTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<InventoryChangeTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<InventoryChangeTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47391_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192490_a = p_i47391_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192488_a()
+        public boolean isEmpty()
         {
-            return this.field_192491_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192489_a(ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> p_192489_1_)
+        public void add(ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener)
         {
-            this.field_192491_b.add(p_192489_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192487_b(ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> p_192487_1_)
+        public void remove(ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener)
         {
-            this.field_192491_b.remove(p_192487_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192486_a(InventoryPlayer p_192486_1_)
+        public void trigger(InventoryPlayer inventory)
         {
             List<ICriterionTrigger.Listener<InventoryChangeTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener : this.field_192491_b)
+            for (ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener : this.listeners)
             {
-                if (((InventoryChangeTrigger.Instance)listener.func_192158_a()).func_192265_a(p_192486_1_))
+                if (((InventoryChangeTrigger.Instance)listener.getCriterionInstance()).test(inventory))
                 {
                     if (list == null)
                     {
@@ -203,7 +206,7 @@ public class InventoryChangeTrigger implements ICriterionTrigger<InventoryChange
             {
                 for (ICriterionTrigger.Listener<InventoryChangeTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192490_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

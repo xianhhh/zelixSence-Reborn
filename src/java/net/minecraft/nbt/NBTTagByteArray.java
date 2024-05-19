@@ -22,10 +22,10 @@ public class NBTTagByteArray extends NBTBase
 
     public NBTTagByteArray(List<Byte> p_i47529_1_)
     {
-        this(func_193589_a(p_i47529_1_));
+        this(toArray(p_i47529_1_));
     }
 
-    private static byte[] func_193589_a(List<Byte> p_193589_0_)
+    private static byte[] toArray(List<Byte> p_193589_0_)
     {
         byte[] abyte = new byte[p_193589_0_.size()];
 

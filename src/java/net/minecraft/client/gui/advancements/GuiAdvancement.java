@@ -19,46 +19,46 @@ import net.minecraft.util.math.MathHelper;
 
 public class GuiAdvancement extends Gui
 {
-    private static final ResourceLocation field_191827_a = new ResourceLocation("textures/gui/advancements/widgets.png");
-    private static final Pattern field_192996_f = Pattern.compile("(.+) \\S+");
-    private final GuiAdvancementTab field_191828_f;
-    private final Advancement field_191829_g;
-    private final DisplayInfo field_191830_h;
-    private final String field_191831_i;
-    private final int field_191832_j;
-    private final List<String> field_192997_l;
-    private final Minecraft field_191833_k;
-    private GuiAdvancement field_191834_l;
-    private final List<GuiAdvancement> field_191835_m = Lists.<GuiAdvancement>newArrayList();
-    private AdvancementProgress field_191836_n;
-    private final int field_191837_o;
-    private final int field_191826_p;
+    private static final ResourceLocation WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
+    private static final Pattern PATTERN = Pattern.compile("(.+) \\S+");
+    private final GuiAdvancementTab guiAdvancementTab;
+    private final Advancement advancement;
+    private final DisplayInfo displayInfo;
+    private final String title;
+    private final int width;
+    private final List<String> description;
+    private final Minecraft minecraft;
+    private GuiAdvancement parent;
+    private final List<GuiAdvancement> children = Lists.<GuiAdvancement>newArrayList();
+    private AdvancementProgress advancementProgress;
+    private final int x;
+    private final int y;
 
     public GuiAdvancement(GuiAdvancementTab p_i47385_1_, Minecraft p_i47385_2_, Advancement p_i47385_3_, DisplayInfo p_i47385_4_)
     {
-        this.field_191828_f = p_i47385_1_;
-        this.field_191829_g = p_i47385_3_;
-        this.field_191830_h = p_i47385_4_;
-        this.field_191833_k = p_i47385_2_;
-        this.field_191831_i = p_i47385_2_.fontRendererObj.trimStringToWidth(p_i47385_4_.func_192297_a().getFormattedText(), 163);
-        this.field_191837_o = MathHelper.floor(p_i47385_4_.func_192299_e() * 28.0F);
-        this.field_191826_p = MathHelper.floor(p_i47385_4_.func_192296_f() * 27.0F);
-        int i = p_i47385_3_.func_193124_g();
+        this.guiAdvancementTab = p_i47385_1_;
+        this.advancement = p_i47385_3_;
+        this.displayInfo = p_i47385_4_;
+        this.minecraft = p_i47385_2_;
+        this.title = p_i47385_2_.fontRenderer.trimStringToWidth(p_i47385_4_.getTitle().getFormattedText(), 163);
+        this.x = MathHelper.floor(p_i47385_4_.getX() * 28.0F);
+        this.y = MathHelper.floor(p_i47385_4_.getY() * 27.0F);
+        int i = p_i47385_3_.getRequirementCount();
         int j = String.valueOf(i).length();
-        int k = i > 1 ? p_i47385_2_.fontRendererObj.getStringWidth("  ") + p_i47385_2_.fontRendererObj.getStringWidth("0") * j * 2 + p_i47385_2_.fontRendererObj.getStringWidth("/") : 0;
-        int l = 29 + p_i47385_2_.fontRendererObj.getStringWidth(this.field_191831_i) + k;
-        String s = p_i47385_4_.func_193222_b().getFormattedText();
-        this.field_192997_l = this.func_192995_a(s, l);
+        int k = i > 1 ? p_i47385_2_.fontRenderer.getStringWidth("  ") + p_i47385_2_.fontRenderer.getStringWidth("0") * j * 2 + p_i47385_2_.fontRenderer.getStringWidth("/") : 0;
+        int l = 29 + p_i47385_2_.fontRenderer.getStringWidth(this.title) + k;
+        String s = p_i47385_4_.getDescription().getFormattedText();
+        this.description = this.findOptimalLines(s, l);
 
-        for (String s1 : this.field_192997_l)
+        for (String s1 : this.description)
         {
-            l = Math.max(l, p_i47385_2_.fontRendererObj.getStringWidth(s1));
+            l = Math.max(l, p_i47385_2_.fontRenderer.getStringWidth(s1));
         }
 
-        this.field_191832_j = l + 3 + 5;
+        this.width = l + 3 + 5;
     }
 
-    private List<String> func_192995_a(String p_192995_1_, int p_192995_2_)
+    private List<String> findOptimalLines(String p_192995_1_, int p_192995_2_)
     {
         if (p_192995_1_.isEmpty())
         {
@@ -66,7 +66,7 @@ public class GuiAdvancement extends Gui
         }
         else
         {
-            List<String> list = this.field_191833_k.fontRendererObj.listFormattedStringToWidth(p_192995_1_, p_192995_2_);
+            List<String> list = this.minecraft.fontRenderer.listFormattedStringToWidth(p_192995_1_, p_192995_2_);
 
             if (list.size() < 2)
             {
@@ -76,23 +76,23 @@ public class GuiAdvancement extends Gui
             {
                 String s = list.get(0);
                 String s1 = list.get(1);
-                int i = this.field_191833_k.fontRendererObj.getStringWidth(s + ' ' + s1.split(" ")[0]);
+                int i = this.minecraft.fontRenderer.getStringWidth(s + ' ' + s1.split(" ")[0]);
 
                 if (i - p_192995_2_ <= 10)
                 {
-                    return this.field_191833_k.fontRendererObj.listFormattedStringToWidth(p_192995_1_, i);
+                    return this.minecraft.fontRenderer.listFormattedStringToWidth(p_192995_1_, i);
                 }
                 else
                 {
-                    Matcher matcher = field_192996_f.matcher(s);
+                    Matcher matcher = PATTERN.matcher(s);
 
                     if (matcher.matches())
                     {
-                        int j = this.field_191833_k.fontRendererObj.getStringWidth(matcher.group(1));
+                        int j = this.minecraft.fontRenderer.getStringWidth(matcher.group(1));
 
                         if (p_192995_2_ - j <= 10)
                         {
-                            return this.field_191833_k.fontRendererObj.listFormattedStringToWidth(p_192995_1_, j);
+                            return this.minecraft.fontRenderer.listFormattedStringToWidth(p_192995_1_, j);
                         }
                     }
 
@@ -103,21 +103,21 @@ public class GuiAdvancement extends Gui
     }
 
     @Nullable
-    private GuiAdvancement func_191818_a(Advancement p_191818_1_)
+    private GuiAdvancement getFirstVisibleParent(Advancement advancementIn)
     {
         while (true)
         {
-            p_191818_1_ = p_191818_1_.func_192070_b();
+            advancementIn = advancementIn.getParent();
 
-            if (p_191818_1_ == null || p_191818_1_.func_192068_c() != null)
+            if (advancementIn == null || advancementIn.getDisplay() != null)
             {
                 break;
             }
         }
 
-        if (p_191818_1_ != null && p_191818_1_.func_192068_c() != null)
+        if (advancementIn != null && advancementIn.getDisplay() != null)
         {
-            return this.field_191828_f.func_191794_b(p_191818_1_);
+            return this.guiAdvancementTab.getAdvancementGui(advancementIn);
         }
         else
         {
@@ -125,15 +125,15 @@ public class GuiAdvancement extends Gui
         }
     }
 
-    public void func_191819_a(int p_191819_1_, int p_191819_2_, boolean p_191819_3_)
+    public void drawConnectivity(int p_191819_1_, int p_191819_2_, boolean p_191819_3_)
     {
-        if (this.field_191834_l != null)
+        if (this.parent != null)
         {
-            int i = p_191819_1_ + this.field_191834_l.field_191837_o + 13;
-            int j = p_191819_1_ + this.field_191834_l.field_191837_o + 26 + 4;
-            int k = p_191819_2_ + this.field_191834_l.field_191826_p + 13;
-            int l = p_191819_1_ + this.field_191837_o + 13;
-            int i1 = p_191819_2_ + this.field_191826_p + 13;
+            int i = p_191819_1_ + this.parent.x + 13;
+            int j = p_191819_1_ + this.parent.x + 26 + 4;
+            int k = p_191819_2_ + this.parent.y + 13;
+            int l = p_191819_1_ + this.x + 13;
+            int i1 = p_191819_2_ + this.y + 13;
             int j1 = p_191819_3_ ? -16777216 : -1;
 
             if (p_191819_3_)
@@ -155,17 +155,17 @@ public class GuiAdvancement extends Gui
             }
         }
 
-        for (GuiAdvancement guiadvancement : this.field_191835_m)
+        for (GuiAdvancement guiadvancement : this.children)
         {
-            guiadvancement.func_191819_a(p_191819_1_, p_191819_2_, p_191819_3_);
+            guiadvancement.drawConnectivity(p_191819_1_, p_191819_2_, p_191819_3_);
         }
     }
 
-    public void func_191817_b(int p_191817_1_, int p_191817_2_)
+    public void draw(int p_191817_1_, int p_191817_2_)
     {
-        if (!this.field_191830_h.func_193224_j() || this.field_191836_n != null && this.field_191836_n.func_192105_a())
+        if (!this.displayInfo.isHidden() || this.advancementProgress != null && this.advancementProgress.isDone())
         {
-            float f = this.field_191836_n == null ? 0.0F : this.field_191836_n.func_192103_c();
+            float f = this.advancementProgress == null ? 0.0F : this.advancementProgress.getPercent();
             AdvancementState advancementstate;
 
             if (f >= 1.0F)
@@ -177,59 +177,59 @@ public class GuiAdvancement extends Gui
                 advancementstate = AdvancementState.UNOBTAINED;
             }
 
-            this.field_191833_k.getTextureManager().bindTexture(field_191827_a);
+            this.minecraft.getTextureManager().bindTexture(WIDGETS);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableBlend();
-            this.drawTexturedModalRect(p_191817_1_ + this.field_191837_o + 3, p_191817_2_ + this.field_191826_p, this.field_191830_h.func_192291_d().func_192309_b(), 128 + advancementstate.func_192667_a() * 26, 26, 26);
+            this.drawTexturedModalRect(p_191817_1_ + this.x + 3, p_191817_2_ + this.y, this.displayInfo.getFrame().getIcon(), 128 + advancementstate.getId() * 26, 26, 26);
             RenderHelper.enableGUIStandardItemLighting();
-            this.field_191833_k.getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.field_191830_h.func_192298_b(), p_191817_1_ + this.field_191837_o + 8, p_191817_2_ + this.field_191826_p + 5);
+            this.minecraft.getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.displayInfo.getIcon(), p_191817_1_ + this.x + 8, p_191817_2_ + this.y + 5);
         }
 
-        for (GuiAdvancement guiadvancement : this.field_191835_m)
+        for (GuiAdvancement guiadvancement : this.children)
         {
-            guiadvancement.func_191817_b(p_191817_1_, p_191817_2_);
+            guiadvancement.draw(p_191817_1_, p_191817_2_);
         }
     }
 
-    public void func_191824_a(AdvancementProgress p_191824_1_)
+    public void getAdvancementProgress(AdvancementProgress advancementProgressIn)
     {
-        this.field_191836_n = p_191824_1_;
+        this.advancementProgress = advancementProgressIn;
     }
 
-    public void func_191822_a(GuiAdvancement p_191822_1_)
+    public void addGuiAdvancement(GuiAdvancement guiAdvancementIn)
     {
-        this.field_191835_m.add(p_191822_1_);
+        this.children.add(guiAdvancementIn);
     }
 
-    public void func_191821_a(int p_191821_1_, int p_191821_2_, float p_191821_3_, int p_191821_4_, int p_191821_5_)
+    public void drawHover(int p_191821_1_, int p_191821_2_, float p_191821_3_, int p_191821_4_, int p_191821_5_)
     {
-        boolean flag = p_191821_4_ + p_191821_1_ + this.field_191837_o + this.field_191832_j + 26 >= this.field_191828_f.func_193934_g().width;
-        String s = this.field_191836_n == null ? null : this.field_191836_n.func_193126_d();
-        int i = s == null ? 0 : this.field_191833_k.fontRendererObj.getStringWidth(s);
-        boolean flag1 = 113 - p_191821_2_ - this.field_191826_p - 26 <= 6 + this.field_192997_l.size() * this.field_191833_k.fontRendererObj.FONT_HEIGHT;
-        float f = this.field_191836_n == null ? 0.0F : this.field_191836_n.func_192103_c();
-        int j = MathHelper.floor(f * (float)this.field_191832_j);
+        boolean flag = p_191821_4_ + p_191821_1_ + this.x + this.width + 26 >= this.guiAdvancementTab.getScreen().width;
+        String s = this.advancementProgress == null ? null : this.advancementProgress.getProgressText();
+        int i = s == null ? 0 : this.minecraft.fontRenderer.getStringWidth(s);
+        boolean flag1 = 113 - p_191821_2_ - this.y - 26 <= 6 + this.description.size() * this.minecraft.fontRenderer.FONT_HEIGHT;
+        float f = this.advancementProgress == null ? 0.0F : this.advancementProgress.getPercent();
+        int j = MathHelper.floor(f * (float)this.width);
         AdvancementState advancementstate;
         AdvancementState advancementstate1;
         AdvancementState advancementstate2;
 
         if (f >= 1.0F)
         {
-            j = this.field_191832_j / 2;
+            j = this.width / 2;
             advancementstate = AdvancementState.OBTAINED;
             advancementstate1 = AdvancementState.OBTAINED;
             advancementstate2 = AdvancementState.OBTAINED;
         }
         else if (j < 2)
         {
-            j = this.field_191832_j / 2;
+            j = this.width / 2;
             advancementstate = AdvancementState.UNOBTAINED;
             advancementstate1 = AdvancementState.UNOBTAINED;
             advancementstate2 = AdvancementState.UNOBTAINED;
         }
-        else if (j > this.field_191832_j - 2)
+        else if (j > this.width - 2)
         {
-            j = this.field_191832_j / 2;
+            j = this.width / 2;
             advancementstate = AdvancementState.OBTAINED;
             advancementstate1 = AdvancementState.OBTAINED;
             advancementstate2 = AdvancementState.UNOBTAINED;
@@ -241,92 +241,92 @@ public class GuiAdvancement extends Gui
             advancementstate2 = AdvancementState.UNOBTAINED;
         }
 
-        int k = this.field_191832_j - j;
-        this.field_191833_k.getTextureManager().bindTexture(field_191827_a);
+        int k = this.width - j;
+        this.minecraft.getTextureManager().bindTexture(WIDGETS);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
-        int l = p_191821_2_ + this.field_191826_p;
+        int l = p_191821_2_ + this.y;
         int i1;
 
         if (flag)
         {
-            i1 = p_191821_1_ + this.field_191837_o - this.field_191832_j + 26 + 6;
+            i1 = p_191821_1_ + this.x - this.width + 26 + 6;
         }
         else
         {
-            i1 = p_191821_1_ + this.field_191837_o;
+            i1 = p_191821_1_ + this.x;
         }
 
-        int j1 = 32 + this.field_192997_l.size() * this.field_191833_k.fontRendererObj.FONT_HEIGHT;
+        int j1 = 32 + this.description.size() * this.minecraft.fontRenderer.FONT_HEIGHT;
 
-        if (!this.field_192997_l.isEmpty())
+        if (!this.description.isEmpty())
         {
             if (flag1)
             {
-                this.func_192994_a(i1, l + 26 - j1, this.field_191832_j, j1, 10, 200, 26, 0, 52);
+                this.render9Sprite(i1, l + 26 - j1, this.width, j1, 10, 200, 26, 0, 52);
             }
             else
             {
-                this.func_192994_a(i1, l, this.field_191832_j, j1, 10, 200, 26, 0, 52);
+                this.render9Sprite(i1, l, this.width, j1, 10, 200, 26, 0, 52);
             }
         }
 
-        this.drawTexturedModalRect(i1, l, 0, advancementstate.func_192667_a() * 26, j, 26);
-        this.drawTexturedModalRect(i1 + j, l, 200 - k, advancementstate1.func_192667_a() * 26, k, 26);
-        this.drawTexturedModalRect(p_191821_1_ + this.field_191837_o + 3, p_191821_2_ + this.field_191826_p, this.field_191830_h.func_192291_d().func_192309_b(), 128 + advancementstate2.func_192667_a() * 26, 26, 26);
+        this.drawTexturedModalRect(i1, l, 0, advancementstate.getId() * 26, j, 26);
+        this.drawTexturedModalRect(i1 + j, l, 200 - k, advancementstate1.getId() * 26, k, 26);
+        this.drawTexturedModalRect(p_191821_1_ + this.x + 3, p_191821_2_ + this.y, this.displayInfo.getFrame().getIcon(), 128 + advancementstate2.getId() * 26, 26, 26);
 
         if (flag)
         {
-            this.field_191833_k.fontRendererObj.drawString(this.field_191831_i, (float)(i1 + 5), (float)(p_191821_2_ + this.field_191826_p + 9), -1, true);
+            this.minecraft.fontRenderer.drawString(this.title, (float)(i1 + 5), (float)(p_191821_2_ + this.y + 9), -1, true);
 
             if (s != null)
             {
-                this.field_191833_k.fontRendererObj.drawString(s, (float)(p_191821_1_ + this.field_191837_o - i), (float)(p_191821_2_ + this.field_191826_p + 9), -1, true);
+                this.minecraft.fontRenderer.drawString(s, (float)(p_191821_1_ + this.x - i), (float)(p_191821_2_ + this.y + 9), -1, true);
             }
         }
         else
         {
-            this.field_191833_k.fontRendererObj.drawString(this.field_191831_i, (float)(p_191821_1_ + this.field_191837_o + 32), (float)(p_191821_2_ + this.field_191826_p + 9), -1, true);
+            this.minecraft.fontRenderer.drawString(this.title, (float)(p_191821_1_ + this.x + 32), (float)(p_191821_2_ + this.y + 9), -1, true);
 
             if (s != null)
             {
-                this.field_191833_k.fontRendererObj.drawString(s, (float)(p_191821_1_ + this.field_191837_o + this.field_191832_j - i - 5), (float)(p_191821_2_ + this.field_191826_p + 9), -1, true);
+                this.minecraft.fontRenderer.drawString(s, (float)(p_191821_1_ + this.x + this.width - i - 5), (float)(p_191821_2_ + this.y + 9), -1, true);
             }
         }
 
         if (flag1)
         {
-            for (int k1 = 0; k1 < this.field_192997_l.size(); ++k1)
+            for (int k1 = 0; k1 < this.description.size(); ++k1)
             {
-                this.field_191833_k.fontRendererObj.drawString(this.field_192997_l.get(k1), (float)(i1 + 5), (float)(l + 26 - j1 + 7 + k1 * this.field_191833_k.fontRendererObj.FONT_HEIGHT), -5592406, false);
+                this.minecraft.fontRenderer.drawString(this.description.get(k1), (float)(i1 + 5), (float)(l + 26 - j1 + 7 + k1 * this.minecraft.fontRenderer.FONT_HEIGHT), -5592406, false);
             }
         }
         else
         {
-            for (int l1 = 0; l1 < this.field_192997_l.size(); ++l1)
+            for (int l1 = 0; l1 < this.description.size(); ++l1)
             {
-                this.field_191833_k.fontRendererObj.drawString(this.field_192997_l.get(l1), (float)(i1 + 5), (float)(p_191821_2_ + this.field_191826_p + 9 + 17 + l1 * this.field_191833_k.fontRendererObj.FONT_HEIGHT), -5592406, false);
+                this.minecraft.fontRenderer.drawString(this.description.get(l1), (float)(i1 + 5), (float)(p_191821_2_ + this.y + 9 + 17 + l1 * this.minecraft.fontRenderer.FONT_HEIGHT), -5592406, false);
             }
         }
 
         RenderHelper.enableGUIStandardItemLighting();
-        this.field_191833_k.getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.field_191830_h.func_192298_b(), p_191821_1_ + this.field_191837_o + 8, p_191821_2_ + this.field_191826_p + 5);
+        this.minecraft.getRenderItem().renderItemAndEffectIntoGUI((EntityLivingBase)null, this.displayInfo.getIcon(), p_191821_1_ + this.x + 8, p_191821_2_ + this.y + 5);
     }
 
-    protected void func_192994_a(int p_192994_1_, int p_192994_2_, int p_192994_3_, int p_192994_4_, int p_192994_5_, int p_192994_6_, int p_192994_7_, int p_192994_8_, int p_192994_9_)
+    protected void render9Sprite(int p_192994_1_, int p_192994_2_, int p_192994_3_, int p_192994_4_, int p_192994_5_, int p_192994_6_, int p_192994_7_, int p_192994_8_, int p_192994_9_)
     {
         this.drawTexturedModalRect(p_192994_1_, p_192994_2_, p_192994_8_, p_192994_9_, p_192994_5_, p_192994_5_);
-        this.func_192993_a(p_192994_1_ + p_192994_5_, p_192994_2_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_);
+        this.renderRepeating(p_192994_1_ + p_192994_5_, p_192994_2_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_);
         this.drawTexturedModalRect(p_192994_1_ + p_192994_3_ - p_192994_5_, p_192994_2_, p_192994_8_ + p_192994_6_ - p_192994_5_, p_192994_9_, p_192994_5_, p_192994_5_);
         this.drawTexturedModalRect(p_192994_1_, p_192994_2_ + p_192994_4_ - p_192994_5_, p_192994_8_, p_192994_9_ + p_192994_7_ - p_192994_5_, p_192994_5_, p_192994_5_);
-        this.func_192993_a(p_192994_1_ + p_192994_5_, p_192994_2_ + p_192994_4_ - p_192994_5_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_ + p_192994_7_ - p_192994_5_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_);
+        this.renderRepeating(p_192994_1_ + p_192994_5_, p_192994_2_ + p_192994_4_ - p_192994_5_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_ + p_192994_7_ - p_192994_5_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_);
         this.drawTexturedModalRect(p_192994_1_ + p_192994_3_ - p_192994_5_, p_192994_2_ + p_192994_4_ - p_192994_5_, p_192994_8_ + p_192994_6_ - p_192994_5_, p_192994_9_ + p_192994_7_ - p_192994_5_, p_192994_5_, p_192994_5_);
-        this.func_192993_a(p_192994_1_, p_192994_2_ + p_192994_5_, p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_, p_192994_9_ + p_192994_5_, p_192994_6_, p_192994_7_ - p_192994_5_ - p_192994_5_);
-        this.func_192993_a(p_192994_1_ + p_192994_5_, p_192994_2_ + p_192994_5_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_ + p_192994_5_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_ - p_192994_5_ - p_192994_5_);
-        this.func_192993_a(p_192994_1_ + p_192994_3_ - p_192994_5_, p_192994_2_ + p_192994_5_, p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_ + p_192994_6_ - p_192994_5_, p_192994_9_ + p_192994_5_, p_192994_6_, p_192994_7_ - p_192994_5_ - p_192994_5_);
+        this.renderRepeating(p_192994_1_, p_192994_2_ + p_192994_5_, p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_, p_192994_9_ + p_192994_5_, p_192994_6_, p_192994_7_ - p_192994_5_ - p_192994_5_);
+        this.renderRepeating(p_192994_1_ + p_192994_5_, p_192994_2_ + p_192994_5_, p_192994_3_ - p_192994_5_ - p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_ + p_192994_5_, p_192994_9_ + p_192994_5_, p_192994_6_ - p_192994_5_ - p_192994_5_, p_192994_7_ - p_192994_5_ - p_192994_5_);
+        this.renderRepeating(p_192994_1_ + p_192994_3_ - p_192994_5_, p_192994_2_ + p_192994_5_, p_192994_5_, p_192994_4_ - p_192994_5_ - p_192994_5_, p_192994_8_ + p_192994_6_ - p_192994_5_, p_192994_9_ + p_192994_5_, p_192994_6_, p_192994_7_ - p_192994_5_ - p_192994_5_);
     }
 
-    protected void func_192993_a(int p_192993_1_, int p_192993_2_, int p_192993_3_, int p_192993_4_, int p_192993_5_, int p_192993_6_, int p_192993_7_, int p_192993_8_)
+    protected void renderRepeating(int p_192993_1_, int p_192993_2_, int p_192993_3_, int p_192993_4_, int p_192993_5_, int p_192993_6_, int p_192993_7_, int p_192993_8_)
     {
         for (int i = 0; i < p_192993_3_; i += p_192993_7_)
         {
@@ -342,13 +342,13 @@ public class GuiAdvancement extends Gui
         }
     }
 
-    public boolean func_191816_c(int p_191816_1_, int p_191816_2_, int p_191816_3_, int p_191816_4_)
+    public boolean isMouseOver(int p_191816_1_, int p_191816_2_, int p_191816_3_, int p_191816_4_)
     {
-        if (!this.field_191830_h.func_193224_j() || this.field_191836_n != null && this.field_191836_n.func_192105_a())
+        if (!this.displayInfo.isHidden() || this.advancementProgress != null && this.advancementProgress.isDone())
         {
-            int i = p_191816_1_ + this.field_191837_o;
+            int i = p_191816_1_ + this.x;
             int j = i + 26;
-            int k = p_191816_2_ + this.field_191826_p;
+            int k = p_191816_2_ + this.y;
             int l = k + 26;
             return p_191816_3_ >= i && p_191816_3_ <= j && p_191816_4_ >= k && p_191816_4_ <= l;
         }
@@ -358,26 +358,26 @@ public class GuiAdvancement extends Gui
         }
     }
 
-    public void func_191825_b()
+    public void attachToParent()
     {
-        if (this.field_191834_l == null && this.field_191829_g.func_192070_b() != null)
+        if (this.parent == null && this.advancement.getParent() != null)
         {
-            this.field_191834_l = this.func_191818_a(this.field_191829_g);
+            this.parent = this.getFirstVisibleParent(this.advancement);
 
-            if (this.field_191834_l != null)
+            if (this.parent != null)
             {
-                this.field_191834_l.func_191822_a(this);
+                this.parent.addGuiAdvancement(this);
             }
         }
     }
 
-    public int func_191820_c()
+    public int getY()
     {
-        return this.field_191826_p;
+        return this.y;
     }
 
-    public int func_191823_d()
+    public int getX()
     {
-        return this.field_191837_o;
+        return this.x;
     }
 }

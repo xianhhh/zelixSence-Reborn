@@ -17,25 +17,25 @@ import net.minecraft.stats.RecipeBook;
 
 public class RecipeBookClient extends RecipeBook
 {
-    public static final Map<CreativeTabs, List<RecipeList>> field_194086_e = Maps.<CreativeTabs, List<RecipeList>>newHashMap();
-    public static final List<RecipeList> field_194087_f = Lists.<RecipeList>newArrayList();
+    public static final Map<CreativeTabs, List<RecipeList>> RECIPES_BY_TAB = Maps.<CreativeTabs, List<RecipeList>>newHashMap();
+    public static final List<RecipeList> ALL_RECIPES = Lists.<RecipeList>newArrayList();
 
-    private static RecipeList func_194082_a(CreativeTabs p_194082_0_)
+    private static RecipeList newRecipeList(CreativeTabs p_194082_0_)
     {
         RecipeList recipelist = new RecipeList();
-        field_194087_f.add(recipelist);
-        (field_194086_e.computeIfAbsent(p_194082_0_, (p_194085_0_) ->
+        ALL_RECIPES.add(recipelist);
+        (RECIPES_BY_TAB.computeIfAbsent(p_194082_0_, (p_194085_0_) ->
         {
             return new ArrayList();
         })).add(recipelist);
-        (field_194086_e.computeIfAbsent(CreativeTabs.SEARCH, (p_194083_0_) ->
+        (RECIPES_BY_TAB.computeIfAbsent(CreativeTabs.SEARCH, (p_194083_0_) ->
         {
             return new ArrayList();
         })).add(recipelist);
         return recipelist;
     }
 
-    private static CreativeTabs func_194084_a(ItemStack p_194084_0_)
+    private static CreativeTabs getItemStackTab(ItemStack p_194084_0_)
     {
         CreativeTabs creativetabs = p_194084_0_.getItem().getCreativeTab();
 
@@ -53,17 +53,17 @@ public class RecipeBookClient extends RecipeBook
     {
         Table<CreativeTabs, String, RecipeList> table = HashBasedTable.<CreativeTabs, String, RecipeList>create();
 
-        for (IRecipe irecipe : CraftingManager.field_193380_a)
+        for (IRecipe irecipe : CraftingManager.REGISTRY)
         {
-            if (!irecipe.func_192399_d())
+            if (!irecipe.isHidden())
             {
-                CreativeTabs creativetabs = func_194084_a(irecipe.getRecipeOutput());
-                String s = irecipe.func_193358_e();
+                CreativeTabs creativetabs = getItemStackTab(irecipe.getRecipeOutput());
+                String s = irecipe.getGroup();
                 RecipeList recipelist1;
 
                 if (s.isEmpty())
                 {
-                    recipelist1 = func_194082_a(creativetabs);
+                    recipelist1 = newRecipeList(creativetabs);
                 }
                 else
                 {
@@ -71,12 +71,12 @@ public class RecipeBookClient extends RecipeBook
 
                     if (recipelist1 == null)
                     {
-                        recipelist1 = func_194082_a(creativetabs);
+                        recipelist1 = newRecipeList(creativetabs);
                         table.put(creativetabs, s, recipelist1);
                     }
                 }
 
-                recipelist1.func_192709_a(irecipe);
+                recipelist1.add(irecipe);
             }
         }
     }

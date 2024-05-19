@@ -19,5 +19,5 @@ public interface IBlockStatePalette
 
     void write(PacketBuffer buf);
 
-    int getSerializedState();
+    int getSerializedSize();
 }

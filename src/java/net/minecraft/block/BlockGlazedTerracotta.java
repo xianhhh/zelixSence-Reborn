@@ -17,12 +17,12 @@ import net.minecraft.world.World;
 
 public class BlockGlazedTerracotta extends BlockHorizontal
 {
-    public BlockGlazedTerracotta(EnumDyeColor p_i47400_1_)
+    public BlockGlazedTerracotta(EnumDyeColor color)
     {
-        super(Material.ROCK, MapColor.func_193558_a(p_i47400_1_));
+        super(Material.ROCK, MapColor.getBlockColor(color));
         this.setHardness(1.4F);
         this.setSoundType(SoundType.STONE);
-        String s = p_i47400_1_.getUnlocalizedName();
+        String s = color.getUnlocalizedName();
 
         if (s.length() > 1)
         {
@@ -60,7 +60,7 @@ public class BlockGlazedTerracotta extends BlockHorizontal
      * Called by ItemBlocks just before a block is actually set in the world, to allow for adjustments to the
      * IBlockstate
      */
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }

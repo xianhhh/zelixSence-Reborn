@@ -44,7 +44,7 @@ public class EntityIronGolem extends EntityGolem
     /** deincrements, and a distance-to-home check is done at 0 */
     private int homeCheckTimer;
     @Nullable
-    Village villageObj;
+    Village village;
     private int attackTimer;
     private int holdRoseTick;
 
@@ -86,16 +86,16 @@ public class EntityIronGolem extends EntityGolem
         if (--this.homeCheckTimer <= 0)
         {
             this.homeCheckTimer = 70 + this.rand.nextInt(50);
-            this.villageObj = this.world.getVillageCollection().getNearestVillage(new BlockPos(this), 32);
+            this.village = this.world.getVillageCollection().getNearestVillage(new BlockPos(this), 32);
 
-            if (this.villageObj == null)
+            if (this.village == null)
             {
                 this.detachHome();
             }
             else
             {
-                BlockPos blockpos = this.villageObj.getCenter();
-                this.setHomePosAndDistance(blockpos, (int)((float)this.villageObj.getVillageRadius() * 0.6F));
+                BlockPos blockpos = this.village.getCenter();
+                this.setHomePosAndDistance(blockpos, (int)((float)this.village.getVillageRadius() * 0.6F));
             }
         }
 
@@ -214,6 +214,9 @@ public class EntityIronGolem extends EntityGolem
         return flag;
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 4)
@@ -237,7 +240,7 @@ public class EntityIronGolem extends EntityGolem
 
     public Village getVillage()
     {
-        return this.villageObj;
+        return this.village;
     }
 
     public int getAttackTimer()
@@ -259,7 +262,7 @@ public class EntityIronGolem extends EntityGolem
         }
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_IRONGOLEM_HURT;
     }
@@ -309,9 +312,9 @@ public class EntityIronGolem extends EntityGolem
      */
     public void onDeath(DamageSource cause)
     {
-        if (!this.isPlayerCreated() && this.attackingPlayer != null && this.villageObj != null)
+        if (!this.isPlayerCreated() && this.attackingPlayer != null && this.village != null)
         {
-            this.villageObj.modifyPlayerReputation(this.attackingPlayer.getName(), -5);
+            this.village.modifyPlayerReputation(this.attackingPlayer.getName(), -5);
         }
 
         super.onDeath(cause);

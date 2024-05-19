@@ -109,19 +109,19 @@ public class WalkNodeProcessor extends NodeProcessor
     {
         int i = 0;
         int j = 0;
-        PathNodeType pathnodetype = this.getPathNodeType(this.entity, currentPoint.xCoord, currentPoint.yCoord + 1, currentPoint.zCoord);
+        PathNodeType pathnodetype = this.getPathNodeType(this.entity, currentPoint.x, currentPoint.y + 1, currentPoint.z);
 
         if (this.entity.getPathPriority(pathnodetype) >= 0.0F)
         {
             j = MathHelper.floor(Math.max(1.0F, this.entity.stepHeight));
         }
 
-        BlockPos blockpos = (new BlockPos(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord)).down();
-        double d0 = (double)currentPoint.yCoord - (1.0D - this.blockaccess.getBlockState(blockpos).getBoundingBox(this.blockaccess, blockpos).maxY);
-        PathPoint pathpoint = this.getSafePoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord + 1, j, d0, EnumFacing.SOUTH);
-        PathPoint pathpoint1 = this.getSafePoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord, j, d0, EnumFacing.WEST);
-        PathPoint pathpoint2 = this.getSafePoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord, j, d0, EnumFacing.EAST);
-        PathPoint pathpoint3 = this.getSafePoint(currentPoint.xCoord, currentPoint.yCoord, currentPoint.zCoord - 1, j, d0, EnumFacing.NORTH);
+        BlockPos blockpos = (new BlockPos(currentPoint.x, currentPoint.y, currentPoint.z)).down();
+        double d0 = (double)currentPoint.y - (1.0D - this.blockaccess.getBlockState(blockpos).getBoundingBox(this.blockaccess, blockpos).maxY);
+        PathPoint pathpoint = this.getSafePoint(currentPoint.x, currentPoint.y, currentPoint.z + 1, j, d0, EnumFacing.SOUTH);
+        PathPoint pathpoint1 = this.getSafePoint(currentPoint.x - 1, currentPoint.y, currentPoint.z, j, d0, EnumFacing.WEST);
+        PathPoint pathpoint2 = this.getSafePoint(currentPoint.x + 1, currentPoint.y, currentPoint.z, j, d0, EnumFacing.EAST);
+        PathPoint pathpoint3 = this.getSafePoint(currentPoint.x, currentPoint.y, currentPoint.z - 1, j, d0, EnumFacing.NORTH);
 
         if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance)
         {
@@ -150,7 +150,7 @@ public class WalkNodeProcessor extends NodeProcessor
 
         if (flag && flag3)
         {
-            PathPoint pathpoint4 = this.getSafePoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord - 1, j, d0, EnumFacing.NORTH);
+            PathPoint pathpoint4 = this.getSafePoint(currentPoint.x - 1, currentPoint.y, currentPoint.z - 1, j, d0, EnumFacing.NORTH);
 
             if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceTo(targetPoint) < maxDistance)
             {
@@ -160,7 +160,7 @@ public class WalkNodeProcessor extends NodeProcessor
 
         if (flag && flag2)
         {
-            PathPoint pathpoint5 = this.getSafePoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord - 1, j, d0, EnumFacing.NORTH);
+            PathPoint pathpoint5 = this.getSafePoint(currentPoint.x + 1, currentPoint.y, currentPoint.z - 1, j, d0, EnumFacing.NORTH);
 
             if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceTo(targetPoint) < maxDistance)
             {
@@ -170,7 +170,7 @@ public class WalkNodeProcessor extends NodeProcessor
 
         if (flag1 && flag3)
         {
-            PathPoint pathpoint6 = this.getSafePoint(currentPoint.xCoord - 1, currentPoint.yCoord, currentPoint.zCoord + 1, j, d0, EnumFacing.SOUTH);
+            PathPoint pathpoint6 = this.getSafePoint(currentPoint.x - 1, currentPoint.y, currentPoint.z + 1, j, d0, EnumFacing.SOUTH);
 
             if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceTo(targetPoint) < maxDistance)
             {
@@ -180,7 +180,7 @@ public class WalkNodeProcessor extends NodeProcessor
 
         if (flag1 && flag2)
         {
-            PathPoint pathpoint7 = this.getSafePoint(currentPoint.xCoord + 1, currentPoint.yCoord, currentPoint.zCoord + 1, j, d0, EnumFacing.SOUTH);
+            PathPoint pathpoint7 = this.getSafePoint(currentPoint.x + 1, currentPoint.y, currentPoint.z + 1, j, d0, EnumFacing.SOUTH);
 
             if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceTo(targetPoint) < maxDistance)
             {
@@ -236,7 +236,7 @@ public class WalkNodeProcessor extends NodeProcessor
                         double d3 = (double)(z - facing.getFrontOffsetZ()) + 0.5D;
                         AxisAlignedBB axisalignedbb = new AxisAlignedBB(d2 - d1, (double)y + 0.001D, d3 - d1, d2 + d1, (double)((float)y + this.entity.height), d3 + d1);
                         AxisAlignedBB axisalignedbb1 = this.blockaccess.getBlockState(blockpos).getBoundingBox(this.blockaccess, blockpos);
-                        AxisAlignedBB axisalignedbb2 = axisalignedbb.addCoord(0.0D, axisalignedbb1.maxY - 0.002D, 0.0D);
+                        AxisAlignedBB axisalignedbb2 = axisalignedbb.expand(0.0D, axisalignedbb1.maxY - 0.002D, 0.0D);
 
                         if (this.entity.world.collidesWithAnyBlock(axisalignedbb2))
                         {
@@ -307,7 +307,7 @@ public class WalkNodeProcessor extends NodeProcessor
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         double d0 = (double)entitylivingIn.width / 2.0D;
         BlockPos blockpos = new BlockPos(entitylivingIn);
-        pathnodetype = this.func_193577_a(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
+        pathnodetype = this.getPathNodeType(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
 
         if (enumset.contains(PathNodeType.FENCE))
         {
@@ -341,25 +341,25 @@ public class WalkNodeProcessor extends NodeProcessor
         }
     }
 
-    public PathNodeType func_193577_a(IBlockAccess p_193577_1_, int p_193577_2_, int p_193577_3_, int p_193577_4_, int p_193577_5_, int p_193577_6_, int p_193577_7_, boolean p_193577_8_, boolean p_193577_9_, EnumSet<PathNodeType> p_193577_10_, PathNodeType p_193577_11_, BlockPos p_193577_12_)
+    public PathNodeType getPathNodeType(IBlockAccess p_193577_1_, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoorsIn, boolean canEnterDoorsIn, EnumSet<PathNodeType> p_193577_10_, PathNodeType p_193577_11_, BlockPos p_193577_12_)
     {
-        for (int i = 0; i < p_193577_5_; ++i)
+        for (int i = 0; i < xSize; ++i)
         {
-            for (int j = 0; j < p_193577_6_; ++j)
+            for (int j = 0; j < ySize; ++j)
             {
-                for (int k = 0; k < p_193577_7_; ++k)
+                for (int k = 0; k < zSize; ++k)
                 {
-                    int l = i + p_193577_2_;
-                    int i1 = j + p_193577_3_;
-                    int j1 = k + p_193577_4_;
+                    int l = i + x;
+                    int i1 = j + y;
+                    int j1 = k + z;
                     PathNodeType pathnodetype = this.getPathNodeType(p_193577_1_, l, i1, j1);
 
-                    if (pathnodetype == PathNodeType.DOOR_WOOD_CLOSED && p_193577_8_ && p_193577_9_)
+                    if (pathnodetype == PathNodeType.DOOR_WOOD_CLOSED && canOpenDoorsIn && canEnterDoorsIn)
                     {
                         pathnodetype = PathNodeType.WALKABLE;
                     }
 
-                    if (pathnodetype == PathNodeType.DOOR_OPEN && !p_193577_9_)
+                    if (pathnodetype == PathNodeType.DOOR_OPEN && !canEnterDoorsIn)
                     {
                         pathnodetype = PathNodeType.BLOCKED;
                     }
@@ -389,7 +389,7 @@ public class WalkNodeProcessor extends NodeProcessor
 
     private PathNodeType getPathNodeType(EntityLiving entitylivingIn, int x, int y, int z)
     {
-        return this.getPathNodeType(this.blockaccess, x, y, z, entitylivingIn, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanBreakDoors(), this.getCanEnterDoors());
+        return this.getPathNodeType(this.blockaccess, x, y, z, entitylivingIn, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 
     public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z)
@@ -413,11 +413,11 @@ public class WalkNodeProcessor extends NodeProcessor
             }
         }
 
-        pathnodetype = this.func_193578_a(blockaccessIn, x, y, z, pathnodetype);
+        pathnodetype = this.checkNeighborBlocks(blockaccessIn, x, y, z, pathnodetype);
         return pathnodetype;
     }
 
-    public PathNodeType func_193578_a(IBlockAccess p_193578_1_, int p_193578_2_, int p_193578_3_, int p_193578_4_, PathNodeType p_193578_5_)
+    public PathNodeType checkNeighborBlocks(IBlockAccess p_193578_1_, int p_193578_2_, int p_193578_3_, int p_193578_4_, PathNodeType p_193578_5_)
     {
         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 

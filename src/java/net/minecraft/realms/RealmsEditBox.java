@@ -9,7 +9,7 @@ public class RealmsEditBox
 
     public RealmsEditBox(int id, int x, int y, int width, int height)
     {
-        this.editBox = new GuiTextField(id, Minecraft.getMinecraft().fontRendererObj, x, y, width, height);
+        this.editBox = new GuiTextField(id, Minecraft.getMinecraft().fontRenderer, x, y, width, height);
     }
 
     public String getValue()

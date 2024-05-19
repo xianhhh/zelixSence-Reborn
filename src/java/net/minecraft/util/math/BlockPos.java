@@ -44,7 +44,7 @@ public class BlockPos extends Vec3i
 
     public BlockPos(Vec3d vec)
     {
-        this(vec.xCoord, vec.yCoord, vec.zCoord);
+        this(vec.x, vec.y, vec.z);
     }
 
     public BlockPos(Vec3i source)
@@ -196,9 +196,9 @@ public class BlockPos extends Vec3i
         return n == 0 ? this : new BlockPos(this.getX() + facing.getFrontOffsetX() * n, this.getY() + facing.getFrontOffsetY() * n, this.getZ() + facing.getFrontOffsetZ() * n);
     }
 
-    public BlockPos func_190942_a(Rotation p_190942_1_)
+    public BlockPos rotate(Rotation rotationIn)
     {
-        switch (p_190942_1_)
+        switch (rotationIn)
         {
             case NONE:
             default:
@@ -244,10 +244,10 @@ public class BlockPos extends Vec3i
 
     public static Iterable<BlockPos> getAllInBox(BlockPos from, BlockPos to)
     {
-        return func_191532_a(Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()), Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
+        return getAllInBox(Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()), Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
     }
 
-    public static Iterable<BlockPos> func_191532_a(final int p_191532_0_, final int p_191532_1_, final int p_191532_2_, final int p_191532_3_, final int p_191532_4_, final int p_191532_5_)
+    public static Iterable<BlockPos> getAllInBox(final int p_191532_0_, final int p_191532_1_, final int p_191532_2_, final int p_191532_3_, final int p_191532_4_, final int p_191532_5_)
     {
         return new Iterable<BlockPos>()
         {
@@ -255,43 +255,43 @@ public class BlockPos extends Vec3i
             {
                 return new AbstractIterator<BlockPos>()
                 {
-                    private boolean field_191534_b = true;
-                    private int field_191535_c;
-                    private int field_191536_d;
-                    private int field_191537_e;
+                    private boolean first = true;
+                    private int lastPosX;
+                    private int lastPosY;
+                    private int lastPosZ;
                     protected BlockPos computeNext()
                     {
-                        if (this.field_191534_b)
+                        if (this.first)
                         {
-                            this.field_191534_b = false;
-                            this.field_191535_c = p_191532_0_;
-                            this.field_191536_d = p_191532_1_;
-                            this.field_191537_e = p_191532_2_;
+                            this.first = false;
+                            this.lastPosX = p_191532_0_;
+                            this.lastPosY = p_191532_1_;
+                            this.lastPosZ = p_191532_2_;
                             return new BlockPos(p_191532_0_, p_191532_1_, p_191532_2_);
                         }
-                        else if (this.field_191535_c == p_191532_3_ && this.field_191536_d == p_191532_4_ && this.field_191537_e == p_191532_5_)
+                        else if (this.lastPosX == p_191532_3_ && this.lastPosY == p_191532_4_ && this.lastPosZ == p_191532_5_)
                         {
                             return (BlockPos)this.endOfData();
                         }
                         else
                         {
-                            if (this.field_191535_c < p_191532_3_)
+                            if (this.lastPosX < p_191532_3_)
                             {
-                                ++this.field_191535_c;
+                                ++this.lastPosX;
                             }
-                            else if (this.field_191536_d < p_191532_4_)
+                            else if (this.lastPosY < p_191532_4_)
                             {
-                                this.field_191535_c = p_191532_0_;
-                                ++this.field_191536_d;
+                                this.lastPosX = p_191532_0_;
+                                ++this.lastPosY;
                             }
-                            else if (this.field_191537_e < p_191532_5_)
+                            else if (this.lastPosZ < p_191532_5_)
                             {
-                                this.field_191535_c = p_191532_0_;
-                                this.field_191536_d = p_191532_1_;
-                                ++this.field_191537_e;
+                                this.lastPosX = p_191532_0_;
+                                this.lastPosY = p_191532_1_;
+                                ++this.lastPosZ;
                             }
 
-                            return new BlockPos(this.field_191535_c, this.field_191536_d, this.field_191537_e);
+                            return new BlockPos(this.lastPosX, this.lastPosY, this.lastPosZ);
                         }
                     }
                 };
@@ -312,10 +312,10 @@ public class BlockPos extends Vec3i
 
     public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(BlockPos from, BlockPos to)
     {
-        return func_191531_b(Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()), Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
+        return mutablesBetween(Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()), Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
     }
 
-    public static Iterable<BlockPos.MutableBlockPos> func_191531_b(final int p_191531_0_, final int p_191531_1_, final int p_191531_2_, final int p_191531_3_, final int p_191531_4_, final int p_191531_5_)
+    public static Iterable<BlockPos.MutableBlockPos> mutablesBetween(final int p_191531_0_, final int p_191531_1_, final int p_191531_2_, final int p_191531_3_, final int p_191531_4_, final int p_191531_5_)
     {
         return new Iterable<BlockPos.MutableBlockPos>()
         {
@@ -323,37 +323,37 @@ public class BlockPos extends Vec3i
             {
                 return new AbstractIterator<BlockPos.MutableBlockPos>()
                 {
-                    private BlockPos.MutableBlockPos theBlockPos;
+                    private BlockPos.MutableBlockPos pos;
                     protected BlockPos.MutableBlockPos computeNext()
                     {
-                        if (this.theBlockPos == null)
+                        if (this.pos == null)
                         {
-                            this.theBlockPos = new BlockPos.MutableBlockPos(p_191531_0_, p_191531_1_, p_191531_2_);
-                            return this.theBlockPos;
+                            this.pos = new BlockPos.MutableBlockPos(p_191531_0_, p_191531_1_, p_191531_2_);
+                            return this.pos;
                         }
-                        else if (this.theBlockPos.x == p_191531_3_ && this.theBlockPos.y == p_191531_4_ && this.theBlockPos.z == p_191531_5_)
+                        else if (this.pos.x == p_191531_3_ && this.pos.y == p_191531_4_ && this.pos.z == p_191531_5_)
                         {
                             return (BlockPos.MutableBlockPos)this.endOfData();
                         }
                         else
                         {
-                            if (this.theBlockPos.x < p_191531_3_)
+                            if (this.pos.x < p_191531_3_)
                             {
-                                ++this.theBlockPos.x;
+                                ++this.pos.x;
                             }
-                            else if (this.theBlockPos.y < p_191531_4_)
+                            else if (this.pos.y < p_191531_4_)
                             {
-                                this.theBlockPos.x = p_191531_0_;
-                                ++this.theBlockPos.y;
+                                this.pos.x = p_191531_0_;
+                                ++this.pos.y;
                             }
-                            else if (this.theBlockPos.z < p_191531_5_)
+                            else if (this.pos.z < p_191531_5_)
                             {
-                                this.theBlockPos.x = p_191531_0_;
-                                this.theBlockPos.y = p_191531_1_;
-                                ++this.theBlockPos.z;
+                                this.pos.x = p_191531_0_;
+                                this.pos.y = p_191531_1_;
+                                ++this.pos.z;
                             }
 
-                            return this.theBlockPos;
+                            return this.pos;
                         }
                     }
                 };
@@ -400,9 +400,9 @@ public class BlockPos extends Vec3i
             return super.offset(facing, n).toImmutable();
         }
 
-        public BlockPos func_190942_a(Rotation p_190942_1_)
+        public BlockPos rotate(Rotation rotationIn)
         {
-            return super.func_190942_a(p_190942_1_).toImmutable();
+            return super.rotate(rotationIn).toImmutable();
         }
 
         public int getX()

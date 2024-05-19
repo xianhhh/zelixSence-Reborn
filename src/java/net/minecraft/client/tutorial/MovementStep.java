@@ -10,129 +10,139 @@ import net.minecraft.world.GameType;
 
 public class MovementStep implements ITutorialStep
 {
-    private static final ITextComponent field_193254_a = new TextComponentTranslation("tutorial.move.title", new Object[] {Tutorial.func_193291_a("forward"), Tutorial.func_193291_a("left"), Tutorial.func_193291_a("back"), Tutorial.func_193291_a("right")});
-    private static final ITextComponent field_193255_b = new TextComponentTranslation("tutorial.move.description", new Object[] {Tutorial.func_193291_a("jump")});
-    private static final ITextComponent field_193256_c = new TextComponentTranslation("tutorial.look.title", new Object[0]);
-    private static final ITextComponent field_193257_d = new TextComponentTranslation("tutorial.look.description", new Object[0]);
-    private final Tutorial field_193258_e;
-    private TutorialToast field_193259_f;
-    private TutorialToast field_193260_g;
-    private int field_193261_h;
-    private int field_193262_i;
-    private int field_193263_j;
-    private boolean field_193264_k;
-    private boolean field_193265_l;
-    private int field_193266_m = -1;
-    private int field_193267_n = -1;
+    private static final ITextComponent MOVE_TITLE = new TextComponentTranslation("tutorial.move.title", new Object[] {Tutorial.createKeybindComponent("forward"), Tutorial.createKeybindComponent("left"), Tutorial.createKeybindComponent("back"), Tutorial.createKeybindComponent("right")});
+    private static final ITextComponent MOVE_DESCRIPTION = new TextComponentTranslation("tutorial.move.description", new Object[] {Tutorial.createKeybindComponent("jump")});
+    private static final ITextComponent LOOK_TITLE = new TextComponentTranslation("tutorial.look.title", new Object[0]);
+    private static final ITextComponent LOOK_DESCRIPTION = new TextComponentTranslation("tutorial.look.description", new Object[0]);
+    private final Tutorial tutorial;
+    private TutorialToast moveToast;
+    private TutorialToast lookToast;
+    private int timeWaiting;
+    private int timeMoved;
+    private int timeLooked;
+    private boolean moved;
+    private boolean turned;
+    private int moveCompleted = -1;
+    private int lookCompleted = -1;
 
-    public MovementStep(Tutorial p_i47581_1_)
+    public MovementStep(Tutorial tutorial)
     {
-        this.field_193258_e = p_i47581_1_;
+        this.tutorial = tutorial;
     }
 
-    public void func_193245_a()
+    public void update()
     {
-        ++this.field_193261_h;
+        ++this.timeWaiting;
 
-        if (this.field_193264_k)
+        if (this.moved)
         {
-            ++this.field_193262_i;
-            this.field_193264_k = false;
+            ++this.timeMoved;
+            this.moved = false;
         }
 
-        if (this.field_193265_l)
+        if (this.turned)
         {
-            ++this.field_193263_j;
-            this.field_193265_l = false;
+            ++this.timeLooked;
+            this.turned = false;
         }
 
-        if (this.field_193266_m == -1 && this.field_193262_i > 40)
+        if (this.moveCompleted == -1 && this.timeMoved > 40)
         {
-            if (this.field_193259_f != null)
+            if (this.moveToast != null)
             {
-                this.field_193259_f.func_193670_a();
-                this.field_193259_f = null;
+                this.moveToast.hide();
+                this.moveToast = null;
             }
 
-            this.field_193266_m = this.field_193261_h;
+            this.moveCompleted = this.timeWaiting;
         }
 
-        if (this.field_193267_n == -1 && this.field_193263_j > 40)
+        if (this.lookCompleted == -1 && this.timeLooked > 40)
         {
-            if (this.field_193260_g != null)
+            if (this.lookToast != null)
             {
-                this.field_193260_g.func_193670_a();
-                this.field_193260_g = null;
+                this.lookToast.hide();
+                this.lookToast = null;
             }
 
-            this.field_193267_n = this.field_193261_h;
+            this.lookCompleted = this.timeWaiting;
         }
 
-        if (this.field_193266_m != -1 && this.field_193267_n != -1)
+        if (this.moveCompleted != -1 && this.lookCompleted != -1)
         {
-            if (this.field_193258_e.func_194072_f() == GameType.SURVIVAL)
+            if (this.tutorial.getGameType() == GameType.SURVIVAL)
             {
-                this.field_193258_e.func_193292_a(TutorialSteps.FIND_TREE);
+                this.tutorial.setStep(TutorialSteps.FIND_TREE);
             }
             else
             {
-                this.field_193258_e.func_193292_a(TutorialSteps.NONE);
+                this.tutorial.setStep(TutorialSteps.NONE);
             }
         }
 
-        if (this.field_193259_f != null)
+        if (this.moveToast != null)
         {
-            this.field_193259_f.func_193669_a((float)this.field_193262_i / 40.0F);
+            this.moveToast.setProgress((float)this.timeMoved / 40.0F);
         }
 
-        if (this.field_193260_g != null)
+        if (this.lookToast != null)
         {
-            this.field_193260_g.func_193669_a((float)this.field_193263_j / 40.0F);
+            this.lookToast.setProgress((float)this.timeLooked / 40.0F);
         }
 
-        if (this.field_193261_h >= 100)
+        if (this.timeWaiting >= 100)
         {
-            if (this.field_193266_m == -1 && this.field_193259_f == null)
+            if (this.moveCompleted == -1 && this.moveToast == null)
             {
-                this.field_193259_f = new TutorialToast(TutorialToast.Icons.MOVEMENT_KEYS, field_193254_a, field_193255_b, true);
-                this.field_193258_e.func_193295_e().func_193033_an().func_192988_a(this.field_193259_f);
+                this.moveToast = new TutorialToast(TutorialToast.Icons.MOVEMENT_KEYS, MOVE_TITLE, MOVE_DESCRIPTION, true);
+                this.tutorial.getMinecraft().getToastGui().add(this.moveToast);
             }
-            else if (this.field_193266_m != -1 && this.field_193261_h - this.field_193266_m >= 20 && this.field_193267_n == -1 && this.field_193260_g == null)
+            else if (this.moveCompleted != -1 && this.timeWaiting - this.moveCompleted >= 20 && this.lookCompleted == -1 && this.lookToast == null)
             {
-                this.field_193260_g = new TutorialToast(TutorialToast.Icons.MOUSE, field_193256_c, field_193257_d, true);
-                this.field_193258_e.func_193295_e().func_193033_an().func_192988_a(this.field_193260_g);
+                this.lookToast = new TutorialToast(TutorialToast.Icons.MOUSE, LOOK_TITLE, LOOK_DESCRIPTION, true);
+                this.tutorial.getMinecraft().getToastGui().add(this.lookToast);
             }
         }
     }
 
-    public void func_193248_b()
+    public void onStop()
     {
-        if (this.field_193259_f != null)
+        if (this.moveToast != null)
         {
-            this.field_193259_f.func_193670_a();
-            this.field_193259_f = null;
+            this.moveToast.hide();
+            this.moveToast = null;
         }
 
-        if (this.field_193260_g != null)
+        if (this.lookToast != null)
         {
-            this.field_193260_g.func_193670_a();
-            this.field_193260_g = null;
-        }
-    }
-
-    public void func_193247_a(MovementInput p_193247_1_)
-    {
-        if (p_193247_1_.forwardKeyDown || p_193247_1_.backKeyDown || p_193247_1_.leftKeyDown || p_193247_1_.rightKeyDown || p_193247_1_.jump)
-        {
-            this.field_193264_k = true;
+            this.lookToast.hide();
+            this.lookToast = null;
         }
     }
 
-    public void func_193249_a(MouseHelper p_193249_1_)
+    /**
+     * Handles the player movement
+     *  
+     * @param input The movement inputs of the player
+     */
+    public void handleMovement(MovementInput input)
     {
-        if ((double)MathHelper.abs(p_193249_1_.deltaX) > 0.01D || (double)MathHelper.abs(p_193249_1_.deltaY) > 0.01D)
+        if (input.forwardKeyDown || input.backKeyDown || input.leftKeyDown || input.rightKeyDown || input.jump)
         {
-            this.field_193265_l = true;
+            this.moved = true;
+        }
+    }
+
+    /**
+     * Handles mouse mouvement
+     *  
+     * @param mouseHelperIn A MouseHelper providing you informations about the player mouse
+     */
+    public void handleMouse(MouseHelper mouseHelperIn)
+    {
+        if ((double)MathHelper.abs(mouseHelperIn.deltaX) > 0.01D || (double)MathHelper.abs(mouseHelperIn.deltaY) > 0.01D)
+        {
+            this.turned = true;
         }
     }
 }

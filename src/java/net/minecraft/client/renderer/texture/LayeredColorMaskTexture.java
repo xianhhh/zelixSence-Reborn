@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 public class LayeredColorMaskTexture extends AbstractTexture
 {
     /** Access to the Logger, for all your logging needs. */
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /** The location of the texture. */
     private final ResourceLocation textureLocation;
@@ -67,7 +67,7 @@ public class LayeredColorMaskTexture extends AbstractTexture
                     try
                     {
                         String s = this.listTextures.get(j);
-                        int k = ((EnumDyeColor)this.listDyeColors.get(j)).func_193350_e();
+                        int k = ((EnumDyeColor)this.listDyeColors.get(j)).getColorValue();
 
                         if (s != null)
                         {
@@ -106,7 +106,7 @@ public class LayeredColorMaskTexture extends AbstractTexture
             }
             catch (IOException ioexception)
             {
-                LOG.error("Couldn't load layered image", (Throwable)ioexception);
+                LOGGER.error("Couldn't load layered image", (Throwable)ioexception);
             }
             finally
             {

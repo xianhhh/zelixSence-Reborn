@@ -16,111 +16,114 @@ import net.minecraft.util.ResourceLocation;
 
 public class ConsumeItemTrigger implements ICriterionTrigger<ConsumeItemTrigger.Instance>
 {
-    private static final ResourceLocation field_193149_a = new ResourceLocation("consume_item");
-    private final Map<PlayerAdvancements, ConsumeItemTrigger.Listeners> field_193150_b = Maps.<PlayerAdvancements, ConsumeItemTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("consume_item");
+    private final Map<PlayerAdvancements, ConsumeItemTrigger.Listeners> listeners = Maps.<PlayerAdvancements, ConsumeItemTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193149_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener)
     {
-        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.field_193150_b.get(p_192165_1_);
+        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (consumeitemtrigger$listeners == null)
         {
-            consumeitemtrigger$listeners = new ConsumeItemTrigger.Listeners(p_192165_1_);
-            this.field_193150_b.put(p_192165_1_, consumeitemtrigger$listeners);
+            consumeitemtrigger$listeners = new ConsumeItemTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, consumeitemtrigger$listeners);
         }
 
-        consumeitemtrigger$listeners.func_193239_a(p_192165_2_);
+        consumeitemtrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener)
     {
-        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.field_193150_b.get(p_192164_1_);
+        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (consumeitemtrigger$listeners != null)
         {
-            consumeitemtrigger$listeners.func_193237_b(p_192164_2_);
+            consumeitemtrigger$listeners.remove(listener);
 
-            if (consumeitemtrigger$listeners.func_193238_a())
+            if (consumeitemtrigger$listeners.isEmpty())
             {
-                this.field_193150_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193150_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public ConsumeItemTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public ConsumeItemTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
+        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
         return new ConsumeItemTrigger.Instance(itempredicate);
     }
 
-    public void func_193148_a(EntityPlayerMP p_193148_1_, ItemStack p_193148_2_)
+    public void trigger(EntityPlayerMP player, ItemStack item)
     {
-        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.field_193150_b.get(p_193148_1_.func_192039_O());
+        ConsumeItemTrigger.Listeners consumeitemtrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (consumeitemtrigger$listeners != null)
         {
-            consumeitemtrigger$listeners.func_193240_a(p_193148_2_);
+            consumeitemtrigger$listeners.trigger(item);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final ItemPredicate field_193194_a;
+        private final ItemPredicate item;
 
-        public Instance(ItemPredicate p_i47562_1_)
+        public Instance(ItemPredicate item)
         {
-            super(ConsumeItemTrigger.field_193149_a);
-            this.field_193194_a = p_i47562_1_;
+            super(ConsumeItemTrigger.ID);
+            this.item = item;
         }
 
-        public boolean func_193193_a(ItemStack p_193193_1_)
+        public boolean test(ItemStack item)
         {
-            return this.field_193194_a.func_192493_a(p_193193_1_);
+            return this.item.test(item);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193241_a;
-        private final Set<ICriterionTrigger.Listener<ConsumeItemTrigger.Instance>> field_193242_b = Sets.<ICriterionTrigger.Listener<ConsumeItemTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<ConsumeItemTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<ConsumeItemTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47563_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193241_a = p_i47563_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193238_a()
+        public boolean isEmpty()
         {
-            return this.field_193242_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193239_a(ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> p_193239_1_)
+        public void add(ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener)
         {
-            this.field_193242_b.add(p_193239_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193237_b(ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> p_193237_1_)
+        public void remove(ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener)
         {
-            this.field_193242_b.remove(p_193237_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193240_a(ItemStack p_193240_1_)
+        public void trigger(ItemStack item)
         {
             List<ICriterionTrigger.Listener<ConsumeItemTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener : this.field_193242_b)
+            for (ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener : this.listeners)
             {
-                if (((ConsumeItemTrigger.Instance)listener.func_192158_a()).func_193193_a(p_193240_1_))
+                if (((ConsumeItemTrigger.Instance)listener.getCriterionInstance()).test(item))
                 {
                     if (list == null)
                     {
@@ -135,7 +138,7 @@ public class ConsumeItemTrigger implements ICriterionTrigger<ConsumeItemTrigger.
             {
                 for (ICriterionTrigger.Listener<ConsumeItemTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193241_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

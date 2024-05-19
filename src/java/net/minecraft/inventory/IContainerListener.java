@@ -8,7 +8,7 @@ public interface IContainerListener
     /**
      * update the crafting window inventory with the items in the list
      */
-    void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList);
+    void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList);
 
     /**
      * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
@@ -21,7 +21,7 @@ public interface IContainerListener
      * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
      * value. Both are truncated to shorts in non-local SMP.
      */
-    void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue);
+    void sendWindowProperty(Container containerIn, int varToUpdate, int newValue);
 
     void sendAllWindowProperties(Container containerIn, IInventory inventory);
 }

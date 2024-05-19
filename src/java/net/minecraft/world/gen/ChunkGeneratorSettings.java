@@ -42,7 +42,7 @@ public class ChunkGeneratorSettings
     public final boolean useMineShafts;
     public final boolean useTemples;
     public final boolean useMonuments;
-    public final boolean field_191077_z;
+    public final boolean useMansions;
     public final boolean useRavines;
     public final boolean useWaterLakes;
     public final int waterLakeChance;
@@ -124,7 +124,7 @@ public class ChunkGeneratorSettings
         this.useMineShafts = settingsFactory.useMineShafts;
         this.useTemples = settingsFactory.useTemples;
         this.useMonuments = settingsFactory.useMonuments;
-        this.field_191077_z = settingsFactory.field_191076_A;
+        this.useMansions = settingsFactory.useMansions;
         this.useRavines = settingsFactory.useRavines;
         this.useWaterLakes = settingsFactory.useWaterLakes;
         this.waterLakeChance = settingsFactory.waterLakeChance;
@@ -209,7 +209,7 @@ public class ChunkGeneratorSettings
         public boolean useMineShafts = true;
         public boolean useTemples = true;
         public boolean useMonuments = true;
-        public boolean field_191076_A = true;
+        public boolean useMansions = true;
         public boolean useRavines = true;
         public boolean useWaterLakes = true;
         public int waterLakeChance = 4;
@@ -320,7 +320,7 @@ public class ChunkGeneratorSettings
             this.useMineShafts = true;
             this.useTemples = true;
             this.useMonuments = true;
-            this.field_191076_A = true;
+            this.useMansions = true;
             this.useRavines = true;
             this.useWaterLakes = true;
             this.waterLakeChance = 4;
@@ -686,7 +686,7 @@ public class ChunkGeneratorSettings
                 {
                     return false;
                 }
-                else if (this.field_191076_A != chunkgeneratorsettings$factory.field_191076_A)
+                else if (this.useMansions != chunkgeneratorsettings$factory.useMansions)
                 {
                     return false;
                 }
@@ -736,7 +736,7 @@ public class ChunkGeneratorSettings
             i = 31 * i + (this.useMineShafts ? 1 : 0);
             i = 31 * i + (this.useTemples ? 1 : 0);
             i = 31 * i + (this.useMonuments ? 1 : 0);
-            i = 31 * i + (this.field_191076_A ? 1 : 0);
+            i = 31 * i + (this.useMansions ? 1 : 0);
             i = 31 * i + (this.useRavines ? 1 : 0);
             i = 31 * i + (this.useWaterLakes ? 1 : 0);
             i = 31 * i + this.waterLakeChance;
@@ -833,7 +833,7 @@ public class ChunkGeneratorSettings
                 chunkgeneratorsettings$factory.useMineShafts = JsonUtils.getBoolean(jsonobject, "useMineShafts", chunkgeneratorsettings$factory.useMineShafts);
                 chunkgeneratorsettings$factory.useTemples = JsonUtils.getBoolean(jsonobject, "useTemples", chunkgeneratorsettings$factory.useTemples);
                 chunkgeneratorsettings$factory.useMonuments = JsonUtils.getBoolean(jsonobject, "useMonuments", chunkgeneratorsettings$factory.useMonuments);
-                chunkgeneratorsettings$factory.field_191076_A = JsonUtils.getBoolean(jsonobject, "useMansions", chunkgeneratorsettings$factory.field_191076_A);
+                chunkgeneratorsettings$factory.useMansions = JsonUtils.getBoolean(jsonobject, "useMansions", chunkgeneratorsettings$factory.useMansions);
                 chunkgeneratorsettings$factory.useRavines = JsonUtils.getBoolean(jsonobject, "useRavines", chunkgeneratorsettings$factory.useRavines);
                 chunkgeneratorsettings$factory.useWaterLakes = JsonUtils.getBoolean(jsonobject, "useWaterLakes", chunkgeneratorsettings$factory.useWaterLakes);
                 chunkgeneratorsettings$factory.waterLakeChance = JsonUtils.getInt(jsonobject, "waterLakeChance", chunkgeneratorsettings$factory.waterLakeChance);
@@ -937,7 +937,7 @@ public class ChunkGeneratorSettings
             jsonobject.addProperty("useMineShafts", Boolean.valueOf(p_serialize_1_.useMineShafts));
             jsonobject.addProperty("useTemples", Boolean.valueOf(p_serialize_1_.useTemples));
             jsonobject.addProperty("useMonuments", Boolean.valueOf(p_serialize_1_.useMonuments));
-            jsonobject.addProperty("useMansions", Boolean.valueOf(p_serialize_1_.field_191076_A));
+            jsonobject.addProperty("useMansions", Boolean.valueOf(p_serialize_1_.useMansions));
             jsonobject.addProperty("useRavines", Boolean.valueOf(p_serialize_1_.useRavines));
             jsonobject.addProperty("useWaterLakes", Boolean.valueOf(p_serialize_1_.useWaterLakes));
             jsonobject.addProperty("waterLakeChance", Integer.valueOf(p_serialize_1_.waterLakeChance));

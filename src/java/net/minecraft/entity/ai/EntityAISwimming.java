@@ -6,20 +6,20 @@ import net.minecraft.pathfinding.PathNavigateGround;
 
 public class EntityAISwimming extends EntityAIBase
 {
-    private final EntityLiving theEntity;
+    private final EntityLiving entity;
 
-    public EntityAISwimming(EntityLiving entitylivingIn)
+    public EntityAISwimming(EntityLiving entityIn)
     {
-        this.theEntity = entitylivingIn;
+        this.entity = entityIn;
         this.setMutexBits(4);
 
-        if (entitylivingIn.getNavigator() instanceof PathNavigateGround)
+        if (entityIn.getNavigator() instanceof PathNavigateGround)
         {
-            ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+            ((PathNavigateGround)entityIn.getNavigator()).setCanSwim(true);
         }
-        else if (entitylivingIn.getNavigator() instanceof PathNavigateFlying)
+        else if (entityIn.getNavigator() instanceof PathNavigateFlying)
         {
-            ((PathNavigateFlying)entitylivingIn.getNavigator()).func_192877_c(true);
+            ((PathNavigateFlying)entityIn.getNavigator()).setCanFloat(true);
         }
     }
 
@@ -28,17 +28,17 @@ public class EntityAISwimming extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        return this.theEntity.isInWater() || this.theEntity.isInLava();
+        return this.entity.isInWater() || this.entity.isInLava();
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {
-        if (this.theEntity.getRNG().nextFloat() < 0.8F)
+        if (this.entity.getRNG().nextFloat() < 0.8F)
         {
-            this.theEntity.getJumpHelper().setJumping();
+            this.entity.getJumpHelper().setJumping();
         }
     }
 }

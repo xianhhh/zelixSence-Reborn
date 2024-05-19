@@ -22,7 +22,7 @@ public abstract class WorldProvider
     public static final float[] MOON_PHASE_FACTORS = new float[] {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
 
     /** world object being used */
-    protected World worldObj;
+    protected World world;
     private WorldType terrainType;
     private String generatorSettings;
 
@@ -32,13 +32,16 @@ public abstract class WorldProvider
     /**
      * States whether the Hell world provider is used(true) or if the normal world provider is used(false)
      */
-    protected boolean isHellWorld;
+    protected boolean doesWaterVaporize;
 
     /**
-     * A boolean that tells if a world does not have a sky. Used in calculating weather and skylight
+     * Whether this dimension should be treated as the nether.
+     *  
+     * @see <a href="https://github.com/ModCoderPack/MCPBot-Issues/issues/330">https://github.com/ModCoderPack/MCPBot-
+     * Issues/issues/330</a>
      */
-    protected boolean hasNoSky;
-    protected boolean field_191067_f;
+    protected boolean nether;
+    protected boolean hasSkyLight;
 
     /** Light to brightness conversion table */
     protected final float[] lightBrightnessTable = new float[16];
@@ -49,12 +52,12 @@ public abstract class WorldProvider
     /**
      * associate an existing world with a World provider, and setup its lightbrightness table
      */
-    public final void registerWorld(World worldIn)
+    public final void setWorld(World worldIn)
     {
-        this.worldObj = worldIn;
+        this.world = worldIn;
         this.terrainType = worldIn.getWorldInfo().getTerrainType();
         this.generatorSettings = worldIn.getWorldInfo().getGeneratorOptions();
-        this.createBiomeProvider();
+        this.init();
         this.generateLightBrightnessTable();
     }
 
@@ -73,25 +76,28 @@ public abstract class WorldProvider
     }
 
     /**
-     * creates a new world chunk manager for WorldProvider
+     * Creates a new {@link BiomeProvider} for the WorldProvider, and also sets the values of {@link #hasSkylight} and
+     * {@link #hasNoSky} appropriately.
+     *  
+     * Note that subclasses generally override this method without calling the parent version.
      */
-    protected void createBiomeProvider()
+    protected void init()
     {
-        this.field_191067_f = true;
-        WorldType worldtype = this.worldObj.getWorldInfo().getTerrainType();
+        this.hasSkyLight = true;
+        WorldType worldtype = this.world.getWorldInfo().getTerrainType();
 
         if (worldtype == WorldType.FLAT)
         {
-            FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(this.worldObj.getWorldInfo().getGeneratorOptions());
+            FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(this.world.getWorldInfo().getGeneratorOptions());
             this.biomeProvider = new BiomeProviderSingle(Biome.getBiome(flatgeneratorinfo.getBiome(), Biomes.DEFAULT));
         }
-        else if (worldtype == WorldType.DEBUG_WORLD)
+        else if (worldtype == WorldType.DEBUG_ALL_BLOCK_STATES)
         {
             this.biomeProvider = new BiomeProviderSingle(Biomes.PLAINS);
         }
         else
         {
-            this.biomeProvider = new BiomeProvider(this.worldObj.getWorldInfo());
+            this.biomeProvider = new BiomeProvider(this.world.getWorldInfo());
         }
     }
 
@@ -99,15 +105,15 @@ public abstract class WorldProvider
     {
         if (this.terrainType == WorldType.FLAT)
         {
-            return new ChunkGeneratorFlat(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings);
+            return new ChunkGeneratorFlat(this.world, this.world.getSeed(), this.world.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings);
         }
-        else if (this.terrainType == WorldType.DEBUG_WORLD)
+        else if (this.terrainType == WorldType.DEBUG_ALL_BLOCK_STATES)
         {
-            return new ChunkGeneratorDebug(this.worldObj);
+            return new ChunkGeneratorDebug(this.world);
         }
         else
         {
-            return this.terrainType == WorldType.CUSTOMIZED ? new ChunkGeneratorOverworld(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings) : new ChunkGeneratorOverworld(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings);
+            return this.terrainType == WorldType.CUSTOMIZED ? new ChunkGeneratorOverworld(this.world, this.world.getSeed(), this.world.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings) : new ChunkGeneratorOverworld(this.world, this.world.getSeed(), this.world.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings);
         }
     }
 
@@ -118,13 +124,13 @@ public abstract class WorldProvider
     {
         BlockPos blockpos = new BlockPos(x, 0, z);
 
-        if (this.worldObj.getBiome(blockpos).ignorePlayerSpawnSuitability())
+        if (this.world.getBiome(blockpos).ignorePlayerSpawnSuitability())
         {
             return true;
         }
         else
         {
-            return this.worldObj.getGroundAboveSeaLevel(blockpos).getBlock() == Blocks.GRASS;
+            return this.world.getGroundAboveSeaLevel(blockpos).getBlock() == Blocks.GRASS;
         }
     }
 
@@ -237,7 +243,7 @@ public abstract class WorldProvider
 
     public int getAverageGroundLevel()
     {
-        return this.terrainType == WorldType.FLAT ? 4 : this.worldObj.getSeaLevel() + 1;
+        return this.terrainType == WorldType.FLAT ? 4 : this.world.getSeaLevel() + 1;
     }
 
     /**
@@ -265,17 +271,17 @@ public abstract class WorldProvider
 
     public boolean doesWaterVaporize()
     {
-        return this.isHellWorld;
+        return this.doesWaterVaporize;
     }
 
-    public boolean func_191066_m()
+    public boolean hasSkyLight()
     {
-        return this.field_191067_f;
+        return this.hasSkyLight;
     }
 
-    public boolean getHasNoSky()
+    public boolean isNether()
     {
-        return this.hasNoSky;
+        return this.nether;
     }
 
     public float[] getLightBrightnessTable()

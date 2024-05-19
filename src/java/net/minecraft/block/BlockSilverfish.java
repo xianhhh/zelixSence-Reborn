@@ -74,7 +74,7 @@ public class BlockSilverfish extends Block
         {
             EntitySilverfish entitysilverfish = new EntitySilverfish(worldIn);
             entitysilverfish.setLocationAndAngles((double)pos.getX() + 0.5D, (double)pos.getY(), (double)pos.getZ() + 0.5D, 0.0F, 0.0F);
-            worldIn.spawnEntityInWorld(entitysilverfish);
+            worldIn.spawnEntity(entitysilverfish);
             entitysilverfish.spawnExplosionParticle();
         }
     }
@@ -87,11 +87,11 @@ public class BlockSilverfish extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
         for (BlockSilverfish.EnumType blocksilverfish$enumtype : BlockSilverfish.EnumType.values())
         {
-            tab.add(new ItemStack(this, 1, blocksilverfish$enumtype.getMetadata()));
+            items.add(new ItemStack(this, 1, blocksilverfish$enumtype.getMetadata()));
         }
     }
 

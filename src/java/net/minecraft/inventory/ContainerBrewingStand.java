@@ -16,7 +16,7 @@ public class ContainerBrewingStand extends Container
     private final IInventory tileBrewingStand;
 
     /** Instance of Slot. */
-    private final Slot theSlot;
+    private final Slot slot;
 
     /**
      * Used to cache the brewing time to send changes to ICrafting listeners.
@@ -34,7 +34,7 @@ public class ContainerBrewingStand extends Container
         this.addSlotToContainer(new ContainerBrewingStand.Potion(tileBrewingStandIn, 0, 56, 51));
         this.addSlotToContainer(new ContainerBrewingStand.Potion(tileBrewingStandIn, 1, 79, 58));
         this.addSlotToContainer(new ContainerBrewingStand.Potion(tileBrewingStandIn, 2, 102, 51));
-        this.theSlot = this.addSlotToContainer(new ContainerBrewingStand.Ingredient(tileBrewingStandIn, 3, 79, 17));
+        this.slot = this.addSlotToContainer(new ContainerBrewingStand.Ingredient(tileBrewingStandIn, 3, 79, 17));
         this.addSlotToContainer(new ContainerBrewingStand.Fuel(tileBrewingStandIn, 4, 17, 17));
 
         for (int i = 0; i < 3; ++i)
@@ -70,12 +70,12 @@ public class ContainerBrewingStand extends Container
 
             if (this.prevBrewTime != this.tileBrewingStand.getField(0))
             {
-                icontainerlistener.sendProgressBarUpdate(this, 0, this.tileBrewingStand.getField(0));
+                icontainerlistener.sendWindowProperty(this, 0, this.tileBrewingStand.getField(0));
             }
 
             if (this.prevFuel != this.tileBrewingStand.getField(1))
             {
-                icontainerlistener.sendProgressBarUpdate(this, 1, this.tileBrewingStand.getField(1));
+                icontainerlistener.sendWindowProperty(this, 1, this.tileBrewingStand.getField(1));
             }
         }
 
@@ -97,11 +97,12 @@ public class ContainerBrewingStand extends Container
     }
 
     /**
-     * Take a stack from the specified inventory slot.
+     * Handle when the stack in slot {@code index} is shift-clicked. Normally this moves the stack between the player
+     * inventory and the other inventory(s).
      */
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
-        ItemStack itemstack = ItemStack.field_190927_a;
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
@@ -111,71 +112,71 @@ public class ContainerBrewingStand extends Container
 
             if ((index < 0 || index > 2) && index != 3 && index != 4)
             {
-                if (this.theSlot.isItemValid(itemstack1))
+                if (this.slot.isItemValid(itemstack1))
                 {
                     if (!this.mergeItemStack(itemstack1, 3, 4, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
-                else if (ContainerBrewingStand.Potion.canHoldPotion(itemstack) && itemstack.func_190916_E() == 1)
+                else if (ContainerBrewingStand.Potion.canHoldPotion(itemstack) && itemstack.getCount() == 1)
                 {
                     if (!this.mergeItemStack(itemstack1, 0, 3, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
                 else if (ContainerBrewingStand.Fuel.isValidBrewingFuel(itemstack))
                 {
                     if (!this.mergeItemStack(itemstack1, 4, 5, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
                 else if (index >= 5 && index < 32)
                 {
                     if (!this.mergeItemStack(itemstack1, 32, 41, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
                 else if (index >= 32 && index < 41)
                 {
                     if (!this.mergeItemStack(itemstack1, 5, 32, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
                 else if (!this.mergeItemStack(itemstack1, 5, 41, false))
                 {
-                    return ItemStack.field_190927_a;
+                    return ItemStack.EMPTY;
                 }
             }
             else
             {
                 if (!this.mergeItemStack(itemstack1, 5, 41, true))
                 {
-                    return ItemStack.field_190927_a;
+                    return ItemStack.EMPTY;
                 }
 
                 slot.onSlotChange(itemstack1, itemstack);
             }
 
-            if (itemstack1.func_190926_b())
+            if (itemstack1.isEmpty())
             {
-                slot.putStack(ItemStack.field_190927_a);
+                slot.putStack(ItemStack.EMPTY);
             }
             else
             {
                 slot.onSlotChanged();
             }
 
-            if (itemstack1.func_190916_E() == itemstack.func_190916_E())
+            if (itemstack1.getCount() == itemstack.getCount())
             {
-                return ItemStack.field_190927_a;
+                return ItemStack.EMPTY;
             }
 
-            slot.func_190901_a(playerIn, itemstack1);
+            slot.onTake(playerIn, itemstack1);
         }
 
         return itemstack;
@@ -239,17 +240,17 @@ public class ContainerBrewingStand extends Container
             return 1;
         }
 
-        public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
+        public ItemStack onTake(EntityPlayer thePlayer, ItemStack stack)
         {
-            PotionType potiontype = PotionUtils.getPotionFromItem(p_190901_2_);
+            PotionType potiontype = PotionUtils.getPotionFromItem(stack);
 
-            if (p_190901_1_ instanceof EntityPlayerMP)
+            if (thePlayer instanceof EntityPlayerMP)
             {
-                CriteriaTriggers.field_192130_j.func_192173_a((EntityPlayerMP)p_190901_1_, potiontype);
+                CriteriaTriggers.BREWED_POTION.trigger((EntityPlayerMP)thePlayer, potiontype);
             }
 
-            super.func_190901_a(p_190901_1_, p_190901_2_);
-            return p_190901_2_;
+            super.onTake(thePlayer, stack);
+            return stack;
         }
 
         public static boolean canHoldPotion(ItemStack stack)

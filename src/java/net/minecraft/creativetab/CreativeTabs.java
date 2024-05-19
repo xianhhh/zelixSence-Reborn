@@ -85,7 +85,7 @@ public abstract class CreativeTabs
         }
     };
     public static final CreativeTabs MATERIALS = MISC;
-    public static final CreativeTabs field_192395_m = new CreativeTabs(4, "hotbar")
+    public static final CreativeTabs HOTBAR = new CreativeTabs(4, "hotbar")
     {
         public ItemStack getTabIconItem()
         {
@@ -95,7 +95,7 @@ public abstract class CreativeTabs
         {
             throw new RuntimeException("Implement exception client-side.");
         }
-        public boolean func_192394_m()
+        public boolean isAlignedRight()
         {
             return true;
         }
@@ -111,7 +111,7 @@ public abstract class CreativeTabs
     private final String tabLabel;
 
     /** Texture to use. */
-    private String theTexture = "items.png";
+    private String backgroundTexture = "items.png";
     private boolean hasScrollbar = true;
 
     /** Whether to draw the title in the foreground of the creative GUI */
@@ -123,7 +123,7 @@ public abstract class CreativeTabs
     {
         this.tabIndex = index;
         this.tabLabel = label;
-        this.iconItemStack = ItemStack.field_190927_a;
+        this.iconItemStack = ItemStack.EMPTY;
         CREATIVE_TAB_ARRAY[index] = this;
     }
 
@@ -147,7 +147,7 @@ public abstract class CreativeTabs
 
     public ItemStack getIconItemStack()
     {
-        if (this.iconItemStack.func_190926_b())
+        if (this.iconItemStack.isEmpty())
         {
             this.iconItemStack = this.getTabIconItem();
         }
@@ -159,12 +159,12 @@ public abstract class CreativeTabs
 
     public String getBackgroundImageName()
     {
-        return this.theTexture;
+        return this.backgroundTexture;
     }
 
     public CreativeTabs setBackgroundImageName(String texture)
     {
-        this.theTexture = texture;
+        this.backgroundTexture = texture;
         return this;
     }
 
@@ -206,7 +206,7 @@ public abstract class CreativeTabs
         return this.tabIndex < 6;
     }
 
-    public boolean func_192394_m()
+    public boolean isAlignedRight()
     {
         return this.getTabColumn() == 5;
     }

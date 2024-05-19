@@ -17,7 +17,7 @@ public class GuiOptionButton extends GuiButton
         this.enumOptions = p_i45013_4_;
     }
 
-    public GameSettings.Options returnEnumOptions()
+    public GameSettings.Options getOption()
     {
         return this.enumOptions;
     }

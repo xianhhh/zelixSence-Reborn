@@ -6,37 +6,40 @@ import net.minecraft.util.ResourceLocation;
 
 public interface ICriterionTrigger<T extends ICriterionInstance>
 {
-    ResourceLocation func_192163_a();
+    ResourceLocation getId();
 
-    void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<T> p_192165_2_);
+    void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<T> listener);
 
-    void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<T> p_192164_2_);
+    void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<T> listener);
 
-    void func_192167_a(PlayerAdvancements p_192167_1_);
+    void removeAllListeners(PlayerAdvancements playerAdvancementsIn);
 
-    T func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_);
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    T deserializeInstance(JsonObject json, JsonDeserializationContext context);
 
     public static class Listener<T extends ICriterionInstance>
     {
-        private final T field_192160_a;
-        private final Advancement field_192161_b;
-        private final String field_192162_c;
+        private final T criterionInstance;
+        private final Advancement advancement;
+        private final String criterionName;
 
-        public Listener(T p_i47405_1_, Advancement p_i47405_2_, String p_i47405_3_)
+        public Listener(T criterionInstanceIn, Advancement advancementIn, String criterionNameIn)
         {
-            this.field_192160_a = p_i47405_1_;
-            this.field_192161_b = p_i47405_2_;
-            this.field_192162_c = p_i47405_3_;
+            this.criterionInstance = criterionInstanceIn;
+            this.advancement = advancementIn;
+            this.criterionName = criterionNameIn;
         }
 
-        public T func_192158_a()
+        public T getCriterionInstance()
         {
-            return this.field_192160_a;
+            return this.criterionInstance;
         }
 
-        public void func_192159_a(PlayerAdvancements p_192159_1_)
+        public void grantCriterion(PlayerAdvancements playerAdvancementsIn)
         {
-            p_192159_1_.func_192750_a(this.field_192161_b, this.field_192162_c);
+            playerAdvancementsIn.grantCriterion(this.advancement, this.criterionName);
         }
 
         public boolean equals(Object p_equals_1_)
@@ -49,13 +52,13 @@ public interface ICriterionTrigger<T extends ICriterionInstance>
             {
                 ICriterionTrigger.Listener<?> listener = (ICriterionTrigger.Listener)p_equals_1_;
 
-                if (!this.field_192160_a.equals(listener.field_192160_a))
+                if (!this.criterionInstance.equals(listener.criterionInstance))
                 {
                     return false;
                 }
                 else
                 {
-                    return !this.field_192161_b.equals(listener.field_192161_b) ? false : this.field_192162_c.equals(listener.field_192162_c);
+                    return !this.advancement.equals(listener.advancement) ? false : this.criterionName.equals(listener.criterionName);
                 }
             }
             else
@@ -66,9 +69,9 @@ public interface ICriterionTrigger<T extends ICriterionInstance>
 
         public int hashCode()
         {
-            int i = this.field_192160_a.hashCode();
-            i = 31 * i + this.field_192161_b.hashCode();
-            i = 31 * i + this.field_192162_c.hashCode();
+            int i = this.criterionInstance.hashCode();
+            i = 31 * i + this.advancement.hashCode();
+            i = 31 * i + this.criterionName.hashCode();
             return i;
         }
     }

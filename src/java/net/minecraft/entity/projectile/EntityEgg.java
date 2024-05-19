@@ -32,6 +32,9 @@ public class EntityEgg extends EntityThrowable
         EntityThrowable.registerFixesThrowable(fixer, "ThrownEgg");
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 3)
@@ -71,7 +74,7 @@ public class EntityEgg extends EntityThrowable
                     EntityChicken entitychicken = new EntityChicken(this.world);
                     entitychicken.setGrowingAge(-24000);
                     entitychicken.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-                    this.world.spawnEntityInWorld(entitychicken);
+                    this.world.spawnEntity(entitychicken);
                 }
             }
 

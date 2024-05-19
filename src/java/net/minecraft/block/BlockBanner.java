@@ -54,6 +54,9 @@ public class BlockBanner extends BlockContainer
         return false;
     }
 
+    /**
+     * Determines if an entity can path through this block
+     */
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
     {
         return true;
@@ -94,13 +97,13 @@ public class BlockBanner extends BlockContainer
     private ItemStack getTileDataItemStack(World worldIn, BlockPos pos)
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
-        return tileentity instanceof TileEntityBanner ? ((TileEntityBanner)tileentity).func_190615_l() : ItemStack.field_190927_a;
+        return tileentity instanceof TileEntityBanner ? ((TileEntityBanner)tileentity).getItem() : ItemStack.EMPTY;
     }
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
         ItemStack itemstack = this.getTileDataItemStack(worldIn, pos);
-        return itemstack.func_190926_b() ? new ItemStack(Items.BANNER) : itemstack;
+        return itemstack.isEmpty() ? new ItemStack(Items.BANNER) : itemstack;
     }
 
     /**
@@ -110,7 +113,7 @@ public class BlockBanner extends BlockContainer
     {
         ItemStack itemstack = this.getTileDataItemStack(worldIn, pos);
 
-        if (itemstack.func_190926_b())
+        if (itemstack.isEmpty())
         {
             super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
         }
@@ -125,12 +128,16 @@ public class BlockBanner extends BlockContainer
         return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
     }
 
+    /**
+     * Spawns the block's drops in the world. By the time this is called the Block has possibly been set to air via
+     * Block.removedByPlayer
+     */
     public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
         if (te instanceof TileEntityBanner)
         {
             TileEntityBanner tileentitybanner = (TileEntityBanner)te;
-            ItemStack itemstack = tileentitybanner.func_190615_l();
+            ItemStack itemstack = tileentitybanner.getItem();
             spawnAsEntity(worldIn, pos, itemstack);
         }
         else
@@ -139,7 +146,7 @@ public class BlockBanner extends BlockContainer
         }
     }
 
-    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
         return BlockFaceShape.UNDEFINED;
     }
@@ -185,7 +192,7 @@ public class BlockBanner extends BlockContainer
             }
         }
 
-        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
         {
             EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
@@ -195,7 +202,7 @@ public class BlockBanner extends BlockContainer
                 worldIn.setBlockToAir(pos);
             }
 
-            super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+            super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         }
 
         public IBlockState getStateFromMeta(int meta)
@@ -243,7 +250,7 @@ public class BlockBanner extends BlockContainer
             return state.withProperty(ROTATION, Integer.valueOf(mirrorIn.mirrorRotation(((Integer)state.getValue(ROTATION)).intValue(), 16)));
         }
 
-        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
+        public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
         {
             if (!worldIn.getBlockState(pos.down()).getMaterial().isSolid())
             {
@@ -251,7 +258,7 @@ public class BlockBanner extends BlockContainer
                 worldIn.setBlockToAir(pos);
             }
 
-            super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
+            super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         }
 
         public IBlockState getStateFromMeta(int meta)

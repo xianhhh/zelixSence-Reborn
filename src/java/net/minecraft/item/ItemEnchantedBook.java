@@ -14,6 +14,14 @@ import net.minecraft.world.World;
 
 public class ItemEnchantedBook extends Item
 {
+    /**
+     * Returns true if this item has an enchantment glint. By default, this returns
+     * <code>stack.isItemEnchanted()</code>, but other items can override it (for instance, written books always return
+     * true).
+     *  
+     * Note that if you override this method, you generally want to also call the super version (on {@link Item}) to get
+     * the glint for enchanted items. Of course, that is unnecessary if the overwritten version always returns true.
+     */
     public boolean hasEffect(ItemStack stack)
     {
         return true;
@@ -22,7 +30,7 @@ public class ItemEnchantedBook extends Item
     /**
      * Checks isDamagable and if it cannot be stacked
      */
-    public boolean isItemTool(ItemStack stack)
+    public boolean isEnchantable(ItemStack stack)
     {
         return false;
     }
@@ -44,9 +52,9 @@ public class ItemEnchantedBook extends Item
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
-        super.addInformation(stack, playerIn, tooltip, advanced);
+        super.addInformation(stack, worldIn, tooltip, flagIn);
         NBTTagList nbttaglist = getEnchantments(stack);
 
         for (int i = 0; i < nbttaglist.tagCount(); ++i)
@@ -74,7 +82,7 @@ public class ItemEnchantedBook extends Item
         {
             NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
 
-            if (Enchantment.getEnchantmentByID(nbttagcompound.getShort("id")) == stack.enchantmentobj)
+            if (Enchantment.getEnchantmentByID(nbttagcompound.getShort("id")) == stack.enchantment)
             {
                 if (nbttagcompound.getShort("lvl") < stack.enchantmentLevel)
                 {
@@ -89,7 +97,7 @@ public class ItemEnchantedBook extends Item
         if (flag)
         {
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-            nbttagcompound1.setShort("id", (short)Enchantment.getEnchantmentID(stack.enchantmentobj));
+            nbttagcompound1.setShort("id", (short)Enchantment.getEnchantmentID(stack.enchantment));
             nbttagcompound1.setShort("lvl", (short)stack.enchantmentLevel);
             nbttaglist.appendTag(nbttagcompound1);
         }
@@ -115,9 +123,9 @@ public class ItemEnchantedBook extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (itemIn == CreativeTabs.SEARCH)
+        if (tab == CreativeTabs.SEARCH)
         {
             for (Enchantment enchantment : Enchantment.REGISTRY)
             {
@@ -125,18 +133,18 @@ public class ItemEnchantedBook extends Item
                 {
                     for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); ++i)
                     {
-                        tab.add(getEnchantedItemStack(new EnchantmentData(enchantment, i)));
+                        items.add(getEnchantedItemStack(new EnchantmentData(enchantment, i)));
                     }
                 }
             }
         }
-        else if (itemIn.getRelevantEnchantmentTypes().length != 0)
+        else if (tab.getRelevantEnchantmentTypes().length != 0)
         {
             for (Enchantment enchantment1 : Enchantment.REGISTRY)
             {
-                if (itemIn.hasRelevantEnchantmentType(enchantment1.type))
+                if (tab.hasRelevantEnchantmentType(enchantment1.type))
                 {
-                    tab.add(getEnchantedItemStack(new EnchantmentData(enchantment1, enchantment1.getMaxLevel())));
+                    items.add(getEnchantedItemStack(new EnchantmentData(enchantment1, enchantment1.getMaxLevel())));
                 }
             }
         }

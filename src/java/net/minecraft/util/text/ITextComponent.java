@@ -20,33 +20,53 @@ import net.minecraft.util.JsonUtils;
 
 public interface ITextComponent extends Iterable<ITextComponent>
 {
+    /**
+     * Sets the style of this component and updates the parent style of all of the sibling components.
+     */
     ITextComponent setStyle(Style style);
 
+    /**
+     * Gets the style of this component. Returns a direct reference; changes to this style will modify the style of this
+     * component (IE, there is no need to call {@link #setStyle(Style)} again after modifying it).
+     *  
+     * If this component's style is currently <code>null</code>, it will be initialized to the default style, and the
+     * parent style of all sibling components will be set to that style. (IE, changes to this style will also be
+     * reflected in sibling components.)
+     *  
+     * This method never returns <code>null</code>.
+     */
     Style getStyle();
 
     /**
-     * Appends the given text to the end of this component.
+     * Adds a new component to the end of the sibling list, with the specified text. Same as calling {@link
+     * #appendSibling(ITextComponent)} with a new {@link TextComponentString}.
+     *  
+     * @return This component, for chaining (and not the newly added component)
      */
     ITextComponent appendText(String text);
 
     /**
-     * Appends the given component to the end of this one.
+     * Adds a new component to the end of the sibling list, setting that component's style's parent style to this
+     * component's style.
+     *  
+     * @return This component, for chaining (and not the newly added component)
      */
     ITextComponent appendSibling(ITextComponent component);
 
     /**
-     * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
-     * different methods?
+     * Gets the raw content of this component (but not its sibling components), without any formatting codes. For
+     * example, this is the raw text in a {@link TextComponentString}, but it's the translated text for a {@link
+     * TextComponentTranslation} and it's the score value for a {@link TextComponentScore}.
      */
     String getUnformattedComponentText();
 
     /**
-     * Get the text of this component, <em>and all child components</em>, with all special formatting codes removed.
+     * Gets the text of this component <em>and all sibling components</em>, without any formatting codes.
      */
     String getUnformattedText();
 
     /**
-     * Gets the text of this component, with formatting codes added for rendering.
+     * Gets the text of this component <em>and all sibling components</em>, with formatting codes added for rendering.
      */
     String getFormattedText();
 
@@ -271,7 +291,7 @@ public interface ITextComponent extends Iterable<ITextComponent>
                 }
 
                 TextComponentKeybind textcomponentkeybind = (TextComponentKeybind)p_serialize_1_;
-                jsonobject.addProperty("keybind", textcomponentkeybind.func_193633_h());
+                jsonobject.addProperty("keybind", textcomponentkeybind.getKeybind());
             }
 
             return jsonobject;

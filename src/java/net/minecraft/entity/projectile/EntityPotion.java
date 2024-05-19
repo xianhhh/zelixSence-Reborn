@@ -34,13 +34,13 @@ import org.apache.logging.log4j.Logger;
 
 public class EntityPotion extends EntityThrowable
 {
-    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityPotion.class, DataSerializers.OPTIONAL_ITEM_STACK);
+    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityPotion.class, DataSerializers.ITEM_STACK);
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final Predicate<EntityLivingBase> field_190546_d = new Predicate<EntityLivingBase>()
+    public static final Predicate<EntityLivingBase> WATER_SENSITIVE = new Predicate<EntityLivingBase>()
     {
         public boolean apply(@Nullable EntityLivingBase p_apply_1_)
         {
-            return EntityPotion.func_190544_c(p_apply_1_);
+            return EntityPotion.isWaterSensitiveEntity(p_apply_1_);
         }
     };
 
@@ -59,7 +59,7 @@ public class EntityPotion extends EntityThrowable
     {
         super(worldIn, x, y, z);
 
-        if (!potionDamageIn.func_190926_b())
+        if (!potionDamageIn.isEmpty())
         {
             this.setItem(potionDamageIn);
         }
@@ -67,7 +67,7 @@ public class EntityPotion extends EntityThrowable
 
     protected void entityInit()
     {
-        this.getDataManager().register(ITEM, ItemStack.field_190927_a);
+        this.getDataManager().register(ITEM, ItemStack.EMPTY);
     }
 
     public ItemStack getPotion()
@@ -128,30 +128,30 @@ public class EntityPotion extends EntityThrowable
 
             if (flag)
             {
-                this.func_190545_n();
+                this.applyWater();
             }
             else if (!list.isEmpty())
             {
                 if (this.isLingering())
                 {
-                    this.func_190542_a(itemstack, potiontype);
+                    this.makeAreaOfEffectCloud(itemstack, potiontype);
                 }
                 else
                 {
-                    this.func_190543_a(result, list);
+                    this.applySplash(result, list);
                 }
             }
 
             int i = potiontype.hasInstantEffect() ? 2007 : 2002;
-            this.world.playEvent(i, new BlockPos(this), PotionUtils.func_190932_c(itemstack));
+            this.world.playEvent(i, new BlockPos(this), PotionUtils.getColor(itemstack));
             this.setDead();
         }
     }
 
-    private void func_190545_n()
+    private void applyWater()
     {
-        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
-        List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb, field_190546_d);
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().grow(4.0D, 2.0D, 4.0D);
+        List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb, WATER_SENSITIVE);
 
         if (!list.isEmpty())
         {
@@ -159,17 +159,17 @@ public class EntityPotion extends EntityThrowable
             {
                 double d0 = this.getDistanceSqToEntity(entitylivingbase);
 
-                if (d0 < 16.0D && func_190544_c(entitylivingbase))
+                if (d0 < 16.0D && isWaterSensitiveEntity(entitylivingbase))
                 {
-                    entitylivingbase.attackEntityFrom(DamageSource.drown, 1.0F);
+                    entitylivingbase.attackEntityFrom(DamageSource.DROWN, 1.0F);
                 }
             }
         }
     }
 
-    private void func_190543_a(RayTraceResult p_190543_1_, List<PotionEffect> p_190543_2_)
+    private void applySplash(RayTraceResult p_190543_1_, List<PotionEffect> p_190543_2_)
     {
-        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().grow(4.0D, 2.0D, 4.0D);
         List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb);
 
         if (!list.isEmpty())
@@ -213,7 +213,7 @@ public class EntityPotion extends EntityThrowable
         }
     }
 
-    private void func_190542_a(ItemStack p_190542_1_, PotionType p_190542_2_)
+    private void makeAreaOfEffectCloud(ItemStack p_190542_1_, PotionType p_190542_2_)
     {
         EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
         entityareaeffectcloud.setOwner(this.getThrower());
@@ -235,7 +235,7 @@ public class EntityPotion extends EntityThrowable
             entityareaeffectcloud.setColor(nbttagcompound.getInteger("CustomPotionColor"));
         }
 
-        this.world.spawnEntityInWorld(entityareaeffectcloud);
+        this.world.spawnEntity(entityareaeffectcloud);
     }
 
     private boolean isLingering()
@@ -265,7 +265,7 @@ public class EntityPotion extends EntityThrowable
         super.readEntityFromNBT(compound);
         ItemStack itemstack = new ItemStack(compound.getCompoundTag("Potion"));
 
-        if (itemstack.func_190926_b())
+        if (itemstack.isEmpty())
         {
             this.setDead();
         }
@@ -283,13 +283,13 @@ public class EntityPotion extends EntityThrowable
         super.writeEntityToNBT(compound);
         ItemStack itemstack = this.getPotion();
 
-        if (!itemstack.func_190926_b())
+        if (!itemstack.isEmpty())
         {
             compound.setTag("Potion", itemstack.writeToNBT(new NBTTagCompound()));
         }
     }
 
-    private static boolean func_190544_c(EntityLivingBase p_190544_0_)
+    private static boolean isWaterSensitiveEntity(EntityLivingBase p_190544_0_)
     {
         return p_190544_0_ instanceof EntityEnderman || p_190544_0_ instanceof EntityBlaze;
     }

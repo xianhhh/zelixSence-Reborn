@@ -72,7 +72,7 @@ public class StructureOceanMonument extends MapGenStructure
 
         int k = chunkX / this.spacing;
         int l = chunkZ / this.spacing;
-        Random random = this.worldObj.setRandomSeed(k, l, 10387313);
+        Random random = this.world.setRandomSeed(k, l, 10387313);
         k = k * this.spacing;
         l = l * this.spacing;
         k = k + (random.nextInt(this.spacing - this.separation) + random.nextInt(this.spacing - this.separation)) / 2;
@@ -80,12 +80,12 @@ public class StructureOceanMonument extends MapGenStructure
 
         if (i == k && j == l)
         {
-            if (!this.worldObj.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 16, SPAWN_BIOMES))
+            if (!this.world.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 16, SPAWN_BIOMES))
             {
                 return false;
             }
 
-            boolean flag = this.worldObj.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 29, WATER_BIOMES);
+            boolean flag = this.world.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 29, WATER_BIOMES);
 
             if (flag)
             {
@@ -96,15 +96,15 @@ public class StructureOceanMonument extends MapGenStructure
         return false;
     }
 
-    public BlockPos getClosestStrongholdPos(World worldIn, BlockPos pos, boolean p_180706_3_)
+    public BlockPos getNearestStructurePos(World worldIn, BlockPos pos, boolean findUnexplored)
     {
-        this.worldObj = worldIn;
-        return func_191069_a(worldIn, this, pos, this.spacing, this.separation, 10387313, true, 100, p_180706_3_);
+        this.world = worldIn;
+        return findNearestStructurePosBySpacing(worldIn, this, pos, this.spacing, this.separation, 10387313, true, 100, findUnexplored);
     }
 
     protected StructureStart getStructureStart(int chunkX, int chunkZ)
     {
-        return new StructureOceanMonument.StartMonument(this.worldObj, this.rand, chunkX, chunkZ);
+        return new StructureOceanMonument.StartMonument(this.world, this.rand, chunkX, chunkZ);
     }
 
     public List<Biome.SpawnListEntry> getScatteredFeatureSpawnList()
@@ -178,8 +178,8 @@ public class StructureOceanMonument extends MapGenStructure
             for (ChunkPos chunkpos : this.processed)
             {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setInteger("X", chunkpos.chunkXPos);
-                nbttagcompound.setInteger("Z", chunkpos.chunkZPos);
+                nbttagcompound.setInteger("X", chunkpos.x);
+                nbttagcompound.setInteger("Z", chunkpos.z);
                 nbttaglist.appendTag(nbttagcompound);
             }
 

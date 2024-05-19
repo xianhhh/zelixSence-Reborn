@@ -17,11 +17,11 @@ public class EnchantWithLevels extends LootFunction
     private final RandomValueRange randomLevel;
     private final boolean isTreasure;
 
-    public EnchantWithLevels(LootCondition[] conditionsIn, RandomValueRange randomRange, boolean p_i46627_3_)
+    public EnchantWithLevels(LootCondition[] conditionsIn, RandomValueRange randomRange, boolean isTreasureIn)
     {
         super(conditionsIn);
         this.randomLevel = randomRange;
-        this.isTreasure = p_i46627_3_;
+        this.isTreasure = isTreasureIn;
     }
 
     public ItemStack apply(ItemStack stack, Random rand, LootContext context)

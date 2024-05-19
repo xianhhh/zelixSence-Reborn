@@ -73,7 +73,7 @@ public class ItemWrittenBook extends Item
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         if (stack.hasTagCompound())
         {
@@ -89,17 +89,17 @@ public class ItemWrittenBook extends Item
         }
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        ItemStack itemstack = playerIn.getHeldItem(handIn);
 
-        if (!itemStackIn.isRemote)
+        if (!worldIn.isRemote)
         {
-            this.resolveContents(itemstack, worldIn);
+            this.resolveContents(itemstack, playerIn);
         }
 
-        worldIn.openBook(itemstack, playerIn);
-        worldIn.addStat(StatList.getObjectUseStats(this));
+        playerIn.openBook(itemstack, handIn);
+        playerIn.addStat(StatList.getObjectUseStats(this));
         return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
     }
 
@@ -147,6 +147,14 @@ public class ItemWrittenBook extends Item
         }
     }
 
+    /**
+     * Returns true if this item has an enchantment glint. By default, this returns
+     * <code>stack.isItemEnchanted()</code>, but other items can override it (for instance, written books always return
+     * true).
+     *  
+     * Note that if you override this method, you generally want to also call the super version (on {@link Item}) to get
+     * the glint for enchanted items. Of course, that is unnecessary if the overwritten version always returns true.
+     */
     public boolean hasEffect(ItemStack stack)
     {
         return true;

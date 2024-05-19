@@ -16,14 +16,14 @@ import org.apache.logging.log4j.Logger;
 public class LanguageManager implements IResourceManagerReloadListener
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final MetadataSerializer theMetadataSerializer;
+    private final MetadataSerializer metadataSerializer;
     private String currentLanguage;
     protected static final Locale CURRENT_LOCALE = new Locale();
     private final Map<String, Language> languageMap = Maps.<String, Language>newHashMap();
 
     public LanguageManager(MetadataSerializer theMetadataSerializerIn, String currentLanguageIn)
     {
-        this.theMetadataSerializer = theMetadataSerializerIn;
+        this.metadataSerializer = theMetadataSerializerIn;
         this.currentLanguage = currentLanguageIn;
         I18n.setLocale(CURRENT_LOCALE);
     }
@@ -36,7 +36,7 @@ public class LanguageManager implements IResourceManagerReloadListener
         {
             try
             {
-                LanguageMetadataSection languagemetadatasection = (LanguageMetadataSection)iresourcepack.getPackMetadata(this.theMetadataSerializer, "language");
+                LanguageMetadataSection languagemetadatasection = (LanguageMetadataSection)iresourcepack.getPackMetadata(this.metadataSerializer, "language");
 
                 if (languagemetadatasection != null)
                 {
@@ -99,7 +99,7 @@ public class LanguageManager implements IResourceManagerReloadListener
         return Sets.newTreeSet(this.languageMap.values());
     }
 
-    public Language func_191960_a(String p_191960_1_)
+    public Language getLanguage(String p_191960_1_)
     {
         return this.languageMap.get(p_191960_1_);
     }

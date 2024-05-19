@@ -87,21 +87,21 @@ public class PlacementSettings
         return this;
     }
 
-    public PlacementSettings setSeed(@Nullable Long p_189949_1_)
+    public PlacementSettings setSeed(@Nullable Long seedIn)
     {
-        this.setSeed = p_189949_1_;
+        this.setSeed = seedIn;
         return this;
     }
 
-    public PlacementSettings setRandom(@Nullable Random p_189950_1_)
+    public PlacementSettings setRandom(@Nullable Random randomIn)
     {
-        this.random = p_189950_1_;
+        this.random = randomIn;
         return this;
     }
 
-    public PlacementSettings setIntegrity(float p_189946_1_)
+    public PlacementSettings setIntegrity(float integrityIn)
     {
-        this.integrity = p_189946_1_;
+        this.integrity = integrityIn;
         return this;
     }
 
@@ -121,7 +121,7 @@ public class PlacementSettings
         return this.rotation;
     }
 
-    public Random getRandom(@Nullable BlockPos p_189947_1_)
+    public Random getRandom(@Nullable BlockPos seed)
     {
         if (this.random != null)
         {
@@ -131,14 +131,14 @@ public class PlacementSettings
         {
             return this.setSeed.longValue() == 0L ? new Random(System.currentTimeMillis()) : new Random(this.setSeed.longValue());
         }
-        else if (p_189947_1_ == null)
+        else if (seed == null)
         {
             return new Random(System.currentTimeMillis());
         }
         else
         {
-            int i = p_189947_1_.getX();
-            int j = p_189947_1_.getZ();
+            int i = seed.getX();
+            int j = seed.getZ();
             return new Random((long)(i * i * 4987142 + i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ 987234911L);
         }
     }
@@ -189,8 +189,8 @@ public class PlacementSettings
         }
         else
         {
-            int i = pos.chunkXPos * 16;
-            int j = pos.chunkZPos * 16;
+            int i = pos.x * 16;
+            int j = pos.z * 16;
             return new StructureBoundingBox(i, 0, j, i + 16 - 1, 255, j + 16 - 1);
         }
     }

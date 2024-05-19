@@ -33,18 +33,18 @@ public class BlockSand extends BlockFalling
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
         for (BlockSand.EnumType blocksand$enumtype : BlockSand.EnumType.values())
         {
-            tab.add(new ItemStack(this, 1, blocksand$enumtype.getMetadata()));
+            items.add(new ItemStack(this, 1, blocksand$enumtype.getMetadata()));
         }
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return ((BlockSand.EnumType)state.getValue(VARIANT)).getMapColor();
     }
@@ -70,9 +70,9 @@ public class BlockSand extends BlockFalling
         return new BlockStateContainer(this, new IProperty[] {VARIANT});
     }
 
-    public int getDustColor(IBlockState p_189876_1_)
+    public int getDustColor(IBlockState state)
     {
-        BlockSand.EnumType blocksand$enumtype = (BlockSand.EnumType)p_189876_1_.getValue(VARIANT);
+        BlockSand.EnumType blocksand$enumtype = (BlockSand.EnumType)state.getValue(VARIANT);
         return blocksand$enumtype.getDustColor();
     }
 

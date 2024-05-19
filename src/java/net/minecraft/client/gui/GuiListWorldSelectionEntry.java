@@ -39,14 +39,14 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
     private DynamicTexture icon;
     private long lastClickTime;
 
-    public GuiListWorldSelectionEntry(GuiListWorldSelection listWorldSelIn, WorldSummary p_i46591_2_, ISaveFormat p_i46591_3_)
+    public GuiListWorldSelectionEntry(GuiListWorldSelection listWorldSelIn, WorldSummary worldSummaryIn, ISaveFormat saveFormat)
     {
         this.containingListSel = listWorldSelIn;
         this.worldSelScreen = listWorldSelIn.getGuiWorldSelection();
-        this.worldSummary = p_i46591_2_;
+        this.worldSummary = worldSummaryIn;
         this.client = Minecraft.getMinecraft();
-        this.iconLocation = new ResourceLocation("worlds/" + p_i46591_2_.getFileName() + "/icon");
-        this.iconFile = p_i46591_3_.getFile(p_i46591_2_.getFileName(), "icon.png");
+        this.iconLocation = new ResourceLocation("worlds/" + worldSummaryIn.getFileName() + "/icon");
+        this.iconFile = saveFormat.getFile(worldSummaryIn.getFileName(), "icon.png");
 
         if (!this.iconFile.isFile())
         {
@@ -56,7 +56,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
         this.loadServerIcon();
     }
 
-    public void func_192634_a(int p_192634_1_, int p_192634_2_, int p_192634_3_, int p_192634_4_, int p_192634_5_, int p_192634_6_, int p_192634_7_, boolean p_192634_8_, float p_192634_9_)
+    public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks)
     {
         String s = this.worldSummary.getDisplayName();
         String s1 = this.worldSummary.getFileName() + " (" + DATE_FORMAT.format(new Date(this.worldSummary.getLastTimePlayed())) + ")";
@@ -64,7 +64,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
 
         if (StringUtils.isEmpty(s))
         {
-            s = I18n.format("selectWorld.world") + " " + (p_192634_1_ + 1);
+            s = I18n.format("selectWorld.world") + " " + (slotIndex + 1);
         }
 
         if (this.worldSummary.requiresConversion())
@@ -104,30 +104,30 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
             }
         }
 
-        this.client.fontRendererObj.drawString(s, p_192634_2_ + 32 + 3, p_192634_3_ + 1, 16777215);
-        this.client.fontRendererObj.drawString(s1, p_192634_2_ + 32 + 3, p_192634_3_ + this.client.fontRendererObj.FONT_HEIGHT + 3, 8421504);
-        this.client.fontRendererObj.drawString(s2, p_192634_2_ + 32 + 3, p_192634_3_ + this.client.fontRendererObj.FONT_HEIGHT + this.client.fontRendererObj.FONT_HEIGHT + 3, 8421504);
+        this.client.fontRenderer.drawString(s, x + 32 + 3, y + 1, 16777215);
+        this.client.fontRenderer.drawString(s1, x + 32 + 3, y + this.client.fontRenderer.FONT_HEIGHT + 3, 8421504);
+        this.client.fontRenderer.drawString(s2, x + 32 + 3, y + this.client.fontRenderer.FONT_HEIGHT + this.client.fontRenderer.FONT_HEIGHT + 3, 8421504);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.client.getTextureManager().bindTexture(this.icon != null ? this.iconLocation : ICON_MISSING);
         GlStateManager.enableBlend();
-        Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
+        Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
         GlStateManager.disableBlend();
 
-        if (this.client.gameSettings.touchscreen || p_192634_8_)
+        if (this.client.gameSettings.touchscreen || isSelected)
         {
             this.client.getTextureManager().bindTexture(ICON_OVERLAY_LOCATION);
-            Gui.drawRect(p_192634_2_, p_192634_3_, p_192634_2_ + 32, p_192634_3_ + 32, -1601138544);
+            Gui.drawRect(x, y, x + 32, y + 32, -1601138544);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            int j = p_192634_6_ - p_192634_2_;
+            int j = mouseX - x;
             int i = j < 32 ? 32 : 0;
 
             if (this.worldSummary.markVersionInList())
             {
-                Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 32.0F, (float)i, 32, 32, 256.0F, 256.0F);
+                Gui.drawModalRectWithCustomSizedTexture(x, y, 32.0F, (float)i, 32, 32, 256.0F, 256.0F);
 
                 if (this.worldSummary.askToOpenWorld())
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 96.0F, (float)i, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 96.0F, (float)i, 32, 32, 256.0F, 256.0F);
 
                     if (j < 32)
                     {
@@ -136,7 +136,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
                 }
                 else
                 {
-                    Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 64.0F, (float)i, 32, 32, 256.0F, 256.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(x, y, 64.0F, (float)i, 32, 32, 256.0F, 256.0F);
 
                     if (j < 32)
                     {
@@ -146,7 +146,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
             }
             else
             {
-                Gui.drawModalRectWithCustomSizedTexture(p_192634_2_, p_192634_3_, 0.0F, (float)i, 32, 32, 256.0F, 256.0F);
+                Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, (float)i, 32, 32, 256.0F, 256.0F);
             }
         }
     }
@@ -295,7 +295,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
     {
     }
 
-    public void func_192633_a(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
+    public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_)
     {
     }
 }

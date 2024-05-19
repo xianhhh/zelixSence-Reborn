@@ -69,11 +69,11 @@ public class ItemFood extends Item
 
             if (entityplayer instanceof EntityPlayerMP)
             {
-                CriteriaTriggers.field_193138_y.func_193148_a((EntityPlayerMP)entityplayer, stack);
+                CriteriaTriggers.CONSUME_ITEM.trigger((EntityPlayerMP)entityplayer, stack);
             }
         }
 
-        stack.func_190918_g(1);
+        stack.shrink(1);
         return stack;
     }
 
@@ -101,13 +101,13 @@ public class ItemFood extends Item
         return EnumAction.EAT;
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        ItemStack itemstack = playerIn.getHeldItem(handIn);
 
-        if (worldIn.canEat(this.alwaysEdible))
+        if (playerIn.canEat(this.alwaysEdible))
         {
-            worldIn.setActiveHand(playerIn);
+            playerIn.setActiveHand(handIn);
             return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
         }
         else
@@ -134,10 +134,10 @@ public class ItemFood extends Item
         return this.isWolfsFavoriteMeat;
     }
 
-    public ItemFood setPotionEffect(PotionEffect p_185070_1_, float p_185070_2_)
+    public ItemFood setPotionEffect(PotionEffect effect, float probability)
     {
-        this.potionId = p_185070_1_;
-        this.potionEffectProbability = p_185070_2_;
+        this.potionId = effect;
+        this.potionEffectProbability = probability;
         return this;
     }
 

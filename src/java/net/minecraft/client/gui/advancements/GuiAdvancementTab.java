@@ -16,85 +16,85 @@ import net.minecraft.util.math.MathHelper;
 
 public class GuiAdvancementTab extends Gui
 {
-    private final Minecraft field_191802_a;
-    private final GuiScreenAdvancements field_193938_f;
-    private final AdvancementTabType field_191803_f;
-    private final int field_191804_g;
-    private final Advancement field_191805_h;
-    private final DisplayInfo field_191806_i;
-    private final ItemStack field_191807_j;
-    private final String field_191808_k;
-    private final GuiAdvancement field_191809_l;
-    private final Map<Advancement, GuiAdvancement> field_191810_m = Maps.<Advancement, GuiAdvancement>newLinkedHashMap();
-    private int field_191811_n;
-    private int field_191812_o;
-    private int field_193939_q = Integer.MAX_VALUE;
-    private int field_193940_r = Integer.MAX_VALUE;
-    private int field_191813_p = Integer.MIN_VALUE;
-    private int field_191814_q = Integer.MIN_VALUE;
-    private float field_191815_r;
-    private boolean field_192992_s;
+    private final Minecraft minecraft;
+    private final GuiScreenAdvancements screen;
+    private final AdvancementTabType type;
+    private final int index;
+    private final Advancement advancement;
+    private final DisplayInfo display;
+    private final ItemStack icon;
+    private final String title;
+    private final GuiAdvancement root;
+    private final Map<Advancement, GuiAdvancement> guis = Maps.<Advancement, GuiAdvancement>newLinkedHashMap();
+    private int scrollX;
+    private int scrollY;
+    private int minX = Integer.MAX_VALUE;
+    private int minY = Integer.MAX_VALUE;
+    private int maxX = Integer.MIN_VALUE;
+    private int maxY = Integer.MIN_VALUE;
+    private float fade;
+    private boolean centered;
 
     public GuiAdvancementTab(Minecraft p_i47589_1_, GuiScreenAdvancements p_i47589_2_, AdvancementTabType p_i47589_3_, int p_i47589_4_, Advancement p_i47589_5_, DisplayInfo p_i47589_6_)
     {
-        this.field_191802_a = p_i47589_1_;
-        this.field_193938_f = p_i47589_2_;
-        this.field_191803_f = p_i47589_3_;
-        this.field_191804_g = p_i47589_4_;
-        this.field_191805_h = p_i47589_5_;
-        this.field_191806_i = p_i47589_6_;
-        this.field_191807_j = p_i47589_6_.func_192298_b();
-        this.field_191808_k = p_i47589_6_.func_192297_a().getFormattedText();
-        this.field_191809_l = new GuiAdvancement(this, p_i47589_1_, p_i47589_5_, p_i47589_6_);
-        this.func_193937_a(this.field_191809_l, p_i47589_5_);
+        this.minecraft = p_i47589_1_;
+        this.screen = p_i47589_2_;
+        this.type = p_i47589_3_;
+        this.index = p_i47589_4_;
+        this.advancement = p_i47589_5_;
+        this.display = p_i47589_6_;
+        this.icon = p_i47589_6_.getIcon();
+        this.title = p_i47589_6_.getTitle().getFormattedText();
+        this.root = new GuiAdvancement(this, p_i47589_1_, p_i47589_5_, p_i47589_6_);
+        this.addGuiAdvancement(this.root, p_i47589_5_);
     }
 
-    public Advancement func_193935_c()
+    public Advancement getAdvancement()
     {
-        return this.field_191805_h;
+        return this.advancement;
     }
 
-    public String func_191795_d()
+    public String getTitle()
     {
-        return this.field_191808_k;
+        return this.title;
     }
 
-    public void func_191798_a(int p_191798_1_, int p_191798_2_, boolean p_191798_3_)
+    public void drawTab(int p_191798_1_, int p_191798_2_, boolean p_191798_3_)
     {
-        this.field_191803_f.func_192651_a(this, p_191798_1_, p_191798_2_, p_191798_3_, this.field_191804_g);
+        this.type.draw(this, p_191798_1_, p_191798_2_, p_191798_3_, this.index);
     }
 
-    public void func_191796_a(int p_191796_1_, int p_191796_2_, RenderItem p_191796_3_)
+    public void drawIcon(int p_191796_1_, int p_191796_2_, RenderItem p_191796_3_)
     {
-        this.field_191803_f.func_192652_a(p_191796_1_, p_191796_2_, this.field_191804_g, p_191796_3_, this.field_191807_j);
+        this.type.drawIcon(p_191796_1_, p_191796_2_, this.index, p_191796_3_, this.icon);
     }
 
-    public void func_191799_a()
+    public void drawContents()
     {
-        if (!this.field_192992_s)
+        if (!this.centered)
         {
-            this.field_191811_n = 117 - (this.field_191813_p + this.field_193939_q) / 2;
-            this.field_191812_o = 56 - (this.field_191814_q + this.field_193940_r) / 2;
-            this.field_192992_s = true;
+            this.scrollX = 117 - (this.maxX + this.minX) / 2;
+            this.scrollY = 56 - (this.maxY + this.minY) / 2;
+            this.centered = true;
         }
 
         GlStateManager.depthFunc(518);
         drawRect(0, 0, 234, 113, -16777216);
         GlStateManager.depthFunc(515);
-        ResourceLocation resourcelocation = this.field_191806_i.func_192293_c();
+        ResourceLocation resourcelocation = this.display.getBackground();
 
         if (resourcelocation != null)
         {
-            this.field_191802_a.getTextureManager().bindTexture(resourcelocation);
+            this.minecraft.getTextureManager().bindTexture(resourcelocation);
         }
         else
         {
-            this.field_191802_a.getTextureManager().bindTexture(TextureManager.field_194008_a);
+            this.minecraft.getTextureManager().bindTexture(TextureManager.RESOURCE_LOCATION_EMPTY);
         }
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = this.field_191811_n % 16;
-        int j = this.field_191812_o % 16;
+        int i = this.scrollX % 16;
+        int j = this.scrollY % 16;
 
         for (int k = -1; k <= 15; ++k)
         {
@@ -104,26 +104,26 @@ public class GuiAdvancementTab extends Gui
             }
         }
 
-        this.field_191809_l.func_191819_a(this.field_191811_n, this.field_191812_o, true);
-        this.field_191809_l.func_191819_a(this.field_191811_n, this.field_191812_o, false);
-        this.field_191809_l.func_191817_b(this.field_191811_n, this.field_191812_o);
+        this.root.drawConnectivity(this.scrollX, this.scrollY, true);
+        this.root.drawConnectivity(this.scrollX, this.scrollY, false);
+        this.root.draw(this.scrollX, this.scrollY);
     }
 
-    public void func_192991_a(int p_192991_1_, int p_192991_2_, int p_192991_3_, int p_192991_4_)
+    public void drawToolTips(int p_192991_1_, int p_192991_2_, int p_192991_3_, int p_192991_4_)
     {
         GlStateManager.pushMatrix();
         GlStateManager.translate(0.0F, 0.0F, 200.0F);
-        drawRect(0, 0, 234, 113, MathHelper.floor(this.field_191815_r * 255.0F) << 24);
+        drawRect(0, 0, 234, 113, MathHelper.floor(this.fade * 255.0F) << 24);
         boolean flag = false;
 
         if (p_192991_1_ > 0 && p_192991_1_ < 234 && p_192991_2_ > 0 && p_192991_2_ < 113)
         {
-            for (GuiAdvancement guiadvancement : this.field_191810_m.values())
+            for (GuiAdvancement guiadvancement : this.guis.values())
             {
-                if (guiadvancement.func_191816_c(this.field_191811_n, this.field_191812_o, p_192991_1_, p_192991_2_))
+                if (guiadvancement.isMouseOver(this.scrollX, this.scrollY, p_192991_1_, p_192991_2_))
                 {
                     flag = true;
-                    guiadvancement.func_191821_a(this.field_191811_n, this.field_191812_o, this.field_191815_r, p_192991_3_, p_192991_4_);
+                    guiadvancement.drawHover(this.scrollX, this.scrollY, this.fade, p_192991_3_, p_192991_4_);
                     break;
                 }
             }
@@ -133,23 +133,23 @@ public class GuiAdvancementTab extends Gui
 
         if (flag)
         {
-            this.field_191815_r = MathHelper.clamp(this.field_191815_r + 0.02F, 0.0F, 0.3F);
+            this.fade = MathHelper.clamp(this.fade + 0.02F, 0.0F, 0.3F);
         }
         else
         {
-            this.field_191815_r = MathHelper.clamp(this.field_191815_r - 0.04F, 0.0F, 1.0F);
+            this.fade = MathHelper.clamp(this.fade - 0.04F, 0.0F, 1.0F);
         }
     }
 
-    public boolean func_191793_c(int p_191793_1_, int p_191793_2_, int p_191793_3_, int p_191793_4_)
+    public boolean isMouseOver(int p_191793_1_, int p_191793_2_, int p_191793_3_, int p_191793_4_)
     {
-        return this.field_191803_f.func_192654_a(p_191793_1_, p_191793_2_, this.field_191804_g, p_191793_3_, p_191793_4_);
+        return this.type.isMouseOver(p_191793_1_, p_191793_2_, this.index, p_191793_3_, p_191793_4_);
     }
 
     @Nullable
-    public static GuiAdvancementTab func_193936_a(Minecraft p_193936_0_, GuiScreenAdvancements p_193936_1_, int p_193936_2_, Advancement p_193936_3_)
+    public static GuiAdvancementTab create(Minecraft p_193936_0_, GuiScreenAdvancements p_193936_1_, int p_193936_2_, Advancement p_193936_3_)
     {
-        if (p_193936_3_.func_192068_c() == null)
+        if (p_193936_3_.getDisplay() == null)
         {
             return null;
         }
@@ -157,66 +157,66 @@ public class GuiAdvancementTab extends Gui
         {
             for (AdvancementTabType advancementtabtype : AdvancementTabType.values())
             {
-                if (p_193936_2_ < advancementtabtype.func_192650_a())
+                if (p_193936_2_ < advancementtabtype.getMax())
                 {
-                    return new GuiAdvancementTab(p_193936_0_, p_193936_1_, advancementtabtype, p_193936_2_, p_193936_3_, p_193936_3_.func_192068_c());
+                    return new GuiAdvancementTab(p_193936_0_, p_193936_1_, advancementtabtype, p_193936_2_, p_193936_3_, p_193936_3_.getDisplay());
                 }
 
-                p_193936_2_ -= advancementtabtype.func_192650_a();
+                p_193936_2_ -= advancementtabtype.getMax();
             }
 
             return null;
         }
     }
 
-    public void func_191797_b(int p_191797_1_, int p_191797_2_)
+    public void scroll(int p_191797_1_, int p_191797_2_)
     {
-        if (this.field_191813_p - this.field_193939_q > 234)
+        if (this.maxX - this.minX > 234)
         {
-            this.field_191811_n = MathHelper.clamp(this.field_191811_n + p_191797_1_, -(this.field_191813_p - 234), 0);
+            this.scrollX = MathHelper.clamp(this.scrollX + p_191797_1_, -(this.maxX - 234), 0);
         }
 
-        if (this.field_191814_q - this.field_193940_r > 113)
+        if (this.maxY - this.minY > 113)
         {
-            this.field_191812_o = MathHelper.clamp(this.field_191812_o + p_191797_2_, -(this.field_191814_q - 113), 0);
-        }
-    }
-
-    public void func_191800_a(Advancement p_191800_1_)
-    {
-        if (p_191800_1_.func_192068_c() != null)
-        {
-            GuiAdvancement guiadvancement = new GuiAdvancement(this, this.field_191802_a, p_191800_1_, p_191800_1_.func_192068_c());
-            this.func_193937_a(guiadvancement, p_191800_1_);
+            this.scrollY = MathHelper.clamp(this.scrollY + p_191797_2_, -(this.maxY - 113), 0);
         }
     }
 
-    private void func_193937_a(GuiAdvancement p_193937_1_, Advancement p_193937_2_)
+    public void addAdvancement(Advancement p_191800_1_)
     {
-        this.field_191810_m.put(p_193937_2_, p_193937_1_);
-        int i = p_193937_1_.func_191823_d();
+        if (p_191800_1_.getDisplay() != null)
+        {
+            GuiAdvancement guiadvancement = new GuiAdvancement(this, this.minecraft, p_191800_1_, p_191800_1_.getDisplay());
+            this.addGuiAdvancement(guiadvancement, p_191800_1_);
+        }
+    }
+
+    private void addGuiAdvancement(GuiAdvancement p_193937_1_, Advancement p_193937_2_)
+    {
+        this.guis.put(p_193937_2_, p_193937_1_);
+        int i = p_193937_1_.getX();
         int j = i + 28;
-        int k = p_193937_1_.func_191820_c();
+        int k = p_193937_1_.getY();
         int l = k + 27;
-        this.field_193939_q = Math.min(this.field_193939_q, i);
-        this.field_191813_p = Math.max(this.field_191813_p, j);
-        this.field_193940_r = Math.min(this.field_193940_r, k);
-        this.field_191814_q = Math.max(this.field_191814_q, l);
+        this.minX = Math.min(this.minX, i);
+        this.maxX = Math.max(this.maxX, j);
+        this.minY = Math.min(this.minY, k);
+        this.maxY = Math.max(this.maxY, l);
 
-        for (GuiAdvancement guiadvancement : this.field_191810_m.values())
+        for (GuiAdvancement guiadvancement : this.guis.values())
         {
-            guiadvancement.func_191825_b();
+            guiadvancement.attachToParent();
         }
     }
 
     @Nullable
-    public GuiAdvancement func_191794_b(Advancement p_191794_1_)
+    public GuiAdvancement getAdvancementGui(Advancement p_191794_1_)
     {
-        return this.field_191810_m.get(p_191794_1_);
+        return this.guis.get(p_191794_1_);
     }
 
-    public GuiScreenAdvancements func_193934_g()
+    public GuiScreenAdvancements getScreen()
     {
-        return this.field_193938_f;
+        return this.screen;
     }
 }

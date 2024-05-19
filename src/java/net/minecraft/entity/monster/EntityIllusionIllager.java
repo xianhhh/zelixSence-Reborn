@@ -39,20 +39,20 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityIllusionIllager extends EntitySpellcasterIllager implements IRangedAttackMob
 {
-    private int field_193099_c;
-    private final Vec3d[][] field_193100_bx;
+    private int ghostTime;
+    private final Vec3d[][] renderLocations;
 
-    public EntityIllusionIllager(World p_i47507_1_)
+    public EntityIllusionIllager(World worldIn)
     {
-        super(p_i47507_1_);
+        super(worldIn);
         this.setSize(0.6F, 1.95F);
         this.experienceValue = 5;
-        this.field_193100_bx = new Vec3d[2][4];
+        this.renderLocations = new Vec3d[2][4];
 
         for (int i = 0; i < 4; ++i)
         {
-            this.field_193100_bx[0][i] = new Vec3d(0.0D, 0.0D, 0.0D);
-            this.field_193100_bx[1][i] = new Vec3d(0.0D, 0.0D, 0.0D);
+            this.renderLocations[0][i] = new Vec3d(0.0D, 0.0D, 0.0D);
+            this.renderLocations[1][i] = new Vec3d(0.0D, 0.0D, 0.0D);
         }
     }
 
@@ -68,9 +68,9 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
         this.tasks.addTask(9, new EntityAIWatchClosest(this, EntityPlayer.class, 3.0F, 1.0F));
         this.tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[] {EntityIllusionIllager.class}));
-        this.targetTasks.addTask(2, (new EntityAINearestAttackableTarget(this, EntityPlayer.class, true)).func_190882_b(300));
-        this.targetTasks.addTask(3, (new EntityAINearestAttackableTarget(this, EntityVillager.class, false)).func_190882_b(300));
-        this.targetTasks.addTask(3, (new EntityAINearestAttackableTarget(this, EntityIronGolem.class, false)).func_190882_b(300));
+        this.targetTasks.addTask(2, (new EntityAINearestAttackableTarget(this, EntityPlayer.class, true)).setUnseenMemoryTicks(300));
+        this.targetTasks.addTask(3, (new EntityAINearestAttackableTarget(this, EntityVillager.class, false)).setUnseenMemoryTicks(300));
+        this.targetTasks.addTask(3, (new EntityAINearestAttackableTarget(this, EntityIronGolem.class, false)).setUnseenMemoryTicks(300));
     }
 
     protected void applyEntityAttributes()
@@ -107,7 +107,7 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
      */
     public AxisAlignedBB getRenderBoundingBox()
     {
-        return this.getEntityBoundingBox().expand(3.0D, 0.0D, 3.0D);
+        return this.getEntityBoundingBox().grow(3.0D, 0.0D, 3.0D);
     }
 
     /**
@@ -120,36 +120,36 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
 
         if (this.world.isRemote && this.isInvisible())
         {
-            --this.field_193099_c;
+            --this.ghostTime;
 
-            if (this.field_193099_c < 0)
+            if (this.ghostTime < 0)
             {
-                this.field_193099_c = 0;
+                this.ghostTime = 0;
             }
 
             if (this.hurtTime != 1 && this.ticksExisted % 1200 != 0)
             {
                 if (this.hurtTime == this.maxHurtTime - 1)
                 {
-                    this.field_193099_c = 3;
+                    this.ghostTime = 3;
 
                     for (int k = 0; k < 4; ++k)
                     {
-                        this.field_193100_bx[0][k] = this.field_193100_bx[1][k];
-                        this.field_193100_bx[1][k] = new Vec3d(0.0D, 0.0D, 0.0D);
+                        this.renderLocations[0][k] = this.renderLocations[1][k];
+                        this.renderLocations[1][k] = new Vec3d(0.0D, 0.0D, 0.0D);
                     }
                 }
             }
             else
             {
-                this.field_193099_c = 3;
+                this.ghostTime = 3;
                 float f = -6.0F;
                 int i = 13;
 
                 for (int j = 0; j < 4; ++j)
                 {
-                    this.field_193100_bx[0][j] = this.field_193100_bx[1][j];
-                    this.field_193100_bx[1][j] = new Vec3d((double)(-6.0F + (float)this.rand.nextInt(13)) * 0.5D, (double)Math.max(0, this.rand.nextInt(6) - 4), (double)(-6.0F + (float)this.rand.nextInt(13)) * 0.5D);
+                    this.renderLocations[0][j] = this.renderLocations[1][j];
+                    this.renderLocations[1][j] = new Vec3d((double)(-6.0F + (float)this.rand.nextInt(13)) * 0.5D, (double)Math.max(0, this.rand.nextInt(6) - 4), (double)(-6.0F + (float)this.rand.nextInt(13)) * 0.5D);
                 }
 
                 for (int l = 0; l < 16; ++l)
@@ -157,26 +157,26 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
                     this.world.spawnParticle(EnumParticleTypes.CLOUD, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, 0.0D, 0.0D, 0.0D);
                 }
 
-                this.world.playSound(this.posX, this.posY, this.posZ, SoundEvents.field_193788_dg, this.getSoundCategory(), 1.0F, 1.0F, false);
+                this.world.playSound(this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ILLAGER_MIRROR_MOVE, this.getSoundCategory(), 1.0F, 1.0F, false);
             }
         }
     }
 
-    public Vec3d[] func_193098_a(float p_193098_1_)
+    public Vec3d[] getRenderLocations(float p_193098_1_)
     {
-        if (this.field_193099_c <= 0)
+        if (this.ghostTime <= 0)
         {
-            return this.field_193100_bx[1];
+            return this.renderLocations[1];
         }
         else
         {
-            double d0 = (double)(((float)this.field_193099_c - p_193098_1_) / 3.0F);
+            double d0 = (double)(((float)this.ghostTime - p_193098_1_) / 3.0F);
             d0 = Math.pow(d0, 0.25D);
             Vec3d[] avec3d = new Vec3d[4];
 
             for (int i = 0; i < 4; ++i)
             {
-                avec3d[i] = this.field_193100_bx[1][i].scale(1.0D - d0).add(this.field_193100_bx[0][i].scale(d0));
+                avec3d[i] = this.renderLocations[1][i].scale(1.0D - d0).add(this.renderLocations[0][i].scale(d0));
             }
 
             return avec3d;
@@ -204,73 +204,71 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
 
     protected SoundEvent getAmbientSound()
     {
-        return SoundEvents.field_193783_dc;
+        return SoundEvents.ENTITY_ILLUSION_ILLAGER_AMBIENT;
     }
 
     protected SoundEvent getDeathSound()
     {
-        return SoundEvents.field_193786_de;
+        return SoundEvents.ENTITY_ILLAGER_DEATH;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
-        return SoundEvents.field_193787_df;
+        return SoundEvents.ENTITY_ILLUSION_ILLAGER_HURT;
     }
 
-    protected SoundEvent func_193086_dk()
+    protected SoundEvent getSpellSound()
     {
-        return SoundEvents.field_193784_dd;
+        return SoundEvents.ENTITY_ILLAGER_CAST_SPELL;
     }
 
     /**
      * Attack the specified entity using a ranged attack.
-     *  
-     * @param distanceFactor How far the target is, normalized and clamped between 0.1 and 1.0
      */
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor)
     {
-        EntityArrow entityarrow = this.func_193097_t(distanceFactor);
+        EntityArrow entityarrow = this.createArrowEntity(distanceFactor);
         double d0 = target.posX - this.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entityarrow.posY;
         double d2 = target.posZ - this.posZ;
         double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
         entityarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-        this.world.spawnEntityInWorld(entityarrow);
+        this.world.spawnEntity(entityarrow);
     }
 
-    protected EntityArrow func_193097_t(float p_193097_1_)
+    protected EntityArrow createArrowEntity(float p_193097_1_)
     {
         EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
-        entitytippedarrow.func_190547_a(this, p_193097_1_);
+        entitytippedarrow.setEnchantmentEffectsFromEntity(this, p_193097_1_);
         return entitytippedarrow;
     }
 
-    public boolean func_193096_dj()
+    public boolean isAggressive()
     {
-        return this.func_193078_a(1);
+        return this.isAggressive(1);
     }
 
     public void setSwingingArms(boolean swingingArms)
     {
-        this.func_193079_a(1, swingingArms);
+        this.setAggressive(1, swingingArms);
     }
 
-    public AbstractIllager.IllagerArmPose func_193077_p()
+    public AbstractIllager.IllagerArmPose getArmPose()
     {
-        if (this.func_193082_dl())
+        if (this.isSpellcasting())
         {
             return AbstractIllager.IllagerArmPose.SPELLCASTING;
         }
         else
         {
-            return this.func_193096_dj() ? AbstractIllager.IllagerArmPose.BOW_AND_ARROW : AbstractIllager.IllagerArmPose.CROSSED;
+            return this.isAggressive() ? AbstractIllager.IllagerArmPose.BOW_AND_ARROW : AbstractIllager.IllagerArmPose.CROSSED;
         }
     }
 
     class AIBlindnessSpell extends EntitySpellcasterIllager.AIUseSpell
     {
-        private int field_193325_b;
+        private int lastTargetId;
 
         private AIBlindnessSpell()
         {
@@ -286,43 +284,43 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
             {
                 return false;
             }
-            else if (EntityIllusionIllager.this.getAttackTarget().getEntityId() == this.field_193325_b)
+            else if (EntityIllusionIllager.this.getAttackTarget().getEntityId() == this.lastTargetId)
             {
                 return false;
             }
             else
             {
-                return EntityIllusionIllager.this.world.getDifficultyForLocation(new BlockPos(EntityIllusionIllager.this)).func_193845_a((float)EnumDifficulty.NORMAL.ordinal());
+                return EntityIllusionIllager.this.world.getDifficultyForLocation(new BlockPos(EntityIllusionIllager.this)).isHarderThan((float)EnumDifficulty.NORMAL.ordinal());
             }
         }
 
         public void startExecuting()
         {
             super.startExecuting();
-            this.field_193325_b = EntityIllusionIllager.this.getAttackTarget().getEntityId();
+            this.lastTargetId = EntityIllusionIllager.this.getAttackTarget().getEntityId();
         }
 
-        protected int func_190869_f()
+        protected int getCastingTime()
         {
             return 20;
         }
 
-        protected int func_190872_i()
+        protected int getCastingInterval()
         {
             return 180;
         }
 
-        protected void func_190868_j()
+        protected void castSpell()
         {
             EntityIllusionIllager.this.getAttackTarget().addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 400));
         }
 
-        protected SoundEvent func_190871_k()
+        protected SoundEvent getSpellPrepareSound()
         {
-            return SoundEvents.field_193789_dh;
+            return SoundEvents.ENTITY_ILLAGER_PREPARE_BLINDNESS;
         }
 
-        protected EntitySpellcasterIllager.SpellType func_193320_l()
+        protected EntitySpellcasterIllager.SpellType getSpellType()
         {
             return EntitySpellcasterIllager.SpellType.BLINDNESS;
         }
@@ -346,28 +344,28 @@ public class EntityIllusionIllager extends EntitySpellcasterIllager implements I
             }
         }
 
-        protected int func_190869_f()
+        protected int getCastingTime()
         {
             return 20;
         }
 
-        protected int func_190872_i()
+        protected int getCastingInterval()
         {
             return 340;
         }
 
-        protected void func_190868_j()
+        protected void castSpell()
         {
             EntityIllusionIllager.this.addPotionEffect(new PotionEffect(MobEffects.INVISIBILITY, 1200));
         }
 
         @Nullable
-        protected SoundEvent func_190871_k()
+        protected SoundEvent getSpellPrepareSound()
         {
-            return SoundEvents.field_193790_di;
+            return SoundEvents.ENTITY_ILLAGER_PREPARE_MIRROR;
         }
 
-        protected EntitySpellcasterIllager.SpellType func_193320_l()
+        protected EntitySpellcasterIllager.SpellType getSpellType()
         {
             return EntitySpellcasterIllager.SpellType.DISAPPEAR;
         }

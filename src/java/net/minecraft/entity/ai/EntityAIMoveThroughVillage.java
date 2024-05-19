@@ -13,7 +13,7 @@ import net.minecraft.village.VillageDoorInfo;
 
 public class EntityAIMoveThroughVillage extends EntityAIBase
 {
-    private final EntityCreature theEntity;
+    private final EntityCreature entity;
     private final double movementSpeed;
 
     /** The PathNavigate of our entity. */
@@ -22,14 +22,14 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
     private final boolean isNocturnal;
     private final List<VillageDoorInfo> doorList = Lists.<VillageDoorInfo>newArrayList();
 
-    public EntityAIMoveThroughVillage(EntityCreature theEntityIn, double movementSpeedIn, boolean isNocturnalIn)
+    public EntityAIMoveThroughVillage(EntityCreature entityIn, double movementSpeedIn, boolean isNocturnalIn)
     {
-        this.theEntity = theEntityIn;
+        this.entity = entityIn;
         this.movementSpeed = movementSpeedIn;
         this.isNocturnal = isNocturnalIn;
         this.setMutexBits(1);
 
-        if (!(theEntityIn.getNavigator() instanceof PathNavigateGround))
+        if (!(entityIn.getNavigator() instanceof PathNavigateGround))
         {
             throw new IllegalArgumentException("Unsupported mob for MoveThroughVillageGoal");
         }
@@ -42,13 +42,13 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
     {
         this.resizeDoorList();
 
-        if (this.isNocturnal && this.theEntity.world.isDaytime())
+        if (this.isNocturnal && this.entity.world.isDaytime())
         {
             return false;
         }
         else
         {
-            Village village = this.theEntity.world.getVillageCollection().getNearestVillage(new BlockPos(this.theEntity), 0);
+            Village village = this.entity.world.getVillageCollection().getNearestVillage(new BlockPos(this.entity), 0);
 
             if (village == null)
             {
@@ -64,7 +64,7 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
                 }
                 else
                 {
-                    PathNavigateGround pathnavigateground = (PathNavigateGround)this.theEntity.getNavigator();
+                    PathNavigateGround pathnavigateground = (PathNavigateGround)this.entity.getNavigator();
                     boolean flag = pathnavigateground.getEnterDoors();
                     pathnavigateground.setBreakDoors(false);
                     this.entityPathNavigate = pathnavigateground.getPathToPos(this.doorInfo.getDoorBlockPos());
@@ -76,7 +76,7 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
                     }
                     else
                     {
-                        Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 10, 7, new Vec3d((double)this.doorInfo.getDoorBlockPos().getX(), (double)this.doorInfo.getDoorBlockPos().getY(), (double)this.doorInfo.getDoorBlockPos().getZ()));
+                        Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.entity, 10, 7, new Vec3d((double)this.doorInfo.getDoorBlockPos().getX(), (double)this.doorInfo.getDoorBlockPos().getY(), (double)this.doorInfo.getDoorBlockPos().getZ()));
 
                         if (vec3d == null)
                         {
@@ -85,7 +85,7 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
                         else
                         {
                             pathnavigateground.setBreakDoors(false);
-                            this.entityPathNavigate = this.theEntity.getNavigator().getPathToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
+                            this.entityPathNavigate = this.entity.getNavigator().getPathToXYZ(vec3d.x, vec3d.y, vec3d.z);
                             pathnavigateground.setBreakDoors(flag);
                             return this.entityPathNavigate != null;
                         }
@@ -98,16 +98,16 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        if (this.theEntity.getNavigator().noPath())
+        if (this.entity.getNavigator().noPath())
         {
             return false;
         }
         else
         {
-            float f = this.theEntity.width + 4.0F;
-            return this.theEntity.getDistanceSq(this.doorInfo.getDoorBlockPos()) > (double)(f * f);
+            float f = this.entity.width + 4.0F;
+            return this.entity.getDistanceSq(this.doorInfo.getDoorBlockPos()) > (double)(f * f);
         }
     }
 
@@ -116,15 +116,15 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theEntity.getNavigator().setPath(this.entityPathNavigate, this.movementSpeed);
+        this.entity.getNavigator().setPath(this.entityPathNavigate, this.movementSpeed);
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
-        if (this.theEntity.getNavigator().noPath() || this.theEntity.getDistanceSq(this.doorInfo.getDoorBlockPos()) < 16.0D)
+        if (this.entity.getNavigator().noPath() || this.entity.getDistanceSq(this.doorInfo.getDoorBlockPos()) < 16.0D)
         {
             this.doorList.add(this.doorInfo);
         }
@@ -137,7 +137,7 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
 
         for (VillageDoorInfo villagedoorinfo1 : villageIn.getVillageDoorInfoList())
         {
-            int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor(this.theEntity.posX), MathHelper.floor(this.theEntity.posY), MathHelper.floor(this.theEntity.posZ));
+            int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor(this.entity.posX), MathHelper.floor(this.entity.posY), MathHelper.floor(this.entity.posZ));
 
             if (j < i && !this.doesDoorListContain(villagedoorinfo1))
             {

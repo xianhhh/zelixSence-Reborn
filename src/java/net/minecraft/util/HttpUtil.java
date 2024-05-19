@@ -81,9 +81,9 @@ public class HttpUtil
     /**
      * Sends a POST to the given URL using the map as the POST args
      */
-    public static String postMap(URL url, Map<String, Object> data, boolean skipLoggingErrors, @Nullable Proxy p_151226_3_)
+    public static String postMap(URL url, Map<String, Object> data, boolean skipLoggingErrors, @Nullable Proxy proxyIn)
     {
-        return post(url, buildPostString(data), skipLoggingErrors, p_151226_3_);
+        return post(url, buildPostString(data), skipLoggingErrors, proxyIn);
     }
 
     /**

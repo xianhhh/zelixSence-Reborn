@@ -135,15 +135,15 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
 
         this.cameraYaw += (f1 - this.cameraYaw) * 0.4F;
         this.cameraPitch += (f - this.cameraPitch) * 0.8F;
-        this.world.theProfiler.startSection("push");
+        this.world.profiler.startSection("push");
         this.collideWithNearbyEntities();
-        this.world.theProfiler.endSection();
+        this.world.profiler.endSection();
     }
 
     /**
      * Send a chat message to the CommandSender
      */
-    public void addChatMessage(ITextComponent component)
+    public void sendMessage(ITextComponent component)
     {
         Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(component);
     }
@@ -151,7 +151,7 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
      */
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName)
+    public boolean canUseCommand(int permLevel, String commandName)
     {
         return false;
     }

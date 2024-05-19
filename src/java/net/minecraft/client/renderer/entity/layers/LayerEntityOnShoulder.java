@@ -17,69 +17,69 @@ import net.minecraft.util.ResourceLocation;
 
 public class LayerEntityOnShoulder implements LayerRenderer<EntityPlayer>
 {
-    private final RenderManager field_192867_c;
-    protected RenderLivingBase <? extends EntityLivingBase > field_192865_a;
-    private ModelBase field_192868_d;
-    private ResourceLocation field_192869_e;
-    private UUID field_192870_f;
-    private Class<?> field_192871_g;
-    protected RenderLivingBase <? extends EntityLivingBase > field_192866_b;
-    private ModelBase field_192872_h;
-    private ResourceLocation field_192873_i;
-    private UUID field_192874_j;
-    private Class<?> field_192875_k;
+    private final RenderManager renderManager;
+    protected RenderLivingBase <? extends EntityLivingBase > leftRenderer;
+    private ModelBase leftModel;
+    private ResourceLocation leftResource;
+    private UUID leftUniqueId;
+    private Class<?> leftEntityClass;
+    protected RenderLivingBase <? extends EntityLivingBase > rightRenderer;
+    private ModelBase rightModel;
+    private ResourceLocation rightResource;
+    private UUID rightUniqueId;
+    private Class<?> rightEntityClass;
 
     public LayerEntityOnShoulder(RenderManager p_i47370_1_)
     {
-        this.field_192867_c = p_i47370_1_;
+        this.renderManager = p_i47370_1_;
     }
 
     public void doRenderLayer(EntityPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        if (entitylivingbaseIn.func_192023_dk() != null || entitylivingbaseIn.func_192025_dl() != null)
+        if (entitylivingbaseIn.getLeftShoulderEntity() != null || entitylivingbaseIn.getRightShoulderEntity() != null)
         {
             GlStateManager.enableRescaleNormal();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            NBTTagCompound nbttagcompound = entitylivingbaseIn.func_192023_dk();
+            NBTTagCompound nbttagcompound = entitylivingbaseIn.getLeftShoulderEntity();
 
             if (!nbttagcompound.hasNoTags())
             {
-                LayerEntityOnShoulder.DataHolder layerentityonshoulder$dataholder = this.func_192864_a(entitylivingbaseIn, this.field_192870_f, nbttagcompound, this.field_192865_a, this.field_192868_d, this.field_192869_e, this.field_192871_g, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, true);
-                this.field_192870_f = layerentityonshoulder$dataholder.field_192882_a;
-                this.field_192865_a = layerentityonshoulder$dataholder.field_192883_b;
-                this.field_192869_e = layerentityonshoulder$dataholder.field_192885_d;
-                this.field_192868_d = layerentityonshoulder$dataholder.field_192884_c;
-                this.field_192871_g = layerentityonshoulder$dataholder.field_192886_e;
+                LayerEntityOnShoulder.DataHolder layerentityonshoulder$dataholder = this.renderEntityOnShoulder(entitylivingbaseIn, this.leftUniqueId, nbttagcompound, this.leftRenderer, this.leftModel, this.leftResource, this.leftEntityClass, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, true);
+                this.leftUniqueId = layerentityonshoulder$dataholder.entityId;
+                this.leftRenderer = layerentityonshoulder$dataholder.renderer;
+                this.leftResource = layerentityonshoulder$dataholder.textureLocation;
+                this.leftModel = layerentityonshoulder$dataholder.model;
+                this.leftEntityClass = layerentityonshoulder$dataholder.clazz;
             }
 
-            NBTTagCompound nbttagcompound1 = entitylivingbaseIn.func_192025_dl();
+            NBTTagCompound nbttagcompound1 = entitylivingbaseIn.getRightShoulderEntity();
 
             if (!nbttagcompound1.hasNoTags())
             {
-                LayerEntityOnShoulder.DataHolder layerentityonshoulder$dataholder1 = this.func_192864_a(entitylivingbaseIn, this.field_192874_j, nbttagcompound1, this.field_192866_b, this.field_192872_h, this.field_192873_i, this.field_192875_k, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, false);
-                this.field_192874_j = layerentityonshoulder$dataholder1.field_192882_a;
-                this.field_192866_b = layerentityonshoulder$dataholder1.field_192883_b;
-                this.field_192873_i = layerentityonshoulder$dataholder1.field_192885_d;
-                this.field_192872_h = layerentityonshoulder$dataholder1.field_192884_c;
-                this.field_192875_k = layerentityonshoulder$dataholder1.field_192886_e;
+                LayerEntityOnShoulder.DataHolder layerentityonshoulder$dataholder1 = this.renderEntityOnShoulder(entitylivingbaseIn, this.rightUniqueId, nbttagcompound1, this.rightRenderer, this.rightModel, this.rightResource, this.rightEntityClass, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, false);
+                this.rightUniqueId = layerentityonshoulder$dataholder1.entityId;
+                this.rightRenderer = layerentityonshoulder$dataholder1.renderer;
+                this.rightResource = layerentityonshoulder$dataholder1.textureLocation;
+                this.rightModel = layerentityonshoulder$dataholder1.model;
+                this.rightEntityClass = layerentityonshoulder$dataholder1.clazz;
             }
 
             GlStateManager.disableRescaleNormal();
         }
     }
 
-    private LayerEntityOnShoulder.DataHolder func_192864_a(EntityPlayer p_192864_1_, @Nullable UUID p_192864_2_, NBTTagCompound p_192864_3_, RenderLivingBase <? extends EntityLivingBase > p_192864_4_, ModelBase p_192864_5_, ResourceLocation p_192864_6_, Class<?> p_192864_7_, float p_192864_8_, float p_192864_9_, float p_192864_10_, float p_192864_11_, float p_192864_12_, float p_192864_13_, float p_192864_14_, boolean p_192864_15_)
+    private LayerEntityOnShoulder.DataHolder renderEntityOnShoulder(EntityPlayer p_192864_1_, @Nullable UUID p_192864_2_, NBTTagCompound p_192864_3_, RenderLivingBase <? extends EntityLivingBase > p_192864_4_, ModelBase p_192864_5_, ResourceLocation p_192864_6_, Class<?> p_192864_7_, float p_192864_8_, float p_192864_9_, float p_192864_10_, float p_192864_11_, float p_192864_12_, float p_192864_13_, float p_192864_14_, boolean p_192864_15_)
     {
         if (p_192864_2_ == null || !p_192864_2_.equals(p_192864_3_.getUniqueId("UUID")))
         {
             p_192864_2_ = p_192864_3_.getUniqueId("UUID");
-            p_192864_7_ = EntityList.func_192839_a(p_192864_3_.getString("id"));
+            p_192864_7_ = EntityList.getClassFromName(p_192864_3_.getString("id"));
 
             if (p_192864_7_ == EntityParrot.class)
             {
-                p_192864_4_ = new RenderParrot(this.field_192867_c);
+                p_192864_4_ = new RenderParrot(this.renderManager);
                 p_192864_5_ = new ModelParrot();
-                p_192864_6_ = RenderParrot.field_192862_a[p_192864_3_.getInteger("Variant")];
+                p_192864_6_ = RenderParrot.PARROT_TEXTURES[p_192864_3_.getInteger("Variant")];
             }
         }
 
@@ -108,19 +108,19 @@ public class LayerEntityOnShoulder implements LayerRenderer<EntityPlayer>
 
     class DataHolder
     {
-        public UUID field_192882_a;
-        public RenderLivingBase <? extends EntityLivingBase > field_192883_b;
-        public ModelBase field_192884_c;
-        public ResourceLocation field_192885_d;
-        public Class<?> field_192886_e;
+        public UUID entityId;
+        public RenderLivingBase <? extends EntityLivingBase > renderer;
+        public ModelBase model;
+        public ResourceLocation textureLocation;
+        public Class<?> clazz;
 
         public DataHolder(UUID p_i47463_2_, RenderLivingBase <? extends EntityLivingBase > p_i47463_3_, ModelBase p_i47463_4_, ResourceLocation p_i47463_5_, Class<?> p_i47463_6_)
         {
-            this.field_192882_a = p_i47463_2_;
-            this.field_192883_b = p_i47463_3_;
-            this.field_192884_c = p_i47463_4_;
-            this.field_192885_d = p_i47463_5_;
-            this.field_192886_e = p_i47463_6_;
+            this.entityId = p_i47463_2_;
+            this.renderer = p_i47463_3_;
+            this.model = p_i47463_4_;
+            this.textureLocation = p_i47463_5_;
+            this.clazz = p_i47463_6_;
         }
     }
 }

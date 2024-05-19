@@ -14,34 +14,48 @@ public class GuiSlider extends GuiButton
     private final GuiPageButtonList.GuiResponder responder;
     private GuiSlider.FormatHelper formatHelper;
 
-    public GuiSlider(GuiPageButtonList.GuiResponder guiResponder, int idIn, int x, int y, String name, float min, float max, float defaultValue, GuiSlider.FormatHelper formatter)
+    public GuiSlider(GuiPageButtonList.GuiResponder guiResponder, int idIn, int x, int y, String nameIn, float minIn, float maxIn, float defaultValue, GuiSlider.FormatHelper formatter)
     {
         super(idIn, x, y, 150, 20, "");
-        this.name = name;
-        this.min = min;
-        this.max = max;
-        this.sliderPosition = (defaultValue - min) / (max - min);
+        this.name = nameIn;
+        this.min = minIn;
+        this.max = maxIn;
+        this.sliderPosition = (defaultValue - minIn) / (maxIn - minIn);
         this.formatHelper = formatter;
         this.responder = guiResponder;
         this.displayString = this.getDisplayString();
     }
 
+    /**
+     * Gets the value of the slider.
+     * @return A value that will under normal circumstances be between the slider's {@link #min} and {@link #max}
+     * values, unless it was manually set out of that range.
+     */
     public float getSliderValue()
     {
         return this.min + (this.max - this.min) * this.sliderPosition;
     }
 
-    public void setSliderValue(float p_175218_1_, boolean p_175218_2_)
+    /**
+     * Sets the slider's value, optionally notifying the associated {@linkplain GuiPageButtonList.GuiResponder
+     * responder} of the change.
+     */
+    public void setSliderValue(float value, boolean notifyResponder)
     {
-        this.sliderPosition = (p_175218_1_ - this.min) / (this.max - this.min);
+        this.sliderPosition = (value - this.min) / (this.max - this.min);
         this.displayString = this.getDisplayString();
 
-        if (p_175218_2_)
+        if (notifyResponder)
         {
             this.responder.setEntryValue(this.id, this.getSliderValue());
         }
     }
 
+    /**
+     * Gets the slider's position.
+     * @return The position of the slider, which will under normal circumstances be between 0 and 1, unless it was
+     * manually set out of that range.
+     */
     public float getSliderPosition()
     {
         return this.sliderPosition;
@@ -70,7 +84,7 @@ public class GuiSlider extends GuiButton
         {
             if (this.isMouseDown)
             {
-                this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
+                this.sliderPosition = (float)(mouseX - (this.x + 4)) / (float)(this.width - 8);
 
                 if (this.sliderPosition < 0.0F)
                 {
@@ -87,14 +101,18 @@ public class GuiSlider extends GuiButton
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(this.xPosition + (int)(this.sliderPosition * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
-            this.drawTexturedModalRect(this.xPosition + (int)(this.sliderPosition * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
+            this.drawTexturedModalRect(this.x + (int)(this.sliderPosition * (float)(this.width - 8)), this.y, 0, 66, 4, 20);
+            this.drawTexturedModalRect(this.x + (int)(this.sliderPosition * (float)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
         }
     }
 
-    public void setSliderPosition(float p_175219_1_)
+    /**
+     * Sets the position of the slider and notifies the associated {@linkplain GuiPageButtonList.GuiResponder responder}
+     * of the change
+     */
+    public void setSliderPosition(float position)
     {
-        this.sliderPosition = p_175219_1_;
+        this.sliderPosition = position;
         this.displayString = this.getDisplayString();
         this.responder.setEntryValue(this.id, this.getSliderValue());
     }
@@ -107,7 +125,7 @@ public class GuiSlider extends GuiButton
     {
         if (super.mousePressed(mc, mouseX, mouseY))
         {
-            this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
+            this.sliderPosition = (float)(mouseX - (this.x + 4)) / (float)(this.width - 8);
 
             if (this.sliderPosition < 0.0F)
             {

@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class EntityAIMoveTowardsTarget extends EntityAIBase
 {
-    private final EntityCreature theEntity;
+    private final EntityCreature creature;
     private EntityLivingBase targetEntity;
     private double movePosX;
     private double movePosY;
@@ -20,7 +20,7 @@ public class EntityAIMoveTowardsTarget extends EntityAIBase
 
     public EntityAIMoveTowardsTarget(EntityCreature creature, double speedIn, float targetMaxDistance)
     {
-        this.theEntity = creature;
+        this.creature = creature;
         this.speed = speedIn;
         this.maxTargetDistance = targetMaxDistance;
         this.setMutexBits(1);
@@ -31,19 +31,19 @@ public class EntityAIMoveTowardsTarget extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        this.targetEntity = this.theEntity.getAttackTarget();
+        this.targetEntity = this.creature.getAttackTarget();
 
         if (this.targetEntity == null)
         {
             return false;
         }
-        else if (this.targetEntity.getDistanceSqToEntity(this.theEntity) > (double)(this.maxTargetDistance * this.maxTargetDistance))
+        else if (this.targetEntity.getDistanceSqToEntity(this.creature) > (double)(this.maxTargetDistance * this.maxTargetDistance))
         {
             return false;
         }
         else
         {
-            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, new Vec3d(this.targetEntity.posX, this.targetEntity.posY, this.targetEntity.posZ));
+            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.creature, 16, 7, new Vec3d(this.targetEntity.posX, this.targetEntity.posY, this.targetEntity.posZ));
 
             if (vec3d == null)
             {
@@ -51,9 +51,9 @@ public class EntityAIMoveTowardsTarget extends EntityAIBase
             }
             else
             {
-                this.movePosX = vec3d.xCoord;
-                this.movePosY = vec3d.yCoord;
-                this.movePosZ = vec3d.zCoord;
+                this.movePosX = vec3d.x;
+                this.movePosY = vec3d.y;
+                this.movePosZ = vec3d.z;
                 return true;
             }
         }
@@ -62,13 +62,13 @@ public class EntityAIMoveTowardsTarget extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return !this.theEntity.getNavigator().noPath() && this.targetEntity.isEntityAlive() && this.targetEntity.getDistanceSqToEntity(this.theEntity) < (double)(this.maxTargetDistance * this.maxTargetDistance);
+        return !this.creature.getNavigator().noPath() && this.targetEntity.isEntityAlive() && this.targetEntity.getDistanceSqToEntity(this.creature) < (double)(this.maxTargetDistance * this.maxTargetDistance);
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
@@ -80,6 +80,6 @@ public class EntityAIMoveTowardsTarget extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theEntity.getNavigator().tryMoveToXYZ(this.movePosX, this.movePosY, this.movePosZ, this.speed);
+        this.creature.getNavigator().tryMoveToXYZ(this.movePosX, this.movePosY, this.movePosZ, this.speed);
     }
 }

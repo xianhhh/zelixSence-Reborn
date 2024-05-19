@@ -66,7 +66,7 @@ public class EntitySlime extends EntityLiving implements IMob
         this.dataManager.register(SLIME_SIZE, Integer.valueOf(1));
     }
 
-    protected void setSlimeSize(int size, boolean p_70799_2_)
+    protected void setSlimeSize(int size, boolean resetHealth)
     {
         this.dataManager.set(SLIME_SIZE, Integer.valueOf(size));
         this.setSize(0.51000005F * (float)size, 0.51000005F * (float)size);
@@ -74,7 +74,7 @@ public class EntitySlime extends EntityLiving implements IMob
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)(size * size));
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)size));
 
-        if (p_70799_2_)
+        if (resetHealth)
         {
             this.setHealth(this.getMaxHealth());
         }
@@ -204,7 +204,7 @@ public class EntitySlime extends EntityLiving implements IMob
 
             if (this.isInWater() && this.rand.nextInt(20) == 0)
             {
-                this.resetHeight();
+                this.doWaterSplashEffect();
             }
         }
 
@@ -240,7 +240,7 @@ public class EntitySlime extends EntityLiving implements IMob
 
                 entityslime.setSlimeSize(i / 2, true);
                 entityslime.setLocationAndAngles(this.posX + (double)f, this.posY + 0.5D, this.posZ + (double)f1, this.rand.nextFloat() * 360.0F, 0.0F);
-                this.world.spawnEntityInWorld(entityslime);
+                this.world.spawnEntity(entityslime);
             }
         }
 
@@ -303,7 +303,7 @@ public class EntitySlime extends EntityLiving implements IMob
         return this.getSlimeSize();
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return this.isSmallSlime() ? SoundEvents.ENTITY_SMALL_SLIME_HURT : SoundEvents.ENTITY_SLIME_HURT;
     }
@@ -456,7 +456,7 @@ public class EntitySlime extends EntityLiving implements IMob
             super.startExecuting();
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
             EntityLivingBase entitylivingbase = this.slime.getAttackTarget();
 
@@ -596,7 +596,7 @@ public class EntitySlime extends EntityLiving implements IMob
 
             if (this.action != EntityMoveHelper.Action.MOVE_TO)
             {
-                this.entity.func_191989_p(0.0F);
+                this.entity.setMoveForward(0.0F);
             }
             else
             {
@@ -625,7 +625,7 @@ public class EntitySlime extends EntityLiving implements IMob
                     else
                     {
                         this.slime.moveStrafing = 0.0F;
-                        this.slime.field_191988_bg = 0.0F;
+                        this.slime.moveForward = 0.0F;
                         this.entity.setAIMoveSpeed(0.0F);
                     }
                 }

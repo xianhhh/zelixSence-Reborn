@@ -23,7 +23,7 @@ public class EntityAIZombieAttack extends EntityAIAttackMelee
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
@@ -32,7 +32,7 @@ public class EntityAIZombieAttack extends EntityAIAttackMelee
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {

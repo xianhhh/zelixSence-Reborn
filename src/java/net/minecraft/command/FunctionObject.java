@@ -9,23 +9,26 @@ import net.minecraft.util.ResourceLocation;
 
 public class FunctionObject
 {
-    private final FunctionObject.Entry[] field_193530_b;
+    private final FunctionObject.Entry[] entries;
 
-    public FunctionObject(FunctionObject.Entry[] p_i47600_1_)
+    public FunctionObject(FunctionObject.Entry[] entriesIn)
     {
-        this.field_193530_b = p_i47600_1_;
+        this.entries = entriesIn;
     }
 
-    public FunctionObject.Entry[] func_193528_a()
+    public FunctionObject.Entry[] getEntries()
     {
-        return this.field_193530_b;
+        return this.entries;
     }
 
-    public static FunctionObject func_193527_a(FunctionManager p_193527_0_, List<String> p_193527_1_)
+    /**
+     * Create a Function from the given function definition.
+     */
+    public static FunctionObject create(FunctionManager functionManagerIn, List<String> commands)
     {
-        List<FunctionObject.Entry> list = Lists.<FunctionObject.Entry>newArrayListWithCapacity(p_193527_1_.size());
+        List<FunctionObject.Entry> list = Lists.<FunctionObject.Entry>newArrayListWithCapacity(commands.size());
 
-        for (String s : p_193527_1_)
+        for (String s : commands)
         {
             s = s.trim();
 
@@ -34,7 +37,7 @@ public class FunctionObject
                 String[] astring = s.split(" ", 2);
                 String s1 = astring[0];
 
-                if (!p_193527_0_.func_193062_a().getCommands().containsKey(s1))
+                if (!functionManagerIn.getCommandManager().getCommands().containsKey(s1))
                 {
                     if (s1.startsWith("//"))
                     {
@@ -58,99 +61,99 @@ public class FunctionObject
 
     public static class CacheableFunction
     {
-        public static final FunctionObject.CacheableFunction field_193519_a = new FunctionObject.CacheableFunction((ResourceLocation)null);
+        public static final FunctionObject.CacheableFunction EMPTY = new FunctionObject.CacheableFunction((ResourceLocation)null);
         @Nullable
-        private final ResourceLocation field_193520_b;
-        private boolean field_193521_c;
-        private FunctionObject field_193522_d;
+        private final ResourceLocation id;
+        private boolean isValid;
+        private FunctionObject function;
 
-        public CacheableFunction(@Nullable ResourceLocation p_i47537_1_)
+        public CacheableFunction(@Nullable ResourceLocation idIn)
         {
-            this.field_193520_b = p_i47537_1_;
+            this.id = idIn;
         }
 
-        public CacheableFunction(FunctionObject p_i47602_1_)
+        public CacheableFunction(FunctionObject functionIn)
         {
-            this.field_193520_b = null;
-            this.field_193522_d = p_i47602_1_;
+            this.id = null;
+            this.function = functionIn;
         }
 
         @Nullable
-        public FunctionObject func_193518_a(FunctionManager p_193518_1_)
+        public FunctionObject get(FunctionManager functionManagerIn)
         {
-            if (!this.field_193521_c)
+            if (!this.isValid)
             {
-                if (this.field_193520_b != null)
+                if (this.id != null)
                 {
-                    this.field_193522_d = p_193518_1_.func_193058_a(this.field_193520_b);
+                    this.function = functionManagerIn.getFunction(this.id);
                 }
 
-                this.field_193521_c = true;
+                this.isValid = true;
             }
 
-            return this.field_193522_d;
+            return this.function;
         }
 
         public String toString()
         {
-            return String.valueOf((Object)this.field_193520_b);
+            return String.valueOf((Object)this.id);
         }
     }
 
     public static class CommandEntry implements FunctionObject.Entry
     {
-        private final String field_193525_a;
+        private final String command;
 
         public CommandEntry(String p_i47534_1_)
         {
-            this.field_193525_a = p_i47534_1_;
+            this.command = p_i47534_1_;
         }
 
-        public void func_194145_a(FunctionManager p_194145_1_, ICommandSender p_194145_2_, ArrayDeque<FunctionManager.QueuedCommand> p_194145_3_, int p_194145_4_)
+        public void execute(FunctionManager functionManagerIn, ICommandSender sender, ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength)
         {
-            p_194145_1_.func_193062_a().executeCommand(p_194145_2_, this.field_193525_a);
+            functionManagerIn.getCommandManager().executeCommand(sender, this.command);
         }
 
         public String toString()
         {
-            return "/" + this.field_193525_a;
+            return "/" + this.command;
         }
     }
 
     public interface Entry
     {
-        void func_194145_a(FunctionManager p_194145_1_, ICommandSender p_194145_2_, ArrayDeque<FunctionManager.QueuedCommand> p_194145_3_, int p_194145_4_);
+        void execute(FunctionManager functionManagerIn, ICommandSender sender, ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength);
     }
 
     public static class FunctionEntry implements FunctionObject.Entry
     {
-        private final FunctionObject.CacheableFunction field_193524_a;
+        private final FunctionObject.CacheableFunction function;
 
-        public FunctionEntry(FunctionObject p_i47601_1_)
+        public FunctionEntry(FunctionObject functionIn)
         {
-            this.field_193524_a = new FunctionObject.CacheableFunction(p_i47601_1_);
+            this.function = new FunctionObject.CacheableFunction(functionIn);
         }
 
-        public void func_194145_a(FunctionManager p_194145_1_, ICommandSender p_194145_2_, ArrayDeque<FunctionManager.QueuedCommand> p_194145_3_, int p_194145_4_)
+        public void execute(FunctionManager functionManagerIn, ICommandSender sender, ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength)
         {
-            FunctionObject functionobject = this.field_193524_a.func_193518_a(p_194145_1_);
+            FunctionObject functionobject = this.function.get(functionManagerIn);
 
             if (functionobject != null)
             {
-                FunctionObject.Entry[] afunctionobject$entry = functionobject.func_193528_a();
-                int i = p_194145_4_ - p_194145_3_.size();
+                FunctionObject.Entry[] afunctionobject$entry = functionobject.getEntries();
+                int i = maxCommandChainLength - commandQueue.size();
                 int j = Math.min(afunctionobject$entry.length, i);
 
                 for (int k = j - 1; k >= 0; --k)
                 {
-                    p_194145_3_.addFirst(new FunctionManager.QueuedCommand(p_194145_1_, p_194145_2_, afunctionobject$entry[k]));
+                    commandQueue.addFirst(new FunctionManager.QueuedCommand(functionManagerIn, sender, afunctionobject$entry[k]));
                 }
             }
         }
 
         public String toString()
         {
-            return "/function " + this.field_193524_a;
+            return "/function " + this.function;
         }
     }
 }

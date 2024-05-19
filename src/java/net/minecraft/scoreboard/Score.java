@@ -18,24 +18,24 @@ public class Score
             }
         }
     };
-    private final Scoreboard theScoreboard;
-    private final ScoreObjective theScoreObjective;
+    private final Scoreboard scoreboard;
+    private final ScoreObjective objective;
     private final String scorePlayerName;
     private int scorePoints;
     private boolean locked;
     private boolean forceUpdate;
 
-    public Score(Scoreboard theScoreboardIn, ScoreObjective theScoreObjectiveIn, String scorePlayerNameIn)
+    public Score(Scoreboard scoreboard, ScoreObjective objective, String playerName)
     {
-        this.theScoreboard = theScoreboardIn;
-        this.theScoreObjective = theScoreObjectiveIn;
-        this.scorePlayerName = scorePlayerNameIn;
+        this.scoreboard = scoreboard;
+        this.objective = objective;
+        this.scorePlayerName = playerName;
         this.forceUpdate = true;
     }
 
     public void increaseScore(int amount)
     {
-        if (this.theScoreObjective.getCriteria().isReadOnly())
+        if (this.objective.getCriteria().isReadOnly())
         {
             throw new IllegalStateException("Cannot modify read-only score");
         }
@@ -47,7 +47,7 @@ public class Score
 
     public void decreaseScore(int amount)
     {
-        if (this.theScoreObjective.getCriteria().isReadOnly())
+        if (this.objective.getCriteria().isReadOnly())
         {
             throw new IllegalStateException("Cannot modify read-only score");
         }
@@ -59,7 +59,7 @@ public class Score
 
     public void incrementScore()
     {
-        if (this.theScoreObjective.getCriteria().isReadOnly())
+        if (this.objective.getCriteria().isReadOnly())
         {
             throw new IllegalStateException("Cannot modify read-only score");
         }
@@ -88,7 +88,7 @@ public class Score
 
     public ScoreObjective getObjective()
     {
-        return this.theScoreObjective;
+        return this.objective;
     }
 
     /**
@@ -101,7 +101,7 @@ public class Score
 
     public Scoreboard getScoreScoreboard()
     {
-        return this.theScoreboard;
+        return this.scoreboard;
     }
 
     public boolean isLocked()

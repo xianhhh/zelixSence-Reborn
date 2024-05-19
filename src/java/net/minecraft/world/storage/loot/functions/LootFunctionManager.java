@@ -20,10 +20,10 @@ public class LootFunctionManager
     private static final Map < ResourceLocation, LootFunction.Serializer<? >> NAME_TO_SERIALIZER_MAP = Maps. < ResourceLocation, LootFunction.Serializer<? >> newHashMap();
     private static final Map < Class <? extends LootFunction > , LootFunction.Serializer<? >> CLASS_TO_SERIALIZER_MAP = Maps. < Class <? extends LootFunction > , LootFunction.Serializer<? >> newHashMap();
 
-    public static <T extends LootFunction> void registerFunction(LootFunction.Serializer <? extends T > p_186582_0_)
+    public static <T extends LootFunction> void registerFunction(LootFunction.Serializer <? extends T > serializer)
     {
-        ResourceLocation resourcelocation = p_186582_0_.getFunctionName();
-        Class<T> oclass = (Class<T>)p_186582_0_.getFunctionClass();
+        ResourceLocation resourcelocation = serializer.getFunctionName();
+        Class<T> oclass = (Class<T>)serializer.getFunctionClass();
 
         if (NAME_TO_SERIALIZER_MAP.containsKey(resourcelocation))
         {
@@ -35,8 +35,8 @@ public class LootFunctionManager
         }
         else
         {
-            NAME_TO_SERIALIZER_MAP.put(resourcelocation, p_186582_0_);
-            CLASS_TO_SERIALIZER_MAP.put(oclass, p_186582_0_);
+            NAME_TO_SERIALIZER_MAP.put(resourcelocation, serializer);
+            CLASS_TO_SERIALIZER_MAP.put(oclass, serializer);
         }
     }
 

@@ -63,7 +63,7 @@ public final class WorldEntitySpawner
 
                                 if (!flag && worldServerIn.getWorldBorder().contains(chunkpos))
                                 {
-                                    PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkpos.chunkXPos, chunkpos.chunkZPos);
+                                    PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkpos.x, chunkpos.z);
 
                                     if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers())
                                     {
@@ -93,7 +93,7 @@ public final class WorldEntitySpawner
 
                         for (ChunkPos chunkpos1 : this.eligibleChunksForSpawning)
                         {
-                            BlockPos blockpos = getRandomChunkPosition(worldServerIn, chunkpos1.chunkXPos, chunkpos1.chunkZPos);
+                            BlockPos blockpos = getRandomChunkPosition(worldServerIn, chunkpos1.x, chunkpos1.z);
                             int k1 = blockpos.getX();
                             int l1 = blockpos.getY();
                             int i2 = blockpos.getZ();
@@ -157,7 +157,7 @@ public final class WorldEntitySpawner
                                                     if (entityliving.isNotColliding())
                                                     {
                                                         ++j2;
-                                                        worldServerIn.spawnEntityInWorld(entityliving);
+                                                        worldServerIn.spawnEntity(entityliving);
                                                     }
                                                     else
                                                     {
@@ -233,7 +233,7 @@ public final class WorldEntitySpawner
             {
                 BlockPos blockpos = pos.down();
 
-                if (!worldIn.getBlockState(blockpos).isFullyOpaque())
+                if (!worldIn.getBlockState(blockpos).isTopSolid())
                 {
                     return false;
                 }
@@ -289,7 +289,7 @@ public final class WorldEntitySpawner
                             }
 
                             entityliving.setLocationAndAngles((double)((float)j + 0.5F), (double)blockpos.getY(), (double)((float)k + 0.5F), randomIn.nextFloat() * 360.0F, 0.0F);
-                            worldIn.spawnEntityInWorld(entityliving);
+                            worldIn.spawnEntity(entityliving);
                             ientitylivingdata = entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
                             flag = true;
                         }

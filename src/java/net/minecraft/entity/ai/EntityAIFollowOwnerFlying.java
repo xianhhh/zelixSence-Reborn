@@ -12,9 +12,9 @@ public class EntityAIFollowOwnerFlying extends EntityAIFollowOwner
         super(p_i47416_1_, p_i47416_2_, p_i47416_4_, p_i47416_5_);
     }
 
-    protected boolean func_192381_a(int p_192381_1_, int p_192381_2_, int p_192381_3_, int p_192381_4_, int p_192381_5_)
+    protected boolean isTeleportFriendlyBlock(int x, int p_192381_2_, int y, int p_192381_4_, int p_192381_5_)
     {
-        IBlockState iblockstate = this.theWorld.getBlockState(new BlockPos(p_192381_1_ + p_192381_4_, p_192381_3_ - 1, p_192381_2_ + p_192381_5_));
-        return (iblockstate.isFullyOpaque() || iblockstate.getMaterial() == Material.LEAVES) && this.theWorld.isAirBlock(new BlockPos(p_192381_1_ + p_192381_4_, p_192381_3_, p_192381_2_ + p_192381_5_)) && this.theWorld.isAirBlock(new BlockPos(p_192381_1_ + p_192381_4_, p_192381_3_ + 1, p_192381_2_ + p_192381_5_));
+        IBlockState iblockstate = this.world.getBlockState(new BlockPos(x + p_192381_4_, y - 1, p_192381_2_ + p_192381_5_));
+        return (iblockstate.isTopSolid() || iblockstate.getMaterial() == Material.LEAVES) && this.world.isAirBlock(new BlockPos(x + p_192381_4_, y, p_192381_2_ + p_192381_5_)) && this.world.isAirBlock(new BlockPos(x + p_192381_4_, y + 1, p_192381_2_ + p_192381_5_));
     }
 }

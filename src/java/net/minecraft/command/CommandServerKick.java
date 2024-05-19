@@ -14,7 +14,7 @@ public class CommandServerKick extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "kick";
     }
@@ -30,7 +30,7 @@ public class CommandServerKick extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.kick.usage";
     }
@@ -53,12 +53,12 @@ public class CommandServerKick extends CommandBase
                 if (args.length >= 2)
                 {
                     ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 1);
-                    entityplayermp.connection.func_194028_b(itextcomponent);
+                    entityplayermp.connection.disconnect(itextcomponent);
                     notifyCommandListener(sender, this, "commands.kick.success.reason", new Object[] {entityplayermp.getName(), itextcomponent.getUnformattedText()});
                 }
                 else
                 {
-                    entityplayermp.connection.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.kicked", new Object[0]));
+                    entityplayermp.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.kicked", new Object[0]));
                     notifyCommandListener(sender, this, "commands.kick.success", new Object[] {entityplayermp.getName()});
                 }
             }
@@ -69,8 +69,8 @@ public class CommandServerKick extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
-        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
     }
 }

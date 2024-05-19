@@ -49,7 +49,7 @@ public class PlayerChunkMapEntry
     {
         if (this.players.contains(player))
         {
-            LOGGER.debug("Failed to add player. {} already is in chunk {}, {}", player, Integer.valueOf(this.pos.chunkXPos), Integer.valueOf(this.pos.chunkZPos));
+            LOGGER.debug("Failed to add player. {} already is in chunk {}, {}", player, Integer.valueOf(this.pos.x), Integer.valueOf(this.pos.z));
         }
         else
         {
@@ -62,7 +62,7 @@ public class PlayerChunkMapEntry
 
             if (this.sentToPlayers)
             {
-                this.sendNearbySpecialEntities(player);
+                this.sendToPlayer(player);
             }
         }
     }
@@ -73,7 +73,7 @@ public class PlayerChunkMapEntry
         {
             if (this.sentToPlayers)
             {
-                player.connection.sendPacket(new SPacketUnloadChunk(this.pos.chunkXPos, this.pos.chunkZPos));
+                player.connection.sendPacket(new SPacketUnloadChunk(this.pos.x, this.pos.z));
             }
 
             this.players.remove(player);
@@ -99,11 +99,11 @@ public class PlayerChunkMapEntry
         {
             if (canGenerate)
             {
-                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().provideChunk(this.pos.chunkXPos, this.pos.chunkZPos);
+                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().provideChunk(this.pos.x, this.pos.z);
             }
             else
             {
-                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(this.pos.chunkXPos, this.pos.chunkZPos);
+                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(this.pos.x, this.pos.z);
             }
 
             return this.chunk != null;
@@ -142,12 +142,10 @@ public class PlayerChunkMapEntry
     }
 
     /**
-     * Send packets to player for:
-     *  - nearby tile entities
-     *  - nearby entities that are leashed
-     *  - nearby entities with
+     * Fully resyncs this chunk's blocks, tile entities, and entity attachments (passengers and leashes) to all tracking
+     * players
      */
-    public void sendNearbySpecialEntities(EntityPlayerMP player)
+    public void sendToPlayer(EntityPlayerMP player)
     {
         if (this.sentToPlayers)
         {
@@ -174,7 +172,7 @@ public class PlayerChunkMapEntry
         {
             if (this.changes == 0)
             {
-                this.playerChunkMap.addEntry(this);
+                this.playerChunkMap.entryChanged(this);
             }
 
             this.changedSectionFilter |= 1 << (y >> 4);
@@ -215,9 +213,9 @@ public class PlayerChunkMapEntry
             {
                 if (this.changes == 1)
                 {
-                    int i = (this.changedBlocks[0] >> 12 & 15) + this.pos.chunkXPos * 16;
+                    int i = (this.changedBlocks[0] >> 12 & 15) + this.pos.x * 16;
                     int j = this.changedBlocks[0] & 255;
-                    int k = (this.changedBlocks[0] >> 8 & 15) + this.pos.chunkZPos * 16;
+                    int k = (this.changedBlocks[0] >> 8 & 15) + this.pos.z * 16;
                     BlockPos blockpos = new BlockPos(i, j, k);
                     this.sendPacket(new SPacketBlockChange(this.playerChunkMap.getWorldServer(), blockpos));
 
@@ -236,9 +234,9 @@ public class PlayerChunkMapEntry
 
                     for (int l = 0; l < this.changes; ++l)
                     {
-                        int i1 = (this.changedBlocks[l] >> 12 & 15) + this.pos.chunkXPos * 16;
+                        int i1 = (this.changedBlocks[l] >> 12 & 15) + this.pos.x * 16;
                         int j1 = this.changedBlocks[l] & 255;
-                        int k1 = (this.changedBlocks[l] >> 8 & 15) + this.pos.chunkZPos * 16;
+                        int k1 = (this.changedBlocks[l] >> 8 & 15) + this.pos.z * 16;
                         BlockPos blockpos1 = new BlockPos(i1, j1, k1);
 
                         if (this.playerChunkMap.getWorldServer().getBlockState(blockpos1).getBlock().hasTileEntity())

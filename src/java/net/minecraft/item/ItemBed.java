@@ -32,69 +32,69 @@ public class ItemBed extends Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        if (playerIn.isRemote)
+        if (worldIn.isRemote)
         {
             return EnumActionResult.SUCCESS;
         }
-        else if (hand != EnumFacing.UP)
+        else if (facing != EnumFacing.UP)
         {
             return EnumActionResult.FAIL;
         }
         else
         {
-            IBlockState iblockstate = playerIn.getBlockState(worldIn);
+            IBlockState iblockstate = worldIn.getBlockState(pos);
             Block block = iblockstate.getBlock();
-            boolean flag = block.isReplaceable(playerIn, worldIn);
+            boolean flag = block.isReplaceable(worldIn, pos);
 
             if (!flag)
             {
-                worldIn = worldIn.up();
+                pos = pos.up();
             }
 
-            int i = MathHelper.floor((double)(stack.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+            int i = MathHelper.floor((double)(player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
             EnumFacing enumfacing = EnumFacing.getHorizontal(i);
-            BlockPos blockpos = worldIn.offset(enumfacing);
-            ItemStack itemstack = stack.getHeldItem(pos);
+            BlockPos blockpos = pos.offset(enumfacing);
+            ItemStack itemstack = player.getHeldItem(hand);
 
-            if (stack.canPlayerEdit(worldIn, hand, itemstack) && stack.canPlayerEdit(blockpos, hand, itemstack))
+            if (player.canPlayerEdit(pos, facing, itemstack) && player.canPlayerEdit(blockpos, facing, itemstack))
             {
-                IBlockState iblockstate1 = playerIn.getBlockState(blockpos);
-                boolean flag1 = iblockstate1.getBlock().isReplaceable(playerIn, blockpos);
-                boolean flag2 = flag || playerIn.isAirBlock(worldIn);
-                boolean flag3 = flag1 || playerIn.isAirBlock(blockpos);
+                IBlockState iblockstate1 = worldIn.getBlockState(blockpos);
+                boolean flag1 = iblockstate1.getBlock().isReplaceable(worldIn, blockpos);
+                boolean flag2 = flag || worldIn.isAirBlock(pos);
+                boolean flag3 = flag1 || worldIn.isAirBlock(blockpos);
 
-                if (flag2 && flag3 && playerIn.getBlockState(worldIn.down()).isFullyOpaque() && playerIn.getBlockState(blockpos.down()).isFullyOpaque())
+                if (flag2 && flag3 && worldIn.getBlockState(pos.down()).isTopSolid() && worldIn.getBlockState(blockpos.down()).isTopSolid())
                 {
                     IBlockState iblockstate2 = Blocks.BED.getDefaultState().withProperty(BlockBed.OCCUPIED, Boolean.valueOf(false)).withProperty(BlockBed.FACING, enumfacing).withProperty(BlockBed.PART, BlockBed.EnumPartType.FOOT);
-                    playerIn.setBlockState(worldIn, iblockstate2, 10);
-                    playerIn.setBlockState(blockpos, iblockstate2.withProperty(BlockBed.PART, BlockBed.EnumPartType.HEAD), 10);
+                    worldIn.setBlockState(pos, iblockstate2, 10);
+                    worldIn.setBlockState(blockpos, iblockstate2.withProperty(BlockBed.PART, BlockBed.EnumPartType.HEAD), 10);
                     SoundType soundtype = iblockstate2.getBlock().getSoundType();
-                    playerIn.playSound((EntityPlayer)null, worldIn, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    TileEntity tileentity = playerIn.getTileEntity(blockpos);
+                    worldIn.playSound((EntityPlayer)null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                    TileEntity tileentity = worldIn.getTileEntity(blockpos);
 
                     if (tileentity instanceof TileEntityBed)
                     {
-                        ((TileEntityBed)tileentity).func_193051_a(itemstack);
+                        ((TileEntityBed)tileentity).setItemValues(itemstack);
                     }
 
-                    TileEntity tileentity1 = playerIn.getTileEntity(worldIn);
+                    TileEntity tileentity1 = worldIn.getTileEntity(pos);
 
                     if (tileentity1 instanceof TileEntityBed)
                     {
-                        ((TileEntityBed)tileentity1).func_193051_a(itemstack);
+                        ((TileEntityBed)tileentity1).setItemValues(itemstack);
                     }
 
-                    playerIn.notifyNeighborsRespectDebug(worldIn, block, false);
-                    playerIn.notifyNeighborsRespectDebug(blockpos, iblockstate1.getBlock(), false);
+                    worldIn.notifyNeighborsRespectDebug(pos, block, false);
+                    worldIn.notifyNeighborsRespectDebug(blockpos, iblockstate1.getBlock(), false);
 
-                    if (stack instanceof EntityPlayerMP)
+                    if (player instanceof EntityPlayerMP)
                     {
-                        CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                        CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, pos, itemstack);
                     }
 
-                    itemstack.func_190918_g(1);
+                    itemstack.shrink(1);
                     return EnumActionResult.SUCCESS;
                 }
                 else
@@ -121,13 +121,13 @@ public class ItemBed extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.func_194125_a(itemIn))
+        if (this.isInCreativeTab(tab))
         {
             for (int i = 0; i < 16; ++i)
             {
-                tab.add(new ItemStack(this, 1, i));
+                items.add(new ItemStack(this, 1, i));
             }
         }
     }

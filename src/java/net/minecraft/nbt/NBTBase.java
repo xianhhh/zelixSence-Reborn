@@ -73,7 +73,7 @@ public abstract class NBTBase
         }
     }
 
-    public static String func_193581_j(int p_193581_0_)
+    public static String getTagTypeName(int p_193581_0_)
     {
         switch (p_193581_0_)
         {

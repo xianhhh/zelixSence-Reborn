@@ -45,6 +45,10 @@ public class EntityPigZombie extends EntityZombie
         this.isImmuneToFire = true;
     }
 
+    /**
+     * Hint to AI tasks that we were attacked by the passed EntityLivingBase and should retaliate. Is not guaranteed to
+     * change our actual active target (for example if we are currently busy attacking someone else)
+     */
     public void setRevengeTarget(@Nullable EntityLivingBase livingBase)
     {
         super.setRevengeTarget(livingBase);
@@ -92,7 +96,7 @@ public class EntityPigZombie extends EntityZombie
             this.playSound(SoundEvents.ENTITY_ZOMBIE_PIG_ANGRY, this.getSoundVolume() * 2.0F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 1.8F);
         }
 
-        if (this.angerLevel > 0 && this.angerTargetUUID != null && this.getAITarget() == null)
+        if (this.angerLevel > 0 && this.angerTargetUUID != null && this.getRevengeTarget() == null)
         {
             EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.angerTargetUUID);
             this.setRevengeTarget(entityplayer);
@@ -176,7 +180,7 @@ public class EntityPigZombie extends EntityZombie
         }
         else
         {
-            Entity entity = source.getEntity();
+            Entity entity = source.getTrueSource();
 
             if (entity instanceof EntityPlayer)
             {
@@ -211,7 +215,7 @@ public class EntityPigZombie extends EntityZombie
         return SoundEvents.ENTITY_ZOMBIE_PIG_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_ZOMBIE_PIG_HURT;
     }
@@ -240,12 +244,12 @@ public class EntityPigZombie extends EntityZombie
         this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
     }
 
-    protected ItemStack func_190732_dj()
+    protected ItemStack getSkullDrop()
     {
-        return ItemStack.field_190927_a;
+        return ItemStack.EMPTY;
     }
 
-    public boolean func_191990_c(EntityPlayer p_191990_1_)
+    public boolean isPreventingPlayerRest(EntityPlayer playerIn)
     {
         return this.isAngry();
     }

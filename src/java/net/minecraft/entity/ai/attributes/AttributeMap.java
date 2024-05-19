@@ -8,8 +8,8 @@ import net.minecraft.util.LowerStringMap;
 
 public class AttributeMap extends AbstractAttributeMap
 {
-    private final Set<IAttributeInstance> attributeInstanceSet = Sets.<IAttributeInstance>newHashSet();
-    protected final Map<String, IAttributeInstance> descriptionToAttributeInstanceMap = new LowerStringMap();
+    private final Set<IAttributeInstance> dirtyInstances = Sets.<IAttributeInstance>newHashSet();
+    protected final Map<String, IAttributeInstance> instancesByName = new LowerStringMap();
 
     public ModifiableAttributeInstance getAttributeInstance(IAttribute attribute)
     {
@@ -22,7 +22,7 @@ public class AttributeMap extends AbstractAttributeMap
 
         if (iattributeinstance == null)
         {
-            iattributeinstance = this.descriptionToAttributeInstanceMap.get(attributeName);
+            iattributeinstance = this.instancesByName.get(attributeName);
         }
 
         return (ModifiableAttributeInstance)iattributeinstance;
@@ -37,7 +37,7 @@ public class AttributeMap extends AbstractAttributeMap
 
         if (attribute instanceof RangedAttribute && ((RangedAttribute)attribute).getDescription() != null)
         {
-            this.descriptionToAttributeInstanceMap.put(((RangedAttribute)attribute).getDescription(), iattributeinstance);
+            this.instancesByName.put(((RangedAttribute)attribute).getDescription(), iattributeinstance);
         }
 
         return iattributeinstance;
@@ -52,7 +52,7 @@ public class AttributeMap extends AbstractAttributeMap
     {
         if (instance.getAttribute().getShouldWatch())
         {
-            this.attributeInstanceSet.add(instance);
+            this.dirtyInstances.add(instance);
         }
 
         for (IAttribute iattribute : this.descendantsByParent.get(instance.getAttribute()))
@@ -66,9 +66,9 @@ public class AttributeMap extends AbstractAttributeMap
         }
     }
 
-    public Set<IAttributeInstance> getAttributeInstanceSet()
+    public Set<IAttributeInstance> getDirtyInstances()
     {
-        return this.attributeInstanceSet;
+        return this.dirtyInstances;
     }
 
     public Collection<IAttributeInstance> getWatchedAttributes()

@@ -79,7 +79,7 @@ public class BiomeSnow extends Biome
         super.decorate(worldIn, rand, pos);
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         return new WorldGenTaiga2(false);
     }

@@ -6,13 +6,13 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class EntityAILandOnOwnersShoulder extends EntityAIBase
 {
-    private final EntityShoulderRiding field_192382_a;
-    private EntityPlayer field_192383_b;
-    private boolean field_192384_c;
+    private final EntityShoulderRiding entity;
+    private EntityPlayer owner;
+    private boolean isSittingOnShoulder;
 
     public EntityAILandOnOwnersShoulder(EntityShoulderRiding p_i47415_1_)
     {
-        this.field_192382_a = p_i47415_1_;
+        this.entity = p_i47415_1_;
     }
 
     /**
@@ -20,9 +20,9 @@ public class EntityAILandOnOwnersShoulder extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        EntityLivingBase entitylivingbase = this.field_192382_a.getOwner();
+        EntityLivingBase entitylivingbase = this.entity.getOwner();
         boolean flag = entitylivingbase != null && !((EntityPlayer)entitylivingbase).isSpectator() && !((EntityPlayer)entitylivingbase).capabilities.isFlying && !entitylivingbase.isInWater();
-        return !this.field_192382_a.isSitting() && flag && this.field_192382_a.func_191995_du();
+        return !this.entity.isSitting() && flag && this.entity.canSitOnShoulder();
     }
 
     /**
@@ -31,7 +31,7 @@ public class EntityAILandOnOwnersShoulder extends EntityAIBase
      */
     public boolean isInterruptible()
     {
-        return !this.field_192384_c;
+        return !this.isSittingOnShoulder;
     }
 
     /**
@@ -39,20 +39,20 @@ public class EntityAILandOnOwnersShoulder extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.field_192383_b = (EntityPlayer)this.field_192382_a.getOwner();
-        this.field_192384_c = false;
+        this.owner = (EntityPlayer)this.entity.getOwner();
+        this.isSittingOnShoulder = false;
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {
-        if (!this.field_192384_c && !this.field_192382_a.isSitting() && !this.field_192382_a.getLeashed())
+        if (!this.isSittingOnShoulder && !this.entity.isSitting() && !this.entity.getLeashed())
         {
-            if (this.field_192382_a.getEntityBoundingBox().intersectsWith(this.field_192383_b.getEntityBoundingBox()))
+            if (this.entity.getEntityBoundingBox().intersects(this.owner.getEntityBoundingBox()))
             {
-                this.field_192384_c = this.field_192382_a.func_191994_f(this.field_192383_b);
+                this.isSittingOnShoulder = this.entity.setEntityOnShoulder(this.owner);
             }
         }
     }

@@ -16,111 +16,114 @@ import net.minecraft.util.ResourceLocation;
 
 public class SummonedEntityTrigger implements ICriterionTrigger<SummonedEntityTrigger.Instance>
 {
-    private static final ResourceLocation field_192232_a = new ResourceLocation("summoned_entity");
-    private final Map<PlayerAdvancements, SummonedEntityTrigger.Listeners> field_192233_b = Maps.<PlayerAdvancements, SummonedEntityTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("summoned_entity");
+    private final Map<PlayerAdvancements, SummonedEntityTrigger.Listeners> listeners = Maps.<PlayerAdvancements, SummonedEntityTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192232_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener)
     {
-        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.field_192233_b.get(p_192165_1_);
+        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (summonedentitytrigger$listeners == null)
         {
-            summonedentitytrigger$listeners = new SummonedEntityTrigger.Listeners(p_192165_1_);
-            this.field_192233_b.put(p_192165_1_, summonedentitytrigger$listeners);
+            summonedentitytrigger$listeners = new SummonedEntityTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, summonedentitytrigger$listeners);
         }
 
-        summonedentitytrigger$listeners.func_192534_a(p_192165_2_);
+        summonedentitytrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener)
     {
-        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.field_192233_b.get(p_192164_1_);
+        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (summonedentitytrigger$listeners != null)
         {
-            summonedentitytrigger$listeners.func_192531_b(p_192164_2_);
+            summonedentitytrigger$listeners.remove(listener);
 
-            if (summonedentitytrigger$listeners.func_192532_a())
+            if (summonedentitytrigger$listeners.isEmpty())
             {
-                this.field_192233_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192233_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public SummonedEntityTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public SummonedEntityTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("entity"));
+        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("entity"));
         return new SummonedEntityTrigger.Instance(entitypredicate);
     }
 
-    public void func_192229_a(EntityPlayerMP p_192229_1_, Entity p_192229_2_)
+    public void trigger(EntityPlayerMP player, Entity entity)
     {
-        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.field_192233_b.get(p_192229_1_.func_192039_O());
+        SummonedEntityTrigger.Listeners summonedentitytrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (summonedentitytrigger$listeners != null)
         {
-            summonedentitytrigger$listeners.func_192533_a(p_192229_1_, p_192229_2_);
+            summonedentitytrigger$listeners.trigger(player, entity);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final EntityPredicate field_192284_a;
+        private final EntityPredicate entity;
 
-        public Instance(EntityPredicate p_i47371_1_)
+        public Instance(EntityPredicate entity)
         {
-            super(SummonedEntityTrigger.field_192232_a);
-            this.field_192284_a = p_i47371_1_;
+            super(SummonedEntityTrigger.ID);
+            this.entity = entity;
         }
 
-        public boolean func_192283_a(EntityPlayerMP p_192283_1_, Entity p_192283_2_)
+        public boolean test(EntityPlayerMP player, Entity entity)
         {
-            return this.field_192284_a.func_192482_a(p_192283_1_, p_192283_2_);
+            return this.entity.test(player, entity);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192535_a;
-        private final Set<ICriterionTrigger.Listener<SummonedEntityTrigger.Instance>> field_192536_b = Sets.<ICriterionTrigger.Listener<SummonedEntityTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<SummonedEntityTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<SummonedEntityTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47372_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192535_a = p_i47372_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192532_a()
+        public boolean isEmpty()
         {
-            return this.field_192536_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192534_a(ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> p_192534_1_)
+        public void add(ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener)
         {
-            this.field_192536_b.add(p_192534_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192531_b(ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> p_192531_1_)
+        public void remove(ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener)
         {
-            this.field_192536_b.remove(p_192531_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192533_a(EntityPlayerMP p_192533_1_, Entity p_192533_2_)
+        public void trigger(EntityPlayerMP player, Entity entity)
         {
             List<ICriterionTrigger.Listener<SummonedEntityTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener : this.field_192536_b)
+            for (ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener : this.listeners)
             {
-                if (((SummonedEntityTrigger.Instance)listener.func_192158_a()).func_192283_a(p_192533_1_, p_192533_2_))
+                if (((SummonedEntityTrigger.Instance)listener.getCriterionInstance()).test(player, entity))
                 {
                     if (list == null)
                     {
@@ -135,7 +138,7 @@ public class SummonedEntityTrigger implements ICriterionTrigger<SummonedEntityTr
             {
                 for (ICriterionTrigger.Listener<SummonedEntityTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192535_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

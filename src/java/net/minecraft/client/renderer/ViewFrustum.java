@@ -97,14 +97,14 @@ public class ViewFrustum
         return i - j / p_178157_2_ * p_178157_2_;
     }
 
-    public void markBlocksForUpdate(int p_187474_1_, int p_187474_2_, int p_187474_3_, int p_187474_4_, int p_187474_5_, int p_187474_6_, boolean p_187474_7_)
+    public void markBlocksForUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, boolean updateImmediately)
     {
-        int i = MathHelper.intFloorDiv(p_187474_1_, 16);
-        int j = MathHelper.intFloorDiv(p_187474_2_, 16);
-        int k = MathHelper.intFloorDiv(p_187474_3_, 16);
-        int l = MathHelper.intFloorDiv(p_187474_4_, 16);
-        int i1 = MathHelper.intFloorDiv(p_187474_5_, 16);
-        int j1 = MathHelper.intFloorDiv(p_187474_6_, 16);
+        int i = MathHelper.intFloorDiv(minX, 16);
+        int j = MathHelper.intFloorDiv(minY, 16);
+        int k = MathHelper.intFloorDiv(minZ, 16);
+        int l = MathHelper.intFloorDiv(maxX, 16);
+        int i1 = MathHelper.intFloorDiv(maxY, 16);
+        int j1 = MathHelper.intFloorDiv(maxZ, 16);
 
         for (int k1 = i; k1 <= l; ++k1)
         {
@@ -135,18 +135,18 @@ public class ViewFrustum
 
                     int i3 = (l2 * this.countChunksY + j2) * this.countChunksX + l1;
                     RenderChunk renderchunk = this.renderChunks[i3];
-                    renderchunk.setNeedsUpdate(p_187474_7_);
+                    renderchunk.setNeedsUpdate(updateImmediately);
                 }
             }
         }
     }
 
     @Nullable
-    protected RenderChunk getRenderChunk(BlockPos pos)
+    public RenderChunk getRenderChunk(BlockPos pos)
     {
-        int i = MathHelper.intFloorDiv(pos.getX(), 16);
-        int j = MathHelper.intFloorDiv(pos.getY(), 16);
-        int k = MathHelper.intFloorDiv(pos.getZ(), 16);
+        int i = pos.getX() >> 4;
+        int j = pos.getY() >> 4;
+        int k = pos.getZ() >> 4;
 
         if (j >= 0 && j < this.countChunksY)
         {

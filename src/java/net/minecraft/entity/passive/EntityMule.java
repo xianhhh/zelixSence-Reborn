@@ -11,20 +11,20 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityMule extends AbstractChestHorse
 {
-    public EntityMule(World p_i47296_1_)
+    public EntityMule(World worldIn)
     {
-        super(p_i47296_1_);
+        super(worldIn);
     }
 
-    public static void func_190700_b(DataFixer p_190700_0_)
+    public static void registerFixesMule(DataFixer fixer)
     {
-        AbstractChestHorse.func_190694_b(p_190700_0_, EntityMule.class);
+        AbstractChestHorse.registerFixesAbstractChestHorse(fixer, EntityMule.class);
     }
 
     @Nullable
     protected ResourceLocation getLootTable()
     {
-        return LootTableList.field_191191_I;
+        return LootTableList.ENTITIES_MULE;
     }
 
     protected SoundEvent getAmbientSound()
@@ -39,14 +39,14 @@ public class EntityMule extends AbstractChestHorse
         return SoundEvents.ENTITY_MULE_DEATH;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
-        super.getHurtSound(p_184601_1_);
+        super.getHurtSound(damageSourceIn);
         return SoundEvents.ENTITY_MULE_HURT;
     }
 
-    protected void func_190697_dk()
+    protected void playChestEquipSound()
     {
-        this.playSound(SoundEvents.field_191259_dX, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        this.playSound(SoundEvents.ENTITY_MULE_CHEST, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
     }
 }

@@ -25,7 +25,7 @@ public class CommandSetBlock extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "setblock";
     }
@@ -41,7 +41,7 @@ public class CommandSetBlock extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.setblock.usage";
     }
@@ -64,7 +64,7 @@ public class CommandSetBlock extends CommandBase
 
             if (args.length >= 5)
             {
-                iblockstate = func_190794_a(block, args[4]);
+                iblockstate = convertArgToBlockState(block, args[4]);
             }
             else
             {
@@ -149,11 +149,11 @@ public class CommandSetBlock extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length > 0 && args.length <= 3)
         {
-            return getTabCompletionCoordinate(args, 0, pos);
+            return getTabCompletionCoordinate(args, 0, targetPos);
         }
         else if (args.length == 4)
         {

@@ -11,5 +11,5 @@ public interface DataSerializer<T>
 
     DataParameter<T> createKey(int id);
 
-    T func_192717_a(T p_192717_1_);
+    T copyValue(T value);
 }

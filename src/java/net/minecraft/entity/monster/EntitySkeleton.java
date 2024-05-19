@@ -39,7 +39,7 @@ public class EntitySkeleton extends AbstractSkeleton
         return SoundEvents.ENTITY_SKELETON_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_SKELETON_HURT;
     }
@@ -49,7 +49,7 @@ public class EntitySkeleton extends AbstractSkeleton
         return SoundEvents.ENTITY_SKELETON_DEATH;
     }
 
-    SoundEvent func_190727_o()
+    SoundEvent getStepSound()
     {
         return SoundEvents.ENTITY_SKELETON_STEP;
     }
@@ -61,11 +61,11 @@ public class EntitySkeleton extends AbstractSkeleton
     {
         super.onDeath(cause);
 
-        if (cause.getEntity() instanceof EntityCreeper)
+        if (cause.getTrueSource() instanceof EntityCreeper)
         {
-            EntityCreeper entitycreeper = (EntityCreeper)cause.getEntity();
+            EntityCreeper entitycreeper = (EntityCreeper)cause.getTrueSource();
 
-            if (entitycreeper.getPowered() && entitycreeper.isAIEnabled())
+            if (entitycreeper.getPowered() && entitycreeper.ableToCauseSkullDrop())
             {
                 entitycreeper.incrementDroppedSkulls();
                 this.entityDropItem(new ItemStack(Items.SKULL, 1, 0), 0.0F);
@@ -73,19 +73,19 @@ public class EntitySkeleton extends AbstractSkeleton
         }
     }
 
-    protected EntityArrow func_190726_a(float p_190726_1_)
+    protected EntityArrow getArrow(float p_190726_1_)
     {
         ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.OFFHAND);
 
         if (itemstack.getItem() == Items.SPECTRAL_ARROW)
         {
             EntitySpectralArrow entityspectralarrow = new EntitySpectralArrow(this.world, this);
-            entityspectralarrow.func_190547_a(this, p_190726_1_);
+            entityspectralarrow.setEnchantmentEffectsFromEntity(this, p_190726_1_);
             return entityspectralarrow;
         }
         else
         {
-            EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
+            EntityArrow entityarrow = super.getArrow(p_190726_1_);
 
             if (itemstack.getItem() == Items.TIPPED_ARROW && entityarrow instanceof EntityTippedArrow)
             {

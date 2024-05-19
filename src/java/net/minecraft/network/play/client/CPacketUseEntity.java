@@ -47,7 +47,7 @@ public class CPacketUseEntity implements Packet<INetHandlerPlayServer>
      */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
-        this.entityId = buf.readVarIntFromBuffer();
+        this.entityId = buf.readVarInt();
         this.action = (CPacketUseEntity.Action)buf.readEnumValue(CPacketUseEntity.Action.class);
 
         if (this.action == CPacketUseEntity.Action.INTERACT_AT)
@@ -66,14 +66,14 @@ public class CPacketUseEntity implements Packet<INetHandlerPlayServer>
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeVarInt(this.entityId);
         buf.writeEnumValue(this.action);
 
         if (this.action == CPacketUseEntity.Action.INTERACT_AT)
         {
-            buf.writeFloat((float)this.hitVec.xCoord);
-            buf.writeFloat((float)this.hitVec.yCoord);
-            buf.writeFloat((float)this.hitVec.zCoord);
+            buf.writeFloat((float)this.hitVec.x);
+            buf.writeFloat((float)this.hitVec.y);
+            buf.writeFloat((float)this.hitVec.z);
         }
 
         if (this.action == CPacketUseEntity.Action.INTERACT || this.action == CPacketUseEntity.Action.INTERACT_AT)

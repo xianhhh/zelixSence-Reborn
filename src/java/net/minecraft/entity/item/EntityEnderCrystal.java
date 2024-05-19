@@ -120,7 +120,7 @@ public class EntityEnderCrystal extends Entity
         {
             return false;
         }
-        else if (source.getEntity() instanceof EntityDragon)
+        else if (source.getTrueSource() instanceof EntityDragon)
         {
             return false;
         }
@@ -150,7 +150,7 @@ public class EntityEnderCrystal extends Entity
      */
     public void onKillCommand()
     {
-        this.onCrystalDestroyed(DamageSource.generic);
+        this.onCrystalDestroyed(DamageSource.GENERIC);
         super.onKillCommand();
     }
 

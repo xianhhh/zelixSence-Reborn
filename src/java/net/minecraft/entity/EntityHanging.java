@@ -208,7 +208,7 @@ public abstract class EntityHanging extends Entity
             {
                 this.setDead();
                 this.setBeenAttacked();
-                this.onBroken(source.getEntity());
+                this.onBroken(source.getTrueSource());
             }
 
             return true;
@@ -218,9 +218,9 @@ public abstract class EntityHanging extends Entity
     /**
      * Tries to move the entity towards the specified location.
      */
-    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
+    public void move(MoverType type, double x, double y, double z)
     {
-        if (!this.world.isRemote && !this.isDead && p_70091_2_ * p_70091_2_ + p_70091_4_ * p_70091_4_ + p_70091_6_ * p_70091_6_ > 0.0D)
+        if (!this.world.isRemote && !this.isDead && x * x + y * y + z * z > 0.0D)
         {
             this.setDead();
             this.onBroken((Entity)null);
@@ -278,7 +278,7 @@ public abstract class EntityHanging extends Entity
     {
         EntityItem entityitem = new EntityItem(this.world, this.posX + (double)((float)this.facingDirection.getFrontOffsetX() * 0.15F), this.posY + (double)offsetY, this.posZ + (double)((float)this.facingDirection.getFrontOffsetZ() * 0.15F), stack);
         entityitem.setDefaultPickupDelay();
-        this.world.spawnEntityInWorld(entityitem);
+        this.world.spawnEntity(entityitem);
         return entityitem;
     }
 

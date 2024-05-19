@@ -17,102 +17,115 @@ import net.minecraft.world.GameType;
 
 public class PunchTreeStep implements ITutorialStep
 {
-    private static final Set<Block> field_193274_a = Sets.newHashSet(Blocks.LOG, Blocks.LOG2);
-    private static final ITextComponent field_193275_b = new TextComponentTranslation("tutorial.punch_tree.title", new Object[0]);
-    private static final ITextComponent field_193276_c = new TextComponentTranslation("tutorial.punch_tree.description", new Object[] {Tutorial.func_193291_a("attack")});
-    private final Tutorial field_193277_d;
-    private TutorialToast field_193278_e;
-    private int field_193279_f;
-    private int field_193280_g;
+    private static final Set<Block> LOG_BLOCKS = Sets.newHashSet(Blocks.LOG, Blocks.LOG2);
+    private static final ITextComponent TITLE = new TextComponentTranslation("tutorial.punch_tree.title", new Object[0]);
+    private static final ITextComponent DESCRIPTION = new TextComponentTranslation("tutorial.punch_tree.description", new Object[] {Tutorial.createKeybindComponent("attack")});
+    private final Tutorial tutorial;
+    private TutorialToast toast;
+    private int timeWaiting;
+    private int resetCount;
 
-    public PunchTreeStep(Tutorial p_i47579_1_)
+    public PunchTreeStep(Tutorial tutorial)
     {
-        this.field_193277_d = p_i47579_1_;
+        this.tutorial = tutorial;
     }
 
-    public void func_193245_a()
+    public void update()
     {
-        ++this.field_193279_f;
+        ++this.timeWaiting;
 
-        if (this.field_193277_d.func_194072_f() != GameType.SURVIVAL)
+        if (this.tutorial.getGameType() != GameType.SURVIVAL)
         {
-            this.field_193277_d.func_193292_a(TutorialSteps.NONE);
+            this.tutorial.setStep(TutorialSteps.NONE);
         }
         else
         {
-            if (this.field_193279_f == 1)
+            if (this.timeWaiting == 1)
             {
-                EntityPlayerSP entityplayersp = this.field_193277_d.func_193295_e().player;
+                EntityPlayerSP entityplayersp = this.tutorial.getMinecraft().player;
 
                 if (entityplayersp != null)
                 {
-                    for (Block block : field_193274_a)
+                    for (Block block : LOG_BLOCKS)
                     {
                         if (entityplayersp.inventory.hasItemStack(new ItemStack(block)))
                         {
-                            this.field_193277_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                            this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                             return;
                         }
                     }
 
-                    if (FindTreeStep.func_194070_a(entityplayersp))
+                    if (FindTreeStep.hasPunchedTreesPreviously(entityplayersp))
                     {
-                        this.field_193277_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                        this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                         return;
                     }
                 }
             }
 
-            if ((this.field_193279_f >= 600 || this.field_193280_g > 3) && this.field_193278_e == null)
+            if ((this.timeWaiting >= 600 || this.resetCount > 3) && this.toast == null)
             {
-                this.field_193278_e = new TutorialToast(TutorialToast.Icons.TREE, field_193275_b, field_193276_c, true);
-                this.field_193277_d.func_193295_e().func_193033_an().func_192988_a(this.field_193278_e);
+                this.toast = new TutorialToast(TutorialToast.Icons.TREE, TITLE, DESCRIPTION, true);
+                this.tutorial.getMinecraft().getToastGui().add(this.toast);
             }
         }
     }
 
-    public void func_193248_b()
+    public void onStop()
     {
-        if (this.field_193278_e != null)
+        if (this.toast != null)
         {
-            this.field_193278_e.func_193670_a();
-            this.field_193278_e = null;
+            this.toast.hide();
+            this.toast = null;
         }
     }
 
-    public void func_193250_a(WorldClient p_193250_1_, BlockPos p_193250_2_, IBlockState p_193250_3_, float p_193250_4_)
+    /**
+     * Called when a player hits block to destroy it.
+     *  
+     * @param worldIn The world the player is in
+     * @param pos The block position
+     * @param state The block state
+     * @param diggingStage The amount of digging, 1.0 means the block is totally digged, -1.0 means the player stopped
+     */
+    public void onHitBlock(WorldClient worldIn, BlockPos pos, IBlockState state, float diggingStage)
     {
-        boolean flag = field_193274_a.contains(p_193250_3_.getBlock());
+        boolean flag = LOG_BLOCKS.contains(state.getBlock());
 
-        if (flag && p_193250_4_ > 0.0F)
+        if (flag && diggingStage > 0.0F)
         {
-            if (this.field_193278_e != null)
+            if (this.toast != null)
             {
-                this.field_193278_e.func_193669_a(p_193250_4_);
+                this.toast.setProgress(diggingStage);
             }
 
-            if (p_193250_4_ >= 1.0F)
+            if (diggingStage >= 1.0F)
             {
-                this.field_193277_d.func_193292_a(TutorialSteps.OPEN_INVENTORY);
+                this.tutorial.setStep(TutorialSteps.OPEN_INVENTORY);
             }
         }
-        else if (this.field_193278_e != null)
+        else if (this.toast != null)
         {
-            this.field_193278_e.func_193669_a(0.0F);
+            this.toast.setProgress(0.0F);
         }
         else if (flag)
         {
-            ++this.field_193280_g;
+            ++this.resetCount;
         }
     }
 
-    public void func_193252_a(ItemStack p_193252_1_)
+    /**
+     * Called when the player pick up an ItemStack
+     *  
+     * @param stack The ItemStack
+     */
+    public void handleSetSlot(ItemStack stack)
     {
-        for (Block block : field_193274_a)
+        for (Block block : LOG_BLOCKS)
         {
-            if (p_193252_1_.getItem() == Item.getItemFromBlock(block))
+            if (stack.getItem() == Item.getItemFromBlock(block))
             {
-                this.field_193277_d.func_193292_a(TutorialSteps.CRAFT_PLANKS);
+                this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                 return;
             }
         }

@@ -127,7 +127,7 @@ public class Item
     public static Item getItemFromBlock(Block blockIn)
     {
         Item item = BLOCK_TO_ITEM.get(blockIn);
-        return item == null ? Items.field_190931_a : item;
+        return item == null ? Items.AIR : item;
     }
 
     @Nullable
@@ -197,7 +197,7 @@ public class Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         return EnumActionResult.PASS;
     }
@@ -207,9 +207,9 @@ public class Item
         return 1.0F;
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
-        return new ActionResult<ItemStack>(EnumActionResult.PASS, worldIn.getHeldItem(playerIn));
+        return new ActionResult<ItemStack>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
     }
 
     /**
@@ -449,7 +449,7 @@ public class Item
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
     }
 
@@ -458,6 +458,14 @@ public class Item
         return I18n.translateToLocal(this.getUnlocalizedNameInefficiently(stack) + ".name").trim();
     }
 
+    /**
+     * Returns true if this item has an enchantment glint. By default, this returns
+     * <code>stack.isItemEnchanted()</code>, but other items can override it (for instance, written books always return
+     * true).
+     *  
+     * Note that if you override this method, you generally want to also call the super version (on {@link Item}) to get
+     * the glint for enchanted items. Of course, that is unnecessary if the overwritten version always returns true.
+     */
     public boolean hasEffect(ItemStack stack)
     {
         return stack.isItemEnchanted();
@@ -474,7 +482,7 @@ public class Item
     /**
      * Checks isDamagable and if it cannot be stacked
      */
-    public boolean isItemTool(ItemStack stack)
+    public boolean isEnchantable(ItemStack stack)
     {
         return this.getItemStackLimit() == 1 && this.isDamageable();
     }
@@ -509,18 +517,18 @@ public class Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.func_194125_a(itemIn))
+        if (this.isInCreativeTab(tab))
         {
-            tab.add(new ItemStack(this));
+            items.add(new ItemStack(this));
         }
     }
 
-    protected boolean func_194125_a(CreativeTabs p_194125_1_)
+    protected boolean isInCreativeTab(CreativeTabs targetTab)
     {
         CreativeTabs creativetabs = this.getCreativeTab();
-        return creativetabs != null && (p_194125_1_ == CreativeTabs.SEARCH || p_194125_1_ == creativetabs);
+        return creativetabs != null && (targetTab == CreativeTabs.SEARCH || targetTab == creativetabs);
     }
 
     @Nullable
@@ -834,41 +842,41 @@ public class Item
         registerItemBlock(Blocks.RED_NETHER_BRICK);
         registerItemBlock(Blocks.BONE_BLOCK);
         registerItemBlock(Blocks.STRUCTURE_VOID);
-        registerItemBlock(Blocks.field_190976_dk);
-        registerItemBlock(Blocks.field_190977_dl, new ItemShulkerBox(Blocks.field_190977_dl));
-        registerItemBlock(Blocks.field_190978_dm, new ItemShulkerBox(Blocks.field_190978_dm));
-        registerItemBlock(Blocks.field_190979_dn, new ItemShulkerBox(Blocks.field_190979_dn));
-        registerItemBlock(Blocks.field_190980_do, new ItemShulkerBox(Blocks.field_190980_do));
-        registerItemBlock(Blocks.field_190981_dp, new ItemShulkerBox(Blocks.field_190981_dp));
-        registerItemBlock(Blocks.field_190982_dq, new ItemShulkerBox(Blocks.field_190982_dq));
-        registerItemBlock(Blocks.field_190983_dr, new ItemShulkerBox(Blocks.field_190983_dr));
-        registerItemBlock(Blocks.field_190984_ds, new ItemShulkerBox(Blocks.field_190984_ds));
-        registerItemBlock(Blocks.field_190985_dt, new ItemShulkerBox(Blocks.field_190985_dt));
-        registerItemBlock(Blocks.field_190986_du, new ItemShulkerBox(Blocks.field_190986_du));
-        registerItemBlock(Blocks.field_190987_dv, new ItemShulkerBox(Blocks.field_190987_dv));
-        registerItemBlock(Blocks.field_190988_dw, new ItemShulkerBox(Blocks.field_190988_dw));
-        registerItemBlock(Blocks.field_190989_dx, new ItemShulkerBox(Blocks.field_190989_dx));
-        registerItemBlock(Blocks.field_190990_dy, new ItemShulkerBox(Blocks.field_190990_dy));
-        registerItemBlock(Blocks.field_190991_dz, new ItemShulkerBox(Blocks.field_190991_dz));
-        registerItemBlock(Blocks.field_190975_dA, new ItemShulkerBox(Blocks.field_190975_dA));
-        registerItemBlock(Blocks.field_192427_dB);
-        registerItemBlock(Blocks.field_192428_dC);
-        registerItemBlock(Blocks.field_192429_dD);
-        registerItemBlock(Blocks.field_192430_dE);
-        registerItemBlock(Blocks.field_192431_dF);
-        registerItemBlock(Blocks.field_192432_dG);
-        registerItemBlock(Blocks.field_192433_dH);
-        registerItemBlock(Blocks.field_192434_dI);
-        registerItemBlock(Blocks.field_192435_dJ);
-        registerItemBlock(Blocks.field_192436_dK);
-        registerItemBlock(Blocks.field_192437_dL);
-        registerItemBlock(Blocks.field_192438_dM);
-        registerItemBlock(Blocks.field_192439_dN);
-        registerItemBlock(Blocks.field_192440_dO);
-        registerItemBlock(Blocks.field_192441_dP);
-        registerItemBlock(Blocks.field_192442_dQ);
-        registerItemBlock(Blocks.field_192443_dR, (new ItemCloth(Blocks.field_192443_dR)).setUnlocalizedName("concrete"));
-        registerItemBlock(Blocks.field_192444_dS, (new ItemCloth(Blocks.field_192444_dS)).setUnlocalizedName("concrete_powder"));
+        registerItemBlock(Blocks.OBSERVER);
+        registerItemBlock(Blocks.WHITE_SHULKER_BOX, new ItemShulkerBox(Blocks.WHITE_SHULKER_BOX));
+        registerItemBlock(Blocks.ORANGE_SHULKER_BOX, new ItemShulkerBox(Blocks.ORANGE_SHULKER_BOX));
+        registerItemBlock(Blocks.MAGENTA_SHULKER_BOX, new ItemShulkerBox(Blocks.MAGENTA_SHULKER_BOX));
+        registerItemBlock(Blocks.LIGHT_BLUE_SHULKER_BOX, new ItemShulkerBox(Blocks.LIGHT_BLUE_SHULKER_BOX));
+        registerItemBlock(Blocks.YELLOW_SHULKER_BOX, new ItemShulkerBox(Blocks.YELLOW_SHULKER_BOX));
+        registerItemBlock(Blocks.LIME_SHULKER_BOX, new ItemShulkerBox(Blocks.LIME_SHULKER_BOX));
+        registerItemBlock(Blocks.PINK_SHULKER_BOX, new ItemShulkerBox(Blocks.PINK_SHULKER_BOX));
+        registerItemBlock(Blocks.GRAY_SHULKER_BOX, new ItemShulkerBox(Blocks.GRAY_SHULKER_BOX));
+        registerItemBlock(Blocks.SILVER_SHULKER_BOX, new ItemShulkerBox(Blocks.SILVER_SHULKER_BOX));
+        registerItemBlock(Blocks.CYAN_SHULKER_BOX, new ItemShulkerBox(Blocks.CYAN_SHULKER_BOX));
+        registerItemBlock(Blocks.PURPLE_SHULKER_BOX, new ItemShulkerBox(Blocks.PURPLE_SHULKER_BOX));
+        registerItemBlock(Blocks.BLUE_SHULKER_BOX, new ItemShulkerBox(Blocks.BLUE_SHULKER_BOX));
+        registerItemBlock(Blocks.BROWN_SHULKER_BOX, new ItemShulkerBox(Blocks.BROWN_SHULKER_BOX));
+        registerItemBlock(Blocks.GREEN_SHULKER_BOX, new ItemShulkerBox(Blocks.GREEN_SHULKER_BOX));
+        registerItemBlock(Blocks.RED_SHULKER_BOX, new ItemShulkerBox(Blocks.RED_SHULKER_BOX));
+        registerItemBlock(Blocks.BLACK_SHULKER_BOX, new ItemShulkerBox(Blocks.BLACK_SHULKER_BOX));
+        registerItemBlock(Blocks.WHITE_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.ORANGE_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.MAGENTA_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.YELLOW_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.LIME_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.PINK_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.GRAY_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.SILVER_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.CYAN_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.PURPLE_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.BLUE_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.BROWN_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.GREEN_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.RED_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.BLACK_GLAZED_TERRACOTTA);
+        registerItemBlock(Blocks.CONCRETE, (new ItemCloth(Blocks.CONCRETE)).setUnlocalizedName("concrete"));
+        registerItemBlock(Blocks.CONCRETE_POWDER, (new ItemCloth(Blocks.CONCRETE_POWDER)).setUnlocalizedName("concrete_powder"));
         registerItemBlock(Blocks.STRUCTURE_BLOCK);
         registerItem(256, "iron_shovel", (new ItemSpade(Item.ToolMaterial.IRON)).setUnlocalizedName("shovelIron"));
         registerItem(257, "iron_pickaxe", (new ItemPickaxe(Item.ToolMaterial.IRON)).setUnlocalizedName("pickaxeIron"));
@@ -1110,7 +1118,7 @@ public class Item
         REGISTRY.register(id, textualID, itemIn);
     }
 
-    public ItemStack func_190903_i()
+    public ItemStack getDefaultInstance()
     {
         return new ItemStack(this);
     }

@@ -15,14 +15,14 @@ public class EntityAITasks
     private final Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
 
     /** Instance of Profiler. */
-    private final Profiler theProfiler;
+    private final Profiler profiler;
     private int tickCount;
     private int tickRate = 3;
     private int disabledControlFlags;
 
     public EntityAITasks(Profiler profilerIn)
     {
-        this.theProfiler = profilerIn;
+        this.profiler = profilerIn;
     }
 
     /**
@@ -62,7 +62,7 @@ public class EntityAITasks
 
     public void onUpdateTasks()
     {
-        this.theProfiler.startSection("goalSetup");
+        this.profiler.startSection("goalSetup");
 
         if (this.tickCount++ % this.tickRate == 0)
         {
@@ -102,18 +102,18 @@ public class EntityAITasks
             }
         }
 
-        this.theProfiler.endSection();
+        this.profiler.endSection();
 
         if (!this.executingTaskEntries.isEmpty())
         {
-            this.theProfiler.startSection("goalTick");
+            this.profiler.startSection("goalTick");
 
             for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry2 : this.executingTaskEntries)
             {
                 entityaitasks$entityaitaskentry2.action.updateTask();
             }
 
-            this.theProfiler.endSection();
+            this.profiler.endSection();
         }
     }
 
@@ -122,7 +122,7 @@ public class EntityAITasks
      */
     private boolean canContinue(EntityAITasks.EntityAITaskEntry taskEntry)
     {
-        return taskEntry.action.continueExecuting();
+        return taskEntry.action.shouldContinueExecuting();
     }
 
     /**

@@ -81,17 +81,17 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
 
         if (this.connectionTimer++ == 600)
         {
-            this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.slow_login", new Object[0]));
+            this.disconnect(new TextComponentTranslation("multiplayer.disconnect.slow_login", new Object[0]));
         }
     }
 
-    public void func_194026_b(ITextComponent p_194026_1_)
+    public void disconnect(ITextComponent reason)
     {
         try
         {
-            LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), p_194026_1_.getUnformattedText());
-            this.networkManager.sendPacket(new SPacketDisconnect(p_194026_1_));
-            this.networkManager.closeChannel(p_194026_1_);
+            LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), reason.getUnformattedText());
+            this.networkManager.sendPacket(new SPacketDisconnect(reason));
+            this.networkManager.closeChannel(reason);
         }
         catch (Exception exception)
         {
@@ -110,7 +110,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
 
         if (s != null)
         {
-            this.func_194026_b(new TextComponentTranslation(s, new Object[0]));
+            this.disconnect(new TextComponentTranslation(s, new Object[0]));
         }
         else
         {
@@ -194,7 +194,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
                     try
                     {
                         String s = (new BigInteger(CryptManager.getServerIdHash("", NetHandlerLoginServer.this.server.getKeyPair().getPublic(), NetHandlerLoginServer.this.secretKey))).toString(16);
-                        NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.server.getMinecraftSessionService().hasJoinedServer(new GameProfile((UUID)null, gameprofile.getName()), s, this.func_191235_a());
+                        NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.server.getMinecraftSessionService().hasJoinedServer(new GameProfile((UUID)null, gameprofile.getName()), s, this.getAddress());
 
                         if (NetHandlerLoginServer.this.loginGameProfile != null)
                         {
@@ -209,7 +209,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
                         }
                         else
                         {
-                            NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.unverified_username", new Object[0]));
+                            NetHandlerLoginServer.this.disconnect(new TextComponentTranslation("multiplayer.disconnect.unverified_username", new Object[0]));
                             NetHandlerLoginServer.LOGGER.error("Username '{}' tried to join with an invalid session", (Object)gameprofile.getName());
                         }
                     }
@@ -223,16 +223,16 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
                         }
                         else
                         {
-                            NetHandlerLoginServer.this.func_194026_b(new TextComponentTranslation("multiplayer.disconnect.authservers_down", new Object[0]));
+                            NetHandlerLoginServer.this.disconnect(new TextComponentTranslation("multiplayer.disconnect.authservers_down", new Object[0]));
                             NetHandlerLoginServer.LOGGER.error("Couldn't verify username because servers are unavailable");
                         }
                     }
                 }
                 @Nullable
-                private InetAddress func_191235_a()
+                private InetAddress getAddress()
                 {
                     SocketAddress socketaddress = NetHandlerLoginServer.this.networkManager.getRemoteAddress();
-                    return NetHandlerLoginServer.this.server.func_190518_ac() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress)socketaddress).getAddress() : null;
+                    return NetHandlerLoginServer.this.server.getPreventProxyConnections() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress)socketaddress).getAddress() : null;
                 }
             }).start();
         }

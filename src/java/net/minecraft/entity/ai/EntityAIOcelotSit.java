@@ -38,7 +38,7 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
@@ -47,7 +47,7 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {

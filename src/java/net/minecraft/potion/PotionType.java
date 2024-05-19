@@ -10,8 +10,8 @@ import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
 
 public class PotionType
 {
-    private static final ResourceLocation WATER = new ResourceLocation("empty");
-    public static final RegistryNamespacedDefaultedByKey<ResourceLocation, PotionType> REGISTRY = new RegistryNamespacedDefaultedByKey<ResourceLocation, PotionType>(WATER);
+    private static final ResourceLocation EMPTY = new ResourceLocation("empty");
+    public static final RegistryNamespacedDefaultedByKey<ResourceLocation, PotionType> REGISTRY = new RegistryNamespacedDefaultedByKey<ResourceLocation, PotionType>(EMPTY);
     private static int nextPotionTypeId;
 
     /**

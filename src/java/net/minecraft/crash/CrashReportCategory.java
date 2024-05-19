@@ -86,7 +86,12 @@ public class CrashReportCategory
         return stringbuilder.toString();
     }
 
-    public void setDetail(String nameIn, ICrashReportDetail<String> detail)
+    /**
+     * Adds an additional section to this crash report category, resolved by calling the given callable.
+     *  
+     * If the given callable throws an exception, a detail containing that exception will be created instead.
+     */
+    public void addDetail(String nameIn, ICrashReportDetail<String> detail)
     {
         try
         {
@@ -213,7 +218,7 @@ public class CrashReportCategory
     public static void addBlockInfo(CrashReportCategory category, final BlockPos pos, final Block blockIn, final int blockData)
     {
         final int i = Block.getIdFromBlock(blockIn);
-        category.setDetail("Block type", new ICrashReportDetail<String>()
+        category.addDetail("Block type", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -227,7 +232,7 @@ public class CrashReportCategory
                 }
             }
         });
-        category.setDetail("Block data value", new ICrashReportDetail<String>()
+        category.addDetail("Block data value", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -242,7 +247,7 @@ public class CrashReportCategory
                 }
             }
         });
-        category.setDetail("Block location", new ICrashReportDetail<String>()
+        category.addDetail("Block location", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
@@ -253,14 +258,14 @@ public class CrashReportCategory
 
     public static void addBlockInfo(CrashReportCategory category, final BlockPos pos, final IBlockState state)
     {
-        category.setDetail("Block", new ICrashReportDetail<String>()
+        category.addDetail("Block", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {
                 return state.toString();
             }
         });
-        category.setDetail("Block location", new ICrashReportDetail<String>()
+        category.addDetail("Block location", new ICrashReportDetail<String>()
         {
             public String call() throws Exception
             {

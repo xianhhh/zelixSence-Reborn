@@ -18,18 +18,18 @@ import org.lwjgl.input.Mouse;
 
 public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancementManager.IListener
 {
-    private static final ResourceLocation field_191943_f = new ResourceLocation("textures/gui/advancements/window.png");
-    private static final ResourceLocation field_191945_g = new ResourceLocation("textures/gui/advancements/tabs.png");
-    private final ClientAdvancementManager field_191946_h;
-    private final Map<Advancement, GuiAdvancementTab> field_191947_i = Maps.<Advancement, GuiAdvancementTab>newLinkedHashMap();
-    private GuiAdvancementTab field_191940_s;
-    private int field_191941_t;
-    private int field_191942_u;
-    private boolean field_191944_v;
+    private static final ResourceLocation WINDOW = new ResourceLocation("textures/gui/advancements/window.png");
+    private static final ResourceLocation TABS = new ResourceLocation("textures/gui/advancements/tabs.png");
+    private final ClientAdvancementManager clientAdvancementManager;
+    private final Map<Advancement, GuiAdvancementTab> tabs = Maps.<Advancement, GuiAdvancementTab>newLinkedHashMap();
+    private GuiAdvancementTab selectedTab;
+    private int scrollMouseX;
+    private int scrollMouseY;
+    private boolean isScrolling;
 
     public GuiScreenAdvancements(ClientAdvancementManager p_i47383_1_)
     {
-        this.field_191946_h = p_i47383_1_;
+        this.clientAdvancementManager = p_i47383_1_;
     }
 
     /**
@@ -38,17 +38,17 @@ public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancemen
      */
     public void initGui()
     {
-        this.field_191947_i.clear();
-        this.field_191940_s = null;
-        this.field_191946_h.func_192798_a(this);
+        this.tabs.clear();
+        this.selectedTab = null;
+        this.clientAdvancementManager.setListener(this);
 
-        if (this.field_191940_s == null && !this.field_191947_i.isEmpty())
+        if (this.selectedTab == null && !this.tabs.isEmpty())
         {
-            this.field_191946_h.func_194230_a(((GuiAdvancementTab)this.field_191947_i.values().iterator().next()).func_193935_c(), true);
+            this.clientAdvancementManager.setSelectedTab(((GuiAdvancementTab)this.tabs.values().iterator().next()).getAdvancement(), true);
         }
         else
         {
-            this.field_191946_h.func_194230_a(this.field_191940_s == null ? null : this.field_191940_s.func_193935_c(), true);
+            this.clientAdvancementManager.setSelectedTab(this.selectedTab == null ? null : this.selectedTab.getAdvancement(), true);
         }
     }
 
@@ -57,12 +57,12 @@ public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancemen
      */
     public void onGuiClosed()
     {
-        this.field_191946_h.func_192798_a((ClientAdvancementManager.IListener)null);
+        this.clientAdvancementManager.setListener((ClientAdvancementManager.IListener)null);
         NetHandlerPlayClient nethandlerplayclient = this.mc.getConnection();
 
         if (nethandlerplayclient != null)
         {
-            nethandlerplayclient.sendPacket(CPacketSeenAdvancements.func_194164_a());
+            nethandlerplayclient.sendPacket(CPacketSeenAdvancements.closedScreen());
         }
     }
 
@@ -76,11 +76,11 @@ public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancemen
             int i = (this.width - 252) / 2;
             int j = (this.height - 140) / 2;
 
-            for (GuiAdvancementTab guiadvancementtab : this.field_191947_i.values())
+            for (GuiAdvancementTab guiadvancementtab : this.tabs.values())
             {
-                if (guiadvancementtab.func_191793_c(i, j, mouseX, mouseY))
+                if (guiadvancementtab.isMouseOver(i, j, mouseX, mouseY))
                 {
-                    this.field_191946_h.func_194230_a(guiadvancementtab.func_193935_c(), true);
+                    this.clientAdvancementManager.setSelectedTab(guiadvancementtab.getAdvancement(), true);
                     break;
                 }
             }
@@ -95,7 +95,7 @@ public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancemen
      */
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
-        if (keyCode == this.mc.gameSettings.field_194146_ao.getKeyCode())
+        if (keyCode == this.mc.gameSettings.keyBindAdvancements.getKeyCode())
         {
             this.mc.displayGuiScreen((GuiScreen)null);
             this.mc.setIngameFocus();
@@ -116,175 +116,175 @@ public class GuiScreenAdvancements extends GuiScreen implements ClientAdvancemen
 
         if (Mouse.isButtonDown(0))
         {
-            if (!this.field_191944_v)
+            if (!this.isScrolling)
             {
-                this.field_191944_v = true;
+                this.isScrolling = true;
             }
-            else if (this.field_191940_s != null)
+            else if (this.selectedTab != null)
             {
-                this.field_191940_s.func_191797_b(mouseX - this.field_191941_t, mouseY - this.field_191942_u);
+                this.selectedTab.scroll(mouseX - this.scrollMouseX, mouseY - this.scrollMouseY);
             }
 
-            this.field_191941_t = mouseX;
-            this.field_191942_u = mouseY;
+            this.scrollMouseX = mouseX;
+            this.scrollMouseY = mouseY;
         }
         else
         {
-            this.field_191944_v = false;
+            this.isScrolling = false;
         }
 
         this.drawDefaultBackground();
-        this.func_191936_c(mouseX, mouseY, i, j);
-        this.func_191934_b(i, j);
-        this.func_191937_d(mouseX, mouseY, i, j);
+        this.renderInside(mouseX, mouseY, i, j);
+        this.renderWindow(i, j);
+        this.renderToolTips(mouseX, mouseY, i, j);
     }
 
-    private void func_191936_c(int p_191936_1_, int p_191936_2_, int p_191936_3_, int p_191936_4_)
+    private void renderInside(int p_191936_1_, int p_191936_2_, int p_191936_3_, int p_191936_4_)
     {
-        GuiAdvancementTab guiadvancementtab = this.field_191940_s;
+        GuiAdvancementTab guiadvancementtab = this.selectedTab;
 
         if (guiadvancementtab == null)
         {
             drawRect(p_191936_3_ + 9, p_191936_4_ + 18, p_191936_3_ + 9 + 234, p_191936_4_ + 18 + 113, -16777216);
             String s = I18n.format("advancements.empty");
-            int i = this.fontRendererObj.getStringWidth(s);
-            this.fontRendererObj.drawString(s, p_191936_3_ + 9 + 117 - i / 2, p_191936_4_ + 18 + 56 - this.fontRendererObj.FONT_HEIGHT / 2, -1);
-            this.fontRendererObj.drawString(":(", p_191936_3_ + 9 + 117 - this.fontRendererObj.getStringWidth(":(") / 2, p_191936_4_ + 18 + 113 - this.fontRendererObj.FONT_HEIGHT, -1);
+            int i = this.fontRenderer.getStringWidth(s);
+            this.fontRenderer.drawString(s, p_191936_3_ + 9 + 117 - i / 2, p_191936_4_ + 18 + 56 - this.fontRenderer.FONT_HEIGHT / 2, -1);
+            this.fontRenderer.drawString(":(", p_191936_3_ + 9 + 117 - this.fontRenderer.getStringWidth(":(") / 2, p_191936_4_ + 18 + 113 - this.fontRenderer.FONT_HEIGHT, -1);
         }
         else
         {
             GlStateManager.pushMatrix();
             GlStateManager.translate((float)(p_191936_3_ + 9), (float)(p_191936_4_ + 18), -400.0F);
             GlStateManager.enableDepth();
-            guiadvancementtab.func_191799_a();
+            guiadvancementtab.drawContents();
             GlStateManager.popMatrix();
             GlStateManager.depthFunc(515);
             GlStateManager.disableDepth();
         }
     }
 
-    public void func_191934_b(int p_191934_1_, int p_191934_2_)
+    public void renderWindow(int p_191934_1_, int p_191934_2_)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
         RenderHelper.disableStandardItemLighting();
-        this.mc.getTextureManager().bindTexture(field_191943_f);
+        this.mc.getTextureManager().bindTexture(WINDOW);
         this.drawTexturedModalRect(p_191934_1_, p_191934_2_, 0, 0, 252, 140);
 
-        if (this.field_191947_i.size() > 1)
+        if (this.tabs.size() > 1)
         {
-            this.mc.getTextureManager().bindTexture(field_191945_g);
+            this.mc.getTextureManager().bindTexture(TABS);
 
-            for (GuiAdvancementTab guiadvancementtab : this.field_191947_i.values())
+            for (GuiAdvancementTab guiadvancementtab : this.tabs.values())
             {
-                guiadvancementtab.func_191798_a(p_191934_1_, p_191934_2_, guiadvancementtab == this.field_191940_s);
+                guiadvancementtab.drawTab(p_191934_1_, p_191934_2_, guiadvancementtab == this.selectedTab);
             }
 
             GlStateManager.enableRescaleNormal();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             RenderHelper.enableGUIStandardItemLighting();
 
-            for (GuiAdvancementTab guiadvancementtab1 : this.field_191947_i.values())
+            for (GuiAdvancementTab guiadvancementtab1 : this.tabs.values())
             {
-                guiadvancementtab1.func_191796_a(p_191934_1_, p_191934_2_, this.itemRender);
+                guiadvancementtab1.drawIcon(p_191934_1_, p_191934_2_, this.itemRender);
             }
 
             GlStateManager.disableBlend();
         }
 
-        this.fontRendererObj.drawString(I18n.format("gui.advancements"), p_191934_1_ + 8, p_191934_2_ + 6, 4210752);
+        this.fontRenderer.drawString(I18n.format("gui.advancements"), p_191934_1_ + 8, p_191934_2_ + 6, 4210752);
     }
 
-    private void func_191937_d(int p_191937_1_, int p_191937_2_, int p_191937_3_, int p_191937_4_)
+    private void renderToolTips(int p_191937_1_, int p_191937_2_, int p_191937_3_, int p_191937_4_)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        if (this.field_191940_s != null)
+        if (this.selectedTab != null)
         {
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
             GlStateManager.translate((float)(p_191937_3_ + 9), (float)(p_191937_4_ + 18), 400.0F);
-            this.field_191940_s.func_192991_a(p_191937_1_ - p_191937_3_ - 9, p_191937_2_ - p_191937_4_ - 18, p_191937_3_, p_191937_4_);
+            this.selectedTab.drawToolTips(p_191937_1_ - p_191937_3_ - 9, p_191937_2_ - p_191937_4_ - 18, p_191937_3_, p_191937_4_);
             GlStateManager.disableDepth();
             GlStateManager.popMatrix();
         }
 
-        if (this.field_191947_i.size() > 1)
+        if (this.tabs.size() > 1)
         {
-            for (GuiAdvancementTab guiadvancementtab : this.field_191947_i.values())
+            for (GuiAdvancementTab guiadvancementtab : this.tabs.values())
             {
-                if (guiadvancementtab.func_191793_c(p_191937_3_, p_191937_4_, p_191937_1_, p_191937_2_))
+                if (guiadvancementtab.isMouseOver(p_191937_3_, p_191937_4_, p_191937_1_, p_191937_2_))
                 {
-                    this.drawCreativeTabHoveringText(guiadvancementtab.func_191795_d(), p_191937_1_, p_191937_2_);
+                    this.drawHoveringText(guiadvancementtab.getTitle(), p_191937_1_, p_191937_2_);
                 }
             }
         }
     }
 
-    public void func_191931_a(Advancement p_191931_1_)
+    public void rootAdvancementAdded(Advancement advancementIn)
     {
-        GuiAdvancementTab guiadvancementtab = GuiAdvancementTab.func_193936_a(this.mc, this, this.field_191947_i.size(), p_191931_1_);
+        GuiAdvancementTab guiadvancementtab = GuiAdvancementTab.create(this.mc, this, this.tabs.size(), advancementIn);
 
         if (guiadvancementtab != null)
         {
-            this.field_191947_i.put(p_191931_1_, guiadvancementtab);
+            this.tabs.put(advancementIn, guiadvancementtab);
         }
     }
 
-    public void func_191928_b(Advancement p_191928_1_)
+    public void rootAdvancementRemoved(Advancement advancementIn)
     {
     }
 
-    public void func_191932_c(Advancement p_191932_1_)
+    public void nonRootAdvancementAdded(Advancement advancementIn)
     {
-        GuiAdvancementTab guiadvancementtab = this.func_191935_f(p_191932_1_);
+        GuiAdvancementTab guiadvancementtab = this.getTab(advancementIn);
 
         if (guiadvancementtab != null)
         {
-            guiadvancementtab.func_191800_a(p_191932_1_);
+            guiadvancementtab.addAdvancement(advancementIn);
         }
     }
 
-    public void func_191929_d(Advancement p_191929_1_)
+    public void nonRootAdvancementRemoved(Advancement advancementIn)
     {
     }
 
-    public void func_191933_a(Advancement p_191933_1_, AdvancementProgress p_191933_2_)
+    public void onUpdateAdvancementProgress(Advancement p_191933_1_, AdvancementProgress p_191933_2_)
     {
-        GuiAdvancement guiadvancement = this.func_191938_e(p_191933_1_);
+        GuiAdvancement guiadvancement = this.getAdvancementGui(p_191933_1_);
 
         if (guiadvancement != null)
         {
-            guiadvancement.func_191824_a(p_191933_2_);
+            guiadvancement.getAdvancementProgress(p_191933_2_);
         }
     }
 
-    public void func_193982_e(@Nullable Advancement p_193982_1_)
+    public void setSelectedTab(@Nullable Advancement p_193982_1_)
     {
-        this.field_191940_s = this.field_191947_i.get(p_193982_1_);
+        this.selectedTab = this.tabs.get(p_193982_1_);
     }
 
-    public void func_191930_a()
+    public void advancementsCleared()
     {
-        this.field_191947_i.clear();
-        this.field_191940_s = null;
-    }
-
-    @Nullable
-    public GuiAdvancement func_191938_e(Advancement p_191938_1_)
-    {
-        GuiAdvancementTab guiadvancementtab = this.func_191935_f(p_191938_1_);
-        return guiadvancementtab == null ? null : guiadvancementtab.func_191794_b(p_191938_1_);
+        this.tabs.clear();
+        this.selectedTab = null;
     }
 
     @Nullable
-    private GuiAdvancementTab func_191935_f(Advancement p_191935_1_)
+    public GuiAdvancement getAdvancementGui(Advancement p_191938_1_)
     {
-        while (p_191935_1_.func_192070_b() != null)
+        GuiAdvancementTab guiadvancementtab = this.getTab(p_191938_1_);
+        return guiadvancementtab == null ? null : guiadvancementtab.getAdvancementGui(p_191938_1_);
+    }
+
+    @Nullable
+    private GuiAdvancementTab getTab(Advancement p_191935_1_)
+    {
+        while (p_191935_1_.getParent() != null)
         {
-            p_191935_1_ = p_191935_1_.func_192070_b();
+            p_191935_1_ = p_191935_1_.getParent();
         }
 
-        return this.field_191947_i.get(p_191935_1_);
+        return this.tabs.get(p_191935_1_);
     }
 }

@@ -69,7 +69,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
     {
         public boolean apply(@Nullable Entity p_apply_1_)
         {
-            return p_apply_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_apply_1_).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD && ((EntityLivingBase)p_apply_1_).func_190631_cK();
+            return p_apply_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_apply_1_).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD && ((EntityLivingBase)p_apply_1_).attackable();
         }
     };
 
@@ -146,7 +146,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
         return SoundEvents.ENTITY_WITHER_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_WITHER_HURT;
     }
@@ -333,7 +333,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
                     }
                     else
                     {
-                        List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
+                        List<EntityLivingBase> list = this.world.<EntityLivingBase>getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
 
                         for (int j2 = 0; j2 < 10 && !list.isEmpty(); ++j2)
                         {
@@ -537,13 +537,11 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
         entitywitherskull.posY = d1;
         entitywitherskull.posX = d0;
         entitywitherskull.posZ = d2;
-        this.world.spawnEntityInWorld(entitywitherskull);
+        this.world.spawnEntity(entitywitherskull);
     }
 
     /**
      * Attack the specified entity using a ranged attack.
-     *  
-     * @param distanceFactor How far the target is, normalized and clamped between 0.1 and 1.0
      */
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor)
     {
@@ -559,9 +557,9 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
         {
             return false;
         }
-        else if (source != DamageSource.drown && !(source.getEntity() instanceof EntityWither))
+        else if (source != DamageSource.DROWN && !(source.getTrueSource() instanceof EntityWither))
         {
-            if (this.getInvulTime() > 0 && source != DamageSource.outOfWorld)
+            if (this.getInvulTime() > 0 && source != DamageSource.OUT_OF_WORLD)
             {
                 return false;
             }
@@ -569,7 +567,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
             {
                 if (this.isArmored())
                 {
-                    Entity entity = source.getSourceOfDamage();
+                    Entity entity = source.getImmediateSource();
 
                     if (entity instanceof EntityArrow)
                     {
@@ -577,7 +575,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
                     }
                 }
 
-                Entity entity1 = source.getEntity();
+                Entity entity1 = source.getTrueSource();
 
                 if (entity1 != null && !(entity1 instanceof EntityPlayer) && entity1 instanceof EntityLivingBase && ((EntityLivingBase)entity1).getCreatureAttribute() == this.getCreatureAttribute())
                 {
@@ -623,7 +621,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob
      */
     protected void despawnEntity()
     {
-        this.entityAge = 0;
+        this.idleTime = 0;
     }
 
     public int getBrightnessForRender()

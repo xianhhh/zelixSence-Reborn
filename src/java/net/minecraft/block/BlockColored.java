@@ -36,20 +36,20 @@ public class BlockColored extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
         for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
         {
-            tab.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
+            items.add(new ItemStack(this, 1, enumdyecolor.getMetadata()));
         }
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        return MapColor.func_193558_a((EnumDyeColor)state.getValue(COLOR));
+        return MapColor.getBlockColor((EnumDyeColor)state.getValue(COLOR));
     }
 
     /**

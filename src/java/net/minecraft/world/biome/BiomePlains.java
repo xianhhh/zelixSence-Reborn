@@ -19,10 +19,10 @@ public class BiomePlains extends Biome
         this.sunflowers = p_i46699_1_;
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityHorse.class, 5, 2, 6));
         this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityDonkey.class, 1, 1, 3));
-        this.theBiomeDecorator.treesPerChunk = 0;
-        this.theBiomeDecorator.extraTreeChance = 0.05F;
-        this.theBiomeDecorator.flowersPerChunk = 4;
-        this.theBiomeDecorator.grassPerChunk = 10;
+        this.decorator.treesPerChunk = 0;
+        this.decorator.extraTreeChance = 0.05F;
+        this.decorator.flowersPerChunk = 4;
+        this.decorator.grassPerChunk = 10;
     }
 
     public BlockFlower.EnumFlowerType pickRandomFlower(Random rand, BlockPos pos)
@@ -74,13 +74,13 @@ public class BiomePlains extends Biome
 
         if (d0 < -0.8D)
         {
-            this.theBiomeDecorator.flowersPerChunk = 15;
-            this.theBiomeDecorator.grassPerChunk = 5;
+            this.decorator.flowersPerChunk = 15;
+            this.decorator.grassPerChunk = 5;
         }
         else
         {
-            this.theBiomeDecorator.flowersPerChunk = 4;
-            this.theBiomeDecorator.grassPerChunk = 10;
+            this.decorator.flowersPerChunk = 4;
+            this.decorator.grassPerChunk = 10;
             DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
 
             for (int i = 0; i < 7; ++i)
@@ -108,7 +108,7 @@ public class BiomePlains extends Biome
         super.decorate(worldIn, rand, pos);
     }
 
-    public WorldGenAbstractTree genBigTreeChance(Random rand)
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand)
     {
         return (WorldGenAbstractTree)(rand.nextInt(3) == 0 ? BIG_TREE_FEATURE : TREE_FEATURE);
     }

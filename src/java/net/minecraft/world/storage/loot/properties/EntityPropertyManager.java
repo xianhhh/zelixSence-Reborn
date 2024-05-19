@@ -9,10 +9,10 @@ public class EntityPropertyManager
     private static final Map < ResourceLocation, EntityProperty.Serializer<? >> NAME_TO_SERIALIZER_MAP = Maps. < ResourceLocation, EntityProperty.Serializer<? >> newHashMap();
     private static final Map < Class <? extends EntityProperty > , EntityProperty.Serializer<? >> CLASS_TO_SERIALIZER_MAP = Maps. < Class <? extends EntityProperty > , EntityProperty.Serializer<? >> newHashMap();
 
-    public static <T extends EntityProperty> void registerProperty(EntityProperty.Serializer <? extends T > p_186644_0_)
+    public static <T extends EntityProperty> void registerProperty(EntityProperty.Serializer <? extends T > serializer)
     {
-        ResourceLocation resourcelocation = p_186644_0_.getName();
-        Class<T> oclass = (Class<T>)p_186644_0_.getPropertyClass();
+        ResourceLocation resourcelocation = serializer.getName();
+        Class<T> oclass = (Class<T>)serializer.getPropertyClass();
 
         if (NAME_TO_SERIALIZER_MAP.containsKey(resourcelocation))
         {
@@ -24,18 +24,18 @@ public class EntityPropertyManager
         }
         else
         {
-            NAME_TO_SERIALIZER_MAP.put(resourcelocation, p_186644_0_);
-            CLASS_TO_SERIALIZER_MAP.put(oclass, p_186644_0_);
+            NAME_TO_SERIALIZER_MAP.put(resourcelocation, serializer);
+            CLASS_TO_SERIALIZER_MAP.put(oclass, serializer);
         }
     }
 
-    public static EntityProperty.Serializer<?> getSerializerForName(ResourceLocation p_186646_0_)
+    public static EntityProperty.Serializer<?> getSerializerForName(ResourceLocation name)
     {
-        EntityProperty.Serializer<?> serializer = (EntityProperty.Serializer)NAME_TO_SERIALIZER_MAP.get(p_186646_0_);
+        EntityProperty.Serializer<?> serializer = (EntityProperty.Serializer)NAME_TO_SERIALIZER_MAP.get(name);
 
         if (serializer == null)
         {
-            throw new IllegalArgumentException("Unknown loot entity property '" + p_186646_0_ + "'");
+            throw new IllegalArgumentException("Unknown loot entity property '" + name + "'");
         }
         else
         {

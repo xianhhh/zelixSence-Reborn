@@ -50,7 +50,7 @@ import net.minecraft.world.World;
 
 public final class ItemStack
 {
-    public static final ItemStack field_190927_a = new ItemStack((Item)null);
+    public static final ItemStack EMPTY = new ItemStack((Item)null);
     public static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.##");
 
     /** Size of the stack. */
@@ -62,11 +62,9 @@ public final class ItemStack
     private int animationsToGo;
     private final Item item;
 
-    /**
-     * A NBTTagMap containing data about an ItemStack. Can only be used for non stackable items
-     */
+    /** An NBTTagCompound containing data about an ItemStack. */
     private NBTTagCompound stackTagCompound;
-    private boolean field_190928_g;
+    private boolean isEmpty;
     private int itemDamage;
 
     /** Item frame this stack is on, or null if not on an item frame. */
@@ -112,36 +110,36 @@ public final class ItemStack
             this.itemDamage = 0;
         }
 
-        this.func_190923_F();
+        this.updateEmptyState();
     }
 
-    private void func_190923_F()
+    private void updateEmptyState()
     {
-        this.field_190928_g = this.func_190926_b();
+        this.isEmpty = this.isEmpty();
     }
 
-    public ItemStack(NBTTagCompound p_i47263_1_)
+    public ItemStack(NBTTagCompound compound)
     {
-        this.item = Item.getByNameOrId(p_i47263_1_.getString("id"));
-        this.stackSize = p_i47263_1_.getByte("Count");
-        this.itemDamage = Math.max(0, p_i47263_1_.getShort("Damage"));
+        this.item = Item.getByNameOrId(compound.getString("id"));
+        this.stackSize = compound.getByte("Count");
+        this.itemDamage = Math.max(0, compound.getShort("Damage"));
 
-        if (p_i47263_1_.hasKey("tag", 10))
+        if (compound.hasKey("tag", 10))
         {
-            this.stackTagCompound = p_i47263_1_.getCompoundTag("tag");
+            this.stackTagCompound = compound.getCompoundTag("tag");
 
             if (this.item != null)
             {
-                this.item.updateItemStackNBT(p_i47263_1_);
+                this.item.updateItemStackNBT(compound);
             }
         }
 
-        this.func_190923_F();
+        this.updateEmptyState();
     }
 
-    public boolean func_190926_b()
+    public boolean isEmpty()
     {
-        if (this == field_190927_a)
+        if (this == EMPTY)
         {
             return true;
         }
@@ -175,8 +173,8 @@ public final class ItemStack
     {
         int i = Math.min(amount, this.stackSize);
         ItemStack itemstack = this.copy();
-        itemstack.func_190920_e(i);
-        this.func_190918_g(i);
+        itemstack.setCount(i);
+        this.shrink(i);
         return itemstack;
     }
 
@@ -185,7 +183,7 @@ public final class ItemStack
      */
     public Item getItem()
     {
-        return this.field_190928_g ? Item.getItemFromBlock(Blocks.AIR) : this.item;
+        return this.isEmpty ? Item.getItemFromBlock(Blocks.AIR) : this.item;
     }
 
     /**
@@ -261,7 +259,7 @@ public final class ItemStack
      */
     public boolean isItemStackDamageable()
     {
-        if (this.field_190928_g)
+        if (this.isEmpty)
         {
             return false;
         }
@@ -322,7 +320,7 @@ public final class ItemStack
      * getMaxDamage(). Returns false otherwise or if the ItemStack can't be damaged or if all points of damage are
      * negated.
      */
-    public boolean attemptDamageItem(int amount, Random rand, @Nullable EntityPlayerMP p_96631_3_)
+    public boolean attemptDamageItem(int amount, Random rand, @Nullable EntityPlayerMP damager)
     {
         if (!this.isItemStackDamageable())
         {
@@ -351,9 +349,9 @@ public final class ItemStack
                 }
             }
 
-            if (p_96631_3_ != null && amount != 0)
+            if (damager != null && amount != 0)
             {
-                CriteriaTriggers.field_193132_s.func_193158_a(p_96631_3_, this, this.itemDamage + amount);
+                CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(damager, this, this.itemDamage + amount);
             }
 
             this.itemDamage += amount;
@@ -373,7 +371,7 @@ public final class ItemStack
                 if (this.attemptDamageItem(amount, entityIn.getRNG(), entityIn instanceof EntityPlayerMP ? (EntityPlayerMP)entityIn : null))
                 {
                     entityIn.renderBrokenItemStack(this);
-                    this.func_190918_g(1);
+                    this.shrink(1);
 
                     if (entityIn instanceof EntityPlayer)
                     {
@@ -433,7 +431,7 @@ public final class ItemStack
     public ItemStack copy()
     {
         ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage);
-        itemstack.func_190915_d(this.func_190921_D());
+        itemstack.setAnimationsToGo(this.getAnimationsToGo());
 
         if (this.stackTagCompound != null)
         {
@@ -445,11 +443,11 @@ public final class ItemStack
 
     public static boolean areItemStackTagsEqual(ItemStack stackA, ItemStack stackB)
     {
-        if (stackA.func_190926_b() && stackB.func_190926_b())
+        if (stackA.isEmpty() && stackB.isEmpty())
         {
             return true;
         }
-        else if (!stackA.func_190926_b() && !stackB.func_190926_b())
+        else if (!stackA.isEmpty() && !stackB.isEmpty())
         {
             if (stackA.stackTagCompound == null && stackB.stackTagCompound != null)
             {
@@ -471,13 +469,13 @@ public final class ItemStack
      */
     public static boolean areItemStacksEqual(ItemStack stackA, ItemStack stackB)
     {
-        if (stackA.func_190926_b() && stackB.func_190926_b())
+        if (stackA.isEmpty() && stackB.isEmpty())
         {
             return true;
         }
         else
         {
-            return !stackA.func_190926_b() && !stackB.func_190926_b() ? stackA.isItemStackEqual(stackB) : false;
+            return !stackA.isEmpty() && !stackB.isEmpty() ? stackA.isItemStackEqual(stackB) : false;
         }
     }
 
@@ -519,7 +517,7 @@ public final class ItemStack
         }
         else
         {
-            return !stackA.func_190926_b() && !stackB.func_190926_b() ? stackA.isItemEqual(stackB) : false;
+            return !stackA.isEmpty() && !stackB.isEmpty() ? stackA.isItemEqual(stackB) : false;
         }
     }
 
@@ -531,7 +529,7 @@ public final class ItemStack
         }
         else
         {
-            return !stackA.func_190926_b() && !stackB.func_190926_b() ? stackA.isItemEqualIgnoreDurability(stackB) : false;
+            return !stackA.isEmpty() && !stackB.isEmpty() ? stackA.isItemEqualIgnoreDurability(stackB) : false;
         }
     }
 
@@ -541,7 +539,7 @@ public final class ItemStack
      */
     public boolean isItemEqual(ItemStack other)
     {
-        return !other.func_190926_b() && this.item == other.item && this.itemDamage == other.itemDamage;
+        return !other.isEmpty() && this.item == other.item && this.itemDamage == other.itemDamage;
     }
 
     public boolean isItemEqualIgnoreDurability(ItemStack stack)
@@ -552,7 +550,7 @@ public final class ItemStack
         }
         else
         {
-            return !stack.func_190926_b() && this.item == stack.item;
+            return !stack.isEmpty() && this.item == stack.item;
         }
     }
 
@@ -612,7 +610,7 @@ public final class ItemStack
      */
     public boolean hasTagCompound()
     {
-        return !this.field_190928_g && this.stackTagCompound != null;
+        return !this.isEmpty && this.stackTagCompound != null;
     }
 
     @Nullable
@@ -625,16 +623,16 @@ public final class ItemStack
         return this.stackTagCompound;
     }
 
-    public NBTTagCompound func_190925_c(String p_190925_1_)
+    public NBTTagCompound getOrCreateSubCompound(String key)
     {
-        if (this.stackTagCompound != null && this.stackTagCompound.hasKey(p_190925_1_, 10))
+        if (this.stackTagCompound != null && this.stackTagCompound.hasKey(key, 10))
         {
-            return this.stackTagCompound.getCompoundTag(p_190925_1_);
+            return this.stackTagCompound.getCompoundTag(key);
         }
         else
         {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
-            this.setTagInfo(p_190925_1_, nbttagcompound);
+            this.setTagInfo(key, nbttagcompound);
             return nbttagcompound;
         }
     }
@@ -649,11 +647,11 @@ public final class ItemStack
         return this.stackTagCompound != null && this.stackTagCompound.hasKey(key, 10) ? this.stackTagCompound.getCompoundTag(key) : null;
     }
 
-    public void func_190919_e(String p_190919_1_)
+    public void removeSubCompound(String key)
     {
-        if (this.stackTagCompound != null && this.stackTagCompound.hasKey(p_190919_1_, 10))
+        if (this.stackTagCompound != null && this.stackTagCompound.hasKey(key, 10))
         {
-            this.stackTagCompound.removeTag(p_190919_1_);
+            this.stackTagCompound.removeTag(key);
         }
     }
 
@@ -693,15 +691,15 @@ public final class ItemStack
         return this.getItem().getItemStackDisplayName(this);
     }
 
-    public ItemStack func_190924_f(String p_190924_1_)
+    public ItemStack setTranslatableName(String p_190924_1_)
     {
-        this.func_190925_c("display").setString("LocName", p_190924_1_);
+        this.getOrCreateSubCompound("display").setString("LocName", p_190924_1_);
         return this;
     }
 
     public ItemStack setStackDisplayName(String displayName)
     {
-        this.func_190925_c("display").setString("Name", displayName);
+        this.getOrCreateSubCompound("display").setString("Name", displayName);
         return this;
     }
 
@@ -718,7 +716,7 @@ public final class ItemStack
 
             if (nbttagcompound.hasNoTags())
             {
-                this.func_190919_e("display");
+                this.removeSubCompound("display");
             }
         }
 
@@ -749,7 +747,7 @@ public final class ItemStack
 
         s = s + TextFormatting.RESET;
 
-        if (advanced.func_194127_a())
+        if (advanced.isAdvanced())
         {
             String s1 = "";
 
@@ -814,7 +812,7 @@ public final class ItemStack
 
                 if (nbttagcompound1.hasKey("color", 3))
                 {
-                    if (advanced.func_194127_a())
+                    if (advanced.isAdvanced())
                     {
                         list.add(I18n.translateToLocalFormatted("item.color", String.format("#%06X", nbttagcompound1.getInteger("color"))));
                     }
@@ -952,7 +950,7 @@ public final class ItemStack
             }
         }
 
-        if (advanced.func_194127_a())
+        if (advanced.isAdvanced())
         {
             if (this.isItemDamaged())
             {
@@ -985,7 +983,7 @@ public final class ItemStack
      */
     public boolean isItemEnchantable()
     {
-        if (!this.getItem().isItemTool(this))
+        if (!this.getItem().isEnchantable(this))
         {
             return false;
         }
@@ -1070,7 +1068,7 @@ public final class ItemStack
      */
     public EntityItemFrame getItemFrame()
     {
-        return this.field_190928_g ? null : this.itemFrame;
+        return this.isEmpty ? null : this.itemFrame;
     }
 
     /**
@@ -1160,7 +1158,7 @@ public final class ItemStack
 
         ITextComponent itextcomponent = (new TextComponentString("[")).appendSibling(textcomponentstring).appendText("]");
 
-        if (!this.field_190928_g)
+        if (!this.isEmpty)
         {
             NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
             itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(nbttagcompound.toString())));
@@ -1232,34 +1230,34 @@ public final class ItemStack
         }
     }
 
-    public int func_190921_D()
+    public int getAnimationsToGo()
     {
         return this.animationsToGo;
     }
 
-    public void func_190915_d(int p_190915_1_)
+    public void setAnimationsToGo(int animations)
     {
-        this.animationsToGo = p_190915_1_;
+        this.animationsToGo = animations;
     }
 
-    public int func_190916_E()
+    public int getCount()
     {
-        return this.field_190928_g ? 0 : this.stackSize;
+        return this.isEmpty ? 0 : this.stackSize;
     }
 
-    public void func_190920_e(int p_190920_1_)
+    public void setCount(int size)
     {
-        this.stackSize = p_190920_1_;
-        this.func_190923_F();
+        this.stackSize = size;
+        this.updateEmptyState();
     }
 
-    public void func_190917_f(int p_190917_1_)
+    public void grow(int quantity)
     {
-        this.func_190920_e(this.stackSize + p_190917_1_);
+        this.setCount(this.stackSize + quantity);
     }
 
-    public void func_190918_g(int p_190918_1_)
+    public void shrink(int quantity)
     {
-        this.func_190917_f(-p_190918_1_);
+        this.grow(-quantity);
     }
 }

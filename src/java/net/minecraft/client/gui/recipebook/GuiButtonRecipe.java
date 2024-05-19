@@ -15,98 +15,101 @@ import net.minecraft.util.math.MathHelper;
 
 public class GuiButtonRecipe extends GuiButton
 {
-    private static final ResourceLocation field_191780_o = new ResourceLocation("textures/gui/recipe_book.png");
-    private RecipeBook field_193930_p;
-    private RecipeList field_191774_p;
-    private float field_193931_r;
-    private float field_191778_t;
-    private int field_193932_t;
+    private static final ResourceLocation RECIPE_BOOK = new ResourceLocation("textures/gui/recipe_book.png");
+    private RecipeBook book;
+    private RecipeList list;
+    private float time;
+    private float animationTime;
+    private int currentIndex;
 
     public GuiButtonRecipe()
     {
         super(0, 0, 0, 25, 25, "");
     }
 
-    public void func_193928_a(RecipeList p_193928_1_, RecipeBookPage p_193928_2_, RecipeBook p_193928_3_)
+    public void init(RecipeList p_193928_1_, RecipeBookPage p_193928_2_, RecipeBook p_193928_3_)
     {
-        this.field_191774_p = p_193928_1_;
-        this.field_193930_p = p_193928_3_;
-        List<IRecipe> list = p_193928_1_.func_194208_a(p_193928_3_.func_192815_c());
+        this.list = p_193928_1_;
+        this.book = p_193928_3_;
+        List<IRecipe> list = p_193928_1_.getRecipes(p_193928_3_.isFilteringCraftable());
 
         for (IRecipe irecipe : list)
         {
-            if (p_193928_3_.func_194076_e(irecipe))
+            if (p_193928_3_.isRecipeUnseen(irecipe))
             {
-                p_193928_2_.func_194195_a(list);
-                this.field_191778_t = 15.0F;
+                p_193928_2_.recipesShown(list);
+                this.animationTime = 15.0F;
                 break;
             }
         }
     }
 
-    public RecipeList func_191771_c()
+    public RecipeList getList()
     {
-        return this.field_191774_p;
+        return this.list;
     }
 
-    public void func_191770_c(int p_191770_1_, int p_191770_2_)
+    public void setPosition(int p_191770_1_, int p_191770_2_)
     {
-        this.xPosition = p_191770_1_;
-        this.yPosition = p_191770_2_;
+        this.x = p_191770_1_;
+        this.y = p_191770_2_;
     }
 
-    public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
+    /**
+     * Draws this button to the screen.
+     */
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         if (this.visible)
         {
             if (!GuiScreen.isCtrlKeyDown())
             {
-                this.field_193931_r += p_191745_4_;
+                this.time += partialTicks;
             }
 
-            this.hovered = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
+            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             RenderHelper.enableGUIStandardItemLighting();
-            p_191745_1_.getTextureManager().bindTexture(field_191780_o);
+            mc.getTextureManager().bindTexture(RECIPE_BOOK);
             GlStateManager.disableLighting();
             int i = 29;
 
-            if (!this.field_191774_p.func_192708_c())
+            if (!this.list.containsCraftableRecipes())
             {
                 i += 25;
             }
 
             int j = 206;
 
-            if (this.field_191774_p.func_194208_a(this.field_193930_p.func_192815_c()).size() > 1)
+            if (this.list.getRecipes(this.book.isFilteringCraftable()).size() > 1)
             {
                 j += 25;
             }
 
-            boolean flag = this.field_191778_t > 0.0F;
+            boolean flag = this.animationTime > 0.0F;
 
             if (flag)
             {
-                float f = 1.0F + 0.1F * (float)Math.sin((double)(this.field_191778_t / 15.0F * (float)Math.PI));
+                float f = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float)Math.PI));
                 GlStateManager.pushMatrix();
-                GlStateManager.translate((float)(this.xPosition + 8), (float)(this.yPosition + 12), 0.0F);
+                GlStateManager.translate((float)(this.x + 8), (float)(this.y + 12), 0.0F);
                 GlStateManager.scale(f, f, 1.0F);
-                GlStateManager.translate((float)(-(this.xPosition + 8)), (float)(-(this.yPosition + 12)), 0.0F);
-                this.field_191778_t -= p_191745_4_;
+                GlStateManager.translate((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
+                this.animationTime -= partialTicks;
             }
 
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, i, j, this.width, this.height);
-            List<IRecipe> list = this.func_193927_f();
-            this.field_193932_t = MathHelper.floor(this.field_193931_r / 30.0F) % list.size();
-            ItemStack itemstack = ((IRecipe)list.get(this.field_193932_t)).getRecipeOutput();
+            this.drawTexturedModalRect(this.x, this.y, i, j, this.width, this.height);
+            List<IRecipe> list = this.getOrderedRecipes();
+            this.currentIndex = MathHelper.floor(this.time / 30.0F) % list.size();
+            ItemStack itemstack = ((IRecipe)list.get(this.currentIndex)).getRecipeOutput();
             int k = 4;
 
-            if (this.field_191774_p.func_194211_e() && this.func_193927_f().size() > 1)
+            if (this.list.hasSingleResultItem() && this.getOrderedRecipes().size() > 1)
             {
-                p_191745_1_.getRenderItem().renderItemAndEffectIntoGUI(itemstack, this.xPosition + k + 1, this.yPosition + k + 1);
+                mc.getRenderItem().renderItemAndEffectIntoGUI(itemstack, this.x + k + 1, this.y + k + 1);
                 --k;
             }
 
-            p_191745_1_.getRenderItem().renderItemAndEffectIntoGUI(itemstack, this.xPosition + k, this.yPosition + k);
+            mc.getRenderItem().renderItemAndEffectIntoGUI(itemstack, this.x + k, this.y + k);
 
             if (flag)
             {
@@ -118,35 +121,35 @@ public class GuiButtonRecipe extends GuiButton
         }
     }
 
-    private List<IRecipe> func_193927_f()
+    private List<IRecipe> getOrderedRecipes()
     {
-        List<IRecipe> list = this.field_191774_p.func_194207_b(true);
+        List<IRecipe> list = this.list.getDisplayRecipes(true);
 
-        if (!this.field_193930_p.func_192815_c())
+        if (!this.book.isFilteringCraftable())
         {
-            list.addAll(this.field_191774_p.func_194207_b(false));
+            list.addAll(this.list.getDisplayRecipes(false));
         }
 
         return list;
     }
 
-    public boolean func_193929_d()
+    public boolean isOnlyOption()
     {
-        return this.func_193927_f().size() == 1;
+        return this.getOrderedRecipes().size() == 1;
     }
 
-    public IRecipe func_193760_e()
+    public IRecipe getRecipe()
     {
-        List<IRecipe> list = this.func_193927_f();
-        return list.get(this.field_193932_t);
+        List<IRecipe> list = this.getOrderedRecipes();
+        return list.get(this.currentIndex);
     }
 
-    public List<String> func_191772_a(GuiScreen p_191772_1_)
+    public List<String> getToolTipText(GuiScreen p_191772_1_)
     {
-        ItemStack itemstack = ((IRecipe)this.func_193927_f().get(this.field_193932_t)).getRecipeOutput();
-        List<String> list = p_191772_1_.func_191927_a(itemstack);
+        ItemStack itemstack = ((IRecipe)this.getOrderedRecipes().get(this.currentIndex)).getRecipeOutput();
+        List<String> list = p_191772_1_.getItemToolTip(itemstack);
 
-        if (this.field_191774_p.func_194208_a(this.field_193930_p.func_192815_c()).size() > 1)
+        if (this.list.getRecipes(this.book.isFilteringCraftable()).size() > 1)
         {
             list.add(I18n.format("gui.recipebook.moreRecipes"));
         }

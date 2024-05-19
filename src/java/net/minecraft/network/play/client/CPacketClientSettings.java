@@ -35,7 +35,7 @@ public class CPacketClientSettings implements Packet<INetHandlerPlayServer>
      */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
-        this.lang = buf.readStringFromBuffer(16);
+        this.lang = buf.readString(16);
         this.view = buf.readByte();
         this.chatVisibility = (EntityPlayer.EnumChatVisibility)buf.readEnumValue(EntityPlayer.EnumChatVisibility.class);
         this.enableColors = buf.readBoolean();

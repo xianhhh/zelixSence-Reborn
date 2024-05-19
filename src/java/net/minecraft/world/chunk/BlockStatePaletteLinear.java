@@ -12,11 +12,11 @@ public class BlockStatePaletteLinear implements IBlockStatePalette
     private final int bits;
     private int arraySize;
 
-    public BlockStatePaletteLinear(int p_i47088_1_, IBlockStatePaletteResizer p_i47088_2_)
+    public BlockStatePaletteLinear(int bitsIn, IBlockStatePaletteResizer resizeHandlerIn)
     {
-        this.states = new IBlockState[1 << p_i47088_1_];
-        this.bits = p_i47088_1_;
-        this.resizeHandler = p_i47088_2_;
+        this.states = new IBlockState[1 << bitsIn];
+        this.bits = bitsIn;
+        this.resizeHandler = resizeHandlerIn;
     }
 
     public int idFor(IBlockState state)
@@ -55,25 +55,25 @@ public class BlockStatePaletteLinear implements IBlockStatePalette
 
     public void read(PacketBuffer buf)
     {
-        this.arraySize = buf.readVarIntFromBuffer();
+        this.arraySize = buf.readVarInt();
 
         for (int i = 0; i < this.arraySize; ++i)
         {
-            this.states[i] = Block.BLOCK_STATE_IDS.getByValue(buf.readVarIntFromBuffer());
+            this.states[i] = Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt());
         }
     }
 
     public void write(PacketBuffer buf)
     {
-        buf.writeVarIntToBuffer(this.arraySize);
+        buf.writeVarInt(this.arraySize);
 
         for (int i = 0; i < this.arraySize; ++i)
         {
-            buf.writeVarIntToBuffer(Block.BLOCK_STATE_IDS.get(this.states[i]));
+            buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.states[i]));
         }
     }
 
-    public int getSerializedState()
+    public int getSerializedSize()
     {
         int i = PacketBuffer.getVarIntSize(this.arraySize);
 

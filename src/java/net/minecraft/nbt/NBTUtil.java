@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 public final class NBTUtil
 {
-    private static final Logger field_193591_a = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Nullable
 
@@ -253,8 +253,6 @@ public final class NBTUtil
 
     /**
      * Reads a blockstate from the given tag.
-     *  
-     * @param tag The tag the blockstate is to be read from
      */
     public static IBlockState readBlockState(NBTTagCompound tag)
     {
@@ -278,7 +276,7 @@ public final class NBTUtil
 
                     if (iproperty != null)
                     {
-                        iblockstate = func_193590_a(iblockstate, iproperty, s, nbttagcompound, tag);
+                        iblockstate = setValueHelper(iblockstate, iproperty, s, nbttagcompound, tag);
                     }
                 }
             }
@@ -287,7 +285,7 @@ public final class NBTUtil
         }
     }
 
-    private static <T extends Comparable<T>> IBlockState func_193590_a(IBlockState p_193590_0_, IProperty<T> p_193590_1_, String p_193590_2_, NBTTagCompound p_193590_3_, NBTTagCompound p_193590_4_)
+    private static <T extends Comparable<T>> IBlockState setValueHelper(IBlockState p_193590_0_, IProperty<T> p_193590_1_, String p_193590_2_, NBTTagCompound p_193590_3_, NBTTagCompound p_193590_4_)
     {
         Optional<T> optional = p_193590_1_.parseValue(p_193590_3_.getString(p_193590_2_));
 
@@ -297,16 +295,13 @@ public final class NBTUtil
         }
         else
         {
-            field_193591_a.warn("Unable to read property: {} with value: {} for blockstate: {}", p_193590_2_, p_193590_3_.getString(p_193590_2_), p_193590_4_.toString());
+            LOGGER.warn("Unable to read property: {} with value: {} for blockstate: {}", p_193590_2_, p_193590_3_.getString(p_193590_2_), p_193590_4_.toString());
             return p_193590_0_;
         }
     }
 
     /**
      * Writes the given blockstate to the given tag.
-     *  
-     * @param tag The tag to write to
-     * @param state The blockstate to be written
      */
     public static NBTTagCompound writeBlockState(NBTTagCompound tag, IBlockState state)
     {

@@ -24,8 +24,7 @@ public class BlockWorldState
 
     /**
      * Gets the block state as currently held, or (if it has not gotten it from the world) loads it from the world.
-     *  This will only look up the state from the world if {@link #forceLoad} is true or the block position is
-     * loaded.
+     *  This will only look up the state from the world if {@link #forceLoad} is true or the block position is loaded.
      */
     public IBlockState getBlockState()
     {

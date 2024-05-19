@@ -48,7 +48,7 @@ public interface IBlockProperties
 
     boolean isFullCube();
 
-    boolean func_191057_i();
+    boolean hasCustomBreakingProgress();
 
     EnumBlockRenderType getRenderType();
 
@@ -87,17 +87,20 @@ public interface IBlockProperties
     @Nullable
     AxisAlignedBB getCollisionBoundingBox(IBlockAccess worldIn, BlockPos pos);
 
-    void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB p_185908_3_, List<AxisAlignedBB> p_185908_4_, Entity p_185908_5_, boolean p_185908_6_);
+    void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, Entity entityIn, boolean p_185908_6_);
 
     AxisAlignedBB getBoundingBox(IBlockAccess blockAccess, BlockPos pos);
 
     RayTraceResult collisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end);
 
-    boolean isFullyOpaque();
+    /**
+     * Determines if the block is solid enough on the top side to support other blocks, like redstone components.
+     */
+    boolean isTopSolid();
 
-    Vec3d func_191059_e(IBlockAccess p_191059_1_, BlockPos p_191059_2_);
+    Vec3d getOffset(IBlockAccess access, BlockPos pos);
 
-    boolean func_191058_s();
+    boolean causesSuffocation();
 
-    BlockFaceShape func_193401_d(IBlockAccess p_193401_1_, BlockPos p_193401_2_, EnumFacing p_193401_3_);
+    BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, BlockPos pos, EnumFacing facing);
 }

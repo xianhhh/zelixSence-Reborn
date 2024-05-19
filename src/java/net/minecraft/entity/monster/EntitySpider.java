@@ -75,7 +75,7 @@ public class EntitySpider extends EntityMob
     /**
      * Returns new PathNavigateGround instance
      */
-    protected PathNavigate getNewNavigator(World worldIn)
+    protected PathNavigate createNavigator(World worldIn)
     {
         return new PathNavigateClimber(this, worldIn);
     }
@@ -111,7 +111,7 @@ public class EntitySpider extends EntityMob
         return SoundEvents.ENTITY_SPIDER_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_SPIDER_HURT;
     }
@@ -133,7 +133,8 @@ public class EntitySpider extends EntityMob
     }
 
     /**
-     * returns true if this entity is by a ladder, false otherwise
+     * Returns true if this entity should move as if it were on a ladder (either because it's actually on a ladder, or
+     * for AI reasons)
      */
     public boolean isOnLadder()
     {
@@ -204,7 +205,7 @@ public class EntitySpider extends EntityMob
             EntitySkeleton entityskeleton = new EntitySkeleton(this.world);
             entityskeleton.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
             entityskeleton.onInitialSpawn(difficulty, (IEntityLivingData)null);
-            this.world.spawnEntityInWorld(entityskeleton);
+            this.world.spawnEntity(entityskeleton);
             entityskeleton.startRiding(this);
         }
 
@@ -243,7 +244,7 @@ public class EntitySpider extends EntityMob
             super(spider, 1.0D, true);
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
             float f = this.attacker.getBrightness();
 
@@ -254,7 +255,7 @@ public class EntitySpider extends EntityMob
             }
             else
             {
-                return super.continueExecuting();
+                return super.shouldContinueExecuting();
             }
         }
 

@@ -5,20 +5,20 @@ import net.minecraft.util.ResourceLocation;
 
 public class AbstractCriterionInstance implements ICriterionInstance
 {
-    private final ResourceLocation field_192245_a;
+    private final ResourceLocation criterion;
 
-    public AbstractCriterionInstance(ResourceLocation p_i47465_1_)
+    public AbstractCriterionInstance(ResourceLocation criterionIn)
     {
-        this.field_192245_a = p_i47465_1_;
+        this.criterion = criterionIn;
     }
 
-    public ResourceLocation func_192244_a()
+    public ResourceLocation getId()
     {
-        return this.field_192245_a;
+        return this.criterion;
     }
 
     public String toString()
     {
-        return "AbstractCriterionInstance{criterion=" + this.field_192245_a + '}';
+        return "AbstractCriterionInstance{criterion=" + this.criterion + '}';
     }
 }

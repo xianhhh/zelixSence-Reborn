@@ -6,23 +6,23 @@ public enum ChatType
     SYSTEM((byte)1),
     GAME_INFO((byte)2);
 
-    private final byte field_192588_d;
+    private final byte id;
 
-    private ChatType(byte p_i47429_3_)
+    private ChatType(byte id)
     {
-        this.field_192588_d = p_i47429_3_;
+        this.id = id;
     }
 
-    public byte func_192583_a()
+    public byte getId()
     {
-        return this.field_192588_d;
+        return this.id;
     }
 
-    public static ChatType func_192582_a(byte p_192582_0_)
+    public static ChatType byId(byte p_192582_0_)
     {
         for (ChatType chattype : values())
         {
-            if (p_192582_0_ == chattype.field_192588_d)
+            if (p_192582_0_ == chattype.id)
             {
                 return chattype;
             }

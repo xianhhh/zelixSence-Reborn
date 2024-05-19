@@ -17,15 +17,15 @@ public class ResourcePackListEntryServer extends ResourcePackListEntry
     private final IResourcePack resourcePack;
     private final ResourceLocation resourcePackIcon;
 
-    public ResourcePackListEntryServer(GuiScreenResourcePacks p_i46594_1_, IResourcePack p_i46594_2_)
+    public ResourcePackListEntryServer(GuiScreenResourcePacks resourcePacksGUIIn, IResourcePack resourcePackIn)
     {
-        super(p_i46594_1_);
-        this.resourcePack = p_i46594_2_;
+        super(resourcePacksGUIIn);
+        this.resourcePack = resourcePackIn;
         DynamicTexture dynamictexture;
 
         try
         {
-            dynamictexture = new DynamicTexture(p_i46594_2_.getPackImage());
+            dynamictexture = new DynamicTexture(resourcePackIn.getPackImage());
         }
         catch (IOException var5)
         {

@@ -10,7 +10,7 @@ import net.minecraft.util.ResourceLocation;
 public class SPacketSelectAdvancementsTab implements Packet<INetHandlerPlayClient>
 {
     @Nullable
-    private ResourceLocation field_194155_a;
+    private ResourceLocation tab;
 
     public SPacketSelectAdvancementsTab()
     {
@@ -18,7 +18,7 @@ public class SPacketSelectAdvancementsTab implements Packet<INetHandlerPlayClien
 
     public SPacketSelectAdvancementsTab(@Nullable ResourceLocation p_i47596_1_)
     {
-        this.field_194155_a = p_i47596_1_;
+        this.tab = p_i47596_1_;
     }
 
     /**
@@ -26,7 +26,7 @@ public class SPacketSelectAdvancementsTab implements Packet<INetHandlerPlayClien
      */
     public void processPacket(INetHandlerPlayClient handler)
     {
-        handler.func_194022_a(this);
+        handler.handleSelectAdvancementsTab(this);
     }
 
     /**
@@ -36,7 +36,7 @@ public class SPacketSelectAdvancementsTab implements Packet<INetHandlerPlayClien
     {
         if (buf.readBoolean())
         {
-            this.field_194155_a = buf.func_192575_l();
+            this.tab = buf.readResourceLocation();
         }
     }
 
@@ -45,17 +45,17 @@ public class SPacketSelectAdvancementsTab implements Packet<INetHandlerPlayClien
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeBoolean(this.field_194155_a != null);
+        buf.writeBoolean(this.tab != null);
 
-        if (this.field_194155_a != null)
+        if (this.tab != null)
         {
-            buf.func_192572_a(this.field_194155_a);
+            buf.writeResourceLocation(this.tab);
         }
     }
 
     @Nullable
-    public ResourceLocation func_194154_a()
+    public ResourceLocation getTab()
     {
-        return this.field_194155_a;
+        return this.tab;
     }
 }

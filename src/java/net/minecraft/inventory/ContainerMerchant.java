@@ -9,16 +9,16 @@ import net.minecraft.world.World;
 public class ContainerMerchant extends Container
 {
     /** Instance of Merchant. */
-    private final IMerchant theMerchant;
+    private final IMerchant merchant;
     private final InventoryMerchant merchantInventory;
 
     /** Instance of World. */
-    private final World theWorld;
+    private final World world;
 
     public ContainerMerchant(InventoryPlayer playerInventory, IMerchant merchant, World worldIn)
     {
-        this.theMerchant = merchant;
-        this.theWorld = worldIn;
+        this.merchant = merchant;
+        this.world = worldIn;
         this.merchantInventory = new InventoryMerchant(playerInventory.player, merchant);
         this.addSlotToContainer(new Slot(this.merchantInventory, 0, 36, 53));
         this.addSlotToContainer(new Slot(this.merchantInventory, 1, 62, 53));
@@ -62,15 +62,16 @@ public class ContainerMerchant extends Container
      */
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.theMerchant.getCustomer() == playerIn;
+        return this.merchant.getCustomer() == playerIn;
     }
 
     /**
-     * Take a stack from the specified inventory slot.
+     * Handle when the stack in slot {@code index} is shift-clicked. Normally this moves the stack between the player
+     * inventory and the other inventory(s).
      */
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
-        ItemStack itemstack = ItemStack.field_190927_a;
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
@@ -82,7 +83,7 @@ public class ContainerMerchant extends Container
             {
                 if (!this.mergeItemStack(itemstack1, 3, 39, true))
                 {
-                    return ItemStack.field_190927_a;
+                    return ItemStack.EMPTY;
                 }
 
                 slot.onSlotChange(itemstack1, itemstack);
@@ -93,34 +94,34 @@ public class ContainerMerchant extends Container
                 {
                     if (!this.mergeItemStack(itemstack1, 30, 39, false))
                     {
-                        return ItemStack.field_190927_a;
+                        return ItemStack.EMPTY;
                     }
                 }
                 else if (index >= 30 && index < 39 && !this.mergeItemStack(itemstack1, 3, 30, false))
                 {
-                    return ItemStack.field_190927_a;
+                    return ItemStack.EMPTY;
                 }
             }
             else if (!this.mergeItemStack(itemstack1, 3, 39, false))
             {
-                return ItemStack.field_190927_a;
+                return ItemStack.EMPTY;
             }
 
-            if (itemstack1.func_190926_b())
+            if (itemstack1.isEmpty())
             {
-                slot.putStack(ItemStack.field_190927_a);
+                slot.putStack(ItemStack.EMPTY);
             }
             else
             {
                 slot.onSlotChanged();
             }
 
-            if (itemstack1.func_190916_E() == itemstack.func_190916_E())
+            if (itemstack1.getCount() == itemstack.getCount())
             {
-                return ItemStack.field_190927_a;
+                return ItemStack.EMPTY;
             }
 
-            slot.func_190901_a(playerIn, itemstack1);
+            slot.onTake(playerIn, itemstack1);
         }
 
         return itemstack;
@@ -132,21 +133,21 @@ public class ContainerMerchant extends Container
     public void onContainerClosed(EntityPlayer playerIn)
     {
         super.onContainerClosed(playerIn);
-        this.theMerchant.setCustomer((EntityPlayer)null);
+        this.merchant.setCustomer((EntityPlayer)null);
         super.onContainerClosed(playerIn);
 
-        if (!this.theWorld.isRemote)
+        if (!this.world.isRemote)
         {
             ItemStack itemstack = this.merchantInventory.removeStackFromSlot(0);
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 playerIn.dropItem(itemstack, false);
             }
 
             itemstack = this.merchantInventory.removeStackFromSlot(1);
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 playerIn.dropItem(itemstack, false);
             }

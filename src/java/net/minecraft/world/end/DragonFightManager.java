@@ -226,7 +226,7 @@ public class DragonFightManager
                     if (list1.isEmpty())
                     {
                         LOGGER.debug("Haven't seen the dragon, respawning it");
-                        this.func_192445_m();
+                        this.createNewDragon();
                     }
                     else
                     {
@@ -260,11 +260,11 @@ public class DragonFightManager
             {
                 this.respawnState = null;
                 this.dragonKilled = false;
-                EntityDragon entitydragon = this.func_192445_m();
+                EntityDragon entitydragon = this.createNewDragon();
 
                 for (EntityPlayerMP entityplayermp : this.bossInfo.getPlayers())
                 {
-                    CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp, entitydragon);
+                    CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp, entitydragon);
                 }
             }
             else
@@ -440,13 +440,13 @@ public class DragonFightManager
         worldgenendpodium.generate(this.world, new Random(), this.exitPortalLocation);
     }
 
-    private EntityDragon func_192445_m()
+    private EntityDragon createNewDragon()
     {
         this.world.getChunkFromBlockCoords(new BlockPos(0, 128, 0));
         EntityDragon entitydragon = new EntityDragon(this.world);
         entitydragon.getPhaseManager().setPhase(PhaseList.HOLDING_PATTERN);
         entitydragon.setLocationAndAngles(0.0D, 128.0D, 0.0D, this.world.rand.nextFloat() * 360.0F, 0.0F);
-        this.world.spawnEntityInWorld(entitydragon);
+        this.world.spawnEntity(entitydragon);
         this.dragonUniqueId = entitydragon.getUniqueID();
         return entitydragon;
     }

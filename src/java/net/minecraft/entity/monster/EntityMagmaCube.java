@@ -48,9 +48,9 @@ public class EntityMagmaCube extends EntitySlime
         return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this) && this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(this.getEntityBoundingBox());
     }
 
-    protected void setSlimeSize(int size, boolean p_70799_2_)
+    protected void setSlimeSize(int size, boolean resetHealth)
     {
-        super.setSlimeSize(size, p_70799_2_);
+        super.setSlimeSize(size, resetHealth);
         this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(size * 3));
     }
 
@@ -139,7 +139,7 @@ public class EntityMagmaCube extends EntitySlime
         return super.getAttackStrength() + 2;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return this.isSmallSlime() ? SoundEvents.ENTITY_SMALL_MAGMACUBE_HURT : SoundEvents.ENTITY_MAGMACUBE_HURT;
     }

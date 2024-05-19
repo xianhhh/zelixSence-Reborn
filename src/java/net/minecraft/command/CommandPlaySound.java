@@ -16,7 +16,7 @@ public class CommandPlaySound extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "playsound";
     }
@@ -32,7 +32,7 @@ public class CommandPlaySound extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.playsound.usage";
     }
@@ -44,7 +44,7 @@ public class CommandPlaySound extends CommandBase
     {
         if (args.length < 2)
         {
-            throw new WrongUsageException(this.getCommandUsage(sender), new Object[0]);
+            throw new WrongUsageException(this.getUsage(sender), new Object[0]);
         }
         else
         {
@@ -61,9 +61,9 @@ public class CommandPlaySound extends CommandBase
             {
                 EntityPlayerMP entityplayermp = getPlayer(server, sender, args[i++]);
                 Vec3d vec3d = sender.getPositionVector();
-                double d0 = args.length > i ? parseDouble(vec3d.xCoord, args[i++], true) : vec3d.xCoord;
-                double d1 = args.length > i ? parseDouble(vec3d.yCoord, args[i++], 0, 0, false) : vec3d.yCoord;
-                double d2 = args.length > i ? parseDouble(vec3d.zCoord, args[i++], true) : vec3d.zCoord;
+                double d0 = args.length > i ? parseDouble(vec3d.x, args[i++], true) : vec3d.x;
+                double d1 = args.length > i ? parseDouble(vec3d.y, args[i++], 0, 0, false) : vec3d.y;
+                double d2 = args.length > i ? parseDouble(vec3d.z, args[i++], true) : vec3d.z;
                 double d3 = args.length > i ? parseDouble(args[i++], 0.0D, 3.4028234663852886E38D) : 1.0D;
                 double d4 = args.length > i ? parseDouble(args[i++], 0.0D, 2.0D) : 1.0D;
                 double d5 = args.length > i ? parseDouble(args[i], 0.0D, 1.0D) : 0.0D;
@@ -98,7 +98,7 @@ public class CommandPlaySound extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
@@ -110,11 +110,11 @@ public class CommandPlaySound extends CommandBase
         }
         else if (args.length == 3)
         {
-            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
         else
         {
-            return args.length > 3 && args.length <= 6 ? getTabCompletionCoordinate(args, 3, pos) : Collections.emptyList();
+            return args.length > 3 && args.length <= 6 ? getTabCompletionCoordinate(args, 3, targetPos) : Collections.emptyList();
         }
     }
 

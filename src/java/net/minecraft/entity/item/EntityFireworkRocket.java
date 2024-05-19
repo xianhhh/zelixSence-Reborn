@@ -24,8 +24,8 @@ import net.minecraft.world.World;
 
 public class EntityFireworkRocket extends Entity
 {
-    private static final DataParameter<ItemStack> FIREWORK_ITEM = EntityDataManager.<ItemStack>createKey(EntityFireworkRocket.class, DataSerializers.OPTIONAL_ITEM_STACK);
-    private static final DataParameter<Integer> field_191512_b = EntityDataManager.<Integer>createKey(EntityFireworkRocket.class, DataSerializers.VARINT);
+    private static final DataParameter<ItemStack> FIREWORK_ITEM = EntityDataManager.<ItemStack>createKey(EntityFireworkRocket.class, DataSerializers.ITEM_STACK);
+    private static final DataParameter<Integer> BOOSTED_ENTITY_ID = EntityDataManager.<Integer>createKey(EntityFireworkRocket.class, DataSerializers.VARINT);
 
     /** The age of the firework in ticks. */
     private int fireworkAge;
@@ -34,7 +34,7 @@ public class EntityFireworkRocket extends Entity
      * The lifetime of the firework in ticks. When the age reaches the lifetime the firework explodes.
      */
     private int lifetime;
-    private EntityLivingBase field_191513_e;
+    private EntityLivingBase boostedEntity;
 
     public EntityFireworkRocket(World worldIn)
     {
@@ -44,8 +44,8 @@ public class EntityFireworkRocket extends Entity
 
     protected void entityInit()
     {
-        this.dataManager.register(FIREWORK_ITEM, ItemStack.field_190927_a);
-        this.dataManager.register(field_191512_b, Integer.valueOf(0));
+        this.dataManager.register(FIREWORK_ITEM, ItemStack.EMPTY);
+        this.dataManager.register(BOOSTED_ENTITY_ID, Integer.valueOf(0));
     }
 
     /**
@@ -53,12 +53,12 @@ public class EntityFireworkRocket extends Entity
      */
     public boolean isInRangeToRenderDist(double distance)
     {
-        return distance < 4096.0D && !this.func_191511_j();
+        return distance < 4096.0D && !this.isAttachedToEntity();
     }
 
     public boolean isInRangeToRender3d(double x, double y, double z)
     {
-        return super.isInRangeToRender3d(x, y, z) && !this.func_191511_j();
+        return super.isInRangeToRender3d(x, y, z) && !this.isAttachedToEntity();
     }
 
     public EntityFireworkRocket(World worldIn, double x, double y, double z, ItemStack givenItem)
@@ -69,7 +69,7 @@ public class EntityFireworkRocket extends Entity
         this.setPosition(x, y, z);
         int i = 1;
 
-        if (!givenItem.func_190926_b() && givenItem.hasTagCompound())
+        if (!givenItem.isEmpty() && givenItem.hasTagCompound())
         {
             this.dataManager.set(FIREWORK_ITEM, givenItem.copy());
             NBTTagCompound nbttagcompound = givenItem.getTagCompound();
@@ -86,12 +86,12 @@ public class EntityFireworkRocket extends Entity
     public EntityFireworkRocket(World p_i47367_1_, ItemStack p_i47367_2_, EntityLivingBase p_i47367_3_)
     {
         this(p_i47367_1_, p_i47367_3_.posX, p_i47367_3_.posY, p_i47367_3_.posZ, p_i47367_2_);
-        this.dataManager.set(field_191512_b, Integer.valueOf(p_i47367_3_.getEntityId()));
-        this.field_191513_e = p_i47367_3_;
+        this.dataManager.set(BOOSTED_ENTITY_ID, Integer.valueOf(p_i47367_3_.getEntityId()));
+        this.boostedEntity = p_i47367_3_;
     }
 
     /**
-     * Updates the velocity of the entity to a new value.
+     * Updates the entity motion clientside, called by packets from the server
      */
     public void setVelocity(double x, double y, double z)
     {
@@ -119,34 +119,34 @@ public class EntityFireworkRocket extends Entity
         this.lastTickPosZ = this.posZ;
         super.onUpdate();
 
-        if (this.func_191511_j())
+        if (this.isAttachedToEntity())
         {
-            if (this.field_191513_e == null)
+            if (this.boostedEntity == null)
             {
-                Entity entity = this.world.getEntityByID(((Integer)this.dataManager.get(field_191512_b)).intValue());
+                Entity entity = this.world.getEntityByID(((Integer)this.dataManager.get(BOOSTED_ENTITY_ID)).intValue());
 
                 if (entity instanceof EntityLivingBase)
                 {
-                    this.field_191513_e = (EntityLivingBase)entity;
+                    this.boostedEntity = (EntityLivingBase)entity;
                 }
             }
 
-            if (this.field_191513_e != null)
+            if (this.boostedEntity != null)
             {
-                if (this.field_191513_e.isElytraFlying())
+                if (this.boostedEntity.isElytraFlying())
                 {
-                    Vec3d vec3d = this.field_191513_e.getLookVec();
+                    Vec3d vec3d = this.boostedEntity.getLookVec();
                     double d0 = 1.5D;
                     double d1 = 0.1D;
-                    this.field_191513_e.motionX += vec3d.xCoord * 0.1D + (vec3d.xCoord * 1.5D - this.field_191513_e.motionX) * 0.5D;
-                    this.field_191513_e.motionY += vec3d.yCoord * 0.1D + (vec3d.yCoord * 1.5D - this.field_191513_e.motionY) * 0.5D;
-                    this.field_191513_e.motionZ += vec3d.zCoord * 0.1D + (vec3d.zCoord * 1.5D - this.field_191513_e.motionZ) * 0.5D;
+                    this.boostedEntity.motionX += vec3d.x * 0.1D + (vec3d.x * 1.5D - this.boostedEntity.motionX) * 0.5D;
+                    this.boostedEntity.motionY += vec3d.y * 0.1D + (vec3d.y * 1.5D - this.boostedEntity.motionY) * 0.5D;
+                    this.boostedEntity.motionZ += vec3d.z * 0.1D + (vec3d.z * 1.5D - this.boostedEntity.motionZ) * 0.5D;
                 }
 
-                this.setPosition(this.field_191513_e.posX, this.field_191513_e.posY, this.field_191513_e.posZ);
-                this.motionX = this.field_191513_e.motionX;
-                this.motionY = this.field_191513_e.motionY;
-                this.motionZ = this.field_191513_e.motionZ;
+                this.setPosition(this.boostedEntity.posX, this.boostedEntity.posY, this.boostedEntity.posZ);
+                this.motionX = this.boostedEntity.motionX;
+                this.motionY = this.boostedEntity.motionY;
+                this.motionZ = this.boostedEntity.motionZ;
             }
         }
         else
@@ -154,7 +154,7 @@ public class EntityFireworkRocket extends Entity
             this.motionX *= 1.15D;
             this.motionZ *= 1.15D;
             this.motionY += 0.04D;
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
         }
 
         float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -198,16 +198,16 @@ public class EntityFireworkRocket extends Entity
         if (!this.world.isRemote && this.fireworkAge > this.lifetime)
         {
             this.world.setEntityState(this, (byte)17);
-            this.func_191510_k();
+            this.dealExplosionDamage();
             this.setDead();
         }
     }
 
-    private void func_191510_k()
+    private void dealExplosionDamage()
     {
         float f = 0.0F;
         ItemStack itemstack = (ItemStack)this.dataManager.get(FIREWORK_ITEM);
-        NBTTagCompound nbttagcompound = itemstack.func_190926_b() ? null : itemstack.getSubCompound("Fireworks");
+        NBTTagCompound nbttagcompound = itemstack.isEmpty() ? null : itemstack.getSubCompound("Fireworks");
         NBTTagList nbttaglist = nbttagcompound != null ? nbttagcompound.getTagList("Explosions", 10) : null;
 
         if (nbttaglist != null && !nbttaglist.hasNoTags())
@@ -217,17 +217,17 @@ public class EntityFireworkRocket extends Entity
 
         if (f > 0.0F)
         {
-            if (this.field_191513_e != null)
+            if (this.boostedEntity != null)
             {
-                this.field_191513_e.attackEntityFrom(DamageSource.field_191552_t, (float)(5 + nbttaglist.tagCount() * 2));
+                this.boostedEntity.attackEntityFrom(DamageSource.FIREWORKS, (float)(5 + nbttaglist.tagCount() * 2));
             }
 
             double d0 = 5.0D;
             Vec3d vec3d = new Vec3d(this.posX, this.posY, this.posZ);
 
-            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expandXyz(5.0D)))
+            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(5.0D)))
             {
-                if (entitylivingbase != this.field_191513_e && this.getDistanceSqToEntity(entitylivingbase) <= 25.0D)
+                if (entitylivingbase != this.boostedEntity && this.getDistanceSqToEntity(entitylivingbase) <= 25.0D)
                 {
                     boolean flag = false;
 
@@ -245,24 +245,27 @@ public class EntityFireworkRocket extends Entity
                     if (flag)
                     {
                         float f1 = f * (float)Math.sqrt((5.0D - (double)this.getDistanceToEntity(entitylivingbase)) / 5.0D);
-                        entitylivingbase.attackEntityFrom(DamageSource.field_191552_t, f1);
+                        entitylivingbase.attackEntityFrom(DamageSource.FIREWORKS, f1);
                     }
                 }
             }
         }
     }
 
-    public boolean func_191511_j()
+    public boolean isAttachedToEntity()
     {
-        return ((Integer)this.dataManager.get(field_191512_b)).intValue() > 0;
+        return ((Integer)this.dataManager.get(BOOSTED_ENTITY_ID)).intValue() > 0;
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 17 && this.world.isRemote)
         {
             ItemStack itemstack = (ItemStack)this.dataManager.get(FIREWORK_ITEM);
-            NBTTagCompound nbttagcompound = itemstack.func_190926_b() ? null : itemstack.getSubCompound("Fireworks");
+            NBTTagCompound nbttagcompound = itemstack.isEmpty() ? null : itemstack.getSubCompound("Fireworks");
             this.world.makeFireworks(this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ, nbttagcompound);
         }
 
@@ -283,7 +286,7 @@ public class EntityFireworkRocket extends Entity
         compound.setInteger("LifeTime", this.lifetime);
         ItemStack itemstack = (ItemStack)this.dataManager.get(FIREWORK_ITEM);
 
-        if (!itemstack.func_190926_b())
+        if (!itemstack.isEmpty())
         {
             compound.setTag("FireworksItem", itemstack.writeToNBT(new NBTTagCompound()));
         }
@@ -302,7 +305,7 @@ public class EntityFireworkRocket extends Entity
         {
             ItemStack itemstack = new ItemStack(nbttagcompound);
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 this.dataManager.set(FIREWORK_ITEM, itemstack);
             }

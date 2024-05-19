@@ -9,7 +9,7 @@ public class BiomeVoid extends Biome
         this.spawnableCreatureList.clear();
         this.spawnableWaterCreatureList.clear();
         this.spawnableCaveCreatureList.clear();
-        this.theBiomeDecorator = new BiomeVoidDecorator();
+        this.decorator = new BiomeVoidDecorator();
     }
 
     public boolean ignorePlayerSpawnSuitability()

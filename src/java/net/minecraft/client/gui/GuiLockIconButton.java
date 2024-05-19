@@ -7,9 +7,9 @@ public class GuiLockIconButton extends GuiButton
 {
     private boolean locked;
 
-    public GuiLockIconButton(int p_i45538_1_, int p_i45538_2_, int p_i45538_3_)
+    public GuiLockIconButton(int buttonId, int x, int y)
     {
-        super(p_i45538_1_, p_i45538_2_, p_i45538_3_, 20, 20, "");
+        super(buttonId, x, y, 20, 20, "");
     }
 
     public boolean isLocked()
@@ -22,13 +22,16 @@ public class GuiLockIconButton extends GuiButton
         this.locked = lockedIn;
     }
 
-    public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
+    /**
+     * Draws this button to the screen.
+     */
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         if (this.visible)
         {
-            p_191745_1_.getTextureManager().bindTexture(GuiButton.BUTTON_TEXTURES);
+            mc.getTextureManager().bindTexture(GuiButton.BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean flag = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
+            boolean flag = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             GuiLockIconButton.Icon guilockiconbutton$icon;
 
             if (this.locked)
@@ -59,7 +62,7 @@ public class GuiLockIconButton extends GuiButton
                 guilockiconbutton$icon = GuiLockIconButton.Icon.UNLOCKED;
             }
 
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, guilockiconbutton$icon.getX(), guilockiconbutton$icon.getY(), this.width, this.height);
+            this.drawTexturedModalRect(this.x, this.y, guilockiconbutton$icon.getX(), guilockiconbutton$icon.getY(), this.width, this.height);
         }
     }
 
@@ -75,10 +78,10 @@ public class GuiLockIconButton extends GuiButton
         private final int x;
         private final int y;
 
-        private Icon(int p_i45537_3_, int p_i45537_4_)
+        private Icon(int xIn, int yIn)
         {
-            this.x = p_i45537_3_;
-            this.y = p_i45537_4_;
+            this.x = xIn;
+            this.y = yIn;
         }
 
         public int getX()

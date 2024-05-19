@@ -13,87 +13,102 @@ import net.minecraft.util.ResourceLocation;
 
 public class SearchTree<T> implements ISearchTree<T>
 {
-    protected SuffixArray<T> field_194044_a = new SuffixArray<T>();
-    protected SuffixArray<T> field_194045_b = new SuffixArray<T>();
-    private final Function<T, Iterable<String>> field_194046_c;
-    private final Function<T, Iterable<ResourceLocation>> field_194047_d;
-    private final List<T> field_194048_e = Lists.<T>newArrayList();
-    private Object2IntMap<T> field_194049_f = new Object2IntOpenHashMap<T>();
+    protected SuffixArray<T> byId = new SuffixArray<T>();
+    protected SuffixArray<T> byName = new SuffixArray<T>();
+    private final Function<T, Iterable<String>> nameFunc;
+    private final Function<T, Iterable<ResourceLocation>> idFunc;
+    private final List<T> contents = Lists.<T>newArrayList();
+    private Object2IntMap<T> numericContents = new Object2IntOpenHashMap<T>();
 
-    public SearchTree(Function<T, Iterable<String>> p_i47612_1_, Function<T, Iterable<ResourceLocation>> p_i47612_2_)
+    public SearchTree(Function<T, Iterable<String>> nameFuncIn, Function<T, Iterable<ResourceLocation>> idFuncIn)
     {
-        this.field_194046_c = p_i47612_1_;
-        this.field_194047_d = p_i47612_2_;
+        this.nameFunc = nameFuncIn;
+        this.idFunc = idFuncIn;
     }
 
-    public void func_194040_a()
+    /**
+     * Recalculates the contents of this search tree, reapplying {@link #nameFunc} and {@link #idFunc}. Should be called
+     * whenever resources are reloaded (e.g. language changes).
+     */
+    public void recalculate()
     {
-        this.field_194044_a = new SuffixArray<T>();
-        this.field_194045_b = new SuffixArray<T>();
+        this.byId = new SuffixArray<T>();
+        this.byName = new SuffixArray<T>();
 
-        for (T t : this.field_194048_e)
+        for (T t : this.contents)
         {
-            this.func_194042_b(t);
+            this.index(t);
         }
 
-        this.field_194044_a.func_194058_a();
-        this.field_194045_b.func_194058_a();
+        this.byId.generate();
+        this.byName.generate();
     }
 
-    public void func_194043_a(T p_194043_1_)
+    /**
+     * Adds the given item to the search tree.
+     *  
+     * @param element The element to add
+     */
+    public void add(T element)
     {
-        this.field_194049_f.put(p_194043_1_, this.field_194048_e.size());
-        this.field_194048_e.add(p_194043_1_);
-        this.func_194042_b(p_194043_1_);
+        this.numericContents.put(element, this.contents.size());
+        this.contents.add(element);
+        this.index(element);
     }
 
-    private void func_194042_b(T p_194042_1_)
+    /**
+     * Directly puts the given item into {@link #byId} and {@link #byName}, applying {@link #nameFunc} and {@link
+     * idFunc}.
+     *  
+     * @param element The element to add
+     */
+    private void index(T element)
     {
-        (this.field_194047_d.apply(p_194042_1_)).forEach((p_194039_2_) ->
+        (this.idFunc.apply(element)).forEach((p_194039_2_) ->
         {
-            this.field_194045_b.func_194057_a(p_194042_1_, p_194039_2_.toString().toLowerCase(Locale.ROOT));
+            this.byName.add(element, p_194039_2_.toString().toLowerCase(Locale.ROOT));
         });
-        (this.field_194046_c.apply(p_194042_1_)).forEach((p_194041_2_) ->
+        (this.nameFunc.apply(element)).forEach((p_194041_2_) ->
         {
-            this.field_194044_a.func_194057_a(p_194042_1_, p_194041_2_.toLowerCase(Locale.ROOT));
+            this.byId.add(element, p_194041_2_.toLowerCase(Locale.ROOT));
         });
     }
 
-    public List<T> func_194038_a(String p_194038_1_)
+    public List<T> search(String searchText)
     {
-        List<T> list = this.field_194044_a.func_194055_a(p_194038_1_);
+        List<T> list = this.byId.search(searchText);
 
-        if (p_194038_1_.indexOf(58) < 0)
+        if (searchText.indexOf(58) < 0)
         {
             return list;
         }
         else
         {
-            List<T> list1 = this.field_194045_b.func_194055_a(p_194038_1_);
-            return (List<T>)(list1.isEmpty() ? list : Lists.newArrayList(new SearchTree.MergingIterator(list.iterator(), list1.iterator(), this.field_194049_f)));
+            List<T> list1 = this.byName.search(searchText);
+            return (List<T>)(list1.isEmpty() ? list : Lists.newArrayList(new SearchTree.MergingIterator(list.iterator(), list1.iterator(), this.numericContents)));
         }
     }
 
     static class MergingIterator<T> extends AbstractIterator<T>
     {
-        private final Iterator<T> field_194033_a;
-        private final Iterator<T> field_194034_b;
-        private final Object2IntMap<T> field_194035_c;
-        private T field_194036_d;
-        private T field_194037_e;
+        private final Iterator<T> leftItr;
+        private final Iterator<T> rightItr;
+        private final Object2IntMap<T> numbers;
+        private T left;
+        private T right;
 
-        public MergingIterator(Iterator<T> p_i47606_1_, Iterator<T> p_i47606_2_, Object2IntMap<T> p_i47606_3_)
+        public MergingIterator(Iterator<T> leftIn, Iterator<T> rightIn, Object2IntMap<T> numbersIn)
         {
-            this.field_194033_a = p_i47606_1_;
-            this.field_194034_b = p_i47606_2_;
-            this.field_194035_c = p_i47606_3_;
-            this.field_194036_d = (T)(p_i47606_1_.hasNext() ? p_i47606_1_.next() : null);
-            this.field_194037_e = (T)(p_i47606_2_.hasNext() ? p_i47606_2_.next() : null);
+            this.leftItr = leftIn;
+            this.rightItr = rightIn;
+            this.numbers = numbersIn;
+            this.left = (T)(leftIn.hasNext() ? leftIn.next() : null);
+            this.right = (T)(rightIn.hasNext() ? rightIn.next() : null);
         }
 
         protected T computeNext()
         {
-            if (this.field_194036_d == null && this.field_194037_e == null)
+            if (this.left == null && this.right == null)
             {
                 return (T)this.endOfData();
             }
@@ -101,33 +116,33 @@ public class SearchTree<T> implements ISearchTree<T>
             {
                 int i;
 
-                if (this.field_194036_d == this.field_194037_e)
+                if (this.left == this.right)
                 {
                     i = 0;
                 }
-                else if (this.field_194036_d == null)
+                else if (this.left == null)
                 {
                     i = 1;
                 }
-                else if (this.field_194037_e == null)
+                else if (this.right == null)
                 {
                     i = -1;
                 }
                 else
                 {
-                    i = Integer.compare(this.field_194035_c.getInt(this.field_194036_d), this.field_194035_c.getInt(this.field_194037_e));
+                    i = Integer.compare(this.numbers.getInt(this.left), this.numbers.getInt(this.right));
                 }
 
-                T t = (T)(i <= 0 ? this.field_194036_d : this.field_194037_e);
+                T t = (T)(i <= 0 ? this.left : this.right);
 
                 if (i <= 0)
                 {
-                    this.field_194036_d = (T)(this.field_194033_a.hasNext() ? this.field_194033_a.next() : null);
+                    this.left = (T)(this.leftItr.hasNext() ? this.leftItr.next() : null);
                 }
 
                 if (i >= 0)
                 {
-                    this.field_194037_e = (T)(this.field_194034_b.hasNext() ? this.field_194034_b.next() : null);
+                    this.right = (T)(this.rightItr.hasNext() ? this.rightItr.next() : null);
                 }
 
                 return t;

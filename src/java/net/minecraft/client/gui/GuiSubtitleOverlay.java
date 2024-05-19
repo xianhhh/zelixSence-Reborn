@@ -58,11 +58,11 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener
                 }
                 else
                 {
-                    j = Math.max(j, this.client.fontRendererObj.getStringWidth(guisubtitleoverlay$subtitle.getString()));
+                    j = Math.max(j, this.client.fontRenderer.getStringWidth(guisubtitleoverlay$subtitle.getString()));
                 }
             }
 
-            j = j + this.client.fontRendererObj.getStringWidth("<") + this.client.fontRendererObj.getStringWidth(" ") + this.client.fontRendererObj.getStringWidth(">") + this.client.fontRendererObj.getStringWidth(" ");
+            j = j + this.client.fontRenderer.getStringWidth("<") + this.client.fontRenderer.getStringWidth(" ") + this.client.fontRenderer.getStringWidth(">") + this.client.fontRenderer.getStringWidth(" ");
 
             for (GuiSubtitleOverlay.Subtitle guisubtitleoverlay$subtitle1 : this.subtitles)
             {
@@ -73,10 +73,10 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener
                 double d1 = -vec3d1.dotProduct(vec3d4);
                 boolean flag = d1 > 0.5D;
                 int l = j / 2;
-                int i1 = this.client.fontRendererObj.FONT_HEIGHT;
+                int i1 = this.client.fontRenderer.FONT_HEIGHT;
                 int j1 = i1 / 2;
                 float f = 1.0F;
-                int k1 = this.client.fontRendererObj.getStringWidth(s);
+                int k1 = this.client.fontRenderer.getStringWidth(s);
                 int l1 = MathHelper.floor(MathHelper.clampedLerp(255.0D, 75.0D, (double)((float)(Minecraft.getSystemTime() - guisubtitleoverlay$subtitle1.getStartTime()) / 3000.0F)));
                 int i2 = l1 << 16 | l1 << 8 | l1;
                 GlStateManager.pushMatrix();
@@ -89,15 +89,15 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener
                 {
                     if (d0 > 0.0D)
                     {
-                        this.client.fontRendererObj.drawString(">", l - this.client.fontRendererObj.getStringWidth(">"), -j1, i2 + -16777216);
+                        this.client.fontRenderer.drawString(">", l - this.client.fontRenderer.getStringWidth(">"), -j1, i2 + -16777216);
                     }
                     else if (d0 < 0.0D)
                     {
-                        this.client.fontRendererObj.drawString("<", -l, -j1, i2 + -16777216);
+                        this.client.fontRenderer.drawString("<", -l, -j1, i2 + -16777216);
                     }
                 }
 
-                this.client.fontRendererObj.drawString(s, -k1 / 2, -j1, i2 + -16777216);
+                this.client.fontRenderer.drawString(s, -k1 / 2, -j1, i2 + -16777216);
                 GlStateManager.popMatrix();
                 ++i;
             }

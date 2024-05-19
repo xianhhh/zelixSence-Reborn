@@ -30,7 +30,7 @@ public class CommandDebug extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "debug";
     }
@@ -46,7 +46,7 @@ public class CommandDebug extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.debug.usage";
     }
@@ -86,7 +86,7 @@ public class CommandDebug extends CommandBase
                     throw new WrongUsageException("commands.debug.usage", new Object[0]);
                 }
 
-                if (!server.theProfiler.profilingEnabled)
+                if (!server.profiler.profilingEnabled)
                 {
                     throw new CommandException("commands.debug.notStarted", new Object[0]);
                 }
@@ -96,7 +96,7 @@ public class CommandDebug extends CommandBase
                 long k = i - this.profileStartTime;
                 int l = j - this.profileStartTick;
                 this.saveProfilerResults(k, l, server);
-                server.theProfiler.profilingEnabled = false;
+                server.profiler.profilingEnabled = false;
                 notifyCommandListener(sender, this, "commands.debug.stop", new Object[] {String.format("%.2f", (float)k / 1000.0F), l});
             }
         }
@@ -139,18 +139,18 @@ public class CommandDebug extends CommandBase
         return stringbuilder.toString();
     }
 
-    private void appendProfilerResults(int p_184895_1_, String sectionName, StringBuilder builder, MinecraftServer server)
+    private void appendProfilerResults(int depth, String sectionName, StringBuilder builder, MinecraftServer server)
     {
-        List<Profiler.Result> list = server.theProfiler.getProfilingData(sectionName);
+        List<Profiler.Result> list = server.profiler.getProfilingData(sectionName);
 
         if (list != null && list.size() >= 3)
         {
             for (int i = 1; i < list.size(); ++i)
             {
                 Profiler.Result profiler$result = list.get(i);
-                builder.append(String.format("[%02d] ", p_184895_1_));
+                builder.append(String.format("[%02d] ", depth));
 
-                for (int j = 0; j < p_184895_1_; ++j)
+                for (int j = 0; j < depth; ++j)
                 {
                     builder.append("|   ");
                 }
@@ -161,7 +161,7 @@ public class CommandDebug extends CommandBase
                 {
                     try
                     {
-                        this.appendProfilerResults(p_184895_1_ + 1, sectionName + "." + profiler$result.profilerName, builder, server);
+                        this.appendProfilerResults(depth + 1, sectionName + "." + profiler$result.profilerName, builder, server);
                     }
                     catch (Exception exception)
                     {
@@ -189,7 +189,7 @@ public class CommandDebug extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"start", "stop"}) : Collections.emptyList();
     }

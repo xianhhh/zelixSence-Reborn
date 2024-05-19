@@ -19,7 +19,7 @@ public class CreativeCrafting implements IContainerListener
     /**
      * update the crafting window inventory with the items in the list
      */
-    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
+    public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList)
     {
     }
 
@@ -37,7 +37,7 @@ public class CreativeCrafting implements IContainerListener
      * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new
      * value. Both are truncated to shorts in non-local SMP.
      */
-    public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue)
+    public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue)
     {
     }
 

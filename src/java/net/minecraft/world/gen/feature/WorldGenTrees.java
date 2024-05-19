@@ -38,13 +38,13 @@ public class WorldGenTrees extends WorldGenAbstractTree
         this(p_i2027_1_, 4, DEFAULT_TRUNK, DEFAULT_LEAF, false);
     }
 
-    public WorldGenTrees(boolean p_i46446_1_, int p_i46446_2_, IBlockState p_i46446_3_, IBlockState p_i46446_4_, boolean p_i46446_5_)
+    public WorldGenTrees(boolean notify, int minTreeHeightIn, IBlockState woodMeta, IBlockState p_i46446_4_, boolean growVines)
     {
-        super(p_i46446_1_);
-        this.minTreeHeight = p_i46446_2_;
-        this.metaWood = p_i46446_3_;
+        super(notify);
+        this.minTreeHeight = minTreeHeightIn;
+        this.metaWood = woodMeta;
         this.metaLeaves = p_i46446_4_;
-        this.vinesGrow = p_i46446_5_;
+        this.vinesGrow = growVines;
     }
 
     public boolean generate(World worldIn, Random rand, BlockPos position)

@@ -16,111 +16,114 @@ import net.minecraft.util.ResourceLocation;
 
 public class ConstructBeaconTrigger implements ICriterionTrigger<ConstructBeaconTrigger.Instance>
 {
-    private static final ResourceLocation field_192181_a = new ResourceLocation("construct_beacon");
-    private final Map<PlayerAdvancements, ConstructBeaconTrigger.Listeners> field_192182_b = Maps.<PlayerAdvancements, ConstructBeaconTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("construct_beacon");
+    private final Map<PlayerAdvancements, ConstructBeaconTrigger.Listeners> listeners = Maps.<PlayerAdvancements, ConstructBeaconTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192181_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener)
     {
-        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.field_192182_b.get(p_192165_1_);
+        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (constructbeacontrigger$listeners == null)
         {
-            constructbeacontrigger$listeners = new ConstructBeaconTrigger.Listeners(p_192165_1_);
-            this.field_192182_b.put(p_192165_1_, constructbeacontrigger$listeners);
+            constructbeacontrigger$listeners = new ConstructBeaconTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, constructbeacontrigger$listeners);
         }
 
-        constructbeacontrigger$listeners.func_192355_a(p_192165_2_);
+        constructbeacontrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener)
     {
-        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.field_192182_b.get(p_192164_1_);
+        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (constructbeacontrigger$listeners != null)
         {
-            constructbeacontrigger$listeners.func_192353_b(p_192164_2_);
+            constructbeacontrigger$listeners.remove(listener);
 
-            if (constructbeacontrigger$listeners.func_192354_a())
+            if (constructbeacontrigger$listeners.isEmpty())
             {
-                this.field_192182_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192182_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public ConstructBeaconTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public ConstructBeaconTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(p_192166_1_.get("level"));
+        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(json.get("level"));
         return new ConstructBeaconTrigger.Instance(minmaxbounds);
     }
 
-    public void func_192180_a(EntityPlayerMP p_192180_1_, TileEntityBeacon p_192180_2_)
+    public void trigger(EntityPlayerMP player, TileEntityBeacon beacon)
     {
-        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.field_192182_b.get(p_192180_1_.func_192039_O());
+        ConstructBeaconTrigger.Listeners constructbeacontrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (constructbeacontrigger$listeners != null)
         {
-            constructbeacontrigger$listeners.func_192352_a(p_192180_2_);
+            constructbeacontrigger$listeners.trigger(beacon);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final MinMaxBounds field_192253_a;
+        private final MinMaxBounds level;
 
-        public Instance(MinMaxBounds p_i47373_1_)
+        public Instance(MinMaxBounds level)
         {
-            super(ConstructBeaconTrigger.field_192181_a);
-            this.field_192253_a = p_i47373_1_;
+            super(ConstructBeaconTrigger.ID);
+            this.level = level;
         }
 
-        public boolean func_192252_a(TileEntityBeacon p_192252_1_)
+        public boolean test(TileEntityBeacon beacon)
         {
-            return this.field_192253_a.func_192514_a((float)p_192252_1_.func_191979_s());
+            return this.level.test((float)beacon.getLevels());
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192356_a;
-        private final Set<ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance>> field_192357_b = Sets.<ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47374_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192356_a = p_i47374_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192354_a()
+        public boolean isEmpty()
         {
-            return this.field_192357_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192355_a(ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> p_192355_1_)
+        public void add(ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener)
         {
-            this.field_192357_b.add(p_192355_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192353_b(ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> p_192353_1_)
+        public void remove(ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener)
         {
-            this.field_192357_b.remove(p_192353_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192352_a(TileEntityBeacon p_192352_1_)
+        public void trigger(TileEntityBeacon beacon)
         {
             List<ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener : this.field_192357_b)
+            for (ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener : this.listeners)
             {
-                if (((ConstructBeaconTrigger.Instance)listener.func_192158_a()).func_192252_a(p_192352_1_))
+                if (((ConstructBeaconTrigger.Instance)listener.getCriterionInstance()).test(beacon))
                 {
                     if (list == null)
                     {
@@ -135,7 +138,7 @@ public class ConstructBeaconTrigger implements ICriterionTrigger<ConstructBeacon
             {
                 for (ICriterionTrigger.Listener<ConstructBeaconTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192356_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

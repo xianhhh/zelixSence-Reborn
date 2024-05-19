@@ -140,7 +140,7 @@ public class BlockRailDetector extends BlockRailBase
         worldIn.updateComparatorOutputLevel(pos, this);
     }
 
-    protected void updateConnectedRails(World worldIn, BlockPos pos, IBlockState state, boolean p_185592_4_)
+    protected void updateConnectedRails(World worldIn, BlockPos pos, IBlockState state, boolean powered)
     {
         BlockRailBase.Rail blockrailbase$rail = new BlockRailBase.Rail(worldIn, pos, state);
 

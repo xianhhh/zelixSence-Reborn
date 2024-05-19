@@ -148,15 +148,15 @@ public class PhaseHoldingPattern extends PhaseBase
         {
             Vec3d vec3d = this.currentPath.getCurrentPos();
             this.currentPath.incrementPathIndex();
-            double d0 = vec3d.xCoord;
-            double d1 = vec3d.zCoord;
+            double d0 = vec3d.x;
+            double d1 = vec3d.z;
             double d2;
 
             while (true)
             {
-                d2 = vec3d.yCoord + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
+                d2 = vec3d.y + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
 
-                if (d2 >= vec3d.yCoord)
+                if (d2 >= vec3d.y)
                 {
                     break;
                 }

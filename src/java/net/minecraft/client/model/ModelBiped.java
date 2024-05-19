@@ -300,15 +300,15 @@ public class ModelBiped extends ModelBase
         }
     }
 
-    public void setInvisible(boolean invisible)
+    public void setVisible(boolean visible)
     {
-        this.bipedHead.showModel = invisible;
-        this.bipedHeadwear.showModel = invisible;
-        this.bipedBody.showModel = invisible;
-        this.bipedRightArm.showModel = invisible;
-        this.bipedLeftArm.showModel = invisible;
-        this.bipedRightLeg.showModel = invisible;
-        this.bipedLeftLeg.showModel = invisible;
+        this.bipedHead.showModel = visible;
+        this.bipedHeadwear.showModel = visible;
+        this.bipedBody.showModel = visible;
+        this.bipedRightArm.showModel = visible;
+        this.bipedLeftArm.showModel = visible;
+        this.bipedRightLeg.showModel = visible;
+        this.bipedLeftLeg.showModel = visible;
     }
 
     public void postRenderArm(float scale, EnumHandSide side)

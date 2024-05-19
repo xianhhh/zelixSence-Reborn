@@ -13,9 +13,9 @@ import net.minecraft.world.World;
 
 public abstract class EntitySpellcasterIllager extends AbstractIllager
 {
-    private static final DataParameter<Byte> field_193088_c = EntityDataManager.<Byte>createKey(EntitySpellcasterIllager.class, DataSerializers.BYTE);
-    protected int field_193087_b;
-    private EntitySpellcasterIllager.SpellType field_193089_bx = EntitySpellcasterIllager.SpellType.NONE;
+    private static final DataParameter<Byte> SPELL = EntityDataManager.<Byte>createKey(EntitySpellcasterIllager.class, DataSerializers.BYTE);
+    protected int spellTicks;
+    private EntitySpellcasterIllager.SpellType activeSpell = EntitySpellcasterIllager.SpellType.NONE;
 
     public EntitySpellcasterIllager(World p_i47506_1_)
     {
@@ -25,7 +25,7 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
     protected void entityInit()
     {
         super.entityInit();
-        this.dataManager.register(field_193088_c, Byte.valueOf((byte)0));
+        this.dataManager.register(SPELL, Byte.valueOf((byte)0));
     }
 
     /**
@@ -34,7 +34,7 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
     public void readEntityFromNBT(NBTTagCompound compound)
     {
         super.readEntityFromNBT(compound);
-        this.field_193087_b = compound.getInteger("SpellTicks");
+        this.spellTicks = compound.getInteger("SpellTicks");
     }
 
     /**
@@ -43,44 +43,44 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
     public void writeEntityToNBT(NBTTagCompound compound)
     {
         super.writeEntityToNBT(compound);
-        compound.setInteger("SpellTicks", this.field_193087_b);
+        compound.setInteger("SpellTicks", this.spellTicks);
     }
 
-    public AbstractIllager.IllagerArmPose func_193077_p()
+    public AbstractIllager.IllagerArmPose getArmPose()
     {
-        return this.func_193082_dl() ? AbstractIllager.IllagerArmPose.SPELLCASTING : AbstractIllager.IllagerArmPose.CROSSED;
+        return this.isSpellcasting() ? AbstractIllager.IllagerArmPose.SPELLCASTING : AbstractIllager.IllagerArmPose.CROSSED;
     }
 
-    public boolean func_193082_dl()
+    public boolean isSpellcasting()
     {
         if (this.world.isRemote)
         {
-            return ((Byte)this.dataManager.get(field_193088_c)).byteValue() > 0;
+            return ((Byte)this.dataManager.get(SPELL)).byteValue() > 0;
         }
         else
         {
-            return this.field_193087_b > 0;
+            return this.spellTicks > 0;
         }
     }
 
-    public void func_193081_a(EntitySpellcasterIllager.SpellType p_193081_1_)
+    public void setSpellType(EntitySpellcasterIllager.SpellType spellType)
     {
-        this.field_193089_bx = p_193081_1_;
-        this.dataManager.set(field_193088_c, Byte.valueOf((byte)p_193081_1_.field_193345_g));
+        this.activeSpell = spellType;
+        this.dataManager.set(SPELL, Byte.valueOf((byte)spellType.id));
     }
 
-    protected EntitySpellcasterIllager.SpellType func_193083_dm()
+    protected EntitySpellcasterIllager.SpellType getSpellType()
     {
-        return !this.world.isRemote ? this.field_193089_bx : EntitySpellcasterIllager.SpellType.func_193337_a(((Byte)this.dataManager.get(field_193088_c)).byteValue());
+        return !this.world.isRemote ? this.activeSpell : EntitySpellcasterIllager.SpellType.getFromId(((Byte)this.dataManager.get(SPELL)).byteValue());
     }
 
     protected void updateAITasks()
     {
         super.updateAITasks();
 
-        if (this.field_193087_b > 0)
+        if (this.spellTicks > 0)
         {
-            --this.field_193087_b;
+            --this.spellTicks;
         }
     }
 
@@ -91,12 +91,12 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
     {
         super.onUpdate();
 
-        if (this.world.isRemote && this.func_193082_dl())
+        if (this.world.isRemote && this.isSpellcasting())
         {
-            EntitySpellcasterIllager.SpellType entityspellcasterillager$spelltype = this.func_193083_dm();
-            double d0 = entityspellcasterillager$spelltype.field_193346_h[0];
-            double d1 = entityspellcasterillager$spelltype.field_193346_h[1];
-            double d2 = entityspellcasterillager$spelltype.field_193346_h[2];
+            EntitySpellcasterIllager.SpellType entityspellcasterillager$spelltype = this.getSpellType();
+            double d0 = entityspellcasterillager$spelltype.particleSpeed[0];
+            double d1 = entityspellcasterillager$spelltype.particleSpeed[1];
+            double d2 = entityspellcasterillager$spelltype.particleSpeed[2];
             float f = this.renderYawOffset * 0.017453292F + MathHelper.cos((float)this.ticksExisted * 0.6662F) * 0.25F;
             float f1 = MathHelper.cos(f);
             float f2 = MathHelper.sin(f);
@@ -105,12 +105,12 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
         }
     }
 
-    protected int func_193085_dn()
+    protected int getSpellTicks()
     {
-        return this.field_193087_b;
+        return this.spellTicks;
     }
 
-    protected abstract SoundEvent func_193086_dk();
+    protected abstract SoundEvent getSpellSound();
 
     public class AICastingApell extends EntityAIBase
     {
@@ -121,7 +121,7 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
 
         public boolean shouldExecute()
         {
-            return EntitySpellcasterIllager.this.func_193085_dn() > 0;
+            return EntitySpellcasterIllager.this.getSpellTicks() > 0;
         }
 
         public void startExecuting()
@@ -133,7 +133,7 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
         public void resetTask()
         {
             super.resetTask();
-            EntitySpellcasterIllager.this.func_193081_a(EntitySpellcasterIllager.SpellType.NONE);
+            EntitySpellcasterIllager.this.setSpellType(EntitySpellcasterIllager.SpellType.NONE);
         }
 
         public void updateTask()
@@ -147,8 +147,8 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
 
     public abstract class AIUseSpell extends EntityAIBase
     {
-        protected int field_193321_c;
-        protected int field_193322_d;
+        protected int spellWarmup;
+        protected int spellCooldown;
 
         public boolean shouldExecute()
         {
@@ -156,62 +156,62 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
             {
                 return false;
             }
-            else if (EntitySpellcasterIllager.this.func_193082_dl())
+            else if (EntitySpellcasterIllager.this.isSpellcasting())
             {
                 return false;
             }
             else
             {
-                return EntitySpellcasterIllager.this.ticksExisted >= this.field_193322_d;
+                return EntitySpellcasterIllager.this.ticksExisted >= this.spellCooldown;
             }
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
-            return EntitySpellcasterIllager.this.getAttackTarget() != null && this.field_193321_c > 0;
+            return EntitySpellcasterIllager.this.getAttackTarget() != null && this.spellWarmup > 0;
         }
 
         public void startExecuting()
         {
-            this.field_193321_c = this.func_190867_m();
-            EntitySpellcasterIllager.this.field_193087_b = this.func_190869_f();
-            this.field_193322_d = EntitySpellcasterIllager.this.ticksExisted + this.func_190872_i();
-            SoundEvent soundevent = this.func_190871_k();
+            this.spellWarmup = this.getCastWarmupTime();
+            EntitySpellcasterIllager.this.spellTicks = this.getCastingTime();
+            this.spellCooldown = EntitySpellcasterIllager.this.ticksExisted + this.getCastingInterval();
+            SoundEvent soundevent = this.getSpellPrepareSound();
 
             if (soundevent != null)
             {
                 EntitySpellcasterIllager.this.playSound(soundevent, 1.0F, 1.0F);
             }
 
-            EntitySpellcasterIllager.this.func_193081_a(this.func_193320_l());
+            EntitySpellcasterIllager.this.setSpellType(this.getSpellType());
         }
 
         public void updateTask()
         {
-            --this.field_193321_c;
+            --this.spellWarmup;
 
-            if (this.field_193321_c == 0)
+            if (this.spellWarmup == 0)
             {
-                this.func_190868_j();
-                EntitySpellcasterIllager.this.playSound(EntitySpellcasterIllager.this.func_193086_dk(), 1.0F, 1.0F);
+                this.castSpell();
+                EntitySpellcasterIllager.this.playSound(EntitySpellcasterIllager.this.getSpellSound(), 1.0F, 1.0F);
             }
         }
 
-        protected abstract void func_190868_j();
+        protected abstract void castSpell();
 
-        protected int func_190867_m()
+        protected int getCastWarmupTime()
         {
             return 20;
         }
 
-        protected abstract int func_190869_f();
+        protected abstract int getCastingTime();
 
-        protected abstract int func_190872_i();
+        protected abstract int getCastingInterval();
 
         @Nullable
-        protected abstract SoundEvent func_190871_k();
+        protected abstract SoundEvent getSpellPrepareSound();
 
-        protected abstract EntitySpellcasterIllager.SpellType func_193320_l();
+        protected abstract EntitySpellcasterIllager.SpellType getSpellType();
     }
 
     public static enum SpellType
@@ -223,20 +223,20 @@ public abstract class EntitySpellcasterIllager extends AbstractIllager
         DISAPPEAR(4, 0.3D, 0.3D, 0.8D),
         BLINDNESS(5, 0.1D, 0.1D, 0.2D);
 
-        private final int field_193345_g;
-        private final double[] field_193346_h;
+        private final int id;
+        private final double[] particleSpeed;
 
-        private SpellType(int p_i47561_3_, double p_i47561_4_, double p_i47561_6_, double p_i47561_8_)
+        private SpellType(int idIn, double xParticleSpeed, double yParticleSpeed, double zParticleSpeed)
         {
-            this.field_193345_g = p_i47561_3_;
-            this.field_193346_h = new double[] {p_i47561_4_, p_i47561_6_, p_i47561_8_};
+            this.id = idIn;
+            this.particleSpeed = new double[] {xParticleSpeed, yParticleSpeed, zParticleSpeed};
         }
 
-        public static EntitySpellcasterIllager.SpellType func_193337_a(int p_193337_0_)
+        public static EntitySpellcasterIllager.SpellType getFromId(int idIn)
         {
             for (EntitySpellcasterIllager.SpellType entityspellcasterillager$spelltype : values())
             {
-                if (p_193337_0_ == entityspellcasterillager$spelltype.field_193345_g)
+                if (idIn == entityspellcasterillager$spelltype.id)
                 {
                     return entityspellcasterillager$spelltype;
                 }

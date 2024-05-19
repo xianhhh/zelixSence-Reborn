@@ -16,116 +16,119 @@ import net.minecraft.world.WorldServer;
 
 public class PositionTrigger implements ICriterionTrigger<PositionTrigger.Instance>
 {
-    private final ResourceLocation field_192217_a;
-    private final Map<PlayerAdvancements, PositionTrigger.Listeners> field_192218_b = Maps.<PlayerAdvancements, PositionTrigger.Listeners>newHashMap();
+    private final ResourceLocation id;
+    private final Map<PlayerAdvancements, PositionTrigger.Listeners> listeners = Maps.<PlayerAdvancements, PositionTrigger.Listeners>newHashMap();
 
-    public PositionTrigger(ResourceLocation p_i47432_1_)
+    public PositionTrigger(ResourceLocation id)
     {
-        this.field_192217_a = p_i47432_1_;
+        this.id = id;
     }
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return this.field_192217_a;
+        return this.id;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<PositionTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PositionTrigger.Instance> listener)
     {
-        PositionTrigger.Listeners positiontrigger$listeners = this.field_192218_b.get(p_192165_1_);
+        PositionTrigger.Listeners positiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (positiontrigger$listeners == null)
         {
-            positiontrigger$listeners = new PositionTrigger.Listeners(p_192165_1_);
-            this.field_192218_b.put(p_192165_1_, positiontrigger$listeners);
+            positiontrigger$listeners = new PositionTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, positiontrigger$listeners);
         }
 
-        positiontrigger$listeners.func_192510_a(p_192165_2_);
+        positiontrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<PositionTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<PositionTrigger.Instance> listener)
     {
-        PositionTrigger.Listeners positiontrigger$listeners = this.field_192218_b.get(p_192164_1_);
+        PositionTrigger.Listeners positiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (positiontrigger$listeners != null)
         {
-            positiontrigger$listeners.func_192507_b(p_192164_2_);
+            positiontrigger$listeners.remove(listener);
 
-            if (positiontrigger$listeners.func_192508_a())
+            if (positiontrigger$listeners.isEmpty())
             {
-                this.field_192218_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192218_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public PositionTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public PositionTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        LocationPredicate locationpredicate = LocationPredicate.func_193454_a(p_192166_1_);
-        return new PositionTrigger.Instance(this.field_192217_a, locationpredicate);
+        LocationPredicate locationpredicate = LocationPredicate.deserialize(json);
+        return new PositionTrigger.Instance(this.id, locationpredicate);
     }
 
-    public void func_192215_a(EntityPlayerMP p_192215_1_)
+    public void trigger(EntityPlayerMP player)
     {
-        PositionTrigger.Listeners positiontrigger$listeners = this.field_192218_b.get(p_192215_1_.func_192039_O());
+        PositionTrigger.Listeners positiontrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (positiontrigger$listeners != null)
         {
-            positiontrigger$listeners.func_193462_a(p_192215_1_.getServerWorld(), p_192215_1_.posX, p_192215_1_.posY, p_192215_1_.posZ);
+            positiontrigger$listeners.trigger(player.getServerWorld(), player.posX, player.posY, player.posZ);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final LocationPredicate field_193205_a;
+        private final LocationPredicate location;
 
-        public Instance(ResourceLocation p_i47544_1_, LocationPredicate p_i47544_2_)
+        public Instance(ResourceLocation criterionIn, LocationPredicate location)
         {
-            super(p_i47544_1_);
-            this.field_193205_a = p_i47544_2_;
+            super(criterionIn);
+            this.location = location;
         }
 
-        public boolean func_193204_a(WorldServer p_193204_1_, double p_193204_2_, double p_193204_4_, double p_193204_6_)
+        public boolean test(WorldServer world, double x, double y, double z)
         {
-            return this.field_193205_a.func_193452_a(p_193204_1_, p_193204_2_, p_193204_4_, p_193204_6_);
+            return this.location.test(world, x, y, z);
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192511_a;
-        private final Set<ICriterionTrigger.Listener<PositionTrigger.Instance>> field_192512_b = Sets.<ICriterionTrigger.Listener<PositionTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<PositionTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<PositionTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47442_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192511_a = p_i47442_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192508_a()
+        public boolean isEmpty()
         {
-            return this.field_192512_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192510_a(ICriterionTrigger.Listener<PositionTrigger.Instance> p_192510_1_)
+        public void add(ICriterionTrigger.Listener<PositionTrigger.Instance> listener)
         {
-            this.field_192512_b.add(p_192510_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192507_b(ICriterionTrigger.Listener<PositionTrigger.Instance> p_192507_1_)
+        public void remove(ICriterionTrigger.Listener<PositionTrigger.Instance> listener)
         {
-            this.field_192512_b.remove(p_192507_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193462_a(WorldServer p_193462_1_, double p_193462_2_, double p_193462_4_, double p_193462_6_)
+        public void trigger(WorldServer world, double x, double y, double z)
         {
             List<ICriterionTrigger.Listener<PositionTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<PositionTrigger.Instance> listener : this.field_192512_b)
+            for (ICriterionTrigger.Listener<PositionTrigger.Instance> listener : this.listeners)
             {
-                if (((PositionTrigger.Instance)listener.func_192158_a()).func_193204_a(p_193462_1_, p_193462_2_, p_193462_4_, p_193462_6_))
+                if (((PositionTrigger.Instance)listener.getCriterionInstance()).test(world, x, y, z))
                 {
                     if (list == null)
                     {
@@ -140,7 +143,7 @@ public class PositionTrigger implements ICriterionTrigger<PositionTrigger.Instan
             {
                 for (ICriterionTrigger.Listener<PositionTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192511_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

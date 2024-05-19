@@ -75,13 +75,13 @@ public abstract class BlockStoneSlab extends BlockSlab
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
         for (BlockStoneSlab.EnumType blockstoneslab$enumtype : BlockStoneSlab.EnumType.values())
         {
             if (blockstoneslab$enumtype != BlockStoneSlab.EnumType.WOOD)
             {
-                tab.add(new ItemStack(this, 1, blockstoneslab$enumtype.getMetadata()));
+                items.add(new ItemStack(this, 1, blockstoneslab$enumtype.getMetadata()));
             }
         }
     }
@@ -145,7 +145,7 @@ public abstract class BlockStoneSlab extends BlockSlab
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return ((BlockStoneSlab.EnumType)state.getValue(VARIANT)).getMapColor();
     }

@@ -999,7 +999,7 @@ public class StructureNetherBridgePieces
 
                     if (k < 0)
                     {
-                        if (!structurenetherbridgepieces$pieceweight.doPlace(p_175871_9_) || structurenetherbridgepieces$pieceweight == p_175871_1_.theNetherBridgePieceWeight && !structurenetherbridgepieces$pieceweight.allowInRow)
+                        if (!structurenetherbridgepieces$pieceweight.doPlace(p_175871_9_) || structurenetherbridgepieces$pieceweight == p_175871_1_.lastPlaced && !structurenetherbridgepieces$pieceweight.allowInRow)
                         {
                             break;
                         }
@@ -1009,7 +1009,7 @@ public class StructureNetherBridgePieces
                         if (structurenetherbridgepieces$piece != null)
                         {
                             ++structurenetherbridgepieces$pieceweight.placeCount;
-                            p_175871_1_.theNetherBridgePieceWeight = structurenetherbridgepieces$pieceweight;
+                            p_175871_1_.lastPlaced = structurenetherbridgepieces$pieceweight;
 
                             if (!structurenetherbridgepieces$pieceweight.isValid())
                             {
@@ -1228,7 +1228,7 @@ public class StructureNetherBridgePieces
 
     public static class Start extends StructureNetherBridgePieces.Crossing3
     {
-        public StructureNetherBridgePieces.PieceWeight theNetherBridgePieceWeight;
+        public StructureNetherBridgePieces.PieceWeight lastPlaced;
         public List<StructureNetherBridgePieces.PieceWeight> primaryWeights;
         public List<StructureNetherBridgePieces.PieceWeight> secondaryWeights;
         public List<StructureComponent> pendingChildren = Lists.<StructureComponent>newArrayList();
@@ -1380,7 +1380,7 @@ public class StructureNetherBridgePieces
 
                     if (tileentity instanceof TileEntityMobSpawner)
                     {
-                        ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic().func_190894_a(EntityList.func_191306_a(EntityBlaze.class));
+                        ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic().setEntityId(EntityList.getKey(EntityBlaze.class));
                     }
                 }
             }

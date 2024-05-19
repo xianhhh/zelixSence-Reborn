@@ -38,8 +38,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 public abstract class CommandBase implements ICommand
 {
     private static ICommandListener commandListener;
-    private static final Splitter field_190796_b = Splitter.on(',');
-    private static final Splitter field_190797_c = Splitter.on('=').limit(2);
+    private static final Splitter COMMA_SPLITTER = Splitter.on(',');
+    private static final Splitter EQUAL_SPLITTER = Splitter.on('=').limit(2);
 
     /**
      * Convert a JsonParseException into a user-friendly exception
@@ -70,7 +70,7 @@ public abstract class CommandBase implements ICommand
         {
             ItemStack itemstack = ((EntityPlayer)theEntity).inventory.getCurrentItem();
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 nbttagcompound.setTag("SelectedItem", itemstack.writeToNBT(new NBTTagCompound()));
             }
@@ -87,7 +87,7 @@ public abstract class CommandBase implements ICommand
         return 4;
     }
 
-    public List<String> getCommandAliases()
+    public List<String> getAliases()
     {
         return Collections.<String>emptyList();
     }
@@ -97,10 +97,10 @@ public abstract class CommandBase implements ICommand
      */
     public boolean checkPermission(MinecraftServer server, ICommandSender sender)
     {
-        return sender.canCommandSenderUseCommand(this.getRequiredPermissionLevel(), this.getCommandName());
+        return sender.canUseCommand(this.getRequiredPermissionLevel(), this.getName());
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         return Collections.<String>emptyList();
     }
@@ -254,18 +254,18 @@ public abstract class CommandBase implements ICommand
         }
     }
 
-    public static List<EntityPlayerMP> func_193513_a(MinecraftServer p_193513_0_, ICommandSender p_193513_1_, String p_193513_2_) throws CommandException
+    public static List<EntityPlayerMP> getPlayers(MinecraftServer p_193513_0_, ICommandSender p_193513_1_, String p_193513_2_) throws CommandException
     {
-        List<EntityPlayerMP> list = EntitySelector.func_193531_b(p_193513_1_, p_193513_2_);
-        return (List<EntityPlayerMP>)(list.isEmpty() ? Lists.newArrayList(func_193512_a(p_193513_0_, (EntityPlayerMP)null, p_193513_2_)) : list);
+        List<EntityPlayerMP> list = EntitySelector.getPlayers(p_193513_1_, p_193513_2_);
+        return (List<EntityPlayerMP>)(list.isEmpty() ? Lists.newArrayList(getPlayer(p_193513_0_, (EntityPlayerMP)null, p_193513_2_)) : list);
     }
 
     public static EntityPlayerMP getPlayer(MinecraftServer server, ICommandSender sender, String target) throws PlayerNotFoundException, CommandException
     {
-        return func_193512_a(server, EntitySelector.matchOnePlayer(sender, target), target);
+        return getPlayer(server, EntitySelector.matchOnePlayer(sender, target), target);
     }
 
-    private static EntityPlayerMP func_193512_a(MinecraftServer p_193512_0_, @Nullable EntityPlayerMP p_193512_1_, String p_193512_2_) throws CommandException
+    private static EntityPlayerMP getPlayer(MinecraftServer p_193512_0_, @Nullable EntityPlayerMP p_193512_1_, String p_193512_2_) throws CommandException
     {
         if (p_193512_1_ == null)
         {
@@ -341,7 +341,7 @@ public abstract class CommandBase implements ICommand
 
     public static List<Entity> getEntityList(MinecraftServer server, ICommandSender sender, String target) throws EntityNotFoundException, CommandException
     {
-        return (List<Entity>)(EntitySelector.hasArguments(target) ? EntitySelector.matchEntities(sender, target, Entity.class) : Lists.newArrayList(getEntity(server, sender, target)));
+        return (List<Entity>)(EntitySelector.isSelector(target) ? EntitySelector.matchEntities(sender, target, Entity.class) : Lists.newArrayList(getEntity(server, sender, target)));
     }
 
     public static String getPlayerName(MinecraftServer server, ICommandSender sender, String target) throws PlayerNotFoundException, CommandException
@@ -352,7 +352,7 @@ public abstract class CommandBase implements ICommand
         }
         catch (CommandException commandexception)
         {
-            if (EntitySelector.hasArguments(target))
+            if (EntitySelector.isSelector(target))
             {
                 throw commandexception;
             }
@@ -377,7 +377,7 @@ public abstract class CommandBase implements ICommand
             }
             catch (EntityNotFoundException entitynotfoundexception)
             {
-                if (EntitySelector.hasArguments(target))
+                if (EntitySelector.isSelector(target))
                 {
                     throw entitynotfoundexception;
                 }
@@ -413,7 +413,7 @@ public abstract class CommandBase implements ICommand
 
                 if (itextcomponent2 == null)
                 {
-                    if (EntitySelector.hasArguments(args[i]))
+                    if (EntitySelector.isSelector(args[i]))
                     {
                         throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[] {args[i]});
                     }
@@ -594,7 +594,7 @@ public abstract class CommandBase implements ICommand
         }
     }
 
-    public static IBlockState func_190794_a(Block p_190794_0_, String p_190794_1_) throws NumberInvalidException, InvalidBlockStateException
+    public static IBlockState convertArgToBlockState(Block p_190794_0_, String p_190794_1_) throws NumberInvalidException, InvalidBlockStateException
     {
         try
         {
@@ -617,12 +617,12 @@ public abstract class CommandBase implements ICommand
         {
             try
             {
-                Map < IProperty<?>, Comparable<? >> map = func_190795_c(p_190794_0_, p_190794_1_);
+                Map < IProperty<?>, Comparable<? >> map = getBlockStatePropertyValueMap(p_190794_0_, p_190794_1_);
                 IBlockState iblockstate = p_190794_0_.getDefaultState();
 
                 for (Entry < IProperty<?>, Comparable<? >> entry : map.entrySet())
                 {
-                    iblockstate = func_190793_a(iblockstate, entry.getKey(), entry.getValue());
+                    iblockstate = getBlockState(iblockstate, entry.getKey(), entry.getValue());
                 }
 
                 return iblockstate;
@@ -634,12 +634,12 @@ public abstract class CommandBase implements ICommand
         }
     }
 
-    private static <T extends Comparable<T>> IBlockState func_190793_a(IBlockState p_190793_0_, IProperty<T> p_190793_1_, Comparable<?> p_190793_2_)
+    private static <T extends Comparable<T>> IBlockState getBlockState(IBlockState p_190793_0_, IProperty<T> p_190793_1_, Comparable<?> p_190793_2_)
     {
         return p_190793_0_.withProperty(p_190793_1_, (T)p_190793_2_);
     }
 
-    public static Predicate<IBlockState> func_190791_b(final Block p_190791_0_, String p_190791_1_) throws InvalidBlockStateException
+    public static Predicate<IBlockState> convertArgToBlockStatePredicate(final Block p_190791_0_, String p_190791_1_) throws InvalidBlockStateException
     {
         if (!"*".equals(p_190791_1_) && !"-1".equals(p_190791_1_))
         {
@@ -656,7 +656,7 @@ public abstract class CommandBase implements ICommand
             }
             catch (RuntimeException var3)
             {
-                final Map < IProperty<?>, Comparable<? >> map = func_190795_c(p_190791_0_, p_190791_1_);
+                final Map < IProperty<?>, Comparable<? >> map = getBlockStatePropertyValueMap(p_190791_0_, p_190791_1_);
                 return new Predicate<IBlockState>()
                 {
                     public boolean apply(@Nullable IBlockState p_apply_1_)
@@ -687,7 +687,7 @@ public abstract class CommandBase implements ICommand
         }
     }
 
-    private static Map < IProperty<?>, Comparable<? >> func_190795_c(Block p_190795_0_, String p_190795_1_) throws InvalidBlockStateException
+    private static Map < IProperty<?>, Comparable<? >> getBlockStatePropertyValueMap(Block p_190795_0_, String p_190795_1_) throws InvalidBlockStateException
     {
         Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newHashMap();
 
@@ -698,7 +698,7 @@ public abstract class CommandBase implements ICommand
         else
         {
             BlockStateContainer blockstatecontainer = p_190795_0_.getBlockState();
-            Iterator iterator = field_190796_b.split(p_190795_1_).iterator();
+            Iterator iterator = COMMA_SPLITTER.split(p_190795_1_).iterator();
 
             while (true)
             {
@@ -708,7 +708,7 @@ public abstract class CommandBase implements ICommand
                 }
 
                 String s = (String)iterator.next();
-                Iterator<String> iterator1 = field_190797_c.split(s).iterator();
+                Iterator<String> iterator1 = EQUAL_SPLITTER.split(s).iterator();
 
                 if (!iterator1.hasNext())
                 {
@@ -722,7 +722,7 @@ public abstract class CommandBase implements ICommand
                     break;
                 }
 
-                Comparable<?> comparable = func_190792_a(iproperty, iterator1.next());
+                Comparable<?> comparable = getValueHelper(iproperty, iterator1.next());
 
                 if (comparable == null)
                 {
@@ -737,7 +737,7 @@ public abstract class CommandBase implements ICommand
     }
 
     @Nullable
-    private static <T extends Comparable<T>> T func_190792_a(IProperty<T> p_190792_0_, String p_190792_1_)
+    private static <T extends Comparable<T>> T getValueHelper(IProperty<T> p_190792_0_, String p_190792_1_)
     {
         return (T)(p_190792_0_.parseValue(p_190792_1_).orNull());
     }
@@ -942,7 +942,7 @@ public abstract class CommandBase implements ICommand
 
     public int compareTo(ICommand p_compareTo_1_)
     {
-        return this.getCommandName().compareTo(p_compareTo_1_.getCommandName());
+        return this.getName().compareTo(p_compareTo_1_.getName());
     }
 
     public static class CoordinateArg

@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 public class EntityItem extends Entity
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItem.class, DataSerializers.OPTIONAL_ITEM_STACK);
+    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItem.class, DataSerializers.ITEM_STACK);
 
     /**
      * The age of this EntityItem (used to animate it up and down as well as expire it)
@@ -60,7 +60,7 @@ public class EntityItem extends Entity
     public EntityItem(World worldIn, double x, double y, double z, ItemStack stack)
     {
         this(worldIn, x, y, z);
-        this.setEntityItemStack(stack);
+        this.setItem(stack);
     }
 
     /**
@@ -78,12 +78,12 @@ public class EntityItem extends Entity
         this.health = 5;
         this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
         this.setSize(0.25F, 0.25F);
-        this.setEntityItemStack(ItemStack.field_190927_a);
+        this.setItem(ItemStack.EMPTY);
     }
 
     protected void entityInit()
     {
-        this.getDataManager().register(ITEM, ItemStack.field_190927_a);
+        this.getDataManager().register(ITEM, ItemStack.EMPTY);
     }
 
     /**
@@ -91,7 +91,7 @@ public class EntityItem extends Entity
      */
     public void onUpdate()
     {
-        if (this.getEntityItem().func_190926_b())
+        if (this.getItem().isEmpty())
         {
             this.setDead();
         }
@@ -125,7 +125,7 @@ public class EntityItem extends Entity
                 this.noClip = this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
             }
 
-            this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
 
             if (flag || this.ticksExisted % 25 == 0)
@@ -192,7 +192,7 @@ public class EntityItem extends Entity
      */
     private void searchForOtherItemsNearby()
     {
-        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().expand(0.5D, 0.0D, 0.5D)))
+        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(0.5D, 0.0D, 0.5D)))
         {
             this.combineItems(entityitem);
         }
@@ -210,8 +210,8 @@ public class EntityItem extends Entity
         }
         else if (other.isEntityAlive() && this.isEntityAlive())
         {
-            ItemStack itemstack = this.getEntityItem();
-            ItemStack itemstack1 = other.getEntityItem();
+            ItemStack itemstack = this.getItem();
+            ItemStack itemstack1 = other.getItem();
 
             if (this.delayBeforeCanPickup != 32767 && other.delayBeforeCanPickup != 32767)
             {
@@ -237,20 +237,20 @@ public class EntityItem extends Entity
                     {
                         return false;
                     }
-                    else if (itemstack1.func_190916_E() < itemstack.func_190916_E())
+                    else if (itemstack1.getCount() < itemstack.getCount())
                     {
                         return other.combineItems(this);
                     }
-                    else if (itemstack1.func_190916_E() + itemstack.func_190916_E() > itemstack1.getMaxStackSize())
+                    else if (itemstack1.getCount() + itemstack.getCount() > itemstack1.getMaxStackSize())
                     {
                         return false;
                     }
                     else
                     {
-                        itemstack1.func_190917_f(itemstack.func_190916_E());
+                        itemstack1.grow(itemstack.getCount());
                         other.delayBeforeCanPickup = Math.max(other.delayBeforeCanPickup, this.delayBeforeCanPickup);
                         other.age = Math.min(other.age, this.age);
-                        other.setEntityItemStack(itemstack1);
+                        other.setItem(itemstack1);
                         this.setDead();
                         return true;
                     }
@@ -289,7 +289,7 @@ public class EntityItem extends Entity
         {
             if (!this.inWater && !this.firstUpdate)
             {
-                this.resetHeight();
+                this.doWaterSplashEffect();
             }
 
             this.inWater = true;
@@ -307,7 +307,7 @@ public class EntityItem extends Entity
      */
     protected void dealFireDamage(int amount)
     {
-        this.attackEntityFrom(DamageSource.inFire, (float)amount);
+        this.attackEntityFrom(DamageSource.IN_FIRE, (float)amount);
     }
 
     /**
@@ -319,7 +319,7 @@ public class EntityItem extends Entity
         {
             return false;
         }
-        else if (!this.getEntityItem().func_190926_b() && this.getEntityItem().getItem() == Items.NETHER_STAR && source.isExplosion())
+        else if (!this.getItem().isEmpty() && this.getItem().getItem() == Items.NETHER_STAR && source.isExplosion())
         {
             return false;
         }
@@ -361,9 +361,9 @@ public class EntityItem extends Entity
             compound.setString("Owner", this.owner);
         }
 
-        if (!this.getEntityItem().func_190926_b())
+        if (!this.getItem().isEmpty())
         {
-            compound.setTag("Item", this.getEntityItem().writeToNBT(new NBTTagCompound()));
+            compound.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound()));
         }
     }
 
@@ -391,9 +391,9 @@ public class EntityItem extends Entity
         }
 
         NBTTagCompound nbttagcompound = compound.getCompoundTag("Item");
-        this.setEntityItemStack(new ItemStack(nbttagcompound));
+        this.setItem(new ItemStack(nbttagcompound));
 
-        if (this.getEntityItem().func_190926_b())
+        if (this.getItem().isEmpty())
         {
             this.setDead();
         }
@@ -406,18 +406,18 @@ public class EntityItem extends Entity
     {
         if (!this.world.isRemote)
         {
-            ItemStack itemstack = this.getEntityItem();
+            ItemStack itemstack = this.getItem();
             Item item = itemstack.getItem();
-            int i = itemstack.func_190916_E();
+            int i = itemstack.getCount();
 
             if (this.delayBeforeCanPickup == 0 && (this.owner == null || 6000 - this.age <= 200 || this.owner.equals(entityIn.getName())) && entityIn.inventory.addItemStackToInventory(itemstack))
             {
                 entityIn.onItemPickup(this, i);
 
-                if (itemstack.func_190926_b())
+                if (itemstack.isEmpty())
                 {
                     this.setDead();
-                    itemstack.func_190920_e(i);
+                    itemstack.setCount(i);
                 }
 
                 entityIn.addStat(StatList.getObjectsPickedUpStats(item), i);
@@ -430,7 +430,7 @@ public class EntityItem extends Entity
      */
     public String getName()
     {
-        return this.hasCustomName() ? this.getCustomNameTag() : I18n.translateToLocal("item." + this.getEntityItem().getUnlocalizedName());
+        return this.hasCustomName() ? this.getCustomNameTag() : I18n.translateToLocal("item." + this.getItem().getUnlocalizedName());
     }
 
     /**
@@ -455,18 +455,17 @@ public class EntityItem extends Entity
     }
 
     /**
-     * Returns the ItemStack corresponding to the Entity (Note: if no item exists, will log an error but still return an
-     * ItemStack containing Block.stone)
+     * Gets the item that this entity represents.
      */
-    public ItemStack getEntityItem()
+    public ItemStack getItem()
     {
         return (ItemStack)this.getDataManager().get(ITEM);
     }
 
     /**
-     * Sets the ItemStack for this entity
+     * Sets the item that this entity represents.
      */
-    public void setEntityItemStack(ItemStack stack)
+    public void setItem(ItemStack stack)
     {
         this.getDataManager().set(ITEM, stack);
         this.getDataManager().setDirty(ITEM);

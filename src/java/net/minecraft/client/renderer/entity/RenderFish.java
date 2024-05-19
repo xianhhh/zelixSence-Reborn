@@ -28,7 +28,7 @@ public class RenderFish extends Render<EntityFishHook>
      */
     public void doRender(EntityFishHook entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
-        EntityPlayer entityplayer = entity.func_190619_l();
+        EntityPlayer entityplayer = entity.getAngler();
 
         if (entityplayer != null && !this.renderOutlines)
         {
@@ -101,9 +101,9 @@ public class RenderFish extends Render<EntityFishHook>
                 vec3d = vec3d.rotateYaw(-(entityplayer.prevRotationYaw + (entityplayer.rotationYaw - entityplayer.prevRotationYaw) * partialTicks) * 0.017453292F);
                 vec3d = vec3d.rotateYaw(f8 * 0.5F);
                 vec3d = vec3d.rotatePitch(-f8 * 0.7F);
-                d4 = entityplayer.prevPosX + (entityplayer.posX - entityplayer.prevPosX) * (double)partialTicks + vec3d.xCoord;
-                d5 = entityplayer.prevPosY + (entityplayer.posY - entityplayer.prevPosY) * (double)partialTicks + vec3d.yCoord;
-                d6 = entityplayer.prevPosZ + (entityplayer.posZ - entityplayer.prevPosZ) * (double)partialTicks + vec3d.zCoord;
+                d4 = entityplayer.prevPosX + (entityplayer.posX - entityplayer.prevPosX) * (double)partialTicks + vec3d.x;
+                d5 = entityplayer.prevPosY + (entityplayer.posY - entityplayer.prevPosY) * (double)partialTicks + vec3d.y;
+                d6 = entityplayer.prevPosZ + (entityplayer.posZ - entityplayer.prevPosZ) * (double)partialTicks + vec3d.z;
                 d7 = (double)entityplayer.getEyeHeight();
             }
             else

@@ -172,7 +172,7 @@ public class EntityOcelot extends EntityTameable
         }
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_CAT_HURT;
     }
@@ -236,14 +236,14 @@ public class EntityOcelot extends EntityTameable
         {
             if (!player.capabilities.isCreativeMode)
             {
-                itemstack.func_190918_g(1);
+                itemstack.shrink(1);
             }
 
             if (!this.world.isRemote)
             {
                 if (this.rand.nextInt(3) == 0)
                 {
-                    this.func_193101_c(player);
+                    this.setTamedBy(player);
                     this.setTameSkin(1 + this.world.rand.nextInt(3));
                     this.playTameEffect(true);
                     this.aiSit.setSitting(true);
@@ -408,7 +408,7 @@ public class EntityOcelot extends EntityTameable
                 EntityOcelot entityocelot = new EntityOcelot(this.world);
                 entityocelot.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
                 entityocelot.setGrowingAge(-24000);
-                this.world.spawnEntityInWorld(entityocelot);
+                this.world.spawnEntity(entityocelot);
             }
         }
 

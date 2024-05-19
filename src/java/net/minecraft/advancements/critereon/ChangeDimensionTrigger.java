@@ -18,123 +18,126 @@ import net.minecraft.world.DimensionType;
 
 public class ChangeDimensionTrigger implements ICriterionTrigger<ChangeDimensionTrigger.Instance>
 {
-    private static final ResourceLocation field_193144_a = new ResourceLocation("changed_dimension");
-    private final Map<PlayerAdvancements, ChangeDimensionTrigger.Listeners> field_193145_b = Maps.<PlayerAdvancements, ChangeDimensionTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("changed_dimension");
+    private final Map<PlayerAdvancements, ChangeDimensionTrigger.Listeners> listeners = Maps.<PlayerAdvancements, ChangeDimensionTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193144_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener)
     {
-        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.field_193145_b.get(p_192165_1_);
+        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (changedimensiontrigger$listeners == null)
         {
-            changedimensiontrigger$listeners = new ChangeDimensionTrigger.Listeners(p_192165_1_);
-            this.field_193145_b.put(p_192165_1_, changedimensiontrigger$listeners);
+            changedimensiontrigger$listeners = new ChangeDimensionTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, changedimensiontrigger$listeners);
         }
 
-        changedimensiontrigger$listeners.func_193233_a(p_192165_2_);
+        changedimensiontrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener)
     {
-        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.field_193145_b.get(p_192164_1_);
+        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (changedimensiontrigger$listeners != null)
         {
-            changedimensiontrigger$listeners.func_193231_b(p_192164_2_);
+            changedimensiontrigger$listeners.remove(listener);
 
-            if (changedimensiontrigger$listeners.func_193232_a())
+            if (changedimensiontrigger$listeners.isEmpty())
             {
-                this.field_193145_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193145_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public ChangeDimensionTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public ChangeDimensionTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        DimensionType dimensiontype = p_192166_1_.has("from") ? DimensionType.func_193417_a(JsonUtils.getString(p_192166_1_, "from")) : null;
-        DimensionType dimensiontype1 = p_192166_1_.has("to") ? DimensionType.func_193417_a(JsonUtils.getString(p_192166_1_, "to")) : null;
+        DimensionType dimensiontype = json.has("from") ? DimensionType.byName(JsonUtils.getString(json, "from")) : null;
+        DimensionType dimensiontype1 = json.has("to") ? DimensionType.byName(JsonUtils.getString(json, "to")) : null;
         return new ChangeDimensionTrigger.Instance(dimensiontype, dimensiontype1);
     }
 
-    public void func_193143_a(EntityPlayerMP p_193143_1_, DimensionType p_193143_2_, DimensionType p_193143_3_)
+    public void trigger(EntityPlayerMP player, DimensionType from, DimensionType to)
     {
-        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.field_193145_b.get(p_193143_1_.func_192039_O());
+        ChangeDimensionTrigger.Listeners changedimensiontrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (changedimensiontrigger$listeners != null)
         {
-            changedimensiontrigger$listeners.func_193234_a(p_193143_2_, p_193143_3_);
+            changedimensiontrigger$listeners.trigger(from, to);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
         @Nullable
-        private final DimensionType field_193191_a;
+        private final DimensionType from;
         @Nullable
-        private final DimensionType field_193192_b;
+        private final DimensionType to;
 
-        public Instance(@Nullable DimensionType p_i47475_1_, @Nullable DimensionType p_i47475_2_)
+        public Instance(@Nullable DimensionType from, @Nullable DimensionType to)
         {
-            super(ChangeDimensionTrigger.field_193144_a);
-            this.field_193191_a = p_i47475_1_;
-            this.field_193192_b = p_i47475_2_;
+            super(ChangeDimensionTrigger.ID);
+            this.from = from;
+            this.to = to;
         }
 
-        public boolean func_193190_a(DimensionType p_193190_1_, DimensionType p_193190_2_)
+        public boolean test(DimensionType from, DimensionType to)
         {
-            if (this.field_193191_a != null && this.field_193191_a != p_193190_1_)
+            if (this.from != null && this.from != from)
             {
                 return false;
             }
             else
             {
-                return this.field_193192_b == null || this.field_193192_b == p_193190_2_;
+                return this.to == null || this.to == to;
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193235_a;
-        private final Set<ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance>> field_193236_b = Sets.<ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47476_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193235_a = p_i47476_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193232_a()
+        public boolean isEmpty()
         {
-            return this.field_193236_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193233_a(ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> p_193233_1_)
+        public void add(ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener)
         {
-            this.field_193236_b.add(p_193233_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193231_b(ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> p_193231_1_)
+        public void remove(ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener)
         {
-            this.field_193236_b.remove(p_193231_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193234_a(DimensionType p_193234_1_, DimensionType p_193234_2_)
+        public void trigger(DimensionType from, DimensionType to)
         {
             List<ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener : this.field_193236_b)
+            for (ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener : this.listeners)
             {
-                if (((ChangeDimensionTrigger.Instance)listener.func_192158_a()).func_193190_a(p_193234_1_, p_193234_2_))
+                if (((ChangeDimensionTrigger.Instance)listener.getCriterionInstance()).test(from, to))
                 {
                     if (list == null)
                     {
@@ -149,7 +152,7 @@ public class ChangeDimensionTrigger implements ICriterionTrigger<ChangeDimension
             {
                 for (ICriterionTrigger.Listener<ChangeDimensionTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193235_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

@@ -31,7 +31,7 @@ public class BlockDirt extends Block
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return ((BlockDirt.DirtType)state.getValue(VARIANT)).getColor();
     }
@@ -54,11 +54,11 @@ public class BlockDirt extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
-        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.DIRT.getMetadata()));
-        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.COARSE_DIRT.getMetadata()));
-        tab.add(new ItemStack(this, 1, BlockDirt.DirtType.PODZOL.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockDirt.DirtType.DIRT.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockDirt.DirtType.COARSE_DIRT.getMetadata()));
+        items.add(new ItemStack(this, 1, BlockDirt.DirtType.PODZOL.getMetadata()));
     }
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)

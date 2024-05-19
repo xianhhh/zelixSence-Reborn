@@ -14,7 +14,7 @@ public interface ICommandManager
      */
     int executeCommand(ICommandSender sender, String rawCommand);
 
-    List<String> getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos);
+    List<String> getTabCompletions(ICommandSender sender, String input, BlockPos pos);
 
     List<ICommand> getPossibleCommands(ICommandSender sender);
 

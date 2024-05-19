@@ -10,13 +10,16 @@ import net.minecraft.world.gen.IChunkGenerator;
 public class WorldProviderHell extends WorldProvider
 {
     /**
-     * creates a new world chunk manager for WorldProvider
+     * Creates a new {@link BiomeProvider} for the WorldProvider, and also sets the values of {@link #hasSkylight} and
+     * {@link #hasNoSky} appropriately.
+     *  
+     * Note that subclasses generally override this method without calling the parent version.
      */
-    public void createBiomeProvider()
+    public void init()
     {
         this.biomeProvider = new BiomeProviderSingle(Biomes.HELL);
-        this.isHellWorld = true;
-        this.hasNoSky = true;
+        this.doesWaterVaporize = true;
+        this.nether = true;
     }
 
     /**
@@ -43,7 +46,7 @@ public class WorldProviderHell extends WorldProvider
 
     public IChunkGenerator createChunkGenerator()
     {
-        return new ChunkGeneratorHell(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed());
+        return new ChunkGeneratorHell(this.world, this.world.getWorldInfo().isMapFeaturesEnabled(), this.world.getSeed());
     }
 
     /**

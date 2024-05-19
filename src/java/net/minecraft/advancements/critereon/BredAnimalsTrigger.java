@@ -17,124 +17,127 @@ import net.minecraft.util.ResourceLocation;
 
 public class BredAnimalsTrigger implements ICriterionTrigger<BredAnimalsTrigger.Instance>
 {
-    private static final ResourceLocation field_192171_a = new ResourceLocation("bred_animals");
-    private final Map<PlayerAdvancements, BredAnimalsTrigger.Listeners> field_192172_b = Maps.<PlayerAdvancements, BredAnimalsTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("bred_animals");
+    private final Map<PlayerAdvancements, BredAnimalsTrigger.Listeners> listeners = Maps.<PlayerAdvancements, BredAnimalsTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_192171_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener)
     {
-        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.field_192172_b.get(p_192165_1_);
+        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (bredanimalstrigger$listeners == null)
         {
-            bredanimalstrigger$listeners = new BredAnimalsTrigger.Listeners(p_192165_1_);
-            this.field_192172_b.put(p_192165_1_, bredanimalstrigger$listeners);
+            bredanimalstrigger$listeners = new BredAnimalsTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, bredanimalstrigger$listeners);
         }
 
-        bredanimalstrigger$listeners.func_192343_a(p_192165_2_);
+        bredanimalstrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener)
     {
-        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.field_192172_b.get(p_192164_1_);
+        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (bredanimalstrigger$listeners != null)
         {
-            bredanimalstrigger$listeners.func_192340_b(p_192164_2_);
+            bredanimalstrigger$listeners.remove(listener);
 
-            if (bredanimalstrigger$listeners.func_192341_a())
+            if (bredanimalstrigger$listeners.isEmpty())
             {
-                this.field_192172_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_192172_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public BredAnimalsTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public BredAnimalsTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        EntityPredicate entitypredicate = EntityPredicate.func_192481_a(p_192166_1_.get("parent"));
-        EntityPredicate entitypredicate1 = EntityPredicate.func_192481_a(p_192166_1_.get("partner"));
-        EntityPredicate entitypredicate2 = EntityPredicate.func_192481_a(p_192166_1_.get("child"));
+        EntityPredicate entitypredicate = EntityPredicate.deserialize(json.get("parent"));
+        EntityPredicate entitypredicate1 = EntityPredicate.deserialize(json.get("partner"));
+        EntityPredicate entitypredicate2 = EntityPredicate.deserialize(json.get("child"));
         return new BredAnimalsTrigger.Instance(entitypredicate, entitypredicate1, entitypredicate2);
     }
 
-    public void func_192168_a(EntityPlayerMP p_192168_1_, EntityAnimal p_192168_2_, EntityAnimal p_192168_3_, EntityAgeable p_192168_4_)
+    public void trigger(EntityPlayerMP player, EntityAnimal parent1, EntityAnimal parent2, EntityAgeable child)
     {
-        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.field_192172_b.get(p_192168_1_.func_192039_O());
+        BredAnimalsTrigger.Listeners bredanimalstrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (bredanimalstrigger$listeners != null)
         {
-            bredanimalstrigger$listeners.func_192342_a(p_192168_1_, p_192168_2_, p_192168_3_, p_192168_4_);
+            bredanimalstrigger$listeners.trigger(player, parent1, parent2, child);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final EntityPredicate field_192247_a;
-        private final EntityPredicate field_192248_b;
-        private final EntityPredicate field_192249_c;
+        private final EntityPredicate parent;
+        private final EntityPredicate partner;
+        private final EntityPredicate child;
 
-        public Instance(EntityPredicate p_i47408_1_, EntityPredicate p_i47408_2_, EntityPredicate p_i47408_3_)
+        public Instance(EntityPredicate parent, EntityPredicate partner, EntityPredicate child)
         {
-            super(BredAnimalsTrigger.field_192171_a);
-            this.field_192247_a = p_i47408_1_;
-            this.field_192248_b = p_i47408_2_;
-            this.field_192249_c = p_i47408_3_;
+            super(BredAnimalsTrigger.ID);
+            this.parent = parent;
+            this.partner = partner;
+            this.child = child;
         }
 
-        public boolean func_192246_a(EntityPlayerMP p_192246_1_, EntityAnimal p_192246_2_, EntityAnimal p_192246_3_, EntityAgeable p_192246_4_)
+        public boolean test(EntityPlayerMP player, EntityAnimal parent1In, EntityAnimal parent2In, EntityAgeable childIn)
         {
-            if (!this.field_192249_c.func_192482_a(p_192246_1_, p_192246_4_))
+            if (!this.child.test(player, childIn))
             {
                 return false;
             }
             else
             {
-                return this.field_192247_a.func_192482_a(p_192246_1_, p_192246_2_) && this.field_192248_b.func_192482_a(p_192246_1_, p_192246_3_) || this.field_192247_a.func_192482_a(p_192246_1_, p_192246_3_) && this.field_192248_b.func_192482_a(p_192246_1_, p_192246_2_);
+                return this.parent.test(player, parent1In) && this.partner.test(player, parent2In) || this.parent.test(player, parent2In) && this.partner.test(player, parent1In);
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_192344_a;
-        private final Set<ICriterionTrigger.Listener<BredAnimalsTrigger.Instance>> field_192345_b = Sets.<ICriterionTrigger.Listener<BredAnimalsTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<BredAnimalsTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<BredAnimalsTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47409_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_192344_a = p_i47409_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_192341_a()
+        public boolean isEmpty()
         {
-            return this.field_192345_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_192343_a(ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> p_192343_1_)
+        public void add(ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener)
         {
-            this.field_192345_b.add(p_192343_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_192340_b(ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> p_192340_1_)
+        public void remove(ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener)
         {
-            this.field_192345_b.remove(p_192340_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_192342_a(EntityPlayerMP p_192342_1_, EntityAnimal p_192342_2_, EntityAnimal p_192342_3_, EntityAgeable p_192342_4_)
+        public void trigger(EntityPlayerMP player, EntityAnimal parent1, EntityAnimal parent2, EntityAgeable child)
         {
             List<ICriterionTrigger.Listener<BredAnimalsTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener : this.field_192345_b)
+            for (ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener : this.listeners)
             {
-                if (((BredAnimalsTrigger.Instance)listener.func_192158_a()).func_192246_a(p_192342_1_, p_192342_2_, p_192342_3_, p_192342_4_))
+                if (((BredAnimalsTrigger.Instance)listener.getCriterionInstance()).test(player, parent1, parent2, child))
                 {
                     if (list == null)
                     {
@@ -149,7 +152,7 @@ public class BredAnimalsTrigger implements ICriterionTrigger<BredAnimalsTrigger.
             {
                 for (ICriterionTrigger.Listener<BredAnimalsTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_192344_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

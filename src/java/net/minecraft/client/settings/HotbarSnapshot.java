@@ -8,23 +8,23 @@ import net.minecraft.nbt.NBTTagList;
 
 public class HotbarSnapshot extends ArrayList<ItemStack>
 {
-    public static final int field_192835_a = InventoryPlayer.getHotbarSize();
+    public static final int HOTBAR_SIZE = InventoryPlayer.getHotbarSize();
 
     public HotbarSnapshot()
     {
-        this.ensureCapacity(field_192835_a);
+        this.ensureCapacity(HOTBAR_SIZE);
 
-        for (int i = 0; i < field_192835_a; ++i)
+        for (int i = 0; i < HOTBAR_SIZE; ++i)
         {
-            this.add(ItemStack.field_190927_a);
+            this.add(ItemStack.EMPTY);
         }
     }
 
-    public NBTTagList func_192834_a()
+    public NBTTagList createTag()
     {
         NBTTagList nbttaglist = new NBTTagList();
 
-        for (int i = 0; i < field_192835_a; ++i)
+        for (int i = 0; i < HOTBAR_SIZE; ++i)
         {
             nbttaglist.appendTag(((ItemStack)this.get(i)).writeToNBT(new NBTTagCompound()));
         }
@@ -32,9 +32,9 @@ public class HotbarSnapshot extends ArrayList<ItemStack>
         return nbttaglist;
     }
 
-    public void func_192833_a(NBTTagList p_192833_1_)
+    public void fromTag(NBTTagList p_192833_1_)
     {
-        for (int i = 0; i < field_192835_a; ++i)
+        for (int i = 0; i < HOTBAR_SIZE; ++i)
         {
             this.set(i, new ItemStack(p_192833_1_.getCompoundTagAt(i)));
         }
@@ -42,9 +42,9 @@ public class HotbarSnapshot extends ArrayList<ItemStack>
 
     public boolean isEmpty()
     {
-        for (int i = 0; i < field_192835_a; ++i)
+        for (int i = 0; i < HOTBAR_SIZE; ++i)
         {
-            if (!((ItemStack)this.get(i)).func_190926_b())
+            if (!((ItemStack)this.get(i)).isEmpty())
             {
                 return false;
             }

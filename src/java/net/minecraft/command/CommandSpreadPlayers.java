@@ -24,7 +24,7 @@ public class CommandSpreadPlayers extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "spreadplayers";
     }
@@ -40,7 +40,7 @@ public class CommandSpreadPlayers extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.spreadplayers.usage";
     }
@@ -69,7 +69,7 @@ public class CommandSpreadPlayers extends CommandBase
             {
                 String s = args[i++];
 
-                if (EntitySelector.hasArguments(s))
+                if (EntitySelector.isSelector(s))
                 {
                     List<Entity> list1 = EntitySelector.<Entity>matchEntities(sender, s, Entity.class);
 
@@ -101,7 +101,7 @@ public class CommandSpreadPlayers extends CommandBase
             }
             else
             {
-                sender.addChatMessage(new TextComponentTranslation("commands.spreadplayers.spreading." + (flag ? "teams" : "players"), new Object[] {list.size(), d3, d0, d1, d2}));
+                sender.sendMessage(new TextComponentTranslation("commands.spreadplayers.spreading." + (flag ? "teams" : "players"), new Object[] {list.size(), d3, d0, d1, d2}));
                 this.spread(sender, list, new CommandSpreadPlayers.Position(d0, d1), d2, d3, (list.get(0)).world, flag);
             }
         }
@@ -121,7 +121,7 @@ public class CommandSpreadPlayers extends CommandBase
 
         if (acommandspreadplayers$position.length > 1)
         {
-            sender.addChatMessage(new TextComponentTranslation("commands.spreadplayers.info." + (respectTeams ? "teams" : "players"), new Object[] {String.format("%.2f", d4), i}));
+            sender.sendMessage(new TextComponentTranslation("commands.spreadplayers.info." + (respectTeams ? "teams" : "players"), new Object[] {String.format("%.2f", d4), i}));
         }
     }
 
@@ -286,9 +286,9 @@ public class CommandSpreadPlayers extends CommandBase
         return acommandspreadplayers$position;
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
-        return args.length >= 1 && args.length <= 2 ? getTabCompletionCoordinateXZ(args, 0, pos) : Collections.emptyList();
+        return args.length >= 1 && args.length <= 2 ? getTabCompletionCoordinateXZ(args, 0, targetPos) : Collections.emptyList();
     }
 
     static class Position

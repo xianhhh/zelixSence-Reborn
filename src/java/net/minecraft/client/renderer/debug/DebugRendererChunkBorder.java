@@ -16,14 +16,14 @@ public class DebugRendererChunkBorder implements DebugRenderer.IDebugRenderer
         this.minecraft = minecraftIn;
     }
 
-    public void render(float p_190060_1_, long p_190060_2_)
+    public void render(float partialTicks, long finishTimeNano)
     {
         EntityPlayer entityplayer = this.minecraft.player;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        double d0 = entityplayer.lastTickPosX + (entityplayer.posX - entityplayer.lastTickPosX) * (double)p_190060_1_;
-        double d1 = entityplayer.lastTickPosY + (entityplayer.posY - entityplayer.lastTickPosY) * (double)p_190060_1_;
-        double d2 = entityplayer.lastTickPosZ + (entityplayer.posZ - entityplayer.lastTickPosZ) * (double)p_190060_1_;
+        double d0 = entityplayer.lastTickPosX + (entityplayer.posX - entityplayer.lastTickPosX) * (double)partialTicks;
+        double d1 = entityplayer.lastTickPosY + (entityplayer.posY - entityplayer.lastTickPosY) * (double)partialTicks;
+        double d2 = entityplayer.lastTickPosZ + (entityplayer.posZ - entityplayer.lastTickPosZ) * (double)partialTicks;
         double d3 = 0.0D - d1;
         double d4 = 256.0D - d1;
         GlStateManager.disableTexture2D();

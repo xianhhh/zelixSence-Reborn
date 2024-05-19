@@ -7,7 +7,7 @@ public class CommandReload extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "reload";
     }
@@ -23,7 +23,7 @@ public class CommandReload extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.reload.usage";
     }
@@ -39,7 +39,7 @@ public class CommandReload extends CommandBase
         }
         else
         {
-            server.func_193031_aM();
+            server.reload();
             notifyCommandListener(sender, this, "commands.reload.success", new Object[0]);
         }
     }

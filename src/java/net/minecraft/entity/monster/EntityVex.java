@@ -36,16 +36,16 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityVex extends EntityMob
 {
-    protected static final DataParameter<Byte> field_190664_a = EntityDataManager.<Byte>createKey(EntityVex.class, DataSerializers.BYTE);
-    private EntityLiving field_190665_b;
+    protected static final DataParameter<Byte> VEX_FLAGS = EntityDataManager.<Byte>createKey(EntityVex.class, DataSerializers.BYTE);
+    private EntityLiving owner;
     @Nullable
-    private BlockPos field_190666_c;
-    private boolean field_190667_bw;
-    private int field_190668_bx;
+    private BlockPos boundOrigin;
+    private boolean limitedLifespan;
+    private int limitedLifeTicks;
 
-    public EntityVex(World p_i47280_1_)
+    public EntityVex(World worldIn)
     {
-        super(p_i47280_1_);
+        super(worldIn);
         this.isImmuneToFire = true;
         this.moveHelper = new EntityVex.AIMoveControl(this);
         this.setSize(0.4F, 0.8F);
@@ -55,9 +55,9 @@ public class EntityVex extends EntityMob
     /**
      * Tries to move the entity towards the specified location.
      */
-    public void moveEntity(MoverType x, double p_70091_2_, double p_70091_4_, double p_70091_6_)
+    public void move(MoverType type, double x, double y, double z)
     {
-        super.moveEntity(x, p_70091_2_, p_70091_4_, p_70091_6_);
+        super.move(type, x, y, z);
         this.doBlockCollisions();
     }
 
@@ -71,10 +71,10 @@ public class EntityVex extends EntityMob
         this.noClip = false;
         this.setNoGravity(true);
 
-        if (this.field_190667_bw && --this.field_190668_bx <= 0)
+        if (this.limitedLifespan && --this.limitedLifeTicks <= 0)
         {
-            this.field_190668_bx = 20;
-            this.attackEntityFrom(DamageSource.starve, 1.0F);
+            this.limitedLifeTicks = 20;
+            this.attackEntityFrom(DamageSource.STARVE, 1.0F);
         }
     }
 
@@ -101,12 +101,12 @@ public class EntityVex extends EntityMob
     protected void entityInit()
     {
         super.entityInit();
-        this.dataManager.register(field_190664_a, Byte.valueOf((byte)0));
+        this.dataManager.register(VEX_FLAGS, Byte.valueOf((byte)0));
     }
 
-    public static void func_190663_b(DataFixer p_190663_0_)
+    public static void registerFixesVex(DataFixer fixer)
     {
-        EntityLiving.registerFixesMob(p_190663_0_, EntityVex.class);
+        EntityLiving.registerFixesMob(fixer, EntityVex.class);
     }
 
     /**
@@ -118,12 +118,12 @@ public class EntityVex extends EntityMob
 
         if (compound.hasKey("BoundX"))
         {
-            this.field_190666_c = new BlockPos(compound.getInteger("BoundX"), compound.getInteger("BoundY"), compound.getInteger("BoundZ"));
+            this.boundOrigin = new BlockPos(compound.getInteger("BoundX"), compound.getInteger("BoundY"), compound.getInteger("BoundZ"));
         }
 
         if (compound.hasKey("LifeTicks"))
         {
-            this.func_190653_a(compound.getInteger("LifeTicks"));
+            this.setLimitedLife(compound.getInteger("LifeTicks"));
         }
     }
 
@@ -134,97 +134,97 @@ public class EntityVex extends EntityMob
     {
         super.writeEntityToNBT(compound);
 
-        if (this.field_190666_c != null)
+        if (this.boundOrigin != null)
         {
-            compound.setInteger("BoundX", this.field_190666_c.getX());
-            compound.setInteger("BoundY", this.field_190666_c.getY());
-            compound.setInteger("BoundZ", this.field_190666_c.getZ());
+            compound.setInteger("BoundX", this.boundOrigin.getX());
+            compound.setInteger("BoundY", this.boundOrigin.getY());
+            compound.setInteger("BoundZ", this.boundOrigin.getZ());
         }
 
-        if (this.field_190667_bw)
+        if (this.limitedLifespan)
         {
-            compound.setInteger("LifeTicks", this.field_190668_bx);
+            compound.setInteger("LifeTicks", this.limitedLifeTicks);
         }
     }
 
-    public EntityLiving func_190645_o()
+    public EntityLiving getOwner()
     {
-        return this.field_190665_b;
+        return this.owner;
     }
 
     @Nullable
-    public BlockPos func_190646_di()
+    public BlockPos getBoundOrigin()
     {
-        return this.field_190666_c;
+        return this.boundOrigin;
     }
 
-    public void func_190651_g(@Nullable BlockPos p_190651_1_)
+    public void setBoundOrigin(@Nullable BlockPos boundOriginIn)
     {
-        this.field_190666_c = p_190651_1_;
+        this.boundOrigin = boundOriginIn;
     }
 
-    private boolean func_190656_b(int p_190656_1_)
+    private boolean getVexFlag(int mask)
     {
-        int i = ((Byte)this.dataManager.get(field_190664_a)).byteValue();
-        return (i & p_190656_1_) != 0;
+        int i = ((Byte)this.dataManager.get(VEX_FLAGS)).byteValue();
+        return (i & mask) != 0;
     }
 
-    private void func_190660_a(int p_190660_1_, boolean p_190660_2_)
+    private void setVexFlag(int mask, boolean value)
     {
-        int i = ((Byte)this.dataManager.get(field_190664_a)).byteValue();
+        int i = ((Byte)this.dataManager.get(VEX_FLAGS)).byteValue();
 
-        if (p_190660_2_)
+        if (value)
         {
-            i = i | p_190660_1_;
+            i = i | mask;
         }
         else
         {
-            i = i & ~p_190660_1_;
+            i = i & ~mask;
         }
 
-        this.dataManager.set(field_190664_a, Byte.valueOf((byte)(i & 255)));
+        this.dataManager.set(VEX_FLAGS, Byte.valueOf((byte)(i & 255)));
     }
 
-    public boolean func_190647_dj()
+    public boolean isCharging()
     {
-        return this.func_190656_b(1);
+        return this.getVexFlag(1);
     }
 
-    public void func_190648_a(boolean p_190648_1_)
+    public void setIsCharging(boolean p_190648_1_)
     {
-        this.func_190660_a(1, p_190648_1_);
+        this.setVexFlag(1, p_190648_1_);
     }
 
-    public void func_190658_a(EntityLiving p_190658_1_)
+    public void setOwner(EntityLiving ownerIn)
     {
-        this.field_190665_b = p_190658_1_;
+        this.owner = ownerIn;
     }
 
-    public void func_190653_a(int p_190653_1_)
+    public void setLimitedLife(int limitedLifeTicksIn)
     {
-        this.field_190667_bw = true;
-        this.field_190668_bx = p_190653_1_;
+        this.limitedLifespan = true;
+        this.limitedLifeTicks = limitedLifeTicksIn;
     }
 
     protected SoundEvent getAmbientSound()
     {
-        return SoundEvents.field_191264_hc;
+        return SoundEvents.ENTITY_VEX_AMBIENT;
     }
 
     protected SoundEvent getDeathSound()
     {
-        return SoundEvents.field_191266_he;
+        return SoundEvents.ENTITY_VEX_DEATH;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
-        return SoundEvents.field_191267_hf;
+        return SoundEvents.ENTITY_VEX_HURT;
     }
 
     @Nullable
     protected ResourceLocation getLootTable()
     {
-        return LootTableList.field_191188_ax;
+        return LootTableList.ENTITIES_VEX;
     }
 
     public int getBrightnessForRender()
@@ -281,33 +281,33 @@ public class EntityVex extends EntityMob
             }
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
-            return EntityVex.this.getMoveHelper().isUpdating() && EntityVex.this.func_190647_dj() && EntityVex.this.getAttackTarget() != null && EntityVex.this.getAttackTarget().isEntityAlive();
+            return EntityVex.this.getMoveHelper().isUpdating() && EntityVex.this.isCharging() && EntityVex.this.getAttackTarget() != null && EntityVex.this.getAttackTarget().isEntityAlive();
         }
 
         public void startExecuting()
         {
             EntityLivingBase entitylivingbase = EntityVex.this.getAttackTarget();
             Vec3d vec3d = entitylivingbase.getPositionEyes(1.0F);
-            EntityVex.this.moveHelper.setMoveTo(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord, 1.0D);
-            EntityVex.this.func_190648_a(true);
-            EntityVex.this.playSound(SoundEvents.field_191265_hd, 1.0F, 1.0F);
+            EntityVex.this.moveHelper.setMoveTo(vec3d.x, vec3d.y, vec3d.z, 1.0D);
+            EntityVex.this.setIsCharging(true);
+            EntityVex.this.playSound(SoundEvents.ENTITY_VEX_CHARGE, 1.0F, 1.0F);
         }
 
         public void resetTask()
         {
-            EntityVex.this.func_190648_a(false);
+            EntityVex.this.setIsCharging(false);
         }
 
         public void updateTask()
         {
             EntityLivingBase entitylivingbase = EntityVex.this.getAttackTarget();
 
-            if (EntityVex.this.getEntityBoundingBox().intersectsWith(entitylivingbase.getEntityBoundingBox()))
+            if (EntityVex.this.getEntityBoundingBox().intersects(entitylivingbase.getEntityBoundingBox()))
             {
                 EntityVex.this.attackEntityAsMob(entitylivingbase);
-                EntityVex.this.func_190648_a(false);
+                EntityVex.this.setIsCharging(false);
             }
             else
             {
@@ -316,7 +316,7 @@ public class EntityVex extends EntityMob
                 if (d0 < 9.0D)
                 {
                     Vec3d vec3d = entitylivingbase.getPositionEyes(1.0F);
-                    EntityVex.this.moveHelper.setMoveTo(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord, 1.0D);
+                    EntityVex.this.moveHelper.setMoveTo(vec3d.x, vec3d.y, vec3d.z, 1.0D);
                 }
             }
         }
@@ -324,28 +324,28 @@ public class EntityVex extends EntityMob
 
     class AICopyOwnerTarget extends EntityAITarget
     {
-        public AICopyOwnerTarget(EntityCreature p_i47231_2_)
+        public AICopyOwnerTarget(EntityCreature creature)
         {
-            super(p_i47231_2_, false);
+            super(creature, false);
         }
 
         public boolean shouldExecute()
         {
-            return EntityVex.this.field_190665_b != null && EntityVex.this.field_190665_b.getAttackTarget() != null && this.isSuitableTarget(EntityVex.this.field_190665_b.getAttackTarget(), false);
+            return EntityVex.this.owner != null && EntityVex.this.owner.getAttackTarget() != null && this.isSuitableTarget(EntityVex.this.owner.getAttackTarget(), false);
         }
 
         public void startExecuting()
         {
-            EntityVex.this.setAttackTarget(EntityVex.this.field_190665_b.getAttackTarget());
+            EntityVex.this.setAttackTarget(EntityVex.this.owner.getAttackTarget());
             super.startExecuting();
         }
     }
 
     class AIMoveControl extends EntityMoveHelper
     {
-        public AIMoveControl(EntityVex p_i47230_2_)
+        public AIMoveControl(EntityVex vex)
         {
-            super(p_i47230_2_);
+            super(vex);
         }
 
         public void onUpdateMoveHelper()
@@ -400,14 +400,14 @@ public class EntityVex extends EntityMob
             return !EntityVex.this.getMoveHelper().isUpdating() && EntityVex.this.rand.nextInt(7) == 0;
         }
 
-        public boolean continueExecuting()
+        public boolean shouldContinueExecuting()
         {
             return false;
         }
 
         public void updateTask()
         {
-            BlockPos blockpos = EntityVex.this.func_190646_di();
+            BlockPos blockpos = EntityVex.this.getBoundOrigin();
 
             if (blockpos == null)
             {

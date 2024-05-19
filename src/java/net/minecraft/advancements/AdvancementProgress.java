@@ -23,13 +23,16 @@ import net.minecraft.util.JsonUtils;
 
 public class AdvancementProgress implements Comparable<AdvancementProgress>
 {
-    private final Map<String, CriterionProgress> field_192110_a = Maps.<String, CriterionProgress>newHashMap();
-    private String[][] field_192111_b = new String[0][];
+    private final Map<String, CriterionProgress> criteria = Maps.<String, CriterionProgress>newHashMap();
+    private String[][] requirements = new String[0][];
 
-    public void func_192099_a(Map<String, Criterion> p_192099_1_, String[][] p_192099_2_)
+    /**
+     * Update this AdvancementProgress' criteria and requirements
+     */
+    public void update(Map<String, Criterion> criteriaIn, String[][] requirements)
     {
-        Set<String> set = p_192099_1_.keySet();
-        Iterator<Entry<String, CriterionProgress>> iterator = this.field_192110_a.entrySet().iterator();
+        Set<String> set = criteriaIn.keySet();
+        Iterator<Entry<String, CriterionProgress>> iterator = this.criteria.entrySet().iterator();
 
         while (iterator.hasNext())
         {
@@ -43,32 +46,32 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
 
         for (String s : set)
         {
-            if (!this.field_192110_a.containsKey(s))
+            if (!this.criteria.containsKey(s))
             {
-                this.field_192110_a.put(s, new CriterionProgress(this));
+                this.criteria.put(s, new CriterionProgress(this));
             }
         }
 
-        this.field_192111_b = p_192099_2_;
+        this.requirements = requirements;
     }
 
-    public boolean func_192105_a()
+    public boolean isDone()
     {
-        if (this.field_192111_b.length == 0)
+        if (this.requirements.length == 0)
         {
             return false;
         }
         else
         {
-            for (String[] astring : this.field_192111_b)
+            for (String[] astring : this.requirements)
             {
                 boolean flag = false;
 
                 for (String s : astring)
                 {
-                    CriterionProgress criterionprogress = this.func_192106_c(s);
+                    CriterionProgress criterionprogress = this.getCriterionProgress(s);
 
-                    if (criterionprogress != null && criterionprogress.func_192151_a())
+                    if (criterionprogress != null && criterionprogress.isObtained())
                     {
                         flag = true;
                         break;
@@ -85,11 +88,11 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
         }
     }
 
-    public boolean func_192108_b()
+    public boolean hasProgress()
     {
-        for (CriterionProgress criterionprogress : this.field_192110_a.values())
+        for (CriterionProgress criterionprogress : this.criteria.values())
         {
-            if (criterionprogress.func_192151_a())
+            if (criterionprogress.isObtained())
             {
                 return true;
             }
@@ -98,13 +101,13 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
         return false;
     }
 
-    public boolean func_192109_a(String p_192109_1_)
+    public boolean grantCriterion(String criterionIn)
     {
-        CriterionProgress criterionprogress = this.field_192110_a.get(p_192109_1_);
+        CriterionProgress criterionprogress = this.criteria.get(criterionIn);
 
-        if (criterionprogress != null && !criterionprogress.func_192151_a())
+        if (criterionprogress != null && !criterionprogress.isObtained())
         {
-            criterionprogress.func_192153_b();
+            criterionprogress.obtain();
             return true;
         }
         else
@@ -113,13 +116,13 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
         }
     }
 
-    public boolean func_192101_b(String p_192101_1_)
+    public boolean revokeCriterion(String criterionIn)
     {
-        CriterionProgress criterionprogress = this.field_192110_a.get(p_192101_1_);
+        CriterionProgress criterionprogress = this.criteria.get(criterionIn);
 
-        if (criterionprogress != null && criterionprogress.func_192151_a())
+        if (criterionprogress != null && criterionprogress.isObtained())
         {
-            criterionprogress.func_192154_c();
+            criterionprogress.reset();
             return true;
         }
         else
@@ -130,63 +133,63 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
 
     public String toString()
     {
-        return "AdvancementProgress{criteria=" + this.field_192110_a + ", requirements=" + Arrays.deepToString(this.field_192111_b) + '}';
+        return "AdvancementProgress{criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + '}';
     }
 
-    public void func_192104_a(PacketBuffer p_192104_1_)
+    public void serializeToNetwork(PacketBuffer p_192104_1_)
     {
-        p_192104_1_.writeVarIntToBuffer(this.field_192110_a.size());
+        p_192104_1_.writeVarInt(this.criteria.size());
 
-        for (Entry<String, CriterionProgress> entry : this.field_192110_a.entrySet())
+        for (Entry<String, CriterionProgress> entry : this.criteria.entrySet())
         {
             p_192104_1_.writeString(entry.getKey());
-            ((CriterionProgress)entry.getValue()).func_192150_a(p_192104_1_);
+            ((CriterionProgress)entry.getValue()).write(p_192104_1_);
         }
     }
 
-    public static AdvancementProgress func_192100_b(PacketBuffer p_192100_0_)
+    public static AdvancementProgress fromNetwork(PacketBuffer p_192100_0_)
     {
         AdvancementProgress advancementprogress = new AdvancementProgress();
-        int i = p_192100_0_.readVarIntFromBuffer();
+        int i = p_192100_0_.readVarInt();
 
         for (int j = 0; j < i; ++j)
         {
-            advancementprogress.field_192110_a.put(p_192100_0_.readStringFromBuffer(32767), CriterionProgress.func_192149_a(p_192100_0_, advancementprogress));
+            advancementprogress.criteria.put(p_192100_0_.readString(32767), CriterionProgress.read(p_192100_0_, advancementprogress));
         }
 
         return advancementprogress;
     }
 
     @Nullable
-    public CriterionProgress func_192106_c(String p_192106_1_)
+    public CriterionProgress getCriterionProgress(String criterionIn)
     {
-        return this.field_192110_a.get(p_192106_1_);
+        return this.criteria.get(criterionIn);
     }
 
-    public float func_192103_c()
+    public float getPercent()
     {
-        if (this.field_192110_a.isEmpty())
+        if (this.criteria.isEmpty())
         {
             return 0.0F;
         }
         else
         {
-            float f = (float)this.field_192111_b.length;
-            float f1 = (float)this.func_194032_h();
+            float f = (float)this.requirements.length;
+            float f1 = (float)this.countCompletedRequirements();
             return f1 / f;
         }
     }
 
     @Nullable
-    public String func_193126_d()
+    public String getProgressText()
     {
-        if (this.field_192110_a.isEmpty())
+        if (this.criteria.isEmpty())
         {
             return null;
         }
         else
         {
-            int i = this.field_192111_b.length;
+            int i = this.requirements.length;
 
             if (i <= 1)
             {
@@ -194,25 +197,25 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
             }
             else
             {
-                int j = this.func_194032_h();
+                int j = this.countCompletedRequirements();
                 return j + "/" + i;
             }
         }
     }
 
-    private int func_194032_h()
+    private int countCompletedRequirements()
     {
         int i = 0;
 
-        for (String[] astring : this.field_192111_b)
+        for (String[] astring : this.requirements)
         {
             boolean flag = false;
 
             for (String s : astring)
             {
-                CriterionProgress criterionprogress = this.func_192106_c(s);
+                CriterionProgress criterionprogress = this.getCriterionProgress(s);
 
-                if (criterionprogress != null && criterionprogress.func_192151_a())
+                if (criterionprogress != null && criterionprogress.isObtained())
                 {
                     flag = true;
                     break;
@@ -228,13 +231,13 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
         return i;
     }
 
-    public Iterable<String> func_192107_d()
+    public Iterable<String> getRemaningCriteria()
     {
         List<String> list = Lists.<String>newArrayList();
 
-        for (Entry<String, CriterionProgress> entry : this.field_192110_a.entrySet())
+        for (Entry<String, CriterionProgress> entry : this.criteria.entrySet())
         {
-            if (!((CriterionProgress)entry.getValue()).func_192151_a())
+            if (!((CriterionProgress)entry.getValue()).isObtained())
             {
                 list.add(entry.getKey());
             }
@@ -243,13 +246,13 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
         return list;
     }
 
-    public Iterable<String> func_192102_e()
+    public Iterable<String> getCompletedCriteria()
     {
         List<String> list = Lists.<String>newArrayList();
 
-        for (Entry<String, CriterionProgress> entry : this.field_192110_a.entrySet())
+        for (Entry<String, CriterionProgress> entry : this.criteria.entrySet())
         {
-            if (((CriterionProgress)entry.getValue()).func_192151_a())
+            if (((CriterionProgress)entry.getValue()).isObtained())
             {
                 list.add(entry.getKey());
             }
@@ -259,15 +262,15 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
     }
 
     @Nullable
-    public Date func_193128_g()
+    public Date getFirstProgressDate()
     {
         Date date = null;
 
-        for (CriterionProgress criterionprogress : this.field_192110_a.values())
+        for (CriterionProgress criterionprogress : this.criteria.values())
         {
-            if (criterionprogress.func_192151_a() && (date == null || criterionprogress.func_193140_d().before(date)))
+            if (criterionprogress.isObtained() && (date == null || criterionprogress.getObtained().before(date)))
             {
-                date = criterionprogress.func_193140_d();
+                date = criterionprogress.getObtained();
             }
         }
 
@@ -276,8 +279,8 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
 
     public int compareTo(AdvancementProgress p_compareTo_1_)
     {
-        Date date = this.func_193128_g();
-        Date date1 = p_compareTo_1_.func_193128_g();
+        Date date = this.getFirstProgressDate();
+        Date date1 = p_compareTo_1_.getFirstProgressDate();
 
         if (date == null && date1 != null)
         {
@@ -300,13 +303,13 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
             JsonObject jsonobject = new JsonObject();
             JsonObject jsonobject1 = new JsonObject();
 
-            for (Entry<String, CriterionProgress> entry : p_serialize_1_.field_192110_a.entrySet())
+            for (Entry<String, CriterionProgress> entry : p_serialize_1_.criteria.entrySet())
             {
                 CriterionProgress criterionprogress = entry.getValue();
 
-                if (criterionprogress.func_192151_a())
+                if (criterionprogress.isObtained())
                 {
-                    jsonobject1.add(entry.getKey(), criterionprogress.func_192148_e());
+                    jsonobject1.add(entry.getKey(), criterionprogress.serialize());
                 }
             }
 
@@ -315,7 +318,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
                 jsonobject.add("criteria", jsonobject1);
             }
 
-            jsonobject.addProperty("done", Boolean.valueOf(p_serialize_1_.func_192105_a()));
+            jsonobject.addProperty("done", Boolean.valueOf(p_serialize_1_.isDone()));
             return jsonobject;
         }
 
@@ -328,7 +331,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress>
             for (Entry<String, JsonElement> entry : jsonobject1.entrySet())
             {
                 String s = entry.getKey();
-                advancementprogress.field_192110_a.put(s, CriterionProgress.func_192152_a(advancementprogress, JsonUtils.getString(entry.getValue(), s)));
+                advancementprogress.criteria.put(s, CriterionProgress.fromDateTime(advancementprogress, JsonUtils.getString(entry.getValue(), s)));
             }
 
             return advancementprogress;

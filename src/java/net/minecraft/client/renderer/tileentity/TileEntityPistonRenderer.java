@@ -22,13 +22,13 @@ public class TileEntityPistonRenderer extends TileEntitySpecialRenderer<TileEnti
 {
     private final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 
-    public void func_192841_a(TileEntityPiston p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityPiston te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        BlockPos blockpos = p_192841_1_.getPos();
-        IBlockState iblockstate = p_192841_1_.getPistonState();
+        BlockPos blockpos = te.getPos();
+        IBlockState iblockstate = te.getPistonState();
         Block block = iblockstate.getBlock();
 
-        if (iblockstate.getMaterial() != Material.AIR && p_192841_1_.getProgress(p_192841_8_) < 1.0F)
+        if (iblockstate.getMaterial() != Material.AIR && te.getProgress(partialTicks) < 1.0F)
         {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -48,21 +48,21 @@ public class TileEntityPistonRenderer extends TileEntitySpecialRenderer<TileEnti
             }
 
             bufferbuilder.begin(7, DefaultVertexFormats.BLOCK);
-            bufferbuilder.setTranslation(p_192841_2_ - (double)blockpos.getX() + (double)p_192841_1_.getOffsetX(p_192841_8_), p_192841_4_ - (double)blockpos.getY() + (double)p_192841_1_.getOffsetY(p_192841_8_), p_192841_6_ - (double)blockpos.getZ() + (double)p_192841_1_.getOffsetZ(p_192841_8_));
+            bufferbuilder.setTranslation(x - (double)blockpos.getX() + (double)te.getOffsetX(partialTicks), y - (double)blockpos.getY() + (double)te.getOffsetY(partialTicks), z - (double)blockpos.getZ() + (double)te.getOffsetZ(partialTicks));
             World world = this.getWorld();
 
-            if (block == Blocks.PISTON_HEAD && p_192841_1_.getProgress(p_192841_8_) <= 0.25F)
+            if (block == Blocks.PISTON_HEAD && te.getProgress(partialTicks) <= 0.25F)
             {
                 iblockstate = iblockstate.withProperty(BlockPistonExtension.SHORT, Boolean.valueOf(true));
                 this.renderStateModel(blockpos, iblockstate, bufferbuilder, world, true);
             }
-            else if (p_192841_1_.shouldPistonHeadBeRendered() && !p_192841_1_.isExtending())
+            else if (te.shouldPistonHeadBeRendered() && !te.isExtending())
             {
                 BlockPistonExtension.EnumPistonType blockpistonextension$enumpistontype = block == Blocks.STICKY_PISTON ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT;
                 IBlockState iblockstate1 = Blocks.PISTON_HEAD.getDefaultState().withProperty(BlockPistonExtension.TYPE, blockpistonextension$enumpistontype).withProperty(BlockPistonExtension.FACING, iblockstate.getValue(BlockPistonBase.FACING));
-                iblockstate1 = iblockstate1.withProperty(BlockPistonExtension.SHORT, Boolean.valueOf(p_192841_1_.getProgress(p_192841_8_) >= 0.5F));
+                iblockstate1 = iblockstate1.withProperty(BlockPistonExtension.SHORT, Boolean.valueOf(te.getProgress(partialTicks) >= 0.5F));
                 this.renderStateModel(blockpos, iblockstate1, bufferbuilder, world, true);
-                bufferbuilder.setTranslation(p_192841_2_ - (double)blockpos.getX(), p_192841_4_ - (double)blockpos.getY(), p_192841_6_ - (double)blockpos.getZ());
+                bufferbuilder.setTranslation(x - (double)blockpos.getX(), y - (double)blockpos.getY(), z - (double)blockpos.getZ());
                 iblockstate = iblockstate.withProperty(BlockPistonBase.EXTENDED, Boolean.valueOf(true));
                 this.renderStateModel(blockpos, iblockstate, bufferbuilder, world, true);
             }
@@ -77,8 +77,8 @@ public class TileEntityPistonRenderer extends TileEntitySpecialRenderer<TileEnti
         }
     }
 
-    private boolean renderStateModel(BlockPos p_188186_1_, IBlockState p_188186_2_, BufferBuilder p_188186_3_, World p_188186_4_, boolean p_188186_5_)
+    private boolean renderStateModel(BlockPos pos, IBlockState state, BufferBuilder buffer, World p_188186_4_, boolean checkSides)
     {
-        return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(p_188186_2_), p_188186_2_, p_188186_1_, p_188186_3_, p_188186_5_);
+        return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(state), state, pos, buffer, checkSides);
     }
 }

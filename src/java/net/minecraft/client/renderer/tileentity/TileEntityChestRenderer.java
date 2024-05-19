@@ -31,42 +31,42 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
         }
     }
 
-    public void func_192841_a(TileEntityChest p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityChest te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         GlStateManager.enableDepth();
         GlStateManager.depthFunc(515);
         GlStateManager.depthMask(true);
         int i;
 
-        if (p_192841_1_.hasWorldObj())
+        if (te.hasWorld())
         {
-            Block block = p_192841_1_.getBlockType();
-            i = p_192841_1_.getBlockMetadata();
+            Block block = te.getBlockType();
+            i = te.getBlockMetadata();
 
             if (block instanceof BlockChest && i == 0)
             {
-                ((BlockChest)block).checkForSurroundingChests(p_192841_1_.getWorld(), p_192841_1_.getPos(), p_192841_1_.getWorld().getBlockState(p_192841_1_.getPos()));
-                i = p_192841_1_.getBlockMetadata();
+                ((BlockChest)block).checkForSurroundingChests(te.getWorld(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
+                i = te.getBlockMetadata();
             }
 
-            p_192841_1_.checkForAdjacentChests();
+            te.checkForAdjacentChests();
         }
         else
         {
             i = 0;
         }
 
-        if (p_192841_1_.adjacentChestZNeg == null && p_192841_1_.adjacentChestXNeg == null)
+        if (te.adjacentChestZNeg == null && te.adjacentChestXNeg == null)
         {
             ModelChest modelchest;
 
-            if (p_192841_1_.adjacentChestXPos == null && p_192841_1_.adjacentChestZPos == null)
+            if (te.adjacentChestXPos == null && te.adjacentChestZPos == null)
             {
                 modelchest = this.simpleChest;
 
-                if (p_192841_9_ >= 0)
+                if (destroyStage >= 0)
                 {
-                    this.bindTexture(DESTROY_STAGES[p_192841_9_]);
+                    this.bindTexture(DESTROY_STAGES[destroyStage]);
                     GlStateManager.matrixMode(5890);
                     GlStateManager.pushMatrix();
                     GlStateManager.scale(4.0F, 4.0F, 1.0F);
@@ -77,7 +77,7 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
                 {
                     this.bindTexture(TEXTURE_CHRISTMAS);
                 }
-                else if (p_192841_1_.getChestType() == BlockChest.Type.TRAP)
+                else if (te.getChestType() == BlockChest.Type.TRAP)
                 {
                     this.bindTexture(TEXTURE_TRAPPED);
                 }
@@ -90,9 +90,9 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
             {
                 modelchest = this.largeChest;
 
-                if (p_192841_9_ >= 0)
+                if (destroyStage >= 0)
                 {
-                    this.bindTexture(DESTROY_STAGES[p_192841_9_]);
+                    this.bindTexture(DESTROY_STAGES[destroyStage]);
                     GlStateManager.matrixMode(5890);
                     GlStateManager.pushMatrix();
                     GlStateManager.scale(8.0F, 4.0F, 1.0F);
@@ -103,7 +103,7 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
                 {
                     this.bindTexture(TEXTURE_CHRISTMAS_DOUBLE);
                 }
-                else if (p_192841_1_.getChestType() == BlockChest.Type.TRAP)
+                else if (te.getChestType() == BlockChest.Type.TRAP)
                 {
                     this.bindTexture(TEXTURE_TRAPPED_DOUBLE);
                 }
@@ -116,12 +116,12 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
             GlStateManager.pushMatrix();
             GlStateManager.enableRescaleNormal();
 
-            if (p_192841_9_ < 0)
+            if (destroyStage < 0)
             {
-                GlStateManager.color(1.0F, 1.0F, 1.0F, p_192841_10_);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, alpha);
             }
 
-            GlStateManager.translate((float)p_192841_2_, (float)p_192841_4_ + 1.0F, (float)p_192841_6_ + 1.0F);
+            GlStateManager.translate((float)x, (float)y + 1.0F, (float)z + 1.0F);
             GlStateManager.scale(1.0F, -1.0F, -1.0F);
             GlStateManager.translate(0.5F, 0.5F, 0.5F);
             int j = 0;
@@ -146,23 +146,23 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
                 j = -90;
             }
 
-            if (i == 2 && p_192841_1_.adjacentChestXPos != null)
+            if (i == 2 && te.adjacentChestXPos != null)
             {
                 GlStateManager.translate(1.0F, 0.0F, 0.0F);
             }
 
-            if (i == 5 && p_192841_1_.adjacentChestZPos != null)
+            if (i == 5 && te.adjacentChestZPos != null)
             {
                 GlStateManager.translate(0.0F, 0.0F, -1.0F);
             }
 
             GlStateManager.rotate((float)j, 0.0F, 1.0F, 0.0F);
             GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-            float f = p_192841_1_.prevLidAngle + (p_192841_1_.lidAngle - p_192841_1_.prevLidAngle) * p_192841_8_;
+            float f = te.prevLidAngle + (te.lidAngle - te.prevLidAngle) * partialTicks;
 
-            if (p_192841_1_.adjacentChestZNeg != null)
+            if (te.adjacentChestZNeg != null)
             {
-                float f1 = p_192841_1_.adjacentChestZNeg.prevLidAngle + (p_192841_1_.adjacentChestZNeg.lidAngle - p_192841_1_.adjacentChestZNeg.prevLidAngle) * p_192841_8_;
+                float f1 = te.adjacentChestZNeg.prevLidAngle + (te.adjacentChestZNeg.lidAngle - te.adjacentChestZNeg.prevLidAngle) * partialTicks;
 
                 if (f1 > f)
                 {
@@ -170,9 +170,9 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
                 }
             }
 
-            if (p_192841_1_.adjacentChestXNeg != null)
+            if (te.adjacentChestXNeg != null)
             {
-                float f2 = p_192841_1_.adjacentChestXNeg.prevLidAngle + (p_192841_1_.adjacentChestXNeg.lidAngle - p_192841_1_.adjacentChestXNeg.prevLidAngle) * p_192841_8_;
+                float f2 = te.adjacentChestXNeg.prevLidAngle + (te.adjacentChestXNeg.lidAngle - te.adjacentChestXNeg.prevLidAngle) * partialTicks;
 
                 if (f2 > f)
                 {
@@ -188,7 +188,7 @@ public class TileEntityChestRenderer extends TileEntitySpecialRenderer<TileEntit
             GlStateManager.popMatrix();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-            if (p_192841_9_ >= 0)
+            if (destroyStage >= 0)
             {
                 GlStateManager.matrixMode(5890);
                 GlStateManager.popMatrix();

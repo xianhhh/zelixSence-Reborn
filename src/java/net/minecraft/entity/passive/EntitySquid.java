@@ -78,7 +78,7 @@ public class EntitySquid extends EntityWaterMob
         return SoundEvents.ENTITY_SQUID_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_SQUID_HURT;
     }
@@ -205,9 +205,9 @@ public class EntitySquid extends EntityWaterMob
         }
     }
 
-    public void func_191986_a(float p_191986_1_, float p_191986_2_, float p_191986_3_)
+    public void travel(float p_191986_1_, float p_191986_2_, float p_191986_3_)
     {
-        this.moveEntity(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
     }
 
     /**
@@ -218,6 +218,9 @@ public class EntitySquid extends EntityWaterMob
         return this.posY > 45.0D && this.posY < (double)this.world.getSeaLevel() && super.getCanSpawnHere();
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 19)
@@ -258,7 +261,7 @@ public class EntitySquid extends EntityWaterMob
 
         public void updateTask()
         {
-            int i = this.squid.getAge();
+            int i = this.squid.getIdleTime();
 
             if (i > 100)
             {

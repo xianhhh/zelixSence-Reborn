@@ -16,128 +16,131 @@ import net.minecraft.util.ResourceLocation;
 
 public class ItemDurabilityTrigger implements ICriterionTrigger<ItemDurabilityTrigger.Instance>
 {
-    private static final ResourceLocation field_193159_a = new ResourceLocation("item_durability_changed");
-    private final Map<PlayerAdvancements, ItemDurabilityTrigger.Listeners> field_193160_b = Maps.<PlayerAdvancements, ItemDurabilityTrigger.Listeners>newHashMap();
+    private static final ResourceLocation ID = new ResourceLocation("item_durability_changed");
+    private final Map<PlayerAdvancements, ItemDurabilityTrigger.Listeners> listeners = Maps.<PlayerAdvancements, ItemDurabilityTrigger.Listeners>newHashMap();
 
-    public ResourceLocation func_192163_a()
+    public ResourceLocation getId()
     {
-        return field_193159_a;
+        return ID;
     }
 
-    public void func_192165_a(PlayerAdvancements p_192165_1_, ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> p_192165_2_)
+    public void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener)
     {
-        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.field_193160_b.get(p_192165_1_);
+        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (itemdurabilitytrigger$listeners == null)
         {
-            itemdurabilitytrigger$listeners = new ItemDurabilityTrigger.Listeners(p_192165_1_);
-            this.field_193160_b.put(p_192165_1_, itemdurabilitytrigger$listeners);
+            itemdurabilitytrigger$listeners = new ItemDurabilityTrigger.Listeners(playerAdvancementsIn);
+            this.listeners.put(playerAdvancementsIn, itemdurabilitytrigger$listeners);
         }
 
-        itemdurabilitytrigger$listeners.func_193440_a(p_192165_2_);
+        itemdurabilitytrigger$listeners.add(listener);
     }
 
-    public void func_192164_b(PlayerAdvancements p_192164_1_, ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> p_192164_2_)
+    public void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener)
     {
-        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.field_193160_b.get(p_192164_1_);
+        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.listeners.get(playerAdvancementsIn);
 
         if (itemdurabilitytrigger$listeners != null)
         {
-            itemdurabilitytrigger$listeners.func_193438_b(p_192164_2_);
+            itemdurabilitytrigger$listeners.remove(listener);
 
-            if (itemdurabilitytrigger$listeners.func_193439_a())
+            if (itemdurabilitytrigger$listeners.isEmpty())
             {
-                this.field_193160_b.remove(p_192164_1_);
+                this.listeners.remove(playerAdvancementsIn);
             }
         }
     }
 
-    public void func_192167_a(PlayerAdvancements p_192167_1_)
+    public void removeAllListeners(PlayerAdvancements playerAdvancementsIn)
     {
-        this.field_193160_b.remove(p_192167_1_);
+        this.listeners.remove(playerAdvancementsIn);
     }
 
-    public ItemDurabilityTrigger.Instance func_192166_a(JsonObject p_192166_1_, JsonDeserializationContext p_192166_2_)
+    /**
+     * Deserialize a ICriterionInstance of this trigger from the data in the JSON.
+     */
+    public ItemDurabilityTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context)
     {
-        ItemPredicate itempredicate = ItemPredicate.func_192492_a(p_192166_1_.get("item"));
-        MinMaxBounds minmaxbounds = MinMaxBounds.func_192515_a(p_192166_1_.get("durability"));
-        MinMaxBounds minmaxbounds1 = MinMaxBounds.func_192515_a(p_192166_1_.get("delta"));
+        ItemPredicate itempredicate = ItemPredicate.deserialize(json.get("item"));
+        MinMaxBounds minmaxbounds = MinMaxBounds.deserialize(json.get("durability"));
+        MinMaxBounds minmaxbounds1 = MinMaxBounds.deserialize(json.get("delta"));
         return new ItemDurabilityTrigger.Instance(itempredicate, minmaxbounds, minmaxbounds1);
     }
 
-    public void func_193158_a(EntityPlayerMP p_193158_1_, ItemStack p_193158_2_, int p_193158_3_)
+    public void trigger(EntityPlayerMP player, ItemStack itemIn, int newDurability)
     {
-        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.field_193160_b.get(p_193158_1_.func_192039_O());
+        ItemDurabilityTrigger.Listeners itemdurabilitytrigger$listeners = this.listeners.get(player.getAdvancements());
 
         if (itemdurabilitytrigger$listeners != null)
         {
-            itemdurabilitytrigger$listeners.func_193441_a(p_193158_2_, p_193158_3_);
+            itemdurabilitytrigger$listeners.trigger(itemIn, newDurability);
         }
     }
 
     public static class Instance extends AbstractCriterionInstance
     {
-        private final ItemPredicate field_193198_a;
-        private final MinMaxBounds field_193199_b;
-        private final MinMaxBounds field_193200_c;
+        private final ItemPredicate item;
+        private final MinMaxBounds durability;
+        private final MinMaxBounds delta;
 
-        public Instance(ItemPredicate p_i47511_1_, MinMaxBounds p_i47511_2_, MinMaxBounds p_i47511_3_)
+        public Instance(ItemPredicate item, MinMaxBounds durability, MinMaxBounds delta)
         {
-            super(ItemDurabilityTrigger.field_193159_a);
-            this.field_193198_a = p_i47511_1_;
-            this.field_193199_b = p_i47511_2_;
-            this.field_193200_c = p_i47511_3_;
+            super(ItemDurabilityTrigger.ID);
+            this.item = item;
+            this.durability = durability;
+            this.delta = delta;
         }
 
-        public boolean func_193197_a(ItemStack p_193197_1_, int p_193197_2_)
+        public boolean test(ItemStack item, int p_193197_2_)
         {
-            if (!this.field_193198_a.func_192493_a(p_193197_1_))
+            if (!this.item.test(item))
             {
                 return false;
             }
-            else if (!this.field_193199_b.func_192514_a((float)(p_193197_1_.getMaxDamage() - p_193197_2_)))
+            else if (!this.durability.test((float)(item.getMaxDamage() - p_193197_2_)))
             {
                 return false;
             }
             else
             {
-                return this.field_193200_c.func_192514_a((float)(p_193197_1_.getItemDamage() - p_193197_2_));
+                return this.delta.test((float)(item.getItemDamage() - p_193197_2_));
             }
         }
     }
 
     static class Listeners
     {
-        private final PlayerAdvancements field_193442_a;
-        private final Set<ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance>> field_193443_b = Sets.<ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance>>newHashSet();
+        private final PlayerAdvancements playerAdvancements;
+        private final Set<ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance>> listeners = Sets.<ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance>>newHashSet();
 
-        public Listeners(PlayerAdvancements p_i47512_1_)
+        public Listeners(PlayerAdvancements playerAdvancementsIn)
         {
-            this.field_193442_a = p_i47512_1_;
+            this.playerAdvancements = playerAdvancementsIn;
         }
 
-        public boolean func_193439_a()
+        public boolean isEmpty()
         {
-            return this.field_193443_b.isEmpty();
+            return this.listeners.isEmpty();
         }
 
-        public void func_193440_a(ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> p_193440_1_)
+        public void add(ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener)
         {
-            this.field_193443_b.add(p_193440_1_);
+            this.listeners.add(listener);
         }
 
-        public void func_193438_b(ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> p_193438_1_)
+        public void remove(ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener)
         {
-            this.field_193443_b.remove(p_193438_1_);
+            this.listeners.remove(listener);
         }
 
-        public void func_193441_a(ItemStack p_193441_1_, int p_193441_2_)
+        public void trigger(ItemStack item, int newDurability)
         {
             List<ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance>> list = null;
 
-            for (ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener : this.field_193443_b)
+            for (ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener : this.listeners)
             {
-                if (((ItemDurabilityTrigger.Instance)listener.func_192158_a()).func_193197_a(p_193441_1_, p_193441_2_))
+                if (((ItemDurabilityTrigger.Instance)listener.getCriterionInstance()).test(item, newDurability))
                 {
                     if (list == null)
                     {
@@ -152,7 +155,7 @@ public class ItemDurabilityTrigger implements ICriterionTrigger<ItemDurabilityTr
             {
                 for (ICriterionTrigger.Listener<ItemDurabilityTrigger.Instance> listener1 : list)
                 {
-                    listener1.func_192159_a(this.field_193442_a);
+                    listener1.grantCriterion(this.playerAdvancements);
                 }
             }
         }

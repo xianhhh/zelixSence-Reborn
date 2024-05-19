@@ -254,7 +254,10 @@ public class ChunkGeneratorHell implements IChunkGenerator
         }
     }
 
-    public Chunk provideChunk(int x, int z)
+    /**
+     * Generates the chunk at the specified position, from scratch
+     */
+    public Chunk generateChunk(int x, int z)
     {
         this.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
         ChunkPrimer chunkprimer = new ChunkPrimer();
@@ -365,6 +368,9 @@ public class ChunkGeneratorHell implements IChunkGenerator
         return p_185938_1_;
     }
 
+    /**
+     * Generate initial structures in this chunk, e.g. mineshafts, temples, lakes, and dungeons
+     */
     public void populate(int x, int z)
     {
         BlockFalling.fallInstantly = true;
@@ -426,6 +432,9 @@ public class ChunkGeneratorHell implements IChunkGenerator
         BlockFalling.fallInstantly = false;
     }
 
+    /**
+     * Called to generate additional structures after initial worldgen, used by ocean monuments
+     */
     public boolean generateStructures(Chunk chunkIn, int x, int z)
     {
         return false;
@@ -451,16 +460,21 @@ public class ChunkGeneratorHell implements IChunkGenerator
     }
 
     @Nullable
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_)
+    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean findUnexplored)
     {
-        return "Fortress".equals(structureName) && this.genNetherBridge != null ? this.genNetherBridge.getClosestStrongholdPos(worldIn, position, p_180513_4_) : null;
+        return "Fortress".equals(structureName) && this.genNetherBridge != null ? this.genNetherBridge.getNearestStructurePos(worldIn, position, findUnexplored) : null;
     }
 
-    public boolean func_193414_a(World p_193414_1_, String p_193414_2_, BlockPos p_193414_3_)
+    public boolean isInsideStructure(World worldIn, String structureName, BlockPos pos)
     {
-        return "Fortress".equals(p_193414_2_) && this.genNetherBridge != null ? this.genNetherBridge.isInsideStructure(p_193414_3_) : false;
+        return "Fortress".equals(structureName) && this.genNetherBridge != null ? this.genNetherBridge.isInsideStructure(pos) : false;
     }
 
+    /**
+     * Recreates data about structures intersecting given chunk (used for example by getPossibleCreatures), without
+     * placing any blocks. When called for the first time before any chunk is generated - also initializes the internal
+     * state needed by getPossibleCreatures.
+     */
     public void recreateStructures(Chunk chunkIn, int x, int z)
     {
         this.genNetherBridge.generate(this.world, x, z, (ChunkPrimer)null);

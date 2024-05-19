@@ -17,38 +17,47 @@ import org.apache.logging.log4j.Logger;
 
 public class SuffixArray<T>
 {
-    private static final boolean field_194062_b = Boolean.parseBoolean(System.getProperty("SuffixArray.printComparisons", "false"));
-    private static final boolean field_194063_c = Boolean.parseBoolean(System.getProperty("SuffixArray.printArray", "false"));
-    private static final Logger field_194064_d = LogManager.getLogger();
-    protected final List<T> field_194061_a = Lists.<T>newArrayList();
-    private final IntList field_194065_e = new IntArrayList();
-    private final IntList field_194066_f = new IntArrayList();
-    private IntList field_194067_g = new IntArrayList();
-    private IntList field_194068_h = new IntArrayList();
-    private int field_194069_i;
+    /**
+     * A debug property (<code>SuffixArray.printComparisons</code>) that can be specified in the JVM arguments, that
+     * causes debug printing of comparisons as they happen.
+     */
+    private static final boolean DEBUG_PRINT_COMPARISONS = Boolean.parseBoolean(System.getProperty("SuffixArray.printComparisons", "false"));
 
-    public void func_194057_a(T p_194057_1_, String p_194057_2_)
+    /**
+     * A debug property (<code>SuffixArray.printArray</code>) that can be specified in the JVM arguments, that causes
+     * the full array to be printed ({@link #printArray()}) after calling {@link #generate()}
+     */
+    private static final boolean DEBUG_PRINT_ARRAY = Boolean.parseBoolean(System.getProperty("SuffixArray.printArray", "false"));
+    private static final Logger LOGGER = LogManager.getLogger();
+    protected final List<T> list = Lists.<T>newArrayList();
+    private final IntList chars = new IntArrayList();
+    private final IntList wordStarts = new IntArrayList();
+    private IntList suffixToT = new IntArrayList();
+    private IntList offsets = new IntArrayList();
+    private int maxStringLength;
+
+    public void add(T p_194057_1_, String p_194057_2_)
     {
-        this.field_194069_i = Math.max(this.field_194069_i, p_194057_2_.length());
-        int i = this.field_194061_a.size();
-        this.field_194061_a.add(p_194057_1_);
-        this.field_194066_f.add(this.field_194065_e.size());
+        this.maxStringLength = Math.max(this.maxStringLength, p_194057_2_.length());
+        int i = this.list.size();
+        this.list.add(p_194057_1_);
+        this.wordStarts.add(this.chars.size());
 
         for (int j = 0; j < p_194057_2_.length(); ++j)
         {
-            this.field_194067_g.add(i);
-            this.field_194068_h.add(j);
-            this.field_194065_e.add(p_194057_2_.charAt(j));
+            this.suffixToT.add(i);
+            this.offsets.add(j);
+            this.chars.add(p_194057_2_.charAt(j));
         }
 
-        this.field_194067_g.add(i);
-        this.field_194068_h.add(p_194057_2_.length());
-        this.field_194065_e.add(-1);
+        this.suffixToT.add(i);
+        this.offsets.add(p_194057_2_.length());
+        this.chars.add(-1);
     }
 
-    public void func_194058_a()
+    public void generate()
     {
-        int i = this.field_194065_e.size();
+        int i = this.chars.size();
         int[] aint = new int[i];
         final int[] aint1 = new int[i];
         final int[] aint2 = new int[i];
@@ -82,12 +91,12 @@ public class SuffixArray<T>
 
         for (int j = 0; j < i; ++j)
         {
-            aint[j] = this.field_194065_e.getInt(j);
+            aint[j] = this.chars.getInt(j);
         }
 
         int k1 = 1;
 
-        for (int k = Math.min(i, this.field_194069_i); k1 * 2 < k; k1 *= 2)
+        for (int k = Math.min(i, this.maxStringLength); k1 * 2 < k; k1 *= 2)
         {
             for (int l = 0; l < i; aint3[l] = l++)
             {
@@ -110,48 +119,51 @@ public class SuffixArray<T>
             }
         }
 
-        IntList intlist1 = this.field_194067_g;
-        IntList intlist = this.field_194068_h;
-        this.field_194067_g = new IntArrayList(intlist1.size());
-        this.field_194068_h = new IntArrayList(intlist.size());
+        IntList intlist1 = this.suffixToT;
+        IntList intlist = this.offsets;
+        this.suffixToT = new IntArrayList(intlist1.size());
+        this.offsets = new IntArrayList(intlist.size());
 
         for (int i1 = 0; i1 < i; ++i1)
         {
             int j1 = aint3[i1];
-            this.field_194067_g.add(intlist1.getInt(j1));
-            this.field_194068_h.add(intlist.getInt(j1));
+            this.suffixToT.add(intlist1.getInt(j1));
+            this.offsets.add(intlist.getInt(j1));
         }
 
-        if (field_194063_c)
+        if (DEBUG_PRINT_ARRAY)
         {
-            this.func_194060_b();
+            this.printArray();
         }
     }
 
-    private void func_194060_b()
+    /**
+     * Prints the entire array to the logger, on debug level
+     */
+    private void printArray()
     {
-        for (int i2 = 0; i2 < this.field_194067_g.size(); ++i2)
+        for (int i2 = 0; i2 < this.suffixToT.size(); ++i2)
         {
-            field_194064_d.debug("{} {}", Integer.valueOf(i2), this.func_194059_a(i2));
+            LOGGER.debug("{} {}", Integer.valueOf(i2), this.getString(i2));
         }
 
-        field_194064_d.debug("");
+        LOGGER.debug("");
     }
 
-    private String func_194059_a(int p_194059_1_)
+    private String getString(int p_194059_1_)
     {
-        int i2 = this.field_194068_h.getInt(p_194059_1_);
-        int j2 = this.field_194066_f.getInt(this.field_194067_g.getInt(p_194059_1_));
+        int i2 = this.offsets.getInt(p_194059_1_);
+        int j2 = this.wordStarts.getInt(this.suffixToT.getInt(p_194059_1_));
         StringBuilder stringbuilder = new StringBuilder();
 
-        for (int k2 = 0; j2 + k2 < this.field_194065_e.size(); ++k2)
+        for (int k2 = 0; j2 + k2 < this.chars.size(); ++k2)
         {
             if (k2 == i2)
             {
                 stringbuilder.append('^');
             }
 
-            int l2 = ((Integer)this.field_194065_e.get(j2 + k2)).intValue();
+            int l2 = ((Integer)this.chars.get(j2 + k2)).intValue();
 
             if (l2 == -1)
             {
@@ -164,14 +176,14 @@ public class SuffixArray<T>
         return stringbuilder.toString();
     }
 
-    private int func_194056_a(String p_194056_1_, int p_194056_2_)
+    private int compare(String p_194056_1_, int p_194056_2_)
     {
-        int i2 = this.field_194066_f.getInt(this.field_194067_g.getInt(p_194056_2_));
-        int j2 = this.field_194068_h.getInt(p_194056_2_);
+        int i2 = this.wordStarts.getInt(this.suffixToT.getInt(p_194056_2_));
+        int j2 = this.offsets.getInt(p_194056_2_);
 
         for (int k2 = 0; k2 < p_194056_1_.length(); ++k2)
         {
-            int l2 = this.field_194065_e.getInt(i2 + j2 + k2);
+            int l2 = this.chars.getInt(i2 + j2 + k2);
 
             if (l2 == -1)
             {
@@ -195,20 +207,20 @@ public class SuffixArray<T>
         return 0;
     }
 
-    public List<T> func_194055_a(String p_194055_1_)
+    public List<T> search(String p_194055_1_)
     {
-        int i2 = this.field_194067_g.size();
+        int i2 = this.suffixToT.size();
         int j2 = 0;
         int k2 = i2;
 
         while (j2 < k2)
         {
             int l2 = j2 + (k2 - j2) / 2;
-            int i3 = this.func_194056_a(p_194055_1_, l2);
+            int i3 = this.compare(p_194055_1_, l2);
 
-            if (field_194062_b)
+            if (DEBUG_PRINT_COMPARISONS)
             {
-                field_194064_d.debug("comparing lower \"{}\" with {} \"{}\": {}", p_194055_1_, Integer.valueOf(l2), this.func_194059_a(l2), Integer.valueOf(i3));
+                LOGGER.debug("comparing lower \"{}\" with {} \"{}\": {}", p_194055_1_, Integer.valueOf(l2), this.getString(l2), Integer.valueOf(i3));
             }
 
             if (i3 > 0)
@@ -229,11 +241,11 @@ public class SuffixArray<T>
             while (j2 < k2)
             {
                 int j4 = j2 + (k2 - j2) / 2;
-                int j3 = this.func_194056_a(p_194055_1_, j4);
+                int j3 = this.compare(p_194055_1_, j4);
 
-                if (field_194062_b)
+                if (DEBUG_PRINT_COMPARISONS)
                 {
-                    field_194064_d.debug("comparing upper \"{}\" with {} \"{}\": {}", p_194055_1_, Integer.valueOf(j4), this.func_194059_a(j4), Integer.valueOf(j3));
+                    LOGGER.debug("comparing upper \"{}\" with {} \"{}\": {}", p_194055_1_, Integer.valueOf(j4), this.getString(j4), Integer.valueOf(j3));
                 }
 
                 if (j3 >= 0)
@@ -251,7 +263,7 @@ public class SuffixArray<T>
 
             for (int k3 = i4; k3 < k4; ++k3)
             {
-                intset.add(this.field_194067_g.getInt(k3));
+                intset.add(this.suffixToT.getInt(k3));
             }
 
             int[] aint4 = intset.toIntArray();
@@ -260,7 +272,7 @@ public class SuffixArray<T>
 
             for (int l3 : aint4)
             {
-                set.add(this.field_194061_a.get(l3));
+                set.add(this.list.get(l3));
             }
 
             return Lists.newArrayList(set);

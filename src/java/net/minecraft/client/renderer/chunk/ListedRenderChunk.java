@@ -9,9 +9,9 @@ public class ListedRenderChunk extends RenderChunk
 {
     private final int baseDisplayList = GLAllocation.generateDisplayLists(BlockRenderLayer.values().length);
 
-    public ListedRenderChunk(World p_i47121_1_, RenderGlobal p_i47121_2_, int p_i47121_3_)
+    public ListedRenderChunk(World worldIn, RenderGlobal renderGlobalIn, int index)
     {
-        super(p_i47121_1_, p_i47121_2_, p_i47121_3_);
+        super(worldIn, renderGlobalIn, index);
     }
 
     public int getDisplayList(BlockRenderLayer layer, CompiledChunk p_178600_2_)

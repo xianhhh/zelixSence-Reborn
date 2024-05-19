@@ -16,58 +16,58 @@ import net.minecraft.util.math.MathHelper;
 
 public class GhostRecipe
 {
-    private IRecipe field_192687_a;
-    private final List<GhostRecipe.GhostIngredient> field_192688_b = Lists.<GhostRecipe.GhostIngredient>newArrayList();
-    private float field_194190_c;
+    private IRecipe recipe;
+    private final List<GhostRecipe.GhostIngredient> ingredients = Lists.<GhostRecipe.GhostIngredient>newArrayList();
+    private float time;
 
-    public void func_192682_a()
+    public void clear()
     {
-        this.field_192687_a = null;
-        this.field_192688_b.clear();
-        this.field_194190_c = 0.0F;
+        this.recipe = null;
+        this.ingredients.clear();
+        this.time = 0.0F;
     }
 
-    public void func_194187_a(Ingredient p_194187_1_, int p_194187_2_, int p_194187_3_)
+    public void addIngredient(Ingredient p_194187_1_, int p_194187_2_, int p_194187_3_)
     {
-        this.field_192688_b.add(new GhostRecipe.GhostIngredient(p_194187_1_, p_194187_2_, p_194187_3_));
+        this.ingredients.add(new GhostRecipe.GhostIngredient(p_194187_1_, p_194187_2_, p_194187_3_));
     }
 
-    public GhostRecipe.GhostIngredient func_192681_a(int p_192681_1_)
+    public GhostRecipe.GhostIngredient get(int p_192681_1_)
     {
-        return this.field_192688_b.get(p_192681_1_);
+        return this.ingredients.get(p_192681_1_);
     }
 
-    public int func_192684_b()
+    public int size()
     {
-        return this.field_192688_b.size();
+        return this.ingredients.size();
     }
 
     @Nullable
-    public IRecipe func_192686_c()
+    public IRecipe getRecipe()
     {
-        return this.field_192687_a;
+        return this.recipe;
     }
 
-    public void func_192685_a(IRecipe p_192685_1_)
+    public void setRecipe(IRecipe p_192685_1_)
     {
-        this.field_192687_a = p_192685_1_;
+        this.recipe = p_192685_1_;
     }
 
-    public void func_194188_a(Minecraft p_194188_1_, int p_194188_2_, int p_194188_3_, boolean p_194188_4_, float p_194188_5_)
+    public void render(Minecraft p_194188_1_, int p_194188_2_, int p_194188_3_, boolean p_194188_4_, float p_194188_5_)
     {
         if (!GuiScreen.isCtrlKeyDown())
         {
-            this.field_194190_c += p_194188_5_;
+            this.time += p_194188_5_;
         }
 
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.disableLighting();
 
-        for (int i = 0; i < this.field_192688_b.size(); ++i)
+        for (int i = 0; i < this.ingredients.size(); ++i)
         {
-            GhostRecipe.GhostIngredient ghostrecipe$ghostingredient = this.field_192688_b.get(i);
-            int j = ghostrecipe$ghostingredient.func_193713_b() + p_194188_2_;
-            int k = ghostrecipe$ghostingredient.func_193712_c() + p_194188_3_;
+            GhostRecipe.GhostIngredient ghostrecipe$ghostingredient = this.ingredients.get(i);
+            int j = ghostrecipe$ghostingredient.getX() + p_194188_2_;
+            int k = ghostrecipe$ghostingredient.getY() + p_194188_3_;
 
             if (i == 0 && p_194188_4_)
             {
@@ -79,7 +79,7 @@ public class GhostRecipe
             }
 
             GlStateManager.disableLighting();
-            ItemStack itemstack = ghostrecipe$ghostingredient.func_194184_c();
+            ItemStack itemstack = ghostrecipe$ghostingredient.getItem();
             RenderItem renderitem = p_194188_1_.getRenderItem();
             renderitem.renderItemAndEffectIntoGUI(p_194188_1_.player, itemstack, j, k);
             GlStateManager.depthFunc(516);
@@ -88,7 +88,7 @@ public class GhostRecipe
 
             if (i == 0)
             {
-                renderitem.renderItemOverlays(p_194188_1_.fontRendererObj, itemstack, j, k);
+                renderitem.renderItemOverlays(p_194188_1_.fontRenderer, itemstack, j, k);
             }
 
             GlStateManager.enableLighting();
@@ -99,31 +99,31 @@ public class GhostRecipe
 
     public class GhostIngredient
     {
-        private final Ingredient field_194186_b;
-        private final int field_192678_b;
-        private final int field_192679_c;
+        private final Ingredient ingredient;
+        private final int x;
+        private final int y;
 
         public GhostIngredient(Ingredient p_i47604_2_, int p_i47604_3_, int p_i47604_4_)
         {
-            this.field_194186_b = p_i47604_2_;
-            this.field_192678_b = p_i47604_3_;
-            this.field_192679_c = p_i47604_4_;
+            this.ingredient = p_i47604_2_;
+            this.x = p_i47604_3_;
+            this.y = p_i47604_4_;
         }
 
-        public int func_193713_b()
+        public int getX()
         {
-            return this.field_192678_b;
+            return this.x;
         }
 
-        public int func_193712_c()
+        public int getY()
         {
-            return this.field_192679_c;
+            return this.y;
         }
 
-        public ItemStack func_194184_c()
+        public ItemStack getItem()
         {
-            ItemStack[] aitemstack = this.field_194186_b.func_193365_a();
-            return aitemstack[MathHelper.floor(GhostRecipe.this.field_194190_c / 30.0F) % aitemstack.length];
+            ItemStack[] aitemstack = this.ingredient.getMatchingStacks();
+            return aitemstack[MathHelper.floor(GhostRecipe.this.time / 30.0F) % aitemstack.length];
         }
     }
 }

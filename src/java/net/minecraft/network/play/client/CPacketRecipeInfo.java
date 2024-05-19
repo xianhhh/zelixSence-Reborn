@@ -9,10 +9,10 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 
 public class CPacketRecipeInfo implements Packet<INetHandlerPlayServer>
 {
-    private CPacketRecipeInfo.Purpose field_194157_a;
-    private IRecipe field_193649_d;
-    private boolean field_192631_e;
-    private boolean field_192632_f;
+    private CPacketRecipeInfo.Purpose purpose;
+    private IRecipe recipe;
+    private boolean isGuiOpen;
+    private boolean filteringCraftable;
 
     public CPacketRecipeInfo()
     {
@@ -20,15 +20,15 @@ public class CPacketRecipeInfo implements Packet<INetHandlerPlayServer>
 
     public CPacketRecipeInfo(IRecipe p_i47518_1_)
     {
-        this.field_194157_a = CPacketRecipeInfo.Purpose.SHOWN;
-        this.field_193649_d = p_i47518_1_;
+        this.purpose = CPacketRecipeInfo.Purpose.SHOWN;
+        this.recipe = p_i47518_1_;
     }
 
     public CPacketRecipeInfo(boolean p_i47424_1_, boolean p_i47424_2_)
     {
-        this.field_194157_a = CPacketRecipeInfo.Purpose.SETTINGS;
-        this.field_192631_e = p_i47424_1_;
-        this.field_192632_f = p_i47424_2_;
+        this.purpose = CPacketRecipeInfo.Purpose.SETTINGS;
+        this.isGuiOpen = p_i47424_1_;
+        this.filteringCraftable = p_i47424_2_;
     }
 
     /**
@@ -36,16 +36,16 @@ public class CPacketRecipeInfo implements Packet<INetHandlerPlayServer>
      */
     public void readPacketData(PacketBuffer buf) throws IOException
     {
-        this.field_194157_a = (CPacketRecipeInfo.Purpose)buf.readEnumValue(CPacketRecipeInfo.Purpose.class);
+        this.purpose = (CPacketRecipeInfo.Purpose)buf.readEnumValue(CPacketRecipeInfo.Purpose.class);
 
-        if (this.field_194157_a == CPacketRecipeInfo.Purpose.SHOWN)
+        if (this.purpose == CPacketRecipeInfo.Purpose.SHOWN)
         {
-            this.field_193649_d = CraftingManager.func_193374_a(buf.readInt());
+            this.recipe = CraftingManager.getRecipeById(buf.readInt());
         }
-        else if (this.field_194157_a == CPacketRecipeInfo.Purpose.SETTINGS)
+        else if (this.purpose == CPacketRecipeInfo.Purpose.SETTINGS)
         {
-            this.field_192631_e = buf.readBoolean();
-            this.field_192632_f = buf.readBoolean();
+            this.isGuiOpen = buf.readBoolean();
+            this.filteringCraftable = buf.readBoolean();
         }
     }
 
@@ -54,16 +54,16 @@ public class CPacketRecipeInfo implements Packet<INetHandlerPlayServer>
      */
     public void writePacketData(PacketBuffer buf) throws IOException
     {
-        buf.writeEnumValue(this.field_194157_a);
+        buf.writeEnumValue(this.purpose);
 
-        if (this.field_194157_a == CPacketRecipeInfo.Purpose.SHOWN)
+        if (this.purpose == CPacketRecipeInfo.Purpose.SHOWN)
         {
-            buf.writeInt(CraftingManager.func_193375_a(this.field_193649_d));
+            buf.writeInt(CraftingManager.getIDForRecipe(this.recipe));
         }
-        else if (this.field_194157_a == CPacketRecipeInfo.Purpose.SETTINGS)
+        else if (this.purpose == CPacketRecipeInfo.Purpose.SETTINGS)
         {
-            buf.writeBoolean(this.field_192631_e);
-            buf.writeBoolean(this.field_192632_f);
+            buf.writeBoolean(this.isGuiOpen);
+            buf.writeBoolean(this.filteringCraftable);
         }
     }
 
@@ -72,27 +72,27 @@ public class CPacketRecipeInfo implements Packet<INetHandlerPlayServer>
      */
     public void processPacket(INetHandlerPlayServer handler)
     {
-        handler.func_191984_a(this);
+        handler.handleRecipeBookUpdate(this);
     }
 
-    public CPacketRecipeInfo.Purpose func_194156_a()
+    public CPacketRecipeInfo.Purpose getPurpose()
     {
-        return this.field_194157_a;
+        return this.purpose;
     }
 
-    public IRecipe func_193648_b()
+    public IRecipe getRecipe()
     {
-        return this.field_193649_d;
+        return this.recipe;
     }
 
-    public boolean func_192624_c()
+    public boolean isGuiOpen()
     {
-        return this.field_192631_e;
+        return this.isGuiOpen;
     }
 
-    public boolean func_192625_d()
+    public boolean isFilteringCraftable()
     {
-        return this.field_192632_f;
+        return this.filteringCraftable;
     }
 
     public static enum Purpose

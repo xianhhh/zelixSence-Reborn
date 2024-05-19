@@ -5,7 +5,7 @@ import net.minecraft.util.math.MathHelper;
 public class EntityBodyHelper
 {
     /** Instance of EntityLiving. */
-    private final EntityLivingBase theLiving;
+    private final EntityLivingBase living;
 
     /**
      * Used to progressively ajust the rotation of the body to the rotation of the head
@@ -15,7 +15,7 @@ public class EntityBodyHelper
 
     public EntityBodyHelper(EntityLivingBase livingIn)
     {
-        this.theLiving = livingIn;
+        this.living = livingIn;
     }
 
     /**
@@ -23,26 +23,26 @@ public class EntityBodyHelper
      */
     public void updateRenderAngles()
     {
-        double d0 = this.theLiving.posX - this.theLiving.prevPosX;
-        double d1 = this.theLiving.posZ - this.theLiving.prevPosZ;
+        double d0 = this.living.posX - this.living.prevPosX;
+        double d1 = this.living.posZ - this.living.prevPosZ;
 
         if (d0 * d0 + d1 * d1 > 2.500000277905201E-7D)
         {
-            this.theLiving.renderYawOffset = this.theLiving.rotationYaw;
-            this.theLiving.rotationYawHead = this.computeAngleWithBound(this.theLiving.renderYawOffset, this.theLiving.rotationYawHead, 75.0F);
-            this.prevRenderYawHead = this.theLiving.rotationYawHead;
+            this.living.renderYawOffset = this.living.rotationYaw;
+            this.living.rotationYawHead = this.computeAngleWithBound(this.living.renderYawOffset, this.living.rotationYawHead, 75.0F);
+            this.prevRenderYawHead = this.living.rotationYawHead;
             this.rotationTickCounter = 0;
         }
         else
         {
-            if (this.theLiving.getPassengers().isEmpty() || !(this.theLiving.getPassengers().get(0) instanceof EntityLiving))
+            if (this.living.getPassengers().isEmpty() || !(this.living.getPassengers().get(0) instanceof EntityLiving))
             {
                 float f = 75.0F;
 
-                if (Math.abs(this.theLiving.rotationYawHead - this.prevRenderYawHead) > 15.0F)
+                if (Math.abs(this.living.rotationYawHead - this.prevRenderYawHead) > 15.0F)
                 {
                     this.rotationTickCounter = 0;
-                    this.prevRenderYawHead = this.theLiving.rotationYawHead;
+                    this.prevRenderYawHead = this.living.rotationYawHead;
                 }
                 else
                 {
@@ -55,7 +55,7 @@ public class EntityBodyHelper
                     }
                 }
 
-                this.theLiving.renderYawOffset = this.computeAngleWithBound(this.theLiving.rotationYawHead, this.theLiving.renderYawOffset, f);
+                this.living.renderYawOffset = this.computeAngleWithBound(this.living.rotationYawHead, this.living.renderYawOffset, f);
             }
         }
     }

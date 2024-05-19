@@ -46,7 +46,7 @@ public class NBTTagString extends NBTBase
 
     public String toString()
     {
-        return func_193588_a(this.data);
+        return quoteAndEscape(this.data);
     }
 
     /**
@@ -88,7 +88,7 @@ public class NBTTagString extends NBTBase
         return this.data;
     }
 
-    public static String func_193588_a(String p_193588_0_)
+    public static String quoteAndEscape(String p_193588_0_)
     {
         StringBuilder stringbuilder = new StringBuilder("\"");
 

@@ -39,7 +39,7 @@ public class RayTraceResult
         this.typeOfHit = typeIn;
         this.blockPos = blockPosIn;
         this.sideHit = sideHitIn;
-        this.hitVec = new Vec3d(hitVecIn.xCoord, hitVecIn.yCoord, hitVecIn.zCoord);
+        this.hitVec = new Vec3d(hitVecIn.x, hitVecIn.y, hitVecIn.z);
     }
 
     public RayTraceResult(Entity entityHitIn, Vec3d hitVecIn)

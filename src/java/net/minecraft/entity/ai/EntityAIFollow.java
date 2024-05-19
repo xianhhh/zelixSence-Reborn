@@ -11,30 +11,30 @@ import net.minecraft.pathfinding.PathNodeType;
 
 public class EntityAIFollow extends EntityAIBase
 {
-    private final EntityLiving field_192372_a;
-    private final Predicate<EntityLiving> field_192373_b;
-    private EntityLiving field_192374_c;
-    private final double field_192375_d;
-    private final PathNavigate field_192376_e;
-    private int field_192377_f;
-    private final float field_192378_g;
-    private float field_192379_h;
-    private final float field_192380_i;
+    private final EntityLiving entity;
+    private final Predicate<EntityLiving> followPredicate;
+    private EntityLiving followingEntity;
+    private final double speedModifier;
+    private final PathNavigate navigation;
+    private int timeToRecalcPath;
+    private final float stopDistance;
+    private float oldWaterCost;
+    private final float areaSize;
 
     public EntityAIFollow(final EntityLiving p_i47417_1_, double p_i47417_2_, float p_i47417_4_, float p_i47417_5_)
     {
-        this.field_192372_a = p_i47417_1_;
-        this.field_192373_b = new Predicate<EntityLiving>()
+        this.entity = p_i47417_1_;
+        this.followPredicate = new Predicate<EntityLiving>()
         {
             public boolean apply(@Nullable EntityLiving p_apply_1_)
             {
                 return p_apply_1_ != null && p_i47417_1_.getClass() != p_apply_1_.getClass();
             }
         };
-        this.field_192375_d = p_i47417_2_;
-        this.field_192376_e = p_i47417_1_.getNavigator();
-        this.field_192378_g = p_i47417_4_;
-        this.field_192380_i = p_i47417_5_;
+        this.speedModifier = p_i47417_2_;
+        this.navigation = p_i47417_1_.getNavigator();
+        this.stopDistance = p_i47417_4_;
+        this.areaSize = p_i47417_5_;
         this.setMutexBits(3);
 
         if (!(p_i47417_1_.getNavigator() instanceof PathNavigateGround) && !(p_i47417_1_.getNavigator() instanceof PathNavigateFlying))
@@ -48,7 +48,7 @@ public class EntityAIFollow extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        List<EntityLiving> list = this.field_192372_a.world.<EntityLiving>getEntitiesWithinAABB(EntityLiving.class, this.field_192372_a.getEntityBoundingBox().expandXyz((double)this.field_192380_i), this.field_192373_b);
+        List<EntityLiving> list = this.entity.world.<EntityLiving>getEntitiesWithinAABB(EntityLiving.class, this.entity.getEntityBoundingBox().grow((double)this.areaSize), this.followPredicate);
 
         if (!list.isEmpty())
         {
@@ -56,7 +56,7 @@ public class EntityAIFollow extends EntityAIBase
             {
                 if (!entityliving.isInvisible())
                 {
-                    this.field_192374_c = entityliving;
+                    this.followingEntity = entityliving;
                     return true;
                 }
             }
@@ -68,9 +68,9 @@ public class EntityAIFollow extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
+    public boolean shouldContinueExecuting()
     {
-        return this.field_192374_c != null && !this.field_192376_e.noPath() && this.field_192372_a.getDistanceSqToEntity(this.field_192374_c) > (double)(this.field_192378_g * this.field_192378_g);
+        return this.followingEntity != null && !this.navigation.noPath() && this.entity.getDistanceSqToEntity(this.followingEntity) > (double)(this.stopDistance * this.stopDistance);
     }
 
     /**
@@ -78,52 +78,52 @@ public class EntityAIFollow extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.field_192377_f = 0;
-        this.field_192379_h = this.field_192372_a.getPathPriority(PathNodeType.WATER);
-        this.field_192372_a.setPathPriority(PathNodeType.WATER, 0.0F);
+        this.timeToRecalcPath = 0;
+        this.oldWaterCost = this.entity.getPathPriority(PathNodeType.WATER);
+        this.entity.setPathPriority(PathNodeType.WATER, 0.0F);
     }
 
     /**
-     * Resets the task
+     * Reset the task's internal state. Called when this task is interrupted by another one
      */
     public void resetTask()
     {
-        this.field_192374_c = null;
-        this.field_192376_e.clearPathEntity();
-        this.field_192372_a.setPathPriority(PathNodeType.WATER, this.field_192379_h);
+        this.followingEntity = null;
+        this.navigation.clearPathEntity();
+        this.entity.setPathPriority(PathNodeType.WATER, this.oldWaterCost);
     }
 
     /**
-     * Updates the task
+     * Keep ticking a continuous task that has already been started
      */
     public void updateTask()
     {
-        if (this.field_192374_c != null && !this.field_192372_a.getLeashed())
+        if (this.followingEntity != null && !this.entity.getLeashed())
         {
-            this.field_192372_a.getLookHelper().setLookPositionWithEntity(this.field_192374_c, 10.0F, (float)this.field_192372_a.getVerticalFaceSpeed());
+            this.entity.getLookHelper().setLookPositionWithEntity(this.followingEntity, 10.0F, (float)this.entity.getVerticalFaceSpeed());
 
-            if (--this.field_192377_f <= 0)
+            if (--this.timeToRecalcPath <= 0)
             {
-                this.field_192377_f = 10;
-                double d0 = this.field_192372_a.posX - this.field_192374_c.posX;
-                double d1 = this.field_192372_a.posY - this.field_192374_c.posY;
-                double d2 = this.field_192372_a.posZ - this.field_192374_c.posZ;
+                this.timeToRecalcPath = 10;
+                double d0 = this.entity.posX - this.followingEntity.posX;
+                double d1 = this.entity.posY - this.followingEntity.posY;
+                double d2 = this.entity.posZ - this.followingEntity.posZ;
                 double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-                if (d3 > (double)(this.field_192378_g * this.field_192378_g))
+                if (d3 > (double)(this.stopDistance * this.stopDistance))
                 {
-                    this.field_192376_e.tryMoveToEntityLiving(this.field_192374_c, this.field_192375_d);
+                    this.navigation.tryMoveToEntityLiving(this.followingEntity, this.speedModifier);
                 }
                 else
                 {
-                    this.field_192376_e.clearPathEntity();
-                    EntityLookHelper entitylookhelper = this.field_192374_c.getLookHelper();
+                    this.navigation.clearPathEntity();
+                    EntityLookHelper entitylookhelper = this.followingEntity.getLookHelper();
 
-                    if (d3 <= (double)this.field_192378_g || entitylookhelper.getLookPosX() == this.field_192372_a.posX && entitylookhelper.getLookPosY() == this.field_192372_a.posY && entitylookhelper.getLookPosZ() == this.field_192372_a.posZ)
+                    if (d3 <= (double)this.stopDistance || entitylookhelper.getLookPosX() == this.entity.posX && entitylookhelper.getLookPosY() == this.entity.posY && entitylookhelper.getLookPosZ() == this.entity.posZ)
                     {
-                        double d4 = this.field_192374_c.posX - this.field_192372_a.posX;
-                        double d5 = this.field_192374_c.posZ - this.field_192372_a.posZ;
-                        this.field_192376_e.tryMoveToXYZ(this.field_192372_a.posX - d4, this.field_192372_a.posY, this.field_192372_a.posZ - d5, this.field_192375_d);
+                        double d4 = this.followingEntity.posX - this.entity.posX;
+                        double d5 = this.followingEntity.posZ - this.entity.posZ;
+                        this.navigation.tryMoveToXYZ(this.entity.posX - d4, this.entity.posY, this.entity.posZ - d5, this.speedModifier);
                     }
                 }
             }

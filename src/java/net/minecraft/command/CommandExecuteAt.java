@@ -16,7 +16,7 @@ public class CommandExecuteAt extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "execute";
     }
@@ -32,7 +32,7 @@ public class CommandExecuteAt extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.execute.usage";
     }
@@ -76,7 +76,7 @@ public class CommandExecuteAt extends CommandBase
                     throw new CommandException("commands.execute.failed", new Object[] {"detect", entity.getName()});
                 }
 
-                if (!CommandBase.func_190791_b(block, args[9]).apply(iblockstate))
+                if (!CommandBase.convertArgToBlockStatePredicate(block, args[9]).apply(iblockstate))
                 {
                     throw new CommandException("commands.execute.failed", new Object[] {"detect", entity.getName()});
                 }
@@ -85,7 +85,7 @@ public class CommandExecuteAt extends CommandBase
             }
 
             String s = buildString(args, i);
-            ICommandSender icommandsender = CommandSenderWrapper.func_193998_a(sender).func_193997_a(entity, new Vec3d(d0, d1, d2)).func_194001_a(server.worldServers[0].getGameRules().getBoolean("commandBlockOutput"));
+            ICommandSender icommandsender = CommandSenderWrapper.create(sender).withEntity(entity, new Vec3d(d0, d1, d2)).withSendCommandFeedback(server.worlds[0].getGameRules().getBoolean("commandBlockOutput"));
             ICommandManager icommandmanager = server.getCommandManager();
 
             try
@@ -104,19 +104,19 @@ public class CommandExecuteAt extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1)
         {
-            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
         else if (args.length > 1 && args.length <= 4)
         {
-            return getTabCompletionCoordinate(args, 1, pos);
+            return getTabCompletionCoordinate(args, 1, targetPos);
         }
         else if (args.length > 5 && args.length <= 8 && "detect".equals(args[4]))
         {
-            return getTabCompletionCoordinate(args, 5, pos);
+            return getTabCompletionCoordinate(args, 5, targetPos);
         }
         else
         {

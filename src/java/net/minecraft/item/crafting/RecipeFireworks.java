@@ -13,14 +13,14 @@ import net.minecraft.world.World;
 
 public class RecipeFireworks implements IRecipe
 {
-    private ItemStack resultItem = ItemStack.field_190927_a;
+    private ItemStack resultItem = ItemStack.EMPTY;
 
     /**
      * Used to check if a recipe matches current crafting inventory
      */
     public boolean matches(InventoryCrafting inv, World worldIn)
     {
-        this.resultItem = ItemStack.field_190927_a;
+        this.resultItem = ItemStack.EMPTY;
         int i = 0;
         int j = 0;
         int k = 0;
@@ -32,7 +32,7 @@ public class RecipeFireworks implements IRecipe
         {
             ItemStack itemstack = inv.getStackInSlot(k1);
 
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 if (itemstack.getItem() == Items.GUNPOWDER)
                 {
@@ -126,7 +126,7 @@ public class RecipeFireworks implements IRecipe
                 {
                     ItemStack itemstack2 = inv.getStackInSlot(l1);
 
-                    if (!itemstack2.func_190926_b())
+                    if (!itemstack2.isEmpty())
                     {
                         if (itemstack2.getItem() == Items.DYE)
                         {
@@ -180,7 +180,7 @@ public class RecipeFireworks implements IRecipe
                 {
                     ItemStack itemstack1 = inv.getStackInSlot(i2);
 
-                    if (!itemstack1.func_190926_b())
+                    if (!itemstack1.isEmpty())
                     {
                         if (itemstack1.getItem() == Items.DYE)
                         {
@@ -189,7 +189,7 @@ public class RecipeFireworks implements IRecipe
                         else if (itemstack1.getItem() == Items.FIREWORK_CHARGE)
                         {
                             this.resultItem = itemstack1.copy();
-                            this.resultItem.func_190920_e(1);
+                            this.resultItem.setCount(1);
                         }
                     }
                 }
@@ -201,7 +201,7 @@ public class RecipeFireworks implements IRecipe
                     aint[j2] = ((Integer)list1.get(j2)).intValue();
                 }
 
-                if (!this.resultItem.func_190926_b() && this.resultItem.hasTagCompound())
+                if (!this.resultItem.isEmpty() && this.resultItem.hasTagCompound())
                 {
                     NBTTagCompound nbttagcompound4 = this.resultItem.getTagCompound().getCompoundTag("Explosion");
 
@@ -246,7 +246,7 @@ public class RecipeFireworks implements IRecipe
 
     public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
     {
-        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 
         for (int i = 0; i < nonnulllist.size(); ++i)
         {
@@ -261,13 +261,16 @@ public class RecipeFireworks implements IRecipe
         return nonnulllist;
     }
 
-    public boolean func_192399_d()
+    public boolean isHidden()
     {
         return true;
     }
 
-    public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+    /**
+     * Used to determine if this recipe can fit in a grid of the given width/height
+     */
+    public boolean canFit(int width, int height)
     {
-        return p_194133_1_ * p_194133_2_ >= 1;
+        return width * height >= 1;
     }
 }

@@ -25,7 +25,7 @@ public class EmptyChunk extends Chunk
      */
     public boolean isAtLocation(int x, int z)
     {
-        return x == this.xPosition && z == this.zPosition;
+        return x == this.x && z == this.z;
     }
 
     /**
@@ -60,12 +60,12 @@ public class EmptyChunk extends Chunk
         return 255;
     }
 
-    public int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos)
+    public int getLightFor(EnumSkyBlock type, BlockPos pos)
     {
-        return p_177413_1_.defaultLightValue;
+        return type.defaultLightValue;
     }
 
-    public void setLightFor(EnumSkyBlock p_177431_1_, BlockPos pos, int value)
+    public void setLightFor(EnumSkyBlock type, BlockPos pos, int value)
     {
     }
 
@@ -121,32 +121,32 @@ public class EmptyChunk extends Chunk
     /**
      * Called when this Chunk is loaded by the ChunkProvider
      */
-    public void onChunkLoad()
+    public void onLoad()
     {
     }
 
     /**
      * Called when this Chunk is unloaded by the ChunkProvider
      */
-    public void onChunkUnload()
+    public void onUnload()
     {
     }
 
     /**
      * Sets the isModified flag for this Chunk
      */
-    public void setChunkModified()
+    public void markDirty()
     {
     }
 
     /**
      * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
      */
-    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > p_177414_4_)
+    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > filter)
     {
     }
 
-    public <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > filter)
+    public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > filter)
     {
     }
 
@@ -160,7 +160,7 @@ public class EmptyChunk extends Chunk
 
     public Random getRandomWithSeed(long seed)
     {
-        return new Random(this.getWorld().getSeed() + (long)(this.xPosition * this.xPosition * 4987142) + (long)(this.xPosition * 5947611) + (long)(this.zPosition * this.zPosition) * 4392871L + (long)(this.zPosition * 389711) ^ seed);
+        return new Random(this.getWorld().getSeed() + (long)(this.x * this.x * 4987142) + (long)(this.x * 5947611) + (long)(this.z * this.z) * 4392871L + (long)(this.z * 389711) ^ seed);
     }
 
     public boolean isEmpty()
@@ -172,7 +172,7 @@ public class EmptyChunk extends Chunk
      * Returns whether the ExtendedBlockStorages containing levels (in blocks) from arg 1 to arg 2 are fully empty
      * (true) or not (false).
      */
-    public boolean getAreLevelsEmpty(int startY, int endY)
+    public boolean isEmptyBetween(int startY, int endY)
     {
         return true;
     }

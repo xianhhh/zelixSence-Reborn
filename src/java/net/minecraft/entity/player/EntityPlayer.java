@@ -98,12 +98,12 @@ public abstract class EntityPlayer extends EntityLivingBase
     private static final DataParameter<Integer> PLAYER_SCORE = EntityDataManager.<Integer>createKey(EntityPlayer.class, DataSerializers.VARINT);
     protected static final DataParameter<Byte> PLAYER_MODEL_FLAG = EntityDataManager.<Byte>createKey(EntityPlayer.class, DataSerializers.BYTE);
     protected static final DataParameter<Byte> MAIN_HAND = EntityDataManager.<Byte>createKey(EntityPlayer.class, DataSerializers.BYTE);
-    protected static final DataParameter<NBTTagCompound> field_192032_bt = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.field_192734_n);
-    protected static final DataParameter<NBTTagCompound> field_192033_bu = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.field_192734_n);
+    protected static final DataParameter<NBTTagCompound> LEFT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
+    protected static final DataParameter<NBTTagCompound> RIGHT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
 
     /** Inventory of the player */
     public InventoryPlayer inventory = new InventoryPlayer(this);
-    protected InventoryEnderChest theInventoryEnderChest = new InventoryEnderChest();
+    protected InventoryEnderChest enderChest = new InventoryEnderChest();
 
     /**
      * The Container for the player's inventory (which opens when they press E)
@@ -178,7 +178,7 @@ public abstract class EntityPlayer extends EntityLivingBase
     /** The player's unique game profile */
     private final GameProfile gameProfile;
     private boolean hasReducedDebug;
-    private ItemStack itemStackMainHand = ItemStack.field_190927_a;
+    private ItemStack itemStackMainHand = ItemStack.EMPTY;
     private final CooldownTracker cooldownTracker = this.createCooldownTracker();
     @Nullable
 
@@ -220,8 +220,8 @@ public abstract class EntityPlayer extends EntityLivingBase
         this.dataManager.register(PLAYER_SCORE, Integer.valueOf(0));
         this.dataManager.register(PLAYER_MODEL_FLAG, Byte.valueOf((byte)0));
         this.dataManager.register(MAIN_HAND, Byte.valueOf((byte)1));
-        this.dataManager.register(field_192032_bt, new NBTTagCompound());
-        this.dataManager.register(field_192033_bu, new NBTTagCompound());
+        this.dataManager.register(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
+        this.dataManager.register(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
     }
 
     /**
@@ -322,7 +322,7 @@ public abstract class EntityPlayer extends EntityLivingBase
                 this.resetCooldown();
             }
 
-            this.itemStackMainHand = itemstack.func_190926_b() ? ItemStack.field_190927_a : itemstack.copy();
+            this.itemStackMainHand = itemstack.isEmpty() ? ItemStack.EMPTY : itemstack.copy();
         }
 
         this.cooldownTracker.tick();
@@ -454,11 +454,14 @@ public abstract class EntityPlayer extends EntityLivingBase
         return SoundCategory.PLAYERS;
     }
 
-    protected int func_190531_bD()
+    protected int getFireImmuneTicks()
     {
         return 20;
     }
 
+    /**
+     * Handler for {@link World#setEntityState}
+     */
     public void handleStatusUpdate(byte id)
     {
         if (id == 9)
@@ -496,7 +499,7 @@ public abstract class EntityPlayer extends EntityLivingBase
     }
 
     /**
-     * Handles updating while being ridden by an entity
+     * Handles updating while riding another entity
      */
     public void updateRidden()
     {
@@ -614,11 +617,11 @@ public abstract class EntityPlayer extends EntityLivingBase
 
             if (this.isRiding() && !this.getRidingEntity().isDead)
             {
-                axisalignedbb = this.getEntityBoundingBox().union(this.getRidingEntity().getEntityBoundingBox()).expand(1.0D, 0.0D, 1.0D);
+                axisalignedbb = this.getEntityBoundingBox().union(this.getRidingEntity().getEntityBoundingBox()).grow(1.0D, 0.0D, 1.0D);
             }
             else
             {
-                axisalignedbb = this.getEntityBoundingBox().expand(1.0D, 0.5D, 1.0D);
+                axisalignedbb = this.getEntityBoundingBox().grow(1.0D, 0.5D, 1.0D);
             }
 
             List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, axisalignedbb);
@@ -634,24 +637,24 @@ public abstract class EntityPlayer extends EntityLivingBase
             }
         }
 
-        this.func_192028_j(this.func_192023_dk());
-        this.func_192028_j(this.func_192025_dl());
+        this.playShoulderEntityAmbientSound(this.getLeftShoulderEntity());
+        this.playShoulderEntityAmbientSound(this.getRightShoulderEntity());
 
         if (!this.world.isRemote && (this.fallDistance > 0.5F || this.isInWater() || this.isRiding()) || this.capabilities.isFlying)
         {
-            this.func_192030_dh();
+            this.spawnShoulderEntities();
         }
     }
 
-    private void func_192028_j(@Nullable NBTTagCompound p_192028_1_)
+    private void playShoulderEntityAmbientSound(@Nullable NBTTagCompound p_192028_1_)
     {
         if (p_192028_1_ != null && !p_192028_1_.hasKey("Silent") || !p_192028_1_.getBoolean("Silent"))
         {
             String s = p_192028_1_.getString("id");
 
-            if (s.equals(EntityList.func_191306_a(EntityParrot.class).toString()))
+            if (s.equals(EntityList.getKey(EntityParrot.class).toString()))
             {
-                EntityParrot.func_192005_a(this.world, this);
+                EntityParrot.playAmbientSound(this.world, this);
             }
         }
     }
@@ -700,7 +703,7 @@ public abstract class EntityPlayer extends EntityLivingBase
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator())
         {
-            this.func_190776_cN();
+            this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
 
@@ -721,28 +724,28 @@ public abstract class EntityPlayer extends EntityLivingBase
         this.setFlag(0, false);
     }
 
-    protected void func_190776_cN()
+    protected void destroyVanishingCursedItems()
     {
         for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
         {
             ItemStack itemstack = this.inventory.getStackInSlot(i);
 
-            if (!itemstack.func_190926_b() && EnchantmentHelper.func_190939_c(itemstack))
+            if (!itemstack.isEmpty() && EnchantmentHelper.hasVanishingCurse(itemstack))
             {
                 this.inventory.removeStackFromSlot(i);
             }
         }
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
-        if (p_184601_1_ == DamageSource.onFire)
+        if (damageSourceIn == DamageSource.ON_FIRE)
         {
-            return SoundEvents.field_193806_fH;
+            return SoundEvents.ENTITY_PLAYER_HURT_ON_FIRE;
         }
         else
         {
-            return p_184601_1_ == DamageSource.drown ? SoundEvents.field_193805_fG : SoundEvents.ENTITY_PLAYER_HURT;
+            return damageSourceIn == DamageSource.DROWN ? SoundEvents.ENTITY_PLAYER_HURT_DROWN : SoundEvents.ENTITY_PLAYER_HURT;
         }
     }
 
@@ -759,7 +762,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public EntityItem dropItem(boolean dropAll)
     {
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !this.inventory.getCurrentItem().func_190926_b() ? this.inventory.getCurrentItem().func_190916_E() : 1), false, true);
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !this.inventory.getCurrentItem().isEmpty() ? this.inventory.getCurrentItem().getCount() : 1), false, true);
     }
 
     @Nullable
@@ -775,7 +778,7 @@ public abstract class EntityPlayer extends EntityLivingBase
     @Nullable
     public EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem)
     {
-        if (droppedItem.func_190926_b())
+        if (droppedItem.isEmpty())
         {
             return null;
         }
@@ -815,9 +818,9 @@ public abstract class EntityPlayer extends EntityLivingBase
 
             if (traceItem)
             {
-                if (!itemstack.func_190926_b())
+                if (!itemstack.isEmpty())
                 {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.func_190916_E());
+                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
                 }
 
                 this.addStat(StatList.DROP);
@@ -829,8 +832,8 @@ public abstract class EntityPlayer extends EntityLivingBase
 
     protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_)
     {
-        this.world.spawnEntityInWorld(p_184816_1_);
-        return p_184816_1_.getEntityItem();
+        this.world.spawnEntity(p_184816_1_);
+        return p_184816_1_.getItem();
     }
 
     public float getDigSpeed(IBlockState state)
@@ -842,7 +845,7 @@ public abstract class EntityPlayer extends EntityLivingBase
             int i = EnchantmentHelper.getEfficiencyModifier(this);
             ItemStack itemstack = this.getHeldItemMainhand();
 
-            if (i > 0 && !itemstack.func_190926_b())
+            if (i > 0 && !itemstack.isEmpty())
             {
                 f += (float)(i * i + 1);
             }
@@ -963,17 +966,17 @@ public abstract class EntityPlayer extends EntityLivingBase
         if (compound.hasKey("EnderItems", 9))
         {
             NBTTagList nbttaglist1 = compound.getTagList("EnderItems", 10);
-            this.theInventoryEnderChest.loadInventoryFromNBT(nbttaglist1);
+            this.enderChest.loadInventoryFromNBT(nbttaglist1);
         }
 
         if (compound.hasKey("ShoulderEntityLeft", 10))
         {
-            this.func_192029_h(compound.getCompoundTag("ShoulderEntityLeft"));
+            this.setLeftShoulderEntity(compound.getCompoundTag("ShoulderEntityLeft"));
         }
 
         if (compound.hasKey("ShoulderEntityRight", 10))
         {
-            this.func_192031_i(compound.getCompoundTag("ShoulderEntityRight"));
+            this.setRightShoulderEntity(compound.getCompoundTag("ShoulderEntityRight"));
         }
     }
 
@@ -1004,16 +1007,16 @@ public abstract class EntityPlayer extends EntityLivingBase
 
         this.foodStats.writeNBT(compound);
         this.capabilities.writeCapabilitiesToNBT(compound);
-        compound.setTag("EnderItems", this.theInventoryEnderChest.saveInventoryToNBT());
+        compound.setTag("EnderItems", this.enderChest.saveInventoryToNBT());
 
-        if (!this.func_192023_dk().hasNoTags())
+        if (!this.getLeftShoulderEntity().hasNoTags())
         {
-            compound.setTag("ShoulderEntityLeft", this.func_192023_dk());
+            compound.setTag("ShoulderEntityLeft", this.getLeftShoulderEntity());
         }
 
-        if (!this.func_192025_dl().hasNoTags())
+        if (!this.getRightShoulderEntity().hasNoTags())
         {
-            compound.setTag("ShoulderEntityRight", this.func_192025_dl());
+            compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
         }
     }
 
@@ -1032,7 +1035,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
         else
         {
-            this.entityAge = 0;
+            this.idleTime = 0;
 
             if (this.getHealth() <= 0.0F)
             {
@@ -1045,7 +1048,7 @@ public abstract class EntityPlayer extends EntityLivingBase
                     this.wakeUpPlayer(true, true, false);
                 }
 
-                this.func_192030_dh();
+                this.spawnShoulderEntities();
 
                 if (source.isDifficultyScaled())
                 {
@@ -1070,13 +1073,13 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
     }
 
-    protected void func_190629_c(EntityLivingBase p_190629_1_)
+    protected void blockUsingShield(EntityLivingBase p_190629_1_)
     {
-        super.func_190629_c(p_190629_1_);
+        super.blockUsingShield(p_190629_1_);
 
         if (p_190629_1_.getHeldItemMainhand().getItem() instanceof ItemAxe)
         {
-            this.func_190777_m(true);
+            this.disableShield(true);
         }
     }
 
@@ -1107,20 +1110,20 @@ public abstract class EntityPlayer extends EntityLivingBase
             int i = 1 + MathHelper.floor(damage);
             this.activeItemStack.damageItem(i, this);
 
-            if (this.activeItemStack.func_190926_b())
+            if (this.activeItemStack.isEmpty())
             {
                 EnumHand enumhand = this.getActiveHand();
 
                 if (enumhand == EnumHand.MAIN_HAND)
                 {
-                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.field_190927_a);
+                    this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.EMPTY);
                 }
                 else
                 {
-                    this.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, ItemStack.field_190927_a);
+                    this.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, ItemStack.EMPTY);
                 }
 
-                this.activeItemStack = ItemStack.field_190927_a;
+                this.activeItemStack = ItemStack.EMPTY;
                 this.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + this.world.rand.nextFloat() * 0.4F);
             }
         }
@@ -1136,7 +1139,7 @@ public abstract class EntityPlayer extends EntityLivingBase
 
         for (ItemStack itemstack : this.inventory.armorInventory)
         {
-            if (!itemstack.func_190926_b())
+            if (!itemstack.isEmpty())
             {
                 ++i;
             }
@@ -1213,7 +1216,7 @@ public abstract class EntityPlayer extends EntityLivingBase
     {
     }
 
-    public EnumActionResult func_190775_a(Entity p_190775_1_, EnumHand p_190775_2_)
+    public EnumActionResult interactOn(Entity p_190775_1_, EnumHand p_190775_2_)
     {
         if (this.isSpectator())
         {
@@ -1227,20 +1230,20 @@ public abstract class EntityPlayer extends EntityLivingBase
         else
         {
             ItemStack itemstack = this.getHeldItem(p_190775_2_);
-            ItemStack itemstack1 = itemstack.func_190926_b() ? ItemStack.field_190927_a : itemstack.copy();
+            ItemStack itemstack1 = itemstack.isEmpty() ? ItemStack.EMPTY : itemstack.copy();
 
             if (p_190775_1_.processInitialInteract(this, p_190775_2_))
             {
-                if (this.capabilities.isCreativeMode && itemstack == this.getHeldItem(p_190775_2_) && itemstack.func_190916_E() < itemstack1.func_190916_E())
+                if (this.capabilities.isCreativeMode && itemstack == this.getHeldItem(p_190775_2_) && itemstack.getCount() < itemstack1.getCount())
                 {
-                    itemstack.func_190920_e(itemstack1.func_190916_E());
+                    itemstack.setCount(itemstack1.getCount());
                 }
 
                 return EnumActionResult.SUCCESS;
             }
             else
             {
-                if (!itemstack.func_190926_b() && p_190775_1_ instanceof EntityLivingBase)
+                if (!itemstack.isEmpty() && p_190775_1_ instanceof EntityLivingBase)
                 {
                     if (this.capabilities.isCreativeMode)
                     {
@@ -1249,9 +1252,9 @@ public abstract class EntityPlayer extends EntityLivingBase
 
                     if (itemstack.interactWithEntity(this, (EntityLivingBase)p_190775_1_, p_190775_2_))
                     {
-                        if (itemstack.func_190926_b() && !this.capabilities.isCreativeMode)
+                        if (itemstack.isEmpty() && !this.capabilities.isCreativeMode)
                         {
-                            this.setHeldItem(p_190775_2_, ItemStack.field_190927_a);
+                            this.setHeldItem(p_190775_2_, ItemStack.EMPTY);
                         }
 
                         return EnumActionResult.SUCCESS;
@@ -1271,6 +1274,9 @@ public abstract class EntityPlayer extends EntityLivingBase
         return -0.35D;
     }
 
+    /**
+     * Dismounts this entity from the entity it is riding.
+     */
     public void dismountRidingEntity()
     {
         super.dismountRidingEntity();
@@ -1380,9 +1386,9 @@ public abstract class EntityPlayer extends EntityLivingBase
 
                         if (flag3)
                         {
-                            float f3 = 1.0F + EnchantmentHelper.func_191527_a(this) * f;
+                            float f3 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * f;
 
-                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().expand(1.0D, 0.25D, 1.0D)))
+                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D)))
                             {
                                 if (entitylivingbase != this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSqToEntity(entitylivingbase) < 9.0D)
                                 {
@@ -1427,7 +1433,7 @@ public abstract class EntityPlayer extends EntityLivingBase
                             this.onEnchantmentCritical(targetEntity);
                         }
 
-                        this.setLastAttacker(targetEntity);
+                        this.setLastAttackedEntity(targetEntity);
 
                         if (targetEntity instanceof EntityLivingBase)
                         {
@@ -1440,7 +1446,7 @@ public abstract class EntityPlayer extends EntityLivingBase
 
                         if (targetEntity instanceof MultiPartEntityPart)
                         {
-                            IEntityMultiPart ientitymultipart = ((MultiPartEntityPart)targetEntity).entityDragonObj;
+                            IEntityMultiPart ientitymultipart = ((MultiPartEntityPart)targetEntity).parent;
 
                             if (ientitymultipart instanceof EntityLivingBase)
                             {
@@ -1448,13 +1454,13 @@ public abstract class EntityPlayer extends EntityLivingBase
                             }
                         }
 
-                        if (!itemstack1.func_190926_b() && entity instanceof EntityLivingBase)
+                        if (!itemstack1.isEmpty() && entity instanceof EntityLivingBase)
                         {
                             itemstack1.hitEntity((EntityLivingBase)entity, this);
 
-                            if (itemstack1.func_190926_b())
+                            if (itemstack1.isEmpty())
                             {
-                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.field_190927_a);
+                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                             }
                         }
 
@@ -1491,7 +1497,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
     }
 
-    public void func_190777_m(boolean p_190777_1_)
+    public void disableShield(boolean p_190777_1_)
     {
         float f = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
 
@@ -1593,7 +1599,7 @@ public abstract class EntityPlayer extends EntityLivingBase
                 return EntityPlayer.SleepResult.NOT_POSSIBLE_NOW;
             }
 
-            if (!this.func_190774_a(bedLocation, enumfacing))
+            if (!this.bedInRange(bedLocation, enumfacing))
             {
                 return EntityPlayer.SleepResult.TOO_FAR_AWAY;
             }
@@ -1613,7 +1619,7 @@ public abstract class EntityPlayer extends EntityLivingBase
             this.dismountRidingEntity();
         }
 
-        this.func_192030_dh();
+        this.spawnShoulderEntities();
         this.setSize(0.2F, 0.2F);
 
         if (this.world.isBlockLoaded(bedLocation))
@@ -1643,7 +1649,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         return EntityPlayer.SleepResult.OK;
     }
 
-    private boolean func_190774_a(BlockPos p_190774_1_, EnumFacing p_190774_2_)
+    private boolean bedInRange(BlockPos p_190774_1_, EnumFacing p_190774_2_)
     {
         if (Math.abs(this.posX - (double)p_190774_1_.getX()) <= 3.0D && Math.abs(this.posY - (double)p_190774_1_.getY()) <= 2.0D && Math.abs(this.posZ - (double)p_190774_1_.getZ()) <= 3.0D)
         {
@@ -1780,7 +1786,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         return this.sleepTimer;
     }
 
-    public void addChatComponentMessage(ITextComponent chatComponent, boolean p_146105_2_)
+    public void sendStatusMessage(ITextComponent chatComponent, boolean actionBar)
     {
     }
 
@@ -1827,15 +1833,15 @@ public abstract class EntityPlayer extends EntityLivingBase
     {
     }
 
-    public void func_192021_a(List<IRecipe> p_192021_1_)
+    public void unlockRecipes(List<IRecipe> p_192021_1_)
     {
     }
 
-    public void func_193102_a(ResourceLocation[] p_193102_1_)
+    public void unlockRecipes(ResourceLocation[] p_193102_1_)
     {
     }
 
-    public void func_192022_b(List<IRecipe> p_192022_1_)
+    public void resetRecipes(List<IRecipe> p_192022_1_)
     {
     }
 
@@ -1857,7 +1863,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
     }
 
-    public void func_191986_a(float p_191986_1_, float p_191986_2_, float p_191986_3_)
+    public void travel(float p_191986_1_, float p_191986_2_, float p_191986_3_)
     {
         double d0 = this.posX;
         double d1 = this.posY;
@@ -1868,7 +1874,7 @@ public abstract class EntityPlayer extends EntityLivingBase
             double d3 = this.motionY;
             float f = this.jumpMovementFactor;
             this.jumpMovementFactor = this.capabilities.getFlySpeed() * (float)(this.isSprinting() ? 2 : 1);
-            super.func_191986_a(p_191986_1_, p_191986_2_, p_191986_3_);
+            super.travel(p_191986_1_, p_191986_2_, p_191986_3_);
             this.motionY = d3 * 0.6D;
             this.jumpMovementFactor = f;
             this.fallDistance = 0.0F;
@@ -1876,7 +1882,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
         else
         {
-            super.func_191986_a(p_191986_1_, p_191986_2_, p_191986_3_);
+            super.travel(p_191986_1_, p_191986_2_, p_191986_3_);
         }
 
         this.addMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
@@ -2009,13 +2015,14 @@ public abstract class EntityPlayer extends EntityLivingBase
     }
 
     /**
-     * sets the players height back to normal after doing things like sleeping and dieing
+     * Plays the {@link #getSplashSound() splash sound}, and the {@link ParticleType#WATER_BUBBLE} and {@link
+     * ParticleType#WATER_SPLASH} particles.
      */
-    protected void resetHeight()
+    protected void doWaterSplashEffect()
     {
         if (!this.isSpectator())
         {
-            super.resetHeight();
+            super.doWaterSplashEffect();
         }
     }
 
@@ -2029,7 +2036,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public void onKillEntity(EntityLivingBase entityLivingIn)
     {
-        EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.func_191301_a(entityLivingIn));
+        EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entityLivingIn));
 
         if (entitylist$entityegginfo != null)
         {
@@ -2075,9 +2082,9 @@ public abstract class EntityPlayer extends EntityLivingBase
         return this.xpSeed;
     }
 
-    public void func_192024_a(ItemStack p_192024_1_, int p_192024_2_)
+    public void onEnchant(ItemStack enchantedItem, int cost)
     {
-        this.experienceLevel -= p_192024_2_;
+        this.experienceLevel -= cost;
 
         if (this.experienceLevel < 0)
         {
@@ -2173,7 +2180,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         {
             return true;
         }
-        else if (stack.func_190926_b())
+        else if (stack.isEmpty())
         {
             return false;
         }
@@ -2250,7 +2257,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public InventoryEnderChest getInventoryEnderChest()
     {
-        return this.theInventoryEnderChest;
+        return this.enderChest;
     }
 
     public ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn)
@@ -2265,7 +2272,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
         else
         {
-            return slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR ? (ItemStack)this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.field_190927_a;
+            return slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR ? (ItemStack)this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.EMPTY;
         }
     }
 
@@ -2288,7 +2295,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
     }
 
-    public boolean func_191521_c(ItemStack p_191521_1_)
+    public boolean addItemStackToInventory(ItemStack p_191521_1_)
     {
         this.playEquipSound(p_191521_1_);
         return this.inventory.addItemStackToInventory(p_191521_1_);
@@ -2304,18 +2311,18 @@ public abstract class EntityPlayer extends EntityLivingBase
         return this.inventory.armorInventory;
     }
 
-    public boolean func_192027_g(NBTTagCompound p_192027_1_)
+    public boolean addShoulderEntity(NBTTagCompound p_192027_1_)
     {
         if (!this.isRiding() && this.onGround && !this.isInWater())
         {
-            if (this.func_192023_dk().hasNoTags())
+            if (this.getLeftShoulderEntity().hasNoTags())
             {
-                this.func_192029_h(p_192027_1_);
+                this.setLeftShoulderEntity(p_192027_1_);
                 return true;
             }
-            else if (this.func_192025_dl().hasNoTags())
+            else if (this.getRightShoulderEntity().hasNoTags())
             {
-                this.func_192031_i(p_192027_1_);
+                this.setRightShoulderEntity(p_192027_1_);
                 return true;
             }
             else
@@ -2329,15 +2336,15 @@ public abstract class EntityPlayer extends EntityLivingBase
         }
     }
 
-    protected void func_192030_dh()
+    protected void spawnShoulderEntities()
     {
-        this.func_192026_k(this.func_192023_dk());
-        this.func_192029_h(new NBTTagCompound());
-        this.func_192026_k(this.func_192025_dl());
-        this.func_192031_i(new NBTTagCompound());
+        this.spawnShoulderEntity(this.getLeftShoulderEntity());
+        this.setLeftShoulderEntity(new NBTTagCompound());
+        this.spawnShoulderEntity(this.getRightShoulderEntity());
+        this.setRightShoulderEntity(new NBTTagCompound());
     }
 
-    private void func_192026_k(@Nullable NBTTagCompound p_192026_1_)
+    private void spawnShoulderEntity(@Nullable NBTTagCompound p_192026_1_)
     {
         if (!this.world.isRemote && !p_192026_1_.hasNoTags())
         {
@@ -2349,7 +2356,7 @@ public abstract class EntityPlayer extends EntityLivingBase
             }
 
             entity.setPosition(this.posX, this.posY + 0.699999988079071D, this.posZ);
-            this.world.spawnEntityInWorld(entity);
+            this.world.spawnEntity(entity);
         }
     }
 
@@ -2482,7 +2489,7 @@ public abstract class EntityPlayer extends EntityLivingBase
         else
         {
             ItemStack itemstack = this.getHeldItemMainhand();
-            return !itemstack.func_190926_b() && itemstack.hasDisplayName() ? itemstack.getDisplayName().equals(code.getLock()) : false;
+            return !itemstack.isEmpty() && itemstack.hasDisplayName() ? itemstack.getDisplayName().equals(code.getLock()) : false;
         }
     }
 
@@ -2496,7 +2503,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public boolean sendCommandFeedback()
     {
-        return this.getServer().worldServers[0].getGameRules().getBoolean("sendCommandFeedback");
+        return this.getServer().worlds[0].getGameRules().getBoolean("sendCommandFeedback");
     }
 
     public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn)
@@ -2545,9 +2552,9 @@ public abstract class EntityPlayer extends EntityLivingBase
             {
                 int i = inventorySlot - 200;
 
-                if (i >= 0 && i < this.theInventoryEnderChest.getSizeInventory())
+                if (i >= 0 && i < this.enderChest.getSizeInventory())
                 {
-                    this.theInventoryEnderChest.setInventorySlotContents(i, itemStackIn);
+                    this.enderChest.setInventorySlotContents(i, itemStackIn);
                     return true;
                 }
                 else
@@ -2557,7 +2564,7 @@ public abstract class EntityPlayer extends EntityLivingBase
             }
             else
             {
-                if (!itemStackIn.func_190926_b())
+                if (!itemStackIn.isEmpty())
                 {
                     if (!(itemStackIn.getItem() instanceof ItemArmor) && !(itemStackIn.getItem() instanceof ItemElytra))
                     {
@@ -2601,24 +2608,24 @@ public abstract class EntityPlayer extends EntityLivingBase
         this.dataManager.set(MAIN_HAND, Byte.valueOf((byte)(hand == EnumHandSide.LEFT ? 0 : 1)));
     }
 
-    public NBTTagCompound func_192023_dk()
+    public NBTTagCompound getLeftShoulderEntity()
     {
-        return (NBTTagCompound)this.dataManager.get(field_192032_bt);
+        return (NBTTagCompound)this.dataManager.get(LEFT_SHOULDER_ENTITY);
     }
 
-    protected void func_192029_h(NBTTagCompound p_192029_1_)
+    protected void setLeftShoulderEntity(NBTTagCompound tag)
     {
-        this.dataManager.set(field_192032_bt, p_192029_1_);
+        this.dataManager.set(LEFT_SHOULDER_ENTITY, tag);
     }
 
-    public NBTTagCompound func_192025_dl()
+    public NBTTagCompound getRightShoulderEntity()
     {
-        return (NBTTagCompound)this.dataManager.get(field_192033_bu);
+        return (NBTTagCompound)this.dataManager.get(RIGHT_SHOULDER_ENTITY);
     }
 
-    protected void func_192031_i(NBTTagCompound p_192031_1_)
+    protected void setRightShoulderEntity(NBTTagCompound tag)
     {
-        this.dataManager.set(field_192033_bu, p_192031_1_);
+        this.dataManager.set(RIGHT_SHOULDER_ENTITY, tag);
     }
 
     public float getCooldownPeriod()
@@ -2665,7 +2672,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public boolean canUseCommandBlock()
     {
-        return this.capabilities.isCreativeMode && this.canCommandSenderUseCommand(2, "");
+        return this.capabilities.isCreativeMode && this.canUseCommand(2, "");
     }
 
     public static enum EnumChatVisibility
@@ -2709,16 +2716,16 @@ public abstract class EntityPlayer extends EntityLivingBase
 
     static class SleepEnemyPredicate implements Predicate<EntityMob>
     {
-        private final EntityPlayer field_192387_a;
+        private final EntityPlayer player;
 
-        private SleepEnemyPredicate(EntityPlayer p_i47461_1_)
+        private SleepEnemyPredicate(EntityPlayer playerIn)
         {
-            this.field_192387_a = p_i47461_1_;
+            this.player = playerIn;
         }
 
         public boolean apply(@Nullable EntityMob p_apply_1_)
         {
-            return p_apply_1_.func_191990_c(this.field_192387_a);
+            return p_apply_1_.isPreventingPlayerRest(this.player);
         }
     }
 

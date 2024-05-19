@@ -36,11 +36,11 @@ public class BiomeDecorator
     protected WorldGenerator sandGen = new WorldGenSand(Blocks.SAND, 7);
 
     /** The gravel generator. */
-    protected WorldGenerator gravelAsSandGen = new WorldGenSand(Blocks.GRAVEL, 6);
+    protected WorldGenerator gravelGen = new WorldGenSand(Blocks.GRAVEL, 6);
 
     /** The dirt generator. */
     protected WorldGenerator dirtGen;
-    protected WorldGenerator gravelGen;
+    protected WorldGenerator gravelOreGen;
     protected WorldGenerator graniteGen;
     protected WorldGenerator dioriteGen;
     protected WorldGenerator andesiteGen;
@@ -54,7 +54,7 @@ public class BiomeDecorator
 
     /** Field that holds Lapis WorldGenMinable */
     protected WorldGenerator lapisGen;
-    protected WorldGenFlowers yellowFlowerGen = new WorldGenFlowers(Blocks.YELLOW_FLOWER, BlockFlower.EnumFlowerType.DANDELION);
+    protected WorldGenFlowers flowerGen = new WorldGenFlowers(Blocks.YELLOW_FLOWER, BlockFlower.EnumFlowerType.DANDELION);
 
     /** Field that holds mushroomBrown WorldGenFlowers */
     protected WorldGenerator mushroomBrownGen = new WorldGenBush(Blocks.BROWN_MUSHROOM);
@@ -113,16 +113,13 @@ public class BiomeDecorator
      */
     protected int cactiPerChunk;
 
+    /** The number of gravel patches to generate per chunk. */
+    protected int gravelPatchesPerChunk = 1;
+
     /**
      * The number of sand patches to generate per chunk. Sand patches only generate when part of it is underwater.
      */
-    protected int sandPerChunk = 1;
-
-    /**
-     * The number of sand patches to generate per chunk. Sand patches only generate when part of it is underwater. There
-     * appear to be two separate fields for this.
-     */
-    protected int sandPerChunk2 = 3;
+    protected int sandPatchesPerChunk = 3;
 
     /**
      * The number of clay patches to generate per chunk. Only generates when part of it is underwater.
@@ -133,7 +130,7 @@ public class BiomeDecorator
     protected int bigMushroomsPerChunk;
 
     /** True if decorator should generate surface lava & water */
-    public boolean generateLakes = true;
+    public boolean generateFalls = true;
 
     public void decorate(World worldIn, Random random, Biome biome, BlockPos pos)
     {
@@ -146,7 +143,7 @@ public class BiomeDecorator
             this.chunkProviderSettings = ChunkGeneratorSettings.Factory.jsonToFactory(worldIn.getWorldInfo().getGeneratorOptions()).build();
             this.chunkPos = pos;
             this.dirtGen = new WorldGenMinable(Blocks.DIRT.getDefaultState(), this.chunkProviderSettings.dirtSize);
-            this.gravelGen = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), this.chunkProviderSettings.gravelSize);
+            this.gravelOreGen = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), this.chunkProviderSettings.gravelSize);
             this.graniteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), this.chunkProviderSettings.graniteSize);
             this.dioriteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), this.chunkProviderSettings.dioriteSize);
             this.andesiteGen = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), this.chunkProviderSettings.andesiteSize);
@@ -165,7 +162,7 @@ public class BiomeDecorator
     {
         this.generateOres(worldIn, random);
 
-        for (int i = 0; i < this.sandPerChunk2; ++i)
+        for (int i = 0; i < this.sandPatchesPerChunk; ++i)
         {
             int j = random.nextInt(16) + 8;
             int k = random.nextInt(16) + 8;
@@ -179,11 +176,11 @@ public class BiomeDecorator
             this.clayGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(l1, 0, i6)));
         }
 
-        for (int j1 = 0; j1 < this.sandPerChunk; ++j1)
+        for (int j1 = 0; j1 < this.gravelPatchesPerChunk; ++j1)
         {
             int i2 = random.nextInt(16) + 8;
             int j6 = random.nextInt(16) + 8;
-            this.gravelAsSandGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(i2, 0, j6)));
+            this.gravelGen.generate(worldIn, random, worldIn.getTopSolidOrLiquidBlock(this.chunkPos.add(i2, 0, j6)));
         }
 
         int k1 = this.treesPerChunk;
@@ -197,7 +194,7 @@ public class BiomeDecorator
         {
             int k6 = random.nextInt(16) + 8;
             int l = random.nextInt(16) + 8;
-            WorldGenAbstractTree worldgenabstracttree = biomeIn.genBigTreeChance(random);
+            WorldGenAbstractTree worldgenabstracttree = biomeIn.getRandomTreeFeature(random);
             worldgenabstracttree.setDecorationDefaults();
             BlockPos blockpos = worldIn.getHeight(this.chunkPos.add(k6, 0, l));
 
@@ -229,8 +226,8 @@ public class BiomeDecorator
 
                 if (blockflower.getDefaultState().getMaterial() != Material.AIR)
                 {
-                    this.yellowFlowerGen.setGeneratedBlock(blockflower, blockflower$enumflowertype);
-                    this.yellowFlowerGen.generate(worldIn, random, blockpos1);
+                    this.flowerGen.setGeneratedBlock(blockflower, blockflower$enumflowertype);
+                    this.flowerGen.generate(worldIn, random, blockpos1);
                 }
             }
         }
@@ -390,7 +387,7 @@ public class BiomeDecorator
             }
         }
 
-        if (this.generateLakes)
+        if (this.generateFalls)
         {
             for (int k5 = 0; k5 < 50; ++k5)
             {
@@ -423,7 +420,7 @@ public class BiomeDecorator
     protected void generateOres(World worldIn, Random random)
     {
         this.genStandardOre1(worldIn, random, this.chunkProviderSettings.dirtCount, this.dirtGen, this.chunkProviderSettings.dirtMinHeight, this.chunkProviderSettings.dirtMaxHeight);
-        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.gravelCount, this.gravelGen, this.chunkProviderSettings.gravelMinHeight, this.chunkProviderSettings.gravelMaxHeight);
+        this.genStandardOre1(worldIn, random, this.chunkProviderSettings.gravelCount, this.gravelOreGen, this.chunkProviderSettings.gravelMinHeight, this.chunkProviderSettings.gravelMaxHeight);
         this.genStandardOre1(worldIn, random, this.chunkProviderSettings.dioriteCount, this.dioriteGen, this.chunkProviderSettings.dioriteMinHeight, this.chunkProviderSettings.dioriteMaxHeight);
         this.genStandardOre1(worldIn, random, this.chunkProviderSettings.graniteCount, this.graniteGen, this.chunkProviderSettings.graniteMinHeight, this.chunkProviderSettings.graniteMaxHeight);
         this.genStandardOre1(worldIn, random, this.chunkProviderSettings.andesiteCount, this.andesiteGen, this.chunkProviderSettings.andesiteMinHeight, this.chunkProviderSettings.andesiteMaxHeight);

@@ -193,7 +193,7 @@ public class EntityCreeper extends EntityMob
         super.onUpdate();
     }
 
-    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
     {
         return SoundEvents.ENTITY_CREEPER_HURT;
     }
@@ -212,16 +212,16 @@ public class EntityCreeper extends EntityMob
 
         if (this.world.getGameRules().getBoolean("doMobLoot"))
         {
-            if (cause.getEntity() instanceof EntitySkeleton)
+            if (cause.getTrueSource() instanceof EntitySkeleton)
             {
                 int i = Item.getIdFromItem(Items.RECORD_13);
                 int j = Item.getIdFromItem(Items.RECORD_WAIT);
                 int k = i + this.rand.nextInt(j - i + 1);
                 this.dropItem(Item.getItemById(k), 1);
             }
-            else if (cause.getEntity() instanceof EntityCreeper && cause.getEntity() != this && ((EntityCreeper)cause.getEntity()).getPowered() && ((EntityCreeper)cause.getEntity()).isAIEnabled())
+            else if (cause.getTrueSource() instanceof EntityCreeper && cause.getTrueSource() != this && ((EntityCreeper)cause.getTrueSource()).getPowered() && ((EntityCreeper)cause.getTrueSource()).ableToCauseSkullDrop())
             {
-                ((EntityCreeper)cause.getEntity()).incrementDroppedSkulls();
+                ((EntityCreeper)cause.getTrueSource()).incrementDroppedSkulls();
                 this.entityDropItem(new ItemStack(Items.SKULL, 1, 4), 0.0F);
             }
         }
@@ -311,11 +311,11 @@ public class EntityCreeper extends EntityMob
             this.dead = true;
             this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
             this.setDead();
-            this.func_190741_do();
+            this.spawnLingeringCloud();
         }
     }
 
-    private void func_190741_do()
+    private void spawnLingeringCloud()
     {
         Collection<PotionEffect> collection = this.getActivePotionEffects();
 
@@ -333,7 +333,7 @@ public class EntityCreeper extends EntityMob
                 entityareaeffectcloud.addEffect(new PotionEffect(potioneffect));
             }
 
-            this.world.spawnEntityInWorld(entityareaeffectcloud);
+            this.world.spawnEntity(entityareaeffectcloud);
         }
     }
 
@@ -348,9 +348,11 @@ public class EntityCreeper extends EntityMob
     }
 
     /**
-     * Returns true if the newer Entity AI code should be run
+     * Returns true if an entity is able to drop its skull due to being blown up by this creeper.
+     *  
+     * Does not test if this creeper is charged; the caller must do that. However, does test the doMobLoot gamerule.
      */
-    public boolean isAIEnabled()
+    public boolean ableToCauseSkullDrop()
     {
         return this.droppedSkulls < 1 && this.world.getGameRules().getBoolean("doMobLoot");
     }

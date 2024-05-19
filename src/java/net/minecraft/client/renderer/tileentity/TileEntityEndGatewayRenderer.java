@@ -11,34 +11,34 @@ public class TileEntityEndGatewayRenderer extends TileEntityEndPortalRenderer
 {
     private static final ResourceLocation END_GATEWAY_BEAM_TEXTURE = new ResourceLocation("textures/entity/end_gateway_beam.png");
 
-    public void func_192841_a(TileEntityEndPortal p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
+    public void render(TileEntityEndPortal te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         GlStateManager.disableFog();
-        TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)p_192841_1_;
+        TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)te;
 
         if (tileentityendgateway.isSpawning() || tileentityendgateway.isCoolingDown())
         {
             GlStateManager.alphaFunc(516, 0.1F);
             this.bindTexture(END_GATEWAY_BEAM_TEXTURE);
-            float f = tileentityendgateway.isSpawning() ? tileentityendgateway.getSpawnPercent(p_192841_8_) : tileentityendgateway.getCooldownPercent(p_192841_8_);
-            double d0 = tileentityendgateway.isSpawning() ? 256.0D - p_192841_4_ : 50.0D;
+            float f = tileentityendgateway.isSpawning() ? tileentityendgateway.getSpawnPercent(partialTicks) : tileentityendgateway.getCooldownPercent(partialTicks);
+            double d0 = tileentityendgateway.isSpawning() ? 256.0D - y : 50.0D;
             f = MathHelper.sin(f * (float)Math.PI);
             int i = MathHelper.floor((double)f * d0);
-            float[] afloat = tileentityendgateway.isSpawning() ? EnumDyeColor.MAGENTA.func_193349_f() : EnumDyeColor.PURPLE.func_193349_f();
-            TileEntityBeaconRenderer.renderBeamSegment(p_192841_2_, p_192841_4_, p_192841_6_, (double)p_192841_8_, (double)f, (double)tileentityendgateway.getWorld().getTotalWorldTime(), 0, i, afloat, 0.15D, 0.175D);
-            TileEntityBeaconRenderer.renderBeamSegment(p_192841_2_, p_192841_4_, p_192841_6_, (double)p_192841_8_, (double)f, (double)tileentityendgateway.getWorld().getTotalWorldTime(), 0, -i, afloat, 0.15D, 0.175D);
+            float[] afloat = tileentityendgateway.isSpawning() ? EnumDyeColor.MAGENTA.getColorComponentValues() : EnumDyeColor.PURPLE.getColorComponentValues();
+            TileEntityBeaconRenderer.renderBeamSegment(x, y, z, (double)partialTicks, (double)f, (double)tileentityendgateway.getWorld().getTotalWorldTime(), 0, i, afloat, 0.15D, 0.175D);
+            TileEntityBeaconRenderer.renderBeamSegment(x, y, z, (double)partialTicks, (double)f, (double)tileentityendgateway.getWorld().getTotalWorldTime(), 0, -i, afloat, 0.15D, 0.175D);
         }
 
-        super.func_192841_a(p_192841_1_, p_192841_2_, p_192841_4_, p_192841_6_, p_192841_8_, p_192841_9_, p_192841_10_);
+        super.render(te, x, y, z, partialTicks, destroyStage, alpha);
         GlStateManager.enableFog();
     }
 
-    protected int func_191286_a(double p_191286_1_)
+    protected int getPasses(double p_191286_1_)
     {
-        return super.func_191286_a(p_191286_1_) + 1;
+        return super.getPasses(p_191286_1_) + 1;
     }
 
-    protected float func_191287_c()
+    protected float getOffset()
     {
         return 1.0F;
     }

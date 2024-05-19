@@ -23,7 +23,7 @@ public class CommandClone extends CommandBase
     /**
      * Gets the name of the command
      */
-    public String getCommandName()
+    public String getName()
     {
         return "clone";
     }
@@ -39,7 +39,7 @@ public class CommandClone extends CommandBase
     /**
      * Gets the usage string for the command.
      */
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "commands.clone.usage";
     }
@@ -109,7 +109,7 @@ public class CommandClone extends CommandBase
 
                                     if (args.length >= 13)
                                     {
-                                        predicate = func_190791_b(block, args[12]);
+                                        predicate = convertArgToBlockStatePredicate(block, args[12]);
                                     }
                                 }
                             }
@@ -262,19 +262,19 @@ public class CommandClone extends CommandBase
         }
     }
 
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length > 0 && args.length <= 3)
         {
-            return getTabCompletionCoordinate(args, 0, pos);
+            return getTabCompletionCoordinate(args, 0, targetPos);
         }
         else if (args.length > 3 && args.length <= 6)
         {
-            return getTabCompletionCoordinate(args, 3, pos);
+            return getTabCompletionCoordinate(args, 3, targetPos);
         }
         else if (args.length > 6 && args.length <= 9)
         {
-            return getTabCompletionCoordinate(args, 6, pos);
+            return getTabCompletionCoordinate(args, 6, targetPos);
         }
         else if (args.length == 10)
         {
