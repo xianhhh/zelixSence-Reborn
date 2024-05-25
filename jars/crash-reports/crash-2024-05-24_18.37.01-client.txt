@@ -1,0 +1,71 @@
+---- Minecraft Crash Report ----
+// Don't be sad, have a hug! <3
+
+Time: 24-5-24 下午6:37
+Description: Unexpected error
+
+java.lang.NullPointerException: Unexpected error
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1922)
+	at net.minecraft.client.Minecraft.runGameLoop(Minecraft.java:1105)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:423)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Stacktrace:
+	at net.minecraft.client.multiplayer.WorldClient.addWorldInfoToCrashReport(WorldClient.java:380)
+
+-- Affected level --
+Details:
+	Level name: MpServer
+	All players: 1 total; [EntityPlayerSP['Player426'/159, l='MpServer', x=583.30, y=66.00, z=189.30]]
+	Chunk stats: MultiplayerChunkCache: 550, 550
+	Level seed: 0
+	Level generator: ID 02 - largeBiomes, ver 0. Features enabled: false
+	Level generator options: 
+	Level spawn location: 584.00,64.00,166.00 - World: (584,64,166), Chunk: (at 8,4,6 in 36,10; contains blocks 576,0,160 to 591,255,175), Region: (1,0; contains chunks 32,0 to 63,31, blocks 512,0,0 to 1023,255,511)
+	Level time: 2040 game time, 1420 day time
+	Level dimension: 0
+	Level storage version: 0x00000 - Unknown?
+	Level weather: Rain time: 0 (now: false), thunder time: 0 (now: false)
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Cheats: false
+	Forced entities: 88 total; [EntityZombie['僵尸'/1024, l='MpServer', x=595.50, y=24.00, z=180.50], EntitySkeleton['骷髅'/1025, l='MpServer', x=574.50, y=40.00, z=158.50], EntitySkeleton['骷髅'/1026, l='MpServer', x=575.50, y=40.00, z=156.50], EntityBat['蝙蝠'/29, l='MpServer', x=510.44, y=42.79, z=186.25], EntityBat['蝙蝠'/30, l='MpServer', x=536.43, y=24.14, z=114.97], EntityBat['蝙蝠'/31, l='MpServer', x=540.16, y=41.26, z=114.11], EntitySkeleton['骷髅'/33, l='MpServer', x=552.21, y=18.82, z=173.68], EntityCreeper['爬行者'/49, l='MpServer', x=585.50, y=43.00, z=181.50], EntityZombie['僵尸'/50, l='MpServer', x=582.25, y=44.00, z=191.59], EntityZombie['僵尸'/51, l='MpServer', x=583.89, y=43.00, z=188.95], EntityZombie['僵尸'/52, l='MpServer', x=584.50, y=43.00, z=182.94], EntityZombie['僵尸'/53, l='MpServer', x=582.63, y=43.00, z=189.91], EntityZombie['僵尸'/54, l='MpServer', x=585.50, y=55.00, z=222.50], EntityItem['item.tile.torch'/55, l='MpServer', x=580.97, y=38.00, z=252.84], EntityBat['蝙蝠'/57, l='MpServer', x=597.25, y=33.84, z=190.16], EntityZombie['僵尸'/87, l='MpServer', x=608.50, y=53.00, z=184.17], EntityZombie['僵尸'/88, l='MpServer', x=608.47, y=54.00, z=186.03], EntityBat['蝙蝠'/100, l='MpServer', x=619.32, y=19.39, z=200.06], EntitySkeleton['骷髅'/110, l='MpServer', x=650.09, y=23.00, z=223.50], EntityFallingBlock['掉落的方块'/2182, l='MpServer', x=504.50, y=28.85, z=235.50], EntityFallingBlock['掉落的方块'/2183, l='MpServer', x=503.50, y=28.85, z=235.50], EntityFallingBlock['掉落的方块'/2184, l='MpServer', x=503.50, y=28.85, z=234.50], EntityFallingBlock['掉落的方块'/2185, l='MpServer', x=503.50, y=27.85, z=233.50], EntityFallingBlock['掉落的方块'/2186, l='MpServer', x=502.50, y=27.85, z=233.50], EntityFallingBlock['掉落的方块'/2187, l='MpServer', x=502.50, y=28.85, z=234.50], EntityFallingBlock['掉落的方块'/2190, l='MpServer', x=501.50, y=27.85, z=233.50], EntityFallingBlock['掉落的方块'/2191, l='MpServer', x=501.50, y=27.85, z=232.50], EntityFallingBlock['掉落的方块'/2192, l='MpServer', x=502.50, y=27.85, z=232.50], EntityFallingBlock['掉落的方块'/2193, l='MpServer', x=500.50, y=27.85, z=233.50], EntityFallingBlock['掉落的方块'/2194, l='MpServer', x=500.50, y=27.85, z=231.50], EntityFallingBlock['掉落的方块'/2195, l='MpServer', x=500.50, y=27.85, z=232.50], EntityFallingBlock['掉落的方块'/2196, l='MpServer', x=501.50, y=27.85, z=231.50], EntityPlayerSP['Player426'/159, l='MpServer', x=583.30, y=66.00, z=189.30], EntityCreeper['爬行者'/1224, l='MpServer', x=601.50, y=35.00, z=186.50], EntityBat['蝙蝠'/271, l='MpServer', x=643.20, y=20.06, z=229.45], EntityBat['蝙蝠'/1319, l='MpServer', x=535.58, y=22.52, z=119.20], EntityZombie['僵尸'/1415, l='MpServer', x=545.50, y=19.00, z=173.50], EntityZombie['僵尸'/1416, l='MpServer', x=545.50, y=19.00, z=175.50], EntityCreeper['爬行者'/1417, l='MpServer', x=554.50, y=19.00, z=172.50], EntityFallingBlock['掉落的方块'/2450, l='MpServer', x=718.50, y=18.65, z=212.50], EntityFallingBlock['掉落的方块'/2451, l='MpServer', x=718.50, y=18.65, z=213.50], EntityFallingBlock['掉落的方块'/2452, l='MpServer', x=719.50, y=18.65, z=213.50], EntityFallingBlock['掉落的方块'/2453, l='MpServer', x=719.50, y=16.65, z=231.50], EntityFallingBlock['掉落的方块'/2454, l='MpServer', x=718.50, y=14.65, z=231.50], EntityFallingBlock['掉落的方块'/2455, l='MpServer', x=718.50, y=14.65, z=232.50], EntityFallingBlock['掉落的方块'/2456, l='MpServer', x=718.50, y=15.65, z=230.50], EntityBat['蝙蝠'/410, l='MpServer', x=626.68, y=12.07, z=122.94], EntityBat['蝙蝠'/411, l='MpServer', x=618.91, y=13.20, z=120.53], EntityFallingBlock['掉落的方块'/2569, l='MpServer', x=472.50, y=19.41, z=151.50], EntityFallingBlock['掉落的方块'/2571, l='MpServer', x=472.50, y=19.41, z=152.50], EntityFallingBlock['掉落的方块'/2573, l='MpServer', x=471.50, y=19.41, z=151.50], EntityFallingBlock['掉落的方块'/2574, l='MpServer', x=471.50, y=19.41, z=152.50], EntityFallingBlock['掉落的方块'/2577, l='MpServer', x=469.50, y=19.41, z=152.50], EntityFallingBlock['掉落的方块'/2579, l='MpServer', x=470.50, y=19.41, z=151.50], EntityFallingBlock['掉落的方块'/2580, l='MpServer', x=470.50, y=19.41, z=152.50], EntityCreeper['爬行者'/541, l='MpServer', x=580.50, y=22.00, z=169.50], EntityCreeper['爬行者'/542, l='MpServer', x=578.03, y=22.00, z=167.72], EntityCreeper['爬行者'/543, l='MpServer', x=583.50, y=22.00, z=168.50], EntityCreeper['爬行者'/544, l='MpServer', x=582.50, y=22.00, z=169.50], EntityZombie['僵尸'/545, l='MpServer', x=546.50, y=56.00, z=184.50], EntityFallingBlock['掉落的方块'/2599, l='MpServer', x=503.50, y=30.41, z=233.50], EntityFallingBlock['掉落的方块'/2600, l='MpServer', x=502.50, y=30.41, z=233.50], EntityFallingBlock['掉落的方块'/2673, l='MpServer', x=718.50, y=20.41, z=212.50], EntityFallingBlock['掉落的方块'/2674, l='MpServer', x=718.50, y=20.41, z=213.50], EntityFallingBlock['掉落的方块'/2675, l='MpServer', x=719.50, y=20.41, z=213.50], EntityFallingBlock['掉落的方块'/2676, l='MpServer', x=718.50, y=16.41, z=231.50], EntityFallingBlock['掉落的方块'/2677, l='MpServer', x=718.50, y=16.41, z=232.50], EntityEnderman['末影人'/792, l='MpServer', x=570.50, y=57.00, z=145.50], EntityBat['蝙蝠'/808, l='MpServer', x=532.48, y=23.45, z=141.13], EntityBat['蝙蝠'/810, l='MpServer', x=533.72, y=23.00, z=139.25], EntityFallingBlock['掉落的方块'/2865, l='MpServer', x=473.50, y=20.16, z=152.50], EntityFallingBlock['掉落的方块'/2866, l='MpServer', x=472.50, y=21.16, z=152.50], EntityFallingBlock['掉落的方块'/2867, l='MpServer', x=472.50, y=20.16, z=153.50], EntityFallingBlock['掉落的方块'/2868, l='MpServer', x=471.50, y=21.16, z=152.50], EntityFallingBlock['掉落的方块'/2869, l='MpServer', x=471.50, y=20.16, z=153.50], EntityFallingBlock['掉落的方块'/2871, l='MpServer', x=470.50, y=20.16, z=153.50], EntityFallingBlock['掉落的方块'/2872, l='MpServer', x=470.50, y=21.16, z=152.50], EntityFallingBlock['掉落的方块'/2979, l='MpServer', x=718.50, y=22.88, z=212.50], EntityFallingBlock['掉落的方块'/2980, l='MpServer', x=718.50, y=22.88, z=213.50], EntityFallingBlock['掉落的方块'/2981, l='MpServer', x=719.50, y=22.88, z=213.50], EntityFallingBlock['掉落的方块'/2982, l='MpServer', x=718.50, y=18.88, z=231.50], EntityFallingBlock['掉落的方块'/2983, l='MpServer', x=718.50, y=18.88, z=232.50], EntityFallingBlock['掉落的方块'/2986, l='MpServer', x=721.50, y=20.92, z=285.50], EntityFallingBlock['掉落的方块'/3015, l='MpServer', x=472.50, y=24.53, z=153.50], EntityFallingBlock['掉落的方块'/3016, l='MpServer', x=471.50, y=24.53, z=153.50], EntityFallingBlock['掉落的方块'/3017, l='MpServer', x=470.50, y=24.53, z=153.50], EntityZombie['僵尸'/1022, l='MpServer', x=595.50, y=24.00, z=178.50], EntityZombie['僵尸'/1023, l='MpServer', x=592.50, y=24.00, z=177.50]]
+	Retry entities: 0 total; []
+	Server brand: vanilla
+	Server type: Integrated singleplayer server
+Stacktrace:
+	at net.minecraft.client.multiplayer.WorldClient.addWorldInfoToCrashReport(WorldClient.java:380)
+	at net.minecraft.client.Minecraft.addGraphicsAndWorldToCrashReport(Minecraft.java:2752)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:452)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8.8
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 1.8.0_361, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Oracle Corporation
+	Memory: 439674920 bytes (419 MB) / 828375040 bytes (790 MB) up to 1845493760 bytes (1760 MB)
+	JVM Flags: 0 total; 
+	IntCache: cache: 0, tcache: 0, allocated: 13, tallocated: 99
+	Launched Version: mcp
+	LWJGL: 2.9.4
+	OpenGL: Intel(R) UHD Graphics GL version 4.6.0 - Build 32.0.101.5510, Intel
+	GL Caps: Using GL 1.3 multitexturing.
+Using GL 1.3 texture combiners.
+Using framebuffer objects because OpenGL 3.0 is supported and separate blending is supported.
+Shaders are available because OpenGL 2.1 is supported.
+VBOs are available because OpenGL 1.5 is supported.
+
+	Using VBOs: No
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	Resource Packs: 
+	Current Language: 简体中文 (中国)
+	Profiler Position: N/A (disabled)
+	CPU: 4x 11th Gen Intel(R) Core(TM) i3-1115G4 @ 3.00GHz
