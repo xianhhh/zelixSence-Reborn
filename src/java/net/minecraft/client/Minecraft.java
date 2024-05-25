@@ -188,6 +188,7 @@ import zelix.Zelix;
 
 public class Minecraft implements IThreadListener, IPlayerUsage
 {
+    public Zelix z = new Zelix();
     private static final Logger logger = LogManager.getLogger();
     private static final ResourceLocation locationMojangPng = new ResourceLocation("textures/gui/title/mojang.png");
     public static final boolean isRunningOnMac = Util.getOSType() == Util.EnumOS.OSX;
@@ -1778,7 +1779,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable1, "Updating screen events");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Affected screen");
-                crashreportcategory.addCrashSectionCallable("Screen name", new Callable<String>()
+                crashreportcategory.addCrashSectionCallable("zelix.Screen name", new Callable<String>()
                 {
                     public String call() throws Exception
                     {
@@ -1798,7 +1799,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
                 {
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable, "Ticking screen");
                     CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Affected screen");
-                    crashreportcategory1.addCrashSectionCallable("Screen name", new Callable<String>()
+                    crashreportcategory1.addCrashSectionCallable("zelix.Screen name", new Callable<String>()
                     {
                         public String call() throws Exception
                         {

@@ -795,7 +795,7 @@ deathScreen.score=Puntos
 deathScreen.spectate=Panoorin ang mundo
 deathScreen.title=Namatay ka!
 deathScreen.title.hardcore=Tapos na ang laro!
-deathScreen.titleScreen=Screen ng Pamagat
+deathScreen.titleScreen=zelix.Screen ng Pamagat
 debug.advanced_tooltips.help=F3 + H = Naunang mga tooltip
 debug.advanced_tooltips.off=Naunang mga tooltip: itinatago
 debug.advanced_tooltips.on=Naunang mga tooltip: ipinapakita

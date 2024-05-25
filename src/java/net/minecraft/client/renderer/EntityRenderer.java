@@ -1390,8 +1390,8 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 catch (Throwable throwable)
                 {
                     CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering screen");
-                    CrashReportCategory crashreportcategory = crashreport.makeCategory("Screen render details");
-                    crashreportcategory.addCrashSectionCallable("Screen name", new EntityRenderer2(this));
+                    CrashReportCategory crashreportcategory = crashreport.makeCategory("zelix.Screen render details");
+                    crashreportcategory.addCrashSectionCallable("zelix.Screen name", new EntityRenderer2(this));
                     crashreportcategory.addCrashSectionCallable("Mouse location", new Callable()
                     {
                         private static final String __OBFID = "CL_00000950";
@@ -1400,7 +1400,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                             return String.format("Scaled: (%d, %d). Absolute: (%d, %d)", new Object[] {Integer.valueOf(j1), Integer.valueOf(k1), Integer.valueOf(Mouse.getX()), Integer.valueOf(Mouse.getY())});
                         }
                     });
-                    crashreportcategory.addCrashSectionCallable("Screen size", new Callable()
+                    crashreportcategory.addCrashSectionCallable("zelix.Screen size", new Callable()
                     {
                         private static final String __OBFID = "CL_00000951";
                         public String call() throws Exception

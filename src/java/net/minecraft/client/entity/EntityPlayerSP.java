@@ -51,6 +51,7 @@ import net.minecraft.util.MovementInput;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
+import zelix.Event.event.UpdateEvent;
 import zelix.Zelix;
 
 public class EntityPlayerSP extends AbstractClientPlayer
@@ -168,7 +169,6 @@ public class EntityPlayerSP extends AbstractClientPlayer
      */
     public void onUpdate()
     {
-
         if (this.worldObj.isBlockLoaded(new BlockPos(this.posX, 0.0D, this.posZ)))
         {
             super.onUpdate();
@@ -183,6 +183,7 @@ public class EntityPlayerSP extends AbstractClientPlayer
                 this.onUpdateWalkingPlayer();
             }
         }
+        //Zelix.event.register(new UpdateEvent());
     }
 
     /**
